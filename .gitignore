@@ -24,3 +24,11 @@ _testmain.go
 *.prof
 
 *.swp
+
+# debris
+.DS_Store
+*.swp
+
+# ignore list
+/dist/
+
