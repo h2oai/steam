@@ -1,0 +1,13 @@
+{
+	"ImportPath": "github.com/h2oai/steamY",
+	"GoVersion": "go1.5.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Rev": "6efbf0b624dccb17ac2b965f9b729d424d80bf17"
+		}
+	]
+}
