@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "es5",        
+        "sourceMap": false,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "out": "bin/main.js",
+        "sourceMap": false
+    },    
+    "files": [
+      "main.ts"
+    ]
+}

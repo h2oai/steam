@@ -1,0 +1,29 @@
+{
+  "name": "steam-gui",
+  "version": "0.0.1",
+  "description": "steam-gui",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "nodemon --ext ts,jade,styl --ignore tmpl/index.jade --watch tmpl --watch src -x \"make js html css || true\"",
+    "live": "browser-sync start --files \"bin/styles.css, bin/index.html, bin/main.js\" --server \"bin\""
+  },
+  "author": "prithvi@h2o.ai",
+  "license": "ISC",
+  "devDependencies": {
+    "bower": "^1.7.7",
+    "browser-sync": "^2.11.1",
+    "jade": "^1.11.0",
+    "karma": "^0.13.21",
+    "karma-coverage": "^0.5.5",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "karma-qunit": "^0.1.9",
+    "nib": "^1.1.0",
+    "nodemon": "^1.9.1",
+    "phantomjs-prebuilt": "^2.1.4",
+    "qunitjs": "^1.22.0",
+    "stylus": "^0.53.0",
+    "tsd": "^0.6.5",
+    "typescript": "^1.8.7"
+  }
+}
