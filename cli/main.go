@@ -2,13 +2,14 @@ package cli
 
 import (
 	"fmt"
-	"github.com/h2oai/steamY/lib/yarn"
-	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/h2oai/steamY/lib/yarn"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -102,29 +103,29 @@ func start(c *context) *cobra.Command {
 }
 
 var startCloudHelp = `
-cloud [cloud-name] [version]
+cloud
 Start a new cloud using the specified H2O package.
 Examples:
 
 Start a 4 node H2O 3.2.0.9 cloud
 
-    $ steam start cloud cloud42 h2o-tibshirani \
-        --size=4
+    $ steam start --size=4
 `
 
 func startCloud(c *context) *cobra.Command {
 	var size int
 
 	cmd := newCmd(c, startCloudHelp, func(c *context, args []string) {
-		if len(args) != 2 {
-			log.Fatalln("Incorrect number of arguments. See 'steam help start cloud'.")
-		}
+		// if len(args) != 2 {
+		// 	log.Fatalln("Incorrect number of arguments. See 'steam help start cloud'.")
+		// }
+		//
+		// name := args[0]
+		// version := args[1] // FIXME
 
-		name := args[0]
-		version := args[1] // FIXME
 		// --- add additional args here ---
 
-		yarn.StartCloud(name, version)
+		yarn.StartCloud(size)
 
 	})
 	cmd.Flags().IntVar(&size, "size", 1, "The number of nodes to provision.")
@@ -146,11 +147,11 @@ func stop(c *context) *cobra.Command {
 }
 
 var stopCloudHelp = `
-cloud [cloud-name]
+cloud [cloud-id]
 Stop a cloud.
 Examples:
 
-    $ steam stop cloud cloud42
+    $ steam stop cloud 1457562501251_0543
 `
 
 func stopCloud(c *context) *cobra.Command {
