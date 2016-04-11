@@ -1,0 +1,30 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "knockout/knockout.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "async/async.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "qunit/qunit.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "underscore/underscore.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "mousetrap/mousetrap.d.ts": {
+      "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
+    },
+    "faker/faker.d.ts": {
+      "commit": "ec9eb4b28c74665a602c22db3457f0a76fa0fa23"
+    }
+  }
+}
