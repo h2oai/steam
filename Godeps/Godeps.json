@@ -6,8 +6,50 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.1.0-22-g6e1ca38",
+			"Rev": "6e1ca38c6a73025366cd8705553b404746ee6e63"
+		},
+		{
+			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
+			"Comment": "v1.0.4",
+			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
+		},
+		{
+			"ImportPath": "github.com/h2oai/steam/tools/piping/golang",
+			"Rev": "2aef8f936d0edbbfbf2582e78071bf5beb8d681a"
+		},
+		{
+			"ImportPath": "github.com/h2oai/steam/tools/piping/parser",
+			"Rev": "2aef8f936d0edbbfbf2582e78071bf5beb8d681a"
+		},
+		{
+			"ImportPath": "github.com/h2oai/steam/tools/piping/typescript",
+			"Rev": "2aef8f936d0edbbfbf2582e78071bf5beb8d681a"
+		},
+		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/serenize/snaker",
+			"Rev": "d88cc11617e4f179fa2c821a60908d5fabd7bdad"
+		},
+		{
 			"ImportPath": "github.com/spf13/cobra",
 			"Rev": "6efbf0b624dccb17ac2b965f9b729d424d80bf17"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "08b1a584251b5b62f458943640fc8ebd4d50aaa5"
+		},
+		{
+			"ImportPath": "github.com/spf13/viper",
+			"Rev": "e37b56e207dda4d79b9defe0548e960658ee8b6b"
 		}
 	]
 }

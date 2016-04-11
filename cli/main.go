@@ -2,14 +2,14 @@ package cli
 
 import (
 	"fmt"
+	"github.com/h2oai/steamY/lib/yarn"
+	"github.com/h2oai/steamY/master"
+	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/h2oai/steamY/lib/yarn"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -39,6 +39,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 	cmd.AddCommand(
 		start(c), // temporary; will not be accessible from the CLI in the future
 		stop(c),  // temporary; will not be accessible from the CLI in the future
+		serve(c),
 	)
 	return cmd
 }
@@ -87,6 +88,50 @@ func parseHelp(text string) (*Doc, error) {
 //
 // Commands
 //
+
+var serveHelp = `
+serve [agent-type]
+Lauch a new service.
+Examples:
+
+    $ steam serve master
+`
+
+func serve(c *context) *cobra.Command {
+	cmd := newCmd(c, serveHelp, nil)
+	cmd.AddCommand(serveMaster(c))
+	return cmd
+}
+
+var serveMasterHelp = `
+master
+Launch the Steam master.
+Examples:
+
+    $ steam serve master
+`
+
+func serveMaster(c *context) *cobra.Command {
+	var webAddress string
+	var workingDirectory string
+	var enableProfiler bool
+
+	opts := master.DefaultOpts
+
+	cmd := newCmd(c, serveMasterHelp, func(c *context, args []string) {
+		master.Run(c.version, c.buildDate, &master.Opts{
+			webAddress,
+			workingDirectory,
+			enableProfiler,
+		})
+	})
+
+	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address.")
+	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
+	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
+	return cmd
+
+}
 
 var startHelp = `
 start [resource-type]

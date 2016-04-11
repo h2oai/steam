@@ -1,0 +1,5 @@
+package web
+
+service Service
+
+Ping(status bool) status bool

@@ -1,0 +1,205 @@
+package master
+
+import (
+	"fmt"
+	"github.com/gorilla/context"
+	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steamY/lib/rpc"
+	"github.com/h2oai/steamY/master/db"
+	"github.com/h2oai/steamY/master/web"
+	"io"
+	"log"
+	"net/http"
+	"net/http/pprof"
+	"os"
+	"os/signal"
+	"path"
+	"syscall"
+)
+
+const (
+	defaultWebAddress = "0.0.0.0:9000"
+)
+
+type Opts struct {
+	WebAddress       string
+	WorkingDirectory string
+	EnableProfiler   bool
+}
+
+var DefaultOpts = &Opts{
+	defaultWebAddress,
+	path.Join(".", fs.VarDir, "master"),
+	false,
+}
+
+type UploadHandler struct {
+	workingDirectory string
+}
+
+func newUploadHandler(wd string) *UploadHandler {
+	return &UploadHandler{wd}
+}
+
+func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Println("File upload request received.")
+
+	r.ParseMultipartForm(0)
+
+	kind := r.FormValue("kind")
+
+	src, handler, err := r.FormFile("file")
+	if err != nil {
+		log.Println("Upload form parse failed:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Malformed request: %v", err)
+		return
+	}
+	defer src.Close()
+
+	log.Println("Remote file: ", handler.Filename)
+
+	dstPath := path.Join(s.workingDirectory, fs.LibDir, kind, path.Base(handler.Filename))
+
+	if err := os.MkdirAll(path.Dir(dstPath), fs.DirPerm); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "%v", err)
+		return
+	}
+
+	dst, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE, fs.FilePerm)
+	if err != nil {
+		log.Println("Upload file open operation failed:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Error writing uploaded file to disk: %v", err)
+		return
+	}
+	defer dst.Close()
+	io.Copy(dst, src)
+
+	//TODO verify md5 checksum
+
+	log.Println("Pack uploaded:", dstPath)
+
+}
+
+func Run(version, buildDate string, opts *Opts) {
+	log.Printf("steam v%s build %s\n", version, buildDate)
+
+	// --- external ip ---
+	webAddress := opts.WebAddress
+	if webAddress == defaultWebAddress {
+		webAddress = fs.GetExternalIP(webAddress)
+	}
+
+	// --- set up wd ---
+	wd, err := fs.MkWorkingDirectory(opts.WorkingDirectory)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Printf("Working directory: %s", wd)
+
+	// --- www root ---
+	wwwroot := fs.GetWwwRoot(wd)
+	if _, err := os.Stat(path.Join(wwwroot, "index.html")); err != nil {
+		log.Fatalf("Web root not found at %s: %v\n", wwwroot, err)
+	}
+	log.Printf("WWW root: %s", wwwroot)
+
+	// --- init storage ---
+	dbPath := fs.GetDbPath(wd)
+	ds, err := db.Open(dbPath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	primed, err := isPrimed(ds)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if !primed {
+		if err := prime(ds); err != nil {
+			log.Fatalln(err)
+		}
+	}
+	ds.Init()
+	log.Println("Datastore location:", dbPath)
+
+	// --- create domain services ---
+	// jt := job.NewTracker(webAddress)
+
+	// --- create front end api services ---
+
+	webServeMux := http.NewServeMux()
+	webServeMux.Handle("/ws", rpc.NewServer(rpc.NewService("web", web.NewService(wd, ds))))
+	webServeMux.Handle("/upload", newUploadHandler(wd))
+	webServeMux.Handle("/", http.FileServer(http.Dir(path.Join(wd, "/www")))) // no auth
+
+	if opts.EnableProfiler {
+		// --- pprof registrations (no auth) ---
+		webServeMux.Handle("/debug/pprof/", http.HandlerFunc(pprof.Index))
+		webServeMux.Handle("/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+		webServeMux.Handle("/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
+		webServeMux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+	}
+
+	// --- start http servers ---
+
+	failch := make(chan error)
+	sigch := make(chan os.Signal)
+	signal.Notify(sigch, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		log.Println("Web server listening at", webAddress)
+		log.Printf("Configure the Steam CLI using 'steam login %s --username=??? --password=???'", webAddress)
+		log.Printf("Point your web browser to http://%s/\n", webAddress)
+		if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+			failch <- err
+		}
+	}()
+
+	for {
+		select {
+		case err := <-failch:
+			ds.Close()
+			log.Fatalln("HTTP server startup failed:", err)
+			return
+		case sig := <-sigch:
+			ds.Close()
+			log.Println(sig)
+			log.Println("Shut down gracefully.")
+			return
+		}
+	}
+}
+
+const (
+	SchemaVersion uint32 = 1
+)
+
+func isPrimed(ds *db.DS) (bool, error) {
+	primed, err := ds.HasBucket("Sys")
+	if err != nil {
+		return false, err
+	}
+
+	if primed {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func prime(ds *db.DS) error {
+	log.Println("Priming datastore for first time use...")
+
+	if err := ds.CreateBuckets(db.Buckets); err != nil {
+		return err
+	}
+
+	if err := ds.CreateSys(db.NewSys("System", SchemaVersion)); err != nil {
+		return err
+	}
+
+	return nil
+}
