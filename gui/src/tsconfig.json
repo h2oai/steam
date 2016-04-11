@@ -5,7 +5,7 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "out": "bin/main.js",
+        "out": "../var/master/www/main.js",
         "sourceMap": false
     },    
     "files": [

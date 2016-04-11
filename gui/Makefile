@@ -7,7 +7,7 @@
 	lib \
 	test
 
-O=bin
+O=../var/master/www
 N=./node_modules/.bin
 B=./bower_components
 

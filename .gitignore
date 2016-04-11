@@ -31,4 +31,6 @@ _testmain.go
 
 # ignore list
 /dist/
+/var/master/www/
+/var/master/db/steam.db
 

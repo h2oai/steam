@@ -6,6 +6,7 @@
 	fmtcheck \
 	pretest \
 	test \
+	gui \
 	doc \
 	cov \
 	clean \
@@ -29,6 +30,9 @@ install: build
 
 build:
 	go build
+
+gui:
+	$(MAKE) -C gui
 
 generate:
 	go generate ./...
