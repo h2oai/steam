@@ -149,13 +149,13 @@ func start(c *context) *cobra.Command {
 }
 
 var startCloudHelp = `
-cloud
+cloud [cloud-name]
 Start a new cloud using the specified H2O package.
 Examples:
 
 Start a 4 node H2O 3.2.0.9 cloud
 
-    $ steam start --size=4
+    $ steam start cloud42 --size=4
 `
 
 func startCloud(c *context) *cobra.Command {
@@ -171,7 +171,11 @@ func startCloud(c *context) *cobra.Command {
 
 		// --- add additional args here ---
 
-		yarn.StartCloud(name, size)
+		if _, err := yarn.StartCloud(name, size); err != nil {
+			log.Fatalln(err)
+		}
+
+		// TODO: name corresponds to id for purpose of stopCloud
 
 	})
 	cmd.Flags().IntVar(&size, "size", 1, "The number of nodes to provision.")
@@ -183,7 +187,7 @@ stop [resource-type]
 Stop the specified resource.
 Examples:
 
-    $ steam stop cloud cloud42
+    $ steam stop cloud
 `
 
 func stop(c *context) *cobra.Command {
@@ -193,25 +197,28 @@ func stop(c *context) *cobra.Command {
 }
 
 var stopCloudHelp = `
-cloud [cloud-id]
+cloud [cloud-name] [cloud-id]
 Stop a cloud.
 Examples:
 
-    $ steam stop cloud 1457562501251_0543
+    $ steam stop cloud cloud42 1457562501251_0543
 `
 
 func stopCloud(c *context) *cobra.Command {
 	var force bool
 
 	cmd := newCmd(c, stopCloudHelp, func(c *context, args []string) {
-		if len(args) != 1 {
+		if len(args) != 2 {
 			log.Fatalln("Missing cloud-name. See 'steam help stop cloud'.")
 		}
 
 		name := args[0]
+		id := args[1] // FIXME: This should be a function of the name
 		// --- add additional args here ---
 
-		yarn.StopCloud(name)
+		if err := yarn.StopCloud(name, id); err != nil {
+			log.Fatalln(err)
+		}
 
 	})
 

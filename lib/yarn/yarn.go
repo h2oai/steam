@@ -3,7 +3,6 @@ package yarn
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -12,7 +11,7 @@ import (
 )
 
 // If there is a open ticket, does nothing, else kinits a new session
-func kCheck() {
+func kCheck() error {
 	if err := exec.Command("klist", "-s").Run(); err != nil { // returns no err if there's an open ticket
 		log.Println("Kerberos login required")
 		reader := bufio.NewReader(os.Stdin)
@@ -20,44 +19,53 @@ func kCheck() {
 		user, _ := reader.ReadString('\n')
 		user = user[:len(user)-1]
 
-		kInit(user)
+		if err = kInit(user); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-func kInit(user string) {
+func kInit(user string) error {
 	cmd := exec.Command("kinit", user)
-	// stdout, err := cmd.StdoutPipe()
 
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	stdin, err := cmd.StdinPipe()
+	cmd.Stdin = os.Stdin
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		log.Fatalln("InPipe")
+		return err
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		log.Fatalln("Could not execute")
+		return err
 	}
 
-	go io.Copy(stdin, os.Stdin)
+	go func() {
+		in := bufio.NewScanner(stderr)
+		for in.Scan() {
+			log.Printf(in.Text())
+		}
+	}()
 
 	err = cmd.Wait()
 	if err != nil {
-		log.Fatalln("Failed to authenticate.")
+		log.Println("Failed to authenticate.")
+		return err
 	}
+
+	return nil
 }
 
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(name string, size int) {
+func StartCloud(name string, size int) (string, error) {
 
-	kCheck()
-
-	tmpout := "steam_temp_out_001"
-
-	exec.Command("hadoop", "fs", "-rmdir", tmpout).Run() //FIXME: This should be random and stored with the cloud
+	if err := kCheck(); err != nil {
+		return "", err
+	}
 
 	cmdArgs := []string{
 		"jar",              //
@@ -69,7 +77,7 @@ func StartCloud(name string, size int) {
 		"-mapperXmx",       //
 		"10g",              // FIXME: This may be modifialbe down the road
 		"-output",          //
-		tmpout,             // FIXME: This should be random and stored with the cloud
+		name + "_out",      //
 		"-disown",          //
 	}
 
@@ -79,7 +87,7 @@ func StartCloud(name string, size int) {
 	if err != nil {
 		log.Println("Failed to launch hadoop.")
 		log.Println("\n" + string(cmdOut)) // This captures error from the drive.jar
-		log.Fatalln(os.Stderr, err)        // This captures erros from Stderr
+		return "", err                     // This captures erros from Stderr
 	}
 	hpOut := (string(cmdOut))
 	// Capture only the address and ID respectively
@@ -94,25 +102,31 @@ func StartCloud(name string, size int) {
 
 	fmt.Println("")
 	log.Println("Started cloud with ID:", apID)
+
+	return apID, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
-func StopCloud(id string) {
+func StopCloud(name, id string) error {
 
-	kCheck()
+	if err := kCheck(); err != nil {
+		return err
+	}
 
 	log.Println("Attempting to stop cloud...")
 	cmdStop := exec.Command("hadoop", "job", "-kill", "job_"+id)
 	if out, err := cmdStop.CombinedOutput(); err != nil {
 		log.Println("Failed to shutdown hadoop.")
 		log.Println("\n" + string(out))
-		log.Fatalln(os.Stderr, err)
+		return err
 	}
-	cmdClean := exec.Command("hadoop", "fs", "-rmdir", "steam_temp_out_001") //FIXME: this should use above saved dir
+	cmdClean := exec.Command("hadoop", "fs", "-rmdir", name+"_out")
 	log.Println("Stopped cloud:", "job_"+id)
 	if out, err := cmdClean.Output(); err != nil {
 		log.Fatalln("Failed to remove outdir.")
 		log.Println("\n" + string(out))
-		log.Fatalln(os.Stderr, err)
+		return err
 	}
+
+	return nil
 }
