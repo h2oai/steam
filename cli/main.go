@@ -2,14 +2,15 @@ package cli
 
 import (
 	"fmt"
-	"github.com/h2oai/steamY/lib/yarn"
-	"github.com/h2oai/steamY/master"
-	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/h2oai/steamY/lib/yarn"
+	"github.com/h2oai/steamY/master"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -161,16 +162,16 @@ func startCloud(c *context) *cobra.Command {
 	var size int
 
 	cmd := newCmd(c, startCloudHelp, func(c *context, args []string) {
-		// if len(args) != 2 {
-		// 	log.Fatalln("Incorrect number of arguments. See 'steam help start cloud'.")
-		// }
-		//
-		// name := args[0]
+		if len(args) != 1 {
+			log.Fatalln("Incorrect number of arguments. See 'steam help start cloud'.")
+		}
+
+		name := args[0]
 		// version := args[1] // FIXME
 
 		// --- add additional args here ---
 
-		yarn.StartCloud(size)
+		yarn.StartCloud(name, size)
 
 	})
 	cmd.Flags().IntVar(&size, "size", 1, "The number of nodes to provision.")

@@ -51,20 +51,26 @@ func kInit(user string) {
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(size int) {
+func StartCloud(name string, size int) {
 
 	kCheck()
 
+	tmpout := "steam_temp_out_001"
+
+	exec.Command("hadoop", "fs", "-rmdir", tmpout).Run() //FIXME: This should be random and stored with the cloud
+
 	cmdArgs := []string{
-		"jar",                //
-		"h2odriver.jar",      //FIXME: This should be a pack method
-		"-n",                 //
-		strconv.Itoa(size),   //
-		"-mapperXmx",         //
-		"10g",                // FIXME: This may be modifialbe down the road
-		"-output",            //
-		"steam_temp_out_001", // FIXME: This should be random and stored with the cloud
-		"-disown",            //
+		"jar",              //
+		"h2odriver.jar",    //FIXME: This should be a pack method
+		"-jobname",         //
+		"H2O_" + name,      //
+		"-n",               //
+		strconv.Itoa(size), //
+		"-mapperXmx",       //
+		"10g",              // FIXME: This may be modifialbe down the road
+		"-output",          //
+		tmpout,             // FIXME: This should be random and stored with the cloud
+		"-disown",          //
 	}
 
 	log.Println("Attempting to start cloud...")
