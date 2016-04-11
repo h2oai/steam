@@ -151,7 +151,6 @@ func Run(version, buildDate string, opts *Opts) {
 
 	go func() {
 		log.Println("Web server listening at", webAddress)
-		log.Printf("Configure the Steam CLI using 'steam login %s --username=??? --password=???'", webAddress)
 		log.Printf("Point your web browser to http://%s/\n", webAddress)
 		if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
 			failch <- err

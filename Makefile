@@ -18,7 +18,7 @@
 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
-STUBS = ./srv/ctl ./srv/cmd ./srv/usr
+STUBS = ./srv/www
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 WWW=./var/master/www

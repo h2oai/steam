@@ -290,7 +290,10 @@ html, body
 .action-button
   position relative
   height x-action-height
-  cursor pointer
+
+.action-button--unit
+  display: inline-block
+  width: 200px
 
 .action-button__title
   dock(x-action-padding,x-action-padding,x-action-padding,x-action-padding)
@@ -303,10 +306,15 @@ html, body
   text-transform uppercase
   letter-spacing 2px
   line-height x-action-height - 2*x-action-padding
+  cursor pointer
 
 .action-button__title--danger
   background x-color-red
   color white
+
+.action-button--unit
+  .action-button__title
+    right: 0px
 
 
 .pane__page

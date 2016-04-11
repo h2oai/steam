@@ -499,6 +499,18 @@ module Main {
         on(null, services)
     }
 
+    function getEngines(on: On<Engine[]>): void {
+        const engines = _.times(_.random(5, 20), (i: int): Engine => {
+            const name = `h2o-3.4.2.${i}`
+            return {
+                name: name,
+                path: `/var/engines/${name}`,
+                createdDate: String(faker.date.recent())
+            }
+        })
+        on(null, engines)
+    }
+
     function randomFile(): string {
         const lines = _.times(_.random(10, 50), (i: int): string => {
             return faker.lorem.sentence()
@@ -550,19 +562,25 @@ module Main {
     }
 
     class Model {
-      constructor(
-        public id: string,
-        public cloud: string,
-        public frame: string,
-        public responseColumn: string
+        constructor(
+            public id: string,
+            public cloud: string,
+            public frame: string,
+            public responseColumn: string
         ) { }
     }
 
     class Service {
-      constructor(
-        public id: string,
-        public endpoint: string
+        constructor(
+            public id: string,
+            public endpoint: string
         ) { }
+    }
+
+    interface Engine {
+        name: string
+        path: string
+        createdDate: string
     }
 
     //
@@ -604,7 +622,8 @@ module Main {
         const buttons: NavButton[] = [
             newNavButton('ion-ios-cloud-outline', 'Clouds', true, ctx.showClouds),
             newNavButton('ion-ios-color-filter-outline', 'Models', false, ctx.showModels),
-            newNavButton('ion-ios-world-outline', 'Services', false, ctx.showServices)
+            newNavButton('ion-ios-world-outline', 'Services', false, ctx.showServices),
+            newNavButton('ion-ios-gear-outline', 'Admin', false, ctx.showAdmin)
         ]
 
         return new NavBar(buttons)
@@ -651,7 +670,7 @@ module Main {
     }
 
     interface CloudsPane extends Pane {
-        items: Sigs<CloudFolder>
+        items: Sigs<Folder>
         startCloud: Act
     }
 
@@ -664,43 +683,23 @@ module Main {
         })
     }
 
-    class Folder implements Templated {
-        constructor(
-            public title: string,
-            public subhead: string,
-            public slug: string,
-            public execute: Act
-        ) { }
-        public template: string = 'folder'
-    }
-
     interface Pane extends Templated {
         title: string
         dispose: Act
         position: PanePosition
     }
 
-    interface CloudFolder extends Templated {
-      title: string
-      subhead: string
-      slug: string
-      execute: Act
-      template: string
+    interface Folder extends Templated {
+        title: string
+        subhead: string
+        slug: string
+        execute: Act
+        template: string
     }
 
-    interface ModelFolder extends Templated {
+    interface Dialog extends Templated {
       title: string
-      subhead: string
-      slug: string
-      execute: Act
-      template: string
-    }
-
-    interface ServiceFolder extends Templated {
-      title: string
-      subhead: string
-      slug: string
-      execute: Act
+      cancel: Act
       template: string
     }
 
@@ -710,8 +709,7 @@ module Main {
     }
 
     interface ModelsPane extends Pane {
-       items: Sigs<ModelFolder>
-       deleteModels: Act
+        items: Sigs<Folder>
     }
 
     interface ModelPane extends Pane {
@@ -719,10 +717,11 @@ module Main {
         frame: string
         responseColumn: string
         deployModel: Act
+        deleteModel: Act
     }
 
     interface ServicesPane extends Pane {
-       items: Sigs<ServiceFolder>
+        items: Sigs<Folder>
     }
 
     interface ServicePane extends Pane {
@@ -730,18 +729,33 @@ module Main {
         stopService: Act
     }
 
+    interface AdminPane extends Pane {
+        items: Folder[]
+    }
+
+    interface EnginesPane extends Pane {
+        items: Sigs<Folder>
+        addEngine: Act
+    }
+
+    interface EnginePane extends Pane {
+        path: string
+        createdDate: string
+        deleteEngine: Act
+    }
+
     //
     // Panes
     //
 
     function newCloudsPane(ctx: Context, clouds: Cloud[]): CloudsPane {
-        const items = sigs<CloudFolder>(_.map(clouds, (cloud):CloudFolder => {
+        const items = sigs<Folder>(_.map(clouds, (cloud): Folder => {
             return {
-              title: cloud.id,
-              subhead: 'Size:',
-              slug: String(cloud.size),
-              execute: () => { ctx.showCloud(cloud) },
-              template: 'cloud-folder'
+                title: cloud.id,
+                subhead: 'Size:',
+                slug: String(cloud.size),
+                execute: () => { ctx.showCloud(cloud) },
+                template: 'folder'
             }
         }))
         const startCloud: Act = () => {
@@ -763,34 +777,30 @@ module Main {
         }
         return {
             title: cloud.id,
-            template: 'cloud',
-            dispose: noop,
-            position: newPanePosition(650),
             size: String(cloud.size),
             stopCloud: stopCloud,
+            template: 'cloud',
+            dispose: noop,
+            position: newPanePosition(650)
         }
     }
 
     function newModelsPane(ctx: Context, models: Model[]): ModelsPane {
-        const items = sigs<ModelFolder>(_.map(models, (model):ModelFolder => {
-          return {
-            title: model.id,
-            subhead: model.frame,
-            slug: model.responseColumn,
-            execute: () => { ctx.showModel(model) },
-            template: 'model-folder'
-          }
+        const items = sigs<Folder>(_.map(models, (model): Folder => {
+            return {
+                title: model.id,
+                subhead: model.frame,
+                slug: model.responseColumn,
+                execute: () => { ctx.showModel(model) },
+                template: 'folder'
+            }
         }))
-        const deleteModels: Act = () => {
-            alert('--- Delete selected models ---')
-        }
         return {
             title: 'Models',
+            items: items,
             template: 'models',
             dispose: noop,
             position: newPanePosition(),
-            items: items,
-            deleteModels: deleteModels
         }
     }
 
@@ -798,27 +808,31 @@ module Main {
         const deployModel: Act = () => {
             alert('--- Deploy Model ---')
         }
+        const deleteModel: Act = () => {
+            alert('--- Delete selected models ---')
+        }
         return {
             title: model.id,
-            template: 'model',
-            dispose: noop,
-            position: newPanePosition(650),
             cloud: model.cloud,
             frame: model.frame,
             responseColumn: model.responseColumn,
             deployModel: deployModel,
+            deleteModel: deleteModel,
+            template: 'model',
+            dispose: noop,
+            position: newPanePosition(650)
         }
     }
 
     function newServicesPane(ctx: Context, services: Service[]): ServicesPane {
-        const items = sigs<ServiceFolder>(_.map(services, (service):ServiceFolder => {
-          return {
-            title: service.id,
-            subhead: service.endpoint,
-            slug: '',
-            execute: () => { ctx.showService(service) },
-            template: 'service-folder'
-          }
+        const items = sigs<Folder>(_.map(services, (service): Folder => {
+            return {
+                title: service.id,
+                subhead: service.endpoint,
+                slug: '',
+                execute: () => { ctx.showService(service) },
+                template: 'folder'
+            }
         }))
         return {
             title: 'Services',
@@ -843,6 +857,66 @@ module Main {
         }
     }
 
+    function newAdminPane(ctx: Context): AdminPane {
+        const items: Folder[] = [
+            {
+                title: 'Engines',
+                subhead: 'View deployed engines',
+                slug: '',
+                execute: () => { ctx.showEngines() },
+                template: 'folder'
+            }
+        ]
+
+        return {
+            title: 'Admin',
+            template: 'admin',
+            dispose: noop,
+            position: newPanePosition(),
+            items: items
+        }
+    }
+
+    function newEnginesPane(ctx: Context, engines: Engine[]): EnginesPane {
+        const items = sigs<Folder>(_.map(engines, (engine): Folder => {
+            return {
+                title: engine.name,
+                subhead: engine.createdDate,
+                slug: '',
+                execute: () => { ctx.showEngine(engine) },
+                template: 'folder'
+            }
+        }))
+
+        const addEngine: Act = () => {
+          alert('--- Add engine ---')
+        }
+
+        return {
+            title: 'Engines',
+            items: items,
+            addEngine: addEngine,
+            template: 'engines',
+            dispose: noop,
+            position: newPanePosition()
+        }
+    }
+
+    function newEnginePane(ctx: Context, engine: Engine): EnginePane {
+        const deleteEngine: Act = () => {
+            alert('--- Delete Engine ---')
+        }
+        return {
+            title: engine.name,
+            path: engine.path,
+            createdDate: engine.createdDate,
+            deleteEngine: deleteEngine,
+            template: 'engine',
+            dispose: noop,
+            position: newPanePosition(650),
+        }
+    }
+
     export class Context {
         public showPane = uni2<int, Pane>()
         public showClouds = uni()
@@ -851,6 +925,9 @@ module Main {
         public showModel = uni1<Model>()
         public showServices = uni()
         public showService = uni1<Service>()
+        public showAdmin = uni()
+        public showEngines = uni()
+        public showEngine = uni1<Engine>()
     }
 
     class Breadcrumb {
@@ -860,16 +937,16 @@ module Main {
         ) { }
     }
 
-    export class App {
-        constructor(
-            public context: Context,
-            public navBar: NavBar,
-            public breadcrumbs: Sigs<Breadcrumb>,
-            public panes: Sigs<Pane>,
-            public span: Sig<string>,
-            public templateOf: (t: Templated) => string,
-            public afterRender: Eff<HTMLElement[]>
-        ) { }
+    export interface App {
+      context: Context
+      navBar: NavBar
+      breadcrumbs: Sigs<Breadcrumb>
+      panes: Sigs<Pane>
+      span: Sig<string>
+      hasDialogs: Sig<boolean>
+      dialogs: Sigs<Dialog>
+      templateOf: (t: Templated) => string
+      afterRender: Eff<HTMLElement[]>
     }
 
     export function newApp(): App {
@@ -879,6 +956,9 @@ module Main {
         const panes = sigs<Pane>([])
         const span = sig<int>(0)
         const spanPx = lift(span, px)
+
+        const dialogs = sigs<Dialog>([])
+        const hasDialogs = lifts(dialogs,isNonEmpty)
 
         ctx.showPane.on((index: int, pane: Pane) => {
             const disposables = panes.splice(index, panes().length - index, pane)
@@ -939,16 +1019,32 @@ module Main {
             ctx.showPane(1, newServicePane(ctx, service))
         })
 
+        ctx.showAdmin.on(() => {
+            ctx.showPane(0, newAdminPane(ctx))
+        })
+
+        ctx.showEngines.on(() => {
+            getEngines((err, engines) => {
+                ctx.showPane(1, newEnginesPane(ctx, engines))
+            })
+        })
+
+        ctx.showEngine.on((engine: Engine) => {
+            ctx.showPane(2, newEnginePane(ctx, engine))
+        })
+
         ctx.showClouds()
 
-        return new App(
-            ctx,
-            navBar,
-            breadcrumbs,
-            panes,
-            spanPx,
-            templateOf,
-            doAfterRender
-        )
+        return { 
+            context: ctx,
+            navBar: navBar,
+            breadcrumbs: breadcrumbs,
+            panes: panes,
+            span: spanPx,
+            hasDialogs: hasDialogs,
+            dialogs: dialogs,
+            templateOf: templateOf,
+            afterRender: doAfterRender
+        } 
     }
 }

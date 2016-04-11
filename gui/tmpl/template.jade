@@ -43,8 +43,16 @@ html.no-js
           .breadcrumb__arrow
           .breadcrumb__title(data-bind="text:title")
         // /ko
+    // ko if:hasDialogs
     .mask
-    .dialogs
+      .dialogs(data-bind="template: { name:'tmpl-dialog', foreach: dialogs}")
+    // /ko
+
+    //
+    // Templates
+    //
+
+    template.dialog
       .dialog
         .dialog__titlebar
           .dialog__title
@@ -54,10 +62,6 @@ html.no-js
           .action-button.action-button--primary Primary
           .action-button Cancel
           .action-button.action-button--danger Danger
-
-    //
-    // Templates
-    //
 
     template.navbar-button
       .navbar-button(data-bind="css:{ 'navbar-button--selected':isSelected }, click:execute")
@@ -72,59 +76,6 @@ html.no-js
           span.folder__subhead(data-bind="text:subhead")
           span.folder__slug(data-bind="text:slug")
 
-    template.bar-folder
-      .folder(data-bind="click:execute")
-        .folder__bar(data-bind="style:{ width:span }")
-        .folder__title(data-bind="text:title")
-        .folder__detail
-          span.folder__subhead(data-bind="text:subhead")
-          span.folder__slug(data-bind="text:slug")
-
-    template.cloud-folder
-      .folder(data-bind="click:execute")
-        .folder__title(data-bind="text:title")
-        .folder__detail
-          span.folder__subhead(data-bind="text:subhead")
-          span.folder__slug(data-bind="text:slug")
-
-    template.cloud-node-folder
-      .folder(data-bind="click:execute")
-        .folder__title(data-bind="text:title")
-        .folder__detail
-          span.folder__subhead(data-bind="text:subhead")
-          span.folder__slug(data-bind="text:slug")
-        .cloud-node-folder__graphic(data-bind="element:graphic")
-
-    template.model-folder
-      .folder(data-bind="click:execute")
-        .folder__title(data-bind="text:title")
-        .folder__detail
-          span.folder__subhead(data-bind="text:subhead")
-          span.folder__slug(data-bind="text:slug")
-
-    template.service-folder
-      .folder(data-bind="click:execute")
-        .folder__title(data-bind="text:title")
-        .folder__detail
-          span.folder__subhead(data-bind="text:subhead")
-          span.folder__slug(data-bind="text:slug")
-
-    template.cloud-job-folder
-      .folder(data-bind="click:execute")
-        .folder__title(data-bind="text:title")
-        .folder__detail
-          span.folder__subhead(data-bind="text:subhead")
-          span.folder__slug(data-bind="text:slug")
-        .job-folder__graphic(data-bind="element:graphic")
-
-    template.cloud-frame-column-folder
-      .folder(data-bind="click:execute")
-        .folder__title(data-bind="text:title")
-        .folder__detail
-          span.folder__subhead(data-bind="text:subhead")
-          span.folder__slug(data-bind="text:slug")
-        .cloud-frame-column-folder__graphic(data-bind="element:graphic")
-
     template.clouds
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
@@ -137,15 +88,12 @@ html.no-js
       .pane__body.pane__body--01
         div(data-bind="text:size")
       .pane__actions
-        .action-button
+        .action-button.action-button--unit
           .action-button__title.action-button__title--danger(data-bind="click:stopCloud") Stop this cloud
 
     template.models
       .pane__titlebar(data-bind="text:title")
-      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-      .pane__actions
-        .action-button
-          .action-button__title.action-button__title--danger(data-bind="click:deleteModels") Delete models...
+      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
 
     template.model
       .pane__titlebar(data-bind="text:title")
@@ -154,247 +102,42 @@ html.no-js
         div(data-bind="text: frame")
         div(data-bind="text: responseColumn")
       .pane__actions
-        .action-button
+        .action-button.action-button--unit
           .action-button__title(data-bind="click:deployModel") Deploy this model...
+        .action-button.action-button--unit
+          .action-button__title.action-button__title--danger(data-bind="click:deleteModel") Delete model
 
     template.services
       .pane__titlebar(data-bind="text:title")
-      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
 
     template.service
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
         div(data-bind="text: endpoint")
       .pane__actions
-        .action-button
-          .action-button__title(data-bind="click:stopService") Stop this service
-
-    template.cloud-nodes
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.cloud-node
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-
-    template.cloud-frames
-      .pane__titlebar(data-bind="text:title")
-      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-      .pane__actions
-        .action-button
-          .action-button__title(data-bind="click:importFrame") Import Frame...
-
-    template.cloud-frame
-      .pane__titlebar(data-bind="text:title")
-      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-      .pane__actions
-        .action-button
-          .action-button__title(data-bind="click:buildModel") Build Model...
-
-    template.cloud-frame-summary
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        h1 Summary
-        .table(data-bind="html:summary")
-
-    template.cloud-frame-columns
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.cloud-frame-column
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        h1 Summary
-        .table(data-bind="element:summary")
-        h1 Characteristics
-        .table(data-bind="element:characteristics")
-        h1 Distribution
-        .table(data-bind="element:distribution")
-
-    template.cloud-models
-      .pane__titlebar(data-bind="text:title")
-      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-      .pane__actions
-        .action-button
-          .action-button__title(data-bind="click:importSelected") Import these models
-
-    template.cloud-model
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.cloud-jobs
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-    template.cloud-job
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-
-    template.projects
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.project
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.project-scoreboard
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-
-    template.assets
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.experiments
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-    template.experiment
-      .pane__titlebar(data-bind="text:title")
-      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-      .pane__actions
-        .action-button
-          .action-button__title(data-bind="click:run") Run this experiment
-
-    template.experiment-files
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-    template.experiment-logs
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.scripts
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.script
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-    template.script-files
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-    template.script-logs
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.engines
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+        .action-button.action-button--unit
+          .action-button__title.action-button__title--danger(data-bind="click:stopService") Stop this service
 
     template.admin
       .pane__titlebar(data-bind="text:title")
       .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
 
-    template.groups-admin
+    template.engines
       .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-    template.group-admin
+      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      .pane__actions
+        .action-button
+          .action-button__title(data-bind="click:addEngine") Add Engine...
+
+    template.engine
       .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.group-roles-admin
-      .pane__titlebar(data-bind="text:title")
-
-      .pane__body
-        .pane__page
-          // ko foreach:roles
-          p(data-bind="text:$data")
-          // /ko
-
-    template.group-perms-admin
-      .pane__titlebar(data-bind="text:title")
-
-      .pane__body
-        .pane__page
-          // ko foreach:perms
-          p(data-bind="text:$data")
-          // /ko
-
-    template.group-users-admin
-      .pane__titlebar(data-bind="text:title")
-
-      .pane__body
-        .pane__page
-          // ko foreach:users
-          p(data-bind="text:$data")
-          // /ko
-
-    template.roles-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-    template.role-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.role-perms-admin
-      .pane__titlebar(data-bind="text:title")
-
-      .pane__body
-        .pane__page
-          // ko foreach:perms
-          p(data-bind="text:$data")
-          // /ko
-
-    template.role-users-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        .pane__page
-          // ko foreach:users
-          p(data-bind="text:$data")
-          // /ko
-
-    template.users-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.user-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
-
-    template.user-groups-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        .pane__page
-          // ko foreach:groups
-          p(data-bind="text:$data")
-          // /ko
-
-    template.user-roles-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        .pane__page
-          // ko foreach:roles
-          p(data-bind="text:$data")
-          // /ko
-
-    template.user-perms-admin
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        .pane__page
-          // ko foreach:perms
-          p(data-bind="text:$data")
-          // /ko
-    
-    template.dummy-report
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        .pane__page
-          h1(data-bind="text:subhead")
-          div(data-bind="element:content")
-
-    template.dummy-file
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        .pane__page
-          h1(data-bind="text:subhead")
-          pre(data-bind="text:content")
-
-    template.dummy-log
-      .pane__titlebar(data-bind="text:title")
-      .pane__body
-        .pane__page
-          h1(data-bind="text:subhead")
-          pre(data-bind="text:content")
+      .pane__body.pane__body--01
+        div(data-bind="text: path")
+        div(data-bind="text: createdDate")
+      .pane__actions
+        .action-button.action-button--unit
+          .action-button__title.action-button__title--danger(data-bind="click:deleteEngine") Delete Engine
 
 
     script(src='jquery.min.js')
