@@ -23,7 +23,7 @@ DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 WWW=./var/master/www
 
-all: build
+all: build gui
 
 install: build
 	go install
