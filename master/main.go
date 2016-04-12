@@ -2,11 +2,6 @@ package master
 
 import (
 	"fmt"
-	"github.com/gorilla/context"
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/lib/rpc"
-	"github.com/h2oai/steamY/master/db"
-	"github.com/h2oai/steamY/master/web"
 	"io"
 	"log"
 	"net/http"
@@ -15,6 +10,12 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
+
+	"github.com/gorilla/context"
+	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steamY/lib/rpc"
+	"github.com/h2oai/steamY/master/db"
+	"github.com/h2oai/steamY/master/web"
 )
 
 const (
@@ -131,7 +132,7 @@ func Run(version, buildDate string, opts *Opts) {
 	// --- create front end api services ---
 
 	webServeMux := http.NewServeMux()
-	webServeMux.Handle("/ws", rpc.NewServer(rpc.NewService("web", web.NewService(wd, ds))))
+	webServeMux.Handle("/web", rpc.NewServer(rpc.NewService("web", web.NewService(wd, ds))))
 	webServeMux.Handle("/upload", newUploadHandler(wd))
 	webServeMux.Handle("/", http.FileServer(http.Dir(path.Join(wd, "/www")))) // no auth
 
