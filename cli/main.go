@@ -159,7 +159,11 @@ Start a 4 node H2O 3.2.0.9 cloud
 `
 
 func startCloud(c *context) *cobra.Command {
-	var size int
+	var (
+		size             int
+		keytab, username string
+		kerberos         bool
+	)
 
 	cmd := newCmd(c, startCloudHelp, func(c *context, args []string) {
 		if len(args) != 1 {
@@ -171,7 +175,7 @@ func startCloud(c *context) *cobra.Command {
 
 		// --- add additional args here ---
 
-		if _, err := yarn.StartCloud(name, size); err != nil {
+		if _, err := yarn.StartCloud(size, kerberos, name, username, keytab); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -179,6 +183,10 @@ func startCloud(c *context) *cobra.Command {
 
 	})
 	cmd.Flags().IntVar(&size, "size", 1, "The number of nodes to provision.")
+	cmd.Flags().BoolVar(&kerberos, "kerberos", true, "Set false on systems with no kerberos authentication.")
+	cmd.Flags().StringVar(&username, "username", "", "The valid kerberos username.")
+	cmd.Flags().StringVar(&keytab, "keytab", "", "The name of the keytab file to use")
+
 	return cmd
 }
 
@@ -205,7 +213,10 @@ Examples:
 `
 
 func stopCloud(c *context) *cobra.Command {
-	var force bool
+	var (
+		kerberos, force  bool
+		username, keytab string
+	)
 
 	cmd := newCmd(c, stopCloudHelp, func(c *context, args []string) {
 		if len(args) != 2 {
@@ -216,12 +227,15 @@ func stopCloud(c *context) *cobra.Command {
 		id := args[1] // FIXME: This should be a function of the name
 		// --- add additional args here ---
 
-		if err := yarn.StopCloud(name, id); err != nil {
+		if err := yarn.StopCloud(kerberos, name, id, username, keytab); err != nil {
 			log.Fatalln(err)
 		}
 
 	})
 
+	cmd.Flags().BoolVar(&kerberos, "kerberos", true, "Set false on systems with no kerberos authentication.")
+	cmd.Flags().StringVar(&username, "username", "", "The valid kerberos username.")
+	cmd.Flags().StringVar(&keytab, "keytab", "", "The name of the keytab file to use")
 	cmd.Flags().BoolVar(&force, "force", false, "Force-kill all H2O instances in the cloud")
 
 	return cmd

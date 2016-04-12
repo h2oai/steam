@@ -2,24 +2,18 @@ package yarn
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 )
 
 // If there is a open ticket, does nothing, else kinits a new session
-func kCheck() error {
+func kCheck(username, keytab string) error {
 	if err := exec.Command("klist", "-s").Run(); err != nil { // returns no err if there's an open ticket
-		log.Println("Kerberos login required")
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("User: ")
-		user, _ := reader.ReadString('\n')
-		user = user[:len(user)-1]
-
-		if err = kInit(user); err != nil {
+		if err = kInit(username, keytab); err != nil {
 			return err
 		}
 	}
@@ -27,21 +21,25 @@ func kCheck() error {
 	return nil
 }
 
-func kInit(user string) error {
-	cmd := exec.Command("kinit", user)
+func kInit(username, keytab string) error {
 
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
+	if len(username) < 1 {
+		return errors.New("A username is required to authenticate with Kerberos.")
+	}
+	if len(keytab) < 0 {
+		return errors.New("A keytab is required to authenticate with Kerberos.")
+	}
+
+	cmd := exec.Command("kinit", username, "-k", "-t", keytab)
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		return err
 	}
-
-	err = cmd.Start()
-	if err != nil {
+	if err := cmd.Start(); err != nil {
 		return err
 	}
 
+	// Scanning for errors while cmd is running
 	go func() {
 		in := bufio.NewScanner(stderr)
 		for in.Scan() {
@@ -49,8 +47,7 @@ func kInit(user string) error {
 		}
 	}()
 
-	err = cmd.Wait()
-	if err != nil {
+	if err := cmd.Wait(); err != nil {
 		log.Println("Failed to authenticate.")
 		return err
 	}
@@ -61,10 +58,11 @@ func kInit(user string) error {
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(name string, size int) (string, error) {
-
-	if err := kCheck(); err != nil {
-		return "", err
+func StartCloud(size int, kerberos bool, name, username, keytab string) (string, error) {
+	if kerberos {
+		if err := kCheck(username, keytab); err != nil {
+			return "", err
+		}
 	}
 
 	cmdArgs := []string{
@@ -107,10 +105,13 @@ func StartCloud(name string, size int) (string, error) {
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
-func StopCloud(name, id string) error {
-
-	if err := kCheck(); err != nil {
-		return err
+//
+// In the future this
+func StopCloud(kerberos bool, name, id, username, keytab string) error {
+	if kerberos {
+		if err := kCheck(username, keytab); err != nil {
+			return err
+		}
 	}
 
 	log.Println("Attempting to stop cloud...")
