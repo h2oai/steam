@@ -43,9 +43,16 @@ html.no-js
           .breadcrumb__arrow
           .breadcrumb__title(data-bind="text:title")
         // /ko
+
     // ko if:hasDialogs
     .mask
-      .dialogs(data-bind="template: { name:'tmpl-dialog', foreach: dialogs}")
+    .dialogs(data-bind="template: { name:'tmpl-dialog', foreach: dialogs}")
+    // /ko
+
+    // ko if:busyMessage
+    .mask
+    .busy
+      div(data-bind="text:busyMessage")
     // /ko
 
     //
@@ -55,13 +62,29 @@ html.no-js
     template.dialog
       .dialog
         .dialog__titlebar
-          .dialog__title
-          .dialog__exit
-        .dialog__body
-        .dialog__actions
-          .action-button.action-button--primary Primary
-          .action-button Cancel
-          .action-button.action-button--danger Danger
+          .dialog__title(data-bind="text:title")
+          .dialog__exit(data-bind="click:cancel")
+            i.icon.ion-ios-close-empty
+        .dialog__body(data-bind="template:{ name:$root.templateOf }")
+    
+    template.start-cloud-dialog
+      .dialog__form
+        table.form
+          tbody
+            tr
+              th Cloud Name
+              td
+                input.textbox(type='text' placeholder='Name' data-bind='value:cloudName' style='width:300px')
+            tr
+              th Cloud Size
+              td
+                input.textbox(type='text' placeholder='Size' data-bind='value:cloudSize' style='width:50px')
+
+      .dialog__actions
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:startCloud") Start Cloud
+        .buttons.buttons--unit
+          .button(data-bind="click:cancel") Cancel
 
     template.navbar-button
       .navbar-button(data-bind="css:{ 'navbar-button--selected':isSelected }, click:execute")
@@ -80,16 +103,16 @@ html.no-js
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
       .pane__actions
-        .action-button
-          .action-button__title(data-bind="click:startCloud") Start a cloud
+        .buttons
+          .button.button--primary(data-bind="click:startCloud") Start a cloud
 
     template.cloud
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
         div(data-bind="text:size")
       .pane__actions
-        .action-button.action-button--unit
-          .action-button__title.action-button__title--danger(data-bind="click:stopCloud") Stop this cloud
+        .buttons.buttons--unit
+          .button.button--danger(data-bind="click:stopCloud") Stop this cloud
 
     template.models
       .pane__titlebar(data-bind="text:title")
@@ -102,10 +125,10 @@ html.no-js
         div(data-bind="text: frame")
         div(data-bind="text: responseColumn")
       .pane__actions
-        .action-button.action-button--unit
-          .action-button__title(data-bind="click:deployModel") Deploy this model...
-        .action-button.action-button--unit
-          .action-button__title.action-button__title--danger(data-bind="click:deleteModel") Delete model
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:deployModel") Deploy this model...
+        .buttons.buttons--unit
+          .button.button--danger(data-bind="click:deleteModel") Delete model
 
     template.services
       .pane__titlebar(data-bind="text:title")
@@ -116,8 +139,8 @@ html.no-js
       .pane__body.pane__body--01
         div(data-bind="text: endpoint")
       .pane__actions
-        .action-button.action-button--unit
-          .action-button__title.action-button__title--danger(data-bind="click:stopService") Stop this service
+        .buttons.buttons--unit
+          .button.button--danger(data-bind="click:stopService") Stop this service
 
     template.admin
       .pane__titlebar(data-bind="text:title")
@@ -127,8 +150,8 @@ html.no-js
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
       .pane__actions
-        .action-button
-          .action-button__title(data-bind="click:addEngine") Add Engine...
+        .buttons
+          .button.button--primary(data-bind="click:addEngine") Add Engine...
 
     template.engine
       .pane__titlebar(data-bind="text:title")
@@ -136,8 +159,8 @@ html.no-js
         div(data-bind="text: path")
         div(data-bind="text: createdDate")
       .pane__actions
-        .action-button.action-button--unit
-          .action-button__title.action-button__title--danger(data-bind="click:deleteEngine") Delete Engine
+        .buttons.buttons--unit
+          .button.button--danger(data-bind="click:deleteEngine") Delete Engine
 
 
     script(src='jquery.min.js')

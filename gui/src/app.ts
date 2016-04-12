@@ -346,6 +346,13 @@ module Main {
         return a.length === 0
     }
 
+    function isNull(a: any): boolean {
+        return a === null
+    }
+    function isUndefined(a: any): boolean {
+        return a === void 0
+    }
+
 
     //
     // Knockout Extensions
@@ -453,20 +460,11 @@ module Main {
         return randomUseCase().toLowerCase().replace(/\s+/g, '-')
     }
 
-    function generateRandoms(n: int, min: int, max: int): int[] {
-        return _.times(n, (i: int): int => _.random(min, max))
+    function proxy_startCloud(cloudName: string, cloudSize: int, on:On<string>): void {
+      on(null, `app_id_${(Math.random() * 100) | 0}`)
     }
 
-    function generateNoise(n: int): float[] {
-        noise.seed(Math.random())
-        const values: float[] = new Array<float>(n)
-        for (let i = 0; i < n; i++) {
-            values[i] = 1 + noise.simplex2(i / n, 0.1)
-        }
-        return values
-    }
-
-    function getClouds(on: On<Cloud[]>): void {
+    function proxy_getClouds(on: On<Cloud[]>): void {
         const clouds = _.times(_.random(5, 20), (i: int): Cloud => {
             return new Cloud(
                 `${faker.name.firstName()}'s Cloud`,
@@ -476,7 +474,7 @@ module Main {
         on(null, clouds)
     }
 
-    function getModels(on: On<Model[]>): void {
+    function proxy_getModels(on: On<Model[]>): void {
         const clouds = _.times(_.random(5, 20), (i: int): Model => {
             const useCase = randomUseCaseSlug()
             return new Model(
@@ -489,7 +487,7 @@ module Main {
         on(null, clouds)
     }
 
-    function getServices(on: On<Service[]>): void {
+    function proxy_getServices(on: On<Service[]>): void {
         const services = _.times(_.random(5, 20), (i: int): Service => {
             return new Service(
                 `${randomUseCaseSlug()}`,
@@ -499,7 +497,7 @@ module Main {
         on(null, services)
     }
 
-    function getEngines(on: On<Engine[]>): void {
+    function proxy_getEngines(on: On<Engine[]>): void {
         const engines = _.times(_.random(5, 20), (i: int): Engine => {
             const name = `h2o-3.4.2.${i}`
             return {
@@ -509,44 +507,6 @@ module Main {
             }
         })
         on(null, engines)
-    }
-
-    function randomFile(): string {
-        const lines = _.times(_.random(10, 50), (i: int): string => {
-            return faker.lorem.sentence()
-        })
-        return lines.join("\n")
-    }
-
-    function randomLog(): string {
-        const lines = _.times(_.random(10, 50), (i: int): string => {
-            return faker.date.recent() + '  ' + faker.lorem.sentence()
-        })
-        return lines.join("\n")
-    }
-
-    function randomUsers(): string[] {
-        return _.times(_.random(5, 10), (i: int): string => {
-            return faker.name.findName()
-        })
-    }
-
-    function randomGroups(): string[] {
-        return _.times(_.random(5, 10), (i: int): string => {
-            return faker.name.jobArea()
-        })
-    }
-
-    function randomRoles(): string[] {
-        return _.times(_.random(5, 10), (i: int): string => {
-            return faker.name.jobType()
-        })
-    }
-
-    function randomPerms(): string[] {
-        return _.times(_.random(5, 10), (i: int): string => {
-            return _.sample<string>(permissionTypes)
-        })
     }
 
 
@@ -698,9 +658,24 @@ module Main {
     }
 
     interface Dialog extends Templated {
-      title: string
-      cancel: Act
-      template: string
+        title: string
+        cancel: Act
+        dispose: Act
+        template: string
+    }
+
+    interface StartCloudDialog extends Dialog {
+        cloudName: Sig<string>
+        cloudNameError: Sig<string>
+        cloudSize: Sig<string>
+        cloudSizeError: Sig<string>
+        canStartCloud: Sig<boolean>
+        startCloud: Act
+        error: Sig<string>
+    }
+
+    interface StartCloudDialogResult {
+        applicationId: string
     }
 
     interface CloudPane extends Pane {
@@ -745,6 +720,69 @@ module Main {
     }
 
     //
+    // Dialogs
+    //
+
+
+    const cloudNamePattern = /^(a-z0-9-)$/i
+    function newStartCloudDialog(ctx: Context, go: Eff<StartCloudDialogResult>): StartCloudDialog {
+
+        const error = sig<string>(void 0)
+
+        const cloudName = sig<string>('')
+        const cloudNameError = lift(cloudName, (cloudName): string =>
+            (!cloudNamePattern.test(cloudName))
+                ? "Invalid cloud name"
+                : void 0
+        )
+
+        const cloudSize = sig<string>('1')
+        const cloudSizeNum = lift(cloudSize, (cloudSize): int =>
+            parseInt(cloudSize, 10)
+        )
+        const cloudSizeError = lift(cloudSizeNum, (size): string =>
+            isNaN(size)
+                ? "Invalid cloud size"
+                : void 0
+        )
+
+        const canStartCloud = lift2(cloudNameError, cloudSizeError, (e1, e2): boolean =>
+            !isUndefined(e1) && !isUndefined(e2)
+        )
+
+        const startCloud: Act = () => {
+            ctx.setBusy('Creating cloud...')
+            proxy_startCloud(cloudName(), cloudSizeNum(), (err, applicationId) => {
+                if (err) {
+                    error(err.message)
+                } else {
+                  go({
+                    applicationId: applicationId
+                  })
+                }
+                ctx.setFree()
+            })
+        }
+        const cancel: Act = () => {
+          go(null)
+        }
+
+        return {
+            title: 'Start a new cloud',
+            cloudName: cloudName,
+            cloudNameError: cloudNameError,
+            cloudSize: cloudSize,
+            cloudSizeError: cloudSizeError,
+            canStartCloud: canStartCloud,
+            startCloud: startCloud,
+            error: error,
+            cancel: cancel,
+            dispose: noop,
+            template: 'start-cloud-dialog'
+        }
+    }
+
+    //
     // Panes
     //
 
@@ -759,7 +797,10 @@ module Main {
             }
         }))
         const startCloud: Act = () => {
-            alert('--- Start Cloud ---')
+            const dialog = newStartCloudDialog(ctx, (result:StartCloudDialogResult) =>{
+              ctx.popDialog()
+            })
+            ctx.pushDialog(dialog)
         }
         return {
             title: 'Clouds',
@@ -889,7 +930,7 @@ module Main {
         }))
 
         const addEngine: Act = () => {
-          alert('--- Add engine ---')
+            alert('--- Add engine ---')
         }
 
         return {
@@ -918,6 +959,10 @@ module Main {
     }
 
     export class Context {
+        public setBusy = uni1<string>()
+        public setFree = uni()
+        public pushDialog = uni1<Dialog>()
+        public popDialog = uni()
         public showPane = uni2<int, Pane>()
         public showClouds = uni()
         public showCloud = uni1<Cloud>()
@@ -938,15 +983,16 @@ module Main {
     }
 
     export interface App {
-      context: Context
-      navBar: NavBar
-      breadcrumbs: Sigs<Breadcrumb>
-      panes: Sigs<Pane>
-      span: Sig<string>
-      hasDialogs: Sig<boolean>
-      dialogs: Sigs<Dialog>
-      templateOf: (t: Templated) => string
-      afterRender: Eff<HTMLElement[]>
+        context: Context
+        navBar: NavBar
+        breadcrumbs: Sigs<Breadcrumb>
+        panes: Sigs<Pane>
+        span: Sig<string>
+        hasDialogs: Sig<boolean>
+        dialogs: Sigs<Dialog>
+        busyMessage: Sig<string>
+        templateOf: (t: Templated) => string
+        afterRender: Eff<HTMLElement[]>
     }
 
     export function newApp(): App {
@@ -958,7 +1004,23 @@ module Main {
         const spanPx = lift(span, px)
 
         const dialogs = sigs<Dialog>([])
-        const hasDialogs = lifts(dialogs,isNonEmpty)
+        const hasDialogs = lifts(dialogs, isNonEmpty)
+        const busyMessage = sig<string>(void 0)
+
+        ctx.pushDialog.on((dialog:Dialog) => {
+          dialogs.push(dialog)
+        })
+
+        ctx.popDialog.on(() => {
+          dialogs.pop()
+        })
+
+        ctx.setBusy.on((message:string) => {
+          busyMessage(message)
+        })
+        ctx.setFree.on(() => {
+          busyMessage(void 0)
+        })
 
         ctx.showPane.on((index: int, pane: Pane) => {
             const disposables = panes.splice(index, panes().length - index, pane)
@@ -990,7 +1052,7 @@ module Main {
         })
 
         ctx.showClouds.on(() => {
-            getClouds((err, clouds) => {
+            proxy_getClouds((err, clouds) => {
                 ctx.showPane(0, newCloudsPane(ctx, clouds))
             })
         })
@@ -1000,7 +1062,7 @@ module Main {
         })
 
         ctx.showModels.on(() => {
-            getModels((err, models) => {
+            proxy_getModels((err, models) => {
                 ctx.showPane(0, newModelsPane(ctx, models))
             })
         })
@@ -1010,7 +1072,7 @@ module Main {
         })
 
         ctx.showServices.on(() => {
-            getServices((err, services) => {
+            proxy_getServices((err, services) => {
                 ctx.showPane(0, newServicesPane(ctx, services))
             })
         })
@@ -1024,7 +1086,7 @@ module Main {
         })
 
         ctx.showEngines.on(() => {
-            getEngines((err, engines) => {
+            proxy_getEngines((err, engines) => {
                 ctx.showPane(1, newEnginesPane(ctx, engines))
             })
         })
@@ -1035,7 +1097,7 @@ module Main {
 
         ctx.showClouds()
 
-        return { 
+        return {
             context: ctx,
             navBar: navBar,
             breadcrumbs: breadcrumbs,
@@ -1043,8 +1105,9 @@ module Main {
             span: spanPx,
             hasDialogs: hasDialogs,
             dialogs: dialogs,
+            busyMessage: busyMessage,
             templateOf: templateOf,
             afterRender: doAfterRender
-        } 
+        }
     }
 }

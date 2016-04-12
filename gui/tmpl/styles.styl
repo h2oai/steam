@@ -287,19 +287,17 @@ html, body
   dock-bottom(x-action-height)
   background #303030
 
-.action-button
+.buttons
   position relative
   height x-action-height
 
-.action-button--unit
+.buttons--unit
   display: inline-block
   width: 200px
 
-.action-button__title
+.button
   dock(x-action-padding,x-action-padding,x-action-padding,x-action-padding)
   box-sizing border-box
-  background x-color-accent
-  color x-color-bg
   border-radius 100px
   text-align center
   font-size 10px
@@ -307,15 +305,19 @@ html, body
   letter-spacing 2px
   line-height x-action-height - 2*x-action-padding
   cursor pointer
-
-.action-button__title--danger
-  background x-color-red
+  background #909090
   color white
 
-.action-button--unit
-  .action-button__title
-    right: 0px
+.button--primary
+  background x-color-accent
+  color x-color-bg
 
+.button--danger
+  background x-color-red
+
+.buttons--unit
+  .button
+    right: 0px
 
 .pane__page
   margin 20px 20px 40px 20px
@@ -423,43 +425,90 @@ x-progressbar-height = 1px
   background #000
   opacity 0.5
   cursor default
-  display none
 
-.mask--active
-  display block
-
+.busy
+  dock()
 
 .dialogs
   dock(x-navbar-width, x-navbar-width, x-navbar-width, x-navbar-width)
-  background red
-  display none
+  border 1px solid x-color-accent
+  background x-color-bg
 
 .dialog
   dock()
 
 .dialog__titlebar
-  background white
+  dock-top(x-navbar-width)
+  line-height x-navbar-width
+  overflow ellipsis
+  background #292929
+  border-bottom 1px solid #383838
 
 .dialog__title
-  background white
+  dock(0px, x-navbar-width, 0, 10px)
+  thin()
+  color #f7f7f7
+  font-size 20px
 
 .dialog__exit
-  background white
+  dock-right(x-navbar-width)
+  cursor pointer
+  text-align center
+  font-size 50px
+  color #777
 
 .dialog__body
-  background white
+  dock(x-navbar-width, 0, 0, 0)
+
+.dialog__form
+  dock(0, 0, x-action-height, 0)
+  padding 10px
 
 .dialog__actions
+  dock-bottom(x-action-height)
+  background #303030
+
+.dialog__buttons
   background white
 
-.dialog__action-button
-  background white
-
-.dialog__action-button--primary
+.dialog__buttons--primary
   background x-color-accent
   color x-color-bg
 
-.dialog__action-button--danger
+.dialog__buttons--danger
   background x-color-red
   color white
 
+.form
+  font-size 16px
+  th, td
+    thin()
+    vertical-align middle
+    padding 5px 10px
+  th
+    text-align right
+    border-right 1px solid #444
+
+.textbox
+  background x-color-bg
+  color x-color-dim
+  border none
+  border-bottom 1px solid x-color-dim
+  transition color x-easing, border-color x-easing
+  font-size 16px
+  padding 4px 6px
+  &::-webkit-input-placeholder
+    color x-color-dimmer
+  &:-moz-placeholder
+    color x-color-dimmer
+  &::-moz-placeholder
+    color x-color-dimmer
+  &:-ms-input-placeholder
+    color x-color-dimmer
+  &:hover
+    color x-color-bright
+    border-color x-color-bright
+  &:focus
+    color x-color-accent
+    border-color x-color-accent
+    
