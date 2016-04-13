@@ -38,10 +38,8 @@ type Service interface {
 	StartCloud(size int, kerberos bool, name string, username string, keytab string) (string, error)
 	StopCloud(kerberos bool, name string, id string, username string, keytab string) error
 	GetCloud(address string) (*Cloud, error)
-	BuildAutoML(address string, dataset string, targetName string) error
-	GetModels(address string) ([]*CloudModelSynopsis, error)
-	GetModel(address string, modelID string) (*RawModel, error)
-	CompilePojo(address string, javaModel string, jar string) error
+	BuildAutoML(address string, dataset string, targetName string, maxTime int) (string, error)
+	DeployPojo(address string, javaModel string, jar string) error
 	Shutdown(address string) error
 }
 
@@ -90,35 +88,20 @@ type BuildAutoMLIn struct {
 	Address string `json:"address"`
 	Dataset string `json:"dataset"`
 	TargetName string `json:"target_name"`
+	MaxTime int `json:"max_time"`
 }
 
 type BuildAutoMLOut struct {
-}
-
-type GetModelsIn struct {
-	Address string `json:"address"`
-}
-
-type GetModelsOut struct {
-	Models []*CloudModelSynopsis `json:"models"`
-}
-
-type GetModelIn struct {
-	Address string `json:"address"`
 	ModelID string `json:"model_id"`
 }
 
-type GetModelOut struct {
-	Model *RawModel `json:"model"`
-}
-
-type CompilePojoIn struct {
+type DeployPojoIn struct {
 	Address string `json:"address"`
 	JavaModel string `json:"java_model"`
 	Jar string `json:"jar"`
 }
 
-type CompilePojoOut struct {
+type DeployPojoOut struct {
 }
 
 type ShutdownIn struct {
@@ -178,40 +161,20 @@ func (this *Remote) GetCloud(address string) (*Cloud,  error) {
 	return out.Cloud, nil
 }
 
-func (this *Remote) BuildAutoML(address string, dataset string, targetName string) ( error) {
-	in := BuildAutoMLIn{address, dataset, targetName}
+func (this *Remote) BuildAutoML(address string, dataset string, targetName string, maxTime int) (string,  error) {
+	in := BuildAutoMLIn{address, dataset, targetName, maxTime}
 	var out BuildAutoMLOut
 	err := this.Proc.Call("BuildAutoML", &in, &out)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return out.ModelID, nil
 }
 
-func (this *Remote) GetModels(address string) ([]*CloudModelSynopsis,  error) {
-	in := GetModelsIn{address}
-	var out GetModelsOut
-	err := this.Proc.Call("GetModels", &in, &out)
-	if err != nil {
-		return nil, err
-	}
-	return out.Models, nil
-}
-
-func (this *Remote) GetModel(address string, modelID string) (*RawModel,  error) {
-	in := GetModelIn{address, modelID}
-	var out GetModelOut
-	err := this.Proc.Call("GetModel", &in, &out)
-	if err != nil {
-		return nil, err
-	}
-	return out.Model, nil
-}
-
-func (this *Remote) CompilePojo(address string, javaModel string, jar string) ( error) {
-	in := CompilePojoIn{address, javaModel, jar}
-	var out CompilePojoOut
-	err := this.Proc.Call("CompilePojo", &in, &out)
+func (this *Remote) DeployPojo(address string, javaModel string, jar string) ( error) {
+	in := DeployPojoIn{address, javaModel, jar}
+	var out DeployPojoOut
+	err := this.Proc.Call("DeployPojo", &in, &out)
 	if err != nil {
 		return err
 	}
@@ -270,33 +233,16 @@ func (this *Impl) GetCloud(r *http.Request, in *GetCloudIn, out *GetCloudOut) er
 }
 
 func (this *Impl) BuildAutoML(r *http.Request, in *BuildAutoMLIn, out *BuildAutoMLOut) error {
-	err := this.Service.BuildAutoML(in.Address, in.Dataset, in.TargetName)
+	it, err := this.Service.BuildAutoML(in.Address, in.Dataset, in.TargetName, in.MaxTime)
 	if err != nil {
 		return err
 	}
+	out.ModelID = it
 	return nil
 }
 
-func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut) error {
-	it, err := this.Service.GetModels(in.Address)
-	if err != nil {
-		return err
-	}
-	out.Models = it
-	return nil
-}
-
-func (this *Impl) GetModel(r *http.Request, in *GetModelIn, out *GetModelOut) error {
-	it, err := this.Service.GetModel(in.Address, in.ModelID)
-	if err != nil {
-		return err
-	}
-	out.Model = it
-	return nil
-}
-
-func (this *Impl) CompilePojo(r *http.Request, in *CompilePojoIn, out *CompilePojoOut) error {
-	err := this.Service.CompilePojo(in.Address, in.JavaModel, in.Jar)
+func (this *Impl) DeployPojo(r *http.Request, in *DeployPojoIn, out *DeployPojoOut) error {
+	err := this.Service.DeployPojo(in.Address, in.JavaModel, in.Jar)
 	if err != nil {
 		return err
 	}

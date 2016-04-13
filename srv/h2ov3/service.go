@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
 
 	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/srv/web"
 )
 
 type H2O struct {
@@ -145,75 +145,97 @@ type ModelKeyV3 struct {
 	Name string `json:"name"`
 }
 
-func (h *H2O) BuildAutoML(dataset, targetName string) error {
-	_, err := h.get("/3/AutoMLBuilder", url.Values{ // FIXME: This needs first value needs to be stored
+type AutoMLBuilderV3 struct {
+	Job JobV3 `json:"job"`
+}
+
+type AutoMLKeyV3 struct {
+	Name string `json:"name"`
+}
+
+type AutoMLV3 struct {
+	Leader ModelKeyV3 `json:"leader"`
+}
+
+type JobsV3 struct {
+	Jobs []*JobV3 `json:"jobs"`
+}
+
+type JobV3 struct {
+	JobKey    JobKeyV3    `json:"key"`
+	Status    string      `json:"status"`
+	Dest      AutoMLKeyV3 `json:"dest"` //FIXME: This should be a general key
+	Exception string      `json:"exception"`
+}
+
+type JobKeyV3 struct {
+	Name string `json:"name"`
+}
+
+func (h *H2O) jobPoll(jobID string) (*JobV3, error) {
+	var (
+		j JobsV3
+		k JobV3
+	)
+
+	for { // Polling for job
+		b, err := h.get("/3/Jobs/"+jobID, nil)
+		if err != nil {
+			return nil, err
+		}
+		if err := unmarshal(b, &j); err != nil {
+			return nil, err
+		}
+		k = *j.Jobs[0]
+		if k.Status == "CREATED" || k.Status == "RUNNING" {
+			continue
+		} else {
+			if k.Exception != "" {
+				return nil, fmt.Errorf("Error running AutoML: %s", k.Exception)
+			}
+		}
+		break
+	}
+
+	return &k, nil
+}
+
+// AutoML will use the built in AutoML tool to create a model with minimal
+// user interaction.
+func (h *H2O) AutoML(dataset, targetName string, maxTime int) (string, error) {
+	b, err := h.post("/3/AutoMLBuilder", url.Values{
 		"dataset":     {dataset},
 		"target_name": {targetName},
+		"max_time":    {strconv.Itoa(maxTime)},
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
-}
+	var a AutoMLBuilderV3
+	if err := unmarshal(b, &a); err != nil {
+		return "", err
+	}
 
-func (h *H2O) GetModels() ([]*web.CloudModelSynopsis, error) {
-	b, err := h.get("/3/Models", nil)
+	k, err := h.jobPoll(a.Job.JobKey.Name)
+
+	b, err = h.get("/3/AutoML/"+k.Dest.Name, nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	var r GetModelsResponseV3
-	if err := unmarshal(b, &r); err != nil {
-		return nil, err
-	}
-
-	models := make([]*web.CloudModelSynopsis, len(r.Models))
-	for i, s := range r.Models {
-		models[i] = &web.CloudModelSynopsis{
-			s.Algo,
-			s.AlgoFullName,
-			s.DataFrame.Name,
-			s.ModelId.Name,
-			s.ResponseColumnName,
-			web.Timestamp(s.Timestamp / 1000),
-		}
+	var m AutoMLV3
+	if err = unmarshal(b, &m); err != nil {
+		return "", err
 	}
 
-	return models, nil
-}
-
-func (h *H2O) GetModel(modelID string) (*RawModel, error) {
-	b, err := h.get("/3/Models/"+url.QueryEscape(modelID), nil)
-	if err != nil {
-		return nil, err
+	if m.Leader.Name == "" {
+		return "", fmt.Errorf("Unable to complete model in %d seconds", maxTime)
 	}
-	return &RawModel{modelID, b}, nil
-}
 
-func (h *H2O) ExportBinaryModel(modelID, p string) error {
-	_, err := h.get("/99/Models.bin/"+url.QueryEscape(modelID), url.Values{
-		"dir":   {p},
-		"force": {"true"},
-	})
-	if err != nil {
-		return fmt.Errorf("Binary model export failed: %s", err)
-	}
-	return nil
-}
-
-func (h *H2O) ImportBinaryModel(modelName, p string) error {
-	_, err := h.post("/99/Models.bin/"+url.QueryEscape(modelName), url.Values{
-		"dir":   {p},
-		"force": {"true"},
-	})
-
-	if err != nil {
-		return fmt.Errorf("Binary model import failed: %s", err)
-	}
-	return nil
+	return m.Leader.Name, err
 }
 
 func (h *H2O) ExportJavaModel(modelID, p string) error {
-	_, err := h.download("/3/Models.java/"+url.QueryEscape(modelID), p, true)
+	_, err := h.download("/3/Models.java/"+modelID, p, true)
 	if err != nil {
 		return fmt.Errorf("Java model export failed: %s", err)
 	}

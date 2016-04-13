@@ -9,6 +9,7 @@ import (
 	// "github.com/h2oai/steam/master/cli"
 	// "github.com/h2oai/steam/master/ctl"
 
+	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/db"
 	"github.com/h2oai/steamY/srv/h2ov3"
@@ -74,39 +75,51 @@ func (s *Service) GetCloud(address string) (*web.Cloud, error) {
 	return cc, nil
 }
 
-func (s *Service) BuildAutoML(address, dataset, targetName string) error {
+func (s *Service) BuildAutoML(address, dataset, targetName string, maxTime int) (string, error) {
 	h := h2ov3.NewClient(address)
 
-	err := h.BuildAutoML(dataset, targetName)
+	modelName, err := h.AutoML(dataset, targetName, maxTime) //TODO: j is a job that can be started and waited for
 	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *Service) GetModels(address string) ([]*web.CloudModelSynopsis, error) {
-	h := h2ov3.NewClient(address)
-
-	ms, err := h.GetModels()
-	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return ms, nil
-}
-
-func (s *Service) GetModel(address string) (*RawModel, error) {
-	h := h2ov3.NewClient(address)
-
-	m, err := h.GetModels()
-	if err != nil {
-		return nil, err
+	javaModelDir := fs.GetModelPath(s.wd, modelName, "java")
+	if err := h.ExportJavaModel(modelName, javaModelDir); err != nil {
+		return "", err
+	}
+	if err := h.ExportGenModel(javaModelDir); err != nil {
+		return "", err
 	}
 
-	return m, nil
+	return modelName, nil
 }
 
-func (s *Service) CompilePojo(address, javaModel, jar string) error {
+// func (s *Service) GetModels(address string) ([]*web.CloudModelSynopsis, error) {
+// 	h := h2ov3.NewClient(address)
+
+// 	ms, err := h.GetModels()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return ms, nil
+// }
+
+// func (s *Service) GetModel(address string, modelID string) (*web.ModelInfo, error) {
+
+// 	h := h2ov3.NewClient(address)
+
+// 	m, err := h.GetModel(modelID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	log.Println()
+
+// 	return nil, nil
+// }
+
+func (s *Service) DeployPojo(address, javaModel, jar string) error {
 	// h := compileClient.NewClient()
 	//
 	// p, err := h.CompilePojo(javaModel, jar)
@@ -126,3 +139,7 @@ func (s *Service) Shutdown(address string) error {
 
 	return nil
 }
+
+// func toWebModel(m *db.Model) *web.ModelInfo {
+// 	return nil
+// }

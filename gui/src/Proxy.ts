@@ -34,10 +34,8 @@ module Proxy {
 		startCloud: (size: number, kerberos: boolean, name: string, username: string, keytab: string, go: (error: Error, apID: string) => void) => void
 		stopCloud: (kerberos: boolean, name: string, id: string, username: string, keytab: string, go: (error: Error) => void) => void
 		getCloud: (address: string, go: (error: Error, cloud: Cloud) => void) => void
-		buildAutoML: (address: string, dataset: string, targetName: string, go: (error: Error) => void) => void
-		getModels: (address: string, go: (error: Error, models: CloudModelSynopsis[]) => void) => void
-		getModel: (address: string, modelID: string, go: (error: Error, model: RawModel) => void) => void
-		compilePojo: (address: string, javaModel: string, jar: string, go: (error: Error) => void) => void
+		buildAutoML: (address: string, dataset: string, targetName: string, maxTime: number, go: (error: Error, modelID: string) => void) => void
+		deployPojo: (address: string, javaModel: string, jar: string, go: (error: Error) => void) => void
 		shutdown: (address: string, go: (error: Error) => void) => void
 	}
 
@@ -86,35 +84,20 @@ module Proxy {
 		address: string
 		dataset: string
 		target_name: string
+		max_time: number
 	}
 
 	interface BuildAutoMLOut {
-	}
-
-	interface GetModelsIn {
-		address: string
-	}
-
-	interface GetModelsOut {
-		models: CloudModelSynopsis[]
-	}
-
-	interface GetModelIn {
-		address: string
 		model_id: string
 	}
 
-	interface GetModelOut {
-		model: RawModel
-	}
-
-	interface CompilePojoIn {
+	interface DeployPojoIn {
 		address: string
 		java_model: string
 		jar: string
 	}
 
-	interface CompilePojoOut {
+	interface DeployPojoOut {
 	}
 
 	interface ShutdownIn {
@@ -170,43 +153,25 @@ module Proxy {
 		})
 
 	}
-	export function buildAutoML(address: string, dataset: string, targetName: string, go: (error: Error) => void): void {
+	export function buildAutoML(address: string, dataset: string, targetName: string, maxTime: number, go: (error: Error, modelID: string) => void): void {
 		var req: BuildAutoMLIn = {
 			address: address,
 			dataset: dataset,
-			target_name: targetName
+			target_name: targetName,
+			max_time: maxTime
 		}
 		Proxy.Call("BuildAutoML", req, function(error, data) {
-			return error ? go(error) : go(null)
+			return error ? go(error, null) : go(null, (<BuildAutoMLOut>data).modelID)
 		})
 
 	}
-	export function getModels(address: string, go: (error: Error, models: CloudModelSynopsis[]) => void): void {
-		var req: GetModelsIn = {
-			address: address
-		}
-		Proxy.Call("GetModels", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<GetModelsOut>data).models)
-		})
-
-	}
-	export function getModel(address: string, modelID: string, go: (error: Error, model: RawModel) => void): void {
-		var req: GetModelIn = {
-			address: address,
-			model_id: modelID
-		}
-		Proxy.Call("GetModel", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<GetModelOut>data).model)
-		})
-
-	}
-	export function compilePojo(address: string, javaModel: string, jar: string, go: (error: Error) => void): void {
-		var req: CompilePojoIn = {
+	export function deployPojo(address: string, javaModel: string, jar: string, go: (error: Error) => void): void {
+		var req: DeployPojoIn = {
 			address: address,
 			java_model: javaModel,
 			jar: jar
 		}
-		Proxy.Call("CompilePojo", req, function(error, data) {
+		Proxy.Call("DeployPojo", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 

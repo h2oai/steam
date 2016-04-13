@@ -19,22 +19,12 @@ type CloudModelSynopsis
  ResponseColumnName string
  ModifiedAt Timestamp
 
-type ModelInfo
- ID string
- ModelID string
- CloudName string
- CreatedAt
- 
-
 Ping(status bool) status bool
 
 StartCloud (size int, kerberos bool, name string, username string, keytab string) apID string
 StopCloud (kerberos bool, name string, id string, username string, keytab string)
 
-
 GetCloud (address string) cloud *Cloud
-BuildAutoML (address string, dataset string, targetName string)
-GetModels (address string) models []*CloudModelSynopsis
-GetModel (address string, modelID string) model *RawModel
-CompilePojo (address string, javaModel string, jar string)
+BuildAutoML (address string, dataset string, targetName string, maxTime int) modelID string
+DeployPojo (address string, javaModel string, jar string)
 Shutdown (address string)
