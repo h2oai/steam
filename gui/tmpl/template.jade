@@ -8,11 +8,8 @@ html.no-js
     meta(name='description' content='Fast Scalable Machine Learning for Smarter Applications')
     meta(name='viewport' content='width=device-width, initial-scale=1')
     link(rel='stylesheet' href='reset.css' type='text/css')
-    // link(rel='stylesheet' href='fonts/roboto-fontface.css' type='text/css')
-    // link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,600,700' type='text/css')
     link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,200' type='text/css')
     link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Inconsolata' type='text/css')
-    // link(rel='stylesheet' href='fonts/material-icons.css' type='text/css')
     link(rel='stylesheet' href='http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' type='text/css')
     link(rel='stylesheet' href='styles.css' type='text/css')
     //-script(src='js/vendor/modernizr-2.7.1.min.js')
@@ -73,8 +70,8 @@ html.no-js
       .dialog__form
         .form-field-label Specify a name for this cloud:
         .form-field
-          input.textbox(type='text' placeholder='Name' data-bind="value:cloudName, valueUpdate:'afterkeydown'" style='width:300px')
-        .form-field-error(data-bind="text:cloudNameError")
+          input.textbox(type='text' placeholder='Name' data-bind="value:cloudId, valueUpdate:'afterkeydown'" style='width:300px')
+        .form-field-error(data-bind="text:cloudIdError")
 
         .form-field-label How many nodes should this cloud have?
         .form-field
@@ -84,6 +81,24 @@ html.no-js
       .dialog__actions
         .buttons.buttons--unit
           .button.button--primary(data-bind="click:startCloud") Start Cloud
+        .buttons.buttons--unit
+          .button(data-bind="click:cancel") Cancel
+
+    template.build-model-dialog
+      .dialog__form
+        .form-field-label Specify a frame to train on:
+        .form-field
+          input.textbox(type='text' placeholder='Frame' data-bind="value:frame, valueUpdate:'afterkeydown'" style='width:90%')
+        .form-field-error(data-bind="text:frameError")
+
+        .form-field-label Specify the response column:
+        .form-field
+          input.textbox(type='text' placeholder='Response column name' data-bind="value:responseColumn, valueUpdate:'afterkeydown'" style='width:300px')
+        .form-field-error(data-bind="text:responseColumnError")
+
+      .dialog__actions
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:buildModel") Start building
         .buttons.buttons--unit
           .button(data-bind="click:cancel") Cancel
 
@@ -138,6 +153,8 @@ html.no-js
       .pane__body.pane__body--01
         div(data-bind="text:size")
       .pane__actions
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:buildModel") Build a model
         .buttons.buttons--unit
           .button.button--danger(data-bind="click:stopCloud") Stop this cloud
 

@@ -460,14 +460,41 @@ module Main {
         return randomUseCase().toLowerCase().replace(/\s+/g, '-')
     }
 
-    function proxy_startCloud(cloudName: string, cloudSize: int, on: On<string>): void {
+    function proxy_startCloud(cloudId: string, cloudSize: int, on: On<string>): void {
         function go() {
             on(null, `app_id_${(Math.random() * 100) | 0}`)
         }
         setTimeout(go, 3000)
     }
+    function proxy_stopCloud(cloudId: string, on: On<string>): void {
+        function go() {
+            on(null, '')
+        }
+        setTimeout(go, 3000)
+    }
+    function proxy_buildModel(cloudId: string, frame: string, responseColumn: string, on: On<string>): void {
+        function go() {
+            on(null, '')
+        }
+        setTimeout(go, 3000)
+    }
+
+    function proxy_deleteModel(modelId: string, on: On<string>): void {
+        function go() {
+            on(null, '')
+        }
+        setTimeout(go, 3000)
+    }
+
 
     function proxy_deployModel(modelId: string, port: int, on: On<string>): void {
+        function go() {
+            on(null, '')
+        }
+        setTimeout(go, 3000)
+    }
+
+    function proxy_stopService(serviceId: string, on: On<string>): void {
         function go() {
             on(null, '')
         }
@@ -682,8 +709,8 @@ module Main {
     }
 
     interface StartCloudDialog extends Dialog {
-        cloudName: Sig<string>
-        cloudNameError: Sig<string>
+        cloudId: Sig<string>
+        cloudIdError: Sig<string>
         cloudSize: Sig<string>
         cloudSizeError: Sig<string>
         canStartCloud: Sig<boolean>
@@ -693,6 +720,20 @@ module Main {
 
     interface StartCloudDialogResult {
         applicationId: string
+    }
+
+    interface BuildModelDialog extends Dialog {
+        frame: Sig<string>
+        frameError: Sig<string>
+        responseColumn: Sig<string>
+        responseColumnError: Sig<string>
+        canBuildModel: Sig<boolean>
+        buildModel: Act
+        error: Sig<string>
+    }
+
+    interface BuildModelDialogResult {
+        success: boolean
     }
 
     interface DeployModelDialog extends Dialog {
@@ -720,6 +761,7 @@ module Main {
 
     interface CloudPane extends Pane {
         size: string
+        buildModel: Act
         stopCloud: Act
     }
 
@@ -764,14 +806,14 @@ module Main {
     //
 
 
-    const cloudNamePattern = /^[a-z0-9-]{1,16}$/i
+    const cloudIdPattern = /^[a-z0-9-]{1,16}$/i
     function newStartCloudDialog(ctx: Context, go: Eff<StartCloudDialogResult>): StartCloudDialog {
 
         const error = sig<string>('')
 
-        const cloudName = sig<string>('')
-        const cloudNameError = lift(cloudName, (cloudName): string =>
-            (cloudNamePattern.test(cloudName))
+        const cloudId = sig<string>('')
+        const cloudIdError = lift(cloudId, (cloudId): string =>
+            (cloudIdPattern.test(cloudId))
                 ? ''
                 : "Enter a valid cloud name"
         )
@@ -786,13 +828,13 @@ module Main {
                 : "Invalid cloud size"
         )
 
-        const canStartCloud = lift2(cloudNameError, cloudSizeError, (e1, e2): boolean =>
+        const canStartCloud = lift2(cloudIdError, cloudSizeError, (e1, e2): boolean =>
             e1 === '' && e2 === ''
         )
 
         const startCloud: Act = () => {
             ctx.setBusy('Creating cloud...')
-            proxy_startCloud(cloudName(), cloudSizeNum(), (err, applicationId) => {
+            proxy_startCloud(cloudId(), cloudSizeNum(), (err, applicationId) => {
                 if (err) {
                     error(err.message)
                 } else {
@@ -809,8 +851,8 @@ module Main {
 
         return {
             title: 'Start a new cloud',
-            cloudName: cloudName,
-            cloudNameError: cloudNameError,
+            cloudId: cloudId,
+            cloudIdError: cloudIdError,
             cloudSize: cloudSize,
             cloudSizeError: cloudSizeError,
             canStartCloud: canStartCloud,
@@ -819,6 +861,61 @@ module Main {
             cancel: cancel,
             dispose: noop,
             template: 'start-cloud-dialog'
+        }
+    }
+
+    function newBuildModelDialog(ctx: Context, cloudId: string, go: Eff<BuildModelDialogResult>): BuildModelDialog {
+
+        const error = sig<string>('')
+
+        const frame = sig<string>('')
+        const frameError = lift(frame, (f): string =>
+            (f && f.trim().length > 0)
+                ? ''
+                : 'Enter a valid dataset path'
+        )
+
+        const responseColumn = sig<string>('')
+        const responseColumnError = lift(responseColumn, (c): string =>
+            (c && c.trim().length > 0)
+                ? ''
+                : 'Enter a valid column name'
+        )
+
+        const canBuildModel = lift2(frameError, responseColumnError, (e1, e2): boolean =>
+            e1 === '' && e2 === ''
+        )
+
+        function buildModel(): void {
+            ctx.setBusy('Building model...')
+            proxy_buildModel(cloudId, frame(), responseColumn(), (err) => {
+                if (err) {
+                    error(err.message)
+                } else {
+                    go({
+                        success: true
+                    })
+                }
+                ctx.setFree()
+            })
+        }
+
+        const cancel: Act = () => {
+            go(null)
+        }
+
+        return {
+            title: `Build a Model`,
+            frame: frame,
+            frameError: frameError,
+            responseColumn: responseColumn,
+            responseColumnError: responseColumnError,
+            canBuildModel: canBuildModel,
+            buildModel: buildModel,
+            error: error,
+            cancel: cancel,
+            dispose: noop,
+            template: 'build-model-dialog'
         }
     }
 
@@ -947,12 +1044,23 @@ module Main {
     }
 
     function newCloudPane(ctx: Context, cloud: Cloud): CloudPane {
-        const stopCloud: Act = () => {
-            alert('--- Stop Cloud ---')
+        function buildModel(): void {
+            const dialog = newBuildModelDialog(ctx, cloud.id, (result: BuildModelDialogResult) => {
+                // XXX use result to update cloud list
+                ctx.popDialog()
+            })
+            ctx.pushDialog(dialog)
+        }
+        function stopCloud(): void {
+            ctx.setBusy('Stopping cloud...')
+            proxy_stopCloud(cloud.id, (err, result) => {
+                ctx.setFree()
+            })
         }
         return {
             title: cloud.id,
             size: String(cloud.size),
+            buildModel: buildModel,
             stopCloud: stopCloud,
             template: 'cloud',
             dispose: noop,
@@ -988,7 +1096,10 @@ module Main {
             ctx.pushDialog(dialog)
         }
         const deleteModel: Act = () => {
-            alert('--- Delete selected models ---')
+            ctx.setBusy('Deleting model...')
+            proxy_deleteModel(model.id, (err, result) => {
+                ctx.setFree()
+            })
         }
         return {
             title: model.id,
@@ -1024,7 +1135,10 @@ module Main {
 
     function newServicePane(ctx: Context, service: Service): ServicePane {
         const stopService: Act = () => {
-            alert('--- Deploy Service ---')
+            ctx.setBusy('Stopping service...')
+            proxy_stopService(service.id, (err, result) => {
+                ctx.setFree()
+            })
         }
         return {
             title: service.id,
