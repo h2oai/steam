@@ -460,8 +460,25 @@ module Main {
         return randomUseCase().toLowerCase().replace(/\s+/g, '-')
     }
 
-    function proxy_startCloud(cloudName: string, cloudSize: int, on:On<string>): void {
-      on(null, `app_id_${(Math.random() * 100) | 0}`)
+    function proxy_startCloud(cloudName: string, cloudSize: int, on: On<string>): void {
+        function go() {
+            on(null, `app_id_${(Math.random() * 100) | 0}`)
+        }
+        setTimeout(go, 3000)
+    }
+
+    function proxy_deployModel(modelId: string, port: int, on: On<string>): void {
+        function go() {
+            on(null, '')
+        }
+        setTimeout(go, 3000)
+    }
+
+    function proxy_uploadFile(file: string, on: On<string>): void {
+        function go() {
+            on(null, '')
+        }
+        setTimeout(go, 3000)
     }
 
     function proxy_getClouds(on: On<Cloud[]>): void {
@@ -583,7 +600,7 @@ module Main {
             newNavButton('ion-ios-cloud-outline', 'Clouds', true, ctx.showClouds),
             newNavButton('ion-ios-color-filter-outline', 'Models', false, ctx.showModels),
             newNavButton('ion-ios-world-outline', 'Services', false, ctx.showServices),
-            newNavButton('ion-ios-gear-outline', 'Admin', false, ctx.showAdmin)
+            newNavButton('ion-ios-paper-outline', 'Assets', false, ctx.showAssets)
         ]
 
         return new NavBar(buttons)
@@ -678,6 +695,29 @@ module Main {
         applicationId: string
     }
 
+    interface DeployModelDialog extends Dialog {
+        port: Sig<string>
+        portError: Sig<string>
+        canDeployModel: Sig<boolean>
+        deployModel: Act
+        error: Sig<string>
+    }
+
+    interface DeployModelDialogResult {
+        success: boolean // FIXME
+    }
+
+    interface AddEngineDialog extends Dialog {
+        file: Sig<string>
+        fileError: Sig<string>
+        canAddEngine: Sig<boolean>
+        addEngine: Act
+        error: Sig<string>
+    }
+    interface AddEngineDialogResult {
+        success: boolean // FIXME
+    }
+
     interface CloudPane extends Pane {
         size: string
         stopCloud: Act
@@ -704,7 +744,7 @@ module Main {
         stopService: Act
     }
 
-    interface AdminPane extends Pane {
+    interface AssetsPane extends Pane {
         items: Folder[]
     }
 
@@ -724,16 +764,16 @@ module Main {
     //
 
 
-    const cloudNamePattern = /^(a-z0-9-)$/i
+    const cloudNamePattern = /^[a-z0-9-]{1,16}$/i
     function newStartCloudDialog(ctx: Context, go: Eff<StartCloudDialogResult>): StartCloudDialog {
 
-        const error = sig<string>(void 0)
+        const error = sig<string>('')
 
         const cloudName = sig<string>('')
         const cloudNameError = lift(cloudName, (cloudName): string =>
-            (!cloudNamePattern.test(cloudName))
-                ? "Invalid cloud name"
-                : void 0
+            (cloudNamePattern.test(cloudName))
+                ? ''
+                : "Enter a valid cloud name"
         )
 
         const cloudSize = sig<string>('1')
@@ -741,13 +781,13 @@ module Main {
             parseInt(cloudSize, 10)
         )
         const cloudSizeError = lift(cloudSizeNum, (size): string =>
-            isNaN(size)
-                ? "Invalid cloud size"
-                : void 0
+            (!isNaN(size) && size > 0)
+                ? ''
+                : "Invalid cloud size"
         )
 
         const canStartCloud = lift2(cloudNameError, cloudSizeError, (e1, e2): boolean =>
-            !isUndefined(e1) && !isUndefined(e2)
+            e1 === '' && e2 === ''
         )
 
         const startCloud: Act = () => {
@@ -756,15 +796,15 @@ module Main {
                 if (err) {
                     error(err.message)
                 } else {
-                  go({
-                    applicationId: applicationId
-                  })
+                    go({
+                        applicationId: applicationId
+                    })
                 }
                 ctx.setFree()
             })
         }
         const cancel: Act = () => {
-          go(null)
+            go(null)
         }
 
         return {
@@ -779,6 +819,99 @@ module Main {
             cancel: cancel,
             dispose: noop,
             template: 'start-cloud-dialog'
+        }
+    }
+
+    function newDeployModelDialog(ctx: Context, modelId: string, go: Eff<DeployModelDialogResult>): DeployModelDialog {
+
+        const error = sig<string>('')
+
+        const port = sig<string>('8000')
+        const portNum = lift(port, (port): int =>
+            parseInt(port, 10)
+        )
+        const portError = lift(portNum, (size): string =>
+            (!isNaN(size) && size > 0)
+                ? ''
+                : 'Invalid port number'
+        )
+
+        const canDeployModel = lift(portError, (e): boolean =>
+            e === ''
+        )
+
+        const deployModel: Act = () => {
+            ctx.setBusy('Deploying model...')
+            proxy_deployModel(modelId, portNum(), (err) => {
+                if (err) {
+                    error(err.message)
+                } else {
+                    go({
+                        success: true
+                    })
+                }
+                ctx.setFree()
+            })
+        }
+        const cancel: Act = () => {
+            go(null)
+        }
+
+        return {
+            title: `Deploy Model ${modelId}`,
+            port: port,
+            portError: portError,
+            canDeployModel: canDeployModel,
+            deployModel: deployModel,
+            error: error,
+            cancel: cancel,
+            dispose: noop,
+            template: 'deploy-model-dialog'
+        }
+    }
+
+    function newAddEngineDialog(ctx: Context, go: Eff<AddEngineDialogResult>): AddEngineDialog {
+
+        const error = sig<string>('')
+
+        const file = sig<string>('')
+        const fileError = lift(file, (file): string =>
+            (file && file.trim() !== '')
+                ? ''
+                : 'Invalid file name'
+        )
+
+        const canAddEngine = lift(file, (e): boolean =>
+            e === ''
+        )
+
+        const addEngine: Act = () => {
+            ctx.setBusy('Uploading asset...')
+            proxy_uploadFile(file(), (err) => {
+                if (err) {
+                    error(err.message)
+                } else {
+                    go({
+                        success: true
+                    })
+                }
+                ctx.setFree()
+            })
+        }
+        const cancel: Act = () => {
+            go(null)
+        }
+
+        return {
+            title: `Add Engine`,
+            file: file,
+            fileError: fileError,
+            canAddEngine: canAddEngine,
+            addEngine: addEngine,
+            error: error,
+            cancel: cancel,
+            dispose: noop,
+            template: 'add-engine-dialog'
         }
     }
 
@@ -797,8 +930,9 @@ module Main {
             }
         }))
         const startCloud: Act = () => {
-            const dialog = newStartCloudDialog(ctx, (result:StartCloudDialogResult) =>{
-              ctx.popDialog()
+            const dialog = newStartCloudDialog(ctx, (result: StartCloudDialogResult) => {
+                // XXX use result to update cloud list
+                ctx.popDialog()
             })
             ctx.pushDialog(dialog)
         }
@@ -847,7 +981,11 @@ module Main {
 
     function newModelPane(ctx: Context, model: Model): ModelPane {
         const deployModel: Act = () => {
-            alert('--- Deploy Model ---')
+            const dialog = newDeployModelDialog(ctx, model.id, (result: DeployModelDialogResult) => {
+                // XXX use result to update services list
+                ctx.popDialog()
+            })
+            ctx.pushDialog(dialog)
         }
         const deleteModel: Act = () => {
             alert('--- Delete selected models ---')
@@ -898,7 +1036,7 @@ module Main {
         }
     }
 
-    function newAdminPane(ctx: Context): AdminPane {
+    function newAssetsPane(ctx: Context): AssetsPane {
         const items: Folder[] = [
             {
                 title: 'Engines',
@@ -910,8 +1048,8 @@ module Main {
         ]
 
         return {
-            title: 'Admin',
-            template: 'admin',
+            title: 'Assets',
+            template: 'assets',
             dispose: noop,
             position: newPanePosition(),
             items: items
@@ -930,7 +1068,11 @@ module Main {
         }))
 
         const addEngine: Act = () => {
-            alert('--- Add engine ---')
+            const dialog = newAddEngineDialog(ctx, (result: AddEngineDialogResult) => {
+                // XXX use result to update engine list
+                ctx.popDialog()
+            })
+            ctx.pushDialog(dialog)
         }
 
         return {
@@ -970,7 +1112,7 @@ module Main {
         public showModel = uni1<Model>()
         public showServices = uni()
         public showService = uni1<Service>()
-        public showAdmin = uni()
+        public showAssets = uni()
         public showEngines = uni()
         public showEngine = uni1<Engine>()
     }
@@ -1007,19 +1149,19 @@ module Main {
         const hasDialogs = lifts(dialogs, isNonEmpty)
         const busyMessage = sig<string>(void 0)
 
-        ctx.pushDialog.on((dialog:Dialog) => {
-          dialogs.push(dialog)
+        ctx.pushDialog.on((dialog: Dialog) => {
+            dialogs.push(dialog)
         })
 
         ctx.popDialog.on(() => {
-          dialogs.pop()
+            dialogs.pop()
         })
 
-        ctx.setBusy.on((message:string) => {
-          busyMessage(message)
+        ctx.setBusy.on((message: string) => {
+            busyMessage(message)
         })
         ctx.setFree.on(() => {
-          busyMessage(void 0)
+            busyMessage(void 0)
         })
 
         ctx.showPane.on((index: int, pane: Pane) => {
@@ -1081,8 +1223,8 @@ module Main {
             ctx.showPane(1, newServicePane(ctx, service))
         })
 
-        ctx.showAdmin.on(() => {
-            ctx.showPane(0, newAdminPane(ctx))
+        ctx.showAssets.on(() => {
+            ctx.showPane(0, newAssetsPane(ctx))
         })
 
         ctx.showEngines.on(() => {

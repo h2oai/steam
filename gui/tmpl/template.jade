@@ -52,7 +52,9 @@ html.no-js
     // ko if:busyMessage
     .mask
     .busy
-      div(data-bind="text:busyMessage")
+      .busy-message
+        img(src="spinner.gif" style="margin-right:10px")
+        span(data-bind="text:busyMessage")
     // /ko
 
     //
@@ -69,20 +71,45 @@ html.no-js
     
     template.start-cloud-dialog
       .dialog__form
-        table.form
-          tbody
-            tr
-              th Cloud Name
-              td
-                input.textbox(type='text' placeholder='Name' data-bind='value:cloudName' style='width:300px')
-            tr
-              th Cloud Size
-              td
-                input.textbox(type='text' placeholder='Size' data-bind='value:cloudSize' style='width:50px')
+        .form-field-label Specify a name for this cloud:
+        .form-field
+          input.textbox(type='text' placeholder='Name' data-bind="value:cloudName, valueUpdate:'afterkeydown'" style='width:300px')
+        .form-field-error(data-bind="text:cloudNameError")
+
+        .form-field-label How many nodes should this cloud have?
+        .form-field
+          input.textbox(type='text' placeholder='Size' data-bind="value:cloudSize, valueUpdate:'afterkeydown'" style='width:50px')
+        .form-field-error(data-bind="text:cloudSizeError")
 
       .dialog__actions
         .buttons.buttons--unit
           .button.button--primary(data-bind="click:startCloud") Start Cloud
+        .buttons.buttons--unit
+          .button(data-bind="click:cancel") Cancel
+
+    template.deploy-model-dialog
+      .dialog__form
+        .form-field-label Specify a port number for the scoring service:
+        .form-field
+          input.textbox(type='text' placeholder='Port' data-bind="value:port, valueUpdate:'afterkeydown'" style='width:50px')
+        .form-field-error(data-bind="text:portError")
+
+      .dialog__actions
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:deployModel") Deploy
+        .buttons.buttons--unit
+          .button(data-bind="click:cancel") Cancel
+
+    template.add-engine-dialog
+      .dialog__form
+        .form-field-label Select the file to upload:
+        .form-field
+          input.textbox(type='text' placeholder='Browse and select a file...' data-bind="value:file, valueUpdate:'afterkeydown'" style='width:250px')
+        .form-field-error(data-bind="text:fileError")
+
+      .dialog__actions
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:addEngine") Upload
         .buttons.buttons--unit
           .button(data-bind="click:cancel") Cancel
 
@@ -142,7 +169,7 @@ html.no-js
         .buttons.buttons--unit
           .button.button--danger(data-bind="click:stopService") Stop this service
 
-    template.admin
+    template.assets
       .pane__titlebar(data-bind="text:title")
       .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
 

@@ -429,6 +429,16 @@ x-progressbar-height = 1px
 .busy
   dock()
 
+.busy-message
+  position absolute
+  text-align center
+  left 0
+  right 0
+  top 45%
+  font-size 20px
+  color white
+  thin()
+
 .dialogs
   dock(x-navbar-width, x-navbar-width, x-navbar-width, x-navbar-width)
   border 1px solid x-color-accent
@@ -437,28 +447,30 @@ x-progressbar-height = 1px
 .dialog
   dock()
 
+x-dialog-title-height = 40px
+
 .dialog__titlebar
-  dock-top(x-navbar-width)
-  line-height x-navbar-width
+  dock-top(x-dialog-title-height)
+  line-height x-dialog-title-height
   overflow ellipsis
-  background #292929
+  background x-color-accent
   border-bottom 1px solid #383838
 
 .dialog__title
-  dock(0px, x-navbar-width, 0, 10px)
-  thin()
-  color #f7f7f7
+  dock(0px, x-dialog-title-height, 0, 10px)
+  light()
+  color #000
   font-size 20px
 
 .dialog__exit
-  dock-right(x-navbar-width)
+  dock-right(x-dialog-title-height)
   cursor pointer
   text-align center
-  font-size 50px
-  color #777
+  font-size 40px
+  color x-color-bg
 
 .dialog__body
-  dock(x-navbar-width, 0, 0, 0)
+  dock(x-dialog-title-height, 0, 0, 0)
 
 .dialog__form
   dock(0, 0, x-action-height, 0)
@@ -478,6 +490,16 @@ x-progressbar-height = 1px
 .dialog__buttons--danger
   background x-color-red
   color white
+
+.form-field-label
+  font-size 14px
+
+.form-field-error
+  min-height 20px
+  margin-bottom 10px
+  color x-color-accent
+  light()
+  font-size 13px
 
 .form
   font-size 16px

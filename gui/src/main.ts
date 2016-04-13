@@ -11,8 +11,8 @@ module Main {
         ko.applyBindings(app)
     }
 
-    (document.readyState !== 'loading') 
-      ? boot() 
-      : document.addEventListener('DOMContentLoaded', boot)
+    (document.readyState !== 'loading')
+        ? boot()
+        : document.addEventListener('DOMContentLoaded', boot)
 }
 

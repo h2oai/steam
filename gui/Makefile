@@ -30,6 +30,7 @@ lib:
 	rsync -u $B/qunit/qunit/qunit.css $O/
 	rsync -u $B/qunit/qunit/qunit.js $O/
 	mkdir -p $O/fonts
+	rsync -u tmpl/spinner.gif $O/
 	rsync -u tmpl/favicon.ico $O/
 	$N/jade --pretty --out $O ./tmpl/test.jade
 
