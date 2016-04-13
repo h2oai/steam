@@ -512,7 +512,8 @@ module Main {
         const clouds = _.times(_.random(5, 20), (i: int): Cloud => {
             return new Cloud(
                 `${faker.name.firstName()}'s Cloud`,
-                _.random(1, 10)
+                _.random(1, 10),
+                'A few minutes ago'
             )
         })
         on(null, clouds)
@@ -525,7 +526,8 @@ module Main {
                 `model-${useCase}`,
                 `${faker.name.firstName()}'s Cloud`,
                 `${useCase}.hex`,
-                `${faker.lorem.word()}`
+                `${faker.lorem.word()}`,
+                'A few minutes ago'
             )
         })
         on(null, clouds)
@@ -535,7 +537,8 @@ module Main {
         const services = _.times(_.random(5, 20), (i: int): Service => {
             return new Service(
                 `${randomUseCaseSlug()}`,
-                `${faker.internet.ip()}/${randomUseCaseSlug()}`
+                `${faker.internet.ip()}/${randomUseCaseSlug()}`,
+                'A few minutes ago'
             )
         })
         on(null, services)
@@ -547,7 +550,7 @@ module Main {
             return {
                 name: name,
                 path: `/var/engines/${name}`,
-                createdDate: String(faker.date.recent())
+                createdAt: 'A few minutes ago'
             }
         })
         on(null, engines)
@@ -561,7 +564,8 @@ module Main {
     class Cloud {
         constructor(
             public id: string,
-            public size: int
+            public size: int,
+            public createdAt: string
         ) { }
     }
 
@@ -570,21 +574,23 @@ module Main {
             public id: string,
             public cloud: string,
             public frame: string,
-            public responseColumn: string
+            public responseColumn: string,
+            public createdAt: string
         ) { }
     }
 
     class Service {
         constructor(
             public id: string,
-            public endpoint: string
+            public endpoint: string,
+            public createdAt: string
         ) { }
     }
 
     interface Engine {
         name: string
         path: string
-        createdDate: string
+        createdAt: string
     }
 
     //
@@ -761,6 +767,7 @@ module Main {
 
     interface CloudPane extends Pane {
         size: string
+        createdAt: string
         buildModel: Act
         stopCloud: Act
     }
@@ -773,6 +780,7 @@ module Main {
         cloud: string
         frame: string
         responseColumn: string
+        createdAt: string
         deployModel: Act
         deleteModel: Act
     }
@@ -783,6 +791,7 @@ module Main {
 
     interface ServicePane extends Pane {
         endpoint: string
+        createdAt: string
         stopService: Act
     }
 
@@ -797,7 +806,7 @@ module Main {
 
     interface EnginePane extends Pane {
         path: string
-        createdDate: string
+        createdAt: string
         deleteEngine: Act
     }
 
@@ -1060,6 +1069,7 @@ module Main {
         return {
             title: cloud.id,
             size: String(cloud.size),
+            createdAt: cloud.createdAt,
             buildModel: buildModel,
             stopCloud: stopCloud,
             template: 'cloud',
@@ -1106,6 +1116,7 @@ module Main {
             cloud: model.cloud,
             frame: model.frame,
             responseColumn: model.responseColumn,
+            createdAt: model.createdAt,
             deployModel: deployModel,
             deleteModel: deleteModel,
             template: 'model',
@@ -1146,6 +1157,7 @@ module Main {
             dispose: noop,
             position: newPanePosition(650),
             endpoint: service.endpoint,
+            createdAt: service.createdAt,
             stopService: stopService,
         }
     }
@@ -1174,7 +1186,7 @@ module Main {
         const items = sigs<Folder>(_.map(engines, (engine): Folder => {
             return {
                 title: engine.name,
-                subhead: engine.createdDate,
+                subhead: engine.createdAt,
                 slug: '',
                 execute: () => { ctx.showEngine(engine) },
                 template: 'folder'
@@ -1206,7 +1218,7 @@ module Main {
         return {
             title: engine.name,
             path: engine.path,
-            createdDate: engine.createdDate,
+            createdAt: engine.createdAt,
             deleteEngine: deleteEngine,
             template: 'engine',
             dispose: noop,

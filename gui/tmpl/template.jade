@@ -151,7 +151,15 @@ html.no-js
     template.cloud
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
-        div(data-bind="text:size")
+        .pane__page
+          table
+            tbody
+              tr
+                th Cloud Size
+                td(data-bind="text:size")
+              tr
+                th Created
+                td(data-bind="text:createdAt")
       .pane__actions
         .buttons.buttons--unit
           .button.button--primary(data-bind="click:buildModel") Build a model
@@ -165,9 +173,21 @@ html.no-js
     template.model
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
-        div(data-bind="text: cloud")
-        div(data-bind="text: frame")
-        div(data-bind="text: responseColumn")
+        .pane__page
+          table
+            tbody
+              tr
+                th Cloud
+                td(data-bind="text: cloud")
+              tr
+                th Frame
+                td(data-bind="text: frame")
+              tr
+                th Response Column
+                td(data-bind="text: responseColumn")
+              tr
+                th Created
+                td(data-bind="text:createdAt")
       .pane__actions
         .buttons.buttons--unit
           .button.button--primary(data-bind="click:deployModel") Deploy this model...
@@ -181,7 +201,15 @@ html.no-js
     template.service
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
-        div(data-bind="text: endpoint")
+        .pane__page
+          table
+            tbody
+              tr
+                th Endpoint
+                td(data-bind="text: endpoint")
+              tr
+                th Created
+                td(data-bind="text:createdAt")
       .pane__actions
         .buttons.buttons--unit
           .button.button--danger(data-bind="click:stopService") Stop this service
@@ -200,8 +228,15 @@ html.no-js
     template.engine
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
-        div(data-bind="text: path")
-        div(data-bind="text: createdDate")
+        .pane__page
+          table
+            tbody
+              tr
+                th Path
+                td(data-bind="text: path")
+              tr
+                th Created
+                td(data-bind="text: createdAt")
       .pane__actions
         .buttons.buttons--unit
           .button.button--danger(data-bind="click:deleteEngine") Delete Engine
