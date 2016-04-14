@@ -144,7 +144,8 @@ func genClientStub(f *parser.Func) string {
 }
 
 func Generate(i *parser.Interface) string {
-	c := "// ----------------------------------\n"
+	c := "/// <reference path=\"xhr.ts\" />\n"
+	c += "// ----------------------------------\n"
 	c += "// --- Generated with go:generate ---\n"
 	c += "// ---        DO NOT EDIT         ---\n"
 	c += "// ----------------------------------\n\n"
