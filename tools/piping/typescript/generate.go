@@ -132,7 +132,7 @@ func genClientStub(f *parser.Func) string {
 
 	c += "\t\tProxy.Call(\"" + f.Name + "\", req, function(error, data) {\n"
 	if f.Return != nil {
-		c += "\t\t\treturn error ? go(error, null) : go(null, (<" + f.Name + "Out>data)." + f.Return.Name + ")\n"
+		c += "\t\t\treturn error ? go(error, null) : go(null, (<" + f.Name + "Out>data)." + snaker.CamelToSnake(f.Return.Name) + ")\n"
 	} else {
 		c += "\t\t\treturn error ? go(error) : go(null)\n"
 	}
