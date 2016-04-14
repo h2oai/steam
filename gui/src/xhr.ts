@@ -27,13 +27,13 @@ module Proxy {
 
     function invoke(method: string, param: any, headers: any, go: (error: Error, data: any) => void) {
         const req: RpcRequest = {
-            method: `usr.${method}`,
+            method: `web.${method}`,
             params: [param],
             id: nextId()
         }
 
         const settings: JQueryAjaxSettings = {
-            url: "/urpc",
+            url: "/web",
             type: "POST",
             data: JSON.stringify(req),
             contentType: "application/json; charset=utf-8",

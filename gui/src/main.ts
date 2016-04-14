@@ -1,4 +1,5 @@
 /// <reference path="references.ts" />
+/// <reference path="app.ts" />
 "use strict"
 
 module Main {

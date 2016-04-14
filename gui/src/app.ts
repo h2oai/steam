@@ -1228,6 +1228,7 @@ module Main {
     }
 
     export class Context {
+        public remote = Proxy
         public setBusy = uni1<string>()
         public setFree = uni()
         public pushDialog = uni1<Dialog>()
