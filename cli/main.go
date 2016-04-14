@@ -165,9 +165,9 @@ Start a 4 node H2O 3.2.0.9 cloud
 
 func startCloud(c *context) *cobra.Command {
 	var (
-		size             int
-		keytab, username string
-		kerberos         bool
+		size                  int
+		mem, keytab, username string
+		kerberos              bool
 	)
 
 	cmd := newCmd(c, startCloudHelp, func(c *context, args []string) {
@@ -180,7 +180,7 @@ func startCloud(c *context) *cobra.Command {
 
 		// --- add additional args here ---
 
-		if _, err := yarn.StartCloud(size, kerberos, name, username, keytab); err != nil {
+		if _, _, err := yarn.StartCloud(size, kerberos, mem, name, username, keytab); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -188,6 +188,7 @@ func startCloud(c *context) *cobra.Command {
 
 	})
 	cmd.Flags().IntVar(&size, "size", 1, "The number of nodes to provision.")
+	cmd.Flags().StringVar(&mem, "mem", "10g", "The max amount of memory to use per node.")
 	cmd.Flags().BoolVar(&kerberos, "kerberos", true, "Set false on systems with no kerberos authentication.")
 	cmd.Flags().StringVar(&username, "username", "", "The valid kerberos username.")
 	cmd.Flags().StringVar(&keytab, "keytab", "", "The name of the keytab file to use")

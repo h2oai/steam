@@ -39,12 +39,16 @@ func (s *Service) Ping(status bool) (bool, error) {
 	return status, nil
 }
 
-func (s *Service) StartCloud(name string, size int, kerberos bool, username, keytab string) (string, error) {
-	id, err := yarn.StartCloud(size, kerberos, name, username, keytab)
+func (s *Service) StartCloud(name string, size int, mem string, kerberos bool, username, keytab string) (*web.CloudOpts, error) {
+	id, node, err := yarn.StartCloud(size, kerberos, mem, name, username, keytab)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return id, nil
+	return &web.CloudOpts{
+		name,
+		id,
+		node,
+	}, nil
 }
 
 func (s *Service) StopCloud(name string, kerberos bool, applicationID, username, keytab string) error {

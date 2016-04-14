@@ -1,4 +1,3 @@
-/// <reference path="xhr.ts" />
 // ----------------------------------
 // --- Generated with go:generate ---
 // ---        DO NOT EDIT         ---
@@ -12,6 +11,12 @@ module Proxy {
 	export type Timestamp = number
 
 	// --- Types ---
+
+	export interface CloudOpts {
+		name: string
+		application_id: string
+		address: string
+	}
 
 	export interface Cloud {
 		name: string
@@ -32,7 +37,7 @@ module Proxy {
 
 	export interface Service {
 		ping: (status: boolean, go: (error: Error, status: boolean) => void) => void
-		startCloud: (name: string, size: number, useKerberos: boolean, username: string, keytab: string, go: (error: Error, applicationID: string) => void) => void
+		startCloud: (name: string, size: number, mem: string, useKerberos: boolean, username: string, keytab: string, go: (error: Error, cloud: CloudOpts) => void) => void
 		stopCloud: (name: string, useKerberos: boolean, applicationID: string, username: string, keytab: string, go: (error: Error) => void) => void
 		getCloud: (address: string, go: (error: Error, cloud: Cloud) => void) => void
 		buildAutoML: (address: string, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, modelID: string) => void) => void
@@ -53,13 +58,14 @@ module Proxy {
 	interface StartCloudIn {
 		name: string
 		size: number
+		mem: string
 		use_kerberos: boolean
 		username: string
 		keytab: string
 	}
 
 	interface StartCloudOut {
-		application_id: string
+		cloud: CloudOpts
 	}
 
 	interface StopCloudIn {
@@ -119,16 +125,17 @@ module Proxy {
 		})
 
 	}
-	export function startCloud(name: string, size: number, useKerberos: boolean, username: string, keytab: string, go: (error: Error, applicationID: string) => void): void {
+	export function startCloud(name: string, size: number, mem: string, useKerberos: boolean, username: string, keytab: string, go: (error: Error, cloud: CloudOpts) => void): void {
 		var req: StartCloudIn = {
 			name: name,
 			size: size,
+			mem: mem,
 			use_kerberos: useKerberos,
 			username: username,
 			keytab: keytab
 		}
 		Proxy.Call("StartCloud", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<StartCloudOut>data).application_id)
+			return error ? go(error, null) : go(null, (<StartCloudOut>data).cloud)
 		})
 
 	}
@@ -162,7 +169,7 @@ module Proxy {
 			max_run_time: maxRunTime
 		}
 		Proxy.Call("BuildAutoML", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<BuildAutoMLOut>data).model_id)
+			return error ? go(error, null) : go(null, (<BuildAutoMLOut>data).modelID)
 		})
 
 	}

@@ -6,6 +6,11 @@ alias CloudState string
 
 alias Timestamp int64
 
+type CloudOpts
+ Name string
+ ApplicationID string
+ Address string
+
 type Cloud
  Name string
  Pack string
@@ -21,7 +26,7 @@ type CloudModelSynopsis
 
 Ping(status bool) status bool
 
-StartCloud (name string, size int, useKerberos bool, username string, keytab string) applicationID string
+StartCloud (name string, size int, mem string, useKerberos bool, username string, keytab string) cloud *CloudOpts
 StopCloud (name string, useKerberos bool, applicationID string, username string, keytab string)
 
 GetCloud (address string) cloud *Cloud

@@ -16,6 +16,12 @@ type Timestamp int64
 
 // --- Types ---
 
+type CloudOpts struct {
+	Name          string `json:"name"`
+	ApplicationID string `json:"application_id"`
+	Address       string `json:"address"`
+}
+
 type Cloud struct {
 	Name  string     `json:"name"`
 	Pack  string     `json:"pack"`
@@ -35,7 +41,7 @@ type CloudModelSynopsis struct {
 
 type Service interface {
 	Ping(status bool) (bool, error)
-	StartCloud(name string, size int, useKerberos bool, username string, keytab string) (string, error)
+	StartCloud(name string, size int, mem string, useKerberos bool, username string, keytab string) (*CloudOpts, error)
 	StopCloud(name string, useKerberos bool, applicationID string, username string, keytab string) error
 	GetCloud(address string) (*Cloud, error)
 	BuildAutoML(address string, dataset string, targetName string, maxRunTime int) (string, error)
@@ -56,13 +62,14 @@ type PingOut struct {
 type StartCloudIn struct {
 	Name        string `json:"name"`
 	Size        int    `json:"size"`
+	Mem         string `json:"mem"`
 	UseKerberos bool   `json:"use_kerberos"`
 	Username    string `json:"username"`
 	Keytab      string `json:"keytab"`
 }
 
 type StartCloudOut struct {
-	ApplicationID string `json:"application_id"`
+	Cloud *CloudOpts `json:"cloud"`
 }
 
 type StopCloudIn struct {
@@ -131,14 +138,14 @@ func (this *Remote) Ping(status bool) (bool, error) {
 	return out.Status, nil
 }
 
-func (this *Remote) StartCloud(name string, size int, useKerberos bool, username string, keytab string) (string, error) {
-	in := StartCloudIn{name, size, useKerberos, username, keytab}
+func (this *Remote) StartCloud(name string, size int, mem string, useKerberos bool, username string, keytab string) (*CloudOpts, error) {
+	in := StartCloudIn{name, size, mem, useKerberos, username, keytab}
 	var out StartCloudOut
 	err := this.Proc.Call("StartCloud", &in, &out)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return out.ApplicationID, nil
+	return out.Cloud, nil
 }
 
 func (this *Remote) StopCloud(name string, useKerberos bool, applicationID string, username string, keytab string) error {
@@ -207,11 +214,11 @@ func (this *Impl) Ping(r *http.Request, in *PingIn, out *PingOut) error {
 }
 
 func (this *Impl) StartCloud(r *http.Request, in *StartCloudIn, out *StartCloudOut) error {
-	it, err := this.Service.StartCloud(in.Name, in.Size, in.UseKerberos, in.Username, in.Keytab)
+	it, err := this.Service.StartCloud(in.Name, in.Size, in.Mem, in.UseKerberos, in.Username, in.Keytab)
 	if err != nil {
 		return err
 	}
-	out.ApplicationID = it
+	out.Cloud = it
 	return nil
 }
 

@@ -2,7 +2,6 @@ package yarn
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -24,10 +23,10 @@ func kCheck(username, keytab string) error {
 func kInit(username, keytab string) error {
 
 	if len(username) < 1 {
-		return errors.New("A username is required to authenticate with Kerberos.")
+		return fmt.Errorf("A username is required to authenticate with Kerberos.")
 	}
 	if len(keytab) < 0 {
-		return errors.New("A keytab is required to authenticate with Kerberos.")
+		return fmt.Errorf("A keytab is required to authenticate with Kerberos.")
 	}
 
 	cmd := exec.Command("kinit", username, "-k", "-t", keytab)
@@ -48,8 +47,7 @@ func kInit(username, keytab string) error {
 	}()
 
 	if err := cmd.Wait(); err != nil {
-		log.Println("Failed to authenticate.")
-		return err
+		return fmt.Errorf("Failed to authenticate: %v", err)
 	}
 
 	return nil
@@ -58,10 +56,10 @@ func kInit(username, keytab string) error {
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(size int, kerberos bool, name, username, keytab string) (string, error) {
+func StartCloud(size int, kerberos bool, mem, name, username, keytab string) (string, string, error) {
 	if kerberos {
 		if err := kCheck(username, keytab); err != nil {
-			return "", err
+			return "", "", err
 		}
 	}
 
@@ -73,7 +71,7 @@ func StartCloud(size int, kerberos bool, name, username, keytab string) (string,
 		"-n",               //
 		strconv.Itoa(size), //
 		"-mapperXmx",       //
-		"10g",              // FIXME: This may be modifialbe down the road
+		mem,                //
 		"-output",          //
 		name + "_out",      //
 		"-disown",          //
@@ -85,15 +83,16 @@ func StartCloud(size int, kerberos bool, name, username, keytab string) (string,
 	if err != nil {
 		log.Println("Failed to launch hadoop.")
 		log.Println("\n" + string(cmdOut)) // This captures error from the drive.jar
-		return "", err                     // This captures erros from Stderr
+		return "", "", err                 // This captures erros from Stderr
 	}
 	hpOut := (string(cmdOut))
 	// Capture only the address and ID respectively
 	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
 	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
 
+	var address string
 	for _, node := range reNode.FindAllStringSubmatch(hpOut, size) {
-		address := node[1]
+		address = node[1]
 		log.Println("Node started at:", address)
 	}
 	apID := reApID.FindStringSubmatch(hpOut)[1]
@@ -101,7 +100,7 @@ func StartCloud(size int, kerberos bool, name, username, keytab string) (string,
 	fmt.Println("")
 	log.Println("Started cloud with ID:", apID)
 
-	return apID, nil
+	return apID, address, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
