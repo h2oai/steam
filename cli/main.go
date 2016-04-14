@@ -116,6 +116,7 @@ Examples:
 func serveMaster(c *context) *cobra.Command {
 	var webAddress string
 	var workingDirectory string
+	var compilationServiceAddress string
 	var enableProfiler bool
 
 	opts := master.DefaultOpts
@@ -124,12 +125,14 @@ func serveMaster(c *context) *cobra.Command {
 		master.Run(c.version, c.buildDate, &master.Opts{
 			webAddress,
 			workingDirectory,
+			compilationServiceAddress,
 			enableProfiler,
 		})
 	})
 
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address.")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
+	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Compilation service address")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	return cmd
 

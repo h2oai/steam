@@ -23,14 +23,16 @@ const (
 )
 
 type Opts struct {
-	WebAddress       string
-	WorkingDirectory string
-	EnableProfiler   bool
+	WebAddress                string
+	WorkingDirectory          string
+	CompilationServiceAddress string
+	EnableProfiler            bool
 }
 
 var DefaultOpts = &Opts{
 	defaultWebAddress,
 	path.Join(".", fs.VarDir, "master"),
+	"",
 	false,
 }
 
@@ -132,7 +134,11 @@ func Run(version, buildDate string, opts *Opts) {
 	// --- create front end api services ---
 
 	webServeMux := http.NewServeMux()
-	webServeMux.Handle("/web", rpc.NewServer(rpc.NewService("web", web.NewService(wd, ds))))
+	webServeMux.Handle("/web", rpc.NewServer(rpc.NewService("web", web.NewService(
+		wd,
+		ds,
+		opts.CompilationServiceAddress,
+	))))
 	webServeMux.Handle("/upload", newUploadHandler(wd))
 	webServeMux.Handle("/", http.FileServer(http.Dir(path.Join(wd, "/www")))) // no auth
 

@@ -26,12 +26,13 @@ import (
 )
 
 type Service struct {
-	wd string
-	ds *db.DS
+	workingDir                string
+	ds                        *db.DS
+	compilationServiceAddress string
 }
 
-func NewService(wd string, ds *db.DS) *web.Impl {
-	return &web.Impl{&Service{wd, ds}}
+func NewService(workingDir string, ds *db.DS, compilationServiceAddress string) *web.Impl {
+	return &web.Impl{&Service{workingDir, ds, compilationServiceAddress}}
 }
 
 func (s *Service) Ping(status bool) (bool, error) {
@@ -83,7 +84,7 @@ func (s *Service) BuildAutoML(address, dataset, targetName string, maxTime int) 
 		return "", err
 	}
 
-	javaModelDir := fs.GetModelPath(s.wd, modelName, "java")
+	javaModelDir := fs.GetModelPath(s.workingDir, modelName, "java")
 	if err := h.ExportJavaModel(modelName, javaModelDir); err != nil {
 		return "", err
 	}
