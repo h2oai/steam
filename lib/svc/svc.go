@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -28,10 +30,19 @@ func Stop(pid int) error {
 		return fmt.Errorf("Failed locating scoring service with pid %d: %v", pid, err)
 	}
 
+	// Verify if this pid belongs to a scoring service
+	pscmd, err := getProcessCommand(pid)
+	if err != nil {
+		return fmt.Errorf("Failed inspecting pid %d: %v", pid, err)
+	}
+	if !strings.Contains(pscmd, "/bin/sleep") { // FIXME check for jetty-runner
+		return fmt.Errorf("Process %d is not a scoring service")
+	}
+
 	const sigintInterval = time.Second
 	const sigintTimeout = time.Second * 10
 
-	// retry SIGINTs;  SIGKILL on timeout
+	// Retry SIGINTs;  SIGKILL on timeout
 	ticker := time.NewTicker(sigintInterval)
 	timeout := time.NewTimer(sigintTimeout)
 	for {
@@ -50,6 +61,14 @@ func Stop(pid int) error {
 			}
 		}
 	}
+}
+
+func getProcessCommand(pid int) (string, error) {
+	lines, err := exec.Command("/bin/ps", "-o", "command", "-p", strconv.Itoa(pid)).Output()
+	if err != nil {
+		return "", fmt.Errorf("Failed inspecting process with pid %d: %v", pid, err)
+	}
+	return string(lines), nil
 }
 
 func isProcessFinished(err error) bool {
