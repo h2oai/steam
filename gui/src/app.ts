@@ -1,5 +1,6 @@
 /// <reference path="references.ts" />
-
+/// <reference path="xhr.ts" />
+/// <reference path="proxy.ts" />
 "use strict"
 
 module Main {
