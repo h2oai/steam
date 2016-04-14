@@ -1,3 +1,4 @@
+/// <reference path="xhr.ts" />
 // ----------------------------------
 // --- Generated with go:generate ---
 // ---        DO NOT EDIT         ---
@@ -31,11 +32,11 @@ module Proxy {
 
 	export interface Service {
 		ping: (status: boolean, go: (error: Error, status: boolean) => void) => void
-		startCloud: (size: number, kerberos: boolean, name: string, username: string, keytab: string, go: (error: Error, apID: string) => void) => void
-		stopCloud: (kerberos: boolean, name: string, id: string, username: string, keytab: string, go: (error: Error) => void) => void
+		startCloud: (name: string, size: number, useKerberos: boolean, username: string, keytab: string, go: (error: Error, applicationID: string) => void) => void
+		stopCloud: (name: string, useKerberos: boolean, applicationID: string, username: string, keytab: string, go: (error: Error) => void) => void
 		getCloud: (address: string, go: (error: Error, cloud: Cloud) => void) => void
-		buildAutoML: (address: string, dataset: string, targetName: string, maxTime: number, go: (error: Error, modelID: string) => void) => void
-		deployPojo: (address: string, javaModel: string, jar: string, go: (error: Error) => void) => void
+		buildAutoML: (address: string, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, modelID: string) => void) => void
+		deployPojo: (address: string, javaModelPath: string, genModelPath: string, go: (error: Error) => void) => void
 		shutdown: (address: string, go: (error: Error) => void) => void
 	}
 
@@ -50,21 +51,21 @@ module Proxy {
 	}
 
 	interface StartCloudIn {
-		size: number
-		kerberos: boolean
 		name: string
+		size: number
+		use_kerberos: boolean
 		username: string
 		keytab: string
 	}
 
 	interface StartCloudOut {
-		ap_id: string
+		application_id: string
 	}
 
 	interface StopCloudIn {
-		kerberos: boolean
 		name: string
-		id: string
+		use_kerberos: boolean
+		application_id: string
 		username: string
 		keytab: string
 	}
@@ -84,7 +85,7 @@ module Proxy {
 		address: string
 		dataset: string
 		target_name: string
-		max_time: number
+		max_run_time: number
 	}
 
 	interface BuildAutoMLOut {
@@ -93,8 +94,8 @@ module Proxy {
 
 	interface DeployPojoIn {
 		address: string
-		java_model: string
-		jar: string
+		java_model_path: string
+		gen_model_path: string
 	}
 
 	interface DeployPojoOut {
@@ -118,24 +119,24 @@ module Proxy {
 		})
 
 	}
-	export function startCloud(size: number, kerberos: boolean, name: string, username: string, keytab: string, go: (error: Error, apID: string) => void): void {
+	export function startCloud(name: string, size: number, useKerberos: boolean, username: string, keytab: string, go: (error: Error, applicationID: string) => void): void {
 		var req: StartCloudIn = {
-			size: size,
-			kerberos: kerberos,
 			name: name,
+			size: size,
+			use_kerberos: useKerberos,
 			username: username,
 			keytab: keytab
 		}
 		Proxy.Call("StartCloud", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<StartCloudOut>data).apID)
+			return error ? go(error, null) : go(null, (<StartCloudOut>data).application_id)
 		})
 
 	}
-	export function stopCloud(kerberos: boolean, name: string, id: string, username: string, keytab: string, go: (error: Error) => void): void {
+	export function stopCloud(name: string, useKerberos: boolean, applicationID: string, username: string, keytab: string, go: (error: Error) => void): void {
 		var req: StopCloudIn = {
-			kerberos: kerberos,
 			name: name,
-			id: id,
+			use_kerberos: useKerberos,
+			application_id: applicationID,
 			username: username,
 			keytab: keytab
 		}
@@ -153,23 +154,23 @@ module Proxy {
 		})
 
 	}
-	export function buildAutoML(address: string, dataset: string, targetName: string, maxTime: number, go: (error: Error, modelID: string) => void): void {
+	export function buildAutoML(address: string, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, modelID: string) => void): void {
 		var req: BuildAutoMLIn = {
 			address: address,
 			dataset: dataset,
 			target_name: targetName,
-			max_time: maxTime
+			max_run_time: maxRunTime
 		}
 		Proxy.Call("BuildAutoML", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<BuildAutoMLOut>data).modelID)
+			return error ? go(error, null) : go(null, (<BuildAutoMLOut>data).model_id)
 		})
 
 	}
-	export function deployPojo(address: string, javaModel: string, jar: string, go: (error: Error) => void): void {
+	export function deployPojo(address: string, javaModelPath: string, genModelPath: string, go: (error: Error) => void): void {
 		var req: DeployPojoIn = {
 			address: address,
-			java_model: javaModel,
-			jar: jar
+			java_model_path: javaModelPath,
+			gen_model_path: genModelPath
 		}
 		Proxy.Call("DeployPojo", req, function(error, data) {
 			return error ? go(error) : go(null)

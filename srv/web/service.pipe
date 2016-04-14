@@ -21,10 +21,10 @@ type CloudModelSynopsis
 
 Ping(status bool) status bool
 
-StartCloud (size int, kerberos bool, name string, username string, keytab string) apID string
-StopCloud (kerberos bool, name string, id string, username string, keytab string)
+StartCloud (name string, size int, useKerberos bool, username string, keytab string) applicationID string
+StopCloud (name string, useKerberos bool, applicationID string, username string, keytab string)
 
 GetCloud (address string) cloud *Cloud
-BuildAutoML (address string, dataset string, targetName string, maxTime int) modelID string
-DeployPojo (address string, javaModel string, jar string)
+BuildAutoML (address string, dataset string, targetName string, maxRunTime int) modelID string
+DeployPojo (address string, javaModelPath string, genModelPath string)
 Shutdown (address string)
