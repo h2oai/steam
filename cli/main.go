@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master"
 	"github.com/spf13/cobra"
@@ -145,6 +146,7 @@ Examples:
 func start(c *context) *cobra.Command {
 	cmd := newCmd(c, startHelp, nil)
 	cmd.AddCommand(startCloud(c))
+	cmd.AddCommand(startService(c))
 	return cmd
 }
 
@@ -190,6 +192,32 @@ func startCloud(c *context) *cobra.Command {
 	return cmd
 }
 
+var startServiceHelp = `
+service
+Start a new scoring service
+Examples:
+
+Start a new scoring service instance using foo.war listening on port 8888
+    $ steam start service --warfile=foo.war --port=8888
+`
+
+func startService(c *context) *cobra.Command {
+	var (
+		warfile string
+		port    int
+	)
+	cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
+		pid, err := svc.Start(warfile, port)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Println("Started process:", pid)
+	})
+	cmd.Flags().StringVar(&warfile, "warfile", "", "The WAR file to launch.")
+	cmd.Flags().IntVar(&port, "port", 8000, "The port to listen on.")
+	return cmd
+}
+
 var stopHelp = `
 stop [resource-type]
 Stop the specified resource.
@@ -201,6 +229,7 @@ Examples:
 func stop(c *context) *cobra.Command {
 	cmd := newCmd(c, stopHelp, nil)
 	cmd.AddCommand(stopCloud(c))
+	cmd.AddCommand(stopService(c))
 	return cmd
 }
 
@@ -237,6 +266,34 @@ func stopCloud(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&username, "username", "", "The valid kerberos username.")
 	cmd.Flags().StringVar(&keytab, "keytab", "", "The name of the keytab file to use")
 	cmd.Flags().BoolVar(&force, "force", false, "Force-kill all H2O instances in the cloud")
+
+	return cmd
+}
+
+var stopServiceHelp = `
+service
+Stop a scoring service.
+Examples:
+
+    $ steam stop service --pid=67997
+`
+
+func stopService(c *context) *cobra.Command {
+	var (
+		pid int
+	)
+
+	cmd := newCmd(c, stopServiceHelp, func(c *context, args []string) {
+		if pid == 0 {
+			log.Fatalln("Invalid pid. See 'steam help stop service'")
+		}
+		if err := svc.Stop(pid); err != nil {
+			log.Fatalln(err)
+		}
+		log.Println("Service stopped:", pid)
+	})
+
+	cmd.Flags().IntVar(&pid, "pid", 0, "The pid of the service to kill.")
 
 	return cmd
 }
