@@ -5,8 +5,11 @@ service Service
 type Sys
  Version uint32
 
+type Cloud
+ ApplicationID string
+ Size int
+ 
 type Model
- ModelID string
  CloudName string
  CloudAddress string
  Data []byte
@@ -18,5 +21,7 @@ type Service
  Target string
  IsBuilt bool
 
+type Engine
+ Name string
 
 

@@ -16,14 +16,18 @@ import (
 
 func (ds *DS) Init() {
 	Printers["Sys"] = ds.PrintSys
+	Printers["Cloud"] = ds.PrintCloud
 	Printers["Model"] = ds.PrintModel
 	Printers["Service"] = ds.PrintService
+	Printers["Engine"] = ds.PrintEngine
 }
 
 var Buckets = []string{
 	"Sys",
+	"Cloud",
 	"Model",
 	"Service",
+	"Engine",
 }
 
 type Sys struct {
@@ -42,22 +46,38 @@ func NewSys(id string, version uint32) *Sys {
 	}
 }
 
+type Cloud struct {
+	*Record
+	ApplicationID string
+	Size          int
+}
+
+func NewCloud(id string, applicationID string, size int) *Cloud {
+	return &Cloud{
+		&Record{
+			id,
+			time.Now().UTC().Unix(),
+			0,
+		},
+		applicationID,
+		size,
+	}
+}
+
 type Model struct {
 	*Record
-	ModelID      string
 	CloudName    string
 	CloudAddress string
 	Data         []byte
 }
 
-func NewModel(id string, modelID string, cloudName string, cloudAddress string, data []byte) *Model {
+func NewModel(id string, cloudName string, cloudAddress string, data []byte) *Model {
 	return &Model{
 		&Record{
 			id,
 			time.Now().UTC().Unix(),
 			0,
 		},
-		modelID,
 		cloudName,
 		cloudAddress,
 		data,
@@ -85,6 +105,22 @@ func NewService(id string, caption string, description string, source string, ta
 		source,
 		target,
 		isBuilt,
+	}
+}
+
+type Engine struct {
+	*Record
+	Name string
+}
+
+func NewEngine(id string, name string) *Engine {
+	return &Engine{
+		&Record{
+			id,
+			time.Now().UTC().Unix(),
+			0,
+		},
+		name,
 	}
 }
 
@@ -281,6 +317,211 @@ func DecodeSys(b []byte) (*Sys, error) {
 
 func (ds *DS) PrintSys(b []byte) (string, error) {
 	o, err := DecodeSys(b)
+	if err != nil {
+		return "", err
+	}
+
+	js, err := json.MarshalIndent(o, "", " ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(js), nil
+}
+
+func (ds *DS) HasCloud(id string) (bool, error) {
+	has := false
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Cloud"))
+		if b == nil {
+			return fmt.Errorf("Bucket Cloud does not exist.")
+		}
+
+		v := b.Get([]byte(id))
+		if v != nil {
+			has = true
+		}
+		return nil
+	})
+	return has, err
+}
+
+func (ds *DS) HasClouds(ids []string) (bool, error) {
+	has := true
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Cloud"))
+		if b == nil {
+			return fmt.Errorf("Bucket Cloud does not exist.")
+		}
+
+		for _, id := range ids {
+			v := b.Get([]byte(id))
+			if v == nil {
+				has = false
+				return nil
+			}
+		}
+		return nil
+	})
+	return has, err
+}
+
+func readClouds(tx *bolt.Tx, ids []string) ([]*Cloud, error) {
+	objs := make([]*Cloud, len(ids))
+	b := tx.Bucket([]byte("Cloud"))
+	if b == nil {
+		return nil, fmt.Errorf("Bucket Cloud does not exist.")
+	}
+
+	for i, id := range ids {
+		v := b.Get([]byte(id))
+		if v == nil {
+			continue
+		}
+
+		o, err := DecodeCloud(v)
+		if err != nil {
+			return nil, err
+		}
+
+		objs[i] = o
+	}
+
+	return objs, nil
+}
+
+func (ds *DS) ReadClouds(ids []string) ([]*Cloud, error) {
+	var objs []*Cloud
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		os, err := readClouds(tx, ids)
+		if err != nil {
+			return err
+		}
+		objs = os
+		return nil
+	})
+	return objs, err
+}
+
+func (ds *DS) ReadCloud(id string) (*Cloud, error) {
+	var obj *Cloud
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Cloud"))
+		if b == nil {
+			return fmt.Errorf("Bucket Cloud does not exist.")
+		}
+
+		v := b.Get([]byte(id))
+		if v == nil {
+			return nil
+		}
+
+		o, err := DecodeCloud(v)
+		if err != nil {
+			return err
+		}
+
+		obj = o
+
+		return nil
+	})
+	return obj, err
+}
+
+func (ds *DS) CreateCloud(o *Cloud) error {
+	return ds.writeCloud(o, true)
+}
+
+func (ds *DS) UpdateCloud(o *Cloud) error {
+	return ds.writeCloud(o, false)
+}
+
+func (ds *DS) writeCloud(o *Cloud, create bool) error {
+	err := ds.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Cloud"))
+		if b == nil {
+			return fmt.Errorf("Bucket Cloud does not exist.")
+		}
+
+		o.ModifiedAt = time.Now().UTC().Unix()
+
+		v, err := EncodeCloud(o)
+		if err != nil {
+			return err
+		}
+
+		err = b.Put([]byte(o.ID), v)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("Cloud write failed: %v", err)
+	}
+
+	return nil
+}
+
+func (ds *DS) DeleteCloud(id string) error {
+	err := ds.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Cloud"))
+		if b == nil {
+			return fmt.Errorf("Bucket Cloud does not exist.")
+		}
+		return b.Delete([]byte(id))
+	})
+	if err != nil {
+		return fmt.Errorf("Cloud delete failed: %v", err)
+	}
+	return nil
+}
+
+func (ds *DS) ListCloud() ([]*Cloud, error) {
+	var objs []*Cloud
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Cloud"))
+		if b == nil {
+			return fmt.Errorf("Bucket Cloud does not exist.")
+		}
+
+		c := b.Cursor()
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			o, err := DecodeCloud(v)
+			if err != nil {
+				return err
+			}
+			objs = append(objs, o)
+		}
+		return nil
+	})
+	return objs, err
+}
+
+func EncodeCloud(o *Cloud) ([]byte, error) {
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(o)
+	if err != nil {
+		return nil, fmt.Errorf("Cloud encode failed: %v", err)
+	}
+	return b.Bytes(), nil
+}
+
+func DecodeCloud(b []byte) (*Cloud, error) {
+	dec := gob.NewDecoder(bytes.NewBuffer(b))
+	var o Cloud
+	err := dec.Decode(&o)
+	if err != nil {
+		return nil, fmt.Errorf("Cloud decode failed: %v", err)
+	}
+	return &o, nil
+}
+
+func (ds *DS) PrintCloud(b []byte) (string, error) {
+	o, err := DecodeCloud(b)
 	if err != nil {
 		return "", err
 	}
@@ -691,6 +932,211 @@ func DecodeService(b []byte) (*Service, error) {
 
 func (ds *DS) PrintService(b []byte) (string, error) {
 	o, err := DecodeService(b)
+	if err != nil {
+		return "", err
+	}
+
+	js, err := json.MarshalIndent(o, "", " ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(js), nil
+}
+
+func (ds *DS) HasEngine(id string) (bool, error) {
+	has := false
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Engine"))
+		if b == nil {
+			return fmt.Errorf("Bucket Engine does not exist.")
+		}
+
+		v := b.Get([]byte(id))
+		if v != nil {
+			has = true
+		}
+		return nil
+	})
+	return has, err
+}
+
+func (ds *DS) HasEngines(ids []string) (bool, error) {
+	has := true
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Engine"))
+		if b == nil {
+			return fmt.Errorf("Bucket Engine does not exist.")
+		}
+
+		for _, id := range ids {
+			v := b.Get([]byte(id))
+			if v == nil {
+				has = false
+				return nil
+			}
+		}
+		return nil
+	})
+	return has, err
+}
+
+func readEngines(tx *bolt.Tx, ids []string) ([]*Engine, error) {
+	objs := make([]*Engine, len(ids))
+	b := tx.Bucket([]byte("Engine"))
+	if b == nil {
+		return nil, fmt.Errorf("Bucket Engine does not exist.")
+	}
+
+	for i, id := range ids {
+		v := b.Get([]byte(id))
+		if v == nil {
+			continue
+		}
+
+		o, err := DecodeEngine(v)
+		if err != nil {
+			return nil, err
+		}
+
+		objs[i] = o
+	}
+
+	return objs, nil
+}
+
+func (ds *DS) ReadEngines(ids []string) ([]*Engine, error) {
+	var objs []*Engine
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		os, err := readEngines(tx, ids)
+		if err != nil {
+			return err
+		}
+		objs = os
+		return nil
+	})
+	return objs, err
+}
+
+func (ds *DS) ReadEngine(id string) (*Engine, error) {
+	var obj *Engine
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Engine"))
+		if b == nil {
+			return fmt.Errorf("Bucket Engine does not exist.")
+		}
+
+		v := b.Get([]byte(id))
+		if v == nil {
+			return nil
+		}
+
+		o, err := DecodeEngine(v)
+		if err != nil {
+			return err
+		}
+
+		obj = o
+
+		return nil
+	})
+	return obj, err
+}
+
+func (ds *DS) CreateEngine(o *Engine) error {
+	return ds.writeEngine(o, true)
+}
+
+func (ds *DS) UpdateEngine(o *Engine) error {
+	return ds.writeEngine(o, false)
+}
+
+func (ds *DS) writeEngine(o *Engine, create bool) error {
+	err := ds.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Engine"))
+		if b == nil {
+			return fmt.Errorf("Bucket Engine does not exist.")
+		}
+
+		o.ModifiedAt = time.Now().UTC().Unix()
+
+		v, err := EncodeEngine(o)
+		if err != nil {
+			return err
+		}
+
+		err = b.Put([]byte(o.ID), v)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("Engine write failed: %v", err)
+	}
+
+	return nil
+}
+
+func (ds *DS) DeleteEngine(id string) error {
+	err := ds.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Engine"))
+		if b == nil {
+			return fmt.Errorf("Bucket Engine does not exist.")
+		}
+		return b.Delete([]byte(id))
+	})
+	if err != nil {
+		return fmt.Errorf("Engine delete failed: %v", err)
+	}
+	return nil
+}
+
+func (ds *DS) ListEngine() ([]*Engine, error) {
+	var objs []*Engine
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Engine"))
+		if b == nil {
+			return fmt.Errorf("Bucket Engine does not exist.")
+		}
+
+		c := b.Cursor()
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			o, err := DecodeEngine(v)
+			if err != nil {
+				return err
+			}
+			objs = append(objs, o)
+		}
+		return nil
+	})
+	return objs, err
+}
+
+func EncodeEngine(o *Engine) ([]byte, error) {
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(o)
+	if err != nil {
+		return nil, fmt.Errorf("Engine encode failed: %v", err)
+	}
+	return b.Bytes(), nil
+}
+
+func DecodeEngine(b []byte) (*Engine, error) {
+	dec := gob.NewDecoder(bytes.NewBuffer(b))
+	var o Engine
+	err := dec.Decode(&o)
+	if err != nil {
+		return nil, fmt.Errorf("Engine decode failed: %v", err)
+	}
+	return &o, nil
+}
+
+func (ds *DS) PrintEngine(b []byte) (string, error) {
+	o, err := DecodeEngine(b)
 	if err != nil {
 		return "", err
 	}
