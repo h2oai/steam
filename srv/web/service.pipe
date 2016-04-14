@@ -3,33 +3,64 @@ package web
 service Service
 
 alias CloudState string
+const CloudState Cloud Started Stopped
+ 
+alias ScoringServiceState string
+const ScoringServiceState ScoringService Started Stopped
 
 alias Timestamp int64
 
-type CloudOpts
- Name string
- ApplicationID string
- Address string
-
 type Cloud
  Name string
- Pack string
+ EngineName string
+ Size int
+ ApplicationID string
+ Address string
+ Memory string
+ Username string
+ IsKerberosEnabled bool
  State CloudState
+ CreatedAt Timestamp
 
-type CloudModelSynopsis
- Algorithm string
- AlgorithmFullName string
- FrameName string
+type Model
+ Name string
+ Dataset string
+ TargetName string
+ MaxRuntime int
+ JavaModelPath string
+ GenModelPath string
+ CreatedAt Timestamp
+
+type ScoringService
  ModelName string
- ResponseColumnName string
- ModifiedAt Timestamp
+ Address string
+ Port int
+ State ScoringServiceState
+ CreatedAt Timestamp
+
+type Engine
+ Name string
+ CreatedAt Timestamp
 
 Ping(status bool) status bool
 
-StartCloud (name string, size int, mem string, useKerberos bool, username string, keytab string) cloud *CloudOpts
-StopCloud (name string, useKerberos bool, applicationID string, username string, keytab string)
+StartCloud(cloudName string, engineName string, size int, memory string, useKerberos bool, username string) cloud *Cloud
+StopCloud (cloudName string)
+GetCloud (cloudName string) cloud *Cloud
+GetClouds() clouds []*Cloud
+DeleteCloud(cloudName string)
 
-GetCloud (address string) cloud *Cloud
-BuildAutoML (address string, dataset string, targetName string, maxRunTime int) modelID string
-DeployPojo (address string, javaModelPath string, genModelPath string)
-Shutdown (address string)
+BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) model *Model
+GetModel(modelName string) model *Model
+GetModels() models []*Model
+DeleteModel(modelName string)
+
+StartScoringService(modelName string, port int) service *ScoringService
+StopScoringService(modelName string, port int)
+GetScoringService(serviceName string) service *ScoringService
+GetScoringServices() services []*ScoringService
+DeleteScoringService(modelName string, port int)
+
+GetEngine(engineName string) engine *Engine
+GetEngines() engines []*Engine
+DeleteEngine(engineName string)

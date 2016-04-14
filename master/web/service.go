@@ -1,34 +1,26 @@
 package web
 
 import (
-	// "fmt"
-	// "github.com/h2oai/steam/lib/az"
-	// "github.com/h2oai/steam/lib/fs"
-	// "github.com/h2oai/steam/lib/grid"
-	// "github.com/h2oai/steam/lib/sec"
-	// "github.com/h2oai/steam/master/cli"
-	// "github.com/h2oai/steam/master/ctl"
-
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/db"
 	"github.com/h2oai/steamY/srv/h2ov3"
-	// "github.com/h2oai/steam/master/job"
-	// "github.com/h2oai/steam/master/proc"
-	// "github.com/h2oai/steam/master/usr/auth"
-	// "github.com/h2oai/steam/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
-	// "os"
-	// "regexp"
-	// "strconv"
-	// "strings"
-	// "time"
+	"time"
 )
 
 type Service struct {
 	workingDir                string
 	ds                        *db.DS
 	compilationServiceAddress string
+}
+
+func Timestamp(t time.Time) web.Timestamp {
+	return web.Timestamp(t.UTC().Unix())
+}
+
+func Now() web.Timestamp {
+	return Timestamp(time.Now())
 }
 
 func NewService(workingDir string, ds *db.DS, compilationServiceAddress string) *web.Impl {
@@ -39,46 +31,59 @@ func (s *Service) Ping(status bool) (bool, error) {
 	return status, nil
 }
 
-func (s *Service) StartCloud(name string, size int, mem string, kerberos bool, username, keytab string) (*web.CloudOpts, error) {
-	id, node, err := yarn.StartCloud(size, kerberos, mem, name, username, keytab)
+func (s *Service) StartCloud(cloudName, engineName string, size int, memory string, useKerberos bool, username string) (*web.Cloud, error) {
+	keytab := "" // FIXME
+	appId, address, err := yarn.StartCloud(size, useKerberos, memory, cloudName, username, keytab)
 	if err != nil {
 		return nil, err
 	}
-	return &web.CloudOpts{
-		name,
-		id,
-		node,
+	return &web.Cloud{
+		cloudName,
+		engineName,
+		size,
+		appId,
+		address,
+		memory,
+		username,
+		true,
+		web.CloudStarted,
+		Now(), // FIXME
 	}, nil
 }
 
-func (s *Service) StopCloud(name string, kerberos bool, applicationID, username, keytab string) error {
-	err := yarn.StopCloud(kerberos, name, applicationID, username, keytab)
+func (s *Service) StopCloud(cloudName string) error {
+	return nil
+}
+
+func (s *Service) StopCloud__FIXME(name string, useKerberos bool, applicationID, username, keytab string) error {
+	// FIXME
+	err := yarn.StopCloud(useKerberos, name, applicationID, username, keytab)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Service) GetCloud(address string) (*web.Cloud, error) {
-	h := h2ov3.NewClient(address)
+// func (s *Service) GetCloud(address string) (*web.Cloud, error) {
+// 	h := h2ov3.NewClient(address)
 
-	c, err := h.GetCloud()
-	if err != nil {
-		return nil, err
-	}
-	var health web.CloudState
-	if c.IsHealthy {
-		health = "Healthy"
-	} else {
-		health = "Unhealthy"
-	}
-	cc := &web.Cloud{
-		c.Name,
-		c.Version,
-		health,
-	}
-	return cc, nil
-}
+// 	c, err := h.GetCloud()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	var health web.CloudState
+// 	if c.IsHealthy {
+// 		health = "Healthy"
+// 	} else {
+// 		health = "Unhealthy"
+// 	}
+// 	cc := &web.Cloud{
+// 		c.Name,
+// 		c.Version,
+// 		health,
+// 	}
+// 	return cc, nil
+// }
 
 func (s *Service) BuildAutoML(address, dataset, targetName string, maxTime int) (string, error) {
 	h := h2ov3.NewClient(address)
@@ -125,11 +130,11 @@ func (s *Service) BuildAutoML(address, dataset, targetName string, maxTime int) 
 // }
 
 func (s *Service) DeployPojo(address, javaModel, jar string) error {
-	// h := compileClient.NewClient()
-	//
-	// p, err := h.CompilePojo(javaModel, jar)
+	// h := compileclient.newclient()
+
+	// p, err := h.compilepojo(javamodel, jar)
 	// if err != nil {
-	// 	  return err
+	// 	return err
 	// }
 
 	return nil
@@ -148,3 +153,49 @@ func (s *Service) Shutdown(address string) error {
 // func toWebModel(m *db.Model) *web.ModelInfo {
 // 	return nil
 // }
+
+func (s *Service) GetCloud(cloudName string) (*web.Cloud, error) {
+	return nil, nil
+}
+func (s *Service) GetClouds() ([]*web.Cloud, error) {
+	return nil, nil
+}
+func (s *Service) DeleteCloud(cloudName string) error {
+	return nil
+}
+func (s *Service) BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*web.Model, error) {
+	return nil, nil
+}
+func (s *Service) GetModel(modelName string) (*web.Model, error) {
+	return nil, nil
+}
+func (s *Service) GetModels() ([]*web.Model, error) {
+	return nil, nil
+}
+func (s *Service) DeleteModel(modelName string) error {
+	return nil
+}
+func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringService, error) {
+	return nil, nil
+}
+func (s *Service) StopScoringService(modelName string, port int) error {
+	return nil
+}
+func (s *Service) GetScoringService(serviceName string) (*web.ScoringService, error) {
+	return nil, nil
+}
+func (s *Service) GetScoringServices() ([]*web.ScoringService, error) {
+	return nil, nil
+}
+func (s *Service) DeleteScoringService(modelName string, port int) error {
+	return nil
+}
+func (s *Service) GetEngine(engineName string) (*web.Engine, error) {
+	return nil, nil
+}
+func (s *Service) GetEngines() ([]*web.Engine, error) {
+	return nil, nil
+}
+func (s *Service) DeleteEngine(engineName string) error {
+	return nil
+}
