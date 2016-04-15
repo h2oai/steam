@@ -18,7 +18,6 @@
 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
-STUBS = ./srv/www
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 WWW=./var/master/www
@@ -35,8 +34,8 @@ gui:
 	$(MAKE) -C gui
 
 generate:
-	go generate ./...
-	$(foreach stub,$(STUBS),go fmt $(stub)/service.go || exit;)
+	cd ./srv/web && go generate && go fmt service.go
+	cd ./master/db && go generate && go fmt encoding.go
 
 lint:
 	@ go get -v github.com/golang/lint/golint
@@ -68,11 +67,15 @@ clean:
 linux:
 	rm -rf ./dist/$(DIST_LINUX)
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
-	mkdir -p ./dist/$(DIST_LINUX) && mv ./steamY ./dist/$(DIST_LINUX)/steam
+	mkdir -p ./dist/$(DIST_LINUX)/var/master && mv ./steamY ./dist/$(DIST_LINUX)/steam
+	cp -r ./var/master/www ./dist/$(DIST_LINUX)/var/master/
+	tar czfC ./dist/$(DIST_LINUX).tar.gz dist $(DIST_LINUX)
 
 darwin:
 	rm -rf ./dist/$(DIST_DARWIN)
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
-	mkdir -p ./dist/$(DIST_DARWIN)/steam && mv ./steamY ./dist/$(DIST_DARWIN)/steam
+	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steamY ./dist/$(DIST_DARWIN)/steam
+	cp -r ./var/master/www ./dist/$(DIST_DARWIN)/var/master/
+	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
 
