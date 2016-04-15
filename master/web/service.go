@@ -2,18 +2,23 @@ package web
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/db"
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
-	"time"
 )
 
 type Service struct {
 	workingDir                string
 	ds                        *db.DS
 	compilationServiceAddress string
+	kerberosEnabled           bool
+	username                  string
+	keytab                    string
 }
 
 func toTimestamp(t time.Time) web.Timestamp {
@@ -24,17 +29,16 @@ func now() web.Timestamp {
 	return toTimestamp(time.Now())
 }
 
-func NewService(workingDir string, ds *db.DS, compilationServiceAddress string) *web.Impl {
-	return &web.Impl{&Service{workingDir, ds, compilationServiceAddress}}
+func NewService(workingDir string, ds *db.DS, compilationServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
+	return &web.Impl{&Service{workingDir, ds, compilationServiceAddress, kerberos, username, keytab}}
 }
 
 func (s *Service) Ping(status bool) (bool, error) {
 	return status, nil
 }
 
-func (s *Service) StartCloud(cloudName, engineName string, size int, memory string, useKerberos bool, username string) (*web.Cloud, error) {
-	keytab := "" // FIXME
-	appId, address, err := yarn.StartCloud(size, useKerberos, memory, cloudName, username, keytab)
+func (s *Service) StartCloud(cloudName, engineName string, size int, memory, username string) (*web.Cloud, error) { // TODO: YARN DRIVER SHOULD BE THE ENGINE
+	appId, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
 		return nil, err
 	}
@@ -47,9 +51,10 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory stri
 		address,
 		memory,
 		username,
-		true,
 		string(web.CloudStarted),
 	)
+
+	log.Printf("Created Cloud:\n%+v", c)
 
 	if err := s.ds.CreateCloud(c); err != nil {
 		return nil, err
@@ -71,9 +76,7 @@ func (s *Service) StopCloud(cloudName string) error {
 		return fmt.Errorf("Cloud %s is already stopped", cloudName)
 	}
 
-	// FIXME - stop the cloud
-
-	if err := yarn.StopCloud(c.IsKerberosEnabled, c.ID, c.ApplicationID, c.Username, "" /* FIXME yarn.StopCloud shouldn't take a keytab */); err != nil {
+	if err := yarn.StopCloud(s.kerberosEnabled, c.ID, c.ApplicationID, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
 		return err
 	}
 
@@ -279,7 +282,6 @@ func toCloud(c *db.Cloud) *web.Cloud {
 		c.Address,
 		c.Memory,
 		c.Username,
-		c.IsKerberosEnabled,
 		web.CloudState(c.State),
 		web.Timestamp(c.CreatedAt),
 	}

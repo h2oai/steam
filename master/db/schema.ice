@@ -12,7 +12,6 @@ type Cloud
  Address string
  Memory string
  Username string
- IsKerberosEnabled bool
  State string
  
 type Model

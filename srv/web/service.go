@@ -30,16 +30,15 @@ const (
 // --- Types ---
 
 type Cloud struct {
-	Name              string     `json:"name"`
-	EngineName        string     `json:"engine_name"`
-	Size              int        `json:"size"`
-	ApplicationID     string     `json:"application_id"`
-	Address           string     `json:"address"`
-	Memory            string     `json:"memory"`
-	Username          string     `json:"username"`
-	IsKerberosEnabled bool       `json:"is_kerberos_enabled"`
-	State             CloudState `json:"state"`
-	CreatedAt         Timestamp  `json:"created_at"`
+	Name          string     `json:"name"`
+	EngineName    string     `json:"engine_name"`
+	Size          int        `json:"size"`
+	ApplicationID string     `json:"application_id"`
+	Address       string     `json:"address"`
+	Memory        string     `json:"memory"`
+	Username      string     `json:"username"`
+	State         CloudState `json:"state"`
+	CreatedAt     Timestamp  `json:"created_at"`
 }
 
 type Model struct {
@@ -70,7 +69,7 @@ type Engine struct {
 
 type Service interface {
 	Ping(status bool) (bool, error)
-	StartCloud(cloudName string, engineName string, size int, memory string, useKerberos bool, username string) (*Cloud, error)
+	StartCloud(cloudName string, engineName string, size int, memory string, username string) (*Cloud, error)
 	StopCloud(cloudName string) error
 	GetCloud(cloudName string) (*Cloud, error)
 	GetClouds() ([]*Cloud, error)
@@ -100,12 +99,11 @@ type PingOut struct {
 }
 
 type StartCloudIn struct {
-	CloudName   string `json:"cloud_name"`
-	EngineName  string `json:"engine_name"`
-	Size        int    `json:"size"`
-	Memory      string `json:"memory"`
-	UseKerberos bool   `json:"use_kerberos"`
-	Username    string `json:"username"`
+	CloudName  string `json:"cloud_name"`
+	EngineName string `json:"engine_name"`
+	Size       int    `json:"size"`
+	Memory     string `json:"memory"`
+	Username   string `json:"username"`
 }
 
 type StartCloudOut struct {
@@ -256,8 +254,8 @@ func (this *Remote) Ping(status bool) (bool, error) {
 	return out.Status, nil
 }
 
-func (this *Remote) StartCloud(cloudName string, engineName string, size int, memory string, useKerberos bool, username string) (*Cloud, error) {
-	in := StartCloudIn{cloudName, engineName, size, memory, useKerberos, username}
+func (this *Remote) StartCloud(cloudName string, engineName string, size int, memory string, username string) (*Cloud, error) {
+	in := StartCloudIn{cloudName, engineName, size, memory, username}
 	var out StartCloudOut
 	err := this.Proc.Call("StartCloud", &in, &out)
 	if err != nil {
@@ -442,7 +440,7 @@ func (this *Impl) Ping(r *http.Request, in *PingIn, out *PingOut) error {
 }
 
 func (this *Impl) StartCloud(r *http.Request, in *StartCloudIn, out *StartCloudOut) error {
-	it, err := this.Service.StartCloud(in.CloudName, in.EngineName, in.Size, in.Memory, in.UseKerberos, in.Username)
+	it, err := this.Service.StartCloud(in.CloudName, in.EngineName, in.Size, in.Memory, in.Username)
 	if err != nil {
 		return err
 	}

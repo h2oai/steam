@@ -27,6 +27,9 @@ type Opts struct {
 	WorkingDirectory          string
 	CompilationServiceAddress string
 	EnableProfiler            bool
+	KerberosEnabled           bool
+	Username                  string
+	Keytab                    string
 }
 
 var DefaultOpts = &Opts{
@@ -34,6 +37,9 @@ var DefaultOpts = &Opts{
 	path.Join(".", fs.VarDir, "master"),
 	"",
 	false,
+	false,
+	"",
+	"",
 }
 
 type UploadHandler struct {
@@ -138,6 +144,9 @@ func Run(version, buildDate string, opts *Opts) {
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
+		opts.KerberosEnabled,
+		opts.Username,
+		opts.Keytab,
 	))))
 	webServeMux.Handle("/upload", newUploadHandler(wd))
 	webServeMux.Handle("/", http.FileServer(http.Dir(path.Join(wd, "/www")))) // no auth

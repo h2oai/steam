@@ -48,17 +48,16 @@ func NewSys(id string, version uint32) *Sys {
 
 type Cloud struct {
 	*Record
-	EngineName        string
-	Size              int
-	ApplicationID     string
-	Address           string
-	Memory            string
-	Username          string
-	IsKerberosEnabled bool
-	State             string
+	EngineName    string
+	Size          int
+	ApplicationID string
+	Address       string
+	Memory        string
+	Username      string
+	State         string
 }
 
-func NewCloud(id string, engineName string, size int, applicationID string, address string, memory string, username string, isKerberosEnabled bool, state string) *Cloud {
+func NewCloud(id string, engineName string, size int, applicationID string, address string, memory string, username string, state string) *Cloud {
 	return &Cloud{
 		&Record{
 			id,
@@ -71,7 +70,6 @@ func NewCloud(id string, engineName string, size int, applicationID string, addr
 		address,
 		memory,
 		username,
-		isKerberosEnabled,
 		state,
 	}
 }

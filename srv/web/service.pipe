@@ -18,7 +18,6 @@ type Cloud
  Address string
  Memory string
  Username string
- IsKerberosEnabled bool
  State CloudState
  CreatedAt Timestamp
 
@@ -45,7 +44,7 @@ type Engine
 
 Ping(status bool) status bool
 
-StartCloud(cloudName string, engineName string, size int, memory string, useKerberos bool, username string) cloud *Cloud
+StartCloud(cloudName string, engineName string, size int, memory string, username string) cloud *Cloud
 StopCloud (cloudName string)
 GetCloud (cloudName string) cloud *Cloud
 GetClouds() clouds []*Cloud

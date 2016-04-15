@@ -114,10 +114,14 @@ Examples:
 `
 
 func serveMaster(c *context) *cobra.Command {
-	var webAddress string
-	var workingDirectory string
-	var compilationServiceAddress string
-	var enableProfiler bool
+	var (
+		webAddress                string
+		workingDirectory          string
+		compilationServiceAddress string
+		enableProfiler            bool
+		enableKerberos            bool
+		username, keytab          string
+	)
 
 	opts := master.DefaultOpts
 
@@ -127,6 +131,9 @@ func serveMaster(c *context) *cobra.Command {
 			workingDirectory,
 			compilationServiceAddress,
 			enableProfiler,
+			enableKerberos,
+			username,
+			keytab,
 		})
 	})
 
@@ -134,6 +141,9 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Compilation service address")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
+	cmd.Flags().BoolVar(&enableKerberos, "kerberos", opts.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
+	cmd.Flags().StringVar(&username, "username", opts.Username, "Username to enable Kerberos")
+	cmd.Flags().StringVar(&keytab, "keytab", opts.Keytab, "Keytab file to be used with Kerberos authentication")
 	return cmd
 
 }

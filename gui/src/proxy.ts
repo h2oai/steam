@@ -1,4 +1,3 @@
-/// <reference path="xhr.ts" />
 // ----------------------------------
 // --- Generated with go:generate ---
 // ---        DO NOT EDIT         ---
@@ -32,7 +31,6 @@ module Proxy {
 		address: string
 		memory: string
 		username: string
-		is_kerberos_enabled: boolean
 		state: CloudState
 		created_at: Timestamp
 	}
@@ -65,7 +63,7 @@ module Proxy {
 
 	export interface Service {
 		ping: (status: boolean, go: (error: Error, status: boolean) => void) => void
-		startCloud: (cloudName: string, engineName: string, size: number, memory: string, useKerberos: boolean, username: string, go: (error: Error, cloud: Cloud) => void) => void
+		startCloud: (cloudName: string, engineName: string, size: number, memory: string, username: string, go: (error: Error, cloud: Cloud) => void) => void
 		stopCloud: (cloudName: string, go: (error: Error) => void) => void
 		getCloud: (cloudName: string, go: (error: Error, cloud: Cloud) => void) => void
 		getClouds: (go: (error: Error, clouds: Cloud[]) => void) => void
@@ -99,7 +97,6 @@ module Proxy {
 		engine_name: string
 		size: number
 		memory: string
-		use_kerberos: boolean
 		username: string
 	}
 
@@ -242,13 +239,12 @@ module Proxy {
 		})
 
 	}
-	export function startCloud(cloudName: string, engineName: string, size: number, memory: string, useKerberos: boolean, username: string, go: (error: Error, cloud: Cloud) => void): void {
+	export function startCloud(cloudName: string, engineName: string, size: number, memory: string, username: string, go: (error: Error, cloud: Cloud) => void): void {
 		var req: StartCloudIn = {
 			cloud_name: cloudName,
 			engine_name: engineName,
 			size: size,
 			memory: memory,
-			use_kerberos: useKerberos,
 			username: username
 		}
 		Proxy.Call("StartCloud", req, function(error, data) {
