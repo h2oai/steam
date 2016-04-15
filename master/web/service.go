@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/db"
@@ -15,12 +16,12 @@ type Service struct {
 	compilationServiceAddress string
 }
 
-func Timestamp(t time.Time) web.Timestamp {
+func toTimestamp(t time.Time) web.Timestamp {
 	return web.Timestamp(t.UTC().Unix())
 }
 
-func Now() web.Timestamp {
-	return Timestamp(time.Now())
+func now() web.Timestamp {
+	return toTimestamp(time.Now())
 }
 
 func NewService(workingDir string, ds *db.DS, compilationServiceAddress string) *web.Impl {
@@ -37,7 +38,8 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory stri
 	if err != nil {
 		return nil, err
 	}
-	return &web.Cloud{
+
+	c := db.NewCloud(
 		cloudName,
 		engineName,
 		size,
@@ -46,12 +48,41 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory stri
 		memory,
 		username,
 		true,
-		web.CloudStarted,
-		Now(), // FIXME
-	}, nil
+		string(web.CloudStarted),
+	)
+
+	if err := s.ds.CreateCloud(c); err != nil {
+		return nil, err
+	}
+
+	return toCloud(c), nil
 }
 
 func (s *Service) StopCloud(cloudName string) error {
+
+	// Make sure the cloud exists
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return err
+	}
+
+	// Bail out if already stopped
+	if c.State == string(web.CloudStopped) {
+		return fmt.Errorf("Cloud %s is already stopped", cloudName)
+	}
+
+	// FIXME - stop the cloud
+
+	if err := yarn.StopCloud(c.IsKerberosEnabled, c.ID, c.ApplicationID, c.Username, "" /* FIXME yarn.StopCloud shouldn't take a keytab */); err != nil {
+		return err
+	}
+
+	// Update the state and update DB
+	c.State = string(web.CloudStopped)
+	if err := s.ds.UpdateCloud(c); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -150,52 +181,106 @@ func (s *Service) Shutdown(address string) error {
 	return nil
 }
 
-// func toWebModel(m *db.Model) *web.ModelInfo {
-// 	return nil
-// }
-
 func (s *Service) GetCloud(cloudName string) (*web.Cloud, error) {
-	return nil, nil
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return nil, err
+	}
+	return toCloud(c), nil
 }
+
+func (s *Service) getCloud(cloudName string) (*db.Cloud, error) {
+	c, err := s.ds.ReadCloud(cloudName)
+	if err != nil {
+		return nil, err
+	}
+	if c == nil {
+		return nil, fmt.Errorf("Cloud %s does not exist.", cloudName)
+	}
+	return c, nil
+
+}
+
 func (s *Service) GetClouds() ([]*web.Cloud, error) {
-	return nil, nil
+	cs, err := s.ds.ListCloud()
+	if err != nil {
+		return nil, err
+	}
+
+	clouds := make([]*web.Cloud, len(cs))
+	for i, c := range cs {
+		clouds[i] = toCloud(c)
+	}
+	return clouds, nil
 }
+
 func (s *Service) DeleteCloud(cloudName string) error {
-	return nil
+	return s.ds.DeleteCloud(cloudName)
 }
+
 func (s *Service) BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*web.Model, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) GetModel(modelName string) (*web.Model, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) GetModels() ([]*web.Model, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) DeleteModel(modelName string) error {
 	return nil
 }
+
 func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringService, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) StopScoringService(modelName string, port int) error {
-	return nil
+	return nil //FIXME
 }
+
 func (s *Service) GetScoringService(serviceName string) (*web.ScoringService, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) GetScoringServices() ([]*web.ScoringService, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) DeleteScoringService(modelName string, port int) error {
-	return nil
+	return nil //FIXME
 }
+
 func (s *Service) GetEngine(engineName string) (*web.Engine, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) GetEngines() ([]*web.Engine, error) {
-	return nil, nil
+	return nil, nil //FIXME
 }
+
 func (s *Service) DeleteEngine(engineName string) error {
-	return nil
+	return nil //FIXME
+}
+
+//
+// Routines to convert DB structs into API structs
+//
+
+func toCloud(c *db.Cloud) *web.Cloud {
+	return &web.Cloud{
+		c.ID,
+		c.EngineName,
+		c.Size,
+		c.ApplicationID,
+		c.Address,
+		c.Memory,
+		c.Username,
+		c.IsKerberosEnabled,
+		web.CloudState(c.State),
+		web.Timestamp(c.CreatedAt),
+	}
 }

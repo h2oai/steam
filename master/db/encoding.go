@@ -18,7 +18,7 @@ func (ds *DS) Init() {
 	Printers["Sys"] = ds.PrintSys
 	Printers["Cloud"] = ds.PrintCloud
 	Printers["Model"] = ds.PrintModel
-	Printers["Service"] = ds.PrintService
+	Printers["ScoringService"] = ds.PrintScoringService
 	Printers["Engine"] = ds.PrintEngine
 }
 
@@ -26,7 +26,7 @@ var Buckets = []string{
 	"Sys",
 	"Cloud",
 	"Model",
-	"Service",
+	"ScoringService",
 	"Engine",
 }
 
@@ -48,30 +48,45 @@ func NewSys(id string, version uint32) *Sys {
 
 type Cloud struct {
 	*Record
-	ApplicationID string
-	Size          int
+	EngineName        string
+	Size              int
+	ApplicationID     string
+	Address           string
+	Memory            string
+	Username          string
+	IsKerberosEnabled bool
+	State             string
 }
 
-func NewCloud(id string, applicationID string, size int) *Cloud {
+func NewCloud(id string, engineName string, size int, applicationID string, address string, memory string, username string, isKerberosEnabled bool, state string) *Cloud {
 	return &Cloud{
 		&Record{
 			id,
 			time.Now().UTC().Unix(),
 			0,
 		},
-		applicationID,
+		engineName,
 		size,
+		applicationID,
+		address,
+		memory,
+		username,
+		isKerberosEnabled,
+		state,
 	}
 }
 
 type Model struct {
 	*Record
-	CloudName    string
-	CloudAddress string
-	Data         []byte
+	CloudName     string
+	Dataset       string
+	TargetName    string
+	MaxRuntime    int
+	JavaModelPath string
+	GenModelPath  string
 }
 
-func NewModel(id string, cloudName string, cloudAddress string, data []byte) *Model {
+func NewModel(id string, cloudName string, dataset string, targetName string, maxRuntime int, javaModelPath string, genModelPath string) *Model {
 	return &Model{
 		&Record{
 			id,
@@ -79,32 +94,33 @@ func NewModel(id string, cloudName string, cloudAddress string, data []byte) *Mo
 			0,
 		},
 		cloudName,
-		cloudAddress,
-		data,
+		dataset,
+		targetName,
+		maxRuntime,
+		javaModelPath,
+		genModelPath,
 	}
 }
 
-type Service struct {
+type ScoringService struct {
 	*Record
-	Caption     string
-	Description string
-	Source      string
-	Target      string
-	IsBuilt     bool
+	ModelName string
+	Address   string
+	Port      int
+	State     string
 }
 
-func NewService(id string, caption string, description string, source string, target string, isBuilt bool) *Service {
-	return &Service{
+func NewScoringService(id string, modelName string, address string, port int, state string) *ScoringService {
+	return &ScoringService{
 		&Record{
 			id,
 			time.Now().UTC().Unix(),
 			0,
 		},
-		caption,
-		description,
-		source,
-		target,
-		isBuilt,
+		modelName,
+		address,
+		port,
+		state,
 	}
 }
 
@@ -739,12 +755,12 @@ func (ds *DS) PrintModel(b []byte) (string, error) {
 	return string(js), nil
 }
 
-func (ds *DS) HasService(id string) (bool, error) {
+func (ds *DS) HasScoringService(id string) (bool, error) {
 	has := false
 	err := ds.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Service"))
+		b := tx.Bucket([]byte("ScoringService"))
 		if b == nil {
-			return fmt.Errorf("Bucket Service does not exist.")
+			return fmt.Errorf("Bucket ScoringService does not exist.")
 		}
 
 		v := b.Get([]byte(id))
@@ -756,12 +772,12 @@ func (ds *DS) HasService(id string) (bool, error) {
 	return has, err
 }
 
-func (ds *DS) HasServices(ids []string) (bool, error) {
+func (ds *DS) HasScoringServices(ids []string) (bool, error) {
 	has := true
 	err := ds.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Service"))
+		b := tx.Bucket([]byte("ScoringService"))
 		if b == nil {
-			return fmt.Errorf("Bucket Service does not exist.")
+			return fmt.Errorf("Bucket ScoringService does not exist.")
 		}
 
 		for _, id := range ids {
@@ -776,11 +792,11 @@ func (ds *DS) HasServices(ids []string) (bool, error) {
 	return has, err
 }
 
-func readServices(tx *bolt.Tx, ids []string) ([]*Service, error) {
-	objs := make([]*Service, len(ids))
-	b := tx.Bucket([]byte("Service"))
+func readScoringServices(tx *bolt.Tx, ids []string) ([]*ScoringService, error) {
+	objs := make([]*ScoringService, len(ids))
+	b := tx.Bucket([]byte("ScoringService"))
 	if b == nil {
-		return nil, fmt.Errorf("Bucket Service does not exist.")
+		return nil, fmt.Errorf("Bucket ScoringService does not exist.")
 	}
 
 	for i, id := range ids {
@@ -789,7 +805,7 @@ func readServices(tx *bolt.Tx, ids []string) ([]*Service, error) {
 			continue
 		}
 
-		o, err := DecodeService(v)
+		o, err := DecodeScoringService(v)
 		if err != nil {
 			return nil, err
 		}
@@ -800,10 +816,10 @@ func readServices(tx *bolt.Tx, ids []string) ([]*Service, error) {
 	return objs, nil
 }
 
-func (ds *DS) ReadServices(ids []string) ([]*Service, error) {
-	var objs []*Service
+func (ds *DS) ReadScoringServices(ids []string) ([]*ScoringService, error) {
+	var objs []*ScoringService
 	err := ds.db.View(func(tx *bolt.Tx) error {
-		os, err := readServices(tx, ids)
+		os, err := readScoringServices(tx, ids)
 		if err != nil {
 			return err
 		}
@@ -813,12 +829,12 @@ func (ds *DS) ReadServices(ids []string) ([]*Service, error) {
 	return objs, err
 }
 
-func (ds *DS) ReadService(id string) (*Service, error) {
-	var obj *Service
+func (ds *DS) ReadScoringService(id string) (*ScoringService, error) {
+	var obj *ScoringService
 	err := ds.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Service"))
+		b := tx.Bucket([]byte("ScoringService"))
 		if b == nil {
-			return fmt.Errorf("Bucket Service does not exist.")
+			return fmt.Errorf("Bucket ScoringService does not exist.")
 		}
 
 		v := b.Get([]byte(id))
@@ -826,7 +842,7 @@ func (ds *DS) ReadService(id string) (*Service, error) {
 			return nil
 		}
 
-		o, err := DecodeService(v)
+		o, err := DecodeScoringService(v)
 		if err != nil {
 			return err
 		}
@@ -838,24 +854,24 @@ func (ds *DS) ReadService(id string) (*Service, error) {
 	return obj, err
 }
 
-func (ds *DS) CreateService(o *Service) error {
-	return ds.writeService(o, true)
+func (ds *DS) CreateScoringService(o *ScoringService) error {
+	return ds.writeScoringService(o, true)
 }
 
-func (ds *DS) UpdateService(o *Service) error {
-	return ds.writeService(o, false)
+func (ds *DS) UpdateScoringService(o *ScoringService) error {
+	return ds.writeScoringService(o, false)
 }
 
-func (ds *DS) writeService(o *Service, create bool) error {
+func (ds *DS) writeScoringService(o *ScoringService, create bool) error {
 	err := ds.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Service"))
+		b := tx.Bucket([]byte("ScoringService"))
 		if b == nil {
-			return fmt.Errorf("Bucket Service does not exist.")
+			return fmt.Errorf("Bucket ScoringService does not exist.")
 		}
 
 		o.ModifiedAt = time.Now().UTC().Unix()
 
-		v, err := EncodeService(o)
+		v, err := EncodeScoringService(o)
 		if err != nil {
 			return err
 		}
@@ -869,37 +885,37 @@ func (ds *DS) writeService(o *Service, create bool) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Service write failed: %v", err)
+		return fmt.Errorf("ScoringService write failed: %v", err)
 	}
 
 	return nil
 }
 
-func (ds *DS) DeleteService(id string) error {
+func (ds *DS) DeleteScoringService(id string) error {
 	err := ds.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Service"))
+		b := tx.Bucket([]byte("ScoringService"))
 		if b == nil {
-			return fmt.Errorf("Bucket Service does not exist.")
+			return fmt.Errorf("Bucket ScoringService does not exist.")
 		}
 		return b.Delete([]byte(id))
 	})
 	if err != nil {
-		return fmt.Errorf("Service delete failed: %v", err)
+		return fmt.Errorf("ScoringService delete failed: %v", err)
 	}
 	return nil
 }
 
-func (ds *DS) ListService() ([]*Service, error) {
-	var objs []*Service
+func (ds *DS) ListScoringService() ([]*ScoringService, error) {
+	var objs []*ScoringService
 	err := ds.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Service"))
+		b := tx.Bucket([]byte("ScoringService"))
 		if b == nil {
-			return fmt.Errorf("Bucket Service does not exist.")
+			return fmt.Errorf("Bucket ScoringService does not exist.")
 		}
 
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			o, err := DecodeService(v)
+			o, err := DecodeScoringService(v)
 			if err != nil {
 				return err
 			}
@@ -910,28 +926,28 @@ func (ds *DS) ListService() ([]*Service, error) {
 	return objs, err
 }
 
-func EncodeService(o *Service) ([]byte, error) {
+func EncodeScoringService(o *ScoringService) ([]byte, error) {
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(o)
 	if err != nil {
-		return nil, fmt.Errorf("Service encode failed: %v", err)
+		return nil, fmt.Errorf("ScoringService encode failed: %v", err)
 	}
 	return b.Bytes(), nil
 }
 
-func DecodeService(b []byte) (*Service, error) {
+func DecodeScoringService(b []byte) (*ScoringService, error) {
 	dec := gob.NewDecoder(bytes.NewBuffer(b))
-	var o Service
+	var o ScoringService
 	err := dec.Decode(&o)
 	if err != nil {
-		return nil, fmt.Errorf("Service decode failed: %v", err)
+		return nil, fmt.Errorf("ScoringService decode failed: %v", err)
 	}
 	return &o, nil
 }
 
-func (ds *DS) PrintService(b []byte) (string, error) {
-	o, err := DecodeService(b)
+func (ds *DS) PrintScoringService(b []byte) (string, error) {
+	o, err := DecodeScoringService(b)
 	if err != nil {
 		return "", err
 	}

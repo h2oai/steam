@@ -6,20 +6,28 @@ type Sys
  Version uint32
 
 type Cloud
- ApplicationID string
+ EngineName string
  Size int
+ ApplicationID string
+ Address string
+ Memory string
+ Username string
+ IsKerberosEnabled bool
+ State string
  
 type Model
  CloudName string
- CloudAddress string
- Data []byte
+ Dataset string
+ TargetName string
+ MaxRuntime int
+ JavaModelPath string
+ GenModelPath string
 
-type Service
- Caption string
- Description string
- Source string
- Target string
- IsBuilt bool
+type ScoringService
+ ModelName string
+ Address string
+ Port int
+ State string
 
 type Engine
  Name string
