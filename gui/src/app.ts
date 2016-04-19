@@ -21,6 +21,7 @@ module Main {
     export type Func<T1, T> = (arg: T1) => T
     export type Func2<T1, T2, T> = (v1: T1, v2: T2) => T
     export type Func3<T1, T2, T3, T> = (v1: T1, v2: T2, v3: T3) => T
+    export type Func4<T1, T2, T3, T4, T> = (v1: T1, v2: T2, v3: T3, v4: T4) => T
 
     export type Eff<T> = (t: T) => void
     export type Eff2<T1, T2> = (v1: T1, v2: T2) => void
@@ -298,6 +299,15 @@ module Main {
         ]
     }
 
+    export function react4<T1, T2, T3, T4>(s1: Sig<T1>, s2: Sig<T2>, s3: Sig<T3>, s4: Sig<T4>, f: Eff4<T1, T2, T3, T4>): Arrow[] {
+        return [
+            react(s1, (v1: T1) => { f(v1, s2(), s3(), s4()) }),
+            react(s2, (v2: T2) => { f(s1(), v2, s3(), s4()) }),
+            react(s3, (v3: T3) => { f(s1(), s2(), v3, s4()) }),
+            react(s4, (v4: T4) => { f(s1(), s2(), s3(), v4) })
+        ]
+    }
+
     export function act<T1>(s1: Sig<T1>, f: Eff<T1>): Arrow {
         f(s1())
         return react<T1>(s1, f)
@@ -337,6 +347,12 @@ module Main {
         return t
     }
 
+    export function lift4<T1, T2, T3, T4, T>(s1: Sig<T1>, s2: Sig<T2>, s3: Sig<T3>, s4: Sig<T4>, f: Func4<T1, T2, T3, T4, T>): Sig<T> {
+        let t = sig<T>(f(s1(), s2(), s3(), s4()))
+        react4<T1, T2, T3, T4>(s1, s2, s3, s4, (v1: T1, v2: T2, v3: T3, v4: T4) => { t(f(v1, v2, v3, v4)) })
+        return t
+    }
+
     function noop() { }
 
     function isNonEmpty<T>(a: T[]): boolean {
@@ -354,6 +370,13 @@ module Main {
         return a === void 0
     }
 
+    function timestampToAge(t: number): string {
+        return moment.unix(t).fromNow()
+    }
+
+    function formatTimestamp(t: number): string {
+        return moment.unix(t).format("MMM D YYYY h:mm:ss a")
+    }
 
     //
     // Knockout Extensions
@@ -509,17 +532,6 @@ module Main {
         setTimeout(go, 3000)
     }
 
-    function proxy_getClouds(on: On<Cloud[]>): void {
-        const clouds = _.times(_.random(5, 20), (i: int): Cloud => {
-            return new Cloud(
-                `${faker.name.firstName()}'s Cloud`,
-                _.random(1, 10),
-                'A few minutes ago'
-            )
-        })
-        on(null, clouds)
-    }
-
     function proxy_getModels(on: On<Model[]>): void {
         const clouds = _.times(_.random(5, 20), (i: int): Model => {
             const useCase = randomUseCaseSlug()
@@ -561,14 +573,6 @@ module Main {
     //
     // Models
     //
-
-    class Cloud {
-        constructor(
-            public id: string,
-            public size: int,
-            public createdAt: string
-        ) { }
-    }
 
     class Model {
         constructor(
@@ -681,13 +685,15 @@ module Main {
     }
 
     interface CloudsPane extends Pane {
+        error: Sig<string>
         items: Sigs<Folder>
+        hasItems: Sig<boolean>
         startCloud: Act
     }
 
 
     function doAfterRender(elements: HTMLElement[]): void {
-        $(elements).click(function() {
+        $(elements).click(function () {
             const $this = $(this)
             $this.parent().children().removeClass('folder--selected')
             $this.addClass('folder--selected')
@@ -716,17 +722,22 @@ module Main {
     }
 
     interface StartCloudDialog extends Dialog {
+        engineNames: Sigs<string>
+        engineName: Sig<string>
+        engineNameError: Sig<string>
         cloudId: Sig<string>
         cloudIdError: Sig<string>
         cloudSize: Sig<string>
         cloudSizeError: Sig<string>
+        cloudMemory: Sig<string>
+        cloudMemoryError: Sig<string>
         canStartCloud: Sig<boolean>
         startCloud: Act
         error: Sig<string>
     }
 
     interface StartCloudDialogResult {
-        applicationId: string
+        cloud: Proxy.Cloud
     }
 
     interface BuildModelDialog extends Dialog {
@@ -817,9 +828,18 @@ module Main {
 
 
     const cloudIdPattern = /^[a-z0-9-]{1,16}$/i
+    const cloudMemoryPattern = /^[0-9]+[kmg]$/i
     function newStartCloudDialog(ctx: Context, go: Eff<StartCloudDialogResult>): StartCloudDialog {
 
         const error = sig<string>('')
+
+        const engineNames = sigs<string>([])
+        const engineName = sig<string>(void 0)
+        const engineNameError = lift(engineName, (engineName): string =>
+            engineName
+                ? ''
+                : "Select a H2O version"
+        )
 
         const cloudId = sig<string>('')
         const cloudIdError = lift(cloudId, (cloudId): string =>
@@ -838,19 +858,28 @@ module Main {
                 : "Invalid cloud size"
         )
 
-        const canStartCloud = lift2(cloudIdError, cloudSizeError, (e1, e2): boolean =>
-            e1 === '' && e2 === ''
+        const cloudMemory = sig<string>('')
+        const cloudMemoryError = lift(cloudMemory, (cloudMemory): string =>
+            (cloudMemoryPattern.test(cloudMemory))
+                ? ''
+                : "Enter a valid Java memory specifier (e.g. 1024m, 2g, etc.)"
+
+        )
+
+        const canStartCloud = lift4(engineNameError, cloudIdError, cloudSizeError, cloudMemoryError, (e1, e2, e3, e4): boolean =>
+            e1 === '' && e2 === '' && e3 === '' && e4 === ''
         )
 
         const startCloud: Act = () => {
+            if (!canStartCloud()) {
+                return
+            }
             ctx.setBusy('Creating cloud...')
-            proxy_startCloud(cloudId(), cloudSizeNum(), (err, applicationId) => {
+            ctx.remote.startCloud(cloudId(), engineName(), cloudSizeNum(), cloudMemory(), ctx.principal.username, (err, cloud) => {
                 if (err) {
                     error(err.message)
                 } else {
-                    go({
-                        applicationId: applicationId
-                    })
+                    go({ cloud: cloud })
                 }
                 ctx.setFree()
             })
@@ -861,10 +890,15 @@ module Main {
 
         return {
             title: 'Start a new cloud',
+            engineNames: engineNames,
+            engineName: engineName,
+            engineNameError: engineNameError,
             cloudId: cloudId,
             cloudIdError: cloudIdError,
             cloudSize: cloudSize,
             cloudSizeError: cloudSizeError,
+            cloudMemory: cloudMemory,
+            cloudMemoryError: cloudMemoryError,
             canStartCloud: canStartCloud,
             startCloud: startCloud,
             error: error,
@@ -1026,16 +1060,10 @@ module Main {
     // Panes
     //
 
-    function newCloudsPane(ctx: Context, clouds: Cloud[]): CloudsPane {
-        const items = sigs<Folder>(_.map(clouds, (cloud): Folder => {
-            return {
-                title: cloud.id,
-                subhead: 'Size:',
-                slug: String(cloud.size),
-                execute: () => { ctx.showCloud(cloud) },
-                template: 'folder'
-            }
-        }))
+    function newCloudsPane(ctx: Context): CloudsPane {
+        const error = sig<string>('')
+        const items = sigs<Folder>([])
+        const hasItems = lifts(items, (items) => items.length > 0)
         const startCloud: Act = () => {
             const dialog = newStartCloudDialog(ctx, (result: StartCloudDialogResult) => {
                 // XXX use result to update cloud list
@@ -1043,19 +1071,36 @@ module Main {
             })
             ctx.pushDialog(dialog)
         }
+        ctx.remote.getClouds((err, clouds) => {
+            if (err) {
+                error(err.message)
+                return
+            }
+            items(_.map(clouds, (cloud): Folder => {
+                return {
+                    title: cloud.name,
+                    subhead: 'Size:',
+                    slug: String(cloud.size),
+                    execute: () => { ctx.showCloud(cloud) },
+                    template: 'folder'
+                }
+            }))
+        })
         return {
             title: 'Clouds',
             template: 'clouds',
             dispose: noop,
             position: newPanePosition(),
+            error: error,
+            hasItems: hasItems,
             items: items,
             startCloud: startCloud,
         }
     }
 
-    function newCloudPane(ctx: Context, cloud: Cloud): CloudPane {
+    function newCloudPane(ctx: Context, cloud: Proxy.Cloud): CloudPane {
         function buildModel(): void {
-            const dialog = newBuildModelDialog(ctx, cloud.id, (result: BuildModelDialogResult) => {
+            const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
                 // XXX use result to update cloud list
                 ctx.popDialog()
             })
@@ -1063,14 +1108,14 @@ module Main {
         }
         function stopCloud(): void {
             ctx.setBusy('Stopping cloud...')
-            proxy_stopCloud(cloud.id, (err, result) => {
+            proxy_stopCloud(cloud.name, (err, result) => {
                 ctx.setFree()
             })
         }
         return {
-            title: cloud.id,
+            title: cloud.name,
             size: String(cloud.size),
-            createdAt: cloud.createdAt,
+            createdAt: timestampToAge(cloud.created_at),
             buildModel: buildModel,
             stopCloud: stopCloud,
             template: 'cloud',
@@ -1227,15 +1272,20 @@ module Main {
         }
     }
 
+    interface Principal {
+        username: string
+    }
+
     export class Context {
         public remote = Proxy
+        public principal = { username: 'unknown' }
         public setBusy = uni1<string>()
         public setFree = uni()
         public pushDialog = uni1<Dialog>()
         public popDialog = uni()
         public showPane = uni2<int, Pane>()
         public showClouds = uni()
-        public showCloud = uni1<Cloud>()
+        public showCloud = uni1<Proxy.Cloud>()
         public showModels = uni()
         public showModel = uni1<Model>()
         public showServices = uni()
@@ -1322,12 +1372,10 @@ module Main {
         })
 
         ctx.showClouds.on(() => {
-            proxy_getClouds((err, clouds) => {
-                ctx.showPane(0, newCloudsPane(ctx, clouds))
-            })
+            ctx.showPane(0, newCloudsPane(ctx))
         })
 
-        ctx.showCloud.on((cloud: Cloud) => {
+        ctx.showCloud.on((cloud: Proxy.Cloud) => {
             ctx.showPane(1, newCloudPane(ctx, cloud))
         })
 
