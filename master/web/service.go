@@ -8,6 +8,7 @@ import (
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/db"
+	"github.com/h2oai/steamY/srv/comp"
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
 )
@@ -119,25 +120,6 @@ func (s *Service) StopCloud__FIXME(name string, useKerberos bool, applicationID,
 // 	return cc, nil
 // }
 
-func (s *Service) BuildAutoML(address, dataset, targetName string, maxTime int) (string, error) {
-	h := h2ov3.NewClient(address)
-
-	modelName, err := h.AutoML(dataset, targetName, maxTime) //TODO: j is a job that can be started and waited for
-	if err != nil {
-		return "", err
-	}
-
-	javaModelDir := fs.GetModelPath(s.workingDir, modelName, "java")
-	if err := h.ExportJavaModel(modelName, javaModelDir); err != nil {
-		return "", err
-	}
-	if err := h.ExportGenModel(javaModelDir); err != nil {
-		return "", err
-	}
-
-	return modelName, nil
-}
-
 // func (s *Service) GetModels(address string) ([]*web.CloudModelSynopsis, error) {
 // 	h := h2ov3.NewClient(address)
 
@@ -162,17 +144,6 @@ func (s *Service) BuildAutoML(address, dataset, targetName string, maxTime int) 
 
 // 	return nil, nil
 // }
-
-func (s *Service) DeployPojo(address, javaModel, jar string) error {
-	// h := compileclient.newclient()
-
-	// p, err := h.compilepojo(javamodel, jar)
-	// if err != nil {
-	// 	return err
-	// }
-
-	return nil
-}
 
 func (s *Service) Shutdown(address string) error {
 	h := h2ov3.NewClient(address)
@@ -222,7 +193,49 @@ func (s *Service) DeleteCloud(cloudName string) error {
 }
 
 func (s *Service) BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*web.Model, error) {
-	return nil, nil //FIXME
+	h := h2ov3.NewClient("172.16.2.108:54321") //FIXME: THIS SHOULD BE CLOUD ADDRESS
+
+	modelName, err := h.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
+	if err != nil {
+		return nil, err
+	}
+
+	javaModelDir := fs.GetModelPath(s.workingDir, modelName, "java")
+	jm, err := h.ExportJavaModel(modelName, javaModelDir)
+	if err != nil {
+		return nil, err
+	}
+	gm, err := h.ExportGenModel(javaModelDir)
+	if err != nil {
+		return nil, err
+	}
+
+	m := db.NewModel(
+		modelName,
+		cloudName,
+		dataset,
+		targetName,
+		maxRunTime,
+		jm,
+		gm,
+	)
+
+	if err := s.ds.CreateModel(m); err != nil {
+		return nil, err
+	}
+
+	return toModel(m), nil //FIXME
+}
+
+func (s *Service) getModel(modelName string) (*db.Model, error) {
+	m, err := s.ds.ReadModel(modelName)
+	if err != nil {
+		return nil, err
+	}
+	if m == nil {
+		return nil, fmt.Errorf("Model %s does not exist.", modelName)
+	}
+	return m, err
 }
 
 func (s *Service) GetModel(modelName string) (*web.Model, error) {
@@ -238,6 +251,20 @@ func (s *Service) DeleteModel(modelName string) error {
 }
 
 func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringService, error) {
+	c := comp.NewServer(s.compilationServiceAddress)
+	m, err := s.getModel(modelName)
+	if err != nil {
+		return nil, err
+	}
+	j := m.JavaModelPath
+	g := m.GenModelPath
+
+	w, err := c.CompilePojo(j, g, "makewar")
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Warfile Dest: %s", w)
+
 	return nil, nil //FIXME
 }
 
@@ -284,5 +311,18 @@ func toCloud(c *db.Cloud) *web.Cloud {
 		c.Username,
 		web.CloudState(c.State),
 		web.Timestamp(c.CreatedAt),
+	}
+}
+
+func toModel(m *db.Model) *web.Model {
+	return &web.Model{
+		m.ID,
+		m.CloudName,
+		m.Dataset,
+		m.TargetName,
+		m.MaxRuntime,
+		m.JavaModelPath,
+		m.GenModelPath,
+		web.Timestamp(m.CreatedAt),
 	}
 }

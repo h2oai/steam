@@ -234,19 +234,20 @@ func (h *H2O) AutoML(dataset, targetName string, maxTime int) (string, error) {
 	return m.Leader.Name, err
 }
 
-func (h *H2O) ExportJavaModel(modelID, p string) error {
-	_, err := h.download("/3/Models.java/"+modelID, p, true)
+func (h *H2O) ExportJavaModel(modelID, p string) (string, error) {
+	f, err := h.download("/3/Models.java/"+modelID, p, true)
 	if err != nil {
-		return fmt.Errorf("Java model export failed: %s", err)
+		return "", fmt.Errorf("Java model export failed: %s", err)
 	}
-	return nil
+	return f, nil
 }
 
-func (h *H2O) ExportGenModel(p string) error {
-	if _, err := h.download("/3/h2o-genmodel.jar", path.Join(p, "h2o-genmodel.jar"), false); err != nil {
-		return fmt.Errorf("Java genmodel jar export failed: %s", err)
+func (h *H2O) ExportGenModel(p string) (string, error) {
+	f, err := h.download("/3/h2o-genmodel.jar", path.Join(p, "h2o-genmodel.jar"), false)
+	if err != nil {
+		return "", fmt.Errorf("Java genmodel jar export failed: %s", err)
 	}
-	return nil
+	return f, nil
 }
 
 func (h *H2O) CompilePojo(javaModel, jar string) error {
