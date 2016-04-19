@@ -5,3 +5,5 @@
 /// <reference path="qunit/qunit.d.ts" />
 /// <reference path="underscore/underscore.d.ts" />
 /// <reference path="faker/faker.d.ts" />
+/// <reference path="moment/moment.d.ts" />
+/// <reference path="moment/moment-node.d.ts" />

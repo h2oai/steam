@@ -23,6 +23,7 @@ lib:
 	rsync -u $B/jquery/dist/jquery.min.js $O/
 	rsync -u $B/async/dist/async.min.js $O/
 	rsync -u $B/underscore/underscore-min.js $O/
+	rsync -u $B/moment/min/moment.min.js $O/
 	rsync -u $B/knockout/dist/knockout.js $O/
 	rsync -u $B/mousetrap/mousetrap.min.js $O/
 	rsync -u $B/faker/build/build/faker.min.js $O/
