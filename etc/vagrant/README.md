@@ -1,66 +1,21 @@
 YARN VAGRANT SETUP
 ====================
 
-Installing Hadoop
+This will start a CentOS6.4 single node hadoop/yarn cluster.
+
+(OPTIONAL) Installing Hadoop
 -----------------
 
-Install hadoop in the vagrant directory.
+Install hadoop in the resources directory to speed up start time.
 ```
+mkdir resources
+cd /resources/
 wget http://apache.claz.org/hadoop/common/hadoop-2.6.4/hadoop-2.6.4.tar.gz 
-tar xzf hadoop-2.6.4.tar.gz 
-ln -s hadoop-2.6.4.tar.gz hadoop
 ```
 
-Configuring Hadoop
-------------------
 
-`cd hadoop` edit These files
-
-`etc/hadoop/core-site.xml`
-```
-<configuration>
-    <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://localhost:9000</value>
-    </property>
-</configuration>
-```
-
-`etc/hadoop/hdfs-site.xml`
-```
-<configuration>
-    <property>
-        <name>dfs.replication</name>
-        <value>1</value>
-    </property>
-</configuration>
-```
-
-`etc/hadoop/mapred-site.xml`
-```
-<configuration>
-    <property>
-        <name>mapreduce.framework.name</name>
-        <value>yarn</value>
-    </property>
-</configuration>
-```
-
-`etc/hadoop/yarn-site.xml`
-```
-<configuration>
-    <property>
-        <name>yarn.nodemanager.aux-services</name>
-        <value>mapreduce_shuffle</value>
-    </property>
-</configuration>
-```
-
-Starting Vagrant
-----------------
-
-Move the the HDPYarn directory
-`cd ../HDPYarn`
+Starting Vagrant (and Steam)
+----------------------------
 
 Start vagrant
 `vagrant up`
@@ -68,5 +23,15 @@ Start vagrant
 SSH into vagrant
 `vagrant ssh`
 
-The Yarn Application manager:
-`localhost:8088`
+Get the steam tar
+```
+cp /steam/steam--linux--amd64.tar.gz .
+tar -xzvf steam--linux--amd64.tar.gz
+```
+
+Download the most recent h2odriver for hadoop 2.2
+```
+wget http://download.h2o.ai/download/h2o-3.8.2.2-hdp2.2?id=6187c90d-c016-1dc6-d382-3425ad1848f3 -O h2o-3.8.2.2-hdp2.2.zip
+unzip h2o-3.8.2.2-hdp2.2.zip
+cp h2o-3.8.2.2-hdp2.2/h2odriver steam--linux--amd64.tar.gz
+```
