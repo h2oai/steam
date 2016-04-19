@@ -40,4 +40,4 @@ sbin/start-yarn.sh
 /etc/init.d/iptables save
 /etc/init.d/iptables stop
 
-echo export PATH:$PATH:/usr/local/hadoop/bin >> /home/vagrant/.bashrc
+echo export PATH=$PATH:/usr/local/hadoop/bin >> /home/vagrant/.bashrc
