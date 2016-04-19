@@ -68,15 +68,29 @@ html.no-js
     
     template.start-cloud-dialog
       .dialog__form
+
         .form-field-label Specify a name for this cloud:
         .form-field
           input.textbox(type='text' placeholder='Name' data-bind="value:cloudId, valueUpdate:'afterkeydown'" style='width:300px')
         .form-field-error(data-bind="text:cloudIdError")
 
+        .form-field-label Which version of H2O should this cloud run?
+        .form-field
+          span.dropdown
+            select.dropdown-select(data-bind="options:engineNames, value:engineName, optionsCaption:'Choose Version...'")
+        .form-field-error(data-bind="text:engineNameError")
+
         .form-field-label How many nodes should this cloud have?
         .form-field
           input.textbox(type='text' placeholder='Size' data-bind="value:cloudSize, valueUpdate:'afterkeydown'" style='width:50px')
         .form-field-error(data-bind="text:cloudSizeError")
+
+        .form-field-label How much memory should each node have?
+        .form-field
+          input.textbox(type='text' placeholder='Memory' data-bind="value:cloudMemory, valueUpdate:'afterkeydown'" style='width:100px')
+        .form-field-error(data-bind="text:cloudMemoryError")
+
+        .form-error(data-bind='text:error')
 
       .dialog__actions
         .buttons.buttons--unit
