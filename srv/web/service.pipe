@@ -36,6 +36,7 @@ type ScoringService
  Address string
  Port int
  State ScoringServiceState
+ Pid int
  CreatedAt Timestamp
 
 type Engine
@@ -57,7 +58,7 @@ DeleteModel(modelName string)
 
 StartScoringService(modelName string, port int) service *ScoringService
 StopScoringService(modelName string, port int)
-GetScoringService(serviceName string) service *ScoringService
+GetScoringService(modelName string) service *ScoringService
 GetScoringServices() services []*ScoringService
 DeleteScoringService(modelName string, port int)
 

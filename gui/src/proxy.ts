@@ -51,6 +51,7 @@ module Proxy {
 		address: string
 		port: number
 		state: ScoringServiceState
+		pid: number
 		created_at: Timestamp
 	}
 
@@ -74,7 +75,7 @@ module Proxy {
 		deleteModel: (modelName: string, go: (error: Error) => void) => void
 		startScoringService: (modelName: string, port: number, go: (error: Error, service: ScoringService) => void) => void
 		stopScoringService: (modelName: string, port: number, go: (error: Error) => void) => void
-		getScoringService: (serviceName: string, go: (error: Error, service: ScoringService) => void) => void
+		getScoringService: (modelName: string, go: (error: Error, service: ScoringService) => void) => void
 		getScoringServices: (go: (error: Error, services: ScoringService[]) => void) => void
 		deleteScoringService: (modelName: string, port: number, go: (error: Error) => void) => void
 		getEngine: (engineName: string, go: (error: Error, engine: Engine) => void) => void
@@ -184,7 +185,7 @@ module Proxy {
 	}
 
 	interface GetScoringServiceIn {
-		service_name: string
+		model_name: string
 	}
 
 	interface GetScoringServiceOut {
@@ -345,9 +346,9 @@ module Proxy {
 		})
 
 	}
-	export function getScoringService(serviceName: string, go: (error: Error, service: ScoringService) => void): void {
+	export function getScoringService(modelName: string, go: (error: Error, service: ScoringService) => void): void {
 		var req: GetScoringServiceIn = {
-			service_name: serviceName
+			model_name: modelName
 		}
 		Proxy.Call("GetScoringService", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetScoringServiceOut>data).service)

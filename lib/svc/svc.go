@@ -1,25 +1,71 @@
 package svc
 
 import (
+	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
 // Start starts a scoring service.
-func Start(warfile string, port int) (int, error) {
+func Start(warfile, jetty, address string, port int) (int, error) {
 
-	argv := []string{"10000"} // FIXME use jetty-runner args
-
-	cmd := exec.Command("/bin/sleep", argv...) // FIXME use jetty-runner
-
-	if err := cmd.Start(); err != nil {
-		return 0, fmt.Errorf("Failed starting scoring service for %s at port %d: %v", warfile, port, err)
+	argv := []string{
+		"-jar",
+		jetty,
+		"--host",
+		address,
+		"--port",
+		strconv.Itoa(port),
+		warfile,
 	}
 
+	cmd := exec.Command("java", argv...)
+	stdErr, err := cmd.StderrPipe()
+	if err != nil {
+		return 0, err
+	}
+	// stdOut, err := cmd.StdoutPipe()
+	// if err != nil {
+	// 	return 0, err
+	// }
+
+	defer stdErr.Close() // Wait may not necessarily close, so pipe should close
+
+	var errText string
+	if err := cmd.Start(); err != nil {
+		return 0, err
+	}
+
+	e := make(chan error)
+
+	// the cool bits
+	// goroutines will only pipe to e if their condition is met
+	go func() { // This is the success condition
+		in := bufio.NewScanner(stdErr)
+		for in.Scan() {
+			errText = errText + in.Text() + "\n"
+			if strings.Contains(in.Text(), "Started @") {
+				e <- nil
+			}
+		}
+	}()
+	go func() { // This is the fail condition
+		if err := cmd.Wait(); err != nil {
+			log.Printf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
+			e <- fmt.Errorf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
+		}
+	}()
+
+	// Blocking here, until either goroutine returns with their condition
+	if err := <-e; err != nil {
+		return 0, err
+	}
 	return cmd.Process.Pid, nil
 }
 
@@ -35,8 +81,10 @@ func Stop(pid int) error {
 	if err != nil {
 		return fmt.Errorf("Failed inspecting pid %d: %v", pid, err)
 	}
-	if !strings.Contains(pscmd, "/bin/sleep") { // FIXME check for jetty-runner
-		return fmt.Errorf("Process %d is not a scoring service")
+
+	isJetty := regexp.MustCompile(`java -jar .*/jetty.*\.jar .*\.war`)
+	if isJetty.Find([]byte(pscmd)) == nil {
+		return fmt.Errorf("Process %d is not a scoring service", pid)
 	}
 
 	const sigintInterval = time.Second

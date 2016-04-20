@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/db"
 	"github.com/h2oai/steamY/srv/comp"
@@ -17,6 +18,7 @@ type Service struct {
 	workingDir                string
 	ds                        *db.DS
 	compilationServiceAddress string
+	scoringServiceAddress     string
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
@@ -30,8 +32,16 @@ func now() web.Timestamp {
 	return toTimestamp(time.Now())
 }
 
-func NewService(workingDir string, ds *db.DS, compilationServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
-	return &web.Impl{&Service{workingDir, ds, compilationServiceAddress, kerberos, username, keytab}}
+func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
+	return &web.Impl{&Service{
+		workingDir,
+		ds,
+		compilationServiceAddress,
+		scoringServiceAddress,
+		kerberos,
+		username,
+		keytab,
+	}}
 }
 
 func (s *Service) Ping(status bool) (bool, error) {
@@ -39,11 +49,16 @@ func (s *Service) Ping(status bool) (bool, error) {
 }
 
 func (s *Service) StartCloud(cloudName, engineName string, size int, memory, username string) (*web.Cloud, error) { // TODO: YARN DRIVER SHOULD BE THE ENGINE
+	// Make sure this cloud is unique
+	if _, ok := s.getCloud(cloudName), ok == nil {
+		return fmt.Errorf("Cloud start failed. A cloud with the name %s already exists.", cloudName)
+	}
+	// Make cloud with yarn
 	appId, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
 		return nil, err
 	}
-
+	// Add cloud to db
 	c := db.NewCloud(
 		cloudName,
 		engineName,
@@ -56,7 +71,7 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 	)
 
 	log.Printf("Created Cloud:\n%+v", c)
-
+	
 	if err := s.ds.CreateCloud(c); err != nil {
 		return nil, err
 	}
@@ -193,7 +208,13 @@ func (s *Service) DeleteCloud(cloudName string) error {
 }
 
 func (s *Service) BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*web.Model, error) {
-	h := h2ov3.NewClient("172.16.2.108:54321") //FIXME: THIS SHOULD BE CLOUD ADDRESS
+	// c, err := s.GetCloud(cloudName)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// h := h2ov3.NewClient(c.Address)
+
+	h := h2ov3.NewClient("172.16.2.108:54321") //FIXME: THIS SHOULD BE CLOUD A ADDRESS
 
 	modelName, err := h.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
 	if err != nil {
@@ -224,7 +245,7 @@ func (s *Service) BuildModel(cloudName string, dataset string, targetName string
 		return nil, err
 	}
 
-	return toModel(m), nil //FIXME
+	return toModel(m), nil
 }
 
 func (s *Service) getModel(modelName string) (*db.Model, error) {
@@ -239,49 +260,143 @@ func (s *Service) getModel(modelName string) (*db.Model, error) {
 }
 
 func (s *Service) GetModel(modelName string) (*web.Model, error) {
-	return nil, nil //FIXME
-}
-
-func (s *Service) GetModels() ([]*web.Model, error) {
-	return nil, nil //FIXME
-}
-
-func (s *Service) DeleteModel(modelName string) error {
-	return nil
-}
-
-func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringService, error) {
-	c := comp.NewServer(s.compilationServiceAddress)
 	m, err := s.getModel(modelName)
 	if err != nil {
 		return nil, err
 	}
-	j := m.JavaModelPath
-	g := m.GenModelPath
+	return toModel(m), nil
+}
 
-	w, err := c.CompilePojo(j, g, "makewar")
+func (s *Service) GetModels() ([]*web.Model, error) {
+	ms, err := s.ds.ListModel()
 	if err != nil {
 		return nil, err
 	}
+
+	models := make([]*web.Model, len(ms))
+	for i, m := range ms {
+		models[i] = toModel(m)
+	}
+
+	return models, nil
+}
+
+func (s *Service) DeleteModel(modelName string) error {
+	return s.ds.DeleteModel(modelName)
+}
+
+// Returns a Warfile for use in deployment
+func (s *Service) compileModel(modelName string) (string, error) {
+	c := comp.NewServer(s.compilationServiceAddress)
+
+	m, err := s.getModel(modelName)
+	if err != nil {
+		return "", err
+	}
+	j := m.JavaModelPath
+	g := m.GenModelPath
+
+	e := fs.GetAssetsPath(s.workingDir, "makewar-extra.jar")
+
+	w, err := c.CompilePojo(j, g, e, "makewar")
+	if err != nil {
+		return "", err
+	}
 	log.Printf("Warfile Dest: %s", w)
 
-	return nil, nil //FIXME
+	return w, nil
+}
+
+func genScoringServiceName(modelName string) string { return modelName + " Scoring Service" }
+
+func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringService, error) {
+	w, err := s.compileModel(modelName)
+	if err != nil {
+		return nil, err
+	}
+
+	const jetty = "jetty-runner-9.3.9.M1.jar"
+
+	j := fs.GetAssetsPath(s.workingDir, jetty)
+
+	pid, err := svc.Start(w, j, s.scoringServiceAddress, port)
+	if err != nil {
+		return nil, err
+	}
+
+	ss := db.NewScoringService(
+		genScoringServiceName(modelName),
+		modelName,
+		s.scoringServiceAddress,
+		port,
+		string(web.ScoringServiceStarted),
+		pid,
+	)
+
+	if err := s.ds.CreateScoringService(ss); err != nil {
+		return nil, err
+	}
+
+	return toScoringService(ss), nil
 }
 
 func (s *Service) StopScoringService(modelName string, port int) error {
-	return nil //FIXME
+	// Find the cloud in db
+	ss, err := s.getScoringService(modelName)
+	if err != nil {
+		return err
+	}
+	// Verify Scoring Service is still running
+	if ss.State == string(web.ScoringServiceStopped) {
+		return fmt.Errorf("Scoring Service on %s is already stopped", modelName)
+	}
+	// Stop Scoring Service
+	if err := svc.Stop(ss.Pid); err != nil {
+		return err
+	}
+	// Update the state and update DB
+	ss.State = string(web.ScoringServiceStopped)
+	if err := s.ds.UpdateScoringService(ss); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (s *Service) GetScoringService(serviceName string) (*web.ScoringService, error) {
-	return nil, nil //FIXME
+func (s *Service) getScoringService(modelName string) (*db.ScoringService, error) {
+	ss, err := s.ds.ReadScoringService(genScoringServiceName(modelName))
+	if err != nil {
+		return nil, err
+	}
+	if ss == nil {
+		return nil, fmt.Errorf("Scoring service for model %s does not exits.", modelName)
+	}
+
+	return ss, nil
+}
+
+func (s *Service) GetScoringService(modelName string) (*web.ScoringService, error) {
+	ss, err := s.getScoringService(modelName)
+	if err != nil {
+		return nil, err
+	}
+	return toScoringService(ss), nil //FIXME
 }
 
 func (s *Service) GetScoringServices() ([]*web.ScoringService, error) {
-	return nil, nil //FIXME
+	scs, err := s.ds.ListScoringService()
+	if err != nil {
+		return nil, err
+	}
+	ss := make([]*web.ScoringService, len(scs))
+	for i, sc := range scs {
+		ss[i] = toScoringService(sc)
+	}
+
+	return ss, nil
 }
 
 func (s *Service) DeleteScoringService(modelName string, port int) error {
-	return nil //FIXME
+	return s.ds.DeleteScoringService(genScoringServiceName(modelName))
 }
 
 func (s *Service) GetEngine(engineName string) (*web.Engine, error) {
@@ -324,5 +439,16 @@ func toModel(m *db.Model) *web.Model {
 		m.JavaModelPath,
 		m.GenModelPath,
 		web.Timestamp(m.CreatedAt),
+	}
+}
+
+func toScoringService(s *db.ScoringService) *web.ScoringService {
+	return &web.ScoringService{
+		s.ModelName,
+		s.Address,
+		s.Port,
+		web.ScoringServiceState(s.State),
+		s.Pid,
+		web.Timestamp(s.CreatedAt),
 	}
 }

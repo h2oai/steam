@@ -27,6 +27,7 @@ type ScoringService
  Address string
  Port int
  State string
+ Pid int
 
 type Engine
  Name string

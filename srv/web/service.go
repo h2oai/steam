@@ -57,6 +57,7 @@ type ScoringService struct {
 	Address   string              `json:"address"`
 	Port      int                 `json:"port"`
 	State     ScoringServiceState `json:"state"`
+	Pid       int                 `json:"pid"`
 	CreatedAt Timestamp           `json:"created_at"`
 }
 
@@ -80,7 +81,7 @@ type Service interface {
 	DeleteModel(modelName string) error
 	StartScoringService(modelName string, port int) (*ScoringService, error)
 	StopScoringService(modelName string, port int) error
-	GetScoringService(serviceName string) (*ScoringService, error)
+	GetScoringService(modelName string) (*ScoringService, error)
 	GetScoringServices() ([]*ScoringService, error)
 	DeleteScoringService(modelName string, port int) error
 	GetEngine(engineName string) (*Engine, error)
@@ -190,7 +191,7 @@ type StopScoringServiceOut struct {
 }
 
 type GetScoringServiceIn struct {
-	ServiceName string `json:"service_name"`
+	ModelName string `json:"model_name"`
 }
 
 type GetScoringServiceOut struct {
@@ -364,8 +365,8 @@ func (this *Remote) StopScoringService(modelName string, port int) error {
 	return nil
 }
 
-func (this *Remote) GetScoringService(serviceName string) (*ScoringService, error) {
-	in := GetScoringServiceIn{serviceName}
+func (this *Remote) GetScoringService(modelName string) (*ScoringService, error) {
+	in := GetScoringServiceIn{modelName}
 	var out GetScoringServiceOut
 	err := this.Proc.Call("GetScoringService", &in, &out)
 	if err != nil {
@@ -535,7 +536,7 @@ func (this *Impl) StopScoringService(r *http.Request, in *StopScoringServiceIn, 
 }
 
 func (this *Impl) GetScoringService(r *http.Request, in *GetScoringServiceIn, out *GetScoringServiceOut) error {
-	it, err := this.Service.GetScoringService(in.ServiceName)
+	it, err := this.Service.GetScoringService(in.ModelName)
 	if err != nil {
 		return err
 	}

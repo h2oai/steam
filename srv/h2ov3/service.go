@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -230,7 +231,7 @@ func (h *H2O) AutoML(dataset, targetName string, maxTime int) (string, error) {
 	if m.Leader.Name == "" {
 		return "", fmt.Errorf("Unable to complete model in %d seconds", maxTime)
 	}
-
+	log.Printf("Completed AutoML with model: %s", m.Leader.Name)
 	return m.Leader.Name, err
 }
 

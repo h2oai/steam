@@ -118,6 +118,7 @@ func serveMaster(c *context) *cobra.Command {
 		webAddress                string
 		workingDirectory          string
 		compilationServiceAddress string
+		scoringServiceAddress     string
 		enableProfiler            bool
 		enableKerberos            bool
 		username, keytab          string
@@ -130,6 +131,7 @@ func serveMaster(c *context) *cobra.Command {
 			webAddress,
 			workingDirectory,
 			compilationServiceAddress,
+			scoringServiceAddress,
 			enableProfiler,
 			enableKerberos,
 			username,
@@ -140,6 +142,7 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address.")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Compilation service address")
+	cmd.Flags().StringVar(&scoringServiceAddress, "scoring-service-address", opts.ScoringServiceAddress, "Address to start scoring service on")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&enableKerberos, "kerberos", opts.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
 	cmd.Flags().StringVar(&username, "username", opts.Username, "Username to enable Kerberos")
@@ -218,16 +221,20 @@ Start a new scoring service instance using foo.war listening on port 8888
 func startService(c *context) *cobra.Command {
 	var (
 		warfile string
+		jetty   string
+		address string
 		port    int
 	)
 	cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
-		pid, err := svc.Start(warfile, port)
+		pid, err := svc.Start(warfile, jetty, address, port)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		log.Println("Started process:", pid)
 	})
 	cmd.Flags().StringVar(&warfile, "warfile", "", "The WAR file to launch.")
+	cmd.Flags().StringVar(&jetty, "jetty-runner", "", "The jetty runner jar.")
+	cmd.Flags().StringVar(&address, "address", "0.0.0.0", "The ip of the host to launch the scoring service.")
 	cmd.Flags().IntVar(&port, "port", 8000, "The port to listen on.")
 	return cmd
 }

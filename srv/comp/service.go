@@ -28,7 +28,23 @@ func (cs *CompileServer) url(p string) string {
 	return (&url.URL{Scheme: "http", Host: cs.Address, Path: p}).String()
 }
 
-func uploadJavaFiles(url, pojoPath, jarPath string) (*http.Response, error) {
+func uploadFile(filePath, kind string, w *multipart.Writer) error {
+	dst, err := w.CreateFormFile(kind, path.Base(filePath))
+	if err != nil {
+		return fmt.Errorf("Failed writing to buffer: %v", err)
+	}
+	src, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("Failed opening file: %v", err)
+	}
+	if _, err := io.Copy(dst, src); err != nil {
+		return fmt.Errorf("Failed copying file: %v", err)
+	}
+
+	return nil
+}
+
+func uploadJavaFiles(url, pojoPath, jarPath, extraPath string) (*http.Response, error) {
 	pojoPath, err := fs.ResolvePath(pojoPath)
 	if err != nil {
 		return nil, err
@@ -41,33 +57,57 @@ func uploadJavaFiles(url, pojoPath, jarPath string) (*http.Response, error) {
 	b := &bytes.Buffer{}
 	writer := multipart.NewWriter(b)
 
-	pdst, err := writer.CreateFormFile("pojo", path.Base(pojoPath))
-	if err != nil {
-		return nil, fmt.Errorf("Failed writing to buffer: %v", err)
+	if err := uploadFile(pojoPath, "pojo", writer); err != nil {
+		return nil, err
+	}
+	if err := uploadFile(jarPath, "jar", writer); err != nil {
+		return nil, err
+	}
+	if err := uploadFile(extraPath, "extra", writer); err != nil {
+		return nil, err
 	}
 
-	psrc, err := os.Open(pojoPath)
-	if err != nil {
-		return nil, fmt.Errorf("Failed opening file: %v", err)
-	}
+	// pdst, err := writer.CreateFormFile("pojo", path.Base(pojoPath))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Failed writing to buffer: %v", err)
+	// }
 
-	if _, err := io.Copy(pdst, psrc); err != nil {
-		return nil, fmt.Errorf("Failed copying file: %v", err)
-	}
+	// psrc, err := os.Open(pojoPath)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Failed opening file: %v", err)
+	// }
 
-	jdst, err := writer.CreateFormFile("jar", path.Base(jarPath))
-	if err != nil {
-		return nil, fmt.Errorf("Failed writing to buffer: %v", err)
-	}
+	// if _, err := io.Copy(pdst, psrc); err != nil {
+	// 	return nil, fmt.Errorf("Failed copying file: %v", err)
+	// }
 
-	jsrc, err := os.Open(jarPath)
-	if err != nil {
-		return nil, fmt.Errorf("Failed opening file: %v", err)
-	}
+	// jdst, err := writer.CreateFormFile("jar", path.Base(jarPath))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Failed writing to buffer: %v", err)
+	// }
 
-	if _, err := io.Copy(jdst, jsrc); err != nil {
-		return nil, fmt.Errorf("Failed copying file: %v", err)
-	}
+	// jsrc, err := os.Open(jarPath)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Failed opening file: %v", err)
+	// }
+
+	// if _, err := io.Copy(jdst, jsrc); err != nil {
+	// 	return nil, fmt.Errorf("Failed copying file: %v", err)
+	// }
+
+	// edst, err := writer.CreateFormFile("extra", path.Base(extraPath))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Failed writing to buffer: %v", err)
+	// }
+
+	// esrc, err := os.Open(jarPath)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Failed opening file: %v", err)
+	// }
+
+	// if _, err := io.Copy(jdst, jsrc); err != nil {
+	// 	return nil, fmt.Errorf("Failed copying file: %v", err)
+	// }
 
 	ct := writer.FormDataContentType()
 	writer.Close()
@@ -103,18 +143,18 @@ func uploadJavaFiles(url, pojoPath, jarPath string) (*http.Response, error) {
 	return res, nil
 }
 
-func (cs *CompileServer) CompilePojo(javaModel, jar, servlet string) (string, error) {
-	res, err := uploadJavaFiles(cs.url(servlet), javaModel, jar)
+func (cs *CompileServer) CompilePojo(modelPath, jarPath, extraPath, servlet string) (string, error) {
+	res, err := uploadJavaFiles(cs.url(servlet), modelPath, jarPath, extraPath)
 	if err != nil {
 		return "", err
 	}
 	defer res.Body.Close()
 
-	outname := path.Base(javaModel)
+	outname := path.Base(modelPath)
 	outname = outname[0 : len(outname)-5]
 
 	var p string
-	d := path.Dir(javaModel)
+	d := path.Dir(modelPath)
 	if servlet == "compile" {
 		p = path.Join(d, outname+".jar")
 	} else if servlet == "makewar" {

@@ -106,9 +106,10 @@ type ScoringService struct {
 	Address   string
 	Port      int
 	State     string
+	Pid       int
 }
 
-func NewScoringService(id string, modelName string, address string, port int, state string) *ScoringService {
+func NewScoringService(id string, modelName string, address string, port int, state string, pid int) *ScoringService {
 	return &ScoringService{
 		&Record{
 			id,
@@ -119,6 +120,7 @@ func NewScoringService(id string, modelName string, address string, port int, st
 		address,
 		port,
 		state,
+		pid,
 	}
 }
 

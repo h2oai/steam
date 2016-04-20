@@ -19,13 +19,15 @@ import (
 )
 
 const (
-	defaultWebAddress = "0.0.0.0:9000"
+	defaultWebAddress     = "0.0.0.0:9000"
+	defaultScoringService = "0.0.0.0"
 )
 
 type Opts struct {
 	WebAddress                string
 	WorkingDirectory          string
 	CompilationServiceAddress string
+	ScoringServiceAddress     string
 	EnableProfiler            bool
 	KerberosEnabled           bool
 	Username                  string
@@ -36,6 +38,7 @@ var DefaultOpts = &Opts{
 	defaultWebAddress,
 	path.Join(".", fs.VarDir, "master"),
 	"",
+	defaultScoringService,
 	false,
 	false,
 	"",
@@ -144,6 +147,7 @@ func Run(version, buildDate string, opts *Opts) {
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
+		opts.ScoringServiceAddress,
 		opts.KerberosEnabled,
 		opts.Username,
 		opts.Keytab,

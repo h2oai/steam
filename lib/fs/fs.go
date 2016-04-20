@@ -21,6 +21,7 @@ import (
 const (
 	VarDir         = "var"
 	WwwDir         = "www"
+	AssetsDir      = "assets"
 	DbDir          = "db"
 	ModelDir       = "model"
 	LibDir         = "lib"
@@ -147,6 +148,10 @@ func GetWwwRoot(wd string) string {
 
 func GetModelPath(wd, modelName, dir string) string {
 	return path.Join(wd, ModelDir, modelName, dir)
+}
+
+func GetAssetsPath(wd, asset string) string {
+	return path.Join(wd, AssetsDir, asset)
 }
 
 func GetModelDirs(wd, modelName string) ([]string, error) {
