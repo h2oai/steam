@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -37,6 +38,8 @@ func Start(warfile, jetty, address string, port int) (int, error) {
 
 	defer stdErr.Close() // Wait may not necessarily close, so pipe should close
 
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
 	var errText string
 	if err := cmd.Start(); err != nil {
 		return 0, err
@@ -61,12 +64,13 @@ func Start(warfile, jetty, address string, port int) (int, error) {
 			e <- fmt.Errorf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
 		}
 	}()
-
 	// Blocking here, until either goroutine returns with their condition
 	if err := <-e; err != nil {
 		return 0, err
 	}
-	return cmd.Process.Pid, nil
+	pid := cmd.Process.Pid
+	cmd.Process.Release()
+	return pid, nil
 }
 
 // Stop stops a scoring service.

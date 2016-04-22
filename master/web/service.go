@@ -50,8 +50,8 @@ func (s *Service) Ping(status bool) (bool, error) {
 
 func (s *Service) StartCloud(cloudName, engineName string, size int, memory, username string) (*web.Cloud, error) { // TODO: YARN DRIVER SHOULD BE THE ENGINE
 	// Make sure this cloud is unique
-	if _, ok := s.getCloud(cloudName), ok == nil {
-		return fmt.Errorf("Cloud start failed. A cloud with the name %s already exists.", cloudName)
+	if _, ok := s.getCloud(cloudName); ok == nil {
+		return nil, fmt.Errorf("Cloud start failed. A cloud with the name %s already exists.", cloudName)
 	}
 	// Make cloud with yarn
 	appId, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
@@ -71,7 +71,7 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 	)
 
 	log.Printf("Created Cloud:\n%+v", c)
-	
+
 	if err := s.ds.CreateCloud(c); err != nil {
 		return nil, err
 	}
@@ -204,6 +204,15 @@ func (s *Service) GetClouds() ([]*web.Cloud, error) {
 }
 
 func (s *Service) DeleteCloud(cloudName string) error {
+	// Make sure cloud is not running and exists
+	if c, err := s.getCloud(cloudName); c != nil {
+		if c.State != web.CloudStopped {
+			return fmt.Errorf("Cannot delete. Cloud %s is still running.",
+				cloudName)
+		}
+	} else if err != nil {
+		return fmt.Errorf("Cloud %s does not exist.", cloudName)
+	}
 	return s.ds.DeleteCloud(cloudName)
 }
 
@@ -282,6 +291,14 @@ func (s *Service) GetModels() ([]*web.Model, error) {
 }
 
 func (s *Service) DeleteModel(modelName string) error {
+	if ss, _ := s.getScoringService(modelName); ss != nil {
+		if ss.State != web.ScoringServiceStopped {
+			return fmt.Errorf("Cannot delete. A scoring service on model %s is"+
+				" still running.", modelName)
+		}
+	} else if _, err := s.getModel(modelName); err != nil {
+		return fmt.Errorf("Model %s does not exits.", modelName)
+	}
 	return s.ds.DeleteModel(modelName)
 }
 
@@ -310,6 +327,11 @@ func (s *Service) compileModel(modelName string) (string, error) {
 func genScoringServiceName(modelName string) string { return modelName + " Scoring Service" }
 
 func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringService, error) {
+
+	if _, ok := s.getScoringService(modelName); ok == nil {
+		return nil, fmt.Errorf("A scoring service with the model %s already exists.", modelName)
+	}
+
 	w, err := s.compileModel(modelName)
 	if err != nil {
 		return nil, err
@@ -396,6 +418,16 @@ func (s *Service) GetScoringServices() ([]*web.ScoringService, error) {
 }
 
 func (s *Service) DeleteScoringService(modelName string, port int) error {
+	if ss, err := s.getScoringService(modelName); ss != nil {
+		if ss.State != web.ScoringServiceStopped {
+			return fmt.Errorf("Cannot delete. Scoring service on model %s is "+
+				"still running.", modelName)
+		}
+	} else if err != nil {
+		return fmt.Errorf("Scoring service for model %s does not exits.",
+			modelName)
+	}
+
 	return s.ds.DeleteScoringService(genScoringServiceName(modelName))
 }
 

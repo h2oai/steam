@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	defaultWebAddress     = "0.0.0.0:9000"
-	defaultScoringService = "0.0.0.0"
+	defaultWebAddress         = "0.0.0.0:9000"
+	defaultCompilationAddress = "0.0.0.0:8080"
+	defaultScoringService     = "0.0.0.0"
 )
 
 type Opts struct {
@@ -37,7 +38,7 @@ type Opts struct {
 var DefaultOpts = &Opts{
 	defaultWebAddress,
 	path.Join(".", fs.VarDir, "master"),
-	"",
+	defaultCompilationAddress,
 	defaultScoringService,
 	false,
 	false,
