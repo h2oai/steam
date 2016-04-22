@@ -337,7 +337,7 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 		return nil, err
 	}
 
-	const jetty = "jetty-runner-9.3.9.M1.jar"
+	const jetty = "jetty-runner.jar"
 
 	j := fs.GetAssetsPath(s.workingDir, jetty)
 

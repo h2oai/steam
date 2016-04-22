@@ -1,5 +1,6 @@
 .PHONY: \
 	all \
+	setup \
 	lint \
 	vet \
 	fmt \
@@ -21,8 +22,15 @@ SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 WWW=./var/master/www
+ASSETS = ./var/master/assets
+JETTYRUNNER = jetty-runner-9.3.9.M1.jar
 
-all: build gui
+all: build gui setup
+
+setup:
+	mkdir -p $(ASSETS)
+	cp $(SS_HOME)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
+	cp $(SS_HOME)/makewar-extra.jar $(ASSETS)/
 
 install: build
 	go install
