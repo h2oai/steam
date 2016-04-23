@@ -20,20 +20,21 @@
 			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
 		},
 		{
-			"ImportPath": "github.com/h2oai/steam/tools/piping/golang",
-			"Rev": "2aef8f936d0edbbfbf2582e78071bf5beb8d681a"
-		},
-		{
-			"ImportPath": "github.com/h2oai/steam/tools/piping/parser",
-			"Rev": "2aef8f936d0edbbfbf2582e78071bf5beb8d681a"
-		},
-		{
-			"ImportPath": "github.com/h2oai/steam/tools/piping/typescript",
-			"Rev": "2aef8f936d0edbbfbf2582e78071bf5beb8d681a"
+			"ImportPath": "github.com/gorilla/rpc",
+			"Rev": "64e20900b8aa38bb0771dec71ba3bcc2b07fc8ec"
 		},
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/nu7hatch/gouuid",
+			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+		},
+		{
+			"ImportPath": "github.com/russross/blackfriday",
+			"Comment": "v1.3-34-g18432fc",
+			"Rev": "18432fc942c4ea4846063a269f339ede7630bd71"
 		},
 		{
 			"ImportPath": "github.com/serenize/snaker",
@@ -50,6 +51,10 @@
 		{
 			"ImportPath": "github.com/spf13/viper",
 			"Rev": "e37b56e207dda4d79b9defe0548e960658ee8b6b"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "2bacc619e34d59719d9ed86f0e04e8261aed3409"
 		}
 	]
 }
