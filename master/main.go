@@ -16,6 +16,7 @@ import (
 	"github.com/h2oai/steamY/lib/rpc"
 	"github.com/h2oai/steamY/master/db"
 	"github.com/h2oai/steamY/master/web"
+	srvweb "github.com/h2oai/steamY/srv/web"
 )
 
 const (
@@ -48,10 +49,11 @@ var DefaultOpts = &Opts{
 
 type UploadHandler struct {
 	workingDirectory string
+	webService       srvweb.Service
 }
 
-func newUploadHandler(wd string) *UploadHandler {
-	return &UploadHandler{wd}
+func newUploadHandler(wd string, webService srvweb.Service) *UploadHandler {
+	return &UploadHandler{wd, webService}
 }
 
 func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -72,8 +74,9 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Remote file: ", handler.Filename)
 
-	dstPath := path.Join(s.workingDirectory, fs.LibDir, kind, path.Base(handler.Filename))
+	fileBaseName := path.Base(handler.Filename)
 
+	dstPath := path.Join(s.workingDirectory, fs.LibDir, kind, fileBaseName)
 	if err := os.MkdirAll(path.Dir(dstPath), fs.DirPerm); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -91,9 +94,14 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer dst.Close()
 	io.Copy(dst, src)
 
-	//TODO verify md5 checksum
+	if err := s.webService.AddEngine(fileBaseName, dstPath); err != nil {
+		log.Println("Failed saving engine to datastore", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Error saving engine to datastore: %v", err)
+		return
+	}
 
-	log.Println("Pack uploaded:", dstPath)
+	log.Println("Engine uploaded:", dstPath)
 
 }
 
@@ -144,7 +152,7 @@ func Run(version, buildDate string, opts *Opts) {
 	// --- create front end api services ---
 
 	webServeMux := http.NewServeMux()
-	webServeMux.Handle("/web", rpc.NewServer(rpc.NewService("web", web.NewService(
+	webServiceImpl := web.NewService(
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
@@ -152,8 +160,9 @@ func Run(version, buildDate string, opts *Opts) {
 		opts.KerberosEnabled,
 		opts.Username,
 		opts.Keytab,
-	))))
-	webServeMux.Handle("/upload", newUploadHandler(wd))
+	)
+	webServeMux.Handle("/web", rpc.NewServer(rpc.NewService("web", webServiceImpl)))
+	webServeMux.Handle("/upload", newUploadHandler(wd, webServiceImpl.Service))
 	webServeMux.Handle("/", http.FileServer(http.Dir(path.Join(wd, "/www")))) // no auth
 
 	if opts.EnableProfiler {

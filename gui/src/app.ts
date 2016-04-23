@@ -381,13 +381,32 @@ module Main {
     //
     // Knockout Extensions
     //
+
+    // ko.bindingHandlers['element'] = {
+    //     update: (element, valueAccessor, allBindings, viewModel, bindingContext) => {
+    //         const arg = ko.unwrap(valueAccessor())
+    //         if (arg) {
+    //             const $element = $(element)
+    //             $element.empty()
+    //             $element.append(arg)
+    //         }
+    //         return
+    //     }
+    // }
     ko.bindingHandlers['element'] = {
-        update: (element, valueAccessor, allBindings, viewModel, bindingContext) => {
-            const arg = ko.unwrap(valueAccessor())
-            if (arg) {
-                const $element = $(element)
-                $element.empty()
-                $element.append(arg)
+        init: (element, valueAccessor, allBindings, viewModel, bindingContext) => {
+            valueAccessor()(element)
+        }
+    }
+
+    ko.bindingHandlers['file'] = {
+        init: (element, valueAccessor, allBindings, viewModel, bindingContext) => {
+            const file = valueAccessor()
+            if (file) {
+                const $file = $(element)
+                $file.change(() => {
+                    file((<HTMLInputElement>$file[0]).files[0])
+                })
             }
             return
         }
@@ -414,161 +433,6 @@ module Main {
             return
         }
     }
-
-
-    //
-    // Mockers (temporary)
-    // 
-
-    const permissionTypes: string[] = [
-        'ManageGroup',
-        'ViewGroup',
-        'ManageRole',
-        'ViewRole',
-        'ManageUser',
-        'ViewUser',
-        'ManageCloud',
-        'ViewCloud',
-        'ViewJob',
-        'ManageProject',
-        'ViewProject',
-        'ManageModel',
-        'ViewModel',
-        'ManageScript',
-        'ViewScript',
-        'RunScript',
-        'ManageExperiment',
-        'ViewExperiment',
-        'RunExperiment'
-    ]
-
-    const useCases: string[] = [
-        'Wallet Share Estimation',
-        'Churn',
-        'Customer Segmentation',
-        'Product Mix',
-        'Cross Selling',
-        'Up Selling',
-        'Channel Optimization',
-        'Discount Targeting',
-        'Reactivation Likelihood',
-        'Ad Optimization',
-        'Lead Prioritization',
-        'Demand Forecasting',
-        'Credit Risk',
-        'Fraud Detection',
-        'Accounts Payable Recovery',
-        'Anti Money Laundering',
-        'Message Optimization',
-        'Volume Forecasting',
-        'Resume Screening',
-        'Employee Churn',
-        'Training Recommendation',
-        'Talent Management',
-        'Claims Prioritization',
-        'Medicaid Fraud',
-        'Prescription Compliance',
-        'Physician Attrition',
-        'Survival Analysis',
-        'Dosage Effectiveness',
-        'Readmission Risk',
-        'Credit Card Fraud',
-        'Claims Prediction',
-        'Demand Forecasting'
-    ]
-
-    function randomUseCase(): string {
-        return _.sample<string>(useCases)
-    }
-    function randomUseCaseSlug(): string {
-        return randomUseCase().toLowerCase().replace(/\s+/g, '-')
-    }
-
-    function proxy_startCloud(cloudId: string, cloudSize: int, on: On<string>): void {
-        function go() {
-            on(null, `app_id_${(Math.random() * 100) | 0}`)
-        }
-        setTimeout(go, 3000)
-    }
-    function proxy_stopCloud(cloudId: string, on: On<string>): void {
-        function go() {
-            on(null, '')
-        }
-        setTimeout(go, 3000)
-    }
-    function proxy_buildModel(cloudId: string, frame: string, responseColumn: string, on: On<string>): void {
-        function go() {
-            on(null, '')
-        }
-        setTimeout(go, 3000)
-    }
-
-    function proxy_deleteModel(modelId: string, on: On<string>): void {
-        function go() {
-            on(null, '')
-        }
-        setTimeout(go, 3000)
-    }
-
-
-    function proxy_deployModel(modelId: string, port: int, on: On<string>): void {
-        function go() {
-            on(null, '')
-        }
-        setTimeout(go, 3000)
-    }
-
-    function proxy_stopService(serviceId: string, on: On<string>): void {
-        function go() {
-            on(null, '')
-        }
-        setTimeout(go, 3000)
-    }
-
-    function proxy_uploadFile(file: string, on: On<string>): void {
-        function go() {
-            on(null, '')
-        }
-        setTimeout(go, 3000)
-    }
-
-    function proxy_getModels(on: On<Model[]>): void {
-        const clouds = _.times(_.random(5, 20), (i: int): Model => {
-            const useCase = randomUseCaseSlug()
-            return new Model(
-                `model-${useCase}`,
-                `${faker.name.firstName()}'s Cloud`,
-                `${useCase}.hex`,
-                `${faker.lorem.word()}`,
-                'A few minutes ago'
-            )
-        })
-        on(null, clouds)
-    }
-
-    function proxy_getServices(on: On<Service[]>): void {
-        const services = _.times(_.random(5, 20), (i: int): Service => {
-            return new Service(
-                `${randomUseCaseSlug()}`,
-                `${faker.internet.ip()}/${randomUseCaseSlug()}`,
-                'A few minutes ago'
-            )
-        })
-        on(null, services)
-    }
-
-    function proxy_getEngines(on: On<Engine[]>): void {
-        const engines = _.times(_.random(5, 20), (i: int): Engine => {
-            const name = `h2o-3.4.2.${i}`
-            return {
-                name: name,
-                path: `/var/engines/${name}`,
-                createdAt: 'A few minutes ago'
-            }
-        })
-        on(null, engines)
-    }
-
 
     //
     // Models
@@ -745,6 +609,8 @@ module Main {
         frameError: Sig<string>
         responseColumn: Sig<string>
         responseColumnError: Sig<string>
+        maxRunTime: Sig<string>
+        maxRunTimeError: Sig<string>
         canBuildModel: Sig<boolean>
         buildModel: Act
         error: Sig<string>
@@ -767,9 +633,8 @@ module Main {
     }
 
     interface AddEngineDialog extends Dialog {
-        file: Sig<string>
-        fileError: Sig<string>
-        canAddEngine: Sig<boolean>
+        form: Sig<HTMLFormElement>
+        file: Sig<File>
         addEngine: Act
         error: Sig<string>
     }
@@ -778,31 +643,47 @@ module Main {
     }
 
     interface CloudPane extends Pane {
+        engineName: string
         size: string
+        applicationId: string
+        address: string
+        memory: string
+        username: string
+        state: string
         createdAt: string
         buildModel: Act
         stopCloud: Act
     }
 
     interface ModelsPane extends Pane {
+        error: Sig<string>
         items: Sigs<Folder>
+        hasItems: Sig<boolean>
     }
 
     interface ModelPane extends Pane {
         cloud: string
         frame: string
         responseColumn: string
+        maxRunTime: string
+        javaModelPath: string
         createdAt: string
         deployModel: Act
         deleteModel: Act
     }
 
     interface ServicesPane extends Pane {
+        error: Sig<string>
         items: Sigs<Folder>
+        hasItems: Sig<boolean>
     }
 
     interface ServicePane extends Pane {
-        endpoint: string
+        address: string
+        state: string
+        port: string
+        url: string
+        pid: string
         createdAt: string
         stopService: Act
     }
@@ -812,7 +693,9 @@ module Main {
     }
 
     interface EnginesPane extends Pane {
+        error: Sig<string>
         items: Sigs<Folder>
+        hasItems: Sig<boolean>
         addEngine: Act
     }
 
@@ -888,6 +771,14 @@ module Main {
             go(null)
         }
 
+        ctx.remote.getEngines((err, engines) => {
+            if (err) {
+                return
+            }
+
+            engineNames(_.map(engines, (engine) => engine.name))
+        })
+
         return {
             title: 'Start a new cloud',
             engineNames: engineNames,
@@ -926,19 +817,25 @@ module Main {
                 : 'Enter a valid column name'
         )
 
-        const canBuildModel = lift2(frameError, responseColumnError, (e1, e2): boolean =>
-            e1 === '' && e2 === ''
+        const maxRunTime = sig<string>('1000')
+        const maxRunTimeNum = lift(maxRunTime, (t) => parseInt(t, 10))
+        const maxRunTimeError = lift(maxRunTimeNum, (t): string =>
+            (!isNaN(t) && t > 0)
+                ? ''
+                : 'Invalid run time'
+        )
+
+        const canBuildModel = lift3(frameError, responseColumnError, maxRunTimeError, (e1, e2, e3): boolean =>
+            e1 === '' && e2 === '' && e3 === ''
         )
 
         function buildModel(): void {
             ctx.setBusy('Building model...')
-            proxy_buildModel(cloudId, frame(), responseColumn(), (err) => {
+            ctx.remote.buildModel(cloudId, frame(), responseColumn(), maxRunTimeNum(), (err) => {
                 if (err) {
                     error(err.message)
                 } else {
-                    go({
-                        success: true
-                    })
+                    go({ success: true })
                 }
                 ctx.setFree()
             })
@@ -954,6 +851,8 @@ module Main {
             frameError: frameError,
             responseColumn: responseColumn,
             responseColumnError: responseColumnError,
+            maxRunTime: maxRunTime,
+            maxRunTimeError: maxRunTimeError,
             canBuildModel: canBuildModel,
             buildModel: buildModel,
             error: error,
@@ -983,13 +882,11 @@ module Main {
 
         const deployModel: Act = () => {
             ctx.setBusy('Deploying model...')
-            proxy_deployModel(modelId, portNum(), (err) => {
+            ctx.remote.startScoringService(modelId, portNum(), (err) => {
                 if (err) {
                     error(err.message)
                 } else {
-                    go({
-                        success: true
-                    })
+                    go({ success: true })
                 }
                 ctx.setFree()
             })
@@ -1015,29 +912,28 @@ module Main {
 
         const error = sig<string>('')
 
-        const file = sig<string>('')
-        const fileError = lift(file, (file): string =>
-            (file && file.trim() !== '')
-                ? ''
-                : 'Invalid file name'
-        )
-
-        const canAddEngine = lift(file, (e): boolean =>
-            e === ''
-        )
+        const form = sig<HTMLFormElement>(null)
+        const file = sig<File>(null)
 
         const addEngine: Act = () => {
+            const f = file()
+            if (!(f && f.name)) {
+                return
+            }
+
             ctx.setBusy('Uploading asset...')
-            proxy_uploadFile(file(), (err) => {
+            const formData = new FormData(form())
+            ctx.remote.upload(formData, (err, data) => {
+                ctx.setFree()
+
                 if (err) {
                     error(err.message)
-                } else {
-                    go({
-                        success: true
-                    })
+                    return
                 }
-                ctx.setFree()
+
+                go({ success: true })
             })
+
         }
         const cancel: Act = () => {
             go(null)
@@ -1045,9 +941,8 @@ module Main {
 
         return {
             title: `Add Engine`,
+            form: form,
             file: file,
-            fileError: fileError,
-            canAddEngine: canAddEngine,
             addEngine: addEngine,
             error: error,
             cancel: cancel,
@@ -1066,8 +961,10 @@ module Main {
         const hasItems = lifts(items, (items) => items.length > 0)
         const startCloud: Act = () => {
             const dialog = newStartCloudDialog(ctx, (result: StartCloudDialogResult) => {
-                // XXX use result to update cloud list
                 ctx.popDialog()
+                if (result) {
+                    ctx.showClouds()
+                }
             })
             ctx.pushDialog(dialog)
         }
@@ -1088,33 +985,46 @@ module Main {
         })
         return {
             title: 'Clouds',
-            template: 'clouds',
-            dispose: noop,
-            position: newPanePosition(),
             error: error,
             hasItems: hasItems,
             items: items,
             startCloud: startCloud,
+            template: 'clouds',
+            dispose: noop,
+            position: newPanePosition()
         }
     }
 
     function newCloudPane(ctx: Context, cloud: Proxy.Cloud): CloudPane {
         function buildModel(): void {
             const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
-                // XXX use result to update cloud list
                 ctx.popDialog()
+                if (result) {
+                    ctx.showModels()
+                }
             })
             ctx.pushDialog(dialog)
         }
         function stopCloud(): void {
             ctx.setBusy('Stopping cloud...')
-            proxy_stopCloud(cloud.name, (err, result) => {
+            ctx.remote.stopCloud(cloud.name, (err) => {
                 ctx.setFree()
+                if (err) {
+                    alert(err.message)
+                    return
+                }
+                ctx.showClouds()
             })
         }
         return {
             title: cloud.name,
+            engineName: cloud.engine_name,
             size: String(cloud.size),
+            applicationId: cloud.application_id,
+            address: `http://${cloud.address}/`,
+            memory: cloud.memory,
+            username: cloud.username,
+            state: cloud.state,
             createdAt: timestampToAge(cloud.created_at),
             buildModel: buildModel,
             stopCloud: stopCloud,
@@ -1124,45 +1034,66 @@ module Main {
         }
     }
 
-    function newModelsPane(ctx: Context, models: Model[]): ModelsPane {
-        const items = sigs<Folder>(_.map(models, (model): Folder => {
-            return {
-                title: model.id,
-                subhead: model.frame,
-                slug: model.responseColumn,
-                execute: () => { ctx.showModel(model) },
-                template: 'folder'
+    function newModelsPane(ctx: Context): ModelsPane {
+        const error = sig<string>('')
+        const items = sigs<Folder>([])
+        const hasItems = lifts(items, (items) => items.length > 0)
+        ctx.remote.getModels((err, models) => {
+            if (err) {
+                error(err.message)
+                return
             }
-        }))
+            items(_.map(models, (model): Folder => {
+                return {
+                    title: model.name,
+                    subhead: model.dataset,
+                    slug: model.target_name,
+                    execute: () => { ctx.showModel(model) },
+                    template: 'folder'
+                }
+            }))
+        })
+
         return {
             title: 'Models',
+            error: error,
             items: items,
+            hasItems: hasItems,
             template: 'models',
             dispose: noop,
             position: newPanePosition(),
         }
     }
 
-    function newModelPane(ctx: Context, model: Model): ModelPane {
+    function newModelPane(ctx: Context, model: Proxy.Model): ModelPane {
         const deployModel: Act = () => {
-            const dialog = newDeployModelDialog(ctx, model.id, (result: DeployModelDialogResult) => {
-                // XXX use result to update services list
+            const dialog = newDeployModelDialog(ctx, model.name, (result: DeployModelDialogResult) => {
                 ctx.popDialog()
+                if (result) {
+                    ctx.showServices()
+                }
             })
             ctx.pushDialog(dialog)
         }
         const deleteModel: Act = () => {
             ctx.setBusy('Deleting model...')
-            proxy_deleteModel(model.id, (err, result) => {
+            ctx.remote.deleteModel(model.name, (err) => {
                 ctx.setFree()
+                if (err) {
+                    alert(err.message) // FIXME
+                    return
+                }
+                ctx.showModels()
             })
         }
         return {
-            title: model.id,
-            cloud: model.cloud,
-            frame: model.frame,
-            responseColumn: model.responseColumn,
-            createdAt: model.createdAt,
+            title: model.name,
+            cloud: model.cloud_name,
+            frame: model.dataset,
+            responseColumn: model.target_name,
+            maxRunTime: String(model.max_runtime),
+            javaModelPath: model.java_model_path,
+            createdAt: timestampToAge(model.created_at),
             deployModel: deployModel,
             deleteModel: deleteModel,
             template: 'model',
@@ -1171,40 +1102,60 @@ module Main {
         }
     }
 
-    function newServicesPane(ctx: Context, services: Service[]): ServicesPane {
-        const items = sigs<Folder>(_.map(services, (service): Folder => {
-            return {
-                title: service.id,
-                subhead: service.endpoint,
-                slug: '',
-                execute: () => { ctx.showService(service) },
-                template: 'folder'
+    function newServicesPane(ctx: Context): ServicesPane {
+        const error = sig<string>('')
+        const items = sigs<Folder>([])
+        const hasItems = lifts(items, (items) => items.length > 0)
+        ctx.remote.getScoringServices((err, services) => {
+            if (err) {
+                error(err.message)
+                return
             }
-        }))
+            items(_.map(services, (service): Folder => {
+                return {
+                    title: service.model_name,
+                    subhead: 'State:',
+                    slug: service.state,
+                    execute: () => { ctx.showService(service) },
+                    template: 'folder'
+                }
+            }))
+        })
         return {
             title: 'Services',
+            error: error,
+            hasItems: hasItems,
+            items: items,
             template: 'services',
             dispose: noop,
             position: newPanePosition(),
-            items: items,
         }
     }
 
-    function newServicePane(ctx: Context, service: Service): ServicePane {
+    function newServicePane(ctx: Context, service: Proxy.ScoringService): ServicePane {
         const stopService: Act = () => {
             ctx.setBusy('Stopping service...')
-            proxy_stopService(service.id, (err, result) => {
+            ctx.remote.stopScoringService(service.model_name, service.port, (err) => {
                 ctx.setFree()
+                if (err) {
+                    alert(err.message)
+                    return
+                }
+                ctx.showServices()
             })
         }
         return {
-            title: service.id,
+            title: service.model_name,
+            state: service.state,
+            address: service.address,
+            port: String(service.port),
+            url: `http://${service.address}:${service.port}/`,
+            pid: String(service.pid),
+            createdAt: timestampToAge(service.created_at),
+            stopService: stopService,
             template: 'service',
             dispose: noop,
             position: newPanePosition(650),
-            endpoint: service.endpoint,
-            createdAt: service.createdAt,
-            stopService: stopService,
         }
     }
 
@@ -1228,28 +1179,44 @@ module Main {
         }
     }
 
-    function newEnginesPane(ctx: Context, engines: Engine[]): EnginesPane {
-        const items = sigs<Folder>(_.map(engines, (engine): Folder => {
-            return {
-                title: engine.name,
-                subhead: engine.createdAt,
-                slug: '',
-                execute: () => { ctx.showEngine(engine) },
-                template: 'folder'
-            }
-        }))
-
+    function newEnginesPane(ctx: Context): EnginesPane {
+        const error = sig<string>('')
+        const items = sigs<Folder>([])
+        const hasItems = lifts(items, (items) => items.length > 0)
         const addEngine: Act = () => {
             const dialog = newAddEngineDialog(ctx, (result: AddEngineDialogResult) => {
-                // XXX use result to update engine list
                 ctx.popDialog()
+
+                if (result) {
+                    if (result.success) {
+                        console.log('update cloud list')
+                    }
+                }
             })
             ctx.pushDialog(dialog)
         }
 
+        ctx.remote.getEngines((err, engines) => {
+            if (err) {
+                error(err.message)
+                return
+            }
+            items(_.map(engines, (engine): Folder => {
+                return {
+                    title: engine.name,
+                    subhead: timestampToAge(engine.created_at),
+                    slug: '',
+                    execute: () => { ctx.showEngine(engine) },
+                    template: 'folder'
+                }
+            }))
+        })
+
         return {
             title: 'Engines',
+            error: error,
             items: items,
+            hasItems: hasItems,
             addEngine: addEngine,
             template: 'engines',
             dispose: noop,
@@ -1257,14 +1224,22 @@ module Main {
         }
     }
 
-    function newEnginePane(ctx: Context, engine: Engine): EnginePane {
+    function newEnginePane(ctx: Context, engine: Proxy.Engine): EnginePane {
         const deleteEngine: Act = () => {
-            alert('--- Delete Engine ---')
+            ctx.setBusy('Deleting engine...')
+            ctx.remote.deleteEngine(engine.name, (err) => {
+                ctx.setFree()
+                if (err) {
+                    alert(err.message) // FIXME
+                    return
+                }
+                ctx.showEngines()
+            })
         }
         return {
             title: engine.name,
             path: engine.path,
-            createdAt: engine.createdAt,
+            createdAt: timestampToAge(engine.created_at),
             deleteEngine: deleteEngine,
             template: 'engine',
             dispose: noop,
@@ -1287,12 +1262,12 @@ module Main {
         public showClouds = uni()
         public showCloud = uni1<Proxy.Cloud>()
         public showModels = uni()
-        public showModel = uni1<Model>()
+        public showModel = uni1<Proxy.Model>()
         public showServices = uni()
-        public showService = uni1<Service>()
+        public showService = uni1<Proxy.ScoringService>()
         public showAssets = uni()
         public showEngines = uni()
-        public showEngine = uni1<Engine>()
+        public showEngine = uni1<Proxy.Engine>()
     }
 
     class Breadcrumb {
@@ -1380,22 +1355,18 @@ module Main {
         })
 
         ctx.showModels.on(() => {
-            proxy_getModels((err, models) => {
-                ctx.showPane(0, newModelsPane(ctx, models))
-            })
+            ctx.showPane(0, newModelsPane(ctx))
         })
 
-        ctx.showModel.on((model: Model) => {
+        ctx.showModel.on((model: Proxy.Model) => {
             ctx.showPane(1, newModelPane(ctx, model))
         })
 
         ctx.showServices.on(() => {
-            proxy_getServices((err, services) => {
-                ctx.showPane(0, newServicesPane(ctx, services))
-            })
+            ctx.showPane(0, newServicesPane(ctx))
         })
 
-        ctx.showService.on((service: Service) => {
+        ctx.showService.on((service: Proxy.ScoringService) => {
             ctx.showPane(1, newServicePane(ctx, service))
         })
 
@@ -1404,12 +1375,10 @@ module Main {
         })
 
         ctx.showEngines.on(() => {
-            proxy_getEngines((err, engines) => {
-                ctx.showPane(1, newEnginesPane(ctx, engines))
-            })
+            ctx.showPane(1, newEnginesPane(ctx))
         })
 
-        ctx.showEngine.on((engine: Engine) => {
+        ctx.showEngine.on((engine: Proxy.Engine) => {
             ctx.showPane(2, newEnginePane(ctx, engine))
         })
 

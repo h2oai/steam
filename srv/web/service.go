@@ -63,6 +63,7 @@ type ScoringService struct {
 
 type Engine struct {
 	Name      string    `json:"name"`
+	Path      string    `json:"path"`
 	CreatedAt Timestamp `json:"created_at"`
 }
 
@@ -84,6 +85,7 @@ type Service interface {
 	GetScoringService(modelName string) (*ScoringService, error)
 	GetScoringServices() ([]*ScoringService, error)
 	DeleteScoringService(modelName string, port int) error
+	AddEngine(engineName string, enginePath string) error
 	GetEngine(engineName string) (*Engine, error)
 	GetEngines() ([]*Engine, error)
 	DeleteEngine(engineName string) error
@@ -211,6 +213,14 @@ type DeleteScoringServiceIn struct {
 }
 
 type DeleteScoringServiceOut struct {
+}
+
+type AddEngineIn struct {
+	EngineName string `json:"engine_name"`
+	EnginePath string `json:"engine_path"`
+}
+
+type AddEngineOut struct {
 }
 
 type GetEngineIn struct {
@@ -395,6 +405,16 @@ func (this *Remote) DeleteScoringService(modelName string, port int) error {
 	return nil
 }
 
+func (this *Remote) AddEngine(engineName string, enginePath string) error {
+	in := AddEngineIn{engineName, enginePath}
+	var out AddEngineOut
+	err := this.Proc.Call("AddEngine", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (this *Remote) GetEngine(engineName string) (*Engine, error) {
 	in := GetEngineIn{engineName}
 	var out GetEngineOut
@@ -555,6 +575,14 @@ func (this *Impl) GetScoringServices(r *http.Request, in *GetScoringServicesIn, 
 
 func (this *Impl) DeleteScoringService(r *http.Request, in *DeleteScoringServiceIn, out *DeleteScoringServiceOut) error {
 	err := this.Service.DeleteScoringService(in.ModelName, in.Port)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Impl) AddEngine(r *http.Request, in *AddEngineIn, out *AddEngineOut) error {
+	err := this.Service.AddEngine(in.EngineName, in.EnginePath)
 	if err != nil {
 		return err
 	}

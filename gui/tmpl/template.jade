@@ -110,6 +110,11 @@ html.no-js
           input.textbox(type='text' placeholder='Response column name' data-bind="value:responseColumn, valueUpdate:'afterkeydown'" style='width:300px')
         .form-field-error(data-bind="text:responseColumnError")
 
+        .form-field-label Specify the max run time:
+        .form-field
+          input.textbox(type='text' placeholder='Max run time' data-bind="value:maxRunTime, valueUpdate:'afterkeydown'" style='width:200px')
+        .form-field-error(data-bind="text:maxRunTimeError")
+
       .dialog__actions
         .buttons.buttons--unit
           .button.button--primary(data-bind="click:buildModel") Start building
@@ -130,11 +135,11 @@ html.no-js
           .button(data-bind="click:cancel") Cancel
 
     template.add-engine-dialog
-      .dialog__form
+      form.dialog__form(enctype='multipart/form-data' data-bind='element:form')
         .form-field-label Select the file to upload:
         .form-field
-          input.textbox(type='text' placeholder='Browse and select a file...' data-bind="value:file, valueUpdate:'afterkeydown'" style='width:250px')
-        .form-field-error(data-bind="text:fileError")
+          input(name='file' type='file' data-bind='file:file')
+          input(type='hidden' value='engine')
 
       .dialog__actions
         .buttons.buttons--unit
@@ -184,8 +189,27 @@ html.no-js
           table
             tbody
               tr
+                th State
+                td(data-bind="text:state")
+              tr
                 th Cloud Size
                 td(data-bind="text:size")
+              tr
+                th Application ID
+                td(data-bind="text:applicationId")
+              tr
+                th Memory
+                td(data-bind="text:memory")
+              tr
+                th Address
+                td
+                  a(data-bind="attr:{ href:address }, text:address")
+              tr
+                th Username
+                td(data-bind="text:username")
+              tr
+                th Engine
+                td(data-bind="text:engineName")
               tr
                 th Created
                 td(data-bind="text:createdAt")
@@ -197,7 +221,21 @@ html.no-js
 
     template.models
       .pane__titlebar(data-bind="text:title")
+      // ko if:error
+      .pane__body
+        .pane-error(data-bind="text:error")
+      // /ko
+      // ko ifnot:error
+      // ko if:hasItems
       .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      // /ko
+      // ko ifnot:hasItems
+      .pane__body
+        .pane-icon
+          i.icon.ion-ios-color-filter-outline
+        .pane-message You do not have any models.
+      // /ko
+      // /ko
 
     template.model
       .pane__titlebar(data-bind="text:title")
@@ -215,6 +253,12 @@ html.no-js
               tr
                 th Response Column
                 td(data-bind="text: responseColumn")
+              tr
+                th Max Run Time
+                td(data-bind="text: maxRunTime")
+              tr
+                th Java Model Location
+                td(data-bind="text: javaModelPath")
               tr
                 th Created
                 td(data-bind="text:createdAt")
@@ -236,8 +280,20 @@ html.no-js
           table
             tbody
               tr
+                th State
+                td(data-bind="text: state")
+              tr
+                th Address
+                td(data-bind="text: address")
+              tr
+                th Port
+                td(data-bind="text: port")
+              tr
                 th Endpoint
-                td(data-bind="text: endpoint")
+                td(data-bind="text: url")
+              tr
+                th Process ID
+                td(data-bind="text: pid")
               tr
                 th Created
                 td(data-bind="text:createdAt")
@@ -251,7 +307,21 @@ html.no-js
 
     template.engines
       .pane__titlebar(data-bind="text:title")
+      // ko if:error
+      .pane__body.pane__body--01
+        .pane-error(data-bind="text:error")
+      // /ko
+      // ko ifnot:error
+      // ko if:hasItems
       .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      // /ko
+      // ko ifnot:hasItems
+      .pane__body.pane__body--01
+        .pane-icon
+          i.icon.ion-ios-box-outline
+        .pane-message You do not have any H2O engines. Click 'Add Engine...' to begin.
+      // /ko
+      // /ko
       .pane__actions
         .buttons
           .button.button--primary(data-bind="click:addEngine") Add Engine...
@@ -277,6 +347,7 @@ html.no-js
     script(src='jquery.min.js')
     script(src='async.min.js')
     script(src='underscore-min.js')
+    script(src='moment.min.js')
     script(src='knockout.js')
     script(src='mousetrap.min.js')
     script(src='faker.min.js')

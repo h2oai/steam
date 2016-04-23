@@ -2,6 +2,7 @@ package fs
 
 import (
 	"fmt"
+	uuid "github.com/nu7hatch/gouuid"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -34,6 +35,14 @@ const (
 	KindEngine     = "engine"
 	KindExperiment = "module"
 )
+
+func NewID() (string, error) {
+	u, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("Failed generating ID: %v", err)
+	}
+	return u.String(), nil
+}
 
 func ResolvePath(p string) (string, error) {
 	if !path.IsAbs(p) {

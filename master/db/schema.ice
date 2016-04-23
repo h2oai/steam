@@ -30,6 +30,6 @@ type ScoringService
  Pid int
 
 type Engine
- Name string
+ Path string
 
 

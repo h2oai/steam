@@ -41,6 +41,7 @@ type ScoringService
 
 type Engine
  Name string
+ Path string
  CreatedAt Timestamp
 
 Ping(status bool) status bool
@@ -62,6 +63,7 @@ GetScoringService(modelName string) service *ScoringService
 GetScoringServices() services []*ScoringService
 DeleteScoringService(modelName string, port int)
 
+AddEngine(engineName string, enginePath string)
 GetEngine(engineName string) engine *Engine
 GetEngines() engines []*Engine
 DeleteEngine(engineName string)

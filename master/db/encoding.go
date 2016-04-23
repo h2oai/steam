@@ -126,17 +126,17 @@ func NewScoringService(id string, modelName string, address string, port int, st
 
 type Engine struct {
 	*Record
-	Name string
+	Path string
 }
 
-func NewEngine(id string, name string) *Engine {
+func NewEngine(id string, path string) *Engine {
 	return &Engine{
 		&Record{
 			id,
 			time.Now().UTC().Unix(),
 			0,
 		},
-		name,
+		path,
 	}
 }
 

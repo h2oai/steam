@@ -92,9 +92,10 @@ func (s *Service) StopCloud(cloudName string) error {
 		return fmt.Errorf("Cloud %s is already stopped", cloudName)
 	}
 
-	if err := yarn.StopCloud(s.kerberosEnabled, c.ID, c.ApplicationID, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
-		return err
-	}
+	// XXX
+	// if err := yarn.StopCloud(s.kerberosEnabled, c.ID, c.ApplicationID, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
+	// 	return err
+	// }
 
 	// Update the state and update DB
 	c.State = string(web.CloudStopped)
@@ -133,31 +134,6 @@ func (s *Service) StopCloud__FIXME(name string, useKerberos bool, applicationID,
 // 		health,
 // 	}
 // 	return cc, nil
-// }
-
-// func (s *Service) GetModels(address string) ([]*web.CloudModelSynopsis, error) {
-// 	h := h2ov3.NewClient(address)
-
-// 	ms, err := h.GetModels()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return ms, nil
-// }
-
-// func (s *Service) GetModel(address string, modelID string) (*web.ModelInfo, error) {
-
-// 	h := h2ov3.NewClient(address)
-
-// 	m, err := h.GetModel(modelID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	log.Println()
-
-// 	return nil, nil
 // }
 
 func (s *Service) Shutdown(address string) error {
@@ -290,12 +266,17 @@ func (s *Service) GetModels() ([]*web.Model, error) {
 }
 
 func (s *Service) DeleteModel(modelName string) error {
-	if ss, _ := s.getScoringService(modelName); ss != nil {
-		if ss.State != web.ScoringServiceStopped {
-			return fmt.Errorf("Cannot delete. A scoring service on model %s is"+
-				" still running.", modelName)
-		}
-	} else if _, err := s.getModel(modelName); err != nil {
+	ss, err := s.getScoringService(modelName)
+	if err != nil {
+		return err
+	}
+
+	if ss.State != web.ScoringServiceStopped {
+		return fmt.Errorf("Cannot delete. A scoring service on model %s is"+
+			" still running.", modelName)
+	}
+
+	if _, err := s.getModel(modelName); err != nil {
 		return fmt.Errorf("Model %s does not exits.", modelName)
 	}
 	return s.ds.DeleteModel(modelName)
@@ -323,10 +304,7 @@ func (s *Service) compileModel(modelName string) (string, error) {
 	return w, nil
 }
 
-func genScoringServiceName(modelName string) string { return modelName + " Scoring Service" }
-
 func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringService, error) {
-
 	if _, ok := s.getScoringService(modelName); ok == nil {
 		return nil, fmt.Errorf("A scoring service with the model %s already exists.", modelName)
 	}
@@ -346,7 +324,7 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 	}
 
 	ss := db.NewScoringService(
-		genScoringServiceName(modelName),
+		modelName,
 		modelName,
 		s.scoringServiceAddress,
 		port,
@@ -384,7 +362,7 @@ func (s *Service) StopScoringService(modelName string, port int) error {
 }
 
 func (s *Service) getScoringService(modelName string) (*db.ScoringService, error) {
-	ss, err := s.ds.ReadScoringService(genScoringServiceName(modelName))
+	ss, err := s.ds.ReadScoringService(modelName)
 	if err != nil {
 		return nil, err
 	}
@@ -427,19 +405,59 @@ func (s *Service) DeleteScoringService(modelName string, port int) error {
 			modelName)
 	}
 
-	return s.ds.DeleteScoringService(genScoringServiceName(modelName))
+	return s.ds.DeleteScoringService(modelName)
+}
+
+func (s *Service) AddEngine(engineName, enginePath string) error {
+	e := db.NewEngine(
+		engineName,
+		enginePath,
+	)
+	if err := s.ds.CreateEngine(e); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Service) GetEngine(engineName string) (*web.Engine, error) {
-	return nil, nil //FIXME
+	e, err := s.getEngine(engineName)
+	if err != nil {
+		return nil, err
+	}
+	return toEngine(e), nil
+}
+
+func (s *Service) getEngine(engineName string) (*db.Engine, error) {
+	e, err := s.ds.ReadEngine(engineName)
+	if err != nil {
+		return nil, err
+	}
+	if e == nil {
+		return nil, fmt.Errorf("Engine %s does not exist.", engineName)
+	}
+	return e, err
 }
 
 func (s *Service) GetEngines() ([]*web.Engine, error) {
-	return nil, nil //FIXME
+	es, err := s.ds.ListEngine()
+	if err != nil {
+		return nil, err
+	}
+
+	engines := make([]*web.Engine, len(es))
+	for i, e := range es {
+		engines[i] = toEngine(e)
+	}
+
+	return engines, nil
 }
 
 func (s *Service) DeleteEngine(engineName string) error {
-	return nil //FIXME
+	// TODO delete jarfile from disk?
+	if _, err := s.getEngine(engineName); err != nil {
+		return fmt.Errorf("Engine %s does not exits.", engineName)
+	}
+	return s.ds.DeleteEngine(engineName)
 }
 
 //
@@ -481,5 +499,13 @@ func toScoringService(s *db.ScoringService) *web.ScoringService {
 		web.ScoringServiceState(s.State),
 		s.Pid,
 		web.Timestamp(s.CreatedAt),
+	}
+}
+
+func toEngine(e *db.Engine) *web.Engine {
+	return &web.Engine{
+		e.ID,
+		e.Path,
+		web.Timestamp(e.CreatedAt),
 	}
 }
