@@ -11,7 +11,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steamY/lib/fs"
 )
 
 type CompileServer struct {
