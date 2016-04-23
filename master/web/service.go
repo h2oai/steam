@@ -217,13 +217,12 @@ func (s *Service) DeleteCloud(cloudName string) error {
 }
 
 func (s *Service) BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*web.Model, error) {
-	// c, err := s.GetCloud(cloudName)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// h := h2ov3.NewClient(c.Address)
-
-	h := h2ov3.NewClient("172.16.2.108:54321") //FIXME: THIS SHOULD BE CLOUD A ADDRESS
+	c, err := s.GetCloud(cloudName)
+	if err != nil {
+		return nil, err
+	}
+	h := h2ov3.NewClient(c.Address)
+	// h := h2ov3.NewClient("172.16.2.108:54321") //FIXME: THIS SHOULD BE CLOUD A ADDRESS
 
 	modelName, err := h.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
 	if err != nil {

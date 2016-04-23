@@ -23,7 +23,7 @@ DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 WWW=./var/master/www
 ASSETS = ./var/master/assets
-JETTYRUNNER = jetty-runner-9.3.9.M1.jar
+JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
 
 all: build gui setup
 
@@ -76,14 +76,16 @@ linux:
 	rm -rf ./dist/$(DIST_LINUX)
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	mkdir -p ./dist/$(DIST_LINUX)/var/master && mv ./steamY ./dist/$(DIST_LINUX)/steam
-	cp -r ./var/master/www ./dist/$(DIST_LINUX)/var/master/
+	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
+	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/	
 	tar czfC ./dist/$(DIST_LINUX).tar.gz dist $(DIST_LINUX)
 
 darwin:
 	rm -rf ./dist/$(DIST_DARWIN)
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steamY ./dist/$(DIST_DARWIN)/steam
-	cp -r ./var/master/www ./dist/$(DIST_DARWIN)/var/master/
+	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
+	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
 
