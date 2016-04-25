@@ -1189,7 +1189,7 @@ module Main {
 
                 if (result) {
                     if (result.success) {
-                        console.log('update cloud list')
+                        ctx.showEngines()
                     }
                 }
             })
