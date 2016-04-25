@@ -48,13 +48,19 @@ func (s *Service) Ping(status bool) (bool, error) {
 	return status, nil
 }
 
-func (s *Service) StartCloud(cloudName, engineName string, size int, memory, username string) (*web.Cloud, error) { // TODO: YARN DRIVER SHOULD BE THE ENGINE
+func (s *Service) StartCloud(cloudName, engineName string, size int, memory, username string) (*web.Cloud, error) {
 	// Make sure this cloud is unique
 	if _, ok := s.getCloud(cloudName); ok == nil {
 		return nil, fmt.Errorf("Cloud start failed. A cloud with the name %s already exists.", cloudName)
 	}
+
+	e, err := s.getEngine(engineName)
+	if err != nil {
+		return nil, fmt.Errorf("Cloud start failed. Cannot locate engine %s.", engineName)
+	}
+
 	// Make cloud with yarn
-	appId, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
+	appId, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, e.Path, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
 		return nil, err
 	}

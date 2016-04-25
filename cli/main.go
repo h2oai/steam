@@ -173,7 +173,7 @@ Examples:
 
 Start a 4 node H2O 3.2.0.9 cloud
 
-    $ steam start cloud42 --size=4
+    $ steam start cloud42 h2odriver.jar --size=4
 `
 
 func startCloud(c *context) *cobra.Command {
@@ -189,11 +189,11 @@ func startCloud(c *context) *cobra.Command {
 		}
 
 		name := args[0]
-		// version := args[1] // FIXME
+		engine := args[1]
 
 		// --- add additional args here ---
 
-		if _, _, err := yarn.StartCloud(size, kerberos, mem, name, username, keytab); err != nil {
+		if _, _, err := yarn.StartCloud(size, kerberos, mem, name, engine, username, keytab); err != nil {
 			log.Fatalln(err)
 		}
 

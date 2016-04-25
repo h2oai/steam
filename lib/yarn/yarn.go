@@ -56,7 +56,7 @@ func kInit(username, keytab string) error {
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(size int, kerberos bool, mem, name, username, keytab string) (string, string, error) {
+func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string) (string, string, error) {
 	if kerberos {
 		if err := kCheck(username, keytab); err != nil {
 			return "", "", err
@@ -65,7 +65,7 @@ func StartCloud(size int, kerberos bool, mem, name, username, keytab string) (st
 
 	cmdArgs := []string{
 		"jar",              //
-		"h2odriver.jar",    //FIXME: This should be a pack method
+		enginePath,         //
 		"-jobname",         //
 		"H2O_" + name,      //
 		"-n",               //

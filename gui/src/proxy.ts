@@ -1,4 +1,3 @@
-/// <reference path="xhr.ts" />
 // ----------------------------------
 // --- Generated with go:generate ---
 // ---        DO NOT EDIT         ---
@@ -246,7 +245,7 @@ module Proxy {
 		var req: PingIn = {
 			status: status
 		}
-		Proxy.Call("Ping", req, function (error, data) {
+		Proxy.Call("Ping", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<PingOut>data).status)
 		})
 
@@ -259,7 +258,7 @@ module Proxy {
 			memory: memory,
 			username: username
 		}
-		Proxy.Call("StartCloud", req, function (error, data) {
+		Proxy.Call("StartCloud", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<StartCloudOut>data).cloud)
 		})
 
@@ -268,7 +267,7 @@ module Proxy {
 		var req: StopCloudIn = {
 			cloud_name: cloudName
 		}
-		Proxy.Call("StopCloud", req, function (error, data) {
+		Proxy.Call("StopCloud", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
@@ -277,7 +276,7 @@ module Proxy {
 		var req: GetCloudIn = {
 			cloud_name: cloudName
 		}
-		Proxy.Call("GetCloud", req, function (error, data) {
+		Proxy.Call("GetCloud", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetCloudOut>data).cloud)
 		})
 
@@ -285,7 +284,7 @@ module Proxy {
 	export function getClouds(go: (error: Error, clouds: Cloud[]) => void): void {
 		var req: GetCloudsIn = {
 		}
-		Proxy.Call("GetClouds", req, function (error, data) {
+		Proxy.Call("GetClouds", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetCloudsOut>data).clouds)
 		})
 
@@ -294,7 +293,7 @@ module Proxy {
 		var req: DeleteCloudIn = {
 			cloud_name: cloudName
 		}
-		Proxy.Call("DeleteCloud", req, function (error, data) {
+		Proxy.Call("DeleteCloud", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
@@ -306,7 +305,7 @@ module Proxy {
 			target_name: targetName,
 			max_run_time: maxRunTime
 		}
-		Proxy.Call("BuildModel", req, function (error, data) {
+		Proxy.Call("BuildModel", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<BuildModelOut>data).model)
 		})
 
@@ -315,7 +314,7 @@ module Proxy {
 		var req: GetModelIn = {
 			model_name: modelName
 		}
-		Proxy.Call("GetModel", req, function (error, data) {
+		Proxy.Call("GetModel", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetModelOut>data).model)
 		})
 
@@ -323,7 +322,7 @@ module Proxy {
 	export function getModels(go: (error: Error, models: Model[]) => void): void {
 		var req: GetModelsIn = {
 		}
-		Proxy.Call("GetModels", req, function (error, data) {
+		Proxy.Call("GetModels", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetModelsOut>data).models)
 		})
 
@@ -332,7 +331,7 @@ module Proxy {
 		var req: DeleteModelIn = {
 			model_name: modelName
 		}
-		Proxy.Call("DeleteModel", req, function (error, data) {
+		Proxy.Call("DeleteModel", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
@@ -342,7 +341,7 @@ module Proxy {
 			model_name: modelName,
 			port: port
 		}
-		Proxy.Call("StartScoringService", req, function (error, data) {
+		Proxy.Call("StartScoringService", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<StartScoringServiceOut>data).service)
 		})
 
@@ -352,7 +351,7 @@ module Proxy {
 			model_name: modelName,
 			port: port
 		}
-		Proxy.Call("StopScoringService", req, function (error, data) {
+		Proxy.Call("StopScoringService", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
@@ -361,7 +360,7 @@ module Proxy {
 		var req: GetScoringServiceIn = {
 			model_name: modelName
 		}
-		Proxy.Call("GetScoringService", req, function (error, data) {
+		Proxy.Call("GetScoringService", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetScoringServiceOut>data).service)
 		})
 
@@ -369,7 +368,7 @@ module Proxy {
 	export function getScoringServices(go: (error: Error, services: ScoringService[]) => void): void {
 		var req: GetScoringServicesIn = {
 		}
-		Proxy.Call("GetScoringServices", req, function (error, data) {
+		Proxy.Call("GetScoringServices", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetScoringServicesOut>data).services)
 		})
 
@@ -379,7 +378,7 @@ module Proxy {
 			model_name: modelName,
 			port: port
 		}
-		Proxy.Call("DeleteScoringService", req, function (error, data) {
+		Proxy.Call("DeleteScoringService", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
@@ -389,7 +388,7 @@ module Proxy {
 			engine_name: engineName,
 			engine_path: enginePath
 		}
-		Proxy.Call("AddEngine", req, function (error, data) {
+		Proxy.Call("AddEngine", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
@@ -398,7 +397,7 @@ module Proxy {
 		var req: GetEngineIn = {
 			engine_name: engineName
 		}
-		Proxy.Call("GetEngine", req, function (error, data) {
+		Proxy.Call("GetEngine", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetEngineOut>data).engine)
 		})
 
@@ -406,7 +405,7 @@ module Proxy {
 	export function getEngines(go: (error: Error, engines: Engine[]) => void): void {
 		var req: GetEnginesIn = {
 		}
-		Proxy.Call("GetEngines", req, function (error, data) {
+		Proxy.Call("GetEngines", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetEnginesOut>data).engines)
 		})
 
@@ -415,7 +414,7 @@ module Proxy {
 		var req: DeleteEngineIn = {
 			engine_name: engineName
 		}
-		Proxy.Call("DeleteEngine", req, function (error, data) {
+		Proxy.Call("DeleteEngine", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
