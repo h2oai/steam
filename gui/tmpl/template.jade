@@ -286,7 +286,8 @@ html.no-js
                 td(data-bind="text: state")
               tr
                 th Address
-                td(data-bind="text: address")
+                td
+                  a(data-bind="attr:{ href:address }, text:address")
               tr
                 th Port
                 td(data-bind="text: port")
