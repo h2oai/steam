@@ -128,6 +128,8 @@ html.no-js
           input.textbox(type='text' placeholder='Port' data-bind="value:port, valueUpdate:'afterkeydown'" style='width:50px')
         .form-field-error(data-bind="text:portError")
 
+        .form-error(data-bind='text:error')
+
       .dialog__actions
         .buttons.buttons--unit
           .button.button--primary(data-bind="click:deployModel") Deploy
