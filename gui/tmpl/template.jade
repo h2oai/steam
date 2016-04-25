@@ -114,6 +114,7 @@ html.no-js
         .form-field
           input.textbox(type='text' placeholder='Max run time' data-bind="value:maxRunTime, valueUpdate:'afterkeydown'" style='width:200px')
         .form-field-error(data-bind="text:maxRunTimeError")
+        .form-error(data-bind='text:error')
 
       .dialog__actions
         .buttons.buttons--unit
@@ -142,6 +143,8 @@ html.no-js
         .form-field
           input(name='file' type='file' data-bind='file:file')
           input(type='hidden' value='engine')
+
+        .form-error(data-bind='text:error')
 
       .dialog__actions
         .buttons.buttons--unit
