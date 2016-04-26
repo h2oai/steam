@@ -208,7 +208,7 @@ html.no-js
               tr
                 th Address
                 td
-                  a(data-bind="attr:{ href:address }, text:address")
+                  a(target="_blank" data-bind="attr:{ href:address }, text:address")
               tr
                 th Username
                 td(data-bind="text:username")
@@ -288,15 +288,9 @@ html.no-js
                 th State
                 td(data-bind="text: state")
               tr
-                th Address
-                td
-                  a(data-bind="attr:{ href:address }, text:address")
-              tr
-                th Port
-                td(data-bind="text: port")
-              tr
                 th Endpoint
-                td(data-bind="text: url")
+                td
+                  a(target="_blank" data-bind="attr:{ href:url }, text:url")
               tr
                 th Process ID
                 td(data-bind="text: pid")

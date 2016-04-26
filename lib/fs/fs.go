@@ -2,7 +2,6 @@ package fs
 
 import (
 	"fmt"
-	uuid "github.com/nu7hatch/gouuid"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -17,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 const (
@@ -258,7 +259,7 @@ func GetIP(addr string) string {
 }
 
 func GetExternalIP(fallback string) string {
-	ip, err := getExternalIP()
+	ip, err := GetExternalHost()
 	if err != nil {
 		return fallback
 	}
@@ -269,7 +270,7 @@ func GetExternalIP(fallback string) string {
 	return ip + ":" + elems[1]
 }
 
-func getExternalIP() (string, error) {
+func GetExternalHost() (string, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return "", err

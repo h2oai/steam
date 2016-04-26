@@ -329,10 +329,15 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 		return nil, err
 	}
 
+	externalIP, err := fs.GetExternalHost()
+	if err != nil {
+		return nil, err
+	}
+	log.Println("Updated", externalIP)
 	ss := db.NewScoringService(
 		modelName,
 		modelName,
-		s.scoringServiceAddress,
+		externalIP,
 		port,
 		string(web.ScoringServiceStarted),
 		pid,
