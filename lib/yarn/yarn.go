@@ -53,6 +53,16 @@ func kInit(username, keytab string) error {
 	return nil
 }
 
+func cleanDir(dir string) error {
+	cmdClean := exec.Command("hadoop", "fs", "-rmdir", dir)
+	if out, err := cmdClean.Output(); err != nil {
+		log.Fatalln("Failed to remove outdir.")
+		log.Println("\n" + string(out))
+		return err
+	}
+	return nil
+}
+
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
@@ -78,12 +88,42 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	}
 
 	log.Println("Attempting to start cloud...")
-	cmdOut, err := exec.Command("hadoop", cmdArgs...).CombinedOutput()
 
+	cmd := exec.Command("hadoop", cmdArgs...)
+
+	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Println("Failed to launch hadoop.")
-		log.Println("\n" + string(cmdOut)) // This captures error from the drive.jar
-		return "", "", err                 // This captures erros from Stderr
+		return "", "", err
+	}
+	stdErr, err := cmd.StderrPipe()
+	if err != nil {
+		return "", "", err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return "", "", err
+	}
+
+	var cmdOut, cmdErr string
+	go func() {
+		in := bufio.NewScanner(stdOut)
+		for in.Scan() {
+			cmdOut = cmdOut + in.Text() + "\n"
+		}
+	}()
+	go func() {
+		in := bufio.NewScanner(stdErr)
+		for in.Scan() {
+			cmdErr = cmdErr + in.Text() + "\n"
+		}
+	}()
+
+	// TODO should be a ticket system, not halting
+	if err := cmd.Wait(); err != nil {
+		if l := cleanDir(name + "_out"); l != nil {
+			log.Println(err)
+		}
+		return "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdOut)
 	}
 	hpOut := (string(cmdOut))
 	// Capture only the address and ID respectively
@@ -120,11 +160,8 @@ func StopCloud(kerberos bool, name, id, username, keytab string) error {
 		log.Println("\n" + string(out))
 		return err
 	}
-	cmdClean := exec.Command("hadoop", "fs", "-rmdir", name+"_out")
 	log.Println("Stopped cloud:", "job_"+id)
-	if out, err := cmdClean.Output(); err != nil {
-		log.Fatalln("Failed to remove outdir.")
-		log.Println("\n" + string(out))
+	if err := cleanDir(name + "_out"); err != nil {
 		return err
 	}
 

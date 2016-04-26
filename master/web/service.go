@@ -60,16 +60,19 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 	}
 
 	// Make cloud with yarn
-	appId, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, e.Path, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
+	appID, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, e.Path, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
+
+	log.Println(appID, address)
 	// Add cloud to db
 	c := db.NewCloud(
 		cloudName,
 		engineName,
 		size,
-		appId,
+		appID,
 		address,
 		memory,
 		username,
