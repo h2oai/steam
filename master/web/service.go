@@ -101,10 +101,10 @@ func (s *Service) StopCloud(cloudName string) error {
 		return fmt.Errorf("Cloud %s is already stopped", cloudName)
 	}
 
-	// XXX
-	// if err := yarn.StopCloud(s.kerberosEnabled, c.ID, c.ApplicationID, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
-	// 	return err
-	// }
+	if err := yarn.StopCloud(s.kerberosEnabled, c.ID, c.ApplicationID, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
+		log.Println(err)
+		return err
+	}
 
 	// Update the state and update DB
 	c.State = string(web.CloudStopped)
@@ -112,15 +112,6 @@ func (s *Service) StopCloud(cloudName string) error {
 		return err
 	}
 
-	return nil
-}
-
-func (s *Service) StopCloud__FIXME(name string, useKerberos bool, applicationID, username, keytab string) error {
-	// FIXME
-	err := yarn.StopCloud(useKerberos, name, applicationID, username, keytab)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -206,8 +197,10 @@ func (s *Service) BuildModel(cloudName string, dataset string, targetName string
 	if err != nil {
 		return nil, err
 	}
+	if c.State == web.CloudStopped {
+		return nil, fmt.Errorf("%s is a stopped cloud. Cannot build a model.", cloudName)
+	}
 	h := h2ov3.NewClient(c.Address)
-	// h := h2ov3.NewClient("172.16.2.108:54321") //FIXME: THIS SHOULD BE CLOUD A ADDRESS
 
 	modelName, err := h.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
 	if err != nil {
