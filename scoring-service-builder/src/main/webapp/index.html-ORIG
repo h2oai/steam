@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Get Funded!</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="app.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+          <div class="masthead clearfix">
+            <div class="inner">
+              <h3 class="masthead-brand text-shadow">Get Funded!</h3>
+              <nav>
+                <ul class="nav masthead-nav text-shadow">
+                  <li class="active"><a href="http://h2o.ai/" target="_blank">H2O.ai</a></li>
+                  <li><a href="http://h2o.ai/download/" target="_blank">Download</a></li>
+                  <li><a href="http://github.com/h2oai/h2o-3/" target="_blank">Github</a></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+
+          <div class="inner cover">
+            <h1 class="cover-heading text-shadow text-center">Check Your Interest Rate</h1>
+            <p class="lead text-shadow text-center">How much do you need?</p>
+            <form class="form-inline" role="form">
+              <label for="loanAmountField">Loan Amount:</label>
+              <input type="text" class="form-control field-sm" id="loanAmountField" placeholder="Loan Amount" value="5000" data-column="loan_amnt">
+
+              <label for="termField">Term:</label>
+              <select id="termField" class="form-control" data-column="term">
+                <option value="36 months" selected>36 months</option>
+                <option value="60 months">60 months</option>
+              </select>
+
+              <label for="employmentLengthField">Employment Length:</label>
+              <input type="text" class="form-control field-sm" id="employmentLengthField" placeholder="Employment Length" value="10.0" data-column="emp_length">
+
+            </form>
+            <form class="form-inline" role="form">
+              <label for="homeOwnershipField">Home Ownership:</label>
+              <select id="homeOwnershipField" class="form-control" data-column="home_ownership">
+                <option value="ANY">ANY</option>
+                <option value="MORTGAGE">MORTGAGE</option>
+                <option value="NONE">NONE</option>
+                <option value="OTHER">OTHER</option>
+                <option value="OWN">OWN</option>
+                <option value="RENT" selected>RENT</option>
+              </select>
+
+              <label for="incomeField">Annual Income:</label>
+              <input type="text" class="form-control field-sm" id="incomeField" placeholder="Annual Income" value="24000" data-column="annual_inc">
+            </form>
+            <form class="form-inline" role="form">
+              <label for="verificationField">Status:</label>
+              <select id="verificationField" class="form-control" data-column="verification_status">
+                <option value="verified" selected>verified</option>
+                <option value="not verified">not verified</option>
+              </select>
+
+              <label for="purposeField">Purpose:</label>
+              <select id="purposeField" class="form-control" data-column="purpose">
+                <option value="car">car</option>
+                <option value="credit_card" selected>credit_card</option>
+                <option value="debt_consolidation">debt_consolidation</option>
+                <option value="educational">educational</option>
+                <option value="home_improvement">home_improvement</option>
+                <option value="house">house</option>
+                <option value="major_purchase">major_purchase</option>
+                <option value="medical">medical</option>
+                <option value="moving">moving</option>
+                <option value="other">other</option>
+                <option value="renewable_energy">renewable_energy</option>
+                <option value="small_business">small_business</option>
+                <option value="vacation">vacation</option>
+                <option value="wedding">wedding</option>
+              </select>
+
+              <label for="stateField">State:</label>
+              <select id="stateField" class="form-control" data-column="addr_state">
+                <option value="AK">AK</option>
+                <option value="AL">AL</option>
+                <option value="AR">AR</option>
+                <option value="AZ" selected>AZ</option>
+                <option value="CA">CA</option>
+                <option value="CO">CO</option>
+                <option value="CT">CT</option>
+                <option value="DC">DC</option>
+                <option value="DE">DE</option>
+                <option value="FL">FL</option>
+                <option value="GA">GA</option>
+                <option value="HI">HI</option>
+                <option value="IA">IA</option>
+                <option value="ID">ID</option>
+                <option value="IL">IL</option>
+                <option value="IN">IN</option>
+                <option value="KS">KS</option>
+                <option value="KY">KY</option>
+                <option value="LA">LA</option>
+                <option value="MA">MA</option>
+                <option value="MD">MD</option>
+                <option value="ME">ME</option>
+                <option value="MI">MI</option>
+                <option value="MN">MN</option>
+                <option value="MO">MO</option>
+                <option value="MS">MS</option>
+                <option value="MT">MT</option>
+                <option value="NC">NC</option>
+                <option value="NE">NE</option>
+                <option value="NH">NH</option>
+                <option value="NJ">NJ</option>
+                <option value="NM">NM</option>
+                <option value="NV">NV</option>
+                <option value="NY">NY</option>
+                <option value="OH">OH</option>
+                <option value="OK">OK</option>
+                <option value="OR">OR</option>
+                <option value="PA">PA</option>
+                <option value="RI">RI</option>
+                <option value="SC">SC</option>
+                <option value="SD">SD</option>
+                <option value="TN">TN</option>
+                <option value="TX">TX</option>
+                <option value="UT">UT</option>
+                <option value="VA">VA</option>
+                <option value="VT">VT</option>
+                <option value="WA">WA</option>
+                <option value="WI">WI</option>
+                <option value="WV">WV</option>
+                <option value="WY">WY</option>
+              </select>
+
+            </form>
+            <form class="form-inline" role="form">
+              <label for="dtiField">DTI:</label>
+              <input type="text" class="form-control field-sm" id="dtiField" placeholder="DTI" value="27.65" data-column="dti">
+
+              <label for="delinquencyField">Delinquency Incidences:</label>
+              <input type="text" class="form-control field-sm" id="delinquencyField" placeholder="Delinquency Incidences" value="0" data-column="delinq_2yrs">
+
+            </form>
+            <form class="form-inline" role="form">
+              <label for="revolvingRateField">Revolving Line Utility Rate:</label>
+              <input type="text" class="form-control field-sm" id="revolvingRateField" placeholder="Revolving Line Utility Rate" value="83.7" data-column="revol_util">
+
+              <label for="creditLinesField">Total Credit Lines:</label>
+              <input type="text" class="form-control field-sm" id="creditLinesField" placeholder="Total Credit Lines" value="9" data-column="total_acc">
+
+            </form>
+
+            <form class="form-inline" role="form">
+              <label for="longestCreditField">Longest Credit Length:</label>
+              <input type="text" class="form-control field-sm" id="longestCreditField" placeholder="Longest Credit Length" value="26" data-column="longest_credit_length">
+
+            </form>
+
+            <p class="text-center" style="font-size:36px">
+              <strong id="responseField"></strong>
+            </p>
+          </div>
+
+          <div class="mastfoot">
+            <div class="inner text-center">
+              <p class="text-shadow">Build your own predictive apps using <a href="http://h2o.ai/">H2O</a>!</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="bootstrap/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="underscore/underscore-min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

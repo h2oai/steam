@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<body>
+<script src="jquery.js"></script>
+
+<H1>H2O Prediction Service</H1>
+
+The predictor is at <a href="predict">/predict</a> . It takes parameters as
+a query string, .i.e., you place them after the "?".
+
+<h3>Input</h3>
+<div class="input">
+</div>
+<p></p>
+<!-- <hr width="50%">-->
+<p></p>
+<form name="params" action="" method="get">
+    <p>
+        <b>Parameter String</b> <input type="text" name="p" length="50"><br>
+
+        <input type="button" name="okbutton" value="PREDICT" onClick="runpred(this.form)">
+        <input type="reset" value="CLEAR">
+    </p>
+</form>
+
+
+<h3>URL</h3>
+<div class="params">
+</div>
+
+<h3>Prediction result</h3>
+<div class="results">
+</div>
+
+<!--
+<h3>Info</h3>
+<div class="info">
+</div>
+-->
+
+<script src="predict.js"></script>
+
+</body>
+</html>
