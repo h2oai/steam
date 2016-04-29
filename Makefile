@@ -96,5 +96,5 @@ darwin:
 
 release: gui ssb ssb linux darwin
 	rm -rf ./dist/$(DIST_LINUX)
-	rm -rf ./dist/$DIST_DARWIN)
+	rm -rf ./dist/$(DIST_DARWIN)
 
