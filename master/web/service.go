@@ -66,7 +66,6 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 		return nil, err
 	}
 
-	log.Println(appID, address)
 	// Add cloud to db
 	c := db.NewCloud(
 		cloudName,
@@ -78,8 +77,6 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 		username,
 		string(web.CloudStarted),
 	)
-
-	log.Printf("Created Cloud:\n%+v", c)
 
 	if err := s.ds.CreateCloud(c); err != nil {
 		return nil, err

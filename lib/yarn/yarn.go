@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // If there is a open ticket, does nothing, else kinits a new session
@@ -54,10 +55,10 @@ func kInit(username, keytab string) error {
 }
 
 func cleanDir(dir string) error {
+	log.Printf("Removing empty directory %s", dir)
 	cmdClean := exec.Command("hadoop", "fs", "-rmdir", dir)
 	if out, err := cmdClean.Output(); err != nil {
-		log.Fatalln("Failed to remove outdir.")
-		log.Println("\n" + string(out))
+		log.Printf("Failed to remove outdir.\n%s", string(out))
 		return err
 	}
 	return nil
@@ -104,11 +105,22 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		return "", "", err
 	}
 
-	var cmdOut, cmdErr string
+	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
+	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
+	var cmdErr, apID string
+	nodes := make([]string, size)
 	go func() {
 		in := bufio.NewScanner(stdOut)
 		for in.Scan() {
-			cmdOut = cmdOut + in.Text() + "\n"
+			i := 0
+			log.Printf("--YARN-- %s\n", in.Text())
+			if s := reNode.FindSubmatch([]byte(in.Text())); s != nil {
+				nodes[i] = string(s[1])
+				i++
+			}
+			if s := reApID.FindSubmatch([]byte(in.Text())); s != nil {
+				apID = string(s[1])
+			}
 		}
 	}()
 	go func() {
@@ -120,27 +132,10 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 
 	// TODO should be a ticket system, not halting
 	if err := cmd.Wait(); err != nil {
-		if l := cleanDir(name + "_out"); l != nil {
-			log.Println(err)
-		}
-		return "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdOut)
+		cleanDir(name + "_out")
+		return "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdErr)
 	}
-	hpOut := (string(cmdOut))
-	// Capture only the address and ID respectively
-	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
-	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
-
-	var address string
-	for _, node := range reNode.FindAllStringSubmatch(hpOut, size) {
-		address = node[1]
-		log.Println("Node started at:", address)
-	}
-	apID := reApID.FindStringSubmatch(hpOut)[1]
-
-	fmt.Println("")
-	log.Println("Started cloud with ID:", apID)
-
-	return apID, address, nil
+	return apID, nodes[size-1], nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
@@ -154,13 +149,50 @@ func StopCloud(kerberos bool, name, id, username, keytab string) error {
 	}
 
 	log.Println("Attempting to stop cloud...")
-	cmdStop := exec.Command("hadoop", "job", "-kill", "job_"+id)
-	if out, err := cmdStop.CombinedOutput(); err != nil {
-		log.Println("Failed to shutdown hadoop.")
-		log.Println("\n" + string(out))
+	cmd := exec.Command("hadoop", "job", "-kill", "job_"+id)
+	stdOut, err := cmd.StdoutPipe()
+	if err != nil {
 		return err
 	}
-	log.Println("Stopped cloud:", "job_"+id)
+	stdErr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	e := make(chan error)
+	var cmdOut, cmdErr string
+	go func() {
+		in := bufio.NewScanner(stdOut)
+		for in.Scan() {
+			log.Printf("--YARN-- %s\n", in.Text())
+			cmdOut = cmdOut + in.Text() + "\n"
+		}
+	}()
+	go func() {
+		in := bufio.NewScanner(stdErr)
+		for in.Scan() {
+			cmdErr = cmdErr + in.Text() + "\n"
+			if strings.Contains(in.Text(), "Exception") {
+				e <- fmt.Errorf("Failed to shutdown hadoop.\n%s", in.Text())
+			}
+		}
+	}()
+	go func() {
+		err := cmd.Wait()
+		if err != nil {
+			log.Printf("Failed to shutdown hadoop.\n%s", cmdErr)
+			e <- fmt.Errorf("Failed to shutdown hadoop.\n%s", cmdErr)
+		}
+		e <- nil
+	}()
+	if err := <-e; err != nil {
+		return err
+	}
+
 	if err := cleanDir(name + "_out"); err != nil {
 		return err
 	}
