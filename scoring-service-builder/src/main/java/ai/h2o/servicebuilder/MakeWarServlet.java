@@ -147,13 +147,12 @@ public class MakeWarServlet extends HttpServlet {
     } finally {
       // if the temp directory is still there we delete it
       if (tmpDir != null && Files.exists(tmpDir.toPath())) {
-//        try {
-//          FileUtils.deleteDirectory(tmpDir);
-//        }
-//        catch (IOException e) {
-//          System.err.println("Can't delete tmp directory");
-//        }
-
+        try {
+          FileUtils.deleteDirectory(tmpDir);
+        }
+        catch (IOException e) {
+          System.err.println("Can't delete tmp directory");
+        }
       }
     }
 

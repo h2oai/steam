@@ -1,4 +1,4 @@
-# H2O Service Builder
+# H2O Scoring Service Builder
 
 This is a service that can 
 
@@ -6,6 +6,8 @@ This is a service that can
 
 2. Build a War file that is a service from a Pojo, gen-model and
 another Jar file
+
+You can run the war file in Jetty, Tomcat, etc.
 
 ## How to Build 
 
