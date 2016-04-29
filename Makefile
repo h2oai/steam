@@ -1,6 +1,5 @@
 .PHONY: \
 	all \
-	setup \
 	lint \
 	vet \
 	fmt \
@@ -8,6 +7,7 @@
 	pretest \
 	test \
 	gui \
+	ssb \
 	doc \
 	cov \
 	clean \
@@ -15,22 +15,19 @@
 	install \
 	generate \
 	linux \
-	darwin
+	darwin \
+	release
 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
+SSB=./scoring-service-builder
 WWW=./var/master/www
 ASSETS = ./var/master/assets
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
 
-all: build gui setup
-
-setup:
-	mkdir -p $(ASSETS)
-	cp $(SS_HOME)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
-	cp $(SS_HOME)/makewar-extra.jar $(ASSETS)/
+all: build gui ssb
 
 install: build
 	go install
@@ -40,6 +37,13 @@ build:
 
 gui:
 	$(MAKE) -C gui
+
+ssb:
+	cd $(SSB) && ./gradlew build
+	mkdir -p $(ASSETS)
+	cp $(SSB)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
+	cp $(SSB)/makewar-extra.jar $(ASSETS)/
+	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
 
 generate:
 	cd ./srv/web && go generate && go fmt service.go
@@ -71,6 +75,8 @@ cov:
 
 clean:
 	go clean
+	rm -rf var
+	cd $(SSB) && ./gradlew clean
 
 linux:
 	rm -rf ./dist/$(DIST_LINUX)
@@ -88,4 +94,7 @@ darwin:
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
+release: gui ssb ssb linux darwin
+	rm -rf ./dist/$(DIST_LINUX)
+	rm -rf ./dist/$DIST_DARWIN)
 
