@@ -1,77 +1,57 @@
 # Installing, Starting, and Using Steam
 
-This document is meant for H2O developers and describes how to install, start, and use Steam on an in-house YARN cluster. External users should review the [README.md](docs/README.md) file within the **/docs** folder.
+This document is provided for external users and describes how to install, start, and use Steam on a YARN cluster. 
+
+>***Note***: This installation should only be performed on a YARN edge node.
 
 ## Requirements
-- Web browser and an Internet connection
-- Go (available from <a href="https://golang.org">golang.org</a>) 
-- Access to this steamY repository
-- SSH access to a Jetty server running YARN
-- Typescript
-- Node.js
+
+- Web browser with an Internet connection
+- Steam tar for OS X or Linux
+- Typescript (available from <a href="https://www.typescriptlang.org" target="_blank">typscriptlang.org</a>)
+- Node.js (available from <a href="https://nodejs.org/en" target="_blank">nodejs.org</a>)
 - JDK 1.7 or greater
-- H2O AutoML for Apache HDP2.2 or CDH 5.5.3 (internal only)
+- H2O AutoML package (for example, **automl-hdp2.2.jar**)
 
 ## Installation
 Perform the following steps to install Steam.
 
-1. Open a Terminal window and install Go (available from <a href="https://golang.org" target="_blank">golang.org</a>).
+1. Open a terminal window and SSH into your YARN edge node. 
 
-2. Export the GOPATH in the location where Steam will reside. This can be added to your bash profile or specified each time you run Steam. For example:
+2. Retrieve the Steam release for your OS.
 
-	`export GOPATH=$HOME/Desktop` 
-
-3. Create the directory where Steam will reside. This must be in GOPATH location. For example:
-
-	`mkdir -p Desktop/src/github.com/h2oai`
-
-4. Change directories to the new **h2oai** folder, and clone the repository in this folder. Enter your git username and password when prompted. 
-
-		cd Desktop/src/github.com/h2oai
-		git clone https://github.com/h2oai/steamY
+	**Linux**
 	
-5. Change directories to **steamY** and then run make.
+		s3cmd get s3://steam-release/steamY-master-linux-amd64.tar.gz 
+		
+	**OS X**
 
-		cd steamY
-		make
+		s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz		
+	>***Note***: This saves the Steam package (tar file) into your current folder.
 
-You will see a `BUILD SUCCESSFUL` message. At this point, you are ready to start using Steam. 
+3. Untar the Steam package. 
+
+	**Linux**
+	
+		tar -xzf steam--linux-amd64.tar.gz
+	   
+	**OS X**
+	
+		tar -xsf steam--darwin-amd64.tar.gz
 
 ## Starting Steam
 Now that Steam is installed, perform the following steps to start and use Steam. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
 
-1. ssh to the machine running YARN, changing `<user>` and `<domain>` below with appropriate values. Specify your password when prompted. 
-
-	`ssh <user>@<domain>`
-	
-	The machine will include the following folder and files:
-	
-	- steam--linux-amd64.tar.gz
-	- automl-hdp2.2.jar	
-	
-2. Copy the **automl-hdp2.2.jar** file to your local machine. This engine is required in order to run any AutoML jobs in Steam. 
-
-		scp <user>@<domain>:./automl-hdp2.2.jar .
-
-3. On the YARN machine, change directories to the Steam directory, then set up the Jetty server using one of the following methods:
-
-		cd steam--linux-amd64/steam
-		java -jar var/master/assets/jetty-runner.jar --port 8811 var/master/assets/ROOT.war
-
-5. Open another terminal window and again, ssh to the machine running YARN, changing `<user>` and `<domain>` below with appropriate values. Specify your password when prompted. 
-
-	`ssh <user>@<domain>` 
-	
-6. Untar the **steam--linux-amd64.tar.gz** package.
-
-	`tar -xzf steam--linux-amd64.tar.gz`
-
-6. Change directories to the new **steam--linux-amd64** folder, then start Steam on the master server (the compilation server that will run the POJOs). For example, the following commands will start Steam on localhost.
+1. Change directories to your Steam directory, then set up the Jetty server using one of the following methods:
 
 		cd steam--linux-amd64
-		./steam serve master --compilation-service-address="localhost:8080"
+		java -jar var/master/assets/jetty-runner.jar --port 8811 var/master/assets/ROOT.war
+
+2. Open another terminal window, then start Steam on the master server (the compilation server that will run the POJOs). For example, the following commands will start Steam on localhost. Note that the port value must match the port specified when starting the Jetty server.
+
+		./steam serve master --compilation-service-address="localhost:8811"
 		
-	>**Note**: You can view all available options for starting Steam on the master using `./steam help serve master`
+	>**Note**: You can view all available options for starting Steam using `./steam help serve master`
 
 	You will see a message similar to the following when Steam starts successfully.
 
@@ -88,11 +68,11 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 In a Web browser, navigate to the Steam Web server (for example, http://172.16.2.182:9090).
 
 ### Adding an Engine
-An empty Steam UI will display. Before performing any tasks, you must first add an Asset. 
+An empty Steam UI will display. Before performing any tasks, you must first add an Asset. In this case, the **automl-hdp2.2.jar** file (or similar) provides the engine necessary for Steam to run AutoML jobs. 
 
-1. Click the **Assets** icon (<img src="docs/images/icon_assets.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel, then select **Add Engine**. 
+1. Click the **Assets** icon (<img src="images/icon_assets.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel, then select **Add Engine**. 
 
-	![](docs/images/add_engine.png)
+	![](images/add_engine.png)
 
 2. Browse to the **automl-hdp2.2.jar** file on your local machine, then click **Upload**. 
 
@@ -102,7 +82,7 @@ An empty Steam UI will display. Before performing any tasks, you must first add 
 
 Clouds can be configured after the engine asset was successfully added. 
 
-1.  Click the **Clouds** icon (<img src="docs/images/icon_clouds.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel, then select **Start a Cloud**. 
+1.  Click the **Clouds** icon (<img src="images/icon_clouds.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel, then select **Start a Cloud**. 
 
 2. Enter/specify the following information to set up your cloud:
 
@@ -114,7 +94,7 @@ Clouds can be configured after the engine asset was successfully added.
 	
 	d. The amount of memory available on each node. Be sure to include the unit ("m" or "g").
 	
-	![](docs/images/add_cloud.png)
+	![](images/add_cloud.png)
 	
 3. Click **Start Cloud** when you are finished.
 
@@ -124,7 +104,7 @@ The Cloud Details page opens upon successful completion. This page shows the clo
 
 >***Note***: On the Cloud Details page, the **Memory** field shows the memory for each node rather than the total cloud memory.
 
-![](docs/images/cloud_details.png)
+![](images/cloud_details.png)
 
 ### Adding a Model
 Models are created from the Cloud Details page. When building a model, you will need to provide the location of the dataset that you will use as well as the response column. 
@@ -141,11 +121,11 @@ Models are created from the Cloud Details page. When building a model, you will 
 
 5. Click **Start Building** when you are finished. 
 
-	![](docs/images/build_model.png)
+	![](images/build_model.png)
 
 ### Viewing Models	
 
-Click the **Models** icon (<img src="docs/images/icon_models.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel to view models that were successfully created. 
+Click the **Models** icon (<img src="images/icon_models.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel to view models that were successfully created. 
 
 These models are processed using H2O's AutoML algorithm, which determines the best method to use to build the model. The model name includes this method. So, for example, if Steam returns a model named "DRF_model...", then this indicates that DRF was the algorithm that provided the best result.
 
@@ -153,7 +133,7 @@ These models are processed using H2O's AutoML algorithm, which determines the be
 
 After a model is built, the next step is to deploy the model in order to make/view predictions.
 
-1. Click the **Models** icon (<img src="docs/images/icon_models.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel.
+1. Click the **Models** icon (<img src="images/icon_models.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel.
 
 2. Select the model that you want to use, then click the **Deploy this Model** button on the bottom of the page.
 
@@ -166,13 +146,13 @@ After a model is built, the next step is to deploy the model in order to make/vi
 
 Successfully deployed models can be viewed on the Services page. On this page, click the Endpoint link to begin making predictions.  
 
-## Using Steam with Flow
+## Using Steam with H2O Flow
 
 As with other H2O products, Flow can be used alongside Steam when performing machine learning tasks.
 
 On the Cloud Details page, click the Address link to open H2O Flow in a new tab. 
 
-![](docs/images/h2o_flow.png)
+![](images/h2o_flow.png)
 
 >***Note***: Refer to the H2O Flow documentation for information on how to use Flow. 
 
