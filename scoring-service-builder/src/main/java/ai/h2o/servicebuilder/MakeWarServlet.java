@@ -22,11 +22,11 @@ import java.util.jar.Manifest;
 
 /**
  * Compile server for POJO to war file
- *
+ * <p>
  * curl -X POST --form pojo=@pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@pojo/h2o-genmodel.jar --form extra=@makewar-files.tar "localhost:8080/makewar" > model.war
  * java -jar jetty-runner.jar model.war
  * curl "localhost:8080/pred?DayOfMonth=1&Distance=2"
- *
+ * <p>
  * <p>
  * Input is form with pojo java file and h2o-genmodel.jar and extra tar file
  * Output is the war file of the compiled code
@@ -42,7 +42,7 @@ public class MakeWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = Files.createTempDirectory("makeWar").toFile();
-            System.out.println("tmp dir " + tmpDir);
+      System.out.println("tmp dir " + tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -67,7 +67,7 @@ public class MakeWarServlet extends HttpServlet {
         if (filename != null && filename.length() > 0) {
           if (field.equals("pojo")) {
             pojofile = filename;
-            predictorClassName = filename.replace(".java" ,"");
+            predictorClassName = filename.replace(".java", "");
             System.out.println("predictorClassName " + predictorClassName);
             Files.copy(i.getInputStream(), new File(tmpDir, filename).toPath());
           }
@@ -134,7 +134,8 @@ public class MakeWarServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
 
       System.out.println("Done war creation");
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       e.printStackTrace();
       // send the error message back
       String message = e.getMessage();
@@ -144,7 +145,8 @@ public class MakeWarServlet extends HttpServlet {
       response.getWriter().write(message);
       response.getWriter().write(Arrays.toString(e.getStackTrace()));
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-    } finally {
+    }
+    finally {
       // if the temp directory is still there we delete it
       if (tmpDir != null && Files.exists(tmpDir.toPath())) {
         try {
@@ -168,9 +170,9 @@ public class MakeWarServlet extends HttpServlet {
   /**
    * Run command cmd in separate process in directory
    *
-   * @param directory     run in this directory
-   * @param cmd           command to run
-   * @param errorMessage  error message if process didn't finish with exit value 0
+   * @param directory    run in this directory
+   * @param cmd          command to run
+   * @param errorMessage error message if process didn't finish with exit value 0
    * @return stdout combined with stderr
    * @throws Exception
    */
@@ -199,7 +201,7 @@ public class MakeWarServlet extends HttpServlet {
   /**
    * Create jar archive out of files list. Names in archive have paths starting from relativeToDir
    *
-   * @param tobeJared list of files
+   * @param tobeJared     list of files
    * @param relativeToDir starting directory for paths
    * @return jar as byte array
    * @throws IOException

@@ -91,9 +91,9 @@ function showResult(div, data) {
 }
 
 function showUrl(pardiv, params) {
-  url = window.location.href + "predict?" + params;
   // remove empty parameters returned by serialize.
-  params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
+  params = params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
+  url = window.location.href + "predict?" + params;
   pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
 }
 

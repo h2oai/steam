@@ -1,5 +1,3 @@
-//package ai.h2o.servicebuilder;
-
 import java.io.*;
 import java.util.Map;
 import java.util.Arrays;
@@ -12,7 +10,6 @@ import hex.genmodel.easy.*;
 import hex.genmodel.*;
 
 import com.google.gson.Gson;
-//import Model.*;
 
 public class InfoServlet extends HttpServlet {
 

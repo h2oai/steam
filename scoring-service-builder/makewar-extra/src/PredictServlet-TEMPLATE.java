@@ -1,5 +1,3 @@
-//package ai.h2o.servicebuilder;
-
 import java.io.*;
 import java.util.Map;
 import java.util.Arrays;
