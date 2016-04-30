@@ -72,7 +72,7 @@ function showModel(model, element) {
 function showInputParameters() {
     $.get('/info', function(data, status) {
     // show result
-    var info = document.querySelector(".input");
+    info = document.querySelector(".input");
     showModel(data, info);
   },'json');
 }
@@ -83,11 +83,12 @@ function showResult(div, data) {
     probs = data["classProbabilities"];
     prob = probs[index];
 
-    result = "Label: <b>" + label + "</b><br>" +
-      "Probability: <b>" + (prob * 100.0).toFixed(1) + "%</b><p>" +
+    result = "Label <b>" + label + "</b> with probability <b>" + (prob * 100.0).toFixed(1) + "%</b>.<p>" +
       "Class Probabilities: [" + probs + "]<br>" +
-      "Label Index: " + index;
+      "Label Index: " + index + "<p>" +
+      "<code>" + JSON.stringify(data) + "</code>";
     div.innerHTML = result;
+    showStatistics();
 }
 
 function showUrl(pardiv, params) {
@@ -125,8 +126,31 @@ function runpred2(form) {
 
 }
 
+function showStats(div, data) {
+    s = 'Service started ' + data['startTimeUTC'] + ' UTC, uptime ' + Number(data['upDays']).toFixed(2) + ' days. <br>'
+    +  data['numberOfPredictions'] + ' predictions in ' + Number(data['totalPredictionTimeMs']).toFixed(1)
+    + ' (after ' + data['warmupFirstN'] + ' warmups ' + Number(data['totalPredictionTimeAfterWarmupMs']).toFixed(1) + ') ms. '
+    + 'Average prediction time ' + Number(data['avgPredictionTimeMs']).toFixed(3) + ' (' +
+    + Number(data['avgPredictionTimeAfterWarmupMs']).toFixed(3) + ') ms.';
+    url = window.location.href + "stats";
+    s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
+    div.innerHTML = s;
+}
+
+function showStatistics() {
+    cmd = '/stats';
+    res = $.get(cmd, function(data, status) {
+        divs = document.querySelector(".stats");
+        showStats(divs, data);
+       },'json');
+}
+
+
 // main
 showInputParameters();
+
+showStatistics();
+
 
 
 

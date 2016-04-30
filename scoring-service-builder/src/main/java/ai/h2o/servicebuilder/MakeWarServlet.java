@@ -98,14 +98,14 @@ public class MakeWarServlet extends HttpServlet {
       runCmd(tmpDir, Arrays.asList("jar", "xf", extrafile), "Unpack of extra failed");
 
       // change the class name in the predictor template file to the predictor we have
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, "Model-TEMPLATE.java", "Model.java");
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, "PredictServlet-TEMPLATE.java", "PredictServlet.java");
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, "InfoServlet-TEMPLATE.java", "InfoServlet.java");
+      InstantiateJavaTemplateFile(tmpDir, predictorClassName, "StatsServlet.java", "StatsServlet.java");
       // now have a correct PredictorServlet.java and InfoServlet.java files
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", "WEB-INF/lib/*:WEB-INF/classes", "-d", outDir.getPath(),
-          "src/PredictServlet.java", "src/InfoServlet.java"), "Compilation of extra failed");
+          "src/PredictServlet.java", "src/InfoServlet.java", "src/StatsServlet.java"), "Compilation of extra failed");
 
       // create the war jar file
       Collection<File> filesc = FileUtils.listFilesAndDirs(webInfDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);

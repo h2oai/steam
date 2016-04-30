@@ -1,13 +1,14 @@
 import java.io.*;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Arrays;
+import java.lang.reflect.Type;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
 
-import hex.genmodel.easy.prediction.BinomialModelPrediction;
-import hex.genmodel.easy.prediction.RegressionModelPrediction;
 import hex.genmodel.easy.prediction.AbstractPrediction;
+import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.*;
 import hex.genmodel.*;
 
@@ -18,34 +19,18 @@ public class PredictServlet extends HttpServlet {
   // Set to false to get better throughput.
   static boolean VERBOSE = false;
 
-//  EasyPredictModelWrapper model = Model.getInstance().model;
-
-//  public final class Model {
-//    private static final Model INSTANCE = new Model();
-//
-//    public static EasyPredictModelWrapper model = null;
-//    public static GenModel rawModel = null;
-//
-//    static {
-//      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-//      model = new EasyPredictModelWrapper(rawModel);
-//    }
-//
-//    private Model() {}
-//
-//    public static Model getInstance() {
-//      return INSTANCE;
-//    }
-//  }
-
   public static EasyPredictModelWrapper model;
+  public static long numberOfPredictions = 0;
+  public static long startTime = System.currentTimeMillis();
+  public static double totalTimeMs = 0;
+  public static double totalTimeSquareMs = 0;
+  public static double warmupTimeMs = 0;
+  public static double warmupTimeSquareMs = 0;
+  public static int warmupNumber = 5;
 
   static {
     GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
     model = new EasyPredictModelWrapper(rawModel);
-
-//    if (VERBOSE)
-//	System.out.println(jsonModel());
   }
 
   static private String jsonModel() {
@@ -62,18 +47,6 @@ public class PredictServlet extends HttpServlet {
     for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
       String key = entry.getKey();
       String[] values = entry.getValue();
-
-      if (key.equals("VERBOSE")) {
-	  if (values != null && values.length > 0) {
-	      String tf = values[0];
-	      if (tf.equals("true"))
-		  VERBOSE = true;
-	      else if (tf.equals("false"))
-		  VERBOSE = false;
-	  }
-	  continue;
-      }
-
       for (String value : values) {
         if (VERBOSE) System.out.println("Key: " + key + " Value: " + value);
         if (value.length() > 0) {
@@ -83,38 +56,79 @@ public class PredictServlet extends HttpServlet {
     }
   }
 
-  public void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     RowData row = new RowData();
     fillRowDataFromHttpRequest(request, row);
 
     try {
-	if (model == null)
-	    throw new Exception("No predictor model");
+      if (model == null)
+        throw new Exception("No predictor model");
 
-        // we have a model loaded, do the prediction
-        AbstractPrediction pr = model.predict(row);
+      // we have a model loaded, do the prediction
+      AbstractPrediction pr = predict(row);
 
-	// assemble json result
-	Gson gson = new Gson();
-	String prJson = gson.toJson(pr);
-	if (VERBOSE)
-	    System.out.println(prJson);
+      // assemble json result
+      Gson gson = new Gson();
+      String prJson = gson.toJson(pr);
+      if (VERBOSE)
+        System.out.println(prJson);
 
-	// Emit the prediction to the servlet response.
-	if (VERBOSE)
-	    response.getWriter().write(jsonModel());
+      // Emit the prediction to the servlet response.
+      if (VERBOSE)
+        response.getWriter().write(jsonModel());
 
-	response.getWriter().write(prJson);
-  response.setHeader("Access-Control-Allow-Origin", "*");
-	response.setStatus(HttpServletResponse.SC_OK);
+      response.getWriter().write(prJson);
+      response.setHeader("Access-Control-Allow-Origin", "*");
+      response.setStatus(HttpServletResponse.SC_OK);
 
-    } 
+    }
     catch (Exception e) {
-	// Prediction failed.
-	System.out.println(e.getMessage());
-	response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
+      // Prediction failed.
+      System.out.println(e.getMessage());
+      response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
   }
+
+  private AbstractPrediction predict(RowData row) throws PredictException {
+    long start = System.nanoTime();
+    AbstractPrediction p = model.predict(row);
+    long done = System.nanoTime();
+    double elapsed = (done - start) / 1.0e6;
+    totalTimeMs += elapsed;
+    totalTimeSquareMs += elapsed * elapsed;
+    numberOfPredictions += 1;
+    if (numberOfPredictions <= warmupNumber) {
+      warmupTimeMs += elapsed;
+      warmupTimeSquareMs += elapsed * elapsed;
+    }
+    return p;
+  }
+
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    try {
+      if (model == null)
+        throw new Exception("No predictor model");
+
+      Gson gson = new Gson();
+      RowData row = gson.fromJson(request.getReader(), new RowData().getClass());
+
+      // do the prediction
+      AbstractPrediction pr = model.predict(row);
+
+      // assemble json result
+      String prJson = gson.toJson(pr);
+
+      // Emit the prediction to the servlet response.
+      response.getWriter().write(prJson);
+      response.setStatus(HttpServletResponse.SC_OK);
+    }
+    catch (Exception e) {
+      // Prediction failed.
+      System.out.println(e.getMessage());
+      response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
+    }
+  }
+
 
 }
 

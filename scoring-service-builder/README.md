@@ -30,14 +30,17 @@ can be used to create war files.
 
 ## Prediction server
 
+
 The result of the service above is a war file that can be run with
 
 `java -jar jetty-runner-9.3.9.M1.jar --port 8081 gbm.war
 `
+This in turn starts a web service at localhost:8081 .
+There is also a web page for the predictor at http://localhost:8081 .
 
-This in turn starts a web service at localhost:8081 . 
+### Using Get
 
-This service can be used for prediction
+You can send a Get request with the input variables as the query string.
 
 `curl "localhost:8081/predict?Dest=JFK"`
 
@@ -46,9 +49,26 @@ which returns a JSON result
 `{"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]}
 `
 
-The predictor has two classes. "Y" was predicted with probability 0.97.
+The predictor has two classes. "Y" was predicted with probability 97%.
 
-There is also a web page for the predictor at http://localhost:8081 .
+### Using Post
+
+Json can be sent using a Post request.
+
+`curl -d '{Dest: JFK}' localhost:8081/predict`
+
+which returns a JSON result
+
+`{"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]}
+`
+
+## Prediction statistics
+
+Simple prediction statistics: total and average prediction time, with and without
+skipping the first 5 predictions (warmup) are available on the predictor web page
+and at
+
+`http://localhost:8081/stats`
 
 ## Jetty runner versions
 
@@ -62,8 +82,5 @@ version.
 
 ## To Do
 
-The web pages provided are just examples of what can be done and need
+The web pages are just examples of what can be done and need
 to be improved to look good.
-
-We could also improve the handling of the parameters of the predictor
-by getting the right types and variable names from the predictor.
