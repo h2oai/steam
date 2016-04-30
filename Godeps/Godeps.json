@@ -7,17 +7,7 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/BurntSushi/toml",
-			"Comment": "v0.2.0-9-gf0aeabc",
-			"Rev": "f0aeabca5a127c4078abb8c8d64298b147264b55"
-		},
-		{
 			"ImportPath": "github.com/boltdb/bolt",
-			"Comment": "v1.1.0-22-g6e1ca38",
-			"Rev": "6e1ca38c6a73025366cd8705553b404746ee6e63"
-		},
-		{
-			"ImportPath": "github.com/boltdb/bolt/cmd/bolt",
 			"Comment": "v1.1.0-22-g6e1ca38",
 			"Rev": "6e1ca38c6a73025366cd8705553b404746ee6e63"
 		},
@@ -43,24 +33,6 @@
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
 		{
-			"ImportPath": "github.com/kr/pretty",
-			"Comment": "go.weekly.2011-12-22-29-gadd1dbc",
-			"Rev": "add1dbc86daf0f983cd4a48ceb39deb95c729b67"
-		},
-		{
-			"ImportPath": "github.com/kr/text",
-			"Rev": "bb797dc4fb8320488f47bf11de07a733d7233e1f"
-		},
-		{
-			"ImportPath": "github.com/magiconair/properties",
-			"Comment": "v1.7.0",
-			"Rev": "c265cfa48dda6474e208715ca93e987829f572f8"
-		},
-		{
-			"ImportPath": "github.com/mitchellh/mapstructure",
-			"Rev": "d2dd0262208475919e1a362f675cfc0e7c10e905"
-		},
-		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
 			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
@@ -78,45 +50,16 @@
 			"Rev": "10ef21a441db47d8b13ebcc5fd2310f636973c77"
 		},
 		{
-			"ImportPath": "github.com/spf13/cast",
-			"Rev": "27b586b42e29bec072fe7379259cc719e1289da6"
-		},
-		{
 			"ImportPath": "github.com/spf13/cobra",
 			"Rev": "6efbf0b624dccb17ac2b965f9b729d424d80bf17"
-		},
-		{
-			"ImportPath": "github.com/spf13/cobra/cobra",
-			"Rev": "6efbf0b624dccb17ac2b965f9b729d424d80bf17"
-		},
-		{
-			"ImportPath": "github.com/spf13/cobra/cobra/cmd",
-			"Rev": "6efbf0b624dccb17ac2b965f9b729d424d80bf17"
-		},
-		{
-			"ImportPath": "github.com/spf13/jwalterweatherman",
-			"Rev": "33c24e77fb80341fe7130ee7c594256ff08ccc46"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
 			"Rev": "08b1a584251b5b62f458943640fc8ebd4d50aaa5"
 		},
 		{
-			"ImportPath": "github.com/spf13/viper",
-			"Rev": "e37b56e207dda4d79b9defe0548e960658ee8b6b"
-		},
-		{
 			"ImportPath": "golang.org/x/sys/unix",
 			"Rev": "2bacc619e34d59719d9ed86f0e04e8261aed3409"
-		},
-		{
-			"ImportPath": "gopkg.in/fsnotify.v1",
-			"Comment": "v1.3.0",
-			"Rev": "30411dbcefb7a1da7e84f75530ad3abe4011b4f8"
-		},
-		{
-			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "a83829b6f1293c91addabc89d0571c246397bbf4"
 		}
 	]
 }
