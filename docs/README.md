@@ -8,8 +8,6 @@ This document is provided for external users and describes how to install, start
 
 - Web browser with an Internet connection
 - Steam tar for OS X or Linux
-- Typescript (available from <a href="https://www.typescriptlang.org" target="_blank">typscriptlang.org</a>)
-- Node.js (available from <a href="https://nodejs.org/en" target="_blank">nodejs.org</a>)
 - JDK 1.7 or greater
 - H2O AutoML package (for example, **automl-hdp2.2.jar**)
 

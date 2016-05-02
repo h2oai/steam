@@ -30,12 +30,14 @@ Perform the following steps to install Steam.
 		cd Desktop/src/github.com/h2oai
 		git clone https://github.com/h2oai/steamY
 	
-5. Change directories to **steamY** and then run make.
+5. Change directories to **steamY** and then run `make linux`.
 
 		cd steamY
-		make
+		make linux
 
-You will see a `BUILD SUCCESSFUL` message. At this point, you are ready to start using Steam. 
+	>***Note***: If you are building this on your own local machine, then you can run `make` instead of `make linux`. This will only work if your local machine has YARN. 
+
+You will see a `BUILD SUCCESSFUL` message when the installation is complete. At this point, you are ready to start using Steam. 
 
 ## Starting Steam
 Now that Steam is installed, perform the following steps to start and use Steam. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
