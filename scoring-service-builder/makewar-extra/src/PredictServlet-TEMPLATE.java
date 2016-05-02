@@ -21,6 +21,7 @@ public class PredictServlet extends HttpServlet {
 
   public static EasyPredictModelWrapper model;
   public static long numberOfPredictions = 0;
+  public static double lastPredictionMs = 0;
   public static long startTime = System.currentTimeMillis();
   public static double totalTimeMs = 0;
   public static double totalTimeSquareMs = 0;
@@ -70,15 +71,8 @@ public class PredictServlet extends HttpServlet {
       // assemble json result
       Gson gson = new Gson();
       String prJson = gson.toJson(pr);
-      if (VERBOSE)
-        System.out.println(prJson);
-
-      // Emit the prediction to the servlet response.
-      if (VERBOSE)
-        response.getWriter().write(jsonModel());
 
       response.getWriter().write(prJson);
-      response.setHeader("Access-Control-Allow-Origin", "*");
       response.setStatus(HttpServletResponse.SC_OK);
 
     }
@@ -93,13 +87,14 @@ public class PredictServlet extends HttpServlet {
     long start = System.nanoTime();
     AbstractPrediction p = model.predict(row);
     long done = System.nanoTime();
-    double elapsed = (done - start) / 1.0e6;
-    totalTimeMs += elapsed;
-    totalTimeSquareMs += elapsed * elapsed;
+    double elapsedMs = (done - start) / 1.0e6;
+    lastPredictionMs = elapsedMs;
+    totalTimeMs += elapsedMs;
+    totalTimeSquareMs += elapsedMs * elapsedMs;
     numberOfPredictions += 1;
     if (numberOfPredictions <= warmupNumber) {
-      warmupTimeMs += elapsed;
-      warmupTimeSquareMs += elapsed * elapsed;
+      warmupTimeMs += elapsedMs;
+      warmupTimeSquareMs += elapsedMs * elapsedMs;
     }
     return p;
   }

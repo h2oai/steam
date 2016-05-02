@@ -127,8 +127,10 @@ function runpred2(form) {
 }
 
 function showStats(div, data) {
-    s = 'Service started ' + data['startTimeUTC'] + ' UTC, uptime ' + Number(data['upDays']).toFixed(2) + ' days. <br>'
-    +  data['numberOfPredictions'] + ' predictions in ' + Number(data['totalPredictionTimeMs']).toFixed(1)
+    s = 'Service started ' + data['startTimeUTC'] + ' UTC, uptime ' + Number(data['upDays']).toFixed(2) + ' days. '
+    + 'Last prediction took ' + Number(data['lastPredictionMs']).toFixed(3) + ' ms. '
+    +  '<br>'
+    + data['numberOfPredictions'] + ' predictions in ' + Number(data['totalPredictionTimeMs']).toFixed(1)
     + ' (after ' + data['warmupFirstN'] + ' warmups ' + Number(data['totalPredictionTimeAfterWarmupMs']).toFixed(1) + ') ms. '
     + 'Average prediction time ' + Number(data['avgPredictionTimeMs']).toFixed(3) + ' (' +
     + Number(data['avgPredictionTimeAfterWarmupMs']).toFixed(3) + ') ms.';
