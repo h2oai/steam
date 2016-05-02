@@ -107,26 +107,26 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 
 	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
 	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
-	var cmdErr, apID string
-	nodes := make([]string, size)
+	var cmdErr, apID, addr string
 	go func() {
 		in := bufio.NewScanner(stdOut)
 		for in.Scan() {
-			i := 0
 			log.Printf("--YARN-- %s\n", in.Text())
 			if s := reNode.FindSubmatch([]byte(in.Text())); s != nil {
-				nodes[i] = string(s[1])
-				i++
+				addr = string(s[1])
 			}
 			if s := reApID.FindSubmatch([]byte(in.Text())); s != nil {
 				apID = string(s[1])
+			}
+			if strings.Contains(in.Text(), "ERROR") {
+				cmdErr += in.Text() + "\n"
 			}
 		}
 	}()
 	go func() {
 		in := bufio.NewScanner(stdErr)
 		for in.Scan() {
-			cmdErr = cmdErr + in.Text() + "\n"
+			cmdErr += in.Text() + "\n"
 		}
 	}()
 
@@ -135,7 +135,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		cleanDir(name + "_out")
 		return "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdErr)
 	}
-	return apID, nodes[size-1], nil
+	return apID, addr, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
@@ -169,7 +169,7 @@ func StopCloud(kerberos bool, name, id, username, keytab string) error {
 		in := bufio.NewScanner(stdOut)
 		for in.Scan() {
 			log.Printf("--YARN-- %s\n", in.Text())
-			cmdOut = cmdOut + in.Text() + "\n"
+			cmdOut += in.Text() + "\n"
 		}
 	}()
 	go func() {
