@@ -193,7 +193,7 @@ func startCloud(c *context) *cobra.Command {
 
 		// --- add additional args here ---
 
-		if _, _, err := yarn.StartCloud(size, kerberos, mem, name, engine, username, keytab); err != nil {
+		if _, _, _, err := yarn.StartCloud(size, kerberos, mem, name, engine, username, keytab); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -274,10 +274,11 @@ func stopCloud(c *context) *cobra.Command {
 		}
 
 		name := args[0]
-		id := args[1] // FIXME: This should be a function of the name
+		id := args[1]
+		job := args[2]
 		// --- add additional args here ---
 
-		if err := yarn.StopCloud(kerberos, name, id, username, keytab); err != nil {
+		if err := yarn.StopCloud(kerberos, name, id, job, username, keytab); err != nil {
 			log.Fatalln(err)
 		}
 

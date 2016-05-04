@@ -60,7 +60,7 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 	}
 
 	// Make cloud with yarn
-	appID, address, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, e.Path, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
+	appID, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, cloudName, e.Path, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -76,6 +76,7 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 		memory,
 		username,
 		string(web.CloudStarted),
+		out,
 	)
 
 	if err := s.ds.CreateCloud(c); err != nil {
@@ -98,7 +99,7 @@ func (s *Service) StopCloud(cloudName string) error {
 		return fmt.Errorf("Cloud %s is already stopped", cloudName)
 	}
 
-	if err := yarn.StopCloud(s.kerberosEnabled, c.ID, c.ApplicationID, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
+	if err := yarn.StopCloud(s.kerberosEnabled, c.ID, c.ApplicationID, c.Out, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
 		log.Println(err)
 		return err
 	}
@@ -160,7 +161,6 @@ func (s *Service) getCloud(cloudName string) (*db.Cloud, error) {
 		return nil, fmt.Errorf("Cloud %s does not exist.", cloudName)
 	}
 	return c, nil
-
 }
 
 func (s *Service) GetClouds() ([]*web.Cloud, error) {

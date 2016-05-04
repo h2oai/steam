@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math/rand"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // If there is a open ticket, does nothing, else kinits a new session
@@ -54,6 +56,16 @@ func kInit(username, keytab string) error {
 	return nil
 }
 
+func randStr(strlen int) string {
+	rand.Seed(time.Now().UTC().UnixNano())
+	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+	r := make([]byte, strlen)
+	for i := 0; i < strlen; i++ {
+		r[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(r)
+}
+
 func cleanDir(dir string) error {
 	log.Printf("Removing empty directory %s", dir)
 	cmdClean := exec.Command("hadoop", "fs", "-rmdir", dir)
@@ -67,12 +79,14 @@ func cleanDir(dir string) error {
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string) (string, string, error) {
+func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string) (string, string, string, error) {
 	if kerberos {
 		if err := kCheck(username, keytab); err != nil {
-			return "", "", err
+			return "", "", "", err
 		}
 	}
+
+	out := "steam/" + name + "_" + randStr(5) + "_out"
 
 	cmdArgs := []string{
 		"jar",              //
@@ -84,7 +98,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		"-mapperXmx",       //
 		mem,                //
 		"-output",          //
-		name + "_out",      //
+		out,                //
 		"-disown",          //
 	}
 
@@ -94,15 +108,15 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 	stdErr, err := cmd.StderrPipe()
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
 	if err := cmd.Start(); err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
 	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
@@ -133,15 +147,15 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	// TODO should be a ticket system, not halting
 	if err := cmd.Wait(); err != nil {
 		cleanDir(name + "_out")
-		return "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdErr)
+		return "", "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdErr)
 	}
-	return apID, addr, nil
+	return apID, addr, out, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
 //
 // In the future this
-func StopCloud(kerberos bool, name, id, username, keytab string) error {
+func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
 	if kerberos {
 		if err := kCheck(username, keytab); err != nil {
 			return err
@@ -193,7 +207,7 @@ func StopCloud(kerberos bool, name, id, username, keytab string) error {
 		return err
 	}
 
-	if err := cleanDir(name + "_out"); err != nil {
+	if err := cleanDir(outdir); err != nil {
 		return err
 	}
 
