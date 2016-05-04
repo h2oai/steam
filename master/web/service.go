@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/h2oai/steamY/lib/fs"
@@ -174,6 +175,55 @@ func (s *Service) GetClouds() ([]*web.Cloud, error) {
 		clouds[i] = toCloud(c)
 	}
 	return clouds, nil
+}
+
+// Returns the Cloud status from H2O
+// This method should only be called if the cluster reports a non-Stopped status
+// If the cloud was shut down from the outside of steam, will report Unknown
+// / status for cloud
+//
+// TODO: Maybe this should only report if non-Stopped,non-Unknown status
+//       In the case of Unknown, should only check if forced?
+func (s *Service) GetCloudStatus(c *web.Cloud) (*web.Cloud, error) { // Only called if cloud status != found
+	h := h2ov3.NewClient(c.Address)
+
+	cloud, err := h.GetCloud()
+	if err != nil { // Cloud just isn't found
+		c.State = web.CloudUnknown
+		log.Printf("Error from GetCloud in GetCloudStatus:\n%v", err)
+		return c, fmt.Errorf("Cannot find cluster %s, is it still running?", c.Name)
+	}
+
+	var (
+		tot, all int32
+		mem      int64
+	)
+	for _, n := range cloud.Nodes {
+		mem += n.MaxMem
+		tot += n.NumCpus
+		all += n.CpusAllowed
+	}
+	var health web.CloudState
+	if cloud.CloudHealthy {
+		health = web.CloudHealthy
+	} else {
+		health = web.CloudUnknown
+	}
+
+	return &web.Cloud{
+		c.CreatedAt,
+		c.Name,
+		c.EngineName,
+		cloud.Version,
+		c.Size,
+		toSizeBytes(mem),
+		int(tot),
+		int(all),
+		health,
+		c.Address,
+		c.Username,
+		c.ApplicationID,
+	}, nil
 }
 
 func (s *Service) DeleteCloud(cloudName string) error {
@@ -464,21 +514,49 @@ func (s *Service) DeleteEngine(engineName string) error {
 	return s.ds.DeleteEngine(engineName)
 }
 
+// Helper function to convert from int to bytes
+func toSizeBytes(i int64) string {
+	f := float64(i)
+
+	s := 0
+	for f > 1024 {
+		f /= 1024
+		s++
+	}
+	b := strconv.FormatFloat(f, 'f', 2, 64)
+
+	switch s {
+	case 0:
+		return b + " B"
+	case 1:
+		return b + " KB"
+	case 2:
+		return b + " MB"
+	case 3:
+		return b + " GB"
+	case 4:
+		return b + " TB"
+	case 5:
+		return b + " PB"
+	}
+
+	return ""
+}
+
 //
 // Routines to convert DB structs into API structs
 //
 
 func toCloud(c *db.Cloud) *web.Cloud {
 	return &web.Cloud{
-		c.ID,
-		c.EngineName,
-		c.Size,
-		c.ApplicationID,
-		c.Address,
-		c.Memory,
-		c.Username,
-		web.CloudState(c.State),
-		web.Timestamp(c.CreatedAt),
+		CreatedAt:     web.Timestamp(c.CreatedAt),
+		Name:          c.ID,
+		EngineName:    c.EngineName,
+		Size:          c.Size,
+		State:         web.CloudState(c.State),
+		Address:       c.Address,
+		Username:      c.Username,
+		ApplicationID: c.ApplicationID,
 	}
 }
 

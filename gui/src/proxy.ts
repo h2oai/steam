@@ -14,7 +14,9 @@ module Proxy {
 	// --- Consts ---
 
 	export var CloudStarted: CloudState = "Started"
+	export var CloudHealthy: CloudState = "Healthy"
 	export var CloudStopped: CloudState = "Stopped"
+	export var CloudUnknown: CloudState = "Unknown"
 
 
 	export var ScoringServiceStarted: ScoringServiceState = "Started"
@@ -24,15 +26,18 @@ module Proxy {
 	// --- Types ---
 
 	export interface Cloud {
+		created_at: Timestamp
 		name: string
 		engine_name: string
+		engine_version: string
 		size: number
-		application_id: string
-		address: string
 		memory: string
-		username: string
+		total_cores: number
+		allowed_cores: number
 		state: CloudState
-		created_at: Timestamp
+		address: string
+		username: string
+		application_id: string
 	}
 
 	export interface Model {
@@ -69,6 +74,7 @@ module Proxy {
 		stopCloud: (cloudName: string, go: (error: Error) => void) => void
 		getCloud: (cloudName: string, go: (error: Error, cloud: Cloud) => void) => void
 		getClouds: (go: (error: Error, clouds: Cloud[]) => void) => void
+		getCloudStatus: (cloud: Cloud, go: (error: Error, cloud: Cloud) => void) => void
 		deleteCloud: (cloudName: string, go: (error: Error) => void) => void
 		buildModel: (cloudName: string, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
 		getModel: (modelName: string, go: (error: Error, model: Model) => void) => void
@@ -127,6 +133,14 @@ module Proxy {
 
 	interface GetCloudsOut {
 		clouds: Cloud[]
+	}
+
+	interface GetCloudStatusIn {
+		cloud: Cloud
+	}
+
+	interface GetCloudStatusOut {
+		cloud: Cloud
 	}
 
 	interface DeleteCloudIn {
@@ -286,6 +300,15 @@ module Proxy {
 		}
 		Proxy.Call("GetClouds", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetCloudsOut>data).clouds)
+		})
+
+	}
+	export function getCloudStatus(cloud: Cloud, go: (error: Error, cloud: Cloud) => void): void {
+		var req: GetCloudStatusIn = {
+			cloud: cloud
+		}
+		Proxy.Call("GetCloudStatus", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetCloudStatusOut>data).cloud)
 		})
 
 	}

@@ -190,39 +190,53 @@ html.no-js
       .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
         .pane__page
-          h2 Cloud Details
+          h2 Cluster Details
           table
             tbody
               tr
                 th State
                 td(data-bind="text:state")
               tr
-                th Cloud Size
+                th Engine
+                td(data-bind="text:engineName")
+              // ko with: cloudDetails
+              tr
+                th Version
+                td(data-bind="text:engineVersion")
+              // /ko
+              tr
+                th Total Nodes
                 td(data-bind="text:size")
+              // ko with: cloudDetails
               tr
-                th Application ID
-                td(data-bind="text:applicationId")
+                th Total Memory
+                td(data-bind="text:totalMemory")
               tr
-                th Memory
-                td(data-bind="text:memory")
+                th Total Cores
+                td(data-bind="text:totalCores")
+              tr
+                th Allowed Cores
+                td(data-bind="text:allowedCores")
+              // /ko
               tr
                 th Address
                 td
                   a(target="_blank" data-bind="attr:{ href:address }, text:address")
               tr
-                th Username
-                td(data-bind="text:username")
+                th Application ID
+                td(data-bind="text:applicationId")
               tr
-                th Engine
-                td(data-bind="text:engineName")
+                th Username
+                td(data-bind="text:username")             
               tr
                 th Created
                 td(data-bind="text:createdAt")
-      .pane__actions
+                          
         .buttons.buttons--unit
           .button.button--primary(data-bind="click:buildModel") Build a model
         .buttons.buttons--unit
           .button.button--danger(data-bind="click:stopCloud") Stop this cloud
+        .pane-error(data-bind="text:error")
 
     template.models
       .pane__titlebar(data-bind="text:title")

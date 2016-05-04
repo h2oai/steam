@@ -10,6 +10,7 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
 )
 
@@ -94,30 +95,6 @@ func unmarshal(b []byte, v interface{}) error {
 		return fmt.Errorf("H2O response unmarshal failed: %v", err)
 	}
 	return nil
-}
-
-type Cloud struct {
-	Version      string `json:"version"` //TODO use this to determine json decoder
-	Name         string `json:"cloud_name"`
-	Size         int    `json:"cloud_size"`
-	IsHealthy    bool   `json:"cloud_healthy"`
-	BadNodes     int    `json:"bad_nodes"`
-	HasConsensus bool   `json:"consensus"`
-	IsLocked     bool   `json:"locked"`
-}
-
-func (h *H2O) GetCloud() (*Cloud, error) {
-	b, err := h.get("/3/Cloud", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var cloud Cloud
-	if err := unmarshal(b, &cloud); err != nil {
-		return nil, err
-	}
-
-	return &cloud, nil
 }
 
 type RawModel struct {
@@ -267,4 +244,19 @@ func (h *H2O) Shutdown() error {
 		return err
 	}
 	return nil
+}
+
+// TODO: THE FOLLOWING METHODS SHOULD BE IN GENERATED FILES
+func (h *H2O) GetCloud() (*bindings.CloudV3, error) {
+	b, err := h.get("/3/Cloud", nil)
+	if err != nil {
+		return nil, fmt.Errorf("Error from get in GetCloud:\n%v", err)
+	}
+
+	var c bindings.CloudV3
+	if err := unmarshal(b, &c); err != nil {
+		return nil, fmt.Errorf("Error from unmarshal in GetCloud:\n%v", err)
+	}
+
+	return &c, nil
 }

@@ -3,7 +3,7 @@ package web
 service Service
 
 alias CloudState string
-const CloudState Cloud Started Stopped
+const CloudState Cloud Started Healthy Stopped Unknown
  
 alias ScoringServiceState string
 const ScoringServiceState ScoringService Started Stopped
@@ -11,15 +11,19 @@ const ScoringServiceState ScoringService Started Stopped
 alias Timestamp int64
 
 type Cloud
+ CreatedAt Timestamp
  Name string
  EngineName string
+ EngineVersion string
  Size int
- ApplicationID string
- Address string
  Memory string
- Username string
+ TotalCores int
+ AllowedCores int
  State CloudState
- CreatedAt Timestamp
+ Address string
+ Username string
+ ApplicationID string
+ 
 
 type Model
  Name string
@@ -50,6 +54,7 @@ StartCloud(cloudName string, engineName string, size int, memory string, usernam
 StopCloud (cloudName string)
 GetCloud (cloudName string) cloud *Cloud
 GetClouds() clouds []*Cloud
+GetCloudStatus(cloud *Cloud) cloud *Cloud
 DeleteCloud(cloudName string)
 
 BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) model *Model

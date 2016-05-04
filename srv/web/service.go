@@ -19,7 +19,9 @@ type Timestamp int64
 
 const (
 	CloudStarted CloudState = "Started"
+	CloudHealthy            = "Healthy"
 	CloudStopped            = "Stopped"
+	CloudUnknown            = "Unknown"
 )
 
 const (
@@ -30,15 +32,18 @@ const (
 // --- Types ---
 
 type Cloud struct {
+	CreatedAt     Timestamp  `json:"created_at"`
 	Name          string     `json:"name"`
 	EngineName    string     `json:"engine_name"`
+	EngineVersion string     `json:"engine_version"`
 	Size          int        `json:"size"`
-	ApplicationID string     `json:"application_id"`
-	Address       string     `json:"address"`
 	Memory        string     `json:"memory"`
-	Username      string     `json:"username"`
+	TotalCores    int        `json:"total_cores"`
+	AllowedCores  int        `json:"allowed_cores"`
 	State         CloudState `json:"state"`
-	CreatedAt     Timestamp  `json:"created_at"`
+	Address       string     `json:"address"`
+	Username      string     `json:"username"`
+	ApplicationID string     `json:"application_id"`
 }
 
 type Model struct {
@@ -75,6 +80,7 @@ type Service interface {
 	StopCloud(cloudName string) error
 	GetCloud(cloudName string) (*Cloud, error)
 	GetClouds() ([]*Cloud, error)
+	GetCloudStatus(cloud *Cloud) (*Cloud, error)
 	DeleteCloud(cloudName string) error
 	BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*Model, error)
 	GetModel(modelName string) (*Model, error)
@@ -133,6 +139,14 @@ type GetCloudsIn struct {
 
 type GetCloudsOut struct {
 	Clouds []*Cloud `json:"clouds"`
+}
+
+type GetCloudStatusIn struct {
+	Cloud *Cloud `json:"cloud"`
+}
+
+type GetCloudStatusOut struct {
+	Cloud *Cloud `json:"cloud"`
 }
 
 type DeleteCloudIn struct {
@@ -303,6 +317,16 @@ func (this *Remote) GetClouds() ([]*Cloud, error) {
 		return nil, err
 	}
 	return out.Clouds, nil
+}
+
+func (this *Remote) GetCloudStatus(cloud *Cloud) (*Cloud, error) {
+	in := GetCloudStatusIn{cloud}
+	var out GetCloudStatusOut
+	err := this.Proc.Call("GetCloudStatus", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Cloud, nil
 }
 
 func (this *Remote) DeleteCloud(cloudName string) error {
@@ -492,6 +516,15 @@ func (this *Impl) GetClouds(r *http.Request, in *GetCloudsIn, out *GetCloudsOut)
 		return err
 	}
 	out.Clouds = it
+	return nil
+}
+
+func (this *Impl) GetCloudStatus(r *http.Request, in *GetCloudStatusIn, out *GetCloudStatusOut) error {
+	it, err := this.Service.GetCloudStatus(in.Cloud)
+	if err != nil {
+		return err
+	}
+	out.Cloud = it
 	return nil
 }
 

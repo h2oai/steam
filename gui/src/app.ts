@@ -642,6 +642,13 @@ module Main {
         success: boolean // FIXME
     }
 
+    interface CloudDetail{
+        engineVersion: string
+        totalMemory: string
+        totalCores: string
+        allowedCores: string
+    }
+
     interface CloudPane extends Pane {
         engineName: string
         size: string
@@ -651,9 +658,12 @@ module Main {
         username: string
         state: string
         createdAt: string
+        cloudDetails: Sig<CloudDetail>
+        error: Sig<string>
         buildModel: Act
         stopCloud: Act
     }
+
 
     interface ModelsPane extends Pane {
         error: Sig<string>
@@ -996,6 +1006,8 @@ module Main {
     }
 
     function newCloudPane(ctx: Context, cloud: Proxy.Cloud): CloudPane {
+        const error = sig<string>('')
+        const cloudDetails = sig<CloudDetail>(null)
         function buildModel(): void {
             const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
                 ctx.popDialog()
@@ -1016,19 +1028,38 @@ module Main {
                 ctx.showClouds()
             })
         }
+        if (cloud.state != 'Stopped') {
+            ctx.remote.getCloudStatus(cloud, (err, h2oCloud) => {
+                if (err) {
+                    // cloud.state = h2oCloud.state
+                    error(err.message)
+                    return
+                }
+                const cloudDetail = {
+                    engineVersion: h2oCloud.engine_version,
+                    totalMemory: h2oCloud.memory,
+                    totalCores: String(h2oCloud.total_cores),
+                    allowedCores: String(h2oCloud.allowed_cores)
+                }
+                cloudDetails(cloudDetail)
+                cloud.state = h2oCloud.state
+            })
+        }
         return {
             title: cloud.name,
             engineName: cloud.engine_name,
             size: String(cloud.size),
+            memory: cloud.memory,
             applicationId: cloud.application_id,
             address: `http://${cloud.address}/`,
-            memory: cloud.memory,
             username: cloud.username,
             state: cloud.state,
             createdAt: timestampToAge(cloud.created_at),
             buildModel: buildModel,
             stopCloud: stopCloud,
+            cloudDetails: cloudDetails,
             template: 'cloud',
+            error: error,
             dispose: noop,
             position: newPanePosition(650)
         }

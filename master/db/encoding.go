@@ -55,9 +55,10 @@ type Cloud struct {
 	Memory        string
 	Username      string
 	State         string
+	Out           string
 }
 
-func NewCloud(id string, engineName string, size int, applicationID string, address string, memory string, username string, state string) *Cloud {
+func NewCloud(id string, engineName string, size int, applicationID string, address string, memory string, username string, state string, out string) *Cloud {
 	return &Cloud{
 		&Record{
 			id,
@@ -71,6 +72,7 @@ func NewCloud(id string, engineName string, size int, applicationID string, addr
 		memory,
 		username,
 		state,
+		out,
 	}
 }
 

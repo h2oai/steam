@@ -13,6 +13,7 @@ type Cloud
  Memory string
  Username string
  State string
+ Out string
  
 type Model
  CloudName string
