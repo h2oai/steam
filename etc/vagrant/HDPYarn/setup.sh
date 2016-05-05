@@ -6,9 +6,10 @@ yum install -y java-1.7.0-openjdk-devel
 
 # Installing Hadoop
 echo "Using Hadoop Version $VERSION"
-if [ -f `/vagrant/resources/hadoop-${VERSION}.tar.gz`]; then
+FILE="/vagrant/resources/hadoop-${VERSION}.tar.gz"
+if [ -e `$FILE`]; then
 	echo "Importing Hadoop locally"
-	cp /vagrant/resources/hadoop-${VERSION}.tar.gz .
+	cp $FILE .
 else
 	echo "Downlading Hadoop remotely"
 	wget http://apache.claz.org/hadoop/common/hadoop-${VERSION}/hadoop-${VERSION}.tar.gz 
