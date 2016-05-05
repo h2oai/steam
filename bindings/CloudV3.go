@@ -42,7 +42,7 @@ type CloudV3 struct {
 	IsClient bool `json:"is_client"`
 
 	/** nodes */
-	Nodes []NodeV3 `json:"nodes"`
+	Nodes []*NodeV3 `json:"nodes"`
 
 	/* INHERITED: Comma-separated list of JSON field paths to exclude from the result, used like: "/3/Frames?_exclude_fields=frames/frame_id/URL,__meta"
 	ExcludeFields string: "" `json:"_exclude_fields"`

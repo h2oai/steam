@@ -1,10 +1,8 @@
 package bindings
 
-
-type Schema struct{
+type Schema struct {
 }
 
-func newSchema() *Schema{
-return &Schema{
-}
+func newSchema() *Schema {
+	return &Schema{}
 }
