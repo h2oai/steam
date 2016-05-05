@@ -97,34 +97,12 @@ func unmarshal(b []byte, v interface{}) error {
 	return nil
 }
 
-type RawModel struct {
-	ID   string
-	Data []byte
-}
-
-type ModelSynopsisV3 struct {
-	Algo               string     `json:"algo"`
-	AlgoFullName       string     `json:"algo_full_name"`
-	DataFrame          FrameKeyV3 `json:"data_frame"`
-	ModelId            ModelKeyV3 `json:"model_id"`
-	ResponseColumnName string     `json:"response_column_name"`
-	Timestamp          int64      `json:"timestamp"`
-}
-
-type GetModelsResponseV3 struct {
-	Models []*ModelSynopsisV3 `json:"models"`
-}
-
-type FrameKeyV3 struct {
-	Name string `json:"name"`
-}
-
 type ModelKeyV3 struct {
 	Name string `json:"name"`
 }
 
 type AutoMLBuilderV3 struct {
-	Job JobV3 `json:"job"`
+	Job bindings.JobV3 `json:"job"`
 }
 
 type AutoMLKeyV3 struct {
@@ -132,28 +110,13 @@ type AutoMLKeyV3 struct {
 }
 
 type AutoMLV3 struct {
-	Leader ModelKeyV3 `json:"leader"`
+	Leader bindings.ModelKeyV3 `json:"leader"`
 }
 
-type JobsV3 struct {
-	Jobs []*JobV3 `json:"jobs"`
-}
-
-type JobV3 struct {
-	JobKey    JobKeyV3    `json:"key"`
-	Status    string      `json:"status"`
-	Dest      AutoMLKeyV3 `json:"dest"` //FIXME: This should be a general key
-	Exception string      `json:"exception"`
-}
-
-type JobKeyV3 struct {
-	Name string `json:"name"`
-}
-
-func (h *H2O) jobPoll(jobID string) (*JobV3, error) {
+func (h *H2O) jobPoll(jobID string) (*bindings.JobV3, error) {
 	var (
-		j JobsV3
-		k JobV3
+		j bindings.JobsV3
+		k bindings.JobV3
 	)
 
 	for { // Polling for job
@@ -194,7 +157,7 @@ func (h *H2O) AutoML(dataset, targetName string, maxTime int) (string, error) {
 		return "", err
 	}
 
-	k, err := h.jobPoll(a.Job.JobKey.Name)
+	k, err := h.jobPoll(a.Job.Key.Name)
 
 	b, err = h.get("/3/AutoML/"+k.Dest.Name, nil)
 	if err != nil {
@@ -259,4 +222,18 @@ func (h *H2O) GetCloud() (*bindings.CloudV3, error) {
 	}
 
 	return &c, nil
+}
+
+func (h *H2O) GetModels() (*bindings.ModelsV3, error) {
+	b, err := h.get("/3/Models", nil)
+	if err != nil {
+		return nil, fmt.Errorf("Error from get in GetModels:\n%v", err)
+	}
+
+	var m bindings.ModelsV3
+	if err := unmarshal(b, &m); err != nil {
+		return nil, fmt.Errorf("Error from unmarshal in GetModles\n%s", err)
+	}
+
+	return &m, nil
 }

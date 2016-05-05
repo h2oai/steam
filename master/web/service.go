@@ -314,6 +314,32 @@ func (s *Service) GetModels() ([]*web.Model, error) {
 	return models, nil
 }
 
+func (s *Service) GetCloudModels(cloudName string) ([]*web.Model, error) {
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return nil, fmt.Errorf("Cannot find cloud %s in GetCloudModels:\n%v", cloudName, err)
+	}
+
+	h := h2ov3.NewClient(c.Address)
+	ms, err := h.GetModels()
+	if err != nil {
+		return nil, fmt.Errorf("Cannot reach models in cloud %s in GetCloudModels:\n%v", cloudName, err)
+	}
+
+	models := make([]*web.Model, len(ms.Models))
+	for i, m := range ms.Models {
+		models[i] = &web.Model{
+			Name:       m.ModelId.Name,
+			CloudName:  cloudName,
+			Dataset:    m.DataFrame.Name,
+			TargetName: m.ResponseColumnName,
+			CreatedAt:  web.Timestamp(m.Timestamp),
+		}
+	}
+
+	return models, nil
+}
+
 func (s *Service) DeleteModel(modelName string) error {
 	ss, err := s.getScoringService(modelName)
 	if err != nil {
