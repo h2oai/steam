@@ -80,7 +80,7 @@ type Service interface {
 	StopCloud(cloudName string) error
 	GetCloud(cloudName string) (*Cloud, error)
 	GetClouds() ([]*Cloud, error)
-	GetCloudStatus(cloud *Cloud) (*Cloud, error)
+	GetCloudStatus(cloudName string) (*Cloud, error)
 	DeleteCloud(cloudName string) error
 	BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*Model, error)
 	GetModel(modelName string) (*Model, error)
@@ -143,7 +143,7 @@ type GetCloudsOut struct {
 }
 
 type GetCloudStatusIn struct {
-	Cloud *Cloud `json:"cloud"`
+	CloudName string `json:"cloud_name"`
 }
 
 type GetCloudStatusOut struct {
@@ -328,8 +328,8 @@ func (this *Remote) GetClouds() ([]*Cloud, error) {
 	return out.Clouds, nil
 }
 
-func (this *Remote) GetCloudStatus(cloud *Cloud) (*Cloud, error) {
-	in := GetCloudStatusIn{cloud}
+func (this *Remote) GetCloudStatus(cloudName string) (*Cloud, error) {
+	in := GetCloudStatusIn{cloudName}
 	var out GetCloudStatusOut
 	err := this.Proc.Call("GetCloudStatus", &in, &out)
 	if err != nil {
@@ -539,7 +539,7 @@ func (this *Impl) GetClouds(r *http.Request, in *GetCloudsIn, out *GetCloudsOut)
 }
 
 func (this *Impl) GetCloudStatus(r *http.Request, in *GetCloudStatusIn, out *GetCloudStatusOut) error {
-	it, err := this.Service.GetCloudStatus(in.Cloud)
+	it, err := this.Service.GetCloudStatus(in.CloudName)
 	if err != nil {
 		return err
 	}

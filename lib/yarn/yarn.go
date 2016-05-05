@@ -92,7 +92,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		"jar",              //
 		enginePath,         //
 		"-jobname",         //
-		"H2O_" + name,      //
+		"STEAM_" + name,    //
 		"-n",               //
 		strconv.Itoa(size), //
 		"-mapperXmx",       //

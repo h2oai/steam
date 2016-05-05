@@ -184,14 +184,19 @@ func (s *Service) GetClouds() ([]*web.Cloud, error) {
 //
 // TODO: Maybe this should only report if non-Stopped,non-Unknown status
 //       In the case of Unknown, should only check if forced?
-func (s *Service) GetCloudStatus(c *web.Cloud) (*web.Cloud, error) { // Only called if cloud status != found
+func (s *Service) GetCloudStatus(cloudName string) (*web.Cloud, error) { // Only called if cloud status != found
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return nil, fmt.Errorf("Cannot find cluster %s in GetCloudStatus:\n%v", cloudName, err)
+	}
+
 	h := h2ov3.NewClient(c.Address)
 
 	cloud, err := h.GetCloud()
 	if err != nil { // Cloud just isn't found
 		c.State = web.CloudUnknown
 		log.Printf("Error from GetCloud in GetCloudStatus:\n%v", err)
-		return c, fmt.Errorf("Cannot find cluster %s, is it still running?", c.Name)
+		return nil, fmt.Errorf("Cannot find cluster %s, is it still running?", c.ID)
 	}
 
 	var (
@@ -211,8 +216,8 @@ func (s *Service) GetCloudStatus(c *web.Cloud) (*web.Cloud, error) { // Only cal
 	}
 
 	return &web.Cloud{
-		c.CreatedAt,
-		c.Name,
+		web.Timestamp(c.CreatedAt),
+		c.ID,
 		c.EngineName,
 		cloud.Version,
 		c.Size,

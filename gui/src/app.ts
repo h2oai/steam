@@ -1029,7 +1029,7 @@ module Main {
             })
         }
         if (cloud.state != 'Stopped') {
-            ctx.remote.getCloudStatus(cloud, (err, h2oCloud) => {
+            ctx.remote.getCloudStatus(cloud.name, (err, h2oCloud) => {
                 if (err) {
                     // cloud.state = h2oCloud.state
                     error(err.message)

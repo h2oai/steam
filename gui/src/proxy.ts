@@ -74,7 +74,7 @@ module Proxy {
 		stopCloud: (cloudName: string, go: (error: Error) => void) => void
 		getCloud: (cloudName: string, go: (error: Error, cloud: Cloud) => void) => void
 		getClouds: (go: (error: Error, clouds: Cloud[]) => void) => void
-		getCloudStatus: (cloud: Cloud, go: (error: Error, cloud: Cloud) => void) => void
+		getCloudStatus: (cloudName: string, go: (error: Error, cloud: Cloud) => void) => void
 		deleteCloud: (cloudName: string, go: (error: Error) => void) => void
 		buildModel: (cloudName: string, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
 		getModel: (modelName: string, go: (error: Error, model: Model) => void) => void
@@ -137,7 +137,7 @@ module Proxy {
 	}
 
 	interface GetCloudStatusIn {
-		cloud: Cloud
+		cloud_name: string
 	}
 
 	interface GetCloudStatusOut {
@@ -312,9 +312,9 @@ module Proxy {
 		})
 
 	}
-	export function getCloudStatus(cloud: Cloud, go: (error: Error, cloud: Cloud) => void): void {
+	export function getCloudStatus(cloudName: string, go: (error: Error, cloud: Cloud) => void): void {
 		var req: GetCloudStatusIn = {
-			cloud: cloud
+			cloud_name: cloudName
 		}
 		Proxy.Call("GetCloudStatus", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetCloudStatusOut>data).cloud)

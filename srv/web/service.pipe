@@ -54,7 +54,7 @@ StartCloud(cloudName string, engineName string, size int, memory string, usernam
 StopCloud (cloudName string)
 GetCloud (cloudName string) cloud *Cloud
 GetClouds() clouds []*Cloud
-GetCloudStatus(cloud *Cloud) cloud *Cloud
+GetCloudStatus(cloudName string) cloud *Cloud
 DeleteCloud(cloudName string)
 
 BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) model *Model
