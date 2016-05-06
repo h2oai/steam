@@ -188,6 +188,15 @@ html.no-js
 
     template.cloud
       .pane__titlebar(data-bind="text:title")
+      // ko if:error
+      .pane__body.pane__body--01
+        .pane-error(data-bind="text:error")
+      // /ko
+      // ko ifnot:error
+      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      // /ko
+
+    template.cloudInfo
       .pane__body.pane__body--01
         .pane__page
           h2 Cluster Details
@@ -237,6 +246,50 @@ html.no-js
         .buttons.buttons--unit
           .button.button--danger(data-bind="click:stopCloud") Stop this cloud
         .pane-error(data-bind="text:error")
+    
+    template.cloudModels
+      .pane__titlebar(data-bind="text:title")
+      // ko if:error
+      .pane__body
+        .pane-error(data-bind="text:error")
+      // /ko
+      // ko ifnot:error
+      // ko if:hasItems
+      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      // /ko
+      // ko ifnot:hasItems
+      .pane__body
+        .pane-icon
+          i.icon.ion-ios-color-filter-outline
+        .pane-message This cloud has no models.
+      // /ko
+      // /ko
+
+    template.cloudModel
+      .pane__titlebar(data-bind="text:title")
+      .pane__body.pane__body--01
+        .pane__page
+          h2 Model Details
+          table
+            tbody
+              tr
+                th Algo
+                td(data-bind="text: algo")
+              tr
+                th Frame
+                td(data-bind="text: frame")
+              tr
+                th Response Column
+                td(data-bind="text: responseColumn")
+              tr
+                th Java Model Location
+                td(data-bind="text: javaModelPath")
+              tr
+                th Created
+                td(data-bind="text:createdAt")
+      .pane__actions
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:getModel") Import model to Steam
 
     template.models
       .pane__titlebar(data-bind="text:title")

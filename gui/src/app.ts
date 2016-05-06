@@ -549,14 +549,6 @@ module Main {
         }
     }
 
-    interface CloudsPane extends Pane {
-        error: Sig<string>
-        items: Sigs<Folder>
-        hasItems: Sig<boolean>
-        startCloud: Act
-    }
-
-
     function doAfterRender(elements: HTMLElement[]): void {
         $(elements).click(function () {
             const $this = $(this)
@@ -643,14 +635,19 @@ module Main {
         success: boolean // FIXME
     }
 
-    interface CloudDetail{
-        engineVersion: string
-        totalMemory: string
-        totalCores: string
-        allowedCores: string
+    interface CloudsPane extends Pane {
+        error: Sig<string>
+        items: Sigs<Folder>
+        hasItems: Sig<boolean>
+        startCloud: Act
     }
 
     interface CloudPane extends Pane {
+        error: Sig<string>
+        items: Folder[]
+    }
+
+    interface CloudDetailsPane extends Pane {
         engineName: string
         size: string
         applicationId: string
@@ -665,6 +662,12 @@ module Main {
         stopCloud: Act
     }
 
+    interface CloudDetail {
+        engineVersion: string
+        totalMemory: string
+        totalCores: string
+        allowedCores: string
+    }
 
     interface ModelsPane extends Pane {
         error: Sig<string>
@@ -672,7 +675,7 @@ module Main {
         hasItems: Sig<boolean>
     }
 
-    interface ModelPane extends Pane {
+    interface ModelBasePane extends Pane {
         cloud: string
         algo: string
         frame: string
@@ -680,8 +683,15 @@ module Main {
         maxRunTime: string
         javaModelPath: string
         createdAt: string
+    }
+
+    interface ModelPane extends ModelBasePane {
         deployModel: Act
         deleteModel: Act
+    }
+
+    interface CloudModelPane extends ModelBasePane {
+        getModel: Act
     }
 
     interface ServicesPane extends Pane {
@@ -988,8 +998,8 @@ module Main {
             items(_.map(clouds, (cloud): Folder => {
                 return {
                     title: cloud.name,
-                    subhead: 'Size:',
-                    slug: String(cloud.size),
+                    subhead: 'State:',
+                    slug: String(cloud.state),
                     execute: () => { ctx.showCloud(cloud) },
                     template: 'folder'
                 }
@@ -1008,6 +1018,35 @@ module Main {
     }
 
     function newCloudPane(ctx: Context, cloud: Proxy.Cloud): CloudPane {
+        const error = sig<string>('')
+        const items: Folder[] = [
+            {
+                title: 'Cluster Details',
+                subhead: 'Size:',
+                slug: String(cloud.size),
+                execute: () => { ctx.showCloudDetails(cloud) },
+                template: 'folder'
+            },
+            {
+                title: 'Models',
+                subhead: 'Models in cluster',
+                slug: '',
+                execute: () => { ctx.showCloudModels(cloud) },
+                template: 'folder'
+            }
+        ]
+
+        return {
+            title: cloud.name,
+            error: error,
+            items: items,
+            template: 'cloud',
+            dispose: noop,
+            position: newPanePosition()
+        }
+    }
+
+    function newCloudDetailsPane(ctx: Context, cloud: Proxy.Cloud): CloudDetailsPane {
         const error = sig<string>('')
         const cloudDetails = sig<CloudDetail>(null)
         function buildModel(): void {
@@ -1060,8 +1099,69 @@ module Main {
             buildModel: buildModel,
             stopCloud: stopCloud,
             cloudDetails: cloudDetails,
-            template: 'cloud',
+            template: 'cloudInfo',
             error: error,
+            dispose: noop,
+            position: newPanePosition(650)
+        }
+    }
+
+    function newCloudModelsPane(ctx: Context, cloud: Proxy.Cloud): ModelsPane {
+        const error = sig<string>('')
+        const items = sigs<Folder>([])
+        const hasItems = lifts(items, (items) => items.length > 0)
+        ctx.remote.getCloudModels(cloud.name, (err, models) => {
+            if (err) {
+                error(err.message)
+                return
+            }
+            items(_.map(models, (model): Folder => {
+                return {
+                    title: model.name,
+                    subhead: model.dataset,
+                    slug: model.target_name,
+                    execute: () => { ctx.showCloudModel(model) },
+                    template: 'folder'
+                }
+            }))
+        })
+
+        return {
+            title: 'Cloud Models',
+            error: error,
+            items: items,
+            hasItems: hasItems,
+            template: 'cloudModels',
+            dispose: noop,
+            position: newPanePosition(),
+        }
+    }
+
+    function newCloudModelPane(ctx: Context, model: Proxy.Model): CloudModelPane {
+        const getModel: Act = () => {
+            ctx.setBusy('Getting model from h2o...')
+            ctx.remote.getModelFromCloud(model.cloud_name, model.name, (err, model) => {
+                ctx.setFree()
+                if (err) {
+                    alert(err.message)
+                    return
+                }
+
+                ctx.showModels()
+            })
+        }
+
+        return {
+            title: model.name,
+            cloud: model.cloud_name,
+            algo: model.algo,
+            frame: model.dataset,
+            responseColumn: model.target_name,
+            maxRunTime: String(model.max_runtime),
+            javaModelPath: model.java_model_path,
+            createdAt: String(model.created_at),
+            getModel: getModel,
+            template: 'cloudModel',
             dispose: noop,
             position: newPanePosition(650)
         }
@@ -1295,6 +1395,9 @@ module Main {
         public showPane = uni2<int, Pane>()
         public showClouds = uni()
         public showCloud = uni1<Proxy.Cloud>()
+        public showCloudDetails = uni1<Proxy.Cloud>()
+        public showCloudModels = uni1<Proxy.Cloud>()
+        public showCloudModel = uni1<Proxy.Model>()
         public showModels = uni()
         public showModel = uni1<Proxy.Model>()
         public showServices = uni()
@@ -1386,6 +1489,18 @@ module Main {
 
         ctx.showCloud.on((cloud: Proxy.Cloud) => {
             ctx.showPane(1, newCloudPane(ctx, cloud))
+        })
+
+        ctx.showCloudDetails.on((cloud: Proxy.Cloud) => {
+            ctx.showPane(2, newCloudDetailsPane(ctx, cloud))
+        })
+
+        ctx.showCloudModels.on((cloud: Proxy.Cloud) => {
+            ctx.showPane(2, newCloudModelsPane(ctx, cloud))
+        })
+
+        ctx.showCloudModel.on((model: Proxy.Model) => {
+            ctx.showPane(3, newCloudModelPane(ctx, model))
         })
 
         ctx.showModels.on(() => {

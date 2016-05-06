@@ -81,6 +81,7 @@ module Proxy {
 		getModel: (modelName: string, go: (error: Error, model: Model) => void) => void
 		getModels: (go: (error: Error, models: Model[]) => void) => void
 		getCloudModels: (cloudName: string, go: (error: Error, models: Model[]) => void) => void
+		getModelFromCloud: (cloudName: string, modelName: string, go: (error: Error, model: Model) => void) => void
 		deleteModel: (modelName: string, go: (error: Error) => void) => void
 		startScoringService: (modelName: string, port: number, go: (error: Error, service: ScoringService) => void) => void
 		stopScoringService: (modelName: string, port: number, go: (error: Error) => void) => void
@@ -184,6 +185,15 @@ module Proxy {
 
 	interface GetCloudModelsOut {
 		models: Model[]
+	}
+
+	interface GetModelFromCloudIn {
+		cloud_name: string
+		model_name: string
+	}
+
+	interface GetModelFromCloudOut {
+		model: Model
 	}
 
 	interface DeleteModelIn {
@@ -366,6 +376,16 @@ module Proxy {
 		}
 		Proxy.Call("GetCloudModels", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetCloudModelsOut>data).models)
+		})
+
+	}
+	export function getModelFromCloud(cloudName: string, modelName: string, go: (error: Error, model: Model) => void): void {
+		var req: GetModelFromCloudIn = {
+			cloud_name: cloudName,
+			model_name: modelName
+		}
+		Proxy.Call("GetModelFromCloud", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetModelFromCloudOut>data).model)
 		})
 
 	}

@@ -347,6 +347,54 @@ func (s *Service) GetCloudModels(cloudName string) ([]*web.Model, error) {
 	return models, nil
 }
 
+//TODO this is messy, fix it
+func (s *Service) GetModelFromCloud(cloudName string, modelName string) (*web.Model, error) {
+	// get cloud, must exist in db
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return nil, err // FIXME fmt error
+	}
+
+	// get model from the cloud
+	h := h2ov3.NewClient(c.Address)
+	r, err := h.GetModel(modelName)
+	if err != nil {
+		return nil, err //FIXME fmt error
+	}
+
+	m := r.Models[0]
+
+	// get pojo and genmodel
+	modelDir := fs.GetModelPath(s.workingDir, modelName, "java")
+	jm, err := h.ExportJavaModel(modelName, modelDir)
+	if err != nil {
+		return nil, err //FIXME fmt error
+	}
+	gm, err := h.ExportGenModel(modelDir)
+	if err != nil {
+		return nil, err //FIXME fmt error
+	}
+
+	model := db.NewModel(
+		modelName,
+		cloudName,
+		m.AlgoFullName,
+		m.DataFrame.Name,
+		m.ResponseColumnName,
+		-1,
+		jm,
+		gm,
+	)
+	if err := s.ds.CreateModel(model); err != nil {
+		return nil, err //FIXME fmt error
+	}
+
+	mod := toModel(model)
+	mod.Algo = m.AlgoFullName
+
+	return mod, nil
+}
+
 func (s *Service) DeleteModel(modelName string) error {
 	ss, err := s.getScoringService(modelName)
 	if err != nil {

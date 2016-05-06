@@ -62,6 +62,7 @@ BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) 
 GetModel(modelName string) model *Model
 GetModels() models []*Model
 GetCloudModels(cloudName string) models []*Model
+GetModelFromCloud(cloudName string, modelName string) model *Model
 DeleteModel(modelName string)
 
 StartScoringService(modelName string, port int) service *ScoringService

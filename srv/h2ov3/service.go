@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strconv"
 
 	"github.com/h2oai/steamY/bindings"
@@ -59,6 +60,9 @@ func (h *H2O) handleResponse(u string, res *http.Response, httperr error) ([]byt
 		}
 		return nil, fmt.Errorf("H2O response status failed: %s: %s / %s", u, res.Status, string(b))
 	}
+
+	nan := regexp.MustCompile(`"NaN"`)
+	b = nan.ReplaceAllLiteral(b, []byte("0"))
 
 	return b, nil
 }
@@ -202,7 +206,7 @@ func (h *H2O) CompilePojo(javaModel, jar string) error {
 }
 
 func (h *H2O) Shutdown() error {
-	_, err := h.post("/3/Shutdown", url.Values{})
+	_, err := h.post("/3/Shutdown", nil)
 	if err != nil {
 		return err
 	}
@@ -233,6 +237,20 @@ func (h *H2O) GetModels() (*bindings.ModelsV3, error) {
 	var m bindings.ModelsV3
 	if err := unmarshal(b, &m); err != nil {
 		return nil, fmt.Errorf("Error from unmarshal in GetModles\n%s", err)
+	}
+
+	return &m, nil
+}
+
+func (h *H2O) GetModel(modelName string) (*bindings.ModelsV3, error) {
+	b, err := h.get("/3/Models", url.Values{"model_id": {modelName}})
+	if err != nil {
+		return nil, fmt.Errorf("Error from get in GetModels:\n%v", err)
+	}
+
+	var m bindings.ModelsV3
+	if err := unmarshal(b, &m); err != nil {
+		return nil, fmt.Errorf("Error from get in GetModels:\n%v", err)
 	}
 
 	return &m, nil

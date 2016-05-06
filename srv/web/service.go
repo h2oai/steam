@@ -87,6 +87,7 @@ type Service interface {
 	GetModel(modelName string) (*Model, error)
 	GetModels() ([]*Model, error)
 	GetCloudModels(cloudName string) ([]*Model, error)
+	GetModelFromCloud(cloudName string, modelName string) (*Model, error)
 	DeleteModel(modelName string) error
 	StartScoringService(modelName string, port int) (*ScoringService, error)
 	StopScoringService(modelName string, port int) error
@@ -190,6 +191,15 @@ type GetCloudModelsIn struct {
 
 type GetCloudModelsOut struct {
 	Models []*Model `json:"models"`
+}
+
+type GetModelFromCloudIn struct {
+	CloudName string `json:"cloud_name"`
+	ModelName string `json:"model_name"`
+}
+
+type GetModelFromCloudOut struct {
+	Model *Model `json:"model"`
 }
 
 type DeleteModelIn struct {
@@ -387,6 +397,16 @@ func (this *Remote) GetCloudModels(cloudName string) ([]*Model, error) {
 		return nil, err
 	}
 	return out.Models, nil
+}
+
+func (this *Remote) GetModelFromCloud(cloudName string, modelName string) (*Model, error) {
+	in := GetModelFromCloudIn{cloudName, modelName}
+	var out GetModelFromCloudOut
+	err := this.Proc.Call("GetModelFromCloud", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Model, nil
 }
 
 func (this *Remote) DeleteModel(modelName string) error {
@@ -589,6 +609,15 @@ func (this *Impl) GetCloudModels(r *http.Request, in *GetCloudModelsIn, out *Get
 		return err
 	}
 	out.Models = it
+	return nil
+}
+
+func (this *Impl) GetModelFromCloud(r *http.Request, in *GetModelFromCloudIn, out *GetModelFromCloudOut) error {
+	it, err := this.Service.GetModelFromCloud(in.CloudName, in.ModelName)
+	if err != nil {
+		return err
+	}
+	out.Model = it
 	return nil
 }
 
