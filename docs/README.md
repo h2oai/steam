@@ -1,8 +1,25 @@
-# Installing, Starting, and Using Steam
+---
+fontfamily: arev
+
+title: Installing, Starting, and Using H2O Steam
+author: |
+  Copyright H2O, Inc. All rights reserved. 
+date: |
+  May 2016: Alpha Edition
+...
+
+\newpage
+
+Installing, Starting, and Using H2O SteamPublished by H2O.ai, Inc.2307 Leghorn St.Mountain View, CA 94043©2016 H2O.ai, Inc. All Rights Reserved.May 2016: Alpha EditionPhotos by ©H2O.ai, Inc.
+All copyrights belong to their respective owners.While every precaution has been taken in thepreparation of this book, the publisher andauthors assume no responsibility for errors oromissions, or for damages resulting from theuse of the information contained herein.Printed in the United States of America.
+
+\newpage
+
+# Installing, Starting, and H2O Using Steam
 
 This document is provided for external users and describes how to install, start, and use Steam on a YARN cluster. 
 
->***Note***: This installation should only be performed on a YARN edge node.
+***Note***: This installation should only be performed on a YARN edge node.
 
 ## Requirements
 
@@ -25,7 +42,8 @@ Perform the following steps to install Steam.
 	**OS X**
 
 		s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz		
-	>***Note***: This saves the Steam package (tar file) into your current folder.
+
+>***Note***: This saves the Steam package (tar file) into your current folder.
 
 3. Untar the Steam package. 
 
@@ -49,7 +67,7 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 
 		./steam serve master --compilation-service-address="localhost:8811"
 		
-	>**Note**: You can view all available options for starting Steam using `./steam help serve master`
+>**Note**: You can view all available options for starting Steam using `./steam help serve master`
 
 	You will see a message similar to the following when Steam starts successfully.
 
@@ -57,7 +75,8 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 		2016/04/28 13:34:56 Working directory: /home/seb/steam--linux-amd64/var/master
 		2016/04/28 13:34:56 WWW root: /home/seb/steam--linux-amd64/var/master/www
 		2016/04/28 13:34:57 Priming datastore for first time use...
-		2016/04/28 13:34:57 Datastore location: /home/seb/steam--linux-amd64/var/master/db/steam.db
+		2016/04/28 13:34:57 Datastore location: /home/seb/steam--linux-amd64/var/master/db
+		  /steam.db
 		2016/04/28 13:34:57 Web server listening at 172.16.2.182:9000
 		2016/04/28 13:34:57 Point your web browser to http://172.16.2.182:9000/
 
@@ -70,11 +89,11 @@ An empty Steam UI will display. Before performing any tasks, you must first add 
 
 1. Click the **Assets** icon (<img src="images/icon_assets.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel, then select **Add Engine**. 
 
-	![](images/add_engine.png)
+	![Adding an Engine](images/add_engine.png)
 
 2. Browse to the **automl-hdp2.2.jar** file on your local machine, then click **Upload**. 
 
-	>***Note***: This file was added during the "Install Steam" steps. 
+>***Note***: This file was added during the "Install Steam" steps. 
 
 ### Starting a Cloud
 
@@ -92,17 +111,17 @@ Clouds can be configured after the engine asset was successfully added.
 	
 	d. The amount of memory available on each node. Be sure to include the unit ("m" or "g").
 	
-	![](images/add_cloud.png)
+	![Adding a cloud](images/add_cloud.png)
 	
 3. Click **Start Cloud** when you are finished.
 
+The Cloud Details page opens upon successful completion. This page shows the cloud configuration information and includes a link to the H2O Flow URL. From this page, you can begin building your model. 
+
+  ![Cloud details](images/cloud_details.png)
+
 >***Note***: You can view a stream of the cloud creation log in the terminal window that is running Steam. In the UI, Steam will respond with an error if the cloud configuration is incorrect (for example, if you specify more nodes than available on the cluster). 
 
-The Cloud Details page opens upon successful completion. This page shows the cloud configuration information and includes a link to the H2O Flow URL. From this page, you can begin building model. 
-
->***Note***: On the Cloud Details page, the **Memory** field shows the memory for each node rather than the total cloud memory.
-
-![](images/cloud_details.png)
+**Note**: On the Cloud Details page, the **Memory** field shows the memory for each node rather than the total cloud memory.
 
 ### Adding a Model
 Models are created from the Cloud Details page. When building a model, you will need to provide the location of the dataset that you will use as well as the response column. 
@@ -119,7 +138,7 @@ Models are created from the Cloud Details page. When building a model, you will 
 
 5. Click **Start Building** when you are finished. 
 
-	![](images/build_model.png)
+	![Building a model](images/build_model.png)
 
 ### Viewing Models	
 
@@ -136,7 +155,8 @@ After a model is built, the next step is to deploy the model in order to make/vi
 2. Select the model that you want to use, then click the **Deploy this Model** button on the bottom of the page.
 
 3. Specify the port to use for the scoring service. 
->***Note***: Steam will return an error if you specify a port that is already being used.
+
+  ***Note***: Steam will return an error if you specify a port that is already being used.
 
 4. Click **Deploy** when you are done.
 
@@ -150,7 +170,7 @@ As with other H2O products, Flow can be used alongside Steam when performing mac
 
 On the Cloud Details page, click the Address link to open H2O Flow in a new tab. 
 
-![](images/h2o_flow.png)
+   ![H2O Flow UI](images/h2o_flow.png)
 
 >***Note***: Refer to the H2O Flow documentation for information on how to use Flow. 
 
