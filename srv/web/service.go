@@ -49,6 +49,7 @@ type Cloud struct {
 type Model struct {
 	Name          string    `json:"name"`
 	CloudName     string    `json:"cloud_name"`
+	Algo          string    `json:"algo"`
 	Dataset       string    `json:"dataset"`
 	TargetName    string    `json:"target_name"`
 	MaxRuntime    int       `json:"max_runtime"`

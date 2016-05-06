@@ -79,6 +79,7 @@ func NewCloud(id string, engineName string, size int, applicationID string, addr
 type Model struct {
 	*Record
 	CloudName     string
+	Algo          string
 	Dataset       string
 	TargetName    string
 	MaxRuntime    int
@@ -86,7 +87,7 @@ type Model struct {
 	GenModelPath  string
 }
 
-func NewModel(id string, cloudName string, dataset string, targetName string, maxRuntime int, javaModelPath string, genModelPath string) *Model {
+func NewModel(id string, cloudName string, algo string, dataset string, targetName string, maxRuntime int, javaModelPath string, genModelPath string) *Model {
 	return &Model{
 		&Record{
 			id,
@@ -94,6 +95,7 @@ func NewModel(id string, cloudName string, dataset string, targetName string, ma
 			0,
 		},
 		cloudName,
+		algo,
 		dataset,
 		targetName,
 		maxRuntime,

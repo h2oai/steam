@@ -28,6 +28,7 @@ type Cloud
 type Model
  Name string
  CloudName string
+ Algo string
  Dataset string
  TargetName string
  MaxRuntime int

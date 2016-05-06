@@ -442,6 +442,7 @@ module Main {
         constructor(
             public id: string,
             public cloud: string,
+            public algo: string,
             public frame: string,
             public responseColumn: string,
             public createdAt: string
@@ -673,6 +674,7 @@ module Main {
 
     interface ModelPane extends Pane {
         cloud: string
+        algo: string
         frame: string
         responseColumn: string
         maxRunTime: string
@@ -1120,6 +1122,7 @@ module Main {
         return {
             title: model.name,
             cloud: model.cloud_name,
+            algo: model.algo,
             frame: model.dataset,
             responseColumn: model.target_name,
             maxRunTime: String(model.max_runtime),

@@ -43,6 +43,7 @@ module Proxy {
 	export interface Model {
 		name: string
 		cloud_name: string
+		algo: string
 		dataset: string
 		target_name: string
 		max_runtime: number

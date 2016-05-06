@@ -272,6 +272,7 @@ func (s *Service) BuildModel(cloudName string, dataset string, targetName string
 	m := db.NewModel(
 		modelName,
 		cloudName,
+		"AutoML",
 		dataset,
 		targetName,
 		maxRunTime,
@@ -336,6 +337,7 @@ func (s *Service) GetCloudModels(cloudName string) ([]*web.Model, error) {
 		models[i] = &web.Model{
 			Name:       m.ModelId.Name,
 			CloudName:  cloudName,
+			Algo:       m.AlgoFullName,
 			Dataset:    m.DataFrame.Name,
 			TargetName: m.ResponseColumnName,
 			CreatedAt:  web.Timestamp(m.Timestamp),
@@ -593,14 +595,15 @@ func toCloud(c *db.Cloud) *web.Cloud {
 
 func toModel(m *db.Model) *web.Model {
 	return &web.Model{
-		m.ID,
-		m.CloudName,
-		m.Dataset,
-		m.TargetName,
-		m.MaxRuntime,
-		m.JavaModelPath,
-		m.GenModelPath,
-		web.Timestamp(m.CreatedAt),
+		Name:          m.ID,
+		CloudName:     m.CloudName,
+		Algo:          m.Algo,
+		Dataset:       m.Dataset,
+		TargetName:    m.TargetName,
+		MaxRuntime:    m.MaxRuntime,
+		JavaModelPath: m.JavaModelPath,
+		GenModelPath:  m.GenModelPath,
+		CreatedAt:     web.Timestamp(m.CreatedAt),
 	}
 }
 
