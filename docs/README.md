@@ -1,20 +1,3 @@
----
-fontfamily: arev
-
-title: Installing, Starting, and Using H2O Steam
-author: |
-  Copyright H2O, Inc. All rights reserved. 
-date: |
-  May 2016: Alpha Edition
-...
-
-\newpage
-
-Installing, Starting, and Using H2O SteamPublished by H2O.ai, Inc.2307 Leghorn St.Mountain View, CA 94043©2016 H2O.ai, Inc. All Rights Reserved.May 2016: Alpha EditionPhotos by ©H2O.ai, Inc.
-All copyrights belong to their respective owners.While every precaution has been taken in thepreparation of this book, the publisher andauthors assume no responsibility for errors oromissions, or for damages resulting from theuse of the information contained herein.Printed in the United States of America.
-
-\newpage
-
 # Installing, Starting, and H2O Using Steam
 
 This document is provided for external users and describes how to install, start, and use Steam on a YARN cluster. 
