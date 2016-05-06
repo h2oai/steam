@@ -654,7 +654,7 @@ module Main {
         address: string
         memory: string
         username: string
-        state: string
+        state: Sig<string>
         createdAt: string
         cloudDetails: Sig<CloudDetail>
         error: Sig<string>
@@ -1026,16 +1026,17 @@ module Main {
                 slug: String(cloud.size),
                 execute: () => { ctx.showCloudDetails(cloud) },
                 template: 'folder'
-            },
-            {
+            }
+        ]
+        if (cloud.state !== 'Stopped') {
+            items.push({
                 title: 'Models',
                 subhead: 'Models in cluster',
                 slug: '',
                 execute: () => { ctx.showCloudModels(cloud) },
                 template: 'folder'
-            }
-        ]
-
+            })
+        }
         return {
             title: cloud.name,
             error: error,
@@ -1048,6 +1049,7 @@ module Main {
 
     function newCloudDetailsPane(ctx: Context, cloud: Proxy.Cloud): CloudDetailsPane {
         const error = sig<string>('')
+        const state = sig<string>(cloud.state)
         const cloudDetails = sig<CloudDetail>(null)
         function buildModel(): void {
             const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
@@ -1072,7 +1074,7 @@ module Main {
         if (cloud.state != 'Stopped') {
             ctx.remote.getCloudStatus(cloud.name, (err, h2oCloud) => {
                 if (err) {
-                    // cloud.state = h2oCloud.state
+                    state('Unknown')
                     error(err.message)
                     return
                 }
@@ -1083,18 +1085,18 @@ module Main {
                     allowedCores: String(h2oCloud.allowed_cores)
                 }
                 cloudDetails(cloudDetail)
-                cloud.state = h2oCloud.state
+                state(h2oCloud.state)
             })
         }
         return {
-            title: cloud.name,
+            title: 'Cluster Details',
             engineName: cloud.engine_name,
             size: String(cloud.size),
             memory: cloud.memory,
             applicationId: cloud.application_id,
             address: `http://${cloud.address}/`,
             username: cloud.username,
-            state: cloud.state,
+            state: state,
             createdAt: timestampToAge(cloud.created_at),
             buildModel: buildModel,
             stopCloud: stopCloud,
