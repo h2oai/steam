@@ -127,7 +127,7 @@ function runpred2(form) {
 }
 
 function showStats(div, data) {
-    s = 'Service started ' + data['startTimeUTC'] + ' UTC, uptime ' + Number(data['upDays']).toFixed(2) + ' days. '
+    s = 'Service started ' + data['startTimeUTC'] + ' UTC, uptime ' + Number(data['upDays']).toFixed(3) + ' days. '
     + 'Last prediction took ' + Number(data['lastPredictionMs']).toFixed(3) + ' ms. '
     +  '<br>'
     + data['numberOfPredictions'] + ' predictions in ' + Number(data['totalPredictionTimeMs']).toFixed(1)

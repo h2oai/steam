@@ -12,13 +12,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
+
+import static ai.h2o.servicebuilder.Util.*;
 
 /**
  * Compile server for POJO to war file
@@ -34,14 +32,11 @@ import java.util.jar.Manifest;
  */
 public class MakeWarServlet extends HttpServlet {
 
-  public static final String JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-  public static String MEMORY_FOR_JAVA_PROCESSES = "4g";
-
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     File tmpDir = null;
     try {
       //create temp directory
-      tmpDir = Files.createTempDirectory("makeWar").toFile();
+      tmpDir = createTempDirectory("makeWar");
       System.out.println("tmp dir " + tmpDir);
 
       //  create output directories
@@ -69,15 +64,15 @@ public class MakeWarServlet extends HttpServlet {
             pojofile = filename;
             predictorClassName = filename.replace(".java", "");
             System.out.println("predictorClassName " + predictorClassName);
-            Files.copy(i.getInputStream(), new File(tmpDir, filename).toPath());
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
           }
           if (field.equals("jar")) {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
-            Files.copy(i.getInputStream(), new File(libDir, filename).toPath());
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
           if (field.equals("extra")) {
             extrafile = filename;
-            Files.copy(i.getInputStream(), new File(tmpDir, filename).toPath());
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
           }
         }
       }
@@ -86,7 +81,8 @@ public class MakeWarServlet extends HttpServlet {
         throw new Exception("need pojo, jar and extra");
 
       // Compile the pojo
-      runCmd(tmpDir, Arrays.asList("javac", "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile, "-d", outDir.getPath(), pojofile), "Compilation of pojo failed");
+      runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+          "-cp", jarfile, "-d", outDir.getPath(), pojofile), "Compilation of pojo failed");
 
       // possible way to get files included with this servlet
       // instead of inclusing extras
@@ -104,7 +100,8 @@ public class MakeWarServlet extends HttpServlet {
       // now have a correct PredictorServlet.java and InfoServlet.java files
 
       // compile extra
-      runCmd(tmpDir, Arrays.asList("javac", "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", "WEB-INF/lib/*:WEB-INF/classes", "-d", outDir.getPath(),
+      runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+          "-cp", "WEB-INF/lib/*:WEB-INF/classes", "-d", outDir.getPath(),
           "src/PredictServlet.java", "src/InfoServlet.java", "src/StatsServlet.java"), "Compilation of extra failed");
 
       // create the war jar file
@@ -148,7 +145,7 @@ public class MakeWarServlet extends HttpServlet {
     }
     finally {
       // if the temp directory is still there we delete it
-      if (tmpDir != null && Files.exists(tmpDir.toPath())) {
+      if (tmpDir != null && tmpDir.exists()) {
         try {
           FileUtils.deleteDirectory(tmpDir);
         }
@@ -158,84 +155,6 @@ public class MakeWarServlet extends HttpServlet {
       }
     }
 
-  }
-
-  private void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String templateFileName, String resultFileName) throws IOException {
-    File srcDir = new File(tmpDir, "src");
-    byte[] templateJava = Files.readAllBytes(new File(srcDir, templateFileName).toPath());
-    String java = new String(templateJava).replace(JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME, javaClassName);
-    Files.write(new File(srcDir, resultFileName).toPath(), java.getBytes());
-  }
-
-  /**
-   * Run command cmd in separate process in directory
-   *
-   * @param directory    run in this directory
-   * @param cmd          command to run
-   * @param errorMessage error message if process didn't finish with exit value 0
-   * @return stdout combined with stderr
-   * @throws Exception
-   */
-  private String runCmd(File directory, List<String> cmd, String errorMessage) throws Exception {
-    ProcessBuilder pb = new ProcessBuilder(cmd);
-    pb.directory(directory);
-    pb.redirectErrorStream(true); // error sent to output stream
-    Process p = pb.start();
-
-    // get output stream to string
-    String s;
-    StringBuilder sb = new StringBuilder();
-    BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
-    while ((s = stdout.readLine()) != null) {
-      System.out.println(s);
-      sb.append(s);
-      sb.append('\n');
-    }
-    String sbs = sb.toString();
-    int exitValue = p.waitFor();
-    if (exitValue != 0 || sbs.length() > 0)
-      throw new Exception(errorMessage + " exit value " + exitValue + "  " + sbs);
-    return sbs;
-  }
-
-  /**
-   * Create jar archive out of files list. Names in archive have paths starting from relativeToDir
-   *
-   * @param tobeJared     list of files
-   * @param relativeToDir starting directory for paths
-   * @return jar as byte array
-   * @throws IOException
-   */
-  private byte[] createJarArchiveByteArray(File[] tobeJared, String relativeToDir) throws IOException {
-    int BUFFER_SIZE = 10240;
-    byte buffer[] = new byte[BUFFER_SIZE];
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    JarOutputStream out = new JarOutputStream(stream, new Manifest());
-
-    for (File t : tobeJared) {
-      if (t == null || !t.exists() || t.isDirectory())
-        continue;
-
-      // Create jar entry
-      String filename = t.getPath().replace(relativeToDir, "").replace("\\", "/");
-      JarEntry jarAdd = new JarEntry(filename);
-      jarAdd.setTime(t.lastModified());
-      out.putNextEntry(jarAdd);
-
-      // Write file to archive
-      FileInputStream in = new FileInputStream(t);
-      while (true) {
-        int nRead = in.read(buffer, 0, buffer.length);
-        if (nRead <= 0)
-          break;
-        out.write(buffer, 0, nRead);
-      }
-      in.close();
-    }
-
-    out.close();
-    stream.close();
-    return stream.toByteArray();
   }
 
 }
