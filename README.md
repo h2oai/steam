@@ -42,7 +42,11 @@ You will see a `BUILD SUCCESSFUL` message when the installation is complete. At 
 ## Starting Steam
 Now that Steam is installed, perform the following steps to start and use Steam. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
 
-1. ssh to the machine running YARN, changing `<user>` and `<domain>` below with appropriate values. Specify your password when prompted. 
+1. While still in the **steamY** directory, copy the **automl-hdp2.2.jar** file to your local machine. This engine is required in order to run any AutoML jobs in Steam. 
+
+		scp <user>@<domain>:./automl-hdp2.2.jar .
+
+2. ssh to the machine running YARN, changing `<user>` and `<domain>` below with appropriate values. Specify your password when prompted. 
 
 	`ssh <user>@<domain>`
 	
@@ -51,10 +55,6 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 	- steam--linux-amd64.tar.gz
 	- automl-hdp2.2.jar	
 	
-2. Copy the **automl-hdp2.2.jar** file to your local machine. This engine is required in order to run any AutoML jobs in Steam. 
-
-		scp <user>@<domain>:./automl-hdp2.2.jar .
-
 3. On the YARN machine, change directories to the Steam directory, then set up the Jetty server using one of the following methods:
 
 		cd steam--linux-amd64/steam
@@ -87,7 +87,7 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 
 ## Using Steam
 
-In a Web browser, navigate to the Steam Web server (for example, http://172.16.2.182:9090).
+In a Web browser, navigate to the Steam Web server (for example, http://172.16.2.182:9000).
 
 ### Adding an Engine
 An empty Steam UI will display. Before performing any tasks, you must first add an Asset. 
@@ -124,8 +124,6 @@ Clouds can be configured after the engine asset was successfully added.
 
 The Cloud Details page opens upon successful completion. This page shows the cloud configuration information and includes a link to the H2O Flow URL. From this page, you can begin building model. 
 
->***Note***: On the Cloud Details page, the **Memory** field shows the memory for each node rather than the total cloud memory.
-
 ![](docs/images/cloud_details.png)
 
 ### Adding a Model
@@ -160,7 +158,8 @@ After a model is built, the next step is to deploy the model in order to make/vi
 2. Select the model that you want to use, then click the **Deploy this Model** button on the bottom of the page.
 
 3. Specify the port to use for the scoring service. 
->***Note***: Steam will return an error if you specify a port that is already being used.
+
+	>***Note***: Steam will return an error if you specify a port that is already being used.
 
 4. Click **Deploy** when you are done.
 
@@ -182,6 +181,6 @@ On the Cloud Details page, click the Address link to open H2O Flow in a new tab.
 
 When you are finished, use the following process to safely shut down Steam:
 
-1. Stop all running services.
+1. On the Services page, stop all running services.
 
 2. Stop all running clouds.

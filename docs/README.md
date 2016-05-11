@@ -26,7 +26,7 @@ Perform the following steps to install Steam.
 
 		s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz		
 
->***Note***: This saves the Steam package (tar file) into your current folder.
+	***Note***: This saves the Steam package (tar file) into your current folder.
 
 3. Untar the Steam package. 
 
@@ -46,7 +46,9 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 		cd steam--linux-amd64
 		java -jar var/master/assets/jetty-runner.jar --port 8811 var/master/assets/ROOT.war
 
-2. Open another terminal window, then start Steam on the master server (the compilation server that will run the POJOs). For example, the following commands will start Steam on localhost. Note that the port value must match the port specified when starting the Jetty server.
+2. Open another terminal window and ssh to the machine running YARN.
+
+3. Change directories to the Steam directory (either **steam--linux-amd64** or **steam--darwin-amd64**), then start Steam on the master server (the compilation server that will run the POJOs). For example, the following commands will start Steam on localhost. Note that the port value must match the port specified when starting the Jetty server.
 
 		./steam serve master --compilation-service-address="localhost:8811"
 		
@@ -58,14 +60,13 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 		2016/04/28 13:34:56 Working directory: /home/seb/steam--linux-amd64/var/master
 		2016/04/28 13:34:56 WWW root: /home/seb/steam--linux-amd64/var/master/www
 		2016/04/28 13:34:57 Priming datastore for first time use...
-		2016/04/28 13:34:57 Datastore location: /home/seb/steam--linux-amd64/var/master/db
-		  /steam.db
+		2016/04/28 13:34:57 Datastore location: /home/seb/steam--linux-amd64/var/master/db/steam.db
 		2016/04/28 13:34:57 Web server listening at 172.16.2.182:9000
 		2016/04/28 13:34:57 Point your web browser to http://172.16.2.182:9000/
 
 ## Using Steam
 
-In a Web browser, navigate to the Steam Web server (for example, http://172.16.2.182:9090).
+In a Web browser, navigate to the Steam Web server (for example, http://172.16.2.182:9000).
 
 ### Adding an Engine
 An empty Steam UI will display. Before performing any tasks, you must first add an Asset. In this case, the **automl-hdp2.2.jar** file (or similar) provides the engine necessary for Steam to run AutoML jobs. 
@@ -75,8 +76,6 @@ An empty Steam UI will display. Before performing any tasks, you must first add 
 	![Adding an Engine](images/add_engine.png)
 
 2. Browse to the **automl-hdp2.2.jar** file on your local machine, then click **Upload**. 
-
->***Note***: This file was added during the "Install Steam" steps. 
 
 ### Starting a Cloud
 
@@ -103,8 +102,6 @@ The Cloud Details page opens upon successful completion. This page shows the clo
   ![Cloud details](images/cloud_details.png)
 
 >***Note***: You can view a stream of the cloud creation log in the terminal window that is running Steam. In the UI, Steam will respond with an error if the cloud configuration is incorrect (for example, if you specify more nodes than available on the cluster). 
-
-**Note**: On the Cloud Details page, the **Memory** field shows the memory for each node rather than the total cloud memory.
 
 ### Adding a Model
 Models are created from the Cloud Details page. When building a model, you will need to provide the location of the dataset that you will use as well as the response column. 
@@ -139,7 +136,7 @@ After a model is built, the next step is to deploy the model in order to make/vi
 
 3. Specify the port to use for the scoring service. 
 
-  ***Note***: Steam will return an error if you specify a port that is already being used.
+  >***Note***: Steam will return an error if you specify a port that is already being used.
 
 4. Click **Deploy** when you are done.
 
@@ -161,6 +158,6 @@ On the Cloud Details page, click the Address link to open H2O Flow in a new tab.
 
 When you are finished, use the following process to safely shut down Steam:
 
-1. Stop all running services.
+1. On the Services page, stop all running services.
 
 2. Stop all running clouds.
