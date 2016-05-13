@@ -1,6 +1,9 @@
 // predict.js
 // H2O Scoring Service
 
+// TODO
+// check for timeouts in $.get calls
+
 // Sort values if not sorted properly
 // This is needed because c-1, c-2, ... are sorted alphabetically which is wrong
 function sortValues(values) {
@@ -77,7 +80,7 @@ function showInputParameters() {
   },'json');
 }
 
-function showResult(div, data) {
+function showResult(div, status, data) {
     label = data["label"];
     index = data["labelIndex"];
     probs = data["classProbabilities"];
@@ -98,32 +101,33 @@ function showUrl(pardiv, params) {
   pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
 }
 
-function runpred(form) {
-  params = form.p.value;
+function predResults(params) {
   pardiv = document.querySelector(".params");
   // add link that opens in new window
   showUrl(pardiv, params);
 
-  cmd = '/predict?' + params;
   div = document.querySelector(".results");
-  res = $.get(cmd, function(data, status) {
-    showResult(div, data);
-  },'json');
+  cmd = '/predict?' + params;
+    $.get(cmd, function(data, status) {
+      showResult(div, status, data);
+    },'json')
+      .fail(function(data, status, error) {
+//        console.log(arguments);
+//        console.log("fail " + data.status + " " + data.statusText);
+        down = "<b>Service is down</b>";
+        div.innerHTML = down + "<br>status " + data.status + " statusText " + data.statusText;
+        stats = document.querySelector(".stats");
+        stats.innerHTML = down;
+      });
 
 }
 
+function runpred(form) {
+  predResults(form.p.value);
+}
+
 function runpred2(form) {
-  var params = $('#allparams').serialize();
-  pardiv = document.querySelector(".params");
-  // add link that opens in new window
-  showUrl(pardiv, params);
-
-  cmd = '/predict?' + params;
-  div = document.querySelector(".results");
-  res = $.get(cmd, function(data, status) {
-    showResult(div, data);
-   },'json');
-
+  predResults($('#allparams').serialize());
 }
 
 function showStats(div, data) {
