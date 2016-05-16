@@ -658,7 +658,6 @@ module Main {
         createdAt: string
         cloudDetails: Sig<CloudDetail>
         error: Sig<string>
-        buildModel: Act
         stopCloud: Act
     }
 
@@ -673,6 +672,10 @@ module Main {
         error: Sig<string>
         items: Sigs<Folder>
         hasItems: Sig<boolean>
+    }
+
+    interface CloudModelsPane extends ModelsPane {
+        buildModel: Act
     }
 
     interface ModelBasePane extends Pane {
@@ -1051,15 +1054,6 @@ module Main {
         const error = sig<string>('')
         const state = sig<string>(cloud.state)
         const cloudDetails = sig<CloudDetail>(null)
-        function buildModel(): void {
-            const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
-                ctx.popDialog()
-                if (result) {
-                    ctx.showModels()
-                }
-            })
-            ctx.pushDialog(dialog)
-        }
         function stopCloud(): void {
             ctx.setBusy('Stopping cloud...')
             ctx.remote.stopCloud(cloud.name, (err) => {
@@ -1098,7 +1092,6 @@ module Main {
             username: cloud.username,
             state: state,
             createdAt: timestampToAge(cloud.created_at),
-            buildModel: buildModel,
             stopCloud: stopCloud,
             cloudDetails: cloudDetails,
             template: 'cloudInfo',
@@ -1108,10 +1101,19 @@ module Main {
         }
     }
 
-    function newCloudModelsPane(ctx: Context, cloud: Proxy.Cloud): ModelsPane {
+    function newCloudModelsPane(ctx: Context, cloud: Proxy.Cloud): CloudModelsPane {
         const error = sig<string>('')
         const items = sigs<Folder>([])
         const hasItems = lifts(items, (items) => items.length > 0)
+        function buildModel(): void {
+            const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
+                ctx.popDialog()
+                if (result) {
+                    ctx.showModels()
+                }
+            })
+            ctx.pushDialog(dialog)
+        } 
         ctx.remote.getCloudModels(cloud.name, (err, models) => {
             if (err) {
                 error(err.message)
@@ -1134,6 +1136,7 @@ module Main {
             items: items,
             hasItems: hasItems,
             template: 'cloudModels',
+            buildModel: buildModel,
             dispose: noop,
             position: newPanePosition(),
         }
