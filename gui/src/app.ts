@@ -500,7 +500,7 @@ module Main {
         }
 
         const buttons: NavButton[] = [
-            newNavButton('ion-ios-cloud-outline', 'Clouds', true, ctx.showClouds),
+            newNavButton('ion-ios-cloud-outline', 'Clusters', true, ctx.showClouds),
             newNavButton('ion-ios-color-filter-outline', 'Models', false, ctx.showModels),
             newNavButton('ion-ios-world-outline', 'Services', false, ctx.showServices),
             newNavButton('ion-ios-paper-outline', 'Assets', false, ctx.showAssets)
@@ -1009,7 +1009,7 @@ module Main {
             }))
         })
         return {
-            title: 'Clouds',
+            title: 'Clusters',
             error: error,
             hasItems: hasItems,
             items: items,
@@ -1055,7 +1055,7 @@ module Main {
         const state = sig<string>(cloud.state)
         const cloudDetails = sig<CloudDetail>(null)
         function stopCloud(): void {
-            ctx.setBusy('Stopping cloud...')
+            ctx.setBusy('Stopping cluster...')
             ctx.remote.stopCloud(cloud.name, (err) => {
                 ctx.setFree()
                 if (err) {
@@ -1131,7 +1131,7 @@ module Main {
         })
 
         return {
-            title: 'Cloud Models',
+            title: 'Cluster Models',
             error: error,
             items: items,
             hasItems: hasItems,
