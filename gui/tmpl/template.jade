@@ -94,7 +94,7 @@ html.no-js
 
       .dialog__actions
         .buttons.buttons--unit
-          .button.button--primary(data-bind="click:startCloud") Start Cloud
+          .button.button--primary(data-bind="click:startCloud") Start Cluster
         .buttons.buttons--unit
           .button(data-bind="click:cancel") Cancel
 
@@ -184,7 +184,7 @@ html.no-js
       // /ko
       .pane__actions
         .buttons
-          .button.button--primary(data-bind="click:startCloud") Start a cloud
+          .button.button--primary(data-bind="click:startCloud") Start a cluster
 
     template.cloud
       .pane__titlebar(data-bind="text:title")
@@ -242,28 +242,29 @@ html.no-js
                 td(data-bind="text:createdAt")
                           
         .buttons.buttons--unit
-          .button.button--primary(data-bind="click:buildModel") Build a model
-        .buttons.buttons--unit
-          .button.button--danger(data-bind="click:stopCloud") Stop this cloud
+          .button.button--danger(data-bind="click:stopCloud") Stop this cluster
         .pane-error(data-bind="text:error")
     
     template.cloudModels
       .pane__titlebar(data-bind="text:title")
       // ko if:error
-      .pane__body
+      .pane__body.pane__body--01
         .pane-error(data-bind="text:error")
       // /ko
       // ko ifnot:error
       // ko if:hasItems
-      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
       // /ko
       // ko ifnot:hasItems
-      .pane__body
+      .pane__body.pane__body--01
         .pane-icon
           i.icon.ion-ios-color-filter-outline
         .pane-message This cluster has no models.
       // /ko
       // /ko
+      .pane__actions
+        .buttons
+          .button.button--primary(data-bind="click:buildModel") Build a model
 
     template.cloudModel
       .pane__titlebar(data-bind="text:title")
