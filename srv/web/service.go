@@ -46,6 +46,14 @@ type Cloud struct {
 	ApplicationID string     `json:"application_id"`
 }
 
+type Job struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Progress    string    `json:"progress"`
+	CreatedAt   Timestamp `json:"created_at"`
+	FinishedAt  Timestamp `json:"finished_at"`
+}
+
 type Model struct {
 	Name          string    `json:"name"`
 	CloudName     string    `json:"cloud_name"`
@@ -83,6 +91,8 @@ type Service interface {
 	GetClouds() ([]*Cloud, error)
 	GetCloudStatus(cloudName string) (*Cloud, error)
 	DeleteCloud(cloudName string) error
+	GetJob(cloudName string, jobName string) (*Job, error)
+	GetJobs(cloudName string) ([]*Job, error)
 	BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*Model, error)
 	GetModel(modelName string) (*Model, error)
 	GetModels() ([]*Model, error)
@@ -157,6 +167,23 @@ type DeleteCloudIn struct {
 }
 
 type DeleteCloudOut struct {
+}
+
+type GetJobIn struct {
+	CloudName string `json:"cloud_name"`
+	JobName   string `json:"job_name"`
+}
+
+type GetJobOut struct {
+	Job *Job `json:"job"`
+}
+
+type GetJobsIn struct {
+	CloudName string `json:"cloud_name"`
+}
+
+type GetJobsOut struct {
+	Jobs []*Job `json:"jobs"`
 }
 
 type BuildModelIn struct {
@@ -357,6 +384,26 @@ func (this *Remote) DeleteCloud(cloudName string) error {
 		return err
 	}
 	return nil
+}
+
+func (this *Remote) GetJob(cloudName string, jobName string) (*Job, error) {
+	in := GetJobIn{cloudName, jobName}
+	var out GetJobOut
+	err := this.Proc.Call("GetJob", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Job, nil
+}
+
+func (this *Remote) GetJobs(cloudName string) ([]*Job, error) {
+	in := GetJobsIn{cloudName}
+	var out GetJobsOut
+	err := this.Proc.Call("GetJobs", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Jobs, nil
 }
 
 func (this *Remote) BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*Model, error) {
@@ -573,6 +620,24 @@ func (this *Impl) DeleteCloud(r *http.Request, in *DeleteCloudIn, out *DeleteClo
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (this *Impl) GetJob(r *http.Request, in *GetJobIn, out *GetJobOut) error {
+	it, err := this.Service.GetJob(in.CloudName, in.JobName)
+	if err != nil {
+		return err
+	}
+	out.Job = it
+	return nil
+}
+
+func (this *Impl) GetJobs(r *http.Request, in *GetJobsIn, out *GetJobsOut) error {
+	it, err := this.Service.GetJobs(in.CloudName)
+	if err != nil {
+		return err
+	}
+	out.Jobs = it
 	return nil
 }
 

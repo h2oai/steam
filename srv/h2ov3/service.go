@@ -255,3 +255,31 @@ func (h *H2O) GetModel(modelName string) (*bindings.ModelsV3, error) {
 
 	return &m, nil
 }
+
+func (h *H2O) GetJobs() (*bindings.JobsV3, error) {
+	b, err := h.get("/3/Jobs", nil)
+	if err != nil {
+		return nil, fmt.Errorf("Error getting jobs list: \n%v", err)
+	}
+
+	var j bindings.JobsV3
+	if err := unmarshal(b, &j); err != nil {
+		return nil, fmt.Errorf("Error unmarshalling jobs list: \n%v", err)
+	}
+
+	return &j, nil
+}
+
+func (h *H2O) GetJob(jobName string) (*bindings.JobsV3, error) {
+	b, err := h.get("/3/Jobs", url.Values{"job_id": {jobName}})
+	if err != nil {
+		return nil, fmt.Errorf("Error getting job %s: \n%v", jobName, err)
+	}
+
+	var j bindings.JobsV3
+	if err := unmarshal(b, &j); err != nil {
+		return nil, fmt.Errorf("Error unmarshalling job %s: \n%v", jobName, err)
+	}
+
+	return &j, nil
+}

@@ -40,6 +40,14 @@ module Proxy {
 		application_id: string
 	}
 
+	export interface Job {
+		name: string
+		description: string
+		progress: string
+		created_at: Timestamp
+		finished_at: Timestamp
+	}
+
 	export interface Model {
 		name: string
 		cloud_name: string
@@ -77,6 +85,8 @@ module Proxy {
 		getClouds: (go: (error: Error, clouds: Cloud[]) => void) => void
 		getCloudStatus: (cloudName: string, go: (error: Error, cloud: Cloud) => void) => void
 		deleteCloud: (cloudName: string, go: (error: Error) => void) => void
+		getJob: (cloudName: string, jobName: string, go: (error: Error, job: Job) => void) => void
+		getJobs: (cloudName: string, go: (error: Error, jobs: Job[]) => void) => void
 		buildModel: (cloudName: string, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
 		getModel: (modelName: string, go: (error: Error, model: Model) => void) => void
 		getModels: (go: (error: Error, models: Model[]) => void) => void
@@ -151,6 +161,23 @@ module Proxy {
 	}
 
 	interface DeleteCloudOut {
+	}
+
+	interface GetJobIn {
+		cloud_name: string
+		job_name: string
+	}
+
+	interface GetJobOut {
+		job: Job
+	}
+
+	interface GetJobsIn {
+		cloud_name: string
+	}
+
+	interface GetJobsOut {
+		jobs: Job[]
 	}
 
 	interface BuildModelIn {
@@ -338,6 +365,25 @@ module Proxy {
 		}
 		Proxy.Call("DeleteCloud", req, function(error, data) {
 			return error ? go(error) : go(null)
+		})
+
+	}
+	export function getJob(cloudName: string, jobName: string, go: (error: Error, job: Job) => void): void {
+		var req: GetJobIn = {
+			cloud_name: cloudName,
+			job_name: jobName
+		}
+		Proxy.Call("GetJob", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetJobOut>data).job)
+		})
+
+	}
+	export function getJobs(cloudName: string, go: (error: Error, jobs: Job[]) => void): void {
+		var req: GetJobsIn = {
+			cloud_name: cloudName
+		}
+		Proxy.Call("GetJobs", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetJobsOut>data).jobs)
 		})
 
 	}

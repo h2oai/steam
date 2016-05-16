@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
@@ -242,6 +243,44 @@ func (s *Service) DeleteCloud(cloudName string) error {
 		return fmt.Errorf("Cloud %s does not exist.", cloudName)
 	}
 	return s.ds.DeleteCloud(cloudName)
+}
+
+func (s *Service) GetJob(cloudName, jobName string) (*web.Job, error) {
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
+	h := h2ov3.NewClient(c.Address)
+
+	j, err := h.GetJob(jobName)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+	job := j.Jobs[0]
+
+	return htoJob(job), nil
+}
+
+func (s *Service) GetJobs(cloudName string) ([]*web.Job, error) {
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
+	h := h2ov3.NewClient(c.Address)
+
+	j, err := h.GetJobs()
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
+	jobs := make([]*web.Job, len(j.Jobs))
+	for i, job := range j.Jobs {
+		jobs[i] = htoJob(job)
+	}
+
+	return jobs, nil
 }
 
 func (s *Service) BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) (*web.Model, error) {
@@ -513,7 +552,7 @@ func (s *Service) GetScoringService(modelName string) (*web.ScoringService, erro
 	if err != nil {
 		return nil, err
 	}
-	return toScoringService(ss), nil //FIXME
+	return toScoringService(ss), nil
 }
 
 func (s *Service) GetScoringServices() ([]*web.ScoringService, error) {
@@ -671,5 +710,24 @@ func toEngine(e *db.Engine) *web.Engine {
 		e.ID,
 		e.Path,
 		web.Timestamp(e.CreatedAt),
+	}
+}
+
+//
+// Routines to convert H2O structs into API structs
+//
+
+func htoJob(j *bindings.JobV3) *web.Job {
+	var end int64
+	if j.Status == "DONE" {
+		end = j.StartTime + j.Msec
+	}
+
+	return &web.Job{
+		Name:        j.Key.Name,
+		Description: j.Description,
+		Progress:    j.Status,
+		CreatedAt:   web.Timestamp(j.StartTime),
+		FinishedAt:  web.Timestamp(end),
 	}
 }

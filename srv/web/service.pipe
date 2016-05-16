@@ -23,7 +23,13 @@ type Cloud
  Address string
  Username string
  ApplicationID string
- 
+
+type Job
+ Name string
+ Description string
+ Progress string
+ CreatedAt Timestamp
+ FinishedAt Timestamp
 
 type Model
  Name string
@@ -52,11 +58,15 @@ type Engine
 Ping(status bool) status bool
 
 StartCloud(cloudName string, engineName string, size int, memory string, username string) cloud *Cloud
+ConnecttoCloud(cloudName string, address string) cloud *Cloud
 StopCloud (cloudName string)
 GetCloud (cloudName string) cloud *Cloud
 GetClouds() clouds []*Cloud
 GetCloudStatus(cloudName string) cloud *Cloud
 DeleteCloud(cloudName string)
+
+GetJob(cloudName string, jobName string) job *Job
+GetJobs(cloudName string) jobs []*Job
 
 BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) model *Model
 GetModel(modelName string) model *Model
