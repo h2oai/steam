@@ -42,6 +42,7 @@ module Proxy {
 
 	export interface Job {
 		name: string
+		cloud_name: string
 		description: string
 		progress: string
 		created_at: Timestamp

@@ -245,6 +245,16 @@ html.no-js
           .button.button--danger(data-bind="click:stopCloud") Stop this cluster
         .pane-error(data-bind="text:error")
     
+    template.cloudJobs
+      .pane__titlebar(data-bind="text:title")
+      // ko if:error
+      .pane__body
+        .pane-error(data-bind="text:error")
+      // /ko
+      // ko if:hasItems
+      .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      // /ko
+
     template.cloudModels
       .pane__titlebar(data-bind="text:title")
       // ko if:error
@@ -265,6 +275,28 @@ html.no-js
       .pane__actions
         .buttons
           .button.button--primary(data-bind="click:buildModel") Build a model
+
+    template.cloudJob
+      .pane__titlebar(data-bind="text:title")
+      .pane__body.pane__body--01
+        .pane__page
+          h2 Job Details
+          table
+            tbody
+              tr
+                th Description
+                td(data-bind="text:description")
+              tr
+                th Status
+                td(data-bind="text:progress")
+              tr
+                th Start Time
+                td(data-bind="text:createdAt")
+              // ko if:finishedAt
+              tr
+                th End Time
+                td(data-bind="text:finishedAt")
+              // /ko
 
     template.cloudModel
       .pane__titlebar(data-bind="text:title")

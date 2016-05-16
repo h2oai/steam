@@ -26,6 +26,7 @@ type Cloud
 
 type Job
  Name string
+ CloudName string
  Description string
  Progress string
  CreatedAt Timestamp
@@ -58,7 +59,6 @@ type Engine
 Ping(status bool) status bool
 
 StartCloud(cloudName string, engineName string, size int, memory string, username string) cloud *Cloud
-ConnecttoCloud(cloudName string, address string) cloud *Cloud
 StopCloud (cloudName string)
 GetCloud (cloudName string) cloud *Cloud
 GetClouds() clouds []*Cloud

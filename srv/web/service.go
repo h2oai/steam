@@ -48,6 +48,7 @@ type Cloud struct {
 
 type Job struct {
 	Name        string    `json:"name"`
+	CloudName   string    `json:"cloud_name"`
 	Description string    `json:"description"`
 	Progress    string    `json:"progress"`
 	CreatedAt   Timestamp `json:"created_at"`

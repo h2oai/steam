@@ -668,6 +668,20 @@ module Main {
         allowedCores: string
     }
 
+    interface JobsPane extends Pane {
+        error: Sig<string>
+        items: Sigs<Folder>
+        hasItems: Sig<boolean>
+    }
+
+    interface JobPane extends Pane {
+        description: string
+        progress: string
+        createdAt: string
+        finishedAt: Sig<string>
+        error: Sig<string>
+    }
+
     interface ModelsPane extends Pane {
         error: Sig<string>
         items: Sigs<Folder>
@@ -1031,15 +1045,28 @@ module Main {
                 template: 'folder'
             }
         ]
+
         if (cloud.state !== 'Stopped') {
-            items.push({
-                title: 'Models',
-                subhead: 'Models in cluster',
-                slug: '',
-                execute: () => { ctx.showCloudModels(cloud) },
-                template: 'folder'
-            })
+            // ctx.remote.getCloudModels(cloud.name, (err, models) => {
+                items.push({
+                    title: 'Models',
+                    subhead: 'Models in cluster',
+                    slug: '',
+                    execute: () => { ctx.showCloudModels(cloud) },
+                    template: 'folder'
+                })
+            // })
+            // ctx.remote.getJobs(cloud.name, (err, jobs) => {
+                items.push({
+                    title: 'Jobs',
+                    subhead: 'Cluster Jobs',
+                    slug: '',
+                    execute: () => { ctx.showCloudJobs(cloud) },
+                    template: 'folder'
+                })
+            // })
         }
+
         return {
             title: cloud.name,
             error: error,
@@ -1101,6 +1128,38 @@ module Main {
         }
     }
 
+    function newCloudJobsPane(ctx: Context, cloud: Proxy.Cloud): JobsPane {
+        const error = sig<string>('')
+        const items = sigs<Folder>([])
+        const hasItems = lifts(items, (items) => items.length > 0)
+
+        ctx.remote.getJobs(cloud.name, (err, jobs) => {
+            if (err) {
+                error(err.message)
+                return
+            }
+            items(_.map(jobs, (job): Folder => {
+                return {
+                    title: job.name,
+                    subhead: "Status",
+                    slug: job.progress,
+                    execute: () => { ctx.showCloudJob(job) },
+                    template: 'folder'
+                }
+            }))
+        })
+
+        return {
+            title: 'Cluster Jobs',
+            error: error,
+            items: items,
+            hasItems: hasItems,
+            template: 'cloudJobs',
+            dispose: noop,
+            position: newPanePosition(),
+        }
+    }
+
     function newCloudModelsPane(ctx: Context, cloud: Proxy.Cloud): CloudModelsPane {
         const error = sig<string>('')
         const items = sigs<Folder>([])
@@ -1142,6 +1201,25 @@ module Main {
         }
     }
 
+    function newCloudJobPane(ctx: Context, job: Proxy.Job): JobPane {
+        const error = sig<string>('')
+        const finishedAt = sig<string>('')
+        if (job.progress == "DONE") {
+            finishedAt(timestampToAge(job.finished_at/1000))
+        }
+        return {
+            title: job.name,
+            description: job.description,
+            progress: job.progress,
+            createdAt: timestampToAge(job.created_at/1000),
+            finishedAt: finishedAt,
+            error: error,
+            template: 'cloudJob',
+            dispose: noop,
+            position: newPanePosition(650),
+        }
+    }
+
     function newCloudModelPane(ctx: Context, model: Proxy.Model): CloudModelPane {
         const getModel: Act = () => {
             ctx.setBusy('Getting model from h2o...')
@@ -1164,7 +1242,7 @@ module Main {
             responseColumn: model.target_name,
             maxRunTime: String(model.max_runtime),
             javaModelPath: model.java_model_path,
-            createdAt: String(model.created_at),
+            createdAt: timestampToAge(model.created_at/1000),
             getModel: getModel,
             template: 'cloudModel',
             dispose: noop,
@@ -1401,7 +1479,9 @@ module Main {
         public showClouds = uni()
         public showCloud = uni1<Proxy.Cloud>()
         public showCloudDetails = uni1<Proxy.Cloud>()
+        public showCloudJobs = uni1<Proxy.Cloud>()
         public showCloudModels = uni1<Proxy.Cloud>()
+        public showCloudJob = uni1<Proxy.Job>()
         public showCloudModel = uni1<Proxy.Model>()
         public showModels = uni()
         public showModel = uni1<Proxy.Model>()
@@ -1504,8 +1584,16 @@ module Main {
             ctx.showPane(2, newCloudModelsPane(ctx, cloud))
         })
 
+        ctx.showCloudJobs.on((cloud: Proxy.Cloud) => {
+            ctx.showPane(2, newCloudJobsPane(ctx, cloud))
+        })
+
         ctx.showCloudModel.on((model: Proxy.Model) => {
             ctx.showPane(3, newCloudModelPane(ctx, model))
+        })
+
+        ctx.showCloudJob.on((job: Proxy.Job) => {
+            ctx.showPane(3, newCloudJobPane(ctx, job))
         })
 
         ctx.showModels.on(() => {
