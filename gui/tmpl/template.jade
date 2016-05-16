@@ -343,7 +343,21 @@ html.no-js
 
     template.services
       .pane__titlebar(data-bind="text:title")
+      // ko if:error
+      .pane__body
+        .pane-error(data-bind="text:error")
+      // /ko
+      // ko ifnot:error
+      // ko if:hasItems
       .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      // /ko
+      // ko ifnot:hasItems
+      .pane__body
+        .pane-icon
+          i.icon.ion-ios-world-outline
+        .pane-message You do not have any services.
+      // /ko
+      // /ko
 
     template.service
       .pane__titlebar(data-bind="text:title")
