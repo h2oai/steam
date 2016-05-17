@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
 	"time"
 
@@ -245,6 +246,37 @@ func (s *Service) DeleteCloud(cloudName string) error {
 	return s.ds.DeleteCloud(cloudName)
 }
 
+//
+// Functions for sorting jobs
+//
+
+type Jobs []*web.Job
+
+func (k Jobs) Len() int {
+	return len(k)
+}
+
+func (k Jobs) Less(i, j int) bool {
+	switch {
+	case k[i].Progress == "DONE" && k[j].Progress == "DONE":
+		return k[i].FinishedAt < k[j].FinishedAt
+	case k[i].Progress == "DONE":
+		return true
+	case k[j].Progress == "DONE":
+		return false
+	default:
+		return k[i].FinishedAt < k[j].FinishedAt
+	}
+}
+
+func (k Jobs) Swap(i, j int) {
+	k[i], k[j] = k[j], k[i]
+}
+
+//
+// End
+//
+
 func (s *Service) GetJob(cloudName, jobName string) (*web.Job, error) {
 	c, err := s.getCloud(cloudName)
 	if err != nil {
@@ -279,6 +311,8 @@ func (s *Service) GetJobs(cloudName string) ([]*web.Job, error) {
 	for i, job := range j.Jobs {
 		jobs[i] = htoJob(job)
 	}
+
+	sort.Sort(sort.Reverse(Jobs(jobs)))
 
 	return jobs, nil
 }
