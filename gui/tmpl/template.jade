@@ -165,6 +165,18 @@ html.no-js
           span.folder__subhead(data-bind="text:subhead")
           span.folder__slug(data-bind="text:slug")
 
+    template.folderI
+      .folder(data-bind="click:execute")
+        .folder__title(data-bind="text:title")
+        .folder__detail
+          span.folder__subhead(data-bind="text:subhead")
+          span.folder__slug(data-bind="text:slug")
+        // ko if:isActive
+        .folder__detail
+          span.folder__subhead(data-bind="text:subheadI")
+          span.folder__slug(data-bind="text:slugI")
+        // /ko
+
     template.clouds
       .pane__titlebar(data-bind="text:title")
       // ko if:error
@@ -274,7 +286,7 @@ html.no-js
       // /ko
       .pane__actions
         .buttons
-          .button.button--primary(data-bind="click:buildModel") Build a model
+          .button.button--primary(data-bind="click:buildModel") Build a m+-6odel
 
     template.cloudJob
       .pane__titlebar(data-bind="text:title")

@@ -571,6 +571,12 @@ module Main {
         template: string
     }
 
+    interface FolderI extends Folder {
+        isActive: boolean
+        subheadI: string
+        slugI: Sig<string>
+    }
+
     interface Dialog extends Templated {
         title: string
         cancel: Act
@@ -644,7 +650,7 @@ module Main {
 
     interface CloudPane extends Pane {
         error: Sig<string>
-        items: Folder[]
+        items: FolderI[]
     }
 
     interface CloudDetailsPane extends Pane {
@@ -1036,35 +1042,59 @@ module Main {
 
     function newCloudPane(ctx: Context, cloud: Proxy.Cloud): CloudPane {
         const error = sig<string>('')
-        const items: Folder[] = [
+        const slugI = sig<string>('')
+        const items: FolderI[] = [
             {
                 title: 'Cluster Details',
                 subhead: 'Size:',
                 slug: String(cloud.size),
                 execute: () => { ctx.showCloudDetails(cloud) },
-                template: 'folder'
+                template: 'folder',
+                isActive: false,
+                subheadI: '',
+                slugI: slugI
             }
         ]
 
         if (cloud.state !== 'Stopped') {
-            // ctx.remote.getCloudModels(cloud.name, (err, models) => {
-                items.push({
-                    title: 'Models',
-                    subhead: 'Models in cluster',
-                    slug: '',
-                    execute: () => { ctx.showCloudModels(cloud) },
-                    template: 'folder'
-                })
-            // })
-            // ctx.remote.getJobs(cloud.name, (err, jobs) => {
-                items.push({
-                    title: 'Jobs',
-                    subhead: 'Cluster Jobs',
-                    slug: '',
-                    execute: () => { ctx.showCloudJobs(cloud) },
-                    template: 'folder'
-                })
-            // })
+            const modelSlug = sig<string>('')
+            const jobSlug = sig<string>('')
+
+            ctx.remote.getCloudModels(cloud.name, (err, models) => {
+                if (err) {
+                    alert(err.message)
+                    return
+                }
+                modelSlug(String(models.length))
+            })
+            ctx.remote.getJobs(cloud.name, (err, jobs) => {
+                if (err) {
+                    alert(err.message)
+                    return
+                }
+                jobSlug(String(jobs.length))
+            })
+            items.push({
+                title: 'Jobs',
+                subhead: 'Jobs in this cluster',
+                slug: '',
+                execute: () => { ctx.showCloudJobs(cloud) },
+                template: 'folderI',
+                isActive: true,
+                subheadI: 'Number of Jobs:',
+                slugI: jobSlug
+            })
+
+            items.push({
+                title: 'Models',
+                subhead: 'Models in this cluster',
+                slug: '',
+                template: 'folderI',
+                execute: () => { ctx.showCloudModels(cloud) },
+                isActive: true,
+                subheadI: 'Number of models:',
+                slugI: modelSlug
+            })
         }
 
         return {
