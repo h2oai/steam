@@ -44,6 +44,7 @@ type Cloud struct {
 	Address       string     `json:"address"`
 	Username      string     `json:"username"`
 	ApplicationID string     `json:"application_id"`
+	Activity      Timestamp  `json:"activity"`
 }
 
 type Job struct {
@@ -86,6 +87,7 @@ type Engine struct {
 
 type Service interface {
 	Ping(status bool) (bool, error)
+	ActivityPoll(status bool) (bool, error)
 	StartCloud(cloudName string, engineName string, size int, memory string, username string) (*Cloud, error)
 	StopCloud(cloudName string) error
 	GetCloud(cloudName string) (*Cloud, error)
@@ -118,6 +120,14 @@ type PingIn struct {
 }
 
 type PingOut struct {
+	Status bool `json:"status"`
+}
+
+type ActivityPollIn struct {
+	Status bool `json:"status"`
+}
+
+type ActivityPollOut struct {
 	Status bool `json:"status"`
 }
 
@@ -321,6 +331,16 @@ func (this *Remote) Ping(status bool) (bool, error) {
 	in := PingIn{status}
 	var out PingOut
 	err := this.Proc.Call("Ping", &in, &out)
+	if err != nil {
+		return false, err
+	}
+	return out.Status, nil
+}
+
+func (this *Remote) ActivityPoll(status bool) (bool, error) {
+	in := ActivityPollIn{status}
+	var out ActivityPollOut
+	err := this.Proc.Call("ActivityPoll", &in, &out)
 	if err != nil {
 		return false, err
 	}
@@ -565,6 +585,15 @@ type Impl struct {
 
 func (this *Impl) Ping(r *http.Request, in *PingIn, out *PingOut) error {
 	it, err := this.Service.Ping(in.Status)
+	if err != nil {
+		return err
+	}
+	out.Status = it
+	return nil
+}
+
+func (this *Impl) ActivityPoll(r *http.Request, in *ActivityPollIn, out *ActivityPollOut) error {
+	it, err := this.Service.ActivityPoll(in.Status)
 	if err != nil {
 		return err
 	}

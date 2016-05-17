@@ -187,6 +187,8 @@ func Run(version, buildDate string, opts *Opts) {
 		}
 	}()
 
+	webServiceImpl.Service.ActivityPoll(true)
+
 	for {
 		select {
 		case err := <-failch:

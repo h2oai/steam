@@ -23,6 +23,7 @@ type Cloud
  Address string
  Username string
  ApplicationID string
+ Activity Timestamp
 
 type Job
  Name string
@@ -57,6 +58,7 @@ type Engine
  CreatedAt Timestamp
 
 Ping(status bool) status bool
+ActivityPoll(status bool) status bool
 
 StartCloud(cloudName string, engineName string, size int, memory string, username string) cloud *Cloud
 StopCloud (cloudName string)

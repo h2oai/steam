@@ -38,6 +38,7 @@ module Proxy {
 		address: string
 		username: string
 		application_id: string
+		activity: Timestamp
 	}
 
 	export interface Job {
@@ -80,6 +81,7 @@ module Proxy {
 
 	export interface Service {
 		ping: (status: boolean, go: (error: Error, status: boolean) => void) => void
+		activityPoll: (status: boolean, go: (error: Error, status: boolean) => void) => void
 		startCloud: (cloudName: string, engineName: string, size: number, memory: string, username: string, go: (error: Error, cloud: Cloud) => void) => void
 		stopCloud: (cloudName: string, go: (error: Error) => void) => void
 		getCloud: (cloudName: string, go: (error: Error, cloud: Cloud) => void) => void
@@ -112,6 +114,14 @@ module Proxy {
 	}
 
 	interface PingOut {
+		status: boolean
+	}
+
+	interface ActivityPollIn {
+		status: boolean
+	}
+
+	interface ActivityPollOut {
 		status: boolean
 	}
 
@@ -309,6 +319,15 @@ module Proxy {
 		}
 		Proxy.Call("Ping", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<PingOut>data).status)
+		})
+
+	}
+	export function activityPoll(status: boolean, go: (error: Error, status: boolean) => void): void {
+		var req: ActivityPollIn = {
+			status: status
+		}
+		Proxy.Call("ActivityPoll", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<ActivityPollOut>data).status)
 		})
 
 	}

@@ -1019,8 +1019,9 @@ module Main {
                 return
             }
             items(_.map(clouds, (cloud): FolderI => {
-                const slugI = sig<string>('')
+                const slugI = sig<string>('NA')
 
+                slugI(timestampToAge(cloud.activity))
                 return {
                     title: cloud.name,
                     subhead: 'State:',

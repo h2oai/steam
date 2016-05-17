@@ -25,7 +25,7 @@ type Service struct {
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
-	activity                  map[string]int64
+	activity                  map[string]web.Timestamp
 }
 
 func toTimestamp(t time.Time) web.Timestamp {
@@ -37,7 +37,7 @@ func now() web.Timestamp {
 }
 
 func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
-	impl := &web.Impl{&Service{
+	return &web.Impl{&Service{
 		workingDir,
 		ds,
 		compilationServiceAddress,
@@ -45,20 +45,23 @@ func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoring
 		kerberos,
 		username,
 		keytab,
-		make(map[string]int64),
+		make(map[string]web.Timestamp),
 	}}
-
-	activityPoll(impl.Service)
-
-	return impl
 }
 
-func activityPoll(s Service) {
-	log.Println("Cloud Monitoring started")
-	go func() {
-		tickIntv := time.Second * 5
+func (s *Service) Ping(status bool) (bool, error) {
+	return status, nil
+}
 
-		ticker := time.NewTicker(tickIntv)
+func (s *Service) ActivityPoll(status bool) (bool, error) {
+	log.Println("Polling clouds for activity")
+
+	go func() {
+		quickTick := time.Second * 5
+		normlTick := time.Hour
+
+		startTime := time.NewTimer(time.Minute)
+		ticker := time.NewTicker(quickTick)
 		for {
 			select {
 			case <-ticker.C:
@@ -74,21 +77,20 @@ func activityPoll(s Service) {
 					if len(js) > 0 {
 						j := js[0]
 						if j.Progress == "DONE" {
-							s.activity[c.Name] = int64(j.FinishedAt)
+							s.activity[c.Name] = j.FinishedAt / 1000
 						} else {
-							s.activity[c.Name] = 0 // Currently Running
+							s.activity[c.Name] = now()
 						}
 					} else {
-						s.activity[c.Name] = int64(c.CreatedAt)
+						s.activity[c.Name] = c.CreatedAt
 					}
 				}
-
+			case <-startTime.C:
+				ticker = time.NewTicker(normlTick)
+				log.Println("Switching to hourly cloud poll")
 			}
 		}
 	}()
-}
-
-func (s *Service) Ping(status bool) (bool, error) {
 	return status, nil
 }
 
@@ -216,6 +218,7 @@ func (s *Service) GetClouds() ([]*web.Cloud, error) {
 	clouds := make([]*web.Cloud, len(cs))
 	for i, c := range cs {
 		clouds[i] = toCloud(c)
+		clouds[i].Activity = web.Timestamp(s.activity[c.ID]) // update to last known activity
 	}
 	return clouds, nil
 }
@@ -271,6 +274,7 @@ func (s *Service) GetCloudStatus(cloudName string) (*web.Cloud, error) { // Only
 		c.Address,
 		c.Username,
 		c.ApplicationID,
+		web.Timestamp(s.activity[c.ID]),
 	}, nil
 }
 
@@ -752,6 +756,7 @@ func toCloud(c *db.Cloud) *web.Cloud {
 		Address:       c.Address,
 		Username:      c.Username,
 		ApplicationID: c.ApplicationID,
+		Activity:      web.Timestamp(c.CreatedAt), // Defaults to cloud age if poll hasn't occured yet
 	}
 }
 
