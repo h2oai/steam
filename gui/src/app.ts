@@ -643,7 +643,7 @@ module Main {
 
     interface CloudsPane extends Pane {
         error: Sig<string>
-        items: Sigs<Folder>
+        items: Sigs<FolderI>
         hasItems: Sig<boolean>
         startCloud: Act
     }
@@ -1002,7 +1002,7 @@ module Main {
 
     function newCloudsPane(ctx: Context): CloudsPane {
         const error = sig<string>('')
-        const items = sigs<Folder>([])
+        const items = sigs<FolderI>([])
         const hasItems = lifts(items, (items) => items.length > 0)
         const startCloud: Act = () => {
             const dialog = newStartCloudDialog(ctx, (result: StartCloudDialogResult) => {
@@ -1018,13 +1018,18 @@ module Main {
                 error(err.message)
                 return
             }
-            items(_.map(clouds, (cloud): Folder => {
+            items(_.map(clouds, (cloud): FolderI => {
+                const slugI = sig<string>('')
+
                 return {
                     title: cloud.name,
                     subhead: 'State:',
                     slug: String(cloud.state),
                     execute: () => { ctx.showCloud(cloud) },
-                    template: 'folder'
+                    template: 'folderI',
+                    isActive: true,
+                    subheadI: 'Last Active:',
+                    slugI: slugI
                 }
             }))
         })

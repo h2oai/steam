@@ -25,6 +25,7 @@ type Service struct {
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
+	activity                  map[string]int64
 }
 
 func toTimestamp(t time.Time) web.Timestamp {
@@ -36,7 +37,7 @@ func now() web.Timestamp {
 }
 
 func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
-	return &web.Impl{&Service{
+	impl := &web.Impl{&Service{
 		workingDir,
 		ds,
 		compilationServiceAddress,
@@ -44,7 +45,47 @@ func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoring
 		kerberos,
 		username,
 		keytab,
+		make(map[string]int64),
 	}}
+
+	activityPoll(impl.Service)
+
+	return impl
+}
+
+func activityPoll(s Service) {
+	log.Println("Cloud Monitoring started")
+	go func() {
+		tickIntv := time.Second * 5
+
+		ticker := time.NewTicker(tickIntv)
+		for {
+			select {
+			case <-ticker.C:
+				cs, err := s.GetClouds()
+				if err != nil {
+					log.Println(err)
+				}
+				for _, c := range cs {
+					js, err := s.GetJobs(c.Name)
+					if err != nil {
+						log.Println(err)
+					}
+					if len(js) > 0 {
+						j := js[0]
+						if j.Progress == "DONE" {
+							s.activity[c.Name] = int64(j.FinishedAt)
+						} else {
+							s.activity[c.Name] = 0 // Currently Running
+						}
+					} else {
+						s.activity[c.Name] = int64(c.CreatedAt)
+					}
+				}
+
+			}
+		}
+	}()
 }
 
 func (s *Service) Ping(status bool) (bool, error) {
