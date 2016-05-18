@@ -541,9 +541,9 @@ func (s *Service) compileModel(modelName string) (string, error) {
 	j := m.JavaModelPath
 	g := m.GenModelPath
 
-	e := fs.GetAssetsPath(s.workingDir, "makewar-extra.jar")
+	// e := fs.GetAssetsPath(s.workingDir, "makewar-extra.jar")
 
-	w, err := c.CompilePojo(j, g, e, "makewar")
+	w, err := c.CompilePojo(j, g, "makewar")
 	if err != nil {
 		return "", err
 	}

@@ -42,7 +42,6 @@ ssb:
 	cd $(SSB) && ./gradlew build
 	mkdir -p $(ASSETS)
 	cp $(SSB)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
-	cp $(SSB)/makewar-extra.jar $(ASSETS)/
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
 
 generate:

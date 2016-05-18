@@ -44,7 +44,7 @@ func uploadFile(filePath, kind string, w *multipart.Writer) error {
 	return nil
 }
 
-func uploadJavaFiles(url, pojoPath, jarPath, extraPath string) (*http.Response, error) {
+func uploadJavaFiles(url, pojoPath, jarPath string) (*http.Response, error) {
 	pojoPath, err := fs.ResolvePath(pojoPath)
 	if err != nil {
 		return nil, err
@@ -63,9 +63,9 @@ func uploadJavaFiles(url, pojoPath, jarPath, extraPath string) (*http.Response, 
 	if err := uploadFile(jarPath, "jar", writer); err != nil {
 		return nil, err
 	}
-	if err := uploadFile(extraPath, "extra", writer); err != nil {
-		return nil, err
-	}
+	// if err := uploadFile(extraPath, "extra", writer); err != nil {
+	// 	return nil, err
+	// }
 
 	// pdst, err := writer.CreateFormFile("pojo", path.Base(pojoPath))
 	// if err != nil {
@@ -143,8 +143,8 @@ func uploadJavaFiles(url, pojoPath, jarPath, extraPath string) (*http.Response, 
 	return res, nil
 }
 
-func (cs *CompileServer) CompilePojo(modelPath, jarPath, extraPath, servlet string) (string, error) {
-	res, err := uploadJavaFiles(cs.url(servlet), modelPath, jarPath, extraPath)
+func (cs *CompileServer) CompilePojo(modelPath, jarPath, servlet string) (string, error) {
+	res, err := uploadJavaFiles(cs.url(servlet), modelPath, jarPath)
 	if err != nil {
 		return "", err
 	}
