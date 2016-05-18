@@ -53,41 +53,41 @@ func (s *Service) Ping(status bool) (bool, error) {
 	return status, nil
 }
 
+func (s *Service) poll() {
+	cs, err := s.GetClouds()
+	if err != nil {
+		log.Println(err)
+	}
+	for _, c := range cs {
+		js, err := s.GetJobs(c.Name)
+		if err != nil {
+			log.Println(err)
+		}
+		if len(js) > 0 {
+			j := js[0]
+			if j.Progress == "DONE" {
+				s.activity[c.Name] = j.FinishedAt / 1000
+			} else {
+				s.activity[c.Name] = now()
+			}
+		} else {
+			s.activity[c.Name] = c.CreatedAt
+		}
+	}
+}
+
 func (s *Service) ActivityPoll(status bool) (bool, error) {
 	log.Println("Polling clouds for activity")
+	s.poll() // Fill activity map with running clouds on startup
 
 	go func() {
-		quickTick := time.Second * 5
-		normlTick := time.Hour
+		tickInterval := time.Hour
 
-		startTime := time.NewTimer(time.Minute)
-		ticker := time.NewTicker(quickTick)
+		ticker := time.NewTicker(tickInterval)
 		for {
 			select {
 			case <-ticker.C:
-				cs, err := s.GetClouds()
-				if err != nil {
-					log.Println(err)
-				}
-				for _, c := range cs {
-					js, err := s.GetJobs(c.Name)
-					if err != nil {
-						log.Println(err)
-					}
-					if len(js) > 0 {
-						j := js[0]
-						if j.Progress == "DONE" {
-							s.activity[c.Name] = j.FinishedAt / 1000
-						} else {
-							s.activity[c.Name] = now()
-						}
-					} else {
-						s.activity[c.Name] = c.CreatedAt
-					}
-				}
-			case <-startTime.C:
-				ticker = time.NewTicker(normlTick)
-				log.Println("Switching to hourly cloud poll")
+				s.poll()
 			}
 		}
 	}()

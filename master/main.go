@@ -187,7 +187,7 @@ func Run(version, buildDate string, opts *Opts) {
 		}
 	}()
 
-	webServiceImpl.Service.ActivityPoll(true)
+	webServiceImpl.Service.ActivityPoll(true) // Poll clouds for activity
 
 	for {
 		select {
