@@ -1,8 +1,7 @@
 # H2O Scoring Service Builder
 This is a service that can
 1. Compile the Pojo and build a Jar file from a Pojo and a gen-model file
-2. Compile the Pojo and build a War file that is a service from a Pojo, gen-model and
-another Jar file. You can run the war file in Jetty, Tomcat, etc.
+2. Compile the Pojo and build a War file that is a service from a Pojo, gen-model. You can then run the war file in Jetty, Tomcat, etc.
 ## How to Build
 
 `./gradlew build
@@ -17,8 +16,10 @@ This web server can build a WAR file from an H2O Pojo,
 h2o-genmodel.jar file and a an extra jar file. Example files are in
 directory example-pojo.
 
-`curl -X POST --form pojo=@example-pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@example-pojo/h2o-genmodel.jar --form extra=@makewar-extra.jar localhost:8080/makewar > gbm.war
+`curl -X POST --form pojo=@example-pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@example-pojo/h2o-genmodel.jar localhost:8080/makewar > gbm.war
 `
+
+**Note** You no longer need to send the extra file that was needed before.
 
 gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java is the Pojo from
 H2O. h2o-genmodel.jar is the corresponding jar file from the version
@@ -35,6 +36,7 @@ The result of the service above is a war file that can be run with
 
 `java -jar jetty-runner-9.3.9.M1.jar --port 8081 gbm.war
 `
+
 This in turn starts a web service at localhost:8081 .
 There is also a web page for the predictor at http://localhost:8081 .
 
@@ -64,23 +66,30 @@ which returns a JSON result
 
 ## Prediction statistics
 
-Simple prediction statistics: total and average prediction time, with and without
-skipping the first 5 predictions (warmup) are available on the predictor web page
-and at
+Prediction statistics are provided as a web service and in the web page for the predictor:
+ + When the service was started and it's uptime in days
+ + When the last prediction was run and how long ago that was in days
+ + How long time the last prediction took in milliseconds
+ + Total and average prediction time, with and without skipping the first 5 predictions (warmup)
+
+Web service:
 
 `http://localhost:8081/stats`
 
 ## Jetty runner versions
 
+All code is currently compiled to Java 1.6 to make it useable with rJava.
+It's fine to use Jetty 8.
+
 If you use an older Java version, you need to use an older
 jetty-runner. Jetty 9.3 requires Java 1.8. Jetty 9.0-9.2 requires Java
 1.7. Jetty 8 requires Java 1.6. 
 
-Testing has been done on Java 1.8 and 1.7. For Java 1.8 you can use
+Testing has been done on Java 1.6-1.8. For Java 1.8 you can use
 all jetty runners while on Java 1.7 you can use all except the 9.3
-version.
+version. For Java 1.6 you need Jetty 8.
 
 ## To Do
 
 The web pages are just examples of what can be done and need
-to be improved to look good.
+to be improved to look good, though they are not as ugly as they used to be.
