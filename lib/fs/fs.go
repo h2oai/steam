@@ -343,6 +343,10 @@ func Download(p, u string, preserveFilename bool) (int64, string, error) {
 		return 0, "", fmt.Errorf("Download directory creation failed: %s: %v", p, err)
 	}
 
+	if _, err := os.Stat(p); !os.IsNotExist(err) {
+		return 0, "", fmt.Errorf("Download file creation failed: file already exists: %s: %v", p, err)
+	}
+
 	dst, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE, FilePerm)
 	if err != nil {
 		return 0, "", fmt.Errorf("Download file creation failed: %s: %v", p, err)
