@@ -128,7 +128,8 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 	if err := s.ds.CreateCloud(c); err != nil {
 		return nil, err
 	}
-
+	// Create an instance of this cloud in activity map
+	s.activity[c.ID] = web.Timestamp(c.CreatedAt)
 	return toCloud(c), nil
 }
 
@@ -756,7 +757,6 @@ func toCloud(c *db.Cloud) *web.Cloud {
 		Address:       c.Address,
 		Username:      c.Username,
 		ApplicationID: c.ApplicationID,
-		Activity:      web.Timestamp(c.CreatedAt), // Defaults to cloud age if poll hasn't occured yet
 	}
 }
 
