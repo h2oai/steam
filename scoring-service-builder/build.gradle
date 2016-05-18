@@ -39,14 +39,6 @@ task deleteTmp(type: Delete) {
     delete "tmp"
 }
 
-task extraJar(type: Jar) {
-    from 'makewar-extra'
-    baseName = 'makewar-extra'
-    destinationDir = file('.')
-}
-
-war.dependsOn extraJar
-
 //-------------------------------------------------------------------
 // Custom task for cleaning up generated files
 //-------------------------------------------------------------------

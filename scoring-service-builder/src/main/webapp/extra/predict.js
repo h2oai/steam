@@ -61,6 +61,10 @@ function showModel(model, element) {
         }
         form += '</p>\n';
     }
+
+    outputDomain = domains[i1];
+//    console.log(outputDomain);
+
     form += '<input type="button" name="okbutton" value="PREDICT" onClick="runpred2(this.form)">';
 
     form += ' <input type="reset" value="CLEAR">';
@@ -81,15 +85,30 @@ function showInputParameters() {
 }
 
 function showResult(div, status, data) {
-    label = data["label"];
-    index = data["labelIndex"];
-    probs = data["classProbabilities"];
-    prob = probs[index];
+    if ("classProbabilities" in data) {
+        // binomial and multinomial
+        label = data["label"];
+        index = data["labelIndex"];
+        probs = data["classProbabilities"];
+        prob = probs[index];
 
-    result = "Label <b>" + label + "</b> with probability <b>" + (prob * 100.0).toFixed(1) + "%</b>.<p>" +
-      "Class Probabilities: [" + probs + "]<br>" +
-      "Label Index: " + index + "<p>" +
-      "<code>" + JSON.stringify(data) + "</code>";
+        result = "Label <b>" + label + "</b> with probability <b>" + (prob * 100.0).toFixed(1) + "%</b>.<p>"
+            + "Output Labels: [" + outputDomain + "]<br>"
+            + "Class Probabilities: [" + probs + "]<br>"
+            + "Label Index: " + index;
+    }
+    else if ("cluster" in data) {
+        // clustering result
+        result = "Cluster <b>" + data["cluster"] + "</b>";
+    }
+    else if ("value" in data) {
+        // regression result
+       result = "Value <b>" + data["value"] + "</b>";
+    }
+    else
+        result = "Can't parse result";
+
+    result += "<p><code>" + JSON.stringify(data) + "</code>";
     div.innerHTML = result;
     showStatistics();
 }
@@ -131,13 +150,24 @@ function runpred2(form) {
 }
 
 function showStats(div, data) {
-    s = 'Service started ' + data['startTimeUTC'] + ' UTC, uptime ' + Number(data['upDays']).toFixed(3) + ' days. '
-    + 'Last prediction took ' + Number(data['lastPredictionMs']).toFixed(3) + ' ms. '
-    +  '<br>'
-    + data['numberOfPredictions'] + ' predictions in ' + Number(data['totalPredictionTimeMs']).toFixed(1)
-    + ' (after ' + data['warmupFirstN'] + ' warmups ' + Number(data['totalPredictionTimeAfterWarmupMs']).toFixed(1) + ') ms. '
-    + 'Average prediction time ' + Number(data['avgPredictionTimeMs']).toFixed(3) + ' (' +
-    + Number(data['avgPredictionTimeAfterWarmupMs']).toFixed(3) + ') ms.';
+    dayMs = 1000 * 60 * 60;
+    upDays = Number(data['upTimeMs']) / dayMs;
+    lastTimeAgoDays = Number(data['lastTimeAgoMs']) / dayMs;
+    s = 'Service started ' + data['startTimeUTC'] + ', uptime ' + upDays.toFixed(3) + ' days. ';
+    n = Number(data['numberOfPredictions']);
+    if (n > 0) {
+        s +=  '<br>'
+        + 'Last prediction ' + data['lastTimeUTC'] + ', ' + lastTimeAgoDays.toFixed(3) + ' days ago.'
+        +  '<br>'
+        + 'Last prediction took ' + Number(data['lastPredictionMs']).toFixed(3) + ' ms. '
+        +  '<br>'
+        + data['numberOfPredictions'] + ' predictions in ' + Number(data['totalPredictionTimeMs']).toFixed(1)
+        + ' (after ' + data['warmupFirstN'] + ' warmups ' + Number(data['totalPredictionTimeAfterWarmupMs']).toFixed(1) + ') ms. '
+        +  '<br>'
+        + 'Average prediction time ' + Number(data['avgPredictionTimeMs']).toFixed(3)
+        + ' (after ' + data['warmupFirstN'] + ' warmups ' + Number(data['avgPredictionTimeAfterWarmupMs']).toFixed(3) + ') ms.'
+        ;
+    }
     url = window.location.href + "stats";
     s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
     div.innerHTML = s;

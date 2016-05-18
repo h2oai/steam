@@ -21,8 +21,9 @@ public class PredictServlet extends HttpServlet {
 
   public static EasyPredictModelWrapper model;
   public static long numberOfPredictions = 0;
-  public static double lastPredictionMs = 0;
   public static long startTime = System.currentTimeMillis();
+  public static long lastTime = 0;
+  public static double lastPredictionMs = 0;
   public static double totalTimeMs = 0;
   public static double totalTimeSquareMs = 0;
   public static double warmupTimeMs = 0;
@@ -87,6 +88,7 @@ public class PredictServlet extends HttpServlet {
     long start = System.nanoTime();
     AbstractPrediction p = model.predict(row);
     long done = System.nanoTime();
+    lastTime = System.currentTimeMillis();
     double elapsedMs = (done - start) / 1.0e6;
     lastPredictionMs = elapsedMs;
     totalTimeMs += elapsedMs;

@@ -24,23 +24,27 @@ public class StatsServlet extends HttpServlet {
         throw new Exception("No predictor model");
 
       // Emit the prediction to the servlet response.
+      final long now = System.currentTimeMillis();
       final long n = PredictServlet.numberOfPredictions;
       final double avgTimeMs = n > 0 ? PredictServlet.totalTimeMs / n : 0.0;
       final int warmupN = PredictServlet.warmupNumber;
       final double totalPredictionTimeAfterWarmupMs = n > warmupN ? (PredictServlet.totalTimeMs - PredictServlet.warmupTimeMs) : 0.0;
       final double avgTimeAfterWarmupMs = n > warmupN ? totalPredictionTimeAfterWarmupMs / (n - warmupN) : 0.0;
-      final long upTimeMs = System.currentTimeMillis() - PredictServlet.startTime;
-      final double upDays = upTimeMs / (1000.0 * 60 * 60 * 24);
-      SimpleDateFormat sdf = new SimpleDateFormat();
+      final long upTimeMs = now - PredictServlet.startTime;
+      final long lastTimeAgoMs = now - PredictServlet.lastTime;
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
       sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
       final String startUTC = sdf.format(new Date(PredictServlet.startTime));
+      final String lastPredictionUTC = sdf.format(new Date(PredictServlet.lastTime));
       Map<String, String> js = new HashMap<String, String>() {
         {
           put("numberOfPredictions", Long.toString(n));
           put("startTime", Long.toString(PredictServlet.startTime));
+          put("lastTime", Long.toString(PredictServlet.lastTime));
+          put("lastTimeUTC", lastPredictionUTC);
           put("startTimeUTC", startUTC);
           put("upTimeMs", Long.toString(upTimeMs));
-          put("upDays", Double.toString(upDays));
+          put("lastTimeAgoMs", Long.toString(lastTimeAgoMs));
           put("lastPredictionMs", Double.toString(PredictServlet.lastPredictionMs));
           put("avgPredictionTimeMs", Double.toString(avgTimeMs));
           put("avgPredictionTimeAfterWarmupMs", Double.toString(avgTimeAfterWarmupMs));

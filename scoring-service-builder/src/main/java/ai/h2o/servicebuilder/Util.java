@@ -1,7 +1,5 @@
 package ai.h2o.servicebuilder;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.*;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -17,24 +15,6 @@ class Util {
 
   static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
   static final String JAVA_TARGET_VERSION = "1.6";
-
-  private static final String JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-
-  /**
-   * The Java template file has a placeholder for the model name -- we replace that here
-   *
-   * @param tmpDir            run in this directory
-   * @param javaClassName     model name
-   * @param templateFileName  template file
-   * @param resultFileName    restult file
-   * @throws IOException
-   */
-  static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String templateFileName, String resultFileName) throws IOException {
-    File srcDir = new File(tmpDir, "src");
-    byte[] templateJava = FileUtils.readFileToByteArray(new File(srcDir, templateFileName));
-    String java = new String(templateJava).replace(JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME, javaClassName);
-    FileUtils.writeStringToFile(new File(srcDir, resultFileName), java);
-  }
 
   /**
    * Run command cmd in separate process in directory
@@ -82,9 +62,11 @@ class Util {
     JarOutputStream out = new JarOutputStream(stream, new Manifest());
 
     for (File t : tobeJared) {
-      if (t == null || !t.exists() || t.isDirectory())
+      if (t == null || !t.exists() || t.isDirectory()) {
+        if (!t.isDirectory())
+          System.out.println("Can't add to jar " + t);
         continue;
-
+      }
       // Create jar entry
       String filename = t.getPath().replace(relativeToDir, "").replace("\\", "/");
       if (filename.endsWith("MANIFEST.MF")) { // skip to avoid duplicates
