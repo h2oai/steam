@@ -62,19 +62,21 @@ func (s *Service) poll() {
 		log.Println(err)
 	}
 	for _, c := range cs {
-		js, err := s.GetJobs(c.Name)
-		if err != nil {
-			log.Println(err)
-		}
-		if len(js) > 0 {
-			j := js[0]
-			if j.Progress == "DONE" {
-				s.cloudActivity[c.Name] = j.FinishedAt / 1000
-			} else {
-				s.cloudActivity[c.Name] = now()
+		if c.State != web.CloudStopped {
+			js, err := s.GetJobs(c.Name)
+			if err != nil {
+				log.Println(err)
 			}
-		} else {
-			s.cloudActivity[c.Name] = c.CreatedAt
+			if len(js) > 0 {
+				j := js[0]
+				if j.Progress == "DONE" {
+					s.cloudActivity[c.Name] = j.FinishedAt / 1000
+				} else {
+					s.cloudActivity[c.Name] = now()
+				}
+			} else {
+				s.cloudActivity[c.Name] = c.CreatedAt
+			}
 		}
 	}
 	log.Println("Polling for scoring service activity")
@@ -83,9 +85,11 @@ func (s *Service) poll() {
 		log.Println(err)
 	}
 	for _, sc := range ss {
-		s.scoreActivity[sc.ModelName], err = svc.Poll(sc)
-		if err != nil {
-			log.Println(err)
+		if sc.State != web.ScoringServiceStopped {
+			s.scoreActivity[sc.ModelName], err = svc.Poll(sc)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
 }
@@ -599,7 +603,7 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 		pid,
 	)
 
-	log.Println("Scoring service started at", externalIP, ss.Port)
+	log.Printf("Scoring service started at %s:%d\n", externalIP, ss.Port)
 
 	if err := s.ds.CreateScoringService(ss); err != nil {
 		return nil, err
