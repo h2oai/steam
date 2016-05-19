@@ -75,6 +75,7 @@ type ScoringService struct {
 	State     ScoringServiceState `json:"state"`
 	Pid       int                 `json:"pid"`
 	CreatedAt Timestamp           `json:"created_at"`
+	Activity  Timestamp           `json:"activity"`
 }
 
 type Engine struct {

@@ -25,7 +25,8 @@ type Service struct {
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
-	activity                  map[string]web.Timestamp
+	cloudActivity             map[string]web.Timestamp
+	scoreActivity             map[string]web.Timestamp
 }
 
 func toTimestamp(t time.Time) web.Timestamp {
@@ -46,6 +47,7 @@ func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoring
 		username,
 		keytab,
 		make(map[string]web.Timestamp),
+		make(map[string]web.Timestamp),
 	}}
 }
 
@@ -54,6 +56,7 @@ func (s *Service) Ping(status bool) (bool, error) {
 }
 
 func (s *Service) poll() {
+	log.Println("Polling for cloud activity")
 	cs, err := s.GetClouds()
 	if err != nil {
 		log.Println(err)
@@ -66,19 +69,30 @@ func (s *Service) poll() {
 		if len(js) > 0 {
 			j := js[0]
 			if j.Progress == "DONE" {
-				s.activity[c.Name] = j.FinishedAt / 1000
+				s.cloudActivity[c.Name] = j.FinishedAt / 1000
 			} else {
-				s.activity[c.Name] = now()
+				s.cloudActivity[c.Name] = now()
 			}
 		} else {
-			s.activity[c.Name] = c.CreatedAt
+			s.cloudActivity[c.Name] = c.CreatedAt
+		}
+	}
+	log.Println("Polling for scoring service activity")
+	ss, err := s.GetScoringServices()
+	if err != nil {
+		log.Println(err)
+	}
+	for _, sc := range ss {
+		s.scoreActivity[sc.ModelName], err = svc.Poll(sc)
+		if err != nil {
+			log.Println(err)
 		}
 	}
 }
 
 func (s *Service) ActivityPoll(status bool) (bool, error) {
-	log.Println("Polling clouds for activity")
-	s.poll() // Fill activity map with running clouds on startup
+	log.Println("Polling for activity")
+	s.poll() // Fill cloudActivity map with running clouds on startup
 
 	go func() {
 		tickInterval := time.Hour
@@ -128,8 +142,8 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 	if err := s.ds.CreateCloud(c); err != nil {
 		return nil, err
 	}
-	// Create an instance of this cloud in activity map
-	s.activity[c.ID] = web.Timestamp(c.CreatedAt)
+	// Create an instance of this cloud in cloudActivity map
+	s.cloudActivity[c.ID] = web.Timestamp(c.CreatedAt)
 	return toCloud(c), nil
 }
 
@@ -219,7 +233,7 @@ func (s *Service) GetClouds() ([]*web.Cloud, error) {
 	clouds := make([]*web.Cloud, len(cs))
 	for i, c := range cs {
 		clouds[i] = toCloud(c)
-		clouds[i].Activity = web.Timestamp(s.activity[c.ID]) // update to last known activity
+		clouds[i].Activity = web.Timestamp(s.cloudActivity[c.ID]) // update to last known activity
 	}
 	return clouds, nil
 }
@@ -275,7 +289,7 @@ func (s *Service) GetCloudStatus(cloudName string) (*web.Cloud, error) { // Only
 		c.Address,
 		c.Username,
 		c.ApplicationID,
-		web.Timestamp(s.activity[c.ID]),
+		web.Timestamp(s.cloudActivity[c.ID]),
 	}, nil
 }
 
@@ -576,7 +590,6 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Updated", externalIP)
 	ss := db.NewScoringService(
 		modelName,
 		modelName,
@@ -586,10 +599,13 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 		pid,
 	)
 
+	log.Println("Scoring service started at", externalIP, ss.Port)
+
 	if err := s.ds.CreateScoringService(ss); err != nil {
 		return nil, err
 	}
 
+	s.scoreActivity[modelName] = web.Timestamp(ss.CreatedAt)
 	return toScoringService(ss), nil
 }
 
@@ -643,6 +659,7 @@ func (s *Service) GetScoringServices() ([]*web.ScoringService, error) {
 	ss := make([]*web.ScoringService, len(scs))
 	for i, sc := range scs {
 		ss[i] = toScoringService(sc)
+		ss[i].Activity = s.scoreActivity[sc.ModelName]
 	}
 
 	return ss, nil
@@ -776,12 +793,12 @@ func toModel(m *db.Model) *web.Model {
 
 func toScoringService(s *db.ScoringService) *web.ScoringService {
 	return &web.ScoringService{
-		s.ModelName,
-		s.Address,
-		s.Port,
-		web.ScoringServiceState(s.State),
-		s.Pid,
-		web.Timestamp(s.CreatedAt),
+		ModelName: s.ModelName,
+		Address:   s.Address,
+		Port:      s.Port,
+		State:     web.ScoringServiceState(s.State),
+		Pid:       s.Pid,
+		CreatedAt: web.Timestamp(s.CreatedAt),
 	}
 }
 

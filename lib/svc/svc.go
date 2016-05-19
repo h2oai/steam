@@ -2,8 +2,12 @@ package svc
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"regexp"
@@ -11,6 +15,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/h2oai/steamY/srv/web"
 )
 
 // Start starts a scoring service.
@@ -113,6 +119,36 @@ func Stop(pid int) error {
 			}
 		}
 	}
+}
+
+func Poll(s *web.ScoringService) (web.Timestamp, error) {
+	u := (&url.URL{
+		Scheme: "http",
+		Host:   s.Address + ":" + strconv.Itoa(s.Port),
+		Path:   "stats",
+	}).String()
+
+	r, err := http.Get(u)
+	if err != nil {
+		return 0, fmt.Errorf("Service request failed: %s: %v", u, err)
+	}
+
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return 0, fmt.Errorf("Service response read failed: %s: %v", u, err)
+	}
+
+	var m map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return 0, fmt.Errorf("Error unmarshaling response: %s: %v", string(b), err)
+	}
+
+	last, err := strconv.ParseInt(m["lastTime"].(string), 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("Error extracting \"lastTime\" from json: %v: %v", m, err)
+	}
+
+	return web.Timestamp(last / 1000), nil
 }
 
 func getProcessCommand(pid int) (string, error) {

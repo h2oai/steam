@@ -51,6 +51,7 @@ type ScoringService
  State ScoringServiceState
  Pid int
  CreatedAt Timestamp
+ Activity Timestamp
 
 type Engine
  Name string
