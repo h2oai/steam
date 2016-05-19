@@ -572,7 +572,7 @@ module Main {
     }
 
     interface FolderI extends Folder {
-        isActive: boolean
+        isActive: Sig<boolean>
         subheadI: string
         slugI: Sig<string>
     }
@@ -719,7 +719,7 @@ module Main {
 
     interface ServicesPane extends Pane {
         error: Sig<string>
-        items: Sigs<Folder>
+        items: Sigs<FolderI>
         hasItems: Sig<boolean>
     }
 
@@ -1020,15 +1020,18 @@ module Main {
             }
             items(_.map(clouds, (cloud): FolderI => {
                 const slugI = sig<string>('NA')
+                const isActive = sig<boolean>(cloud.state !== 'Stopped')
 
-                slugI(timestampToAge(cloud.activity))
+                if (cloud.state !== 'Stopped') {
+                    slugI(timestampToAge(cloud.activity))
+                }
                 return {
                     title: cloud.name,
                     subhead: 'State:',
                     slug: String(cloud.state),
                     execute: () => { ctx.showCloud(cloud) },
                     template: 'folderI',
-                    isActive: true,
+                    isActive: isActive,
                     subheadI: 'Last Active:',
                     slugI: slugI
                 }
@@ -1056,7 +1059,7 @@ module Main {
                 slug: String(cloud.size),
                 execute: () => { ctx.showCloudDetails(cloud) },
                 template: 'folder',
-                isActive: false,
+                isActive: sig<boolean>(false),
                 subheadI: '',
                 slugI: slugI
             }
@@ -1065,6 +1068,7 @@ module Main {
         if (cloud.state !== 'Stopped') {
             const modelSlug = sig<string>('')
             const jobSlug = sig<string>('')
+            const isActive = sig<boolean>(true)
 
             ctx.remote.getCloudModels(cloud.name, (err, models) => {
                 if (err) {
@@ -1086,7 +1090,7 @@ module Main {
                 slug: '',
                 execute: () => { ctx.showCloudJobs(cloud) },
                 template: 'folderI',
-                isActive: true,
+                isActive: isActive,
                 subheadI: 'Number of Jobs:',
                 slugI: jobSlug
             })
@@ -1097,7 +1101,7 @@ module Main {
                 slug: '',
                 template: 'folderI',
                 execute: () => { ctx.showCloudModels(cloud) },
-                isActive: true,
+                isActive: isActive,
                 subheadI: 'Number of models:',
                 slugI: modelSlug
             })
@@ -1357,20 +1361,29 @@ module Main {
 
     function newServicesPane(ctx: Context): ServicesPane {
         const error = sig<string>('')
-        const items = sigs<Folder>([])
+        const items = sigs<FolderI>([])
         const hasItems = lifts(items, (items) => items.length > 0)
         ctx.remote.getScoringServices((err, services) => {
             if (err) {
                 error(err.message)
                 return
             }
-            items(_.map(services, (service): Folder => {
+            items(_.map(services, (service): FolderI => {
+                const slugI = sig<string>('')
+                const isActive = sig<boolean>(service.state !== 'Stopped')
+
+                if (service.state !== 'Stopped') {
+                    slugI(timestampToAge(service.activity))
+                }
                 return {
                     title: service.model_name,
                     subhead: 'State:',
                     slug: service.state,
                     execute: () => { ctx.showService(service) },
-                    template: 'folder'
+                    template: 'folderI',
+                    isActive: isActive,
+                    subheadI: 'Last Activity:',
+                    slugI: slugI
                 }
             }))
         })

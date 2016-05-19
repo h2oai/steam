@@ -69,6 +69,7 @@ module Proxy {
 		state: ScoringServiceState
 		pid: number
 		created_at: Timestamp
+		activity: Timestamp
 	}
 
 	export interface Engine {
