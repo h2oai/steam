@@ -52,7 +52,7 @@ func Start(warfile, jetty, address string, port int) (int, error) {
 	}
 
 	e := make(chan error)
-
+	success := false
 	// the cool bits
 	// goroutines will only pipe to e if their condition is met
 	go func() { // This is the success condition
@@ -61,13 +61,16 @@ func Start(warfile, jetty, address string, port int) (int, error) {
 			errText = errText + in.Text() + "\n"
 			if strings.Contains(in.Text(), "Started @") {
 				e <- nil
+				success = true
 			}
 		}
 	}()
 	go func() { // This is the fail condition
 		if err := cmd.Wait(); err != nil {
-			log.Printf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
-			e <- fmt.Errorf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
+			if !success {
+				log.Printf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
+				e <- fmt.Errorf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
+			}
 		}
 	}()
 	// Blocking here, until either goroutine returns with their condition
@@ -121,6 +124,10 @@ func Stop(pid int) error {
 	}
 }
 
+// Polls a scoring service to determine the last time it was used
+//
+// Returns a Timestamp(int64) of the Unix time since the scoring services was
+//		created or last used.
 func Poll(s *web.ScoringService) (web.Timestamp, error) {
 	u := (&url.URL{
 		Scheme: "http",
