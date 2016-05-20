@@ -12,7 +12,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +24,7 @@ import static ai.h2o.servicebuilder.Util.*;
 /**
  * Compile server for POJO to war file
  * <p>
- * curl -X POST --form pojo=@pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@pojo/h2o-genmodel.jar "localhost:8080/makewar" > model.war
+ * curl -X POST --form pojo=@pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@pojo/h2o-genmodel.jar --form python=@python.py "localhost:8080/makewar" > model.war
  * java -jar jetty-runner.jar model.war
  * curl "localhost:8080/pred?DayOfMonth=1&Distance=2"
  * <p>
@@ -32,7 +33,7 @@ import static ai.h2o.servicebuilder.Util.*;
  * Output is the war file of the compiled code
  * Errors are sent back if any
  */
-public class MakeWarServlet extends HttpServlet {
+public class MakePythonWarServlet extends HttpServlet {
 
   private File servletPath = null;
 
@@ -70,6 +71,7 @@ public class MakeWarServlet extends HttpServlet {
       List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
       String pojofile = null;
       String jarfile = null;
+      String pythonfile = null;
       String predictorClassName = null;
       for (FileItem i : items) {
         String field = i.getFieldName();
@@ -85,11 +87,16 @@ public class MakeWarServlet extends HttpServlet {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
+          if (field.equals("python")) {
+            pythonfile = "WEB-INF" + File.separator + "lib" + File.separator + "python.py";
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, "python.py"));
+          }
+
         }
       }
-      System.out.printf("jar %s  pojo %s\n", jarfile, pojofile);
+      System.out.printf("jar %s  pojo %s  python %s\n", jarfile, pojofile, pythonfile);
       if (pojofile == null || jarfile == null)
-        throw new Exception("need pojo and jar");
+        throw new Exception("need pojo, jar and python files");
 
       // Compile the pojo
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
@@ -110,14 +117,15 @@ public class MakeWarServlet extends HttpServlet {
 
       // change the class name in the predictor template file to the predictor we have
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
+      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictPythonServlet-TEMPLATE.java", "PredictPythonServlet.java");
       copyExtraFile(srcPath, tmpDir, "InfoServlet.java");
       copyExtraFile(srcPath, tmpDir, "StatsServlet.java");
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java"),
-          "Compilation of extra failed");
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java"),
+          "Compilation of servlet failed");
 
       // create the war jar file
       Collection<File> filesc = FileUtils.listFilesAndDirs(webInfDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
@@ -127,8 +135,6 @@ public class MakeWarServlet extends HttpServlet {
       File[] files = filesc.toArray(new File[]{});
       if (files.length == 0)
         throw new Exception("Can't list compiler output files (out)");
-
-//      System.out.println(filesc);
 
       byte[] resjar = createJarArchiveByteArray(files, tmpDir.getPath() + File.separator);
       if (resjar == null)
@@ -196,6 +202,7 @@ public class MakeWarServlet extends HttpServlet {
 
 
   private void copyExtraFile(String extraPath, File toDir, String fileName) throws IOException {
+    System.out.println("copy file  from " + new File(servletPath, extraPath + fileName) + " to " + new File(toDir, fileName));
     FileUtils.copyFile(new File(servletPath, extraPath + fileName), new File(toDir, fileName));
   }
 

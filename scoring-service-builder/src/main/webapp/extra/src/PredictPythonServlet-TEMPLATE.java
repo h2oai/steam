@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
+import hex.ModelCategory;
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.*;
@@ -15,11 +16,12 @@ import hex.genmodel.*;
 
 import com.google.gson.Gson;
 
-public class PredictServlet extends HttpServlet {
+public class PredictPythonServlet extends HttpServlet {
   // Set to true for demo mode (to print the predictions to stdout).
   // Set to false to get better throughput.
   static boolean VERBOSE = false;
 
+  public static GenModel rawModel;
   public static EasyPredictModelWrapper model;
   public static long numberOfPredictions = 0;
   public static long startTime = System.currentTimeMillis();
@@ -31,18 +33,47 @@ public class PredictServlet extends HttpServlet {
   public static double warmupTimeSquareMs = 0;
   public static int warmupNumber = 5;
 
-  static {
-    GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-    model = new EasyPredictModelWrapper(rawModel);
-  }
+  static Process p;
+  static ProcessBuilder pb;
+  static OutputStream stdin;
+  static BufferedReader reader, err_reader;
 
-  private File servletPath = null;
+  static Gson gson = new Gson();
+
+  private static File servletPath = null;
+  String[] colNames;
 
   public void init(ServletConfig servletConfig) throws ServletException {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
       System.out.println("path = " + servletPath);
+
+      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+      model = new EasyPredictModelWrapper(rawModel);
+
+      if (rawModel == null || model == null)
+        throw new ServletException("can't load model");
+
+      colNames = rawModel.getNames();
+
+      String program = servletPath.getAbsolutePath() + "/WEB-INF/lib/python.py";
+      if (VERBOSE) System.out.println(program);
+      // start the python process
+      try {
+        pb = new ProcessBuilder("python", program);
+        p = pb.start();
+        stdin = p.getOutputStream();
+        InputStream stdout = p.getInputStream();
+        InputStream stderr = p.getErrorStream();
+        reader = new BufferedReader(new InputStreamReader(stdout));
+        err_reader = new BufferedReader(new InputStreamReader(stderr));
+        System.out.println("Python started");
+      } catch (Exception ex) {
+        System.out.println("Python failed");
+        ex.printStackTrace();
+      }
+
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -73,14 +104,36 @@ public class PredictServlet extends HttpServlet {
   }
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    RowData row = new RowData();
-    fillRowDataFromHttpRequest(request, row);
-
     try {
       if (model == null)
         throw new Exception("No predictor model");
 
-      // we have a model loaded, do the prediction
+      String queryString = request.getQueryString();
+      if (VERBOSE) System.out.println("queryString " + queryString);
+
+      String result = null;
+      try {
+        String res = queryString + "\n";
+        stdin.write(res.getBytes());
+        stdin.flush();
+        result = reader.readLine();
+      }
+      catch (Exception ex) {
+        ex.printStackTrace();
+        String line;
+        try {
+          while ((line=err_reader.readLine())!=null) {
+            System.out.println(line);
+          }
+        } catch (Exception ex2) {
+          ex2.printStackTrace();
+        }
+      }
+      if (VERBOSE) System.out.println("result " + result); // should now be in CSV from python
+
+      RowData row = csvToRowData(colNames, result);
+      if (VERBOSE) System.out.println("row " + row);
+
       AbstractPrediction pr = predict(row);
 
       // assemble json result
@@ -95,6 +148,27 @@ public class PredictServlet extends HttpServlet {
       // Prediction failed.
       System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
+    }
+  }
+
+  private RowData csvToRowData(String[] colNames, String result) throws Exception {
+    String[] vals = result.split(",");
+    if (colNames.length != vals.length)
+      throw new Exception("CSV fields not same length " + vals.length + " as model expects " + colNames.length);
+
+    RowData row = new RowData();
+    for (int i = 0; i < vals.length; i++) {
+      String v = vals[i];
+      if (v != null && v.length() > 0) {
+        row.put(colNames[i], v);
+      }
+    }
+    return row;
+  }
+
+  private void setToNaN(double[] arr) {
+    for (int i = 0; i < arr.length; i++) {
+      arr[i] = Double.NaN;
     }
   }
 
@@ -120,7 +194,6 @@ public class PredictServlet extends HttpServlet {
       if (model == null)
         throw new Exception("No predictor model");
 
-      Gson gson = new Gson();
       RowData row = gson.fromJson(request.getReader(), new RowData().getClass());
 
       // do the prediction

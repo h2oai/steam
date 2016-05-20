@@ -64,6 +64,64 @@ which returns a JSON result
 `{"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]}
 `
 
+## Prediction server with Python preprocessing
+TODO
+A python program has to be provided with a specific format...
+
+```
+# this is run within the predictor
+import sys
+
+def oneLine(text):
+#    return '{"text": "' + text + '" }'
+    return text
+
+#
+# You can do anything before the main as that will be
+# initialization of the python code
+#
+
+if __name__ == "__main__":
+    while True:
+        logString = raw_input()
+        if len(logString) > 0:
+#            res = production_main(FE, logString, conn)
+            res = oneLine(logString)
+            print str(res)
+            sys.stdout.flush()
+
+```
+
+### Using Get
+
+```
+curl  'http://localhost:55001/pypredict?,,,4,UA,JFK,SFO,8'
+{"labelIndex":1,"label":"Y","classProbabilities":[0.15612585314337513,0.8438741468566249]}
+```
+
+
+You can send a Get request with the input variables as the query string.
+TODO
+`curl "localhost:8081/pypredict?Dest=JFK"`
+
+which returns a JSON result
+
+`{"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]}
+`
+
+The predictor has two classes. "Y" was predicted with probability 97%.
+
+### Using Post
+
+Json can be sent using a Post request.
+TODO
+`curl -d '{Dest: JFK}' localhost:8081/pypredict`
+
+which returns a JSON result
+
+`{"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]}
+`
+
 ## Prediction statistics
 
 Prediction statistics are provided as a web service and in the web page for the predictor:
