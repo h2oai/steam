@@ -1,13 +1,18 @@
 # This is run within the predictor
+import os
 import sys
 import h2o
-from h2o.estimators.gbm import H2OGradientBoostingEstimator
 import numpy as np
-import lib.modelling as modelling
-
+import argparse
 from sklearn.feature_extraction.text import TfidfVectorizer
+from h2o.estimators.gbm import H2OGradientBoostingEstimator
 
-verbose = False
+# Shared user library between training and scoring
+from lib.modelling import split_into_lemmas, saveModel
+
+# Should be input parameter
+#MODELS_DESTINATION_DIR = "./models"
+MODELS_DESTINATION_DIR = "/tmp/models"
 
 # Load data
 def load_data(filename):
@@ -17,7 +22,7 @@ def load_data(filename):
 def tf_idf(corpus):
     vectorizer = TfidfVectorizer(
             #analyzer = 'word',
-            analyzer = modelling.split_into_lemmas,
+            analyzer = split_into_lemmas,
             stop_words = 'english',
             min_df=0,
             decode_error = 'ignore',
@@ -27,21 +32,34 @@ def tf_idf(corpus):
     model = vectorizer.fit_transform(corpus)
     return (vectorizer, model)
 
-def train(datafile):
+def train(cfg):
     # Load data
-    messages = load_data(datafile)
+    messages = load_data(cfg.datafile)
     # Prepare tf-idf to feature vectorization and also transform input data
     (vectorizer, train) = tf_idf(messages['message'])
     # Save Tf-Idf model
-    modelling.saveModel(vectorizer, './models/vectorizer.pickle')
     h2o.init()
     train_table = h2o.H2OFrame(np.column_stack((messages['label'], train.toarray()))).set_names(['label'] + vectorizer.get_feature_names())
     gbm_model= H2OGradientBoostingEstimator(ntrees=1, learn_rate=0.01, max_depth=6, min_rows=10, distribution="bernoulli")
     gbm_model.train(x = range(1, train_table.shape[1]), y = 0, training_frame = train_table)
-    if verbose: print "GBM Model", gbm_model
-    h2o.download_pojo(gbm_model, "./models/")
+    if cfg.verbose: print "GBM Model", gbm_model
+    # Save models
+    if not os.path.exists(cfg.models_dir):
+        os.makedirs(cfg.models_dir)
+    saveModel(vectorizer, '{}/vectorizer.pickle'.format(cfg.models_dir))
+    h2o.download_pojo(gbm_model, "{}/".format(cfg.models_dir))
     h2o.shutdown()
 
+#
+# Main entry point. Accepts parameters
+#  for example:
+#    ipython train.py -- --verbose --models-dir /tmp/models
+#
 if __name__ == '__main__':
-    train('data/smsData.txt')
+    parser = argparse.ArgumentParser(description = "Train models for Spam detection")
+    parser.add_argument('--datafile', help = 'Input data file', type=str, default = 'data/smsData.txt')
+    parser.add_argument('--models-dir', help = 'Directory to save generated models', type=str, default = MODELS_DESTINATION_DIR)
+    parser.add_argument('--verbose', help = 'More detailed output', dest='verbose', action='store_true')
+    cfg = parser.parse_args()
+    train(cfg)
 
