@@ -4,11 +4,13 @@ import sys
 import h2o
 import numpy as np
 import argparse
+import json
 from sklearn.feature_extraction.text import TfidfVectorizer
-from h2o.estimators.gbm import H2OGradientBoostingEstimator
+# from h2o.estimators.gbm import H2OGradientBoostingEstimator
+import HTMLParser
 
 # Shared user library between training and scoring
-from lib.modelling import split_into_lemmas, saveModel
+# from lib.modelling import split_into_lemmas, saveModel
 
 # Should be input parameter
 #MODELS_DESTINATION_DIR = "./models"
@@ -38,17 +40,17 @@ def train(cfg):
     # Prepare tf-idf to feature vectorization and also transform input data
     (vectorizer, train) = tf_idf(messages['message'])
     # Save Tf-Idf model
-    h2o.init()
-    train_table = h2o.H2OFrame(np.column_stack((messages['label'], train.toarray()))).set_names(['label'] + vectorizer.get_feature_names())
-    gbm_model= H2OGradientBoostingEstimator(ntrees=1, learn_rate=0.01, max_depth=6, min_rows=10, distribution="bernoulli")
-    gbm_model.train(x = range(1, train_table.shape[1]), y = 0, training_frame = train_table)
-    if cfg.verbose: print "GBM Model", gbm_model
-    # Save models
-    if not os.path.exists(cfg.models_dir):
-        os.makedirs(cfg.models_dir)
-    saveModel(vectorizer, '{}/vectorizer.pickle'.format(cfg.models_dir))
-    h2o.download_pojo(gbm_model, "{}/".format(cfg.models_dir))
-    h2o.shutdown()
+    # h2o.init()
+    # train_table = h2o.H2OFrame(np.column_stack((messages['label'], train.toarray()))).set_names(['label'] + vectorizer.get_feature_names())
+    # gbm_model= H2OGradientBoostingEstimator(ntrees=1, learn_rate=0.01, max_depth=6, min_rows=10, distribution="bernoulli")
+    # gbm_model.train(x = range(1, train_table.shape[1]), y = 0, training_frame = train_table)
+    # if cfg.verbose: print "GBM Model", gbm_model
+    # # Save models
+    # if not os.path.exists(cfg.models_dir):
+    #     os.makedirs(cfg.models_dir)
+    # saveModel(vectorizer, '{}/vectorizer.pickle'.format(cfg.models_dir))
+    # h2o.download_pojo(gbm_model, "{}/".format(cfg.models_dir))
+    # h2o.shutdown()
     return vectorizer
 
 #
@@ -79,9 +81,9 @@ from textblob import TextBlob
 MODELS_DESTINATION_DIR = "/tmp/models"
 
 ## FIXME: should be provided by shared library
-def loadModel(source):
-    with open(source, 'rb') as f:
-        return pickle.load(f)
+# def loadModel(source):
+#     with open(source, 'rb') as f:
+#         return pickle.load(f)
 
 def split_into_lemmas(message):
     message = unicode(message, 'utf8').lower()
@@ -89,24 +91,34 @@ def split_into_lemmas(message):
     return [word.lemma for word in words if len(word) > 0 and word.isalpha() ]
 ## END of FIXME
 
-class Scorer(object):
-    def __init__(self, model_file):
-        self._init_model(model_file)
-
-    def _init_model(self, model_file):
-        self.model = loadModel(model_file)
-
-    def score(self, message):
-        return json.dumps(self.model.transform([message]).toarray()[0].tolist())
+# class Scorer(object):
+#     def __init__(self, model_file):
+#         self._init_model(model_file)
+#
+#     def _init_model(self, model_file):
+#         self.model = loadModel(model_file)
+#
+#     def score(self, message):
+#         return json.dumps(self.model.transform([message]).toarray()[0].tolist())
 #
 # Main entry point. Accepts parameters
 #  for example:
 #    ipython score.py -- --verbose --models-dir /tmp/models
 #
+
+def score1(vectorizer, message):
+        return json.dumps(vectorizer.transform([message]).toarray()[0].tolist())
+
+# html_parser = HTMLParser.HTMLParser()
+
+def unescapeHtml(text):
+    # return html_parser.unescape(text)
+    return text.replace("%20", " ")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Train models for Spam detection")
     parser.add_argument('--datafile', help = 'Input data file', type=str, default = 'data/smsData.txt')
-    parser.add_argument('--models-dir', help = 'Directory to save generated models', type=str, default = MODELS_DESTINATION_DIR)
+    # parser.add_argument('--models-dir', help = 'Directory to save generated models', type=str, default = MODELS_DESTINATION_DIR)
     parser.add_argument('--verbose', help = 'More detailed output', dest='verbose', action='store_true')
     cfg = parser.parse_args()
     vectorizer = train(cfg)
@@ -116,10 +128,14 @@ if __name__ == "__main__":
     # parser.add_argument('--verbose', help = 'More detailed output', dest='verbose', action='store_true')
     # cfg = parser.parse_args()
     # scorer = Scorer('{}/vectorizer.pickle'.format(cfg.models_dir))
+    print >> sys.stderr, "ready to score"
     while True:
-        logString = raw_input()
+        rawString = raw_input()
+        logString = unescapeHtml(rawString)
+        print  >> sys.stderr, "rawString = " + rawString + "  logString = " + logString
         if len(logString) > 0:
             # res = scorer.score(logString)
-            res = vectorizer(logString)
-            print str(res)
+            # res = vectorizer.transform(logString)
+            res = score1(vectorizer, logString)
+            print str(res).replace("[","").replace("]","").replace(" ","")
             sys.stdout.flush()

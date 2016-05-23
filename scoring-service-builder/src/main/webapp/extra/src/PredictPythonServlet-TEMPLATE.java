@@ -19,7 +19,7 @@ import com.google.gson.Gson;
 public class PredictPythonServlet extends HttpServlet {
   // Set to true for demo mode (to print the predictions to stdout).
   // Set to false to get better throughput.
-  static boolean VERBOSE = false;
+  static boolean VERBOSE = true;
 
   public static GenModel rawModel;
   public static EasyPredictModelWrapper model;
@@ -61,7 +61,13 @@ public class PredictPythonServlet extends HttpServlet {
       if (VERBOSE) System.out.println(program);
       // start the python process
       try {
-        pb = new ProcessBuilder("python", program);
+        // score.py -- --verbose --models-dir /tmp/models
+//        pb = new ProcessBuilder("python", program, "--models-dir", "/Users/magnus/Git/steamY/scoring-service-builder/examples/example-spam-detection/models");
+        pb = new ProcessBuilder("python", program, "--datafile", "/Users/magnus/Git/steamY/scoring-service-builder/examples/example-spam-detection/data/smsData.txt");
+//        pb = new ProcessBuilder("python", program);
+//        Map<String, String> env = pb.environment();
+//        env.put("PYTHONPATH", env.get("PYTHONPATH") + ":/Users/magnus/Git/steamY/scoring-service-builder/examples/example-spam-detection/lib");
+//        System.out.println(env);
         p = pb.start();
         stdin = p.getOutputStream();
         InputStream stdout = p.getInputStream();
@@ -117,17 +123,11 @@ public class PredictPythonServlet extends HttpServlet {
         stdin.write(res.getBytes());
         stdin.flush();
         result = reader.readLine();
+//        showStderr();
       }
       catch (Exception ex) {
         ex.printStackTrace();
-        String line;
-        try {
-          while ((line=err_reader.readLine())!=null) {
-            System.out.println(line);
-          }
-        } catch (Exception ex2) {
-          ex2.printStackTrace();
-        }
+        showStderr();
       }
       if (VERBOSE) System.out.println("result " + result); // should now be in CSV from python
 
@@ -148,6 +148,17 @@ public class PredictPythonServlet extends HttpServlet {
       // Prediction failed.
       System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
+    }
+  }
+
+  private void showStderr() {
+    String line;
+    try {
+      while ((line=err_reader.readLine())!=null) {
+        System.err.println(line);
+      }
+    } catch (Exception ex2) {
+      ex2.printStackTrace();
     }
   }
 
