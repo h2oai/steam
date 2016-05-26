@@ -6,13 +6,20 @@ import numpy as np
 import argparse
 from sklearn.feature_extraction.text import TfidfVectorizer
 from h2o.estimators.gbm import H2OGradientBoostingEstimator
+from textblob import TextBlob
 
 # Shared user library between training and scoring
-from lib.modelling import split_into_lemmas, saveModel
+from lib.modelling import saveModel
 
 # Should be input parameter
 #MODELS_DESTINATION_DIR = "./models"
 MODELS_DESTINATION_DIR = "/tmp/models"
+
+
+def split_into_lemmas(message):
+    message = unicode(message, 'utf8').lower()
+    words = TextBlob(message).words
+    return [word.lemma for word in words if len(word) > 0 and word.isalpha() ]
 
 # Load data
 def load_data(filename):

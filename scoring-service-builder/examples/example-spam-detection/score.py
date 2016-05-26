@@ -32,6 +32,11 @@ class Scorer(object):
 
     def score(self, message):
         return json.dumps(self.model.transform([message]).toarray()[0].tolist())
+
+def unescapeHtml(text):
+    # return html_parser.unescape(text)
+    return text.replace("%20", " ")
+
 #
 # Main entry point. Accepts parameters
 #  for example:
@@ -46,6 +51,7 @@ if __name__ == "__main__":
     while True:
         logString = raw_input()
         if len(logString) > 0:
-            res = scorer.score(logString)
-            print str(res)
+            res = scorer.score(unescapeHtml(logString))
+            print str(res).replace("[","").replace("]","").replace(" ","")
             sys.stdout.flush()
+
