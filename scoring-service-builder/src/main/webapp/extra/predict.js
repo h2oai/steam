@@ -149,24 +149,56 @@ function runpred2(form) {
   predResults($('#allparams').serialize());
 }
 
+function duration(days) {
+  r = days;
+  s = "";
+  x = Math.floor(r);
+  if (x >= 1) {
+    s += x + " d ";
+  }
+  r = (r - x) * 24; // hours
+  x = Math.floor(r);
+  if (x >= 1) {
+     s += x + " h ";
+  }
+  r = (r - x) * 60; // minutes
+  x = Math.floor(r);
+  if (x >= 1) {
+     s += x + " m ";
+  }
+  r = (r - x) * 60; // seconds
+  // x = Math.floor(r);
+  s += r.toFixed(0) + " s"
+  return s;
+}
+
+function showOneStat(label, data, warmUpCount) {
+        s = label + ' (' + data['count'] + ') Last took ' + Number(data['lastMs']).toFixed(3) + ' ms. '
+        + 'Average time ' + Number(data['averageTime']).toFixed(3)
+        + ' (after ' + warmUpCount + ' warmups ' + Number(data['averageAfterWarmupTime']).toFixed(3) + ') ms.';
+        return s;
+}
+
 function showStats(div, data) {
-    dayMs = 1000 * 60 * 60;
+    dayMs = 1000 * 60 * 60 * 24;
     upDays = Number(data['upTimeMs']) / dayMs;
     lastTimeAgoDays = Number(data['lastTimeAgoMs']) / dayMs;
-    s = 'Service started ' + data['startTimeUTC'] + ', uptime ' + upDays.toFixed(3) + ' days. ';
-    n = Number(data['numberOfPredictions']);
+    s = 'Service started ' + data['startTimeUTC'] + '. Uptime ' + duration(upDays) + "."; //upDays.toFixed(3) + ' days. ';
+    n = Number(data['prediction']['count']);
+    warmupCount = data['warmUpCount'];
     if (n > 0) {
         s +=  '<br>'
-        + 'Last prediction ' + data['lastTimeUTC'] + ', ' + lastTimeAgoDays.toFixed(3) + ' days ago.'
-        +  '<br>'
-        + 'Last prediction took ' + Number(data['lastPredictionMs']).toFixed(3) + ' ms. '
-        +  '<br>'
-        + data['numberOfPredictions'] + ' predictions in ' + Number(data['totalPredictionTimeMs']).toFixed(1)
-        + ' (after ' + data['warmupFirstN'] + ' warmups ' + Number(data['totalPredictionTimeAfterWarmupMs']).toFixed(1) + ') ms. '
-        +  '<br>'
-        + 'Average prediction time ' + Number(data['avgPredictionTimeMs']).toFixed(3)
-        + ' (after ' + data['warmupFirstN'] + ' warmups ' + Number(data['avgPredictionTimeAfterWarmupMs']).toFixed(3) + ') ms.'
-        ;
+        + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'
+        +  '<p>'
+        + showOneStat('Prediction', data['prediction'], warmupCount);
+        if (data['get']['count'] > 0) {
+            s +=  '<p>'
+            + showOneStat('Get', data['get'], warmupCount);
+        }
+        if (data['post']['count'] > 0) {
+            s += '<p>'
+            + showOneStat('Post', data['post'], warmupCount);
+        }
     }
     url = window.location.href + "stats";
     s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';

@@ -1,70 +1,49 @@
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
-import hex.genmodel.easy.prediction.AbstractPrediction;
-import hex.genmodel.easy.*;
-import hex.genmodel.*;
-
-import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class StatsServlet extends HttpServlet {
 
-  static EasyPredictModelWrapper model = PredictServlet.model;
-
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
-      if (model == null)
+      if (PredictServlet.model == null)
         throw new Exception("No predictor model");
 
-      // Emit the prediction to the servlet response.
       final long now = System.currentTimeMillis();
-      final long n = PredictServlet.numberOfPredictions;
-      final double avgTimeMs = n > 0 ? PredictServlet.totalTimeMs / n : 0.0;
-      final int warmupN = PredictServlet.warmupNumber;
-      final double totalPredictionTimeAfterWarmupMs = n > warmupN ? (PredictServlet.totalTimeMs - PredictServlet.warmupTimeMs) : 0.0;
-      final double avgTimeAfterWarmupMs = n > warmupN ? totalPredictionTimeAfterWarmupMs / (n - warmupN) : 0.0;
       final long upTimeMs = now - PredictServlet.startTime;
       final long lastTimeAgoMs = now - PredictServlet.lastTime;
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
       sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
       final String startUTC = sdf.format(new Date(PredictServlet.startTime));
-      final String lastPredictionUTC = sdf.format(new Date(PredictServlet.lastTime));
-      Map<String, String> js = new HashMap<String, String>() {
+      final String lastPredictionUTC = PredictServlet.lastTime > 0 ? sdf.format(new Date(PredictServlet.lastTime)) : "";
+      final long warmUpCount = PredictServlet.warmUpCount;
+
+      Map<String, Object> js = new HashMap<String, Object>() {
         {
-          put("numberOfPredictions", Long.toString(n));
-          put("startTime", Long.toString(PredictServlet.startTime));
-          put("lastTime", Long.toString(PredictServlet.lastTime));
+          put("startTime", PredictServlet.startTime);
+          put("lastTime", PredictServlet.lastTime);
           put("lastTimeUTC", lastPredictionUTC);
           put("startTimeUTC", startUTC);
-          put("upTimeMs", Long.toString(upTimeMs));
-          put("lastTimeAgoMs", Long.toString(lastTimeAgoMs));
-          put("lastPredictionMs", Double.toString(PredictServlet.lastPredictionMs));
-          put("avgPredictionTimeMs", Double.toString(avgTimeMs));
-          put("avgPredictionTimeAfterWarmupMs", Double.toString(avgTimeAfterWarmupMs));
-          put("totalPredictionTimeMs", Double.toString(PredictServlet.totalTimeMs));
-          put("totalPredictionTimeSquareMs", Double.toString(PredictServlet.totalTimeSquareMs));
-          put("totalPredictionTimeAfterWarmupMs", Double.toString(totalPredictionTimeAfterWarmupMs));
-          put("warmupTimeMs", Double.toString(PredictServlet.warmupTimeMs));
-          put("warmupTimeSquareMs", Double.toString(PredictServlet.warmupTimeSquareMs));
-          put("warmupFirstN", Integer.toString(PredictServlet.warmupNumber));
+          put("upTimeMs", upTimeMs);
+          put("lastTimeAgoMs", lastTimeAgoMs);
+          put("lastTimeAgoMs", lastTimeAgoMs);
+          put("warmUpCount", warmUpCount);
+
+          put("prediction", PredictServlet.predictionTimes.toMap());
+          put("get", PredictServlet.getTimes.toMap());
+          put("post", PredictServlet.postTimes.toMap());
         }
       };
-      StringBuilder sb = new StringBuilder("{ ");
-      for (String k : js.keySet()) {
-        String v = js.get(k);
-        sb.append("\"" + k + "\": \"" + v + "\", ");
-      }
-      sb.append("}");
-      String json = sb.toString().replace(", }", " }");
-//      Gson gson = new Gson();
-//      String json = gson.toJson(js);
+      String json = PredictServlet.gson.toJson(js, PredictServlet.mapType);
+
       response.getWriter().write(json);
       response.setStatus(HttpServletResponse.SC_OK);
     }

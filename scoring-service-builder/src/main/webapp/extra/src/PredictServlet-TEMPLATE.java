@@ -1,12 +1,12 @@
 import java.io.*;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Arrays;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
 
+import com.google.gson.reflect.TypeToken;
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.*;
@@ -15,28 +15,81 @@ import hex.genmodel.*;
 import com.google.gson.Gson;
 
 public class PredictServlet extends HttpServlet {
-  // Set to true for demo mode (to print the predictions to stdout).
-  // Set to false to get better throughput.
-  static boolean VERBOSE = false;
 
-  public static EasyPredictModelWrapper model;
-  public static long numberOfPredictions = 0;
-  public static long startTime = System.currentTimeMillis();
-  public static long lastTime = 0;
-  public static double lastPredictionMs = 0;
-  public static double totalTimeMs = 0;
-  public static double totalTimeSquareMs = 0;
-  public static double warmupTimeMs = 0;
-  public static double warmupTimeSquareMs = 0;
-  public static int warmupNumber = 5;
+  static boolean VERBOSE = false;
+  public static int warmUpCount = 5;
+
+  public static Gson gson = new Gson();
+  public static Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
+
+  public static class Times {
+    public long count = 0;
+    public double totalTimeMs = 0;
+    public double totalTimeSquaredMs = 0;
+    public double warmupTimeMs = 0;
+    public double warmupTimeSquaredMs = 0;
+    public double lastMs = 0;
+
+    public void add(long startNs, long endNs) {
+      double elapsed = (endNs - startNs) / 1.0e6;
+      add(elapsed);
+    }
+
+    public synchronized void add(double timeMs) {
+      count += 1;
+      totalTimeMs += timeMs;
+      double tt = timeMs * timeMs;
+      totalTimeSquaredMs += tt;
+      if (count <= warmUpCount) {
+        warmupTimeMs += timeMs;
+        warmupTimeSquaredMs += tt;
+      }
+      lastMs = timeMs;
+    }
+
+    public double avg() {
+      return count > 0 ? totalTimeMs / count : 0.0;
+    }
+
+    public double avgAfterWarmup() {
+      return count > warmUpCount ? (totalTimeMs - warmupTimeMs) / (count - warmUpCount) : 0.0;
+    }
+
+    public String toJson() {
+      return gson.toJson(toMap());
+    }
+
+    public Map<String, Object> toMap() {
+      Map<String, Object> map = classToMap();
+      map.put("averageTime", avg());
+      map.put("averageAfterWarmupTime", avgAfterWarmup());
+      return map;
+    }
+
+    private Map<String, Object> classToMap() {
+      return PredictServlet.gson.fromJson(gson.toJson(this), mapType);
+    }
+
+    public String toString() {
+      return String.format("n %d  last %.3f  avg %.3f after warmup %.3f [ms]", count, lastMs, avg(), avgAfterWarmup());
+    }
+  }
 
   static {
     GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
     model = new EasyPredictModelWrapper(rawModel);
   }
 
+
+  public static EasyPredictModelWrapper model;
+  public static long startTime = System.currentTimeMillis();
+  public static long lastTime = 0;
+  public static Times predictionTimes = new Times();
+  public static Times getTimes = new Times();
+  public static Times postTimes = new Times();
+
   static private String jsonModel() {
-    Gson gson = new Gson();
+
     String modelJson = gson.toJson(model);
     return modelJson;
   }
@@ -59,9 +112,9 @@ public class PredictServlet extends HttpServlet {
   }
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    long start = System.nanoTime();
     RowData row = new RowData();
     fillRowDataFromHttpRequest(request, row);
-
     try {
       if (model == null)
         throw new Exception("No predictor model");
@@ -82,6 +135,9 @@ public class PredictServlet extends HttpServlet {
       System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
+    long done = System.nanoTime();
+    getTimes.add(start, done);
+    if (VERBOSE) System.out.println("Get time " + getTimes);
   }
 
   private AbstractPrediction predict(RowData row) throws PredictException {
@@ -89,19 +145,13 @@ public class PredictServlet extends HttpServlet {
     AbstractPrediction p = model.predict(row);
     long done = System.nanoTime();
     lastTime = System.currentTimeMillis();
-    double elapsedMs = (done - start) / 1.0e6;
-    lastPredictionMs = elapsedMs;
-    totalTimeMs += elapsedMs;
-    totalTimeSquareMs += elapsedMs * elapsedMs;
-    numberOfPredictions += 1;
-    if (numberOfPredictions <= warmupNumber) {
-      warmupTimeMs += elapsedMs;
-      warmupTimeSquareMs += elapsedMs * elapsedMs;
-    }
+    predictionTimes.add(start, done);
+    if (VERBOSE) System.out.println("Prediction time " + predictionTimes);
     return p;
   }
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    long start = System.nanoTime();
     try {
       if (model == null)
         throw new Exception("No predictor model");
@@ -124,8 +174,10 @@ public class PredictServlet extends HttpServlet {
       System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
+    long done = System.nanoTime();
+    postTimes.add(start, done);
+    if (VERBOSE) System.out.println("Post time " + postTimes);
   }
-
 
 }
 
