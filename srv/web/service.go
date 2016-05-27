@@ -89,6 +89,8 @@ type Engine struct {
 type Service interface {
 	Ping(status bool) (bool, error)
 	ActivityPoll(status bool) (bool, error)
+	RegisterCloud(address string) (*Cloud, error)
+	UnregisterCloud(cloudName string) error
 	StartCloud(cloudName string, engineName string, size int, memory string, username string) (*Cloud, error)
 	StopCloud(cloudName string) error
 	GetCloud(cloudName string) (*Cloud, error)
@@ -130,6 +132,21 @@ type ActivityPollIn struct {
 
 type ActivityPollOut struct {
 	Status bool `json:"status"`
+}
+
+type RegisterCloudIn struct {
+	Address string `json:"address"`
+}
+
+type RegisterCloudOut struct {
+	Cloud *Cloud `json:"cloud"`
+}
+
+type UnregisterCloudIn struct {
+	CloudName string `json:"cloud_name"`
+}
+
+type UnregisterCloudOut struct {
 }
 
 type StartCloudIn struct {
@@ -346,6 +363,26 @@ func (this *Remote) ActivityPoll(status bool) (bool, error) {
 		return false, err
 	}
 	return out.Status, nil
+}
+
+func (this *Remote) RegisterCloud(address string) (*Cloud, error) {
+	in := RegisterCloudIn{address}
+	var out RegisterCloudOut
+	err := this.Proc.Call("RegisterCloud", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Cloud, nil
+}
+
+func (this *Remote) UnregisterCloud(cloudName string) error {
+	in := UnregisterCloudIn{cloudName}
+	var out UnregisterCloudOut
+	err := this.Proc.Call("UnregisterCloud", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *Remote) StartCloud(cloudName string, engineName string, size int, memory string, username string) (*Cloud, error) {
@@ -599,6 +636,23 @@ func (this *Impl) ActivityPoll(r *http.Request, in *ActivityPollIn, out *Activit
 		return err
 	}
 	out.Status = it
+	return nil
+}
+
+func (this *Impl) RegisterCloud(r *http.Request, in *RegisterCloudIn, out *RegisterCloudOut) error {
+	it, err := this.Service.RegisterCloud(in.Address)
+	if err != nil {
+		return err
+	}
+	out.Cloud = it
+	return nil
+}
+
+func (this *Impl) UnregisterCloud(r *http.Request, in *UnregisterCloudIn, out *UnregisterCloudOut) error {
+	err := this.Service.UnregisterCloud(in.CloudName)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
