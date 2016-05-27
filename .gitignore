@@ -33,4 +33,8 @@ _testmain.go
 /dist/
 /var/master/www/
 /var/master/db/steam.db
+/scoring-service-builder/.gradle
+/scoring-service-builder/build
+/var/master/assets/*.war
+/var/master/assets/*.jar
 
