@@ -109,17 +109,17 @@ public class MakePythonWarServlet extends HttpServlet {
       String extraPath = "extra" + File.separator;
       String webInfPath = extraPath + File.separator + "WEB-INF" + File.separator;
       String srcPath = extraPath + "src" + File.separator;
-      copyExtraFile(extraPath, tmpDir, "index.html");
-      copyExtraFile(extraPath, tmpDir, "jquery.js");
-      copyExtraFile(extraPath, tmpDir, "predict.js");
-      copyExtraFile(webInfPath, webInfDir, "web.xml");
+      copyExtraFile(servletPath, extraPath, tmpDir, "index.html", "index.html");
+      copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
+      copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
+      copyExtraFile(servletPath, webInfPath, webInfDir, "web-pythonpredict.xml", "web.xml");
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
 
       // change the class name in the predictor template file to the predictor we have
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictPythonServlet-TEMPLATE.java", "PredictPythonServlet.java");
-      copyExtraFile(srcPath, tmpDir, "InfoServlet.java");
-      copyExtraFile(srcPath, tmpDir, "StatsServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
@@ -179,8 +179,6 @@ public class MakePythonWarServlet extends HttpServlet {
 
   }
 
-
-
   private static final String JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
 
   /**
@@ -193,17 +191,9 @@ public class MakePythonWarServlet extends HttpServlet {
    * @throws IOException
    */
   private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String templateFileName, String resultFileName) throws IOException {
-//    File srcDir = new File(tmpDir, "src");
     byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
     String java = new String(templateJava).replace(JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME, javaClassName);
     FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
-  }
-
-
-
-  private void copyExtraFile(String extraPath, File toDir, String fileName) throws IOException {
-    System.out.println("copy file  from " + new File(servletPath, extraPath + fileName) + " to " + new File(toDir, fileName));
-    FileUtils.copyFile(new File(servletPath, extraPath + fileName), new File(toDir, fileName));
   }
 
 }

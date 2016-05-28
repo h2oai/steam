@@ -23,6 +23,21 @@ def split_into_lemmas(message):
     return [word.lemma for word in words if len(word) > 0 and word.isalpha() ]
 ## END of FIXME
 
+def score1(vectorizer, message):
+    v = vectorizer.transform([message])
+    nz = v.nonzero()[1]
+    dat = v.data
+    r = ""
+    i = 0
+    len = nz.size
+    while i < len:
+        index = nz[i]
+        value = dat[i]
+        r += repr(index) + ":" + repr(value) + " "
+        i += 1
+    return r
+
+
 class Scorer(object):
     def __init__(self, model_file):
         self._init_model(model_file)
@@ -31,11 +46,7 @@ class Scorer(object):
         self.model = loadModel(model_file)
 
     def score(self, message):
-        return json.dumps(self.model.transform([message]).toarray()[0].tolist())
-
-def unescapeHtml(text):
-    # return html_parser.unescape(text)
-    return text.replace("%20", " ")
+        return score1(self.model, message)
 
 #
 # Main entry point. Accepts parameters
@@ -48,10 +59,11 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', help = 'More detailed output', dest='verbose', action='store_true')
     cfg = parser.parse_args()
     scorer = Scorer('{}/vectorizer.pickle'.format(cfg.models_dir))
+    print >> sys.stderr, "python ready"
+
     while True:
         logString = raw_input()
         if len(logString) > 0:
-            res = scorer.score(unescapeHtml(logString))
-            print str(res).replace("[","").replace("]","").replace(" ","")
+            res = scorer.score(logString)
+            print res
             sys.stdout.flush()
-

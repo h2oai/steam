@@ -103,6 +103,8 @@ public class PredictServlet extends HttpServlet {
   public static Times predictionTimes = new Times();
   public static Times getTimes = new Times();
   public static Times postTimes = new Times();
+  public static Times getPythonTimes = new PredictServlet.Times();
+  public static Times postPythonTimes = new PredictServlet.Times();
 
   static private String jsonModel() {
 
@@ -156,7 +158,7 @@ public class PredictServlet extends HttpServlet {
     if (VERBOSE) System.out.println("Get time " + getTimes);
   }
 
-  private AbstractPrediction predict(RowData row) throws PredictException {
+  public static AbstractPrediction predict(RowData row) throws PredictException {
     long start = System.nanoTime();
     AbstractPrediction p = model.predict(row);
     long done = System.nanoTime();
@@ -176,7 +178,7 @@ public class PredictServlet extends HttpServlet {
       RowData row = gson.fromJson(request.getReader(), new RowData().getClass());
 
       // do the prediction
-      AbstractPrediction pr = model.predict(row);
+      AbstractPrediction pr = predict(row);
 
       // assemble json result
       String prJson = gson.toJson(pr);

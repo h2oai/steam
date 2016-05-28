@@ -1,16 +1,10 @@
 import java.io.*;
 import java.net.MalformedURLException;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Arrays;
-import java.lang.reflect.Type;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
 
-import hex.ModelCategory;
 import hex.genmodel.easy.prediction.AbstractPrediction;
-import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.*;
 import hex.genmodel.*;
 
@@ -19,24 +13,28 @@ import com.google.gson.Gson;
 public class PredictPythonServlet extends HttpServlet {
   // Set to true for demo mode (to print the predictions to stdout).
   // Set to false to get better throughput.
-  static boolean VERBOSE = true;
+  static boolean VERBOSE = false;
 
   public static GenModel rawModel;
   public static EasyPredictModelWrapper model;
-  public static long numberOfPredictions = 0;
-  public static long startTime = System.currentTimeMillis();
-  public static long lastTime = 0;
-  public static double lastPredictionMs = 0;
-  public static double totalTimeMs = 0;
-  public static double totalTimeSquareMs = 0;
-  public static double warmupTimeMs = 0;
-  public static double warmupTimeSquareMs = 0;
-  public static int warmupNumber = 5;
 
-  static Process p;
-  static ProcessBuilder pb;
-  static OutputStream stdin;
-  static BufferedReader reader, err_reader;
+//  public static long numberOfPredictions = 0;
+//  public static long startTime = System.currentTimeMillis();
+//  public static long lastTime = 0;
+//  public static double lastPredictionMs = 0;
+//  public static double totalTimeMs = 0;
+//  public static double totalTimeSquareMs = 0;
+//  public static double warmupTimeMs = 0;
+//  public static double warmupTimeSquareMs = 0;
+//  public static int warmupNumber = 5;
+
+  private static Process p;
+  private static ProcessBuilder pb;
+  private static OutputStream stdin;
+  private static BufferedReader reader, err_reader;
+
+//  public static PredictServlet.Times getPythonTimes = new PredictServlet.Times();
+//  public static PredictServlet.Times postPythonTimes = new PredictServlet.Times();
 
   static Gson gson = new Gson();
 
@@ -63,7 +61,8 @@ public class PredictPythonServlet extends HttpServlet {
       try {
         // score.py -- --verbose --models-dir /tmp/models
 //        pb = new ProcessBuilder("python", program, "--models-dir", "/Users/magnus/Git/steamY/scoring-service-builder/examples/example-spam-detection/models");
-        pb = new ProcessBuilder("python", program, "--datafile", "/Users/magnus/Git/steamY/scoring-service-builder/examples/example-spam-detection/data/smsData.txt");
+//        pb = new ProcessBuilder("python", program, "--datafile", "/Users/magnus/Git/steamY/scoring-service-builder/examples/example-spam-detection/data/smsData.txt");
+        pb = new ProcessBuilder("python", program);
 //        pb = new ProcessBuilder("python", program);
 //        Map<String, String> env = pb.environment();
 //        env.put("PYTHONPATH", env.get("PYTHONPATH") + ":/Users/magnus/Git/steamY/scoring-service-builder/examples/example-spam-detection/lib");
@@ -92,24 +91,45 @@ public class PredictPythonServlet extends HttpServlet {
     return modelJson;
   }
 
-  @SuppressWarnings("unchecked")
-  private void fillRowDataFromHttpRequest(HttpServletRequest request, RowData row) {
-    Map<String, String[]> parameterMap;
-    parameterMap = request.getParameterMap();
-    if (VERBOSE) System.out.println();
-    for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-      String key = entry.getKey();
-      String[] values = entry.getValue();
-      for (String value : values) {
-        if (VERBOSE) System.out.println("Key: " + key + " Value: " + value);
-        if (value.length() > 0) {
-          row.put(key, value);
-        }
-      }
+//  @SuppressWarnings("unchecked")
+//  private void fillRowDataFromHttpRequest(HttpServletRequest request, RowData row) {
+//    Map<String, String[]> parameterMap;
+//    parameterMap = request.getParameterMap();
+//    if (VERBOSE) System.out.println();
+//    for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+//      String key = entry.getKey();
+//      String[] values = entry.getValue();
+//      for (String value : values) {
+//        if (VERBOSE) System.out.println("Key: " + key + " Value: " + value);
+//        if (value.length() > 0) {
+//          row.put(key, value);
+//        }
+//      }
+//    }
+//  }
+
+  static final byte[] NewlineByteArray = "\n".getBytes();
+
+  public synchronized String sendPython(String queryString) {
+    String result = null;
+
+    try {
+//      String res = queryString + "\n";
+      stdin.write(queryString.getBytes());
+      stdin.write(NewlineByteArray);
+      stdin.flush();
+      result = reader.readLine();
+//        showStderr();
     }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      showStderr();
+    }
+    return result;
   }
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    long start = System.nanoTime();
     try {
       if (model == null)
         throw new Exception("No predictor model");
@@ -117,24 +137,31 @@ public class PredictPythonServlet extends HttpServlet {
       String queryString = request.getQueryString();
       if (VERBOSE) System.out.println("queryString " + queryString);
 
-      String result = null;
-      try {
-        String res = queryString + "\n";
-        stdin.write(res.getBytes());
-        stdin.flush();
-        result = reader.readLine();
+//      String result = null;
+//      try {
+//        String res = queryString + "\n";
+//        stdin.write(res.getBytes());
+//        stdin.flush();
+//        result = reader.readLine();
+////        showStderr();
+//      }
+//      catch (Exception ex) {
+//        ex.printStackTrace();
 //        showStderr();
-      }
-      catch (Exception ex) {
-        ex.printStackTrace();
-        showStderr();
-      }
-      if (VERBOSE) System.out.println("result " + result); // should now be in CSV from python
+//      }
 
-      RowData row = csvToRowData(colNames, result);
+      String result = sendPython(queryString.replaceAll("%20", " "));
+      if (VERBOSE) System.out.println("result " + result);
+
+//      // should now be in CSV from python
+//      RowData row = csvToRowData(colNames, result);
+
+      RowData row = sparseToRowData(colNames, result);
+
+
       if (VERBOSE) System.out.println("row " + row);
 
-      AbstractPrediction pr = predict(row);
+      AbstractPrediction pr = PredictServlet.predict(row);
 
       // assemble json result
       Gson gson = new Gson();
@@ -149,6 +176,9 @@ public class PredictPythonServlet extends HttpServlet {
       System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
+    long done = System.nanoTime();
+    PredictServlet.getPythonTimes.add(start, done);
+    if (VERBOSE) System.out.println("Python Get time " + PredictServlet.getPythonTimes);
   }
 
   private void showStderr() {
@@ -160,6 +190,24 @@ public class PredictPythonServlet extends HttpServlet {
     } catch (Exception ex2) {
       ex2.printStackTrace();
     }
+  }
+
+  private RowData sparseToRowData(String[] colNames, String result) throws Exception {
+//    System.out.println("result in sp " + result);
+    RowData row = new RowData();
+    String[] pairs = result.split(" ");
+    for (String p : pairs) {
+//      System.out.println(" pair " + p);
+      String[] a = p.split(":");
+//      System.out.println(a[0] + " = " + a[1]);
+      int index = Integer.parseInt(a[0]);
+//      if (index < 0 || index > colNames.length)
+//        throw new Exception("index out of range " + index);
+      double value = Float.parseFloat(a[1]);
+//      System.out.println(index + " = " + value);
+      row.put(colNames[index], value);
+    }
+    return row;
   }
 
   private RowData csvToRowData(String[] colNames, String result) throws Exception {
@@ -183,32 +231,44 @@ public class PredictPythonServlet extends HttpServlet {
     }
   }
 
-  private AbstractPrediction predict(RowData row) throws PredictException {
-    long start = System.nanoTime();
-    AbstractPrediction p = model.predict(row);
-    long done = System.nanoTime();
-    lastTime = System.currentTimeMillis();
-    double elapsedMs = (done - start) / 1.0e6;
-    lastPredictionMs = elapsedMs;
-    totalTimeMs += elapsedMs;
-    totalTimeSquareMs += elapsedMs * elapsedMs;
-    numberOfPredictions += 1;
-    if (numberOfPredictions <= warmupNumber) {
-      warmupTimeMs += elapsedMs;
-      warmupTimeSquareMs += elapsedMs * elapsedMs;
-    }
-    return p;
-  }
+//  private AbstractPrediction predict(RowData row) throws PredictException {
+//    long start = System.nanoTime();
+//    AbstractPrediction p = model.predict(row);
+//    long done = System.nanoTime();
+//    lastTime = System.currentTimeMillis();
+//    double elapsedMs = (done - start) / 1.0e6;
+//    lastPredictionMs = elapsedMs;
+//    totalTimeMs += elapsedMs;
+//    totalTimeSquareMs += elapsedMs * elapsedMs;
+//    numberOfPredictions += 1;
+//    if (numberOfPredictions <= warmupNumber) {
+//      warmupTimeMs += elapsedMs;
+//      warmupTimeSquareMs += elapsedMs * elapsedMs;
+//    }
+//    return p;
+//  }
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    long start = System.nanoTime();
     try {
       if (model == null)
         throw new Exception("No predictor model");
 
-      RowData row = gson.fromJson(request.getReader(), new RowData().getClass());
+      BufferedReader r = request.getReader();
+      StringBuilder sb = new StringBuilder();
+      String line = r.readLine();
+      r.close();
+//      System.out.println("line " + line);
+      String result = sendPython(line);
+      if (VERBOSE) System.out.println("result " + result);
 
+//      // should now be in CSV from python
+//      RowData row = csvToRowData(colNames, result);
+
+      RowData row = sparseToRowData(colNames, result);
+//      System.out.println("row " + row);
       // do the prediction
-      AbstractPrediction pr = model.predict(row);
+      AbstractPrediction pr = PredictServlet.predict(row);
 
       // assemble json result
       String prJson = gson.toJson(pr);
@@ -222,6 +282,10 @@ public class PredictPythonServlet extends HttpServlet {
       System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
+    long done = System.nanoTime();
+    PredictServlet.postPythonTimes.add(start, done);
+    if (VERBOSE) System.out.println("Python Get time " + PredictServlet.postPythonTimes);
+
   }
 
 

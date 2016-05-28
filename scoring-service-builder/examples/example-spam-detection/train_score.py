@@ -8,6 +8,7 @@ import json
 from sklearn.feature_extraction.text import TfidfVectorizer
 # from h2o.estimators.gbm import H2OGradientBoostingEstimator
 import HTMLParser
+import time
 
 # Shared user library between training and scoring
 # from lib.modelling import split_into_lemmas, saveModel
@@ -106,8 +107,34 @@ def split_into_lemmas(message):
 #    ipython score.py -- --verbose --models-dir /tmp/models
 #
 
+def score10(vectorizer, message):
+    start = time.clock()
+    v = vectorizer.transform([message])
+    done = time.clock()
+    elapsed = (done - start) * 1000 # ms
+    print >> sys.stderr, elapsed
+    return json.dumps(v.toarray()[0].tolist())
+
 def score1(vectorizer, message):
-        return json.dumps(vectorizer.transform([message]).toarray()[0].tolist())
+    #start = time.clock()
+    v = vectorizer.transform([message])
+    #done = time.clock()
+    #elapsed = (done - start) * 1000 # ms
+    #print >> sys.stderr, elapsed
+    nz = v.nonzero()[1]
+    #print >> sys.stderr, nz
+    dat = v.data
+    #print >> sys.stderr, dat
+    r = ""
+    i = 0
+    len = nz.size
+    while i < len:
+        index = nz[i]
+        value = dat[i]
+     #   print >> sys.stderr, index, value
+        r += repr(index) + ":" + repr(value) + " "
+        i += 1
+    return r
 
 # html_parser = HTMLParser.HTMLParser()
 
@@ -130,12 +157,13 @@ if __name__ == "__main__":
     # scorer = Scorer('{}/vectorizer.pickle'.format(cfg.models_dir))
     print >> sys.stderr, "ready to score"
     while True:
-        rawString = raw_input()
-        logString = unescapeHtml(rawString)
-        print  >> sys.stderr, "rawString = " + rawString + "  logString = " + logString
+        logString = raw_input()
+        #logString = rawString # unescapeHtml(rawString)
+#        print  >> sys.stderr, "rawString = " + rawString + "  logString = " + logString
+     #   print  >> sys.stderr, "  logString = " + logString
         if len(logString) > 0:
             # res = scorer.score(logString)
             # res = vectorizer.transform(logString)
             res = score1(vectorizer, logString)
-            print str(res).replace("[","").replace("]","").replace(" ","")
+            print res # str(res).replace("[","").replace("]","").replace(" ","")
             sys.stdout.flush()

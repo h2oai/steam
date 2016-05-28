@@ -47,7 +47,7 @@ def train(cfg):
     # Save Tf-Idf model
     h2o.init()
     train_table = h2o.H2OFrame(np.column_stack((messages['label'], train.toarray()))).set_names(['label'] + vectorizer.get_feature_names())
-    gbm_model= H2OGradientBoostingEstimator(ntrees=1, learn_rate=0.01, max_depth=6, min_rows=10, distribution="bernoulli")
+    gbm_model= H2OGradientBoostingEstimator(ntrees=10, learn_rate=0.01, max_depth=6, min_rows=10, distribution="bernoulli")
     gbm_model.train(x = range(1, train_table.shape[1]), y = 0, training_frame = train_table)
     if cfg.verbose: print "GBM Model", gbm_model
     # Save models
