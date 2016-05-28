@@ -1,3 +1,4 @@
+/// <reference path="xhr.ts" />
 // ----------------------------------
 // --- Generated with go:generate ---
 // ---        DO NOT EDIT         ---
@@ -83,6 +84,8 @@ module Proxy {
 	export interface Service {
 		ping: (status: boolean, go: (error: Error, status: boolean) => void) => void
 		activityPoll: (status: boolean, go: (error: Error, status: boolean) => void) => void
+		registerCloud: (address: string, go: (error: Error, cloud: Cloud) => void) => void
+		unregisterCloud: (cloudName: string, go: (error: Error) => void) => void
 		startCloud: (cloudName: string, engineName: string, size: number, memory: string, username: string, go: (error: Error, cloud: Cloud) => void) => void
 		stopCloud: (cloudName: string, go: (error: Error) => void) => void
 		getCloud: (cloudName: string, go: (error: Error, cloud: Cloud) => void) => void
@@ -124,6 +127,21 @@ module Proxy {
 
 	interface ActivityPollOut {
 		status: boolean
+	}
+
+	interface RegisterCloudIn {
+		address: string
+	}
+
+	interface RegisterCloudOut {
+		cloud: Cloud
+	}
+
+	interface UnregisterCloudIn {
+		cloud_name: string
+	}
+
+	interface UnregisterCloudOut {
 	}
 
 	interface StartCloudIn {
@@ -329,6 +347,24 @@ module Proxy {
 		}
 		Proxy.Call("ActivityPoll", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<ActivityPollOut>data).status)
+		})
+
+	}
+	export function registerCloud(address: string, go: (error: Error, cloud: Cloud) => void): void {
+		var req: RegisterCloudIn = {
+			address: address
+		}
+		Proxy.Call("RegisterCloud", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<RegisterCloudOut>data).cloud)
+		})
+
+	}
+	export function unregisterCloud(cloudName: string, go: (error: Error) => void): void {
+		var req: UnregisterCloudIn = {
+			cloud_name: cloudName
+		}
+		Proxy.Call("UnregisterCloud", req, function(error, data) {
+			return error ? go(error) : go(null)
 		})
 
 	}

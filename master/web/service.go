@@ -25,8 +25,8 @@ type Service struct {
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
-	cloudActivity             map[string]web.Timestamp
-	scoreActivity             map[string]web.Timestamp
+	cloudActivity             map[string]web.Timestamp // TODO: not threadsafe
+	scoreActivity             map[string]web.Timestamp // TODO: not threadsafe
 }
 
 func toTimestamp(t time.Time) web.Timestamp {
@@ -70,12 +70,12 @@ func (s *Service) poll() {
 			if len(js) > 0 {
 				j := js[0]
 				if j.Progress == "DONE" {
-					s.cloudActivity[c.Name] = j.FinishedAt / 1000
+					s.cloudActivity[c.Name] = j.FinishedAt / 1000 // TODO: not threadsafe
 				} else {
-					s.cloudActivity[c.Name] = now()
+					s.cloudActivity[c.Name] = now() // TODO: not threadsafe
 				}
 			} else {
-				s.cloudActivity[c.Name] = c.CreatedAt
+				s.cloudActivity[c.Name] = c.CreatedAt // TODO: not threadsafe
 			}
 		}
 	}
@@ -112,9 +112,60 @@ func (s *Service) ActivityPoll(status bool) (bool, error) {
 	return status, nil
 }
 
+func (s *Service) RegisterCloud(address string) (*web.Cloud, error) {
+
+	h := h2ov3.NewClient(address)
+	cloud, err := h.GetCloud()
+	if err != nil {
+		return nil, fmt.Errorf("Could not communicate with cloud %s.", address)
+	}
+
+	if _, err := s.getCloud(cloud.CloudName); err == nil {
+		return nil, fmt.Errorf("Cloud registration failed. A cloud with the address %s is already registered.", address)
+	}
+
+	c := db.NewCloud(
+		cloud.CloudName,
+		"",
+		int(cloud.CloudSize),
+		"",
+		address,
+		"",
+		"",
+		string(web.CloudStarted),
+		"",
+	)
+	if err := s.ds.CreateCloud(c); err != nil {
+		return nil, err
+	}
+
+	return toCloud(c), nil
+}
+
+func (s *Service) UnregisterCloud(cloudName string) error {
+
+	// Make sure the cloud exists
+	c, err := s.getCloud(cloudName)
+	if err != nil {
+		return err
+	}
+
+	// HACK: if the engine name is empty, this is not an external cloud. So bail out.
+	if c.EngineName != "" {
+		return fmt.Errorf("Cannot unregister internal clouds.")
+	}
+
+	// Permanently delete this cloud
+	if err := s.ds.DeleteCloud(cloudName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Service) StartCloud(cloudName, engineName string, size int, memory, username string) (*web.Cloud, error) {
 	// Make sure this cloud is unique
-	if _, ok := s.getCloud(cloudName); ok == nil {
+	if _, err := s.getCloud(cloudName); err == nil {
 		return nil, fmt.Errorf("Cloud start failed. A cloud with the name %s already exists.", cloudName)
 	}
 
@@ -147,7 +198,7 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 		return nil, err
 	}
 	// Create an instance of this cloud in cloudActivity map
-	s.cloudActivity[c.ID] = web.Timestamp(c.CreatedAt)
+	s.cloudActivity[c.ID] = web.Timestamp(c.CreatedAt) // TODO: not threadsafe
 	return toCloud(c), nil
 }
 

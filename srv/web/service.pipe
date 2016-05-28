@@ -61,9 +61,11 @@ type Engine
 Ping(status bool) status bool
 ActivityPoll(status bool) status bool
 
+RegisterCloud(address string) cloud *Cloud
+UnregisterCloud(cloudName string)
 StartCloud(cloudName string, engineName string, size int, memory string, username string) cloud *Cloud
-StopCloud (cloudName string)
-GetCloud (cloudName string) cloud *Cloud
+StopCloud(cloudName string)
+GetCloud(cloudName string) cloud *Cloud
 GetClouds() clouds []*Cloud
 GetCloudStatus(cloudName string) cloud *Cloud
 DeleteCloud(cloudName string)
