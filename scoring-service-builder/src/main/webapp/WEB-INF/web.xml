@@ -11,6 +11,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         <servlet-name>MakeWar</servlet-name>
         <servlet-class>ai.h2o.servicebuilder.MakeWarServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>MakePythonWar</servlet-name>
+        <servlet-class>ai.h2o.servicebuilder.MakePythonWarServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>CompilePojo</servlet-name>
@@ -19,6 +23,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     <servlet-mapping>
         <servlet-name>MakeWar</servlet-name>
         <url-pattern>/makewar</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MakePythonWar</servlet-name>
+        <url-pattern>/makepythonwar</url-pattern>
     </servlet-mapping>
 
 </web-app>
