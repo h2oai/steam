@@ -18,6 +18,20 @@ const (
 	steam = "steam"
 )
 
+type Config struct {
+	Version     string
+	Kind        string
+	CurrentHost string
+}
+
+func newConfig() *Config {
+	return &Config{
+		"1.0.0",
+		"Config",
+		"",
+	}
+}
+
 func Run(version, buildDate string) {
 	cmd := Steam(version, buildDate, os.Stdout, os.Stdin, ioutil.Discard)
 	if err := cmd.Execute(); err != nil {
@@ -30,25 +44,29 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 	c := &context{
 		version:   version,
 		buildDate: buildDate,
+		trace:     log.New(trace, "", 0),
+		// remote:    &web.Remote{rpc.NewProc("http", "/web", "web", "172.16.2.103:9000", "", "")},
 	}
 
+	var verbose bool
 	cmd := &cobra.Command{
 		Use:               steam,
 		Short:             fmt.Sprintf("%s v%s build %s: Command Line Interface to Steam", steam, version, buildDate),
 		DisableAutoGenTag: true,
+
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			c.configure(verbose)
+		},
 	}
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	cmd.AddCommand(
+		login(c),
 		start(c), // temporary; will not be accessible from the CLI in the future
 		stop(c),  // temporary; will not be accessible from the CLI in the future
 		serve(c),
 	)
 	return cmd
-}
-
-type context struct {
-	version   string
-	buildDate string
 }
 
 func newCmd(c *context, help string, run func(c *context, args []string)) *cobra.Command {
