@@ -55,7 +55,7 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 	- steam--linux-amd64.tar.gz
 	- automl-hdp2.2.jar	
 	
-3. On the YARN machine, change directories to the Steam directory, then set up the Jetty server using one of the following methods:
+3. On the YARN machine, change directories to the Steam directory, then run the H2O Java Model Compilation Service. This service is required for Steam to be able to compile and build models for deployment purposes:
 
 		cd steam--linux-amd64/steam
 		java -jar var/master/assets/jetty-runner.jar --port 8811 var/master/assets/ROOT.war
