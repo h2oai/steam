@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/h2oai/steamY/lib/svc"
-	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master"
 	"github.com/spf13/cobra"
 )
@@ -61,9 +60,11 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	cmd.AddCommand(
+		delete(c),
+		get(c),
 		login(c),
-		start(c), // temporary; will not be accessible from the CLI in the future
-		stop(c),  // temporary; will not be accessible from the CLI in the future
+		start(c),
+		stop(c),
 		serve(c),
 	)
 	return cmd
@@ -169,64 +170,6 @@ func serveMaster(c *context) *cobra.Command {
 
 }
 
-var startHelp = `
-start [resource-type]
-Start a new resource.
-Examples:
-
-    $ steam start cloud
-`
-
-func start(c *context) *cobra.Command {
-	cmd := newCmd(c, startHelp, nil)
-	cmd.AddCommand(startCloud(c))
-	cmd.AddCommand(startService(c))
-	return cmd
-}
-
-var startCloudHelp = `
-cloud [cloud-name]
-Start a new cloud using the specified H2O package.
-Examples:
-
-Start a 4 node H2O 3.2.0.9 cloud
-
-    $ steam start cloud42 h2odriver.jar --size=4
-`
-
-func startCloud(c *context) *cobra.Command {
-	var (
-		size                  int
-		mem, keytab, username string
-		kerberos              bool
-	)
-
-	cmd := newCmd(c, startCloudHelp, func(c *context, args []string) {
-		if len(args) != 1 {
-			log.Fatalln("Incorrect number of arguments. See 'steam help start cloud'.")
-		}
-
-		name := args[0]
-		engine := args[1]
-
-		// --- add additional args here ---
-
-		if _, _, _, err := yarn.StartCloud(size, kerberos, mem, name, engine, username, keytab); err != nil {
-			log.Fatalln(err)
-		}
-
-		// TODO: name corresponds to id for purpose of stopCloud
-
-	})
-	cmd.Flags().IntVar(&size, "size", 1, "The number of nodes to provision.")
-	cmd.Flags().StringVar(&mem, "mem", "10g", "The max amount of memory to use per node.")
-	cmd.Flags().BoolVar(&kerberos, "kerberos", true, "Set false on systems with no kerberos authentication.")
-	cmd.Flags().StringVar(&username, "username", "", "The valid kerberos username.")
-	cmd.Flags().StringVar(&keytab, "keytab", "", "The name of the keytab file to use")
-
-	return cmd
-}
-
 var startServiceHelp = `
 service
 Start a new scoring service
@@ -254,59 +197,6 @@ func startService(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&jetty, "jetty-runner", "", "The jetty runner jar.")
 	cmd.Flags().StringVar(&address, "address", "0.0.0.0", "The ip of the host to launch the scoring service.")
 	cmd.Flags().IntVar(&port, "port", 8000, "The port to listen on.")
-	return cmd
-}
-
-var stopHelp = `
-stop [resource-type]
-Stop the specified resource.
-Examples:
-
-    $ steam stop cloud
-`
-
-func stop(c *context) *cobra.Command {
-	cmd := newCmd(c, stopHelp, nil)
-	cmd.AddCommand(stopCloud(c))
-	cmd.AddCommand(stopService(c))
-	return cmd
-}
-
-var stopCloudHelp = `
-cloud [cloud-name] [cloud-id]
-Stop a cloud.
-Examples:
-
-    $ steam stop cloud cloud42 1457562501251_0543
-`
-
-func stopCloud(c *context) *cobra.Command {
-	var (
-		kerberos, force  bool
-		username, keytab string
-	)
-
-	cmd := newCmd(c, stopCloudHelp, func(c *context, args []string) {
-		if len(args) != 2 {
-			log.Fatalln("Missing cloud-name. See 'steam help stop cloud'.")
-		}
-
-		name := args[0]
-		id := args[1]
-		job := args[2]
-		// --- add additional args here ---
-
-		if err := yarn.StopCloud(kerberos, name, id, job, username, keytab); err != nil {
-			log.Fatalln(err)
-		}
-
-	})
-
-	cmd.Flags().BoolVar(&kerberos, "kerberos", true, "Set false on systems with no kerberos authentication.")
-	cmd.Flags().StringVar(&username, "username", "", "The valid kerberos username.")
-	cmd.Flags().StringVar(&keytab, "keytab", "", "The name of the keytab file to use")
-	cmd.Flags().BoolVar(&force, "force", false, "Force-kill all H2O instances in the cloud")
-
 	return cmd
 }
 
