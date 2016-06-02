@@ -37,4 +37,5 @@ _testmain.go
 /scoring-service-builder/build
 /var/master/assets/*.war
 /var/master/assets/*.jar
+/var/master/model
 
