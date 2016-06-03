@@ -150,10 +150,7 @@ func Poll(s *web.ScoringService) (web.Timestamp, error) {
 		return 0, fmt.Errorf("Error unmarshaling response: %s: %v", string(b), err)
 	}
 
-	last, err := int64(m["lastTime"].(float64))
-	if err != nil {
-		return 0, fmt.Errorf("Error extracting \"lastTime\" from json: %v: %v", m, err)
-	}
+	last := int64(m["lastTime"].(float64))
 
 	return web.Timestamp(last / 1000), nil
 }
