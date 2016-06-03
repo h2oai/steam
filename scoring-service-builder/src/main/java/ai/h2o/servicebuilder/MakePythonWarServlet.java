@@ -80,7 +80,6 @@ public class MakePythonWarServlet extends HttpServlet {
           if (field.equals("pojo")) {
             pojofile = filename;
             predictorClassName = filename.replace(".java", "");
-            System.out.println("predictorClassName " + predictorClassName);
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
           }
           if (field.equals("jar")) {
@@ -88,8 +87,12 @@ public class MakePythonWarServlet extends HttpServlet {
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
           if (field.equals("python")) {
-            pythonfile = "WEB-INF" + File.separator + "lib" + File.separator + "python.py";
-            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, "python.py"));
+            pythonfile = "WEB-INF" + File.separator + "python.py";
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(webInfDir, "python.py"));
+          }
+          if (field.equals("pythonextra")) {
+            pythonfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
 
         }
@@ -152,7 +155,7 @@ public class MakePythonWarServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
 
       Long elapsedMs = System.currentTimeMillis() - startTime;
-      System.out.println("Done war creation in " + elapsedMs + " ms");
+      System.out.println("Done python war creation in " + elapsedMs + " ms");
     }
     catch (Exception e) {
       e.printStackTrace();

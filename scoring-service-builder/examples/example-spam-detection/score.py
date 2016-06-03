@@ -1,16 +1,13 @@
 # this is run within the predictor
 import sys
 import pickle
-import json
 import argparse
 from textblob import TextBlob
 
-# FIXME: shared library with training
-#import lib.modelling as modelling
+import lib.modelling as modelling
 
 # Should be input parameter
-#MODELS_DESTINATION_DIR = "./models"
-MODELS_DESTINATION_DIR = "/tmp/models"
+MODELS_DESTINATION_DIR = "./lib"
 
 ## FIXME: should be provided by shared library
 def loadModel(source):

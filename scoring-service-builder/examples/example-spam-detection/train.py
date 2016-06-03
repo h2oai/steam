@@ -1,6 +1,5 @@
 # This is run within the predictor
 import os
-import sys
 import h2o
 import numpy as np
 import argparse
@@ -12,8 +11,7 @@ from textblob import TextBlob
 from lib.modelling import saveModel
 
 # Should be input parameter
-#MODELS_DESTINATION_DIR = "./models"
-MODELS_DESTINATION_DIR = "/tmp/models"
+MODELS_DESTINATION_DIR = "./lib"
 
 
 def split_into_lemmas(message):
