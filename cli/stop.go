@@ -2,6 +2,7 @@ package cli
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -17,6 +18,7 @@ Examples:
 func stop(c *context) *cobra.Command {
 	cmd := newCmd(c, stopHelp, nil)
 	cmd.AddCommand(stopCloud(c))
+	cmd.AddCommand(stopService(c))
 	return cmd
 }
 
@@ -55,6 +57,36 @@ func stopCloud(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&username, "username", "", "The valid kerberos username.")
 	cmd.Flags().StringVar(&keytab, "keytab", "", "The name of the keytab file to use")
 	cmd.Flags().BoolVar(&force, "force", false, "Force-kill all H2O instances in the cloud")
+
+	return cmd
+}
+
+var stopServiceHelp = `
+service [modelName] [port]
+Stop a scoring service.
+Examples:
+
+    $ steam stop service model3 
+`
+
+func stopService(c *context) *cobra.Command {
+	cmd := newCmd(c, stopServiceHelp, func(c *context, args []string) {
+		if len(args) != 2 {
+			log.Fatalln("Invalid number of arguments. See 'steam help stop service'.")
+		}
+
+		modelName := args[0]
+		port, err := strconv.Atoi(args[1])
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := c.remote.StopScoringService(modelName, port); err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Println("Service stopped on:", modelName)
+	})
 
 	return cmd
 }

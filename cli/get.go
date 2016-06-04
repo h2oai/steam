@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/h2oai/steamY/srv/web"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,9 @@ Examples:
 func get(c *context) *cobra.Command {
 	cmd := newCmd(c, getHelp, nil)
 	cmd.AddCommand(getClouds(c))
+	cmd.AddCommand(getEngines(c))
+	cmd.AddCommand(getModels(c))
+	cmd.AddCommand(getServices(c))
 	return cmd
 }
 
@@ -30,7 +34,7 @@ Examples:
 `
 
 func getClouds(c *context) *cobra.Command {
-	var details bool
+	var details, silent bool
 	cmd := newCmd(c, getCloudsHelp, func(c *context, args []string) {
 		cs, err := c.remote.GetClouds()
 		if err != nil {
@@ -40,9 +44,18 @@ func getClouds(c *context) *cobra.Command {
 		lines := make([]string, len(cs))
 		if details {
 			for i, cl := range cs {
-				info, err := c.remote.GetCloudStatus(cl.Name)
-				if err != nil {
-					log.Fatalln(err)
+				var info *web.Cloud
+				if cl.State == web.CloudStopped {
+					info = cl
+				} else {
+					info, err = c.remote.GetCloudStatus(cl.Name)
+					if err != nil && silent {
+						log.Println(err)
+						info = cl
+						info.State = web.CloudUnknown
+					} else if err != nil {
+						log.Fatalln(err)
+					}
 				}
 				lines[i] = fmt.Sprintf("%s\t%s\t%s\t%d\t%s", info.Name, info.EngineName, info.Memory, info.Size, info.State)
 			}
@@ -57,8 +70,85 @@ func getClouds(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().BoolVarP(&details, "details", "d", false, "Detailed cluster information")
+	cmd.Flags().BoolVarP(&silent, "silent", "s", false, "Silence errors")
 
 	return cmd
 }
 
-//FIXME: getCloud requires storage of all nodes in cluster
+var getEnginesHelp = `
+engines
+List all engines.
+Examples:
+
+	$ steam get engines
+`
+
+func getEngines(c *context) *cobra.Command {
+	cmd := newCmd(c, getEnginesHelp, func(c *context, args []string) {
+		es, err := c.remote.GetEngines()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		lines := make([]string, len(es))
+		for i, e := range es {
+			lines[i] = fmt.Sprintf("%s\t%s", e.Name, fmtAgo(e.CreatedAt))
+		}
+		c.printt("NAME\tAGE", lines)
+	})
+
+	return cmd
+}
+
+// FIXME: getCloud requires storage of all nodes in cluster
+
+var getModelsHelp = `
+models
+List all models.
+Examples:
+
+	$ steam get models
+`
+
+func getModels(c *context) *cobra.Command {
+	cmd := newCmd(c, getModelsHelp, func(c *context, args []string) {
+		ms, err := c.remote.GetModels()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		lines := make([]string, len(ms))
+		for i, m := range ms {
+			lines[i] = fmt.Sprintf("%s\t%s\t%s\t%s\t%s", m.Name, m.Algo, m.Dataset, m.TargetName, fmtAgo(m.CreatedAt))
+		}
+		c.printt("NAME\tALGO\tDATASET\tTARGET\tAGE", lines)
+	})
+
+	return cmd
+}
+
+var getServicesHelp = `
+services
+List all services.
+Examples:
+
+	$ steam get services
+`
+
+func getServices(c *context) *cobra.Command {
+	cmd := newCmd(c, getServicesHelp, func(c *context, args []string) {
+		ss, err := c.remote.GetScoringServices()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		lines := make([]string, len(ss))
+		for i, s := range ss {
+			lines[i] = fmt.Sprintf("%s\t%s\t%d\t%s\t%s", s.ModelName, s.Address, s.ModelName, s.Port, fmtAgo(s.CreatedAt))
+		}
+
+		c.printt("M.NAME\tADDRESS\tPORT\tSTATE\tAGE", lines)
+	})
+
+	return cmd
+}

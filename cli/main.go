@@ -63,9 +63,10 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		delete(c),
 		get(c),
 		login(c),
+		retrieve(c),
+		serve(c),
 		start(c),
 		stop(c),
-		serve(c),
 	)
 	return cmd
 }
@@ -197,33 +198,5 @@ func startService(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&jetty, "jetty-runner", "", "The jetty runner jar.")
 	cmd.Flags().StringVar(&address, "address", "0.0.0.0", "The ip of the host to launch the scoring service.")
 	cmd.Flags().IntVar(&port, "port", 8000, "The port to listen on.")
-	return cmd
-}
-
-var stopServiceHelp = `
-service
-Stop a scoring service.
-Examples:
-
-    $ steam stop service --pid=67997
-`
-
-func stopService(c *context) *cobra.Command {
-	var (
-		pid int
-	)
-
-	cmd := newCmd(c, stopServiceHelp, func(c *context, args []string) {
-		if pid == 0 {
-			log.Fatalln("Invalid pid. See 'steam help stop service'")
-		}
-		if err := svc.Stop(pid); err != nil {
-			log.Fatalln(err)
-		}
-		log.Println("Service stopped:", pid)
-	})
-
-	cmd.Flags().IntVar(&pid, "pid", 0, "The pid of the service to kill.")
-
 	return cmd
 }
