@@ -585,13 +585,12 @@ func (s *Service) GetModelFromCloud(cloudName string, modelName string) (*web.Mo
 
 func (s *Service) DeleteModel(modelName string) error {
 	ss, err := s.getScoringService(modelName)
-	if err != nil {
-		return err
-	}
+	if err == nil {
 
-	if ss.State != web.ScoringServiceStopped {
-		return fmt.Errorf("Cannot delete. A scoring service on model %s is"+
-			" still running.", modelName)
+		if ss.State != web.ScoringServiceStopped {
+			return fmt.Errorf("Cannot delete. A scoring service on model %s is"+
+				" still running.", modelName)
+		}
 	}
 
 	if _, err := s.getModel(modelName); err != nil {
@@ -821,28 +820,33 @@ func toSizeBytes(i int64) string {
 
 func toCloud(c *db.Cloud) *web.Cloud {
 	return &web.Cloud{
-		CreatedAt:     web.Timestamp(c.CreatedAt),
-		Name:          c.ID,
-		EngineName:    c.EngineName,
-		Size:          c.Size,
-		State:         web.CloudState(c.State),
-		Address:       c.Address,
-		Username:      c.Username,
-		ApplicationID: c.ApplicationID,
+		web.Timestamp(c.CreatedAt), // CreatedAt
+		c.ID,         // Name
+		c.EngineName, // EngineName
+		"",           // EngineVerion
+		c.Size,       // Size
+		"",           // Memory
+		0,            // TotalCores
+		0,            // AllowedCores
+		web.CloudState(c.State), // State
+		c.Address,               // Address
+		c.Username,              // Username
+		c.ApplicationID,         // ApplicationID
+		0,                       //Activity
 	}
 }
 
 func toModel(m *db.Model) *web.Model {
 	return &web.Model{
-		Name:          m.ID,
-		CloudName:     m.CloudName,
-		Algo:          m.Algo,
-		Dataset:       m.Dataset,
-		TargetName:    m.TargetName,
-		MaxRuntime:    m.MaxRuntime,
-		JavaModelPath: m.JavaModelPath,
-		GenModelPath:  m.GenModelPath,
-		CreatedAt:     web.Timestamp(m.CreatedAt),
+		m.ID,                       // Name
+		m.CloudName,                // CloudName
+		m.Algo,                     // Algo
+		m.Dataset,                  // Dataset
+		m.TargetName,               // TargetName
+		m.MaxRuntime,               // MaxRunTime
+		m.JavaModelPath,            // JavaModelPath
+		m.GenModelPath,             // GenModelPath
+		web.Timestamp(m.CreatedAt), // CreatedAt
 	}
 }
 
