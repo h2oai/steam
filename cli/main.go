@@ -61,6 +61,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 
 	cmd.AddCommand(
 		delete(c),
+		deploy(c),
 		get(c),
 		login(c),
 		retrieve(c),
