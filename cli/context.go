@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"text/tabwriter"
@@ -20,6 +21,7 @@ type context struct {
 	version   string
 	buildDate string
 	config    *Config
+	uploadURL string
 	remote    *web.Remote
 	trace     *log.Logger
 }
@@ -51,6 +53,7 @@ func (c *context) configure(verbose bool) {
 	c.config = conf
 	httpScheme := "http"
 	c.remote = &web.Remote{rpc.NewProc(httpScheme, "/web", "web", addr, "", "")}
+	c.uploadURL = (&url.URL{Scheme: httpScheme, Host: addr, Path: "/upload"}).String()
 }
 
 func (c *context) loadConfig(confPath string) *Config {
@@ -78,6 +81,10 @@ func (c *context) saveConfig(conf *Config) {
 	if err := ioutil.WriteFile(confPath, data, 0755); err != nil {
 		log.Fatalln(fmt.Sprintf("Failed writing config file %s:", confPath), err)
 	}
+}
+
+func (c *context) uploadFile(filepath, kind string) error {
+	return uploadFile(c.uploadURL, filepath, kind)
 }
 
 func (c *context) traceln(v ...interface{}) {
