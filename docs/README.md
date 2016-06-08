@@ -53,7 +53,7 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 		
 	**OS X**
 	
-		cd steam-master-linux-amd64
+		cd steam-master-darwin-amd64
 		java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 
 	**Note**: The Jetty server defaults to port 8080. You can optionally provide a `--port` value for jetty-runner.jar.
