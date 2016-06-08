@@ -138,6 +138,7 @@ func serveMaster(c *context) *cobra.Command {
 	var (
 		webAddress                string
 		workingDirectory          string
+		clusterProxyAddress       string
 		compilationServiceAddress string
 		scoringServiceAddress     string
 		enableProfiler            bool
@@ -151,6 +152,7 @@ func serveMaster(c *context) *cobra.Command {
 		master.Run(c.version, c.buildDate, &master.Opts{
 			webAddress,
 			workingDirectory,
+			clusterProxyAddress,
 			compilationServiceAddress,
 			scoringServiceAddress,
 			enableProfiler,
@@ -162,6 +164,7 @@ func serveMaster(c *context) *cobra.Command {
 
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address.")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
+	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Address for cluster proxy")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Compilation service address")
 	cmd.Flags().StringVar(&scoringServiceAddress, "scoring-service-address", opts.ScoringServiceAddress, "Address to start scoring service on")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")

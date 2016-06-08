@@ -89,6 +89,7 @@ type Engine struct {
 type Service interface {
 	Ping(status bool) (bool, error)
 	ActivityPoll(status bool) (bool, error)
+	InitClusterProxy() (bool, error)
 	RegisterCloud(address string) (*Cloud, error)
 	UnregisterCloud(cloudName string) error
 	StartCloud(cloudName string, engineName string, size int, memory string, username string) (*Cloud, error)
@@ -131,6 +132,13 @@ type ActivityPollIn struct {
 }
 
 type ActivityPollOut struct {
+	Status bool `json:"status"`
+}
+
+type InitClusterProxyIn struct {
+}
+
+type InitClusterProxyOut struct {
 	Status bool `json:"status"`
 }
 
@@ -359,6 +367,16 @@ func (this *Remote) ActivityPoll(status bool) (bool, error) {
 	in := ActivityPollIn{status}
 	var out ActivityPollOut
 	err := this.Proc.Call("ActivityPoll", &in, &out)
+	if err != nil {
+		return false, err
+	}
+	return out.Status, nil
+}
+
+func (this *Remote) InitClusterProxy() (bool, error) {
+	in := InitClusterProxyIn{}
+	var out InitClusterProxyOut
+	err := this.Proc.Call("InitClusterProxy", &in, &out)
 	if err != nil {
 		return false, err
 	}
@@ -632,6 +650,15 @@ func (this *Impl) Ping(r *http.Request, in *PingIn, out *PingOut) error {
 
 func (this *Impl) ActivityPoll(r *http.Request, in *ActivityPollIn, out *ActivityPollOut) error {
 	it, err := this.Service.ActivityPoll(in.Status)
+	if err != nil {
+		return err
+	}
+	out.Status = it
+	return nil
+}
+
+func (this *Impl) InitClusterProxy(r *http.Request, in *InitClusterProxyIn, out *InitClusterProxyOut) error {
+	it, err := this.Service.InitClusterProxy()
 	if err != nil {
 		return err
 	}

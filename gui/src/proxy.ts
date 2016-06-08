@@ -1,4 +1,3 @@
-/// <reference path="xhr.ts" />
 // ----------------------------------
 // --- Generated with go:generate ---
 // ---        DO NOT EDIT         ---
@@ -84,6 +83,7 @@ module Proxy {
 	export interface Service {
 		ping: (status: boolean, go: (error: Error, status: boolean) => void) => void
 		activityPoll: (status: boolean, go: (error: Error, status: boolean) => void) => void
+		initClusterProxy: (go: (error: Error, status: boolean) => void) => void
 		registerCloud: (address: string, go: (error: Error, cloud: Cloud) => void) => void
 		unregisterCloud: (cloudName: string, go: (error: Error) => void) => void
 		startCloud: (cloudName: string, engineName: string, size: number, memory: string, username: string, go: (error: Error, cloud: Cloud) => void) => void
@@ -126,6 +126,13 @@ module Proxy {
 	}
 
 	interface ActivityPollOut {
+		status: boolean
+	}
+
+	interface InitClusterProxyIn {
+	}
+
+	interface InitClusterProxyOut {
 		status: boolean
 	}
 
@@ -347,6 +354,14 @@ module Proxy {
 		}
 		Proxy.Call("ActivityPoll", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<ActivityPollOut>data).status)
+		})
+
+	}
+	export function initClusterProxy(go: (error: Error, status: boolean) => void): void {
+		var req: InitClusterProxyIn = {
+		}
+		Proxy.Call("InitClusterProxy", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<InitClusterProxyOut>data).status)
 		})
 
 	}

@@ -60,6 +60,7 @@ type Engine
 
 Ping(status bool) status bool
 ActivityPoll(status bool) status bool
+InitClusterProxy() status bool
 
 RegisterCloud(address string) cloud *Cloud
 UnregisterCloud(cloudName string)

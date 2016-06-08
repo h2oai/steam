@@ -9,6 +9,7 @@ import (
 
 	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/db"
@@ -25,6 +26,7 @@ type Service struct {
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
+	clusterProxy              *proxy.RProxy
 	cloudActivity             map[string]web.Timestamp // TODO: not threadsafe
 	scoreActivity             map[string]web.Timestamp // TODO: not threadsafe
 }
@@ -37,7 +39,7 @@ func now() web.Timestamp {
 	return toTimestamp(time.Now())
 }
 
-func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
+func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoringServiceAddress string, clusterProxy *proxy.RProxy, kerberos bool, username, keytab string) *web.Impl {
 	return &web.Impl{&Service{
 		workingDir,
 		ds,
@@ -46,6 +48,7 @@ func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoring
 		kerberos,
 		username,
 		keytab,
+		clusterProxy,
 		make(map[string]web.Timestamp),
 		make(map[string]web.Timestamp),
 	}}
@@ -112,6 +115,20 @@ func (s *Service) ActivityPoll(status bool) (bool, error) {
 	return status, nil
 }
 
+func (s *Service) InitClusterProxy() (bool, error) {
+	cs, err := s.ds.ListCloud()
+	if err != nil {
+		return false, err //FIXME format error
+	}
+
+	for _, c := range cs {
+		if c.State != "Stopped" {
+			s.clusterProxy.NewProxy(c.ID, c.Address)
+		}
+	}
+	return true, nil
+}
+
 func (s *Service) RegisterCloud(address string) (*web.Cloud, error) {
 
 	h := h2ov3.NewClient(address)
@@ -138,6 +155,7 @@ func (s *Service) RegisterCloud(address string) (*web.Cloud, error) {
 	if err := s.ds.CreateCloud(c); err != nil {
 		return nil, err
 	}
+	s.clusterProxy.NewProxy(c.ID, c.Address)
 
 	return toCloud(c), nil
 }
@@ -199,6 +217,9 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 	}
 	// Create an instance of this cloud in cloudActivity map
 	s.cloudActivity[c.ID] = web.Timestamp(c.CreatedAt) // TODO: not threadsafe
+	// Create a reverse proxy for cluster.
+	s.clusterProxy.NewProxy(c.ID, c.Address)
+
 	return toCloud(c), nil
 }
 
