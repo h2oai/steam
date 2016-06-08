@@ -222,27 +222,25 @@ func TestSecurity(t *testing.T) {
 
 	// verify
 
-	profile, err := ds.ReadProfile(p, user1Id)
+	wgs, err := ds.ReadWorkgroupsForIdentity(p, user1Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.Log(profile)
-	if profile.Identity.Id != user1Id {
-		t.Fatal("wrong identity id")
-	}
-
-	if len(profile.Workgroups) != 1 {
+	if len(wgs) != 1 {
 		t.Fatal("expected 1 workgroup")
 	}
-	if profile.Workgroups[0].Id != group1Id {
+	if wgs[0].Id != group1Id {
 		t.Fatal("wrong workgroup id")
 	}
 
-	if len(profile.Roles) != 1 {
+	rs, err := ds.ReadRolesForIdentity(p, user1Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rs) != 1 {
 		t.Fatal("expected 1 role")
 	}
-	if profile.Roles[0].Id != role1Id {
+	if rs[0].Id != role1Id {
 		t.Fatal("wrong role id")
 	}
 
@@ -266,27 +264,25 @@ func TestSecurity(t *testing.T) {
 
 	// verify
 
-	profile, err = ds.ReadProfile(p, user1Id)
+	wgs, err = ds.ReadWorkgroupsForIdentity(p, user1Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.Log(profile)
-	if profile.Identity.Id != user1Id {
-		t.Fatal("wrong identity id")
-	}
-
-	if len(profile.Workgroups) != 1 {
+	if len(wgs) != 1 {
 		t.Fatal("expected 1 workgroup")
 	}
-	if profile.Workgroups[0].Id != group2Id {
+	if wgs[0].Id != group2Id {
 		t.Fatal("wrong workgroup id")
 	}
 
-	if len(profile.Roles) != 1 {
+	rs, err = ds.ReadRolesForIdentity(p, user1Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rs) != 1 {
 		t.Fatal("expected 1 role")
 	}
-	if profile.Roles[0].Id != role2Id {
+	if rs[0].Id != role2Id {
 		t.Fatal("wrong role id")
 	}
 
@@ -350,11 +346,11 @@ func TestSecurity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	profile1, err := ds.ReadProfile(p, user1Id)
+	id1, err := ds.ReadIdentity(p, user1Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if profile1.Identity.IsActive {
+	if id1.IsActive {
 		t.Fatal("expected user to be inactive")
 	}
 
