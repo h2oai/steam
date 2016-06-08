@@ -653,6 +653,42 @@ func (ds *Datastore) ReadWorkgroupAndIdentities(principal *az.Principal, workgro
 	return wi, nil
 }
 
+type RoleAndIdentities struct {
+	Role       Role
+	Identities []Identity
+}
+
+func (ds *Datastore) ReadRoleAndIdentities(principal *az.Principal, roleId int64) (RoleAndIdentities, error) {
+	var ri RoleAndIdentities
+
+	role, err := ds.ReadRole(principal, roleId)
+	if err != nil {
+		return ri, err
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			i.id, i.name, i.is_active, i.last_login, i.created
+		FROM
+			identity i,
+			identity_role ir
+		WHERE
+			ir.role_id = $1 AND
+		  ir.identity_id = i.id
+		ORDER BY
+			i.name
+		`, roleId)
+
+	identities, err := ScanIdentitys(rows)
+	if err != nil {
+		return ri, nil
+	}
+
+	ri.Role = role
+	ri.Identities = identities
+	return ri, nil
+}
+
 func (ds *Datastore) UpdateWorkgroup(principal *az.Principal, workgroupId int64, name string) error {
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`

@@ -300,6 +300,18 @@ func TestSecurity(t *testing.T) {
 	if len(wi.Identities) != 1 {
 		t.Fatal("expected 1 identity")
 	}
+
+	// read roles + identities
+
+	ri, err := ds.ReadRoleAndIdentities(p, role2Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(ri)
+	if len(ri.Identities) != 1 {
+		t.Fatal("expected 1 identity")
+	}
+
 	// delete roles
 
 	if err := ds.DeleteRole(p, role1Id); err != nil {
