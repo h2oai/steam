@@ -437,11 +437,6 @@ func (ds *Datastore) ReadRoles(principal *az.Principal, offset, limit int64) ([]
 	return ScanRoles(rows)
 }
 
-type RoleAndPermissions struct {
-	Role        Role
-	Permissions []Permission
-}
-
 func (ds *Datastore) ReadRole(principal *az.Principal, roleId int64) (Role, error) {
 	row := ds.db.QueryRow(`
 		SELECT 
@@ -454,7 +449,7 @@ func (ds *Datastore) ReadRole(principal *az.Principal, roleId int64) (Role, erro
 	return ScanRole(row)
 }
 
-func (ds *Datastore) readRolePermissions(principal *az.Principal, roleId int64) ([]Permission, error) {
+func (ds *Datastore) ReadPermissionsForRole(principal *az.Principal, roleId int64) ([]Permission, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			p.id, p.name, p.description
@@ -471,25 +466,8 @@ func (ds *Datastore) readRolePermissions(principal *az.Principal, roleId int64) 
 		return nil, err
 	}
 	defer rows.Close()
+
 	return ScanPermissions(rows)
-}
-
-func (ds *Datastore) ReadRoleAndPermissions(principal *az.Principal, roleId int64) (RoleAndPermissions, error) {
-	var rp RoleAndPermissions
-
-	role, err := ds.ReadRole(principal, roleId)
-	if err != nil {
-		return rp, err
-	}
-
-	permissions, err := ds.readRolePermissions(principal, roleId)
-	if err != nil {
-		return rp, err
-	}
-
-	rp.Role = role
-	rp.Permissions = permissions
-	return rp, nil
 }
 
 func (ds *Datastore) UpdateRole(principal *az.Principal, roleId int64, name string) error {
@@ -603,11 +581,6 @@ func (ds *Datastore) ReadWorkgroups(principal *az.Principal, offset, limit int64
 	return ScanWorkgroups(rows)
 }
 
-type WorkgroupAndIdentities struct {
-	Workgroup  Workgroup
-	Identities []Identity
-}
-
 func (ds *Datastore) ReadWorkgroup(principal *az.Principal, workgroupId int64) (Workgroup, error) {
 	row := ds.db.QueryRow(`
 		SELECT 
@@ -619,17 +592,11 @@ func (ds *Datastore) ReadWorkgroup(principal *az.Principal, workgroupId int64) (
 		ORDER BY
 			name
 		`, workgroupId)
+
 	return ScanWorkgroup(row)
 }
 
-func (ds *Datastore) ReadWorkgroupAndIdentities(principal *az.Principal, workgroupId int64) (WorkgroupAndIdentities, error) {
-	var wi WorkgroupAndIdentities
-
-	workgroup, err := ds.ReadWorkgroup(principal, workgroupId)
-	if err != nil {
-		return wi, err
-	}
-
+func (ds *Datastore) ReadIdentitesForWorkgroup(principal *az.Principal, workgroupId int64) ([]Identity, error) {
 	rows, err := ds.db.Query(`
 		SELECT 
 			i.id, i.name, i.is_active, i.last_login, i.created 
@@ -643,29 +610,15 @@ func (ds *Datastore) ReadWorkgroupAndIdentities(principal *az.Principal, workgro
 			i.name
 		`, workgroupId)
 
-	identities, err := ScanIdentitys(rows)
 	if err != nil {
-		return wi, nil
+		return nil, err
 	}
+	defer rows.Close()
 
-	wi.Workgroup = workgroup
-	wi.Identities = identities
-	return wi, nil
+	return ScanIdentitys(rows)
 }
 
-type RoleAndIdentities struct {
-	Role       Role
-	Identities []Identity
-}
-
-func (ds *Datastore) ReadRoleAndIdentities(principal *az.Principal, roleId int64) (RoleAndIdentities, error) {
-	var ri RoleAndIdentities
-
-	role, err := ds.ReadRole(principal, roleId)
-	if err != nil {
-		return ri, err
-	}
-
+func (ds *Datastore) ReadIdentitesForRole(principal *az.Principal, roleId int64) ([]Identity, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			i.id, i.name, i.is_active, i.last_login, i.created
@@ -679,14 +632,12 @@ func (ds *Datastore) ReadRoleAndIdentities(principal *az.Principal, roleId int64
 			i.name
 		`, roleId)
 
-	identities, err := ScanIdentitys(rows)
 	if err != nil {
-		return ri, nil
+		return nil, err
 	}
+	defer rows.Close()
 
-	ri.Role = role
-	ri.Identities = identities
-	return ri, nil
+	return ScanIdentitys(rows)
 }
 
 func (ds *Datastore) UpdateWorkgroup(principal *az.Principal, workgroupId int64, name string) error {
