@@ -83,12 +83,12 @@ func TestSecurity(t *testing.T) {
 			t.Fatal("role not saved correctly")
 		}
 
-		rp, err := ds.ReadRoleAndPermissions(p, role.Id)
+		perms, err := ds.ReadPermissionsForRole(p, role.Id)
 		if err != nil {
 			t.Fatal(err)
 		}
-		t.Log(rp)
-		if len(rp.Permissions) != 0 {
+		t.Log(perms)
+		if len(perms) != 0 {
 			t.Fatal("expected 0 permissions")
 		}
 	}
@@ -117,14 +117,14 @@ func TestSecurity(t *testing.T) {
 	if err := ds.SetRolePermissions(p, role1Id, perms); err != nil {
 		t.Fatal(err)
 	}
-	rp, err := ds.ReadRoleAndPermissions(p, role1Id)
+	pr, err := ds.ReadPermissionsForRole(p, role1Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rp.Permissions) != permCount {
+	t.Log(pr)
+	if len(pr) != permCount {
 		t.Fatal("expected 5 permissions")
 	}
-	t.Log(rp)
 
 	// create workgroups
 
@@ -292,23 +292,23 @@ func TestSecurity(t *testing.T) {
 
 	// read workgroup + identities
 
-	wi, err := ds.ReadWorkgroupAndIdentities(p, group2Id)
+	wi, err := ds.ReadIdentitesForWorkgroup(p, group2Id)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(wi)
-	if len(wi.Identities) != 1 {
+	if len(wi) != 1 {
 		t.Fatal("expected 1 identity")
 	}
 
 	// read roles + identities
 
-	ri, err := ds.ReadRoleAndIdentities(p, role2Id)
+	ri, err := ds.ReadIdentitesForRole(p, role2Id)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(ri)
-	if len(ri.Identities) != 1 {
+	if len(ri) != 1 {
 		t.Fatal("expected 1 identity")
 	}
 
