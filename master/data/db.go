@@ -290,9 +290,9 @@ func readMetadata(db *sql.DB) (map[string]string, error) {
 
 func readEntityTypes(db *sql.DB) (map[int64]EntityType, error) {
 	rows, err := db.Query(`
-		SELECT 
-			id, name 
-		FROM 
+		SELECT
+			id, name
+		FROM
 			entity_type
 	`)
 	if err != nil {
@@ -363,10 +363,10 @@ func (ds *Datastore) audit(principal *az.Principal, tx *sql.Tx, action, entityTy
 		return err
 	}
 	if _, err := tx.Exec(`
-		INSERT INTO 
-			history 
-			(identity_id, action, entity_type_id, entity_id, description, created) 
-		VALUES  
+		INSERT INTO
+			history
+			(identity_id, action, entity_type_id, entity_id, description, created)
+		VALUES
 			($1,          $2,     $3,             $4,        $5,          now())
 		`, principal.Id, action, entityTypeId, entityId, description); err != nil {
 		return err
@@ -378,9 +378,9 @@ func (ds *Datastore) audit(principal *az.Principal, tx *sql.Tx, action, entityTy
 
 func readPermissions(db *sql.DB) ([]Permission, error) {
 	rows, err := db.Query(`
-		SELECT 
-			id, name, description 
-		FROM 
+		SELECT
+			id, name, description
+		FROM
 			permission
 		ORDER BY
 			name
@@ -395,58 +395,6 @@ func readPermissions(db *sql.DB) ([]Permission, error) {
 
 func (ds *Datastore) ReadPermissions(principal *az.Principal) ([]Permission, error) {
 	return ds.permissions, nil
-}
-
-// --- Role ---
-
-func (ds *Datastore) CreateRole(principal *az.Principal, name, description string) (int64, error) {
-	var id int64
-	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
-			INSERT INTO 
-				role   
-				(name, description, created) 
-			VALUES 
-				($1,   $2,          now()) 
-			RETURNING id
-			`, name, description)
-		if err := row.Scan(&id); err != nil {
-			return err
-		}
-
-		return ds.audit(principal, tx, "create", "role", id, "")
-	})
-	return id, err
-}
-
-func (ds *Datastore) ReadRoles(principal *az.Principal, offset, limit int64) ([]Role, error) {
-	rows, err := ds.db.Query(`
-		SELECT 
-			id, name, description, created 
-		FROM 
-			role 
-		ORDER BY name 
-		OFFSET $1 
-		LIMIT $2
-		`, offset, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	return ScanRoles(rows)
-}
-
-func (ds *Datastore) ReadRole(principal *az.Principal, roleId int64) (Role, error) {
-	row := ds.db.QueryRow(`
-		SELECT 
-			id, name, description, created 
-		FROM 
-			role 
-		WHERE 
-			id = $1
-		`, roleId)
-	return ScanRole(row)
 }
 
 func (ds *Datastore) ReadPermissionsForRole(principal *az.Principal, roleId int64) ([]Permission, error) {
@@ -470,14 +418,109 @@ func (ds *Datastore) ReadPermissionsForRole(principal *az.Principal, roleId int6
 	return ScanPermissions(rows)
 }
 
+func (ds *Datastore) ReadPermissionsForIdentity(principal *az.Principal, identityId int64) ([]int64, error) {
+	rows, err := ds.db.Query(`
+		SELECT DISTINCT
+			p.id
+		FROM
+		  identity_role ir,
+			role_permission rp,
+			permission p
+		WHERE
+			ir.identity_id = $1 AND
+			ir.role_id = rp.role_id AND
+			rp.permission_id = p.id
+	`, identityId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanIds(rows)
+}
+
+// --- Roles ---
+
+func (ds *Datastore) CreateRole(principal *az.Principal, name, description string) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				role
+				(name, description, created)
+			VALUES
+				($1,   $2,          now())
+			RETURNING id
+			`, name, description)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, "create", "role", id, "")
+	})
+	return id, err
+}
+
+func (ds *Datastore) ReadRoles(principal *az.Principal, offset, limit int64) ([]Role, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, description, created
+		FROM
+			role
+		ORDER BY name
+		OFFSET $1
+		LIMIT $2
+		`, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanRoles(rows)
+}
+
+func (ds *Datastore) ReadRole(principal *az.Principal, roleId int64) (Role, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, description, created
+		FROM
+			role
+		WHERE
+			id = $1
+		`, roleId)
+	return ScanRole(row)
+}
+
+func (ds *Datastore) ReadRolesForIdentity(principal *az.Principal, identityId int64) ([]Role, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			r.id, r.name, r.description, r.created
+		FROM
+			role r,
+			identity_role ir
+		WHERE
+		  ir.identity_id = $1 AND
+			ir.role_id = r.id
+		ORDER BY
+			r.name
+		`, identityId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanRoles(rows)
+}
+
 func (ds *Datastore) UpdateRole(principal *az.Principal, roleId int64, name string) error {
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			UPDATE 
-				role 
-			SET 
-				name = $1 
-			WHERE 
+			UPDATE
+				role
+			SET
+				name = $1
+			WHERE
 				id = $2
 			`, name, roleId); err != nil {
 			return err
@@ -501,9 +544,9 @@ func (ds *Datastore) toPermissionNames(ids []int64) ([]string, error) {
 func (ds *Datastore) SetRolePermissions(principal *az.Principal, roleId int64, permissionIds []int64) error {
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			DELETE FROM 
-				role_permission 
-			WHERE 
+			DELETE FROM
+				role_permission
+			WHERE
 				role_id = $1
 			`, roleId); err != nil {
 			return err
@@ -511,9 +554,9 @@ func (ds *Datastore) SetRolePermissions(principal *az.Principal, roleId int64, p
 
 		for _, permissionId := range permissionIds {
 			if _, err := tx.Exec(`
-				INSERT INTO 
-					role_permission 
-				VALUES 
+				INSERT INTO
+					role_permission
+				VALUES
 					($1, $2)
 				`, roleId, permissionId); err != nil {
 				return err
@@ -531,9 +574,9 @@ func (ds *Datastore) SetRolePermissions(principal *az.Principal, roleId int64, p
 func (ds *Datastore) DeleteRole(principal *az.Principal, roleId int64) error {
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			DELETE FROM 
-				role 
-			WHERE 
+			DELETE FROM
+				role
+			WHERE
 				id = $1
 			`, roleId); err != nil {
 			return err
@@ -548,11 +591,11 @@ func (ds *Datastore) CreateWorkgroup(principal *az.Principal, name, description 
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		row := tx.QueryRow(`
-			INSERT INTO 
-				workgroup 
-				(name, description, created) 
-			VALUES 
-				($1,   $2,          now()) 
+			INSERT INTO
+				workgroup
+				(name, description, created)
+			VALUES
+				($1,   $2,          now())
 			RETURNING id
 			`, name, description)
 		if err := row.Scan(&id); err != nil {
@@ -565,12 +608,12 @@ func (ds *Datastore) CreateWorkgroup(principal *az.Principal, name, description 
 
 func (ds *Datastore) ReadWorkgroups(principal *az.Principal, offset, limit int64) ([]Workgroup, error) {
 	rows, err := ds.db.Query(`
-		SELECT 
-			id, name, description, created 
-		FROM 
-			workgroup 
-		ORDER BY name 
-		OFFSET $1 
+		SELECT
+			id, name, description, created
+		FROM
+			workgroup
+		ORDER BY name
+		OFFSET $1
 		LIMIT $2
 		`, offset, limit)
 	if err != nil {
@@ -583,11 +626,11 @@ func (ds *Datastore) ReadWorkgroups(principal *az.Principal, offset, limit int64
 
 func (ds *Datastore) ReadWorkgroup(principal *az.Principal, workgroupId int64) (Workgroup, error) {
 	row := ds.db.QueryRow(`
-		SELECT 
-			id, name, description, created 
-		FROM 
-			workgroup 
-		WHERE 
+		SELECT
+			id, name, description, created
+		FROM
+			workgroup
+		WHERE
 			id = $1
 		ORDER BY
 			name
@@ -596,15 +639,131 @@ func (ds *Datastore) ReadWorkgroup(principal *az.Principal, workgroupId int64) (
 	return ScanWorkgroup(row)
 }
 
+func (ds *Datastore) ReadWorkgroupsForIdentity(principal *az.Principal, identityId int64) ([]Workgroup, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			w.id, w.name, w.description, w.created
+		FROM
+			workgroup w,
+			identity_workgroup iw
+		WHERE
+		  iw.identity_id = $1 AND
+			iw.workgroup_id = w.id
+		ORDER BY
+			w.name
+		`, identityId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanWorkgroups(rows)
+}
+
+func (ds *Datastore) UpdateWorkgroup(principal *az.Principal, workgroupId int64, name string) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				workgroup
+			SET
+				name = $1
+			WHERE
+				id = $2
+			`, name, workgroupId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, "update", "workgroup", workgroupId, fmt.Sprintf("Set name to %s", name))
+	})
+}
+
+func (ds *Datastore) DeleteWorkgroup(principal *az.Principal, workgroupId int64) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				workgroup
+			WHERE
+				id = $1
+			`, workgroupId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, "delete", "workgroup", workgroupId, "")
+	})
+}
+
+// --- Identity ---
+
+func (ds *Datastore) CreateIdentity(principal *az.Principal, name, password string) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				identity
+				(name, password, is_active, created)
+			VALUES
+				($1,   $2,       $3,        now())
+			RETURNING id
+			`, name, password, true)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, "create", "identity", id, "")
+	})
+	return id, err
+}
+
+func (ds *Datastore) ReadIdentities(principal *az.Principal, offset, limit int64) ([]Identity, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, is_active, last_login, created
+		FROM
+			identity
+		ORDER BY name
+		OFFSET $1
+		LIMIT $2
+		`, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanIdentitys(rows)
+}
+
+func (ds *Datastore) ReadIdentity(principal *az.Principal, identityId int64) (Identity, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, is_active, last_login, created
+		FROM
+			identity
+		WHERE
+			id = $1
+		`, identityId)
+
+	return ScanIdentity(row)
+}
+
+func (ds *Datastore) ReadIdentityAndPassword(principal *az.Principal, identityId int64) (IdentityAndPassword, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, password, is_active, last_login, created
+		FROM
+			identity
+		WHERE
+			id = $1
+		`, identityId)
+	return ScanIdentityAndPassword(row)
+}
+
 func (ds *Datastore) ReadIdentitesForWorkgroup(principal *az.Principal, workgroupId int64) ([]Identity, error) {
 	rows, err := ds.db.Query(`
-		SELECT 
-			i.id, i.name, i.is_active, i.last_login, i.created 
-		FROM 
-			identity i, 
-			identity_workgroup iw 
-		WHERE 
-			iw.workgroup_id = $1 AND 
+		SELECT
+			i.id, i.name, i.is_active, i.last_login, i.created
+		FROM
+			identity i,
+			identity_workgroup iw
+		WHERE
+			iw.workgroup_id = $1 AND
 		  iw.identity_id = i.id
 		ORDER BY
 			i.name
@@ -640,87 +799,6 @@ func (ds *Datastore) ReadIdentitesForRole(principal *az.Principal, roleId int64)
 	return ScanIdentitys(rows)
 }
 
-func (ds *Datastore) UpdateWorkgroup(principal *az.Principal, workgroupId int64, name string) error {
-	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
-			UPDATE 
-				workgroup
-			SET 
-				name = $1 
-			WHERE 
-				id = $2
-			`, name, workgroupId); err != nil {
-			return err
-		}
-		return ds.audit(principal, tx, "update", "workgroup", workgroupId, fmt.Sprintf("Set name to %s", name))
-	})
-}
-
-func (ds *Datastore) DeleteWorkgroup(principal *az.Principal, workgroupId int64) error {
-	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
-			DELETE FROM 
-				workgroup 
-			WHERE 
-				id = $1
-			`, workgroupId); err != nil {
-			return err
-		}
-		return ds.audit(principal, tx, "delete", "workgroup", workgroupId, "")
-	})
-}
-
-// --- Identity ---
-
-func (ds *Datastore) CreateIdentity(principal *az.Principal, name, password string) (int64, error) {
-	var id int64
-	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
-			INSERT INTO 
-				identity 
-				(name, password, is_active, created) 
-			VALUES 
-				($1,   $2,       $3,        now()) 
-			RETURNING id
-			`, name, password, true)
-		if err := row.Scan(&id); err != nil {
-			return err
-		}
-		return ds.audit(principal, tx, "create", "identity", id, "")
-	})
-	return id, err
-}
-
-func (ds *Datastore) ReadIdentities(principal *az.Principal, offset, limit int64) ([]Identity, error) {
-	rows, err := ds.db.Query(`
-		SELECT 
-			id, name, is_active, last_login, created 
-		FROM 
-			identity
-		ORDER BY name 
-		OFFSET $1 
-		LIMIT $2
-		`, offset, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	return ScanIdentitys(rows)
-}
-
-func (ds *Datastore) ReadIdentityAndPassword(principal *az.Principal, identityId int64) (IdentityAndPassword, error) {
-	row := ds.db.QueryRow(`
-		SELECT 
-			id, name, password, is_active, last_login, created 
-		FROM 
-			identity
-		WHERE
-			id = $1
-		`, identityId)
-	return ScanIdentityAndPassword(row)
-}
-
 func (ds *Datastore) AssocIdentityToWorkgroup(principal *az.Principal, identityId, workgroupId int64) error {
 	workgroup, err := ds.ReadWorkgroup(principal, workgroupId)
 	if err != nil {
@@ -728,9 +806,9 @@ func (ds *Datastore) AssocIdentityToWorkgroup(principal *az.Principal, identityI
 	}
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			INSERT INTO 
+			INSERT INTO
 				identity_workgroup
-			VALUES 
+			VALUES
 				($1, $2)
 			`, identityId, workgroupId); err != nil {
 			return err
@@ -746,9 +824,9 @@ func (ds *Datastore) DissocIdentityFromWorkgroup(principal *az.Principal, identi
 	}
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			DELETE FROM 
+			DELETE FROM
 				identity_workgroup
-			WHERE 
+			WHERE
 				identity_id = $1 AND
 				workgroup_id = $2
 			`, identityId, workgroupId); err != nil {
@@ -765,9 +843,9 @@ func (ds *Datastore) AssocIdentityToRole(principal *az.Principal, identityId, ro
 	}
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			INSERT INTO 
+			INSERT INTO
 				identity_role
-			VALUES 
+			VALUES
 				($1, $2)
 			`, identityId, roleId); err != nil {
 			return err
@@ -783,9 +861,9 @@ func (ds *Datastore) DissocIdentityFromRole(principal *az.Principal, identityId,
 	}
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			DELETE FROM 
+			DELETE FROM
 				identity_role
-			WHERE 
+			WHERE
 				identity_id = $1 AND
 				role_id = $2
 			`, identityId, roleId); err != nil {
@@ -795,71 +873,14 @@ func (ds *Datastore) DissocIdentityFromRole(principal *az.Principal, identityId,
 	})
 }
 
-func (ds *Datastore) ReadIdentity(principal *az.Principal, identityId int64) (Identity, error) {
-	row := ds.db.QueryRow(`
-		SELECT 
-			id, name, is_active, last_login, created 
-		FROM 
-			identity
-		WHERE
-			id = $1
-		`, identityId)
-
-	return ScanIdentity(row)
-}
-
-func (ds *Datastore) ReadRolesForIdentity(principal *az.Principal, identityId int64) ([]Role, error) {
-	rows, err := ds.db.Query(`
-		SELECT 
-			r.id, r.name, r.description, r.created
-		FROM 
-			role r, 
-			identity_role ir 
-		WHERE 
-		  ir.identity_id = $1 AND
-			ir.role_id = r.id
-		ORDER BY
-			r.name
-		`, identityId)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	return ScanRoles(rows)
-}
-
-func (ds *Datastore) ReadWorkgroupsForIdentity(principal *az.Principal, identityId int64) ([]Workgroup, error) {
-	rows, err := ds.db.Query(`
-		SELECT 
-			w.id, w.name, w.description, w.created
-		FROM 
-			workgroup w, 
-			identity_workgroup iw
-		WHERE 
-		  iw.identity_id = $1 AND
-			iw.workgroup_id = w.id
-		ORDER BY
-			w.name
-		`, identityId)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	return ScanWorkgroups(rows)
-}
-
 func (ds *Datastore) DeactivateIdentity(principal *az.Principal, identityId int64) error {
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
-			UPDATE 
-				identity 
+			UPDATE
+				identity
 			SET
 				is_active = false
-			WHERE 
+			WHERE
 				id = $1
 			`, identityId); err != nil {
 			return err
@@ -867,6 +888,22 @@ func (ds *Datastore) DeactivateIdentity(principal *az.Principal, identityId int6
 		return ds.audit(principal, tx, "deactivate", "identity", identityId, "")
 	})
 	return nil
+}
+
+func ScanIds(rs *sql.Rows) ([]int64, error) {
+	ids := make([]int64, 0, 16)
+	var err error
+	for rs.Next() {
+		var id int64
+		if err = rs.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // --- Privileges ---

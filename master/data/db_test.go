@@ -244,6 +244,15 @@ func TestSecurity(t *testing.T) {
 		t.Fatal("wrong role id")
 	}
 
+	pids, err := ds.ReadPermissionsForIdentity(p, user1Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(pids)
+	if len(pids) != 5 {
+		t.Fatal("expected 5 permissions")
+	}
+
 	// change workgroup
 
 	if err := ds.DissocIdentityFromWorkgroup(p, user1Id, group1Id); err != nil {
