@@ -4,6 +4,38 @@ package data
 
 import "database/sql"
 
+func ScanMeta(r *sql.Row) (Meta, error) {
+	var s Meta
+	if err := r.Scan(
+		&s.Id,
+		&s.Key,
+		&s.Value,
+	); err != nil {
+		return Meta{}, err
+	}
+	return s, nil
+}
+
+func ScanMetas(rs *sql.Rows) ([]Meta, error) {
+	structs := make([]Meta, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Meta
+		if err = rs.Scan(
+			&s.Id,
+			&s.Key,
+			&s.Value,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanPermission(r *sql.Row) (Permission, error) {
 	var s Permission
 	if err := r.Scan(
