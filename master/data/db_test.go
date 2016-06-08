@@ -290,6 +290,16 @@ func TestSecurity(t *testing.T) {
 		t.Fatal("wrong role id")
 	}
 
+	// read workgroup + identities
+
+	wi, err := ds.ReadWorkgroupAndIdentities(p, group2Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(wi)
+	if len(wi.Identities) != 1 {
+		t.Fatal("expected 1 identity")
+	}
 	// delete roles
 
 	if err := ds.DeleteRole(p, role1Id); err != nil {
