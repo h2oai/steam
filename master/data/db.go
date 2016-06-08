@@ -795,7 +795,7 @@ func (ds *Datastore) DissocIdentityFromRole(principal *az.Principal, identityId,
 	})
 }
 
-func (ds *Datastore) readIdentity(principal *az.Principal, identityId int64) (Identity, error) {
+func (ds *Datastore) ReadIdentity(principal *az.Principal, identityId int64) (Identity, error) {
 	row := ds.db.QueryRow(`
 		SELECT 
 			id, name, is_active, last_login, created 
@@ -808,7 +808,7 @@ func (ds *Datastore) readIdentity(principal *az.Principal, identityId int64) (Id
 	return ScanIdentity(row)
 }
 
-func (ds *Datastore) readIdentityRoles(principal *az.Principal, identityId int64) ([]Role, error) {
+func (ds *Datastore) ReadRolesForIdentity(principal *az.Principal, identityId int64) ([]Role, error) {
 	rows, err := ds.db.Query(`
 		SELECT 
 			r.id, r.name, r.description, r.created
@@ -830,7 +830,7 @@ func (ds *Datastore) readIdentityRoles(principal *az.Principal, identityId int64
 	return ScanRoles(rows)
 }
 
-func (ds *Datastore) readIdentityWorkgroups(principal *az.Principal, identityId int64) ([]Workgroup, error) {
+func (ds *Datastore) ReadWorkgroupsForIdentity(principal *az.Principal, identityId int64) ([]Workgroup, error) {
 	rows, err := ds.db.Query(`
 		SELECT 
 			w.id, w.name, w.description, w.created
@@ -850,37 +850,6 @@ func (ds *Datastore) readIdentityWorkgroups(principal *az.Principal, identityId 
 	defer rows.Close()
 
 	return ScanWorkgroups(rows)
-}
-
-type Profile struct {
-	Identity   Identity
-	Roles      []Role
-	Workgroups []Workgroup
-}
-
-func (ds *Datastore) ReadProfile(principal *az.Principal, identityId int64) (Profile, error) {
-	var profile Profile
-
-	identity, err := ds.readIdentity(principal, identityId)
-	if err != nil {
-		return profile, err
-	}
-
-	roles, err := ds.readIdentityRoles(principal, identityId)
-	if err != nil {
-		return profile, err
-	}
-
-	workgroups, err := ds.readIdentityWorkgroups(principal, identityId)
-	if err != nil {
-		return profile, err
-	}
-
-	profile.Identity = identity
-	profile.Roles = roles
-	profile.Workgroups = workgroups
-
-	return profile, nil
 }
 
 func (ds *Datastore) DeactivateIdentity(principal *az.Principal, identityId int64) error {
