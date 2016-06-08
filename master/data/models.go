@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+type Meta struct {
+	Id    int64
+	Key   string
+	Value string
+}
+
 type Permission struct {
 	Id          int64
 	Name        string

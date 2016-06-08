@@ -17,7 +17,14 @@ func TestSecurity(t *testing.T) {
 
 	ds := getConnection(t)
 
-	p := &az.Principal{1} // FIXME
+	ds.Prime()
+
+	su, err := ds.SetupSuperuser("Superuser", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := &az.Principal{su} // FIXME
 
 	// read permissions
 	permissions, err := ds.ReadPermissions(p)
@@ -64,6 +71,9 @@ func TestSecurity(t *testing.T) {
 	t.Log(roles)
 
 	for _, role := range roles {
+		if role.Name == "Superuser" {
+			continue
+		}
 		r, err := ds.ReadRole(p, role.Id)
 		if err != nil {
 			t.Fatal(err)
@@ -200,19 +210,85 @@ func TestSecurity(t *testing.T) {
 
 	// set workgroup
 
-	// XXX
+	if err := ds.AssocIdentityToWorkgroup(p, user1Id, group1Id); err != nil {
+		t.Fatal(err)
+	}
 
 	// set roles
 
-	// XXX
+	if err := ds.AssocIdentityToRole(p, user1Id, role1Id); err != nil {
+		t.Fatal(err)
+	}
+
+	// verify
+
+	profile, err := ds.ReadProfile(p, user1Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(profile)
+	if profile.Identity.Id != user1Id {
+		t.Fatal("wrong identity id")
+	}
+
+	if len(profile.Workgroups) != 1 {
+		t.Fatal("expected 1 workgroup")
+	}
+	if profile.Workgroups[0].Id != group1Id {
+		t.Fatal("wrong workgroup id")
+	}
+
+	if len(profile.Roles) != 1 {
+		t.Fatal("expected 1 role")
+	}
+	if profile.Roles[0].Id != role1Id {
+		t.Fatal("wrong role id")
+	}
 
 	// change workgroup
 
-	// XXX
+	if err := ds.DissocIdentityFromWorkgroup(p, user1Id, group1Id); err != nil {
+		t.Fatal(err)
+	}
+	if err := ds.AssocIdentityToWorkgroup(p, user1Id, group2Id); err != nil {
+		t.Fatal(err)
+	}
 
 	// change roles
 
-	// XXX
+	if err := ds.DissocIdentityFromRole(p, user1Id, role1Id); err != nil {
+		t.Fatal(err)
+	}
+	if err := ds.AssocIdentityToRole(p, user1Id, role2Id); err != nil {
+		t.Fatal(err)
+	}
+
+	// verify
+
+	profile, err = ds.ReadProfile(p, user1Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(profile)
+	if profile.Identity.Id != user1Id {
+		t.Fatal("wrong identity id")
+	}
+
+	if len(profile.Workgroups) != 1 {
+		t.Fatal("expected 1 workgroup")
+	}
+	if profile.Workgroups[0].Id != group2Id {
+		t.Fatal("wrong workgroup id")
+	}
+
+	if len(profile.Roles) != 1 {
+		t.Fatal("expected 1 role")
+	}
+	if profile.Roles[0].Id != role2Id {
+		t.Fatal("wrong role id")
+	}
 
 	// delete roles
 
@@ -259,4 +335,6 @@ func TestSecurity(t *testing.T) {
 	if profile1.Identity.IsActive {
 		t.Fatal("expected user to be inactive")
 	}
+
+	ds.Truncate()
 }
