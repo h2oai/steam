@@ -34,6 +34,7 @@ import static ai.h2o.servicebuilder.Util.*;
  * Errors are sent back if any
  */
 public class MakePythonWarServlet extends HttpServlet {
+  private static boolean VERBOSE = false;
 
   private File servletPath = null;
 
@@ -41,7 +42,7 @@ public class MakePythonWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      System.out.println("path = " + servletPath);
+      if (VERBOSE) System.out.println("servletPath = " + servletPath);
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -54,7 +55,7 @@ public class MakePythonWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      System.out.println("tmp dir " + tmpDir);
+      if (VERBOSE) System.out.println("tmpDir " + tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");

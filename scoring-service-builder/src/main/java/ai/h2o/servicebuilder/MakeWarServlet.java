@@ -33,6 +33,7 @@ import static ai.h2o.servicebuilder.Util.*;
  * Errors are sent back if any
  */
 public class MakeWarServlet extends HttpServlet {
+  private static boolean VERBOSE = false;
 
   private File servletPath = null;
 
@@ -40,7 +41,7 @@ public class MakeWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      System.out.println("path = " + servletPath);
+      if (VERBOSE) System.out.println("servletPath = " + servletPath);
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -53,7 +54,7 @@ public class MakeWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      System.out.println("tmp dir " + tmpDir);
+      if (VERBOSE) System.out.println("tmpDir " + tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -78,7 +79,6 @@ public class MakeWarServlet extends HttpServlet {
           if (field.equals("pojo")) {
             pojofile = filename;
             predictorClassName = filename.replace(".java", "");
-            System.out.println("predictorClassName " + predictorClassName);
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
           }
           if (field.equals("jar")) {
@@ -127,8 +127,6 @@ public class MakeWarServlet extends HttpServlet {
       File[] files = filesc.toArray(new File[]{});
       if (files.length == 0)
         throw new Exception("Can't list compiler output files (out)");
-
-//      System.out.println(filesc);
 
       byte[] resjar = createJarArchiveByteArray(files, tmpDir.getPath() + File.separator);
       if (resjar == null)

@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 
 public class PredictServlet extends HttpServlet {
 
-  static boolean VERBOSE = false;
+  private static boolean VERBOSE = false;
   public static int warmUpCount = 5;
 
   public static Gson gson = new Gson();
@@ -90,7 +90,7 @@ public class PredictServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      System.out.println("path = " + servletPath);
+      if (VERBOSE) System.out.println("servletPath " + servletPath);
     }
     catch (MalformedURLException e) {
       e.printStackTrace();

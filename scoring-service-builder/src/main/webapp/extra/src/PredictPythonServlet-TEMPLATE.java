@@ -13,13 +13,13 @@ import com.google.gson.Gson;
 public class PredictPythonServlet extends HttpServlet {
   // Set to true for demo mode (to print the predictions to stdout).
   // Set to false to get better throughput.
-  static boolean VERBOSE = false;
+  private static boolean VERBOSE = false;
 
   public static GenModel rawModel;
   public static EasyPredictModelWrapper model;
 
-  private static Process p;
-  private static ProcessBuilder pb;
+  private static Process p = null;
+  private static ProcessBuilder pb = null;
   private static OutputStream stdin;
   private static BufferedReader reader, err_reader;
 
@@ -32,7 +32,7 @@ public class PredictPythonServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      System.out.println("path = " + servletPath);
+      if (VERBOSE) System.out.println("servletPath " + servletPath);
 
       rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
       model = new EasyPredictModelWrapper(rawModel);
@@ -66,6 +66,14 @@ public class PredictPythonServlet extends HttpServlet {
     catch (MalformedURLException e) {
       e.printStackTrace();
     }
+  }
+
+  public void destroy() {
+    if (p != null) {
+      p.destroy();
+      System.out.println("Python destroyed");
+    }
+    super.destroy();
   }
 
   static private String jsonModel() {
