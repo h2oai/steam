@@ -187,6 +187,9 @@ func (s *Service) RegisterCloud(address string) (*web.Cloud, error) {
 		return nil, err
 	}
 	s.clusterProxy.NewProxy(c.ID, c.Address)
+	if err := s.pollCloud(toCloud(c)); err != nil {
+		return nil, err
+	}
 
 	return toCloud(c), nil
 }
