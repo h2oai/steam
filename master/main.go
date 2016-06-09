@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/rpc"
 	"github.com/h2oai/steamY/master/db"
 	"github.com/h2oai/steamY/master/web"
@@ -20,14 +21,16 @@ import (
 )
 
 const (
-	defaultWebAddress         = "0.0.0.0:9000"
-	defaultCompilationAddress = "0.0.0.0:8080"
-	defaultScoringService     = "0.0.0.0"
+	defaultWebAddress          = "0.0.0.0:9000"
+	defaultClusterProxyAddress = "0.0.0.0:9001"
+	defaultCompilationAddress  = "0.0.0.0:8080"
+	defaultScoringService      = "0.0.0.0"
 )
 
 type Opts struct {
 	WebAddress                string
 	WorkingDirectory          string
+	ClusterProxyAddress       string
 	CompilationServiceAddress string
 	ScoringServiceAddress     string
 	EnableProfiler            bool
@@ -39,6 +42,7 @@ type Opts struct {
 var DefaultOpts = &Opts{
 	defaultWebAddress,
 	path.Join(".", fs.VarDir, "master"),
+	defaultClusterProxyAddress,
 	defaultCompilationAddress,
 	defaultScoringService,
 	false,
@@ -108,10 +112,12 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func Run(version, buildDate string, opts *Opts) {
 	log.Printf("steam v%s build %s\n", version, buildDate)
 
-	// --- external ip ---
+	// --- external ip for base and proxy ---
 	webAddress := opts.WebAddress
+	proxAddress := opts.ClusterProxyAddress
 	if webAddress == defaultWebAddress {
 		webAddress = fs.GetExternalIP(webAddress)
+		proxAddress = fs.GetExternalIP(proxAddress)
 	}
 
 	// --- set up wd ---
@@ -149,6 +155,17 @@ func Run(version, buildDate string, opts *Opts) {
 	// --- create domain services ---
 	// jt := job.NewTracker(webAddress)
 
+	// --- create proxy services ---
+	rp := proxy.NewRProxy()
+	rpFailch := make(chan error)
+
+	go func() {
+		log.Println()
+		if err := http.ListenAndServe(proxAddress, rp); err != nil {
+			rpFailch <- err
+		}
+	}()
+
 	// --- create front end api services ---
 
 	webServeMux := http.NewServeMux()
@@ -157,6 +174,7 @@ func Run(version, buildDate string, opts *Opts) {
 		ds,
 		opts.CompilationServiceAddress,
 		opts.ScoringServiceAddress,
+		rp,
 		opts.KerberosEnabled,
 		opts.Username,
 		opts.Keytab,
@@ -187,10 +205,14 @@ func Run(version, buildDate string, opts *Opts) {
 		}
 	}()
 
+	webServiceImpl.Service.InitClusterProxy() // Initialize reverse proxies for clusters
 	webServiceImpl.Service.ActivityPoll(true) // Poll clouds for activity
 
 	for {
 		select {
+		case err := <-rpFailch:
+			log.Fatalln("HTTP proxy server startup failed:", err)
+			return
 		case err := <-failch:
 			ds.Close()
 			log.Fatalln("HTTP server startup failed:", err)

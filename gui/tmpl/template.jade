@@ -65,6 +65,22 @@ html.no-js
           .dialog__exit(data-bind="click:cancel")
             i.icon.ion-ios-close-empty
         .dialog__body(data-bind="template:{ name:$root.templateOf }")
+
+    template.register-cloud-dialog
+      .dialog__form
+
+        .form-field-label Cluster Address (IP:port):
+        .form-field
+          input.textbox(type='text' placeholder='IP:port' data-bind="value:address, valueUpdate:'afterkeydown'" style='width:300px')
+        .form-field-error(data-bind="text:addressError")
+
+        .form-error(data-bind='text:error')
+
+      .dialog__actions
+        .buttons.buttons--unit
+          .button.button--primary(data-bind="click:registerCloud") Register Cluster
+        .buttons.buttons--unit
+          .button(data-bind="click:cancel") Cancel
     
     template.start-cloud-dialog
       .dialog__form
@@ -180,21 +196,23 @@ html.no-js
     template.clouds
       .pane__titlebar(data-bind="text:title")
       // ko if:error
-      .pane__body.pane__body--01
+      .pane__body.pane__body--02
         .pane-error(data-bind="text:error")
       // /ko
       // ko ifnot:error
       // ko if:hasItems
-      .pane__body.pane__body--01(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      .pane__body.pane__body--02(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
       // /ko
       // ko ifnot:hasItems
-      .pane__body.pane__body--01
+      .pane__body.pane__body--02
         .pane-icon
           i.icon.ion-ios-cloud-outline
-        .pane-message You do not have any H2O clusters. Click 'Start a Cluster' to begin.
+        .pane-message You do not have any H2O clusters in Steam. Click 'Connect to cluster' or 'Start a cluster' to begin.
       // /ko
       // /ko
-      .pane__actions
+      .pane__actions.pane__actions--02
+        .buttons
+          .button.button--primary(data-bind="click:registerCloud") Connect to cluster
         .buttons
           .button.button--primary(data-bind="click:startCloud") Start a cluster
 
@@ -209,9 +227,9 @@ html.no-js
       // /ko
 
     template.cloudInfo
+      .pane__titlebar(data-bind="text:title")
       .pane__body.pane__body--01
         .pane__page
-          h2 Cluster Details
           table
             tbody
               tr
@@ -254,7 +272,12 @@ html.no-js
                 td(data-bind="text:createdAt")
                           
         .buttons.buttons--unit
+          // ko if:canStopCloud
           .button.button--danger(data-bind="click:stopCloud") Stop this cluster
+          // /ko
+          // ko ifnot:canStopCloud
+          .button.button--danger(data-bind="click:unregisterCloud") Disconnect from cluster
+          // /ko
         .pane-error(data-bind="text:error")
     
     template.cloudJobs
@@ -263,8 +286,17 @@ html.no-js
       .pane__body
         .pane-error(data-bind="text:error")
       // /ko
+
+      // ko ifnot:error
       // ko if:hasItems
       .pane__body(data-bind="template:{ name:$root.templateOf, foreach:items, afterRender:$root.afterRender }")
+      // /ko
+      // ko ifnot:hasItems
+      .pane__body
+        .pane-icon
+          i.icon.ion-ios-bolt-outline
+        .pane-message This cluster has no jobs.
+      // /ko
       // /ko
 
     template.cloudModels
@@ -284,9 +316,12 @@ html.no-js
         .pane-message This cluster has no models.
       // /ko
       // /ko
+
+      // ko if:canBuildModel
       .pane__actions
         .buttons
           .button.button--primary(data-bind="click:buildModel") Build a model
+      // /ko
 
     template.cloudJob
       .pane__titlebar(data-bind="text:title")

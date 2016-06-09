@@ -1,5 +1,4 @@
 import java.io.*;
-import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
@@ -7,8 +6,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.*;
 import javax.servlet.*;
-
-import com.google.gson.reflect.TypeToken;
 
 public class StatsServlet extends HttpServlet {
 
@@ -40,6 +37,8 @@ public class StatsServlet extends HttpServlet {
           put("prediction", PredictServlet.predictionTimes.toMap());
           put("get", PredictServlet.getTimes.toMap());
           put("post", PredictServlet.postTimes.toMap());
+          put("pythonget", PredictServlet.getPythonTimes.toMap());
+          put("pythonpost", PredictServlet.postPythonTimes.toMap());
         }
       };
       String json = PredictServlet.gson.toJson(js, PredictServlet.mapType);

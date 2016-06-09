@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Compile Server</title>
+    <title>Make War</title>
 
     <style type="text/css">
         body {
@@ -29,28 +29,45 @@
         <div class="cover-container">
 
           <div class="inner cover">
-            <h1 class="cover-heading text-shadow text-center">Make a Web Archive (war) from an H2O POJO</h1>
-            <p class="lead text-shadow text-center">Please select files</p>
+            <h1 class="cover-heading text-shadow text-center">Make H2O Web Archives (war files) from POJOs</h1>
 
-            <!--<form class="form-inline" role="form">-->
+            <h2>Make an H2O Prediction Service</h2>
+
             <form class="form-inline" role="form" method="POST" action="makewar" enctype="multipart/form-data">
               <p>
                 Pojo <input type="file" name="pojo"><br>
 
                 Jar <input type="file" name="jar"><br>
-
-                <!--Extra <input type="file" name="extra"><br>-->
-
-                <input type="submit" value="OK"><br>
+                <p>
+                <input type="submit" value="OK">
                 <input type="reset">
               </p>
             </form>
 
-            <p class="text-center" style="font-size:36px">
-              <strong id="responseField"></strong>
-            </p>
-          </div>
+            <h2>Make an H2O Prediction Service with Python pre-processing</h2>
 
+            <form class="form-inline" role="form" method="POST" action="makepythonwar" enctype="multipart/form-data">
+              <p>
+                Pojo file <input type="file" name="pojo"><br>
+
+                h2o-genmodel.jar file <input type="file" name="jar"><br>
+
+                Python file <input type="file" name="python"><br>
+
+                Extra Python files (select one or more files) <input type="file" name="pythonextra" multiple><br>
+
+              <p>
+                <input type="submit" value="OK">
+                <input type="reset">
+              </p>
+            </form>
+
+
+            <!--<p class="text-center" style="font-size:36px">-->
+              <!--<strong id="responseField"></strong>-->
+            <!--</p>-->
+          </div>
+          <p>&nbsp;</p>
           <div class="mastfoot">
             <div class="inner text-center">
               <p class="text-shadow">Build your own predictive apps using <a href="http://h2o.ai/">H2O</a>!</p>

@@ -584,6 +584,18 @@ module Main {
         template: string
     }
 
+    interface RegisterCloudDialog extends Dialog {
+        address: Sig<string>
+        addressError: Sig<string>
+        canRegisterCloud: Sig<boolean>
+        registerCloud: Act
+        error: Sig<string>
+    }
+
+    interface RegisterCloudDialogResult {
+        cloud: Proxy.Cloud
+    }
+
     interface StartCloudDialog extends Dialog {
         engineNames: Sigs<string>
         engineName: Sig<string>
@@ -645,6 +657,7 @@ module Main {
         error: Sig<string>
         items: Sigs<FolderI>
         hasItems: Sig<boolean>
+        registerCloud: Act
         startCloud: Act
     }
 
@@ -664,7 +677,9 @@ module Main {
         createdAt: string
         cloudDetails: Sig<CloudDetail>
         error: Sig<string>
+        canStopCloud: boolean
         stopCloud: Act
+        unregisterCloud: Act
     }
 
     interface CloudDetail {
@@ -695,6 +710,7 @@ module Main {
     }
 
     interface CloudModelsPane extends ModelsPane {
+        canBuildModel: boolean
         buildModel: Act
     }
 
@@ -754,6 +770,42 @@ module Main {
     // Dialogs
     //
 
+    function newRegisterCloudDialog(ctx: Context, go: Eff<RegisterCloudDialogResult>): RegisterCloudDialog {
+        const 
+            error = sig<string>(''),
+            address = sig<string>(void 0),
+            addressError = lift(address, (address): string => address ? '' : 'Enter a valid IP:Port'),
+            canRegisterCloud = lift(addressError, (e1): boolean => e1 === ''),
+            registerCloud: Act = () => {
+                if (!canRegisterCloud()) {
+                    return
+                }
+                ctx.setBusy('Connecting to cluster...')
+                ctx.remote.registerCloud(address(), (err, cloud) => {
+                    if (err) {
+                        error(err.message)
+                    } else {
+                        go({ cloud: cloud })
+                    }
+                    ctx.setFree()
+                })
+            },
+            cancel: Act = () => {
+                go(null)
+            }
+
+        return {
+            title: 'Connect to cluster',
+            address: address,
+            addressError: addressError,
+            canRegisterCloud: canRegisterCloud,
+            registerCloud: registerCloud,
+            error: error,
+            cancel: cancel,
+            dispose: noop,
+            template: 'register-cloud-dialog'
+        }
+    }
 
     const cloudIdPattern = /^[a-z0-9-]{1,16}$/i
     const cloudMemoryPattern = /^[0-9]+[kmg]$/i
@@ -773,7 +825,7 @@ module Main {
         const cloudIdError = lift(cloudId, (cloudId): string =>
             (cloudIdPattern.test(cloudId))
                 ? ''
-                : "Enter a valid cloud name"
+                : "Enter a valid cluster name"
         )
 
         const cloudSize = sig<string>('1')
@@ -783,7 +835,7 @@ module Main {
         const cloudSizeError = lift(cloudSizeNum, (size): string =>
             (!isNaN(size) && size > 0)
                 ? ''
-                : "Invalid cloud size"
+                : "Invalid cluster size"
         )
 
         const cloudMemory = sig<string>('')
@@ -802,7 +854,7 @@ module Main {
             if (!canStartCloud()) {
                 return
             }
-            ctx.setBusy('Creating cloud...')
+            ctx.setBusy('Creating cluster...')
             ctx.remote.startCloud(cloudId(), engineName(), cloudSizeNum(), cloudMemory(), ctx.principal.username, (err, cloud) => {
                 if (err) {
                     error(err.message)
@@ -825,7 +877,7 @@ module Main {
         })
 
         return {
-            title: 'Start a new cloud',
+            title: 'Start a new cluster',
             engineNames: engineNames,
             engineName: engineName,
             engineNameError: engineNameError,
@@ -891,7 +943,7 @@ module Main {
         }
 
         return {
-            title: `Build a Model`,
+            title: 'Build a Model',
             frame: frame,
             frameError: frameError,
             responseColumn: responseColumn,
@@ -1004,6 +1056,17 @@ module Main {
         const error = sig<string>('')
         const items = sigs<FolderI>([])
         const hasItems = lifts(items, (items) => items.length > 0)
+
+        const registerCloud: Act = () => {
+            const dialog = newRegisterCloudDialog(ctx, (result: RegisterCloudDialogResult) => {
+                ctx.popDialog()
+                if (result) {
+                    ctx.showClouds()
+                }
+            })
+            ctx.pushDialog(dialog)
+        }
+
         const startCloud: Act = () => {
             const dialog = newStartCloudDialog(ctx, (result: StartCloudDialogResult) => {
                 ctx.popDialog()
@@ -1013,6 +1076,7 @@ module Main {
             })
             ctx.pushDialog(dialog)
         }
+
         ctx.remote.getClouds((err, clouds) => {
             if (err) {
                 error(err.message)
@@ -1042,6 +1106,7 @@ module Main {
             error: error,
             hasItems: hasItems,
             items: items,
+            registerCloud: registerCloud,
             startCloud: startCloud,
             template: 'clouds',
             dispose: noop,
@@ -1121,17 +1186,31 @@ module Main {
         const error = sig<string>('')
         const state = sig<string>(cloud.state)
         const cloudDetails = sig<CloudDetail>(null)
+        const canStopCloud = !isExternalCluster(cloud)
         function stopCloud(): void {
             ctx.setBusy('Stopping cluster...')
             ctx.remote.stopCloud(cloud.name, (err) => {
                 ctx.setFree()
                 if (err) {
-                    alert(err.message)
+                    error(err.message)
                     return
                 }
                 ctx.showClouds()
             })
         }
+
+        function unregisterCloud(): void {
+            ctx.setBusy('Disconnecting from cluster...')
+            ctx.remote.unregisterCloud(cloud.name, (err) => {
+                ctx.setFree()
+                if (err) {
+                    error(err.message)
+                    return
+                }
+                ctx.showClouds()
+            })
+        }
+
         if (cloud.state != 'Stopped') {
             ctx.remote.getCloudStatus(cloud.name, (err, h2oCloud) => {
                 if (err) {
@@ -1159,7 +1238,9 @@ module Main {
             username: cloud.username,
             state: state,
             createdAt: timestampToAge(cloud.created_at),
+            canStopCloud: canStopCloud,
             stopCloud: stopCloud,
+            unregisterCloud: unregisterCloud,
             cloudDetails: cloudDetails,
             template: 'cloudInfo',
             error: error,
@@ -1200,10 +1281,15 @@ module Main {
         }
     }
 
+    function isExternalCluster(cloud: Proxy.Cloud): boolean {
+        return cloud.engine_name === ""
+    }
+
     function newCloudModelsPane(ctx: Context, cloud: Proxy.Cloud): CloudModelsPane {
         const error = sig<string>('')
         const items = sigs<Folder>([])
         const hasItems = lifts(items, (items) => items.length > 0)
+        const canBuildModel = !isExternalCluster(cloud)
         function buildModel(): void {
             const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
                 ctx.popDialog()
@@ -1235,6 +1321,7 @@ module Main {
             items: items,
             hasItems: hasItems,
             template: 'cloudModels',
+            canBuildModel: canBuildModel,
             buildModel: buildModel,
             dispose: noop,
             position: newPanePosition(),

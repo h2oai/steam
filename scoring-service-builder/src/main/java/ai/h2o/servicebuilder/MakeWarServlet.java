@@ -23,7 +23,7 @@ import static ai.h2o.servicebuilder.Util.*;
 /**
  * Compile server for POJO to war file
  * <p>
- * curl -X POST --form pojo=@pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@pojo/h2o-genmodel.jar --form extra=@makewar-files.tar "localhost:8080/makewar" > model.war
+ * curl -X POST --form pojo=@pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@pojo/h2o-genmodel.jar "localhost:8080/makewar" > model.war
  * java -jar jetty-runner.jar model.war
  * curl "localhost:8080/pred?DayOfMonth=1&Distance=2"
  * <p>
@@ -33,6 +33,7 @@ import static ai.h2o.servicebuilder.Util.*;
  * Errors are sent back if any
  */
 public class MakeWarServlet extends HttpServlet {
+  private static boolean VERBOSE = false;
 
   private File servletPath = null;
 
@@ -40,7 +41,7 @@ public class MakeWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      System.out.println("path = " + servletPath);
+      if (VERBOSE) System.out.println("servletPath = " + servletPath);
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -53,7 +54,7 @@ public class MakeWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      System.out.println("tmp dir " + tmpDir);
+      if (VERBOSE) System.out.println("tmpDir " + tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -78,7 +79,6 @@ public class MakeWarServlet extends HttpServlet {
           if (field.equals("pojo")) {
             pojofile = filename;
             predictorClassName = filename.replace(".java", "");
-            System.out.println("predictorClassName " + predictorClassName);
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
           }
           if (field.equals("jar")) {
@@ -102,16 +102,16 @@ public class MakeWarServlet extends HttpServlet {
       String extraPath = "extra" + File.separator;
       String webInfPath = extraPath + File.separator + "WEB-INF" + File.separator;
       String srcPath = extraPath + "src" + File.separator;
-      copyExtraFile(extraPath, tmpDir, "index.html");
-      copyExtraFile(extraPath, tmpDir, "jquery.js");
-      copyExtraFile(extraPath, tmpDir, "predict.js");
-      copyExtraFile(webInfPath, webInfDir, "web.xml");
+      copyExtraFile(servletPath, extraPath, tmpDir, "index.html", "index.html");
+      copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
+      copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
+      copyExtraFile(servletPath, webInfPath, webInfDir, "web-predict.xml", "web.xml");
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
 
       // change the class name in the predictor template file to the predictor we have
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
-      copyExtraFile(srcPath, tmpDir, "InfoServlet.java");
-      copyExtraFile(srcPath, tmpDir, "StatsServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
@@ -127,8 +127,6 @@ public class MakeWarServlet extends HttpServlet {
       File[] files = filesc.toArray(new File[]{});
       if (files.length == 0)
         throw new Exception("Can't list compiler output files (out)");
-
-//      System.out.println(filesc);
 
       byte[] resjar = createJarArchiveByteArray(files, tmpDir.getPath() + File.separator);
       if (resjar == null)
@@ -173,8 +171,6 @@ public class MakeWarServlet extends HttpServlet {
 
   }
 
-
-
   private static final String JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
 
   /**
@@ -187,16 +183,9 @@ public class MakeWarServlet extends HttpServlet {
    * @throws IOException
    */
   private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String templateFileName, String resultFileName) throws IOException {
-//    File srcDir = new File(tmpDir, "src");
     byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
     String java = new String(templateJava).replace(JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME, javaClassName);
     FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
-  }
-
-
-
-  private void copyExtraFile(String extraPath, File toDir, String fileName) throws IOException {
-    FileUtils.copyFile(new File(servletPath, extraPath + fileName), new File(toDir, fileName));
   }
 
 }

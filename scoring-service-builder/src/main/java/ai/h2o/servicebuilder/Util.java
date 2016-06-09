@@ -1,5 +1,7 @@
 package ai.h2o.servicebuilder;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.*;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -101,6 +103,10 @@ class Util {
       throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
     }
     return temp;
+  }
+
+  static void copyExtraFile(File servletPath, String extraPath, File toDir, String fromFileName, String toFileName) throws IOException {
+    FileUtils.copyFile(new File(servletPath, extraPath + fromFileName), new File(toDir, toFileName));
   }
 
 }

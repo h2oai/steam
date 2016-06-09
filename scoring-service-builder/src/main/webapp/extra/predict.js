@@ -63,7 +63,6 @@ function showModel(model, element) {
     }
 
     outputDomain = domains[i1];
-//    console.log(outputDomain);
 
     form += '<input type="button" name="okbutton" value="PREDICT" onClick="runpred2(this.form)">';
 
@@ -131,8 +130,6 @@ function predResults(params) {
       showResult(div, status, data);
     },'json')
       .fail(function(data, status, error) {
-//        console.log(arguments);
-//        console.log("fail " + data.status + " " + data.statusText);
         down = "<b>Service is down</b>";
         div.innerHTML = down + "<br>status " + data.status + " statusText " + data.statusText;
         stats = document.querySelector(".stats");
@@ -179,6 +176,13 @@ function showOneStat(label, data, warmUpCount) {
         return s;
 }
 
+function showStat(stat, textlabel) {
+        if (stat['count'] > 0) {
+            s +=  '<p>'
+            + showOneStat(textlabel, stat, warmupCount);
+        }
+}
+
 function showStats(div, data) {
     dayMs = 1000 * 60 * 60 * 24;
     upDays = Number(data['upTimeMs']) / dayMs;
@@ -191,14 +195,10 @@ function showStats(div, data) {
         + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'
         +  '<p>'
         + showOneStat('Prediction', data['prediction'], warmupCount);
-        if (data['get']['count'] > 0) {
-            s +=  '<p>'
-            + showOneStat('Get', data['get'], warmupCount);
-        }
-        if (data['post']['count'] > 0) {
-            s += '<p>'
-            + showOneStat('Post', data['post'], warmupCount);
-        }
+        showStat(data['get'], 'Get');
+        showStat(data['post'], 'Post');
+        showStat(data['pythonget'], 'Python Get');
+        showStat(data['pythonpost'], 'Python Post');
     }
     url = window.location.href + "stats";
     s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';

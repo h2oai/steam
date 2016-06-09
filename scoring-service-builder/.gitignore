@@ -12,3 +12,6 @@
 hs_err_pid*
 
 *~
+
+# python compiled files
+*.pyc
