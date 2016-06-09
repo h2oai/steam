@@ -5,6 +5,7 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/h2oai/steamY/bindings"
@@ -18,6 +19,19 @@ import (
 	"github.com/h2oai/steamY/srv/web"
 )
 
+type Activity struct {
+	sync.RWMutex
+	latest map[string]web.Timestamp
+}
+
+func (a *Activity) readActivity(id string) web.Timestamp {
+	a.RLock()
+	last := web.Timestamp(a.latest[id])
+	a.RUnlock()
+
+	return last
+}
+
 type Service struct {
 	workingDir                string
 	ds                        *db.DS
@@ -27,8 +41,8 @@ type Service struct {
 	username                  string
 	keytab                    string
 	clusterProxy              *proxy.RProxy
-	cloudActivity             map[string]web.Timestamp // TODO: not threadsafe
-	scoreActivity             map[string]web.Timestamp // TODO: not threadsafe
+	cloudActivity             *Activity
+	scoreActivity             *Activity
 }
 
 func toTimestamp(t time.Time) web.Timestamp {
@@ -49,8 +63,8 @@ func NewService(workingDir string, ds *db.DS, compilationServiceAddress, scoring
 		username,
 		keytab,
 		clusterProxy,
-		make(map[string]web.Timestamp),
-		make(map[string]web.Timestamp),
+		&Activity{latest: make(map[string]web.Timestamp)},
+		&Activity{latest: make(map[string]web.Timestamp)},
 	}}
 }
 
@@ -58,6 +72,7 @@ func (s *Service) Ping(status bool) (bool, error) {
 	return status, nil
 }
 
+// Cluster Activity
 func (s *Service) poll() {
 	log.Println("Polling for cloud activity")
 	cs, err := s.GetClouds()
@@ -65,21 +80,8 @@ func (s *Service) poll() {
 		log.Println(err)
 	}
 	for _, c := range cs {
-		if c.State != web.CloudStopped {
-			js, err := s.GetJobs(c.Name)
-			if err != nil {
-				log.Println(err)
-			}
-			if len(js) > 0 {
-				j := js[0]
-				if j.Progress == "DONE" {
-					s.cloudActivity[c.Name] = j.FinishedAt / 1000 // TODO: not threadsafe
-				} else {
-					s.cloudActivity[c.Name] = now() // TODO: not threadsafe
-				}
-			} else {
-				s.cloudActivity[c.Name] = c.CreatedAt // TODO: not threadsafe
-			}
+		if err := s.pollCloud(c); err != nil {
+			log.Printf("Cloud poll failed %s: %v", c.Name, err)
 		}
 	}
 	log.Println("Polling for scoring service activity")
@@ -89,12 +91,41 @@ func (s *Service) poll() {
 	}
 	for _, sc := range ss {
 		if sc.State != web.ScoringServiceStopped {
-			s.scoreActivity[sc.ModelName], err = svc.Poll(sc)
+			s.scoreActivity.Lock()
+			s.scoreActivity.latest[sc.ModelName], err = svc.Poll(sc)
+			s.scoreActivity.Unlock()
 			if err != nil {
 				log.Println(err)
 			}
 		}
 	}
+}
+
+func (s *Service) pollCloud(cloud *web.Cloud) error {
+	if cloud.State != web.CloudStopped {
+		js, err := s.GetJobs(cloud.Name)
+		if err != nil { // Cannot talk to cloud?
+			return fmt.Errorf("Cannot talk to H2O cluster: %v", err)
+		}
+
+		s.cloudActivity.Lock()
+		/** If cluster has at least one job, take the latest job. Otherwise take
+		the time of creation. **/
+		if len(js) > 0 {
+			// Jobs are sorted by running jobs first, then most recently completed
+			j := js[0]
+			if j.Progress == "DONE" { // Job finished, top job is most recent
+				s.cloudActivity.latest[cloud.Name] = j.FinishedAt / 1000
+			} else { // At least one job is currently running
+				s.cloudActivity.latest[cloud.Name] = now()
+			}
+		} else {
+			s.cloudActivity.latest[cloud.Name] = cloud.CreatedAt
+		}
+		s.cloudActivity.Unlock()
+	}
+
+	return nil
 }
 
 func (s *Service) ActivityPoll(status bool) (bool, error) {
@@ -216,7 +247,9 @@ func (s *Service) StartCloud(cloudName, engineName string, size int, memory, use
 		return nil, err
 	}
 	// Create an instance of this cloud in cloudActivity map
-	s.cloudActivity[c.ID] = web.Timestamp(c.CreatedAt) // TODO: not threadsafe
+	if err := s.pollCloud(toCloud(c)); err != nil {
+		return nil, err
+	}
 	// Create a reverse proxy for cluster.
 	s.clusterProxy.NewProxy(c.ID, c.Address)
 
@@ -309,7 +342,7 @@ func (s *Service) GetClouds() ([]*web.Cloud, error) {
 	clouds := make([]*web.Cloud, len(cs))
 	for i, c := range cs {
 		clouds[i] = toCloud(c)
-		clouds[i].Activity = web.Timestamp(s.cloudActivity[c.ID]) // update to last known activity
+		clouds[i].Activity = s.cloudActivity.readActivity(c.ID) // update to last known activity
 	}
 	return clouds, nil
 }
@@ -365,7 +398,7 @@ func (s *Service) GetCloudStatus(cloudName string) (*web.Cloud, error) { // Only
 		c.Address,
 		c.Username,
 		c.ApplicationID,
-		web.Timestamp(s.cloudActivity[c.ID]),
+		s.cloudActivity.readActivity(c.ID),
 	}, nil
 }
 
@@ -680,7 +713,10 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 		return nil, err
 	}
 
-	s.scoreActivity[modelName] = web.Timestamp(ss.CreatedAt)
+	s.scoreActivity.Lock()
+	s.scoreActivity.latest[modelName] = web.Timestamp(ss.CreatedAt)
+	s.scoreActivity.Unlock()
+
 	return toScoringService(ss), nil
 }
 
@@ -734,7 +770,7 @@ func (s *Service) GetScoringServices() ([]*web.ScoringService, error) {
 	ss := make([]*web.ScoringService, len(scs))
 	for i, sc := range scs {
 		ss[i] = toScoringService(sc)
-		ss[i].Activity = s.scoreActivity[sc.ModelName]
+		ss[i].Activity = s.scoreActivity.readActivity(sc.ID)
 	}
 
 	return ss, nil
