@@ -36,6 +36,42 @@ func ScanMetas(rs *sql.Rows) ([]Meta, error) {
 	return structs, nil
 }
 
+func ScanPrivilege(r *sql.Row) (Privilege, error) {
+	var s Privilege
+	if err := r.Scan(
+		&s.Type,
+		&s.IdentityType,
+		&s.IdentityId,
+		&s.EntityType,
+		&s.EntityId,
+	); err != nil {
+		return Privilege{}, err
+	}
+	return s, nil
+}
+
+func ScanPrivileges(rs *sql.Rows) ([]Privilege, error) {
+	structs := make([]Privilege, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Privilege
+		if err = rs.Scan(
+			&s.Type,
+			&s.IdentityType,
+			&s.IdentityId,
+			&s.EntityType,
+			&s.EntityId,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanPermission(r *sql.Row) (Permission, error) {
 	var s Permission
 	if err := r.Scan(

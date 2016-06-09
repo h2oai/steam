@@ -70,8 +70,8 @@ SET search_path = public, pg_catalog;
 --
 
 CREATE TYPE identity_type AS ENUM (
-    'Individual',
-    'Workgroup'
+    'identity',
+    'workgroup'
 );
 
 
@@ -82,9 +82,9 @@ ALTER TYPE identity_type OWNER TO steam;
 --
 
 CREATE TYPE privilege_type AS ENUM (
-    'Own',
-    'Edit',
-    'View'
+    'own',
+    'edit',
+    'view'
 );
 
 
