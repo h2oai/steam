@@ -13,6 +13,14 @@ type Meta struct {
 	Value string
 }
 
+type Privilege struct {
+	Type         string
+	IdentityType string
+	IdentityId   int64
+	EntityType   int64
+	EntityId     int64
+}
+
 type Permission struct {
 	Id          int64
 	Name        string

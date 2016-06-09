@@ -2,16 +2,46 @@ package data
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/lib/pq"
-	"strings"
+	"log"
+	"strconv"
 )
 
-var Permissions []Permission
-var EntityTypes []EntityType
+const (
+	Version = "1"
+
+	OwnPrivilege  = "own"
+	EditPrivilege = "edit"
+	ViewPrivilege = "view"
+
+	IdentityPrivilege  = "identity"
+	WorkgroupPrivilege = "workgroup"
+
+	RoleLabel      = "role"
+	WorkgroupLabel = "workgroup"
+	IdentityLabel  = "identity"
+	EngineLabel    = "engine"
+	ClusterLabel   = "cluster"
+	ModelLabel     = "model"
+)
+
+var (
+	Permissions []Permission
+	EntityTypes []EntityType
+)
 
 func init() {
+	EntityTypes = []EntityType{
+		{0, RoleLabel},
+		{0, WorkgroupLabel},
+		{0, IdentityLabel},
+		{0, EngineLabel},
+		{0, ClusterLabel},
+		{0, ModelLabel},
+	}
 	Permissions = []Permission{
 		{0, "role.manage", "Manage roles"},
 		{0, "role.view", "View roles"},
@@ -26,41 +56,49 @@ func init() {
 		{0, "model.manage", "Manage models"},
 		{0, "model.view", "View models"},
 	}
-	EntityTypes = []EntityType{
-		{0, "role"},
-		{0, "workgroup"},
-		{0, "identity"},
-		{0, "engine"},
-		{0, "cluster"},
-		{0, "model"},
+}
+
+type metadata map[string]string
+
+type Keys struct {
+	Role      int64
+	Workgroup int64
+	Identity  int64
+	Engine    int64
+	Cluster   int64
+	Model     int64
+}
+
+func toKeys(entityTypes []EntityType) *Keys {
+	m := make(map[string]int64)
+	for _, entityType := range entityTypes {
+		m[entityType.Name] = entityType.Id
+	}
+
+	return &Keys{
+		m[RoleLabel],
+		m[WorkgroupLabel],
+		m[IdentityLabel],
+		m[EngineLabel],
+		m[ClusterLabel],
+		m[ModelLabel],
 	}
 }
 
 type Datastore struct {
-	db              *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
-	metadata        map[string]string
-	permissions     []Permission
-	permissionMap   map[int64]Permission
-	entityTypeMap   map[int64]EntityType
-	entityTypeIdMap map[string]int64
+	db            *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
+	metadata      metadata
+	permissions   []Permission
+	permissionMap map[int64]Permission
+	entityTypeMap map[int64]EntityType
+	Keys          *Keys
 }
 
-const (
-	Version = "1"
-)
+func Connect(username, dbname, sslmode string) (*sql.DB, error) {
 
-// NewDB creates a new instance of a data access object.
-//
-// Valid values for sslmode are:
-//   disable - No SSL
-//   require - Always SSL (skip verification)
-//   verify-ca - Always SSL (verify that the certificate presented by the server was signed by a trusted CA)
-//   verify-full - Always SSL (verify that the certification presented by the server was signed by a
-//     trusted CA and the server host name matches the one in the certificate)
-func NewDatastore(username, dbname, sslmode string) (*Datastore, error) {
+	log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
 
 	// Open connection
-
 	db, err := sql.Open("postgres", fmt.Sprintf("user=%s dbname=%s sslmode=%s", username, dbname, sslmode))
 	if err != nil {
 		return nil, fmt.Errorf("Database connection failed: %s", err)
@@ -74,6 +112,19 @@ func NewDatastore(username, dbname, sslmode string) (*Datastore, error) {
 		return nil, fmt.Errorf("Database ping failed: %s", err)
 	}
 
+	return db, nil
+}
+
+// NewDB creates a new instance of a data access object.
+//
+// Valid values for sslmode are:
+//   disable - No SSL
+//   require - Always SSL (skip verification)
+//   verify-ca - Always SSL (verify that the certificate presented by the server was signed by a trusted CA)
+//   verify-full - Always SSL (verify that the certification presented by the server was signed by a
+//     trusted CA and the server host name matches the one in the certificate)
+func NewDatastore(db *sql.DB) (*Datastore, error) {
+
 	// Read meta information
 
 	metadata, err := readMetadata(db)
@@ -84,13 +135,14 @@ func NewDatastore(username, dbname, sslmode string) (*Datastore, error) {
 	// Get version; prime if pristine
 
 	version, ok := metadata["version"]
+	log.Println("Using schema version:", version)
 	if !ok {
 		prime(db)
 	}
 
 	upgrade(db, version)
 
-	permissions, err := readPermissions(db)
+	permissions, err := readAllPermissions(db)
 	if err != nil {
 		return nil, err
 	}
@@ -100,14 +152,14 @@ func NewDatastore(username, dbname, sslmode string) (*Datastore, error) {
 		permissionMap[permission.Id] = permission
 	}
 
-	entityTypeMap, err := readEntityTypes(db)
+	entityTypes, err := readEntityTypes(db)
 	if err != nil {
 		return nil, err
 	}
 
-	entityTypeIdMap := make(map[string]int64)
-	for id, entityType := range entityTypeMap {
-		entityTypeIdMap[entityType.Name] = id
+	entityTypeMap := make(map[int64]EntityType)
+	for _, et := range entityTypes {
+		entityTypeMap[et.Id] = et
 	}
 
 	return &Datastore{
@@ -116,11 +168,12 @@ func NewDatastore(username, dbname, sslmode string) (*Datastore, error) {
 		permissions,
 		permissionMap,
 		entityTypeMap,
-		entityTypeIdMap,
+		toKeys(entityTypes),
 	}, nil
 }
 
 func prime(db *sql.DB) error {
+	log.Println("Priming database for first time use...")
 	if err := createMetadata(db, "version", "1"); err != nil {
 		return err
 	}
@@ -210,6 +263,7 @@ func upgrade(db *sql.DB, currentVersion string) error {
 }
 
 func truncate(db *sql.DB) error {
+	log.Println("Truncating database...")
 	return executeTransaction(db, func(tx *sql.Tx) error {
 		tables := []string{
 			"history",
@@ -233,14 +287,6 @@ func truncate(db *sql.DB) error {
 	})
 }
 
-func (ds *Datastore) Prime() error {
-	return prime(ds.db)
-}
-
-func (ds *Datastore) Truncate() error {
-	return truncate(ds.db)
-}
-
 // --- Superuser ---
 
 func (ds *Datastore) SetupSuperuser(name, password string) (int64, error) {
@@ -258,7 +304,16 @@ func (ds *Datastore) SetupSuperuser(name, password string) (int64, error) {
 		return 0, err
 	}
 
-	return ds.CreateIdentity(nil, name, password)
+	identityId, err := ds.CreateIdentity(nil, name, password)
+	if err != nil {
+		return identityId, err
+	}
+
+	if err := ds.LinkIdentityToRole(nil, identityId, roleId); err != nil {
+		return identityId, err
+	}
+
+	return identityId, nil
 }
 
 // --- Lookup tables (static) ---
@@ -288,7 +343,7 @@ func readMetadata(db *sql.DB) (map[string]string, error) {
 	return lookup, nil
 }
 
-func readEntityTypes(db *sql.DB) (map[int64]EntityType, error) {
+func readEntityTypes(db *sql.DB) ([]EntityType, error) {
 	rows, err := db.Query(`
 		SELECT
 			id, name
@@ -300,17 +355,7 @@ func readEntityTypes(db *sql.DB) (map[int64]EntityType, error) {
 	}
 	defer rows.Close()
 
-	entityTypes, err := ScanEntityTypes(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	lookup := make(map[int64]EntityType)
-	for _, et := range entityTypes {
-		lookup[et.Id] = et
-	}
-
-	return lookup, nil
+	return ScanEntityTypes(rows)
 }
 
 func executeTransaction(db *sql.DB, f func(*sql.Tx) error) (err error) {
@@ -345,30 +390,81 @@ func (ds *Datastore) exec(f func(*sql.Tx) error) (err error) {
 	return executeTransaction(ds.db, f)
 }
 
-func (ds *Datastore) toEntityTypeId(name string) (int64, error) {
-	if id, ok := ds.entityTypeIdMap[name]; ok {
-		return id, nil
+func (ds *Datastore) toPermissionNames(ids []int64) ([]string, error) {
+	names := make([]string, len(ids))
+	for i, id := range ids {
+		if p, ok := ds.permissionMap[id]; ok {
+			names[i] = p.Name
+		} else {
+			return names, fmt.Errorf("Invalid permission id: %d", id)
+		}
 	}
-	return 0, fmt.Errorf("Invalid entity type: %s", name)
+	return names, nil
+}
+
+func scanInts(rs *sql.Rows) ([]int64, error) {
+	values := make([]int64, 0, 16)
+	var err error
+	for rs.Next() {
+		var value int64
+		if err = rs.Scan(&value); err != nil {
+			return nil, err
+		}
+		values = append(values, value)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return values, nil
+}
+
+func scanStrings(rs *sql.Rows) ([]string, error) {
+	values := make([]string, 0, 16)
+	var err error
+	for rs.Next() {
+		var value string
+		if err = rs.Scan(&value); err != nil {
+			return nil, err
+		}
+		values = append(values, value)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return values, nil
 }
 
 // --- History ---
 
-func (ds *Datastore) audit(principal *az.Principal, tx *sql.Tx, action, entityType string, entityId int64, description string) error {
+const (
+	CreateOp  string = "create"
+	UpdateOp  string = "update"
+	DeleteOp  string = "delete"
+	EnableOp  string = "enable"
+	DisableOp string = "disable"
+	ShareOp   string = "share"
+	UnshareOp string = "unshare"
+	LinkOp    string = "link"
+	UnlinkOp  string = "unlink"
+)
+
+func (ds *Datastore) audit(principal *az.Principal, tx *sql.Tx, action string, entityTypeId, entityId int64, metadata metadata) error {
 	if principal == nil {
 		return nil
 	}
-	entityTypeId, err := ds.toEntityTypeId(entityType)
+
+	json, err := json.Marshal(metadata)
 	if err != nil {
 		return err
 	}
+
 	if _, err := tx.Exec(`
 		INSERT INTO
 			history
 			(identity_id, action, entity_type_id, entity_id, description, created)
 		VALUES
 			($1,          $2,     $3,             $4,        $5,          now())
-		`, principal.Id, action, entityTypeId, entityId, description); err != nil {
+		`, principal.Id, action, entityTypeId, entityId, string(json)); err != nil {
 		return err
 	}
 	return nil
@@ -376,7 +472,7 @@ func (ds *Datastore) audit(principal *az.Principal, tx *sql.Tx, action, entityTy
 
 // --- Permissions ---
 
-func readPermissions(db *sql.DB) ([]Permission, error) {
+func readAllPermissions(db *sql.DB) ([]Permission, error) {
 	rows, err := db.Query(`
 		SELECT
 			id, name, description
@@ -393,7 +489,7 @@ func readPermissions(db *sql.DB) ([]Permission, error) {
 	return ScanPermissions(rows)
 }
 
-func (ds *Datastore) ReadPermissions(principal *az.Principal) ([]Permission, error) {
+func (ds *Datastore) ReadAllPermissions(principal *az.Principal) ([]Permission, error) {
 	return ds.permissions, nil
 }
 
@@ -436,7 +532,7 @@ func (ds *Datastore) ReadPermissionsForIdentity(principal *az.Principal, identit
 	}
 	defer rows.Close()
 
-	return ScanIds(rows)
+	return scanInts(rows)
 }
 
 // --- Roles ---
@@ -456,7 +552,7 @@ func (ds *Datastore) CreateRole(principal *az.Principal, name, description strin
 			return err
 		}
 
-		return ds.audit(principal, tx, "create", "role", id, "")
+		return ds.audit(principal, tx, CreateOp, ds.Keys.Role, id, metadata{"name": name, "description": description})
 	})
 	return id, err
 }
@@ -525,20 +621,8 @@ func (ds *Datastore) UpdateRole(principal *az.Principal, roleId int64, name stri
 			`, name, roleId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "update", "role", roleId, fmt.Sprintf("Set name to %s", name))
+		return ds.audit(principal, tx, UpdateOp, ds.Keys.Role, roleId, metadata{"name": name})
 	})
-}
-
-func (ds *Datastore) toPermissionNames(ids []int64) ([]string, error) {
-	names := make([]string, len(ids))
-	for i, id := range ids {
-		if p, ok := ds.permissionMap[id]; ok {
-			names[i] = p.Name
-		} else {
-			return names, fmt.Errorf("Invalid permission id: %d", id)
-		}
-	}
-	return names, nil
 }
 
 func (ds *Datastore) SetRolePermissions(principal *az.Principal, roleId int64, permissionIds []int64) error {
@@ -567,7 +651,11 @@ func (ds *Datastore) SetRolePermissions(principal *az.Principal, roleId int64, p
 		if err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "update", "role", roleId, fmt.Sprintf("Set permissions to: %s", strings.Join(permissionNames, ", ")))
+		permissions, err := json.Marshal(permissionNames)
+		if err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, UpdateOp, ds.Keys.Role, roleId, metadata{"permissions": string(permissions)})
 	})
 }
 
@@ -578,10 +666,14 @@ func (ds *Datastore) DeleteRole(principal *az.Principal, roleId int64) error {
 				role
 			WHERE
 				id = $1
-			`, roleId); err != nil {
+			`, roleId,
+		); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "delete", "role", roleId, "")
+		if err := deletePrivilegesOn(tx, ds.Keys.Role, roleId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, DeleteOp, ds.Keys.Role, roleId, metadata{})
 	})
 }
 
@@ -601,7 +693,7 @@ func (ds *Datastore) CreateWorkgroup(principal *az.Principal, name, description 
 		if err := row.Scan(&id); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "create", "workgroup", id, "")
+		return ds.audit(principal, tx, CreateOp, ds.Keys.Workgroup, id, metadata{"name": name, "description": description})
 	})
 	return id, err
 }
@@ -673,7 +765,7 @@ func (ds *Datastore) UpdateWorkgroup(principal *az.Principal, workgroupId int64,
 			`, name, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "update", "workgroup", workgroupId, fmt.Sprintf("Set name to %s", name))
+		return ds.audit(principal, tx, UpdateOp, ds.Keys.Workgroup, workgroupId, metadata{"name": name})
 	})
 }
 
@@ -687,7 +779,13 @@ func (ds *Datastore) DeleteWorkgroup(principal *az.Principal, workgroupId int64)
 			`, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "delete", "workgroup", workgroupId, "")
+		if err := deletePrivilegesOn(tx, ds.Keys.Workgroup, workgroupId); err != nil {
+			return err
+		}
+		if err := deletePrivilegesFor(tx, WorkgroupPrivilege, workgroupId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, DeleteOp, ds.Keys.Workgroup, workgroupId, metadata{})
 	})
 }
 
@@ -707,7 +805,7 @@ func (ds *Datastore) CreateIdentity(principal *az.Principal, name, password stri
 		if err := row.Scan(&id); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "create", "identity", id, "")
+		return ds.audit(principal, tx, CreateOp, ds.Keys.Identity, id, metadata{"name": name})
 	})
 	return id, err
 }
@@ -799,7 +897,7 @@ func (ds *Datastore) ReadIdentitesForRole(principal *az.Principal, roleId int64)
 	return ScanIdentitys(rows)
 }
 
-func (ds *Datastore) AssocIdentityToWorkgroup(principal *az.Principal, identityId, workgroupId int64) error {
+func (ds *Datastore) LinkIdentityToWorkgroup(principal *az.Principal, identityId, workgroupId int64) error {
 	workgroup, err := ds.ReadWorkgroup(principal, workgroupId)
 	if err != nil {
 		return err
@@ -813,11 +911,15 @@ func (ds *Datastore) AssocIdentityToWorkgroup(principal *az.Principal, identityI
 			`, identityId, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "update", "identity", identityId, fmt.Sprintf("Associate group %s", workgroup.Name))
+		return ds.audit(principal, tx, LinkOp, ds.Keys.Identity, identityId, metadata{
+			"type": WorkgroupLabel,
+			"id":   strconv.FormatInt(workgroupId, 10),
+			"name": workgroup.Name,
+		})
 	})
 }
 
-func (ds *Datastore) DissocIdentityFromWorkgroup(principal *az.Principal, identityId, workgroupId int64) error {
+func (ds *Datastore) UnlinkIdentityFromWorkgroup(principal *az.Principal, identityId, workgroupId int64) error {
 	workgroup, err := ds.ReadWorkgroup(principal, workgroupId)
 	if err != nil {
 		return err
@@ -832,11 +934,15 @@ func (ds *Datastore) DissocIdentityFromWorkgroup(principal *az.Principal, identi
 			`, identityId, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "update", "identity", identityId, fmt.Sprintf("Dissociate group %s", workgroup.Name))
+		return ds.audit(principal, tx, UnlinkOp, ds.Keys.Identity, identityId, metadata{
+			"type": WorkgroupLabel,
+			"id":   strconv.FormatInt(workgroupId, 10),
+			"name": workgroup.Name,
+		})
 	})
 }
 
-func (ds *Datastore) AssocIdentityToRole(principal *az.Principal, identityId, roleId int64) error {
+func (ds *Datastore) LinkIdentityToRole(principal *az.Principal, identityId, roleId int64) error {
 	role, err := ds.ReadRole(principal, roleId)
 	if err != nil {
 		return err
@@ -850,11 +956,15 @@ func (ds *Datastore) AssocIdentityToRole(principal *az.Principal, identityId, ro
 			`, identityId, roleId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "update", "identity", identityId, fmt.Sprintf("Associate role %s", role.Name))
+		return ds.audit(principal, tx, LinkOp, ds.Keys.Identity, identityId, metadata{
+			"type": RoleLabel,
+			"id":   strconv.FormatInt(roleId, 10),
+			"name": role.Name,
+		})
 	})
 }
 
-func (ds *Datastore) DissocIdentityFromRole(principal *az.Principal, identityId, roleId int64) error {
+func (ds *Datastore) UnlinkIdentityFromRole(principal *az.Principal, identityId, roleId int64) error {
 	role, err := ds.ReadRole(principal, roleId)
 	if err != nil {
 		return err
@@ -869,11 +979,19 @@ func (ds *Datastore) DissocIdentityFromRole(principal *az.Principal, identityId,
 			`, identityId, roleId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "update", "identity", identityId, fmt.Sprintf("Dissociate role %s", role.Name))
+		return ds.audit(principal, tx, UnlinkOp, ds.Keys.Identity, identityId, metadata{
+			"type": RoleLabel,
+			"id":   strconv.FormatInt(roleId, 10),
+			"name": role.Name,
+		})
 	})
 }
 
 func (ds *Datastore) DeactivateIdentity(principal *az.Principal, identityId int64) error {
+	identity, err := ds.ReadIdentity(principal, identityId)
+	if err != nil {
+		return err
+	}
 	return ds.exec(func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`
 			UPDATE
@@ -885,35 +1003,139 @@ func (ds *Datastore) DeactivateIdentity(principal *az.Principal, identityId int6
 			`, identityId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, "deactivate", "identity", identityId, "")
+		return ds.audit(principal, tx, DisableOp, ds.Keys.Identity, identityId, metadata{"name": identity.Name})
 	})
 	return nil
 }
 
-func ScanIds(rs *sql.Rows) ([]int64, error) {
-	ids := make([]int64, 0, 16)
-	var err error
-	for rs.Next() {
-		var id int64
-		if err = rs.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if err = rs.Err(); err != nil {
-		return nil, err
-	}
-	return ids, nil
-}
-
 // --- Privileges ---
 
-// select privilege_type
-// from privilege
-// where
-//		entity_id = 234 and
-//		entity_type_id = 5 and
-//		((identity_type is individual and identity_id = 2345) OR
-//		(identity_type is workgroup and identity_id in
-//		(select workgroup_id from identity_workgroup where identity_id = 2345)
-//		))
+func readName(tx *sql.Tx, table string, id int64) (string, error) {
+	row := tx.QueryRow("SELECT name FROM "+table+" WHERE id = $1", id)
+	var name string
+	err := row.Scan(&name)
+	return name, err
+}
+
+func (ds *Datastore) CreatePrivilege(principal *az.Principal, privilege Privilege) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			INSERT INTO
+				privilege
+			VALUES
+				($1, $2, $3, $4, $5)
+			`,
+			privilege.Type,
+			privilege.IdentityType,
+			privilege.IdentityId,
+			privilege.EntityType,
+			privilege.EntityId,
+		); err != nil {
+			return err
+		}
+
+		identityName, err := readName(tx, privilege.IdentityType, privilege.IdentityId)
+		if err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, ShareOp, privilege.EntityType, privilege.EntityId, metadata{
+			"type": privilege.IdentityType,
+			"id":   strconv.FormatInt(privilege.IdentityId, 10),
+			"name": identityName,
+		})
+	})
+}
+
+func (ds *Datastore) ReadPrivileges(principal *az.Principal, identityId, entityTypeId, entityId int64) ([]string, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			privilege_type
+		FROM
+			privilege
+		WHERE
+			entity_id = $1 AND
+			entity_type_id = $2 AND
+			(
+				(
+					identity_id = $3 AND
+					identity_type = 'identity'
+				)
+				OR
+				(
+					identity_id IN 
+					(
+						SELECT
+							workgroup_id
+						FROM
+							identity_workgroup
+						WHERE
+							identity_id = $3
+					) AND
+					identity_type = 'workgroup'
+				)
+			)
+		`, entityId, entityTypeId, identityId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanStrings(rows)
+}
+
+func (ds *Datastore) DeletePrivilege(principal *az.Principal, privilege Privilege) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				privilege
+			WHERE
+				privilege_type = $1 AND
+				identity_type = $2 AND
+				identity_id = $3 AND
+				entity_type_id = $4 AND
+				entity_id = $5
+			`,
+			privilege.Type,
+			privilege.IdentityType,
+			privilege.IdentityId,
+			privilege.EntityType,
+			privilege.EntityId,
+		); err != nil {
+			return err
+		}
+
+		identityName, err := readName(tx, privilege.IdentityType, privilege.IdentityId)
+		if err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, UnshareOp, privilege.EntityType, privilege.EntityId, metadata{
+			"type": privilege.IdentityType,
+			"id":   strconv.FormatInt(privilege.IdentityId, 10),
+			"name": identityName,
+		})
+	})
+}
+
+func deletePrivilegesOn(tx *sql.Tx, entityTypeId, entityId int64) error {
+	_, err := tx.Exec(`
+		DELETE FROM
+			privilege
+		WHERE
+			entity_type_id = $1 AND
+			entity_id = $2
+		`, entityTypeId, entityId)
+	return err
+}
+
+func deletePrivilegesFor(tx *sql.Tx, identityType string, identityId int64) error {
+	_, err := tx.Exec(`
+		DELETE FROM
+			privilege
+		WHERE
+			identity_type = $1 AND
+			identity_id = $2
+		`, identityType, identityId)
+	return err
+}

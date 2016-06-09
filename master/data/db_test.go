@@ -5,29 +5,294 @@ import (
 	"testing"
 )
 
-func getConnection(t *testing.T) (ds *Datastore) {
-	ds, err := NewDatastore("steam", "steam", "disable")
+func connect(t *testing.T) *Datastore {
+	db, err := Connect("steam", "steam", "disable")
 	if err != nil {
 		t.Error(err)
 	}
+	if err := truncate(db); err != nil {
+		t.Error(err)
+	}
+	if err := prime(db); err != nil {
+		t.Error(err)
+	}
+
+	ds, err := NewDatastore(db)
+	if err != nil {
+		t.Error(err)
+	}
+
 	return ds
 }
 
-func TestSecurity(t *testing.T) {
-
-	ds := getConnection(t)
-
-	ds.Prime()
+func TestPrivilegesForIdentity(t *testing.T) {
+	ds := connect(t)
 
 	su, err := ds.SetupSuperuser("Superuser", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := &az.Principal{su} // FIXME
+	p := &az.Principal{su}
+
+	// Create user
+	uid, err := ds.CreateIdentity(p, "user", "password1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(uid)
+
+	// Create entity
+	eid, err := ds.CreateWorkgroup(p, "foo", "description")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(eid)
+
+	// Make user own entity
+	ds.CreatePrivilege(p, Privilege{
+		OwnPrivilege,
+		IdentityPrivilege,
+		uid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Get user's privilege on entity
+	privileges, err := ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(privileges)
+
+	if privileges[0] != "own" {
+		t.Fatal("wrong privilege")
+	}
+
+	// Drop privileges
+	ds.DeletePrivilege(p, Privilege{
+		OwnPrivilege,
+		IdentityPrivilege,
+		uid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Get user's privilege on entity
+	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(privileges)
+
+	if len(privileges) != 0 {
+		t.Fatal("wrong privilege")
+	}
+
+}
+
+func TestPrivilegesForWorkgroup(t *testing.T) {
+	ds := connect(t)
+
+	su, err := ds.SetupSuperuser("Superuser", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := &az.Principal{su}
+
+	// Create user
+	uid, err := ds.CreateIdentity(p, "user", "password1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(uid)
+
+	// Create group
+	wgid, err := ds.CreateWorkgroup(p, "group", "description")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(wgid)
+
+	// Add user to group
+	if err := ds.LinkIdentityToWorkgroup(p, uid, wgid); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create entity
+	eid, err := ds.CreateWorkgroup(p, "othergroup", "description")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(eid)
+
+	// Make group edit entity
+	ds.CreatePrivilege(p, Privilege{
+		EditPrivilege,
+		WorkgroupPrivilege,
+		wgid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Read user's privilege on entity
+	privileges, err := ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(privileges)
+
+	if privileges[0] != "edit" {
+		t.Fatal("wrong privilege")
+	}
+
+	// Drop privileges
+	ds.DeletePrivilege(p, Privilege{
+		EditPrivilege,
+		WorkgroupPrivilege,
+		wgid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Read user's privilege on entity
+	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(privileges)
+
+	if len(privileges) != 0 {
+		t.Fatal("wrong privilege")
+	}
+}
+
+func TestPrivilegeCollationForIdentity(t *testing.T) {
+	ds := connect(t)
+
+	su, err := ds.SetupSuperuser("Superuser", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := &az.Principal{su}
+
+	// Create user
+	uid, err := ds.CreateIdentity(p, "user", "password1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(uid)
+
+	// Create group
+	wgid, err := ds.CreateWorkgroup(p, "group", "description")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(wgid)
+
+	// Add user to group
+	if err := ds.LinkIdentityToWorkgroup(p, uid, wgid); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create entity
+	eid, err := ds.CreateWorkgroup(p, "foo", "description")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(eid)
+
+	// Make user own entity
+	ds.CreatePrivilege(p, Privilege{
+		OwnPrivilege,
+		IdentityPrivilege,
+		uid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Make group edit entity
+	ds.CreatePrivilege(p, Privilege{
+		EditPrivilege,
+		WorkgroupPrivilege,
+		wgid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Get user's privilege on entity
+	privileges, err := ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(privileges)
+
+	if len(privileges) != 2 {
+		t.Fatal("wrong privileges")
+	}
+
+	// Drop group privileges
+	ds.DeletePrivilege(p, Privilege{
+		EditPrivilege,
+		WorkgroupPrivilege,
+		wgid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Get user's privilege on entity
+	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(privileges)
+
+	if len(privileges) != 1 {
+		t.Fatal("wrong privileges")
+	}
+
+	// Drop user's privileges
+	ds.DeletePrivilege(p, Privilege{
+		OwnPrivilege,
+		IdentityPrivilege,
+		uid,
+		ds.Keys.Workgroup,
+		eid,
+	})
+
+	// Get user's privilege on entity
+	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(privileges)
+
+	if len(privileges) != 0 {
+		t.Fatal("wrong privileges")
+	}
+}
+
+func TestSecurity(t *testing.T) {
+	ds := connect(t)
+
+	su, err := ds.SetupSuperuser("Superuser", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := &az.Principal{su}
 
 	// read permissions
-	permissions, err := ds.ReadPermissions(p)
+	permissions, err := ds.ReadAllPermissions(p)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -210,13 +475,13 @@ func TestSecurity(t *testing.T) {
 
 	// set workgroup
 
-	if err := ds.AssocIdentityToWorkgroup(p, user1Id, group1Id); err != nil {
+	if err := ds.LinkIdentityToWorkgroup(p, user1Id, group1Id); err != nil {
 		t.Fatal(err)
 	}
 
 	// set roles
 
-	if err := ds.AssocIdentityToRole(p, user1Id, role1Id); err != nil {
+	if err := ds.LinkIdentityToRole(p, user1Id, role1Id); err != nil {
 		t.Fatal(err)
 	}
 
@@ -255,19 +520,19 @@ func TestSecurity(t *testing.T) {
 
 	// change workgroup
 
-	if err := ds.DissocIdentityFromWorkgroup(p, user1Id, group1Id); err != nil {
+	if err := ds.UnlinkIdentityFromWorkgroup(p, user1Id, group1Id); err != nil {
 		t.Fatal(err)
 	}
-	if err := ds.AssocIdentityToWorkgroup(p, user1Id, group2Id); err != nil {
+	if err := ds.LinkIdentityToWorkgroup(p, user1Id, group2Id); err != nil {
 		t.Fatal(err)
 	}
 
 	// change roles
 
-	if err := ds.DissocIdentityFromRole(p, user1Id, role1Id); err != nil {
+	if err := ds.UnlinkIdentityFromRole(p, user1Id, role1Id); err != nil {
 		t.Fatal(err)
 	}
-	if err := ds.AssocIdentityToRole(p, user1Id, role2Id); err != nil {
+	if err := ds.LinkIdentityToRole(p, user1Id, role2Id); err != nil {
 		t.Fatal(err)
 	}
 
@@ -362,6 +627,4 @@ func TestSecurity(t *testing.T) {
 	if id1.IsActive {
 		t.Fatal("expected user to be inactive")
 	}
-
-	ds.Truncate()
 }
