@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <!-- Latest compiled and minified CSS -->
+    <title>Steam :: Prediction Service Builder </title>
 
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
 
@@ -19,121 +20,47 @@
     <script src="jquery.js" ></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
 
+    <script src="data.js" type="text/javascript" charset="utf-8" async></script>
   </head>
  
   <body>
 
       <div class="title grad container-fluid">
         <h1>Steam</h1>
-        <h2>War Building Service</h2>
+        <h2>Prediction Service Builder</h2>
       </div>
+
       <main class="container-fluid">
-        <section class="col-md-12 col-sm-12">
-          <p>Select input paramters, OR enter your own custom query string to predict</p>
+<!--         <section class="col-md-12 col-sm-12">
+          <p>Start building your prediction service!</p>
         </section>
-
-        <section id="inputParams" class="col-md-6 col-sm-12">
-          <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Model input parameters</header>
+ -->
+        <section id="python" class="col-md-4 col-sm-12">
+          <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Python preprocessing</header>
           <form autocomplete="off">
-              <fieldset class="form-group">
-                <legend>Parameters</legend>
-                <div class="form-group row">
-                  <label for="distance" class="col-sm-6 form-control-label">Distance</label>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control" id="input" placeholder="0-2000">
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label for="month" class="col-sm-6 form-control-label">Month</label>
-                  <div class="col-sm-6">
-                     <select id="select" class="form-control">
-                        <option>c-1</option>
-                        <option>c-2</option>
-                        <option>c-3</option>
-                      </select>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend>Query String</legend>
-                <div class="form-group">The parameters above gets automatically built into a REST API query strong. You can also input your own string if that's easier for you.</div>
-                <div class="form-group">
-                  <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
-                  <div class="input-group">
-                    <div class="input-group-addon">http://localhost:8080?</div>
-                    <input type="text" class="form-control" id="exampleInputAmount" placeholder="Month=c1">
-                  </div>
-                </div>
-              </fieldset>
-
-              <div class="btnContainer">
-                <input class="btn btn-primary" type="submit" value="Upload"></input>
-                <input class="btn btn-default" type="reset"></input>
+              <div class="form-group row">
+                    <label class="col-md-1 form-control-label"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></label>
+                    <div class="col-md-8">
+                        <input class="form-control" type="text" id="python1" placeholder="Select a Python file">
+                       <input type="file" class="form-control" style="display: none;">
+                    </div>
               </div>
-          </form>
-          
+
+          </form>    
         </section>
 
         <section class="col-md-1">
           
         </section>
-        <section id="results" class="col-md-4 col-sm-12">
-          <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
-          <fieldset>
-            <legend>Model Predictions</legend>
-            <table class="table noBorders">
-              <tbody>
-                <tr>
-                  <td>labelIndex</td>
-                  <td>1</td>
-                </tr>
-              </tbody>
-            </table>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Labels</th>
-                  <th>Probability</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Y</td>
-                  <td>99.59851912</td>
-                </tr>
-                 <tr>
-                  <td>N</td>
-                  <td>0.004014809</td>
-                </tr>
-              </tbody>
-            </table>
-          </fieldset>
-          <fieldset>
-            <legend>Model Runtime Stats</legend>
-            <table class="table noBorders">
-              <tbody>
-                <tr>
-                  <td>Total prediction time</td>
-                  <td>24.091915 ms</td>
-                </tr>
-                <tr>
-                  <td>Number of predictions</td>
-                  <td>2</td>
-                </tr>    
-                <tr>
-                  <td>Last prediction time</td>
-                  <td>0.122258 ms</td>
-                </tr>                            
-              </tbody>
-            </table>
-          </fieldset>
-          <div class="btnContainer">
-            <button class="btn btn-primary" type="submit">More stats</button>
-          </div>
+        <section id="java" class="col-md-4 col-sm-12">
+          <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Java Prediction Files</header>
         </section>
-        
+
+        <div class="btnContainer col-md-12">
+          <input class="btn btn-primary" type="submit" value="Upload"></input>
+          <input class="btn btn-default" type="reset"></input>
+        </div>
+  
       </main>
  
   </body>
