@@ -11,6 +11,12 @@ Install using `brew`:
 
 Download and install from here: https://www.pgadmin.org/download/macosx.php
 
+## Configuration (development only)
+
+Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
+
+    log_statement = 'all'     # none, ddl, mod, all
+
 ## Start postgresql
 
 To have launchd start postgresql at login:
