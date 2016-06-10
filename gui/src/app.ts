@@ -677,6 +677,7 @@ module Main {
         createdAt: string
         cloudDetails: Sig<CloudDetail>
         error: Sig<string>
+        canStop: Sig<boolean>
         canStopCloud: boolean
         stopCloud: Act
         unregisterCloud: Act
@@ -746,6 +747,7 @@ module Main {
         url: string
         pid: string
         createdAt: string
+        canStop: Sig<boolean>
         stopService: Act
     }
 
@@ -1187,6 +1189,7 @@ module Main {
         const state = sig<string>(cloud.state)
         const cloudDetails = sig<CloudDetail>(null)
         const canStopCloud = !isExternalCluster(cloud)
+        const canStop = sig<boolean>(cloud.state !== 'Stopped')
         function stopCloud(): void {
             ctx.setBusy('Stopping cluster...')
             ctx.remote.stopCloud(cloud.name, (err) => {
@@ -1238,6 +1241,7 @@ module Main {
             username: cloud.username,
             state: state,
             createdAt: timestampToAge(cloud.created_at),
+            canStop: canStop,
             canStopCloud: canStopCloud,
             stopCloud: stopCloud,
             unregisterCloud: unregisterCloud,
@@ -1486,6 +1490,7 @@ module Main {
     }
 
     function newServicePane(ctx: Context, service: Proxy.ScoringService): ServicePane {
+        const canStop = sig<boolean>(service.state !== 'Stopped')
         const stopService: Act = () => {
             ctx.setBusy('Stopping service...')
             ctx.remote.stopScoringService(service.model_name, service.port, (err) => {
@@ -1505,6 +1510,7 @@ module Main {
             url: `http://${service.address}:${service.port}/`,
             pid: String(service.pid),
             createdAt: timestampToAge(service.created_at),
+            canStop: canStop,
             stopService: stopService,
             template: 'service',
             dispose: noop,
