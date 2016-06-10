@@ -273,7 +273,9 @@ html.no-js
                           
         .buttons.buttons--unit
           // ko if:canStopCloud
+          // ko if:canStop
           .button.button--danger(data-bind="click:stopCloud") Stop this cluster
+          // /ko
           // /ko
           // ko ifnot:canStopCloud
           .button.button--danger(data-bind="click:unregisterCloud") Disconnect from cluster
@@ -459,8 +461,10 @@ html.no-js
                 th Created
                 td(data-bind="text:createdAt")
       .pane__actions
+        // ko if:canStop
         .buttons.buttons--unit
           .button.button--danger(data-bind="click:stopService") Stop this service
+        // /ko
 
     template.assets
       .pane__titlebar(data-bind="text:title")
