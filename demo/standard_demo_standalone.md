@@ -4,7 +4,7 @@
 This demo describes how to use Steam without the need for a local running instance of YARN. This demo will walk through the following procedures:
 
 - Installing and starting Steam, the Compilation Service, and H2O
-- Building a simple model in Python
+- Building a simple model in Python (Optional for users who don't have an existing demo)
 - Deploying the model using Steam
 
 During this demo, three terminal windows will remain open for the Steam, Scoring, and H2O services. A fourth terminal window will be used to run H2O commands in a Python example. 
@@ -66,9 +66,10 @@ You are now ready to build a model on this cluster in Python.
 
 ## Building a Model in Python
 
+>**Note**: This section can be skipped if you already have demo steps that you use in R, Python, or Flow. If you use another demo, be sure that you initialize H2O on your local cluster so that the data will be available in Steam.
+
 The steps below show how to build model using the Iris dataset and the GBM algorithm. The steps will be run using H2O in Python. Once created, the model can be deployed in Steam. 
 
-These steps can be skipped if you already have demo steps that you use in R/Python/Flow. If you use another demo, be sure that you initialize H2O on your local cluster so that the data will be available in Steam.
 
 1. Open a terminal window. Change directories to the H2O folder, and start Python. Import the modules that will be used for this demo. 
 
@@ -145,6 +146,3 @@ Once created, the model will be visible in the Steam UI.
 	- 	Use the **Clear** buttons to clear all entries and begin a new prediction.
      
 	- You can view additional statistics about the scoring service by clicking the **More statistics at** link.
-    
-    
-
