@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func connect(t *testing.T) *Datastore {
+func connect(t *testing.T) (*Datastore, *az.Principal) {
 	db, err := Connect("steam", "steam", "disable")
 	if err != nil {
 		t.Error(err)
@@ -22,18 +22,22 @@ func connect(t *testing.T) *Datastore {
 		t.Error(err)
 	}
 
-	return ds
-}
-
-func TestPrivilegesForIdentity(t *testing.T) {
-	ds := connect(t)
-
-	su, err := ds.SetupSuperuser("Superuser", "")
+	su, err := ds.CreateSuperuser("Superuser", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	p := &az.Principal{su}
+
+	if err := ds.SetupSuperuser(p); err != nil {
+		t.Fatal(err)
+	}
+
+	return ds, p
+}
+
+func TestPrivilegesForIdentity(t *testing.T) {
+	ds, p := connect(t)
 
 	// Create user
 	uid, err := ds.CreateIdentity(p, "user", "password1")
@@ -51,15 +55,15 @@ func TestPrivilegesForIdentity(t *testing.T) {
 
 	// Make user own entity
 	ds.CreatePrivilege(p, Privilege{
-		OwnPrivilege,
-		IdentityPrivilege,
+		Owns,
+		ForIdentity,
 		uid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	privileges, err := ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,15 +76,15 @@ func TestPrivilegesForIdentity(t *testing.T) {
 
 	// Drop privileges
 	ds.DeletePrivilege(p, Privilege{
-		OwnPrivilege,
-		IdentityPrivilege,
+		Owns,
+		ForIdentity,
 		uid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,14 +98,7 @@ func TestPrivilegesForIdentity(t *testing.T) {
 }
 
 func TestPrivilegesForWorkgroup(t *testing.T) {
-	ds := connect(t)
-
-	su, err := ds.SetupSuperuser("Superuser", "")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := &az.Principal{su}
+	ds, p := connect(t)
 
 	// Create user
 	uid, err := ds.CreateIdentity(p, "user", "password1")
@@ -131,15 +128,15 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 
 	// Make group edit entity
 	ds.CreatePrivilege(p, Privilege{
-		EditPrivilege,
-		WorkgroupPrivilege,
+		CanEdit,
+		ForWorkgroup,
 		wgid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Read user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	privileges, err := ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,15 +149,15 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 
 	// Drop privileges
 	ds.DeletePrivilege(p, Privilege{
-		EditPrivilege,
-		WorkgroupPrivilege,
+		CanEdit,
+		ForWorkgroup,
 		wgid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Read user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,14 +170,7 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 }
 
 func TestPrivilegeCollationForIdentity(t *testing.T) {
-	ds := connect(t)
-
-	su, err := ds.SetupSuperuser("Superuser", "")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := &az.Principal{su}
+	ds, p := connect(t)
 
 	// Create user
 	uid, err := ds.CreateIdentity(p, "user", "password1")
@@ -210,24 +200,24 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 
 	// Make user own entity
 	ds.CreatePrivilege(p, Privilege{
-		OwnPrivilege,
-		IdentityPrivilege,
+		Owns,
+		ForIdentity,
 		uid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Make group edit entity
 	ds.CreatePrivilege(p, Privilege{
-		EditPrivilege,
-		WorkgroupPrivilege,
+		CanEdit,
+		ForWorkgroup,
 		wgid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	privileges, err := ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -240,15 +230,15 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 
 	// Drop group privileges
 	ds.DeletePrivilege(p, Privilege{
-		EditPrivilege,
-		WorkgroupPrivilege,
+		CanEdit,
+		ForWorkgroup,
 		wgid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,15 +251,15 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 
 	// Drop user's privileges
 	ds.DeletePrivilege(p, Privilege{
-		OwnPrivilege,
-		IdentityPrivilege,
+		Owns,
+		ForIdentity,
 		uid,
-		ds.Keys.Workgroup,
+		ds.On.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.Keys.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -282,14 +272,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 }
 
 func TestSecurity(t *testing.T) {
-	ds := connect(t)
-
-	su, err := ds.SetupSuperuser("Superuser", "")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := &az.Principal{su}
+	ds, p := connect(t)
 
 	// read permissions
 	permissions, err := ds.ReadAllPermissions(p)
@@ -334,6 +317,10 @@ func TestSecurity(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(roles)
+
+	if len(roles) == 0 {
+		t.Fatal("expected > 0 roles")
+	}
 
 	for _, role := range roles {
 		if role.Name == "Superuser" {
