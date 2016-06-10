@@ -66,18 +66,6 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 SET search_path = public, pg_catalog;
 
 --
--- Name: identity_type; Type: TYPE; Schema: public; Owner: steam
---
-
-CREATE TYPE identity_type AS ENUM (
-    'identity',
-    'workgroup'
-);
-
-
-ALTER TYPE identity_type OWNER TO steam;
-
---
 -- Name: privilege_type; Type: TYPE; Schema: public; Owner: steam
 --
 
@@ -89,6 +77,18 @@ CREATE TYPE privilege_type AS ENUM (
 
 
 ALTER TYPE privilege_type OWNER TO steam;
+
+--
+-- Name: workgroup_type; Type: TYPE; Schema: public; Owner: steam
+--
+
+CREATE TYPE workgroup_type AS ENUM (
+    'identity',
+    'workgroup'
+);
+
+
+ALTER TYPE workgroup_type OWNER TO steam;
 
 SET default_tablespace = '';
 
@@ -239,7 +239,8 @@ CREATE TABLE identity (
     password text NOT NULL,
     is_active boolean NOT NULL,
     last_login timestamp with time zone,
-    created timestamp with time zone NOT NULL
+    created timestamp with time zone NOT NULL,
+    workgroup_id integer NOT NULL
 );
 
 
@@ -396,8 +397,7 @@ ALTER SEQUENCE permission_id_seq OWNED BY permission.id;
 
 CREATE TABLE privilege (
     privilege_type privilege_type NOT NULL,
-    identity_type identity_type NOT NULL,
-    identity_id integer NOT NULL,
+    workgroup_id integer NOT NULL,
     entity_type_id integer NOT NULL,
     entity_id integer NOT NULL
 );
@@ -490,6 +490,7 @@ ALTER SEQUENCE service_id_seq OWNED BY service.id;
 
 CREATE TABLE workgroup (
     id integer NOT NULL,
+    type workgroup_type NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
     created timestamp with time zone NOT NULL
@@ -681,7 +682,7 @@ ALTER TABLE ONLY permission
 --
 
 ALTER TABLE ONLY privilege
-    ADD CONSTRAINT pk_privilege PRIMARY KEY (entity_id, identity_id, entity_type_id, identity_type, privilege_type);
+    ADD CONSTRAINT pk_privilege PRIMARY KEY (privilege_type, workgroup_id, entity_type_id, entity_id);
 
 
 --
@@ -800,6 +801,13 @@ CREATE INDEX fki_privilege__entity_type_id ON privilege USING btree (entity_type
 
 
 --
+-- Name: fki_privilege__workgroup_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_privilege__workgroup_id ON privilege USING btree (workgroup_id);
+
+
+--
 -- Name: fki_role_permission__permission_id; Type: INDEX; Schema: public; Owner: steam
 --
 
@@ -811,6 +819,13 @@ CREATE INDEX fki_role_permission__permission_id ON role_permission USING btree (
 --
 
 CREATE INDEX fki_role_permission__role_id ON role_permission USING btree (role_id);
+
+
+--
+-- Name: fki_workgroup_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_workgroup_id ON identity USING btree (workgroup_id);
 
 
 --
@@ -854,6 +869,14 @@ ALTER TABLE ONLY privilege
 
 
 --
+-- Name: fk_privilege__workgroup_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY privilege
+    ADD CONSTRAINT fk_privilege__workgroup_id FOREIGN KEY (workgroup_id) REFERENCES workgroup(id);
+
+
+--
 -- Name: fk_role_permission__permission_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -870,10 +893,19 @@ ALTER TABLE ONLY role_permission
 
 
 --
+-- Name: fk_workgroup_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY identity
+    ADD CONSTRAINT fk_workgroup_id FOREIGN KEY (workgroup_id) REFERENCES workgroup(id);
+
+
+--
 -- Name: public; Type: ACL; Schema: -; Owner: steam
 --
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM steam;
 GRANT ALL ON SCHEMA public TO steam;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
