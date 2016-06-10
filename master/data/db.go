@@ -10,6 +10,51 @@ import (
 	"strconv"
 )
 
+//
+// -----  Privilege / Sharing rules -----
+//
+// --------------------------------------
+// Entity               Own  Edit View
+// --------------------------------------
+// Role
+//   Read               x    x    x
+//   Update             x
+//   Assign Permission  x
+//   Delete             x
+//   Share              x
+//
+// Workgroup
+//   Read               x    x    x
+//   Update             x
+//   Delete             x
+//   Share              x
+//
+// Identity
+//   Read               x    x    x
+//   Assign Role        x
+//   Assign Workgroup   x
+//   Update             x
+//   Delete             x
+//   Share              x
+//
+// Cluster
+//   Read               x    x    x
+//
+// Project
+//   Read               x    x    x
+//   Assign Model       x    x
+//   Update             x    x
+//   Delete             x
+//   Share              x
+//
+// Model
+//   Read               x    x    x
+//   Update             x    x
+//   Delete             x
+//   Share              x
+//
+// --------------------------------------
+
 const (
 	View = 1 << iota
 	Edit // 2
