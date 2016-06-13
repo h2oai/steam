@@ -4,6 +4,10 @@
 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
     <servlet>
+        <servlet-name>Ping</servlet-name>
+        <servlet-class>ai.h2o.servicebuilder.PingServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>CompilePojo</servlet-name>
         <servlet-class>ai.h2o.servicebuilder.CompilePojoServlet</servlet-class>
     </servlet>
@@ -16,6 +20,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         <servlet-class>ai.h2o.servicebuilder.MakePythonWarServlet</servlet-class>
     </servlet>
 
+    <servlet-mapping>
+        <servlet-name>Ping</servlet-name>
+        <url-pattern>/ping</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CompilePojo</servlet-name>
         <url-pattern>/compile</url-pattern>

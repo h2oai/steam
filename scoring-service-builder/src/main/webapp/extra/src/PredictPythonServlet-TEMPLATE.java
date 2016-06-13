@@ -42,29 +42,33 @@ public class PredictPythonServlet extends HttpServlet {
 
       colNames = rawModel.getNames();
 
-      String program = servletPath.getAbsolutePath() + "/WEB-INF/python.py";
-      if (VERBOSE) System.out.println(program);
-      // start the python process
-      try {
-        // score.py
-        pb = new ProcessBuilder("python", program);
-        File pythonProcessDir = new File(servletPath, "/WEB-INF");
-        pb.directory(pythonProcessDir);
-        p = pb.start();
-        stdin = p.getOutputStream();
-        InputStream stdout = p.getInputStream();
-        InputStream stderr = p.getErrorStream();
-        reader = new BufferedReader(new InputStreamReader(stdout));
-        err_reader = new BufferedReader(new InputStreamReader(stderr));
-        System.out.println("Python started");
-      } catch (Exception ex) {
-        System.out.println("Python failed");
-        ex.printStackTrace();
-      }
-
+      startPython();
     }
-    catch (MalformedURLException e) {
+    catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  private void startPython() throws Exception {
+    String program = servletPath.getAbsolutePath() + "/WEB-INF/python.py";
+    if (VERBOSE) System.out.println(program);
+    // start the python process
+    try {
+      // score.py
+      pb = new ProcessBuilder("python", program);
+      File pythonProcessDir = new File(servletPath, "/WEB-INF");
+      pb.directory(pythonProcessDir);
+      p = pb.start();
+      stdin = p.getOutputStream();
+      InputStream stdout = p.getInputStream();
+      InputStream stderr = p.getErrorStream();
+      reader = new BufferedReader(new InputStreamReader(stdout));
+      err_reader = new BufferedReader(new InputStreamReader(stderr));
+      System.out.println("Python started");
+    } catch (Exception ex) {
+      System.out.println("Python failed");
+      ex.printStackTrace();
+      throw new Exception("Python failed");
     }
   }
 
@@ -88,10 +92,30 @@ public class PredictPythonServlet extends HttpServlet {
     String result = null;
 
     try {
-      stdin.write(queryString.getBytes());
-      stdin.write(NewlineByteArray);
-      stdin.flush();
-      result = reader.readLine();
+      // restart if python failed
+      if (p == null)
+        startPython();
+//      else if (stdin == null || stdin.|| !reader.ready() || !err_reader.ready()) {
+//        p.destroy();
+//        startPython();
+//      }
+      // send to python
+      try {
+        stdin.write(queryString.getBytes());
+        stdin.write(NewlineByteArray);
+        stdin.flush();
+        result = reader.readLine();
+      }
+      catch (IOException e) {
+        System.out.println("IOException in sendPython restarting python");
+        // it failed so we restart it and retry
+        if (p != null) p.destroy();
+        startPython();
+        stdin.write(queryString.getBytes());
+        stdin.write(NewlineByteArray);
+        stdin.flush();
+        result = reader.readLine();
+      }
 //        showStderr();
     }
     catch (Exception ex) {
@@ -115,9 +139,10 @@ public class PredictPythonServlet extends HttpServlet {
 
       // should now be in sparse format from python
       RowData row = sparseToRowData(colNames, result);
-      if (VERBOSE) System.out.println("row " + row);
+      if (VERBOSE) System.out.println("row: " + row);
 
       AbstractPrediction pr = PredictServlet.predict(row);
+      if (VERBOSE) System.out.println("pr: " + pr);
 
       // assemble json result
       Gson gson = new Gson();
@@ -150,12 +175,20 @@ public class PredictPythonServlet extends HttpServlet {
 
   private RowData sparseToRowData(String[] colNames, String result) throws Exception {
     RowData row = new RowData();
+    if (result == null || result.length() == 0)
+      return row;
     String[] pairs = result.split(" ");
-    for (String p : pairs) {
-      String[] a = p.split(":");
-      int index = Integer.parseInt(a[0]);
-      double value = Float.parseFloat(a[1]);
-      row.put(colNames[index], value);
+    try {
+      for (String p : pairs) {
+        String[] a = p.split(":");
+        int index = Integer.parseInt(a[0]);
+        double value = Float.parseFloat(a[1]);
+        row.put(colNames[index], value);
+      }
+    }
+    catch (NumberFormatException e) {
+//      throw new Exception("Failed to parse " + result);
+      System.out.println("Failed to parse " + result);
     }
     return row;
   }
@@ -187,21 +220,37 @@ public class PredictPythonServlet extends HttpServlet {
       if (model == null)
         throw new Exception("No predictor model");
 
+      System.out.println(request);
+
       BufferedReader r = request.getReader();
-      StringBuilder sb = new StringBuilder();
       String line = r.readLine();
       r.close();
-      String result = sendPython(line);
-      if (VERBOSE) System.out.println("result " + result);
+      if (VERBOSE) System.out.println("to python: " + line);
 
+      String result = "";
+      if (line == null) {
+        line = "";
+//        throw new Exception("null input to python");
+        System.out.println("null input to python");
+      }
+      else {
+        result = sendPython(line);
+        if (VERBOSE) System.out.println("from python: " + result);
+        if (result == null) {
+//        throw new Exception("null result from python");
+          System.out.println("null result from python");
+        }
+      }
       // should now be in sparse format from python
       RowData row = sparseToRowData(colNames, result);
+      if (VERBOSE) System.out.println("row: " + row);
 
       // do the prediction
       AbstractPrediction pr = PredictServlet.predict(row);
 
       // assemble json result
       String prJson = gson.toJson(pr);
+      if (VERBOSE) System.out.println("prJson: " + prJson);
 
       // Emit the prediction to the servlet response.
       response.getWriter().write(prJson);
@@ -210,6 +259,7 @@ public class PredictPythonServlet extends HttpServlet {
     catch (Exception e) {
       // Prediction failed.
       System.out.println(e.getMessage());
+      e.printStackTrace();
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
     long done = System.nanoTime();

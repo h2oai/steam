@@ -4,7 +4,7 @@
 This demo describes how to use Steam without the need for a local running instance of YARN. This demo will walk through the following procedures:
 
 - Installing and starting Steam, the Compilation Service, and H2O
-- Building a simple model in Python
+- Building a simple model in Python (Optional for users who don't have an existing demo)
 - Deploying the model using Steam
 
 During this demo, three terminal windows will remain open for the Steam, Scoring, and H2O services. A fourth terminal window will be used to run H2O commands in a Python example. 
@@ -14,14 +14,22 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 ## Requirements
 
 - Web browser with an Internet connection
+- s3cmd
+	- available from <a href="http://s3tools.org/s3cmd" target="_blank">s3tools.org</a>
+	- Requires AWS credentials
 - JDK 1.7 or greater
 - Steam binary for Linux or OS X 
 	- `s3cmd get s3://steam-release/steamY-master-linux-amd64.tar.gz`
 	- `s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz`
 - H2O jar file
-	- available from the <a href="http://h2o-release.s3.amazonaws.com/h2o/rel-turchin/8/index.html"> H2O Download</a> page
+	- available from the <a href="http://h2o-release.s3.amazonaws.com/h2o/rel-turchin/8/index.html" target="_blank">H2O Download</a> page
+
+###Optional
+
+The following are required if you use the Python demo included in this document. 
+
 - A dataset that will be used to generate a model. This demo uses the well-known iris.csv dataset, and the dataset is saved onto the desktop. 
-- Python 2.7 (for building the model)
+- Python 2.7
 
 ## Installing and Starting Steam, the Compilation Service, and H2O
 
@@ -38,12 +46,12 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 		user$ cd steam-master-darwin-amd64
 		user$ java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 		
-4. Open another terminal window. Navigate to the Steam folder and start Steam. Replace the IP address with the IP address of your local machine.
+4. Open another terminal window. Navigate to the Steam folder and start the Steam compilation service and scoring service.
 
 		user$ cd steam-master-darwin-amd64/
-		user$ ./steam serve master --compilation-service-address=192.16.2.119:8080 --scoring-service-address=192.16.2.119
+		user$ ./steam serve master
 
-	>***Note***: Use `./steam help serve master` or `./steam serve master -h` to view additional options
+	>***Note***: This starts the compilation service on `localhost:8080` and the scoring service on `localhost`. You can change these using `--compilation-service-address=<ip_address:port>` and `--scoring-service-address=<ip_address>`. Use `./steam help serve master` or `./steam serve master -h` to view additional options.
 
 5. Open another terminal window. Navigate to the folder with your H2O jar file and start H2O. This will create a one-node cluster on your local machine.
 
@@ -56,7 +64,7 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 		06-07 15:36:36.642 192.16.2.119:54321    15931  main      INFO: Cloud of size 1 formed [/192.16.2.119:54321] 
 		...
 
-6. Point you browser to the Steam url, for example, http://192.16.2.119:9000/.
+6. Point you browser to the Steam URL, for example, http://localhost:9000/.
  
 7. In left pane, select the **Clusters** tab, then click the **Connect To Cluster** button to setup Steam with H2O. Specify the IP address and port of the cluster currently running H2O (for example, 192.16.2.119:54321), then click **Register Cluster**. 
 
@@ -64,11 +72,12 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 
 You are now ready to build a model on this cluster in Python. 
 
-## Building a Model in Python
+## Building a Model in Python (Optional)
+
+>**Note**: This section can be skipped if you already have demo steps that you use in R, Python, or Flow. If you use another demo, be sure that you initialize H2O on your local cluster so that the data will be available in Steam.
 
 The steps below show how to build model using the Iris dataset and the GBM algorithm. The steps will be run using H2O in Python. Once created, the model can be deployed in Steam. 
 
-These steps can be skipped if you already have demo steps that you use in R/Python/Flow. If you use another demo, be sure that you initialize H2O on your local cluster so that the data will be available in Steam.
 
 1. Open a terminal window. Change directories to the H2O folder, and start Python. Import the modules that will be used for this demo. 
 
@@ -77,9 +86,9 @@ These steps can be skipped if you already have demo steps that you use in R/Pyth
 		>>> import h2o
 		>>> from h2o.estimators.gbm import H2OGradientBoostingEstimator
 
-2. Initialize H2O using your local IP address and port. 
+2. Initialize H2O using localhost and port 54321. (Note that if started Steam on a different machine, then replace `localhost` with the IP address of that machine.)
 
-		>>> h2o.init(ip=“192.16.2.119”, port=54321)
+		>>> h2o.init(ip=“localhost”, port=54321)
 		------------------------------  -------------------------------------
 		H2O cluster uptime:             2 minutes 37 seconds 168 milliseconds
 		H2O cluster version:            3.8.2.8
@@ -89,7 +98,7 @@ These steps can be skipped if you already have demo steps that you use in R/Pyth
 		H2O cluster total cores:        8
 		H2O cluster allowed cores:      8
 		H2O cluster healthy:            True
-		H2O Connection ip:              192.16.2.119
+		H2O Connection ip:              127.0.0.1
 		H2O Connection port:            54321
 		H2O Connection proxy:
 		Python Version:                 2.7.9
@@ -112,6 +121,7 @@ These steps can be skipped if you already have demo steps that you use in R/Pyth
 		>>> gbm_regressor
 
 Once created, the model will be visible in the Steam UI. 
+Also note that for backward 
 
 ## Deploying a Model in Steam
 
@@ -120,6 +130,7 @@ Once created, the model will be visible in the Steam UI.
   ![](images/import_model.png)
 
 2. Select the **Models** tab in the left pane. You should see the model that you just imported. Select this model, and then click **Deploy This Model** to create scoring services for the model.
+ 
 
 	![](images/deploy_model.png)
 
@@ -134,17 +145,14 @@ Once created, the model will be visible in the Steam UI.
 6. Make predictions using one of the following methods:
     
     - Specify input values based on column data from the original dataset, and then press the first **Predict** button.
-    - Enter a query string using the format `field1=value1&field2=value2` (for example, `C2=2.5&C3=3.4`), and then press the second **Predict** button.
+    - Enter a query string using the format `field1=value1&field2=value2` (for example, `sepal_width=3&petal_len=5`), and then press the second **Predict** button.
     
     ![](images/prediction_service.png)
     
     >***Notes***:
     
-	- Click the **URL** link below a prediction result. The predict variables will display in the URL (for example, http://192.16.2.119:8000/predict?C2=2.5&C3=3.4) 
+	- Click the **URL** link below a prediction result. The predict variables will display in the URL (for example, `http://172.16.2.119:8000/?p=petal_len%3D5%26sepal_wid%3D3predict?sepal_wid=3&petal_len=5`) 
 
 	- 	Use the **Clear** buttons to clear all entries and begin a new prediction.
      
 	- You can view additional statistics about the scoring service by clicking the **More statistics at** link.
-    
-    
-

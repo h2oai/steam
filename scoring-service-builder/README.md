@@ -50,7 +50,6 @@ There is also a web page for the predictor at http://localhost:55001 .
 ![Example service](example_service.png)
 
 
-
 ### Using Get
 
 You can send a Get request with the input variables as the query string.
