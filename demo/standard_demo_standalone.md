@@ -41,10 +41,12 @@ The following are required if you use the Python demo included in this document.
 
 	`user$ tar xvf steamY-master-darwin-amd64.tar.gz`
 
-3. Change directories to your Steam directory, and start the compilation service.
+3. Change directories to your Steam directory, and start the Jetty server.
 
 		user$ cd steam-master-darwin-amd64
 		user$ java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+		
+	>***Note***: The Jetty server defaults to port 8080. You can optionally provide a `--port` value for **jetty-runner.jar**.
 		
 4. Open another terminal window. Navigate to the Steam folder and start the Steam compilation service and scoring service.
 
@@ -58,12 +60,6 @@ The following are required if you use the Python demo included in this document.
 		user$ cd ~/Downloads/h2o-3.8.2.8
 		user$ java -jar h2o.jar 
 		
-	Note the IP address and port in the output. You will enter this information in Steam when connecting to your local cluster. For example:
-	
-		...
-		06-07 15:36:36.642 192.16.2.119:54321    15931  main      INFO: Cloud of size 1 formed [/192.16.2.119:54321] 
-		...
-
 6. Point you browser to the Steam URL, for example, http://localhost:9000/.
  
 7. In left pane, select the **Clusters** tab, then click the **Connect To Cluster** button to setup Steam with H2O. Specify the IP address and port of the cluster currently running H2O (for example, 192.16.2.119:54321), then click **Register Cluster**. 
