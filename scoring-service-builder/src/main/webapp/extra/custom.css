@@ -119,6 +119,18 @@ fieldset legend{
 	box-shadow: none;
 }
 
+
+
+input[type="radio"]{
+	margin-left: 1em;
+	margin-right: 0.5em;
+
+}
+
+.form-group{
+	vertical-align: bottom;
+}
+
 .form-control-label {
 	font-weight: 600;
 }
@@ -153,10 +165,10 @@ fieldset legend{
 	border-color: rgba(36, 67, 90, 0.8);
 }
 
-
 .btnContainer{
 	padding-left: 2em;
 }
+
 
 .form-control{
 	font-weight: normal;
@@ -176,6 +188,10 @@ fieldset legend{
 	background-color: transparent;
 }
 
-.noBorders > tbody > tr > td {
+table.noBorders > tbody > tr > td {
 	border: none;
+}
+
+.hcell {
+	font-weight: bold;
 }

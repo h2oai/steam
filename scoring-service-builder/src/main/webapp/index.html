@@ -116,7 +116,7 @@
         $('#upload').click(function(){
 
             // IF POJO/JAR, gives error
-            if ( !$('input[name="pojo"]').val() || !$('input[name="jar"]').val()){
+            if ( !$('#java form input[name="pojo"]').val() || !$('#java form input[name="jar"]').val()){
                alert('You must select at least a POJO file, and a JAR to make a WAR service. Python files are optional though.');
             } 
             // ELSE IF there are some python files, do a python make war

@@ -19,7 +19,8 @@
     <script src="jquery.js" ></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
 
-    <script src="data.js" type="text/javascript" charset="utf-8" async></script>
+    <script src="predict.js"></script>
+
   </head>
  
   <body>
@@ -35,47 +36,83 @@
 
         <section id="inputParams" class="col-md-6 col-sm-12">
           <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Model input parameters</header>
-          <form autocomplete="off">
+
+              <form autocomplete="off" id="allparams">
+
+                 <fieldset id="fs-params" class="form-group">
+                 </fieldset>
+
+                <fieldset>
+                <legend>Query String</legend>
+                  <div class="form-group">The parameters above gets automatically built into a REST API query strong. You can also input your own string if that's easier for you.</div>
+                  <div class="form-group">
+                    <label class="sr-only"></label>
+                    <div class="input-group">
+                      <div id="url-prefix" class="input-group-addon"></div>
+                      <input type="text" class="form-control" id="queryParams" name="p">
+                    </div>
+                  </div>
+              </fieldset>
+
+                 <div class="btnContainer">
+                    <input id="predict-btn" type="button" class="btn btn-primary" name="okbutton" value="PREDICT" onClick="runpred2(this.form)">
+
+                    <input id="reset-btn" type="reset" class="btn btn-default" value="CLEAR">
+                </div>
+
+              </form>
+
+    <!--       <form autocomplete="off" id="allparams">
               <fieldset class="form-group">
                 <legend>Parameters</legend>
+
                 <div class="form-group row">
                   <label for="distance" class="col-sm-6 form-control-label">Distance</label>
                   <div class="col-sm-6">
-                    <input type="text" class="form-control" id="input" placeholder="0-2000">
+                    <input type="text" class="form-control" id="input" name="distance">
                   </div>
                 </div>
 
-                <NumericInput id="distance" name="Distance"/>
+                <div class="form-group row">
+                  <label for="myname" class="col-sm-6 form-control-label">Month</label>
+                  <div class="col-sm-6">
+                     <input type="radio" name="myname" value="c-1" >c-1</input>
+                     <input type="radio" name="myname" value="c-2" >c-2</input>
+                     <input type="radio" name="myname" value="c-3" >c-3</input>
+                  </div>
+                </div>
 
                 <div class="form-group row">
-                  <label for="month" class="col-sm-6 form-control-label">Month</label>
+                  <label for="selectgroup" class="col-sm-6 form-control-label">Month</label>
                   <div class="col-sm-6">
-                     <select id="select" class="form-control">
+                     <select name="selectgroup" id="select" class="form-control">
                         <option>c-1</option>
                         <option>c-2</option>
                         <option>c-3</option>
                       </select>
                   </div>
                 </div>
+              
+
               </fieldset>
 
               <fieldset>
                 <legend>Query String</legend>
                 <div class="form-group">The parameters above gets automatically built into a REST API query strong. You can also input your own string if that's easier for you.</div>
                 <div class="form-group">
-                  <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
+                  <label class="sr-only"></label>
                   <div class="input-group">
-                    <div class="input-group-addon">http://localhost:8080?</div>
-                    <input type="text" class="form-control" id="exampleInputAmount" placeholder="Month=c1">
+                    <div class="input-group-addon">http://localhost:55001?</div>
+                    <input type="text" class="form-control" id="queryParams" name="p">
                   </div>
                 </div>
               </fieldset>
 
               <div class="btnContainer">
-                <input class="btn btn-primary" type="submit" value="Upload"></input>
-                <input class="btn btn-default" type="reset"></input>
+                <input id="upload-btn" class="btn btn-primary" value="Upload"></input>
+                <input id="reset-btn" class="btn btn-default" type="reset"></input>
               </div>
-          </form>
+          </form> -->
           
         </section>
 
@@ -84,8 +121,8 @@
         </section>
         <section id="results" class="col-md-4 col-sm-12">
           <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
-          <fieldset>
-            <legend>Model Predictions</legend>
+          <fieldset id="modelPredictions">
+<!--             <legend>Model Predictions</legend>
             <table class="table noBorders">
               <tbody>
                 <tr>
@@ -111,10 +148,10 @@
                   <td>0.004014809</td>
                 </tr>
               </tbody>
-            </table>
+            </table> -->
           </fieldset>
-          <fieldset>
-            <legend>Model Runtime Stats</legend>
+          <fieldset id="modelStats">
+ <!--            <legend>Model Runtime Stats</legend>
             <table class="table noBorders">
               <tbody>
                 <tr>
@@ -130,14 +167,14 @@
                   <td>0.122258 ms</td>
                 </tr>                            
               </tbody>
-            </table>
+            </table> -->
           </fieldset>
           <div class="btnContainer">
-            <button class="btn btn-primary" type="submit">More stats</button>
+            <button id="stats-btn" class="btn btn-primary" type="submit">More stats</button>
           </div>
         </section>
         
       </main>
- 
+
   </body>
 </html>

@@ -105,6 +105,7 @@ public class MakeWarServlet extends HttpServlet {
       copyExtraFile(servletPath, extraPath, tmpDir, "index.html", "index.html");
       copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
+      copyExtraFile(servletPath, extraPath, tmpDir, "custom.css", "custom.css");
       copyExtraFile(servletPath, webInfPath, webInfDir, "web-predict.xml", "web.xml");
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
 
@@ -124,6 +125,8 @@ public class MakeWarServlet extends HttpServlet {
       filesc.add(new File(tmpDir, "index.html"));
       filesc.add(new File(tmpDir, "jquery.js"));
       filesc.add(new File(tmpDir, "predict.js"));
+      filesc.add(new File(tmpDir, "custom.css"));
+
       File[] files = filesc.toArray(new File[]{});
       if (files.length == 0)
         throw new Exception("Can't list compiler output files (out)");
