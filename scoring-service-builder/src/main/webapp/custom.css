@@ -160,12 +160,16 @@ form {
 	margin-right: 1em;
 }
 
-.input-inline-row{
-	display: inline-flex;
+.input-inline-row {
+	display: flex;
+	flex-direction: row;
 	padding: 0.5em 0;
 	vertical-align: middle;
 }
 
+.input-inline-row .file-input-div{
+	flex-grow: 1;
+}
 
 .input-inline-row input[type="text"]{
 	padding-left: 0;
