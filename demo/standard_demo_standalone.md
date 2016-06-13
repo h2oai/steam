@@ -62,11 +62,13 @@ The following are required if you use the Python demo included in this document.
 		
 6. Point you browser to the Steam URL, for example, http://localhost:9000/.
  
-7. In left pane, select the **Clusters** tab, then click the **Connect To Cluster** button to setup Steam with H2O. Specify the IP address and port of the cluster currently running H2O (for example, 192.16.2.119:54321), then click **Register Cluster**. 
+7. In left pane, select the **Clusters** tab, then click the **Connect To Cluster** button to setup Steam with H2O. Specify the IP address and port of the cluster currently running H2O (for example, localhost:54321), then click **Register Cluster**. 
 
 	![](images/register_cluster.png)
 
 You are now ready to build a model on this cluster in Python. 
+
+>***Note***: After you connect to a cluster, you can click the **Address** link on the Cluster Details page to launch H2O Flow. 
 
 ## Building a Model in Python (Optional)
 
@@ -147,7 +149,7 @@ Also note that for backward
     
     >***Notes***:
     
-	- Click the **URL** link below a prediction result. The predict variables will display in the URL (for example, `http://172.16.2.119:8000/?p=petal_len%3D5%26sepal_wid%3D3predict?sepal_wid=3&petal_len=5`) 
+	- Click the **URL** link below a prediction result. The predict variables will display in the URL (for example, `http://192.16.2.119:8000/?p=petal_len%3D5%26sepal_wid%3D3predict?sepal_wid=3&petal_len=5`) 
 
 	- 	Use the **Clear** buttons to clear all entries and begin a new prediction.
      
