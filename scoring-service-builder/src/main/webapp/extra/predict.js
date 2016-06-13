@@ -69,10 +69,10 @@ function showModel(model, element) {
     form += ' <input type="reset" value="CLEAR">';
 
     form += '</form>';
-    element.innerHTML += form;
 
-    form += '<p>';
-
+    if (element != null) {
+        element.innerHTML += form;
+    }
 }
 
 function showInputParameters() {
@@ -109,7 +109,6 @@ function showResult(div, status, data) {
 
     result += "<p><code>" + JSON.stringify(data) + "</code>";
     div.innerHTML = result;
-    showStatistics();
 }
 
 function showUrl(pardiv, params) {
@@ -117,6 +116,13 @@ function showUrl(pardiv, params) {
   params = params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
   url = window.location.href + "predict?" + params;
   pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
+}
+
+function showCurl(pardiv, params) {
+  // remove empty parameters returned by serialize.
+  params = params.replace(/'/g, "\\'") // quote quotes
+  url = window.location.href + "pypredict";
+  pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
 }
 
 function predResults(params) {
@@ -134,17 +140,44 @@ function predResults(params) {
         div.innerHTML = down + "<br>status " + data.status + " statusText " + data.statusText;
         stats = document.querySelector(".stats");
         stats.innerHTML = down;
+        pardiv.innerHTML = "";
       });
 
 }
 
 function runpred(form) {
   predResults(form.p.value);
+  showStatistics();
 }
 
 function runpred2(form) {
   predResults($('#allparams').serialize());
+  showStatistics();
 }
+
+function predResultsPost(params) {
+  pardiv = document.querySelector(".curl");
+  showCurl(pardiv, params);
+
+  div = document.querySelector(".results");
+  cmd = '/pypredict';
+    $.post(cmd, params, function(data, status) {
+      showResult(div, status, data);
+    },'json')
+      .fail(function(data, status, error) {
+        down = "<b>POST to /pypredict Failed</b>";
+        div.innerHTML = down + "<br>status " + data.status + "<br>statusText " + data.statusText;
+        stats = document.querySelector(".stats");
+        stats.innerHTML = down;
+      });
+
+}
+
+function runpredpost(form) {
+  predResultsPost(form.p.value);
+  showStatistics();
+}
+
 
 function duration(days) {
   r = days;

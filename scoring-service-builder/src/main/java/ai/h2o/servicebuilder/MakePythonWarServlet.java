@@ -113,7 +113,7 @@ public class MakePythonWarServlet extends HttpServlet {
       String extraPath = "extra" + File.separator;
       String webInfPath = extraPath + File.separator + "WEB-INF" + File.separator;
       String srcPath = extraPath + "src" + File.separator;
-      copyExtraFile(servletPath, extraPath, tmpDir, "index.html", "index.html");
+      copyExtraFile(servletPath, extraPath, tmpDir, "pyindex.html", "index.html");
       copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
       copyExtraFile(servletPath, webInfPath, webInfDir, "web-pythonpredict.xml", "web.xml");

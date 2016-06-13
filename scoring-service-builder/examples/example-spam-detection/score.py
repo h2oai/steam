@@ -22,6 +22,20 @@ def split_into_lemmas(message):
 
 def score1(vectorizer, message):
     v = vectorizer.transform([message])
+    # nz = v.nonzero()[1]
+    # dat = v.data
+    # r = ""
+    # i = 0
+    # len = nz.size
+    # while i < len:
+    #     index = nz[i]
+    #     value = dat[i]
+    #     r += repr(index) + ":" + repr(value) + " "
+    #     i += 1
+    # return r
+    return sparsify(v)
+
+def sparsify(v):
     nz = v.nonzero()[1]
     dat = v.data
     r = ""
@@ -30,7 +44,7 @@ def score1(vectorizer, message):
     while i < len:
         index = nz[i]
         value = dat[i]
-        r += repr(index) + ":" + repr(value) + " "
+        r += repr(index) + ":" + repr(round(value, 6)) + " "
         i += 1
     return r
 
