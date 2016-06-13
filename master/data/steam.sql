@@ -237,10 +237,10 @@ CREATE TABLE identity (
     id integer NOT NULL,
     name text NOT NULL,
     password text NOT NULL,
+    workgroup_id integer NOT NULL,
     is_active boolean NOT NULL,
     last_login timestamp with time zone,
-    created timestamp with time zone NOT NULL,
-    workgroup_id integer NOT NULL
+    created timestamp with time zone NOT NULL
 );
 
 

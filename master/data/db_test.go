@@ -22,12 +22,12 @@ func connect(t *testing.T) (*Datastore, *az.Principal) {
 		t.Error(err)
 	}
 
-	su, err := ds.CreateSuperuser("Superuser", "")
+	uid, wgid, err := ds.CreateSuperuser("Superuser", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := &az.Principal{su}
+	p := &az.Principal{uid, wgid}
 
 	if err := ds.SetupSuperuser(p); err != nil {
 		t.Fatal(err)
@@ -40,7 +40,7 @@ func TestPrivilegesForIdentity(t *testing.T) {
 	ds, p := connect(t)
 
 	// Create user
-	uid, err := ds.CreateIdentity(p, "user", "password1")
+	uid, uwgid, err := ds.CreateIdentity(p, "user", "password1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,8 +56,7 @@ func TestPrivilegesForIdentity(t *testing.T) {
 	// Make user own entity
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
-		ForIdentity,
-		uid,
+		uwgid,
 		ds.On.Workgroup,
 		eid,
 	}); err != nil {
@@ -79,8 +78,7 @@ func TestPrivilegesForIdentity(t *testing.T) {
 	// Drop privileges
 	ds.DeletePrivilege(p, Privilege{
 		Owns,
-		ForIdentity,
-		uid,
+		uwgid,
 		ds.On.Workgroup,
 		eid,
 	})
@@ -103,7 +101,7 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 	ds, p := connect(t)
 
 	// Create user
-	uid, err := ds.CreateIdentity(p, "user", "password1")
+	uid, _, err := ds.CreateIdentity(p, "user", "password1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +115,7 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 	t.Log(wgid)
 
 	// Add user to group
-	if err := ds.LinkIdentityToWorkgroup(p, uid, wgid); err != nil {
+	if err := ds.LinkIdentityAndWorkgroup(p, uid, wgid); err != nil {
 		t.Fatal(err)
 	}
 
@@ -131,7 +129,6 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 	// Make group edit entity
 	if err := ds.CreatePrivilege(p, Privilege{
 		CanEdit,
-		ForWorkgroup,
 		wgid,
 		ds.On.Workgroup,
 		eid,
@@ -151,10 +148,9 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 		t.Fatal("wrong privilege")
 	}
 
-	// Drop privileges
+	// Drop group's privileges
 	ds.DeletePrivilege(p, Privilege{
 		CanEdit,
-		ForWorkgroup,
 		wgid,
 		ds.On.Workgroup,
 		eid,
@@ -177,7 +173,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	ds, p := connect(t)
 
 	// Create user
-	uid, err := ds.CreateIdentity(p, "user", "password1")
+	uid, uwgid, err := ds.CreateIdentity(p, "user", "password1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +187,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	t.Log(wgid)
 
 	// Add user to group
-	if err := ds.LinkIdentityToWorkgroup(p, uid, wgid); err != nil {
+	if err := ds.LinkIdentityAndWorkgroup(p, uid, wgid); err != nil {
 		t.Fatal(err)
 	}
 
@@ -205,8 +201,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	// Make user own entity
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
-		ForIdentity,
-		uid,
+		uwgid,
 		ds.On.Workgroup,
 		eid,
 	}); err != nil {
@@ -216,7 +211,6 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	// Make group edit entity
 	if err := ds.CreatePrivilege(p, Privilege{
 		CanEdit,
-		ForWorkgroup,
 		wgid,
 		ds.On.Workgroup,
 		eid,
@@ -239,7 +233,6 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	// Drop group privileges
 	ds.DeletePrivilege(p, Privilege{
 		CanEdit,
-		ForWorkgroup,
 		wgid,
 		ds.On.Workgroup,
 		eid,
@@ -260,8 +253,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	// Drop user's privileges
 	ds.DeletePrivilege(p, Privilege{
 		Owns,
-		ForIdentity,
-		uid,
+		uwgid,
 		ds.On.Workgroup,
 		eid,
 	})
@@ -297,11 +289,29 @@ func TestSecurity(t *testing.T) {
 	}
 	t.Log(role1Id)
 
+	if err := ds.CreatePrivilege(p, Privilege{
+		Owns,
+		p.WorkgroupId,
+		ds.On.Role,
+		role1Id,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
 	role2Id, err := ds.CreateRole(p, "role2", "a role")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(role2Id)
+
+	if err := ds.CreatePrivilege(p, Privilege{
+		Owns,
+		p.WorkgroupId,
+		ds.On.Role,
+		role2Id,
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	// read roles
 
@@ -396,8 +406,7 @@ func TestSecurity(t *testing.T) {
 
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
-		ForIdentity,
-		p.Id,
+		p.WorkgroupId,
 		ds.On.Workgroup,
 		group1Id,
 	}); err != nil {
@@ -412,8 +421,7 @@ func TestSecurity(t *testing.T) {
 
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
-		ForIdentity,
-		p.Id,
+		p.WorkgroupId,
 		ds.On.Workgroup,
 		group2Id,
 	}); err != nil {
@@ -468,10 +476,19 @@ func TestSecurity(t *testing.T) {
 	}
 
 	// create a user
-	user1Id, err := ds.CreateIdentity(p, "user1", "password1")
+	user1Id, _, err := ds.CreateIdentity(p, "user1", "password1")
 	if err != nil {
 		t.Fatal(err)
 	}
+	if err := ds.CreatePrivilege(p, Privilege{
+		Owns,
+		p.WorkgroupId,
+		ds.On.Identity,
+		user1Id,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
 	users, err := ds.ReadIdentities(p, 0, 100000)
 	if err != nil {
 		t.Fatal(err)
@@ -490,13 +507,13 @@ func TestSecurity(t *testing.T) {
 
 	// set workgroup
 
-	if err := ds.LinkIdentityToWorkgroup(p, user1Id, group1Id); err != nil {
+	if err := ds.LinkIdentityAndWorkgroup(p, user1Id, group1Id); err != nil {
 		t.Fatal(err)
 	}
 
 	// set roles
 
-	if err := ds.LinkIdentityToRole(p, user1Id, role1Id); err != nil {
+	if err := ds.LinkIdentityAndRole(p, user1Id, role1Id); err != nil {
 		t.Fatal(err)
 	}
 
@@ -535,19 +552,19 @@ func TestSecurity(t *testing.T) {
 
 	// change workgroup
 
-	if err := ds.UnlinkIdentityFromWorkgroup(p, user1Id, group1Id); err != nil {
+	if err := ds.UnlinkIdentityAndWorkgroup(p, user1Id, group1Id); err != nil {
 		t.Fatal(err)
 	}
-	if err := ds.LinkIdentityToWorkgroup(p, user1Id, group2Id); err != nil {
+	if err := ds.LinkIdentityAndWorkgroup(p, user1Id, group2Id); err != nil {
 		t.Fatal(err)
 	}
 
 	// change roles
 
-	if err := ds.UnlinkIdentityFromRole(p, user1Id, role1Id); err != nil {
+	if err := ds.UnlinkIdentityAndRole(p, user1Id, role1Id); err != nil {
 		t.Fatal(err)
 	}
-	if err := ds.LinkIdentityToRole(p, user1Id, role2Id); err != nil {
+	if err := ds.LinkIdentityAndRole(p, user1Id, role2Id); err != nil {
 		t.Fatal(err)
 	}
 
@@ -577,7 +594,7 @@ func TestSecurity(t *testing.T) {
 
 	// read workgroup + identities
 
-	wi, err := ds.ReadIdentitesForWorkgroup(p, group2Id)
+	wi, err := ds.ReadIdentitiesForWorkgroup(p, group2Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -588,7 +605,7 @@ func TestSecurity(t *testing.T) {
 
 	// read roles + identities
 
-	ri, err := ds.ReadIdentitesForRole(p, role2Id)
+	ri, err := ds.ReadIdentitiesForRole(p, role2Id)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -40,8 +40,7 @@ func ScanPrivilege(r *sql.Row) (Privilege, error) {
 	var s Privilege
 	if err := r.Scan(
 		&s.Type,
-		&s.IdentityType,
-		&s.IdentityId,
+		&s.WorkgroupId,
 		&s.EntityType,
 		&s.EntityId,
 	); err != nil {
@@ -57,8 +56,7 @@ func ScanPrivileges(rs *sql.Rows) ([]Privilege, error) {
 		var s Privilege
 		if err = rs.Scan(
 			&s.Type,
-			&s.IdentityType,
-			&s.IdentityId,
+			&s.WorkgroupId,
 			&s.EntityType,
 			&s.EntityId,
 		); err != nil {
@@ -172,6 +170,7 @@ func ScanWorkgroup(r *sql.Row) (Workgroup, error) {
 	var s Workgroup
 	if err := r.Scan(
 		&s.Id,
+		&s.Type,
 		&s.Name,
 		&s.Description,
 		&s.Created,
@@ -188,6 +187,7 @@ func ScanWorkgroups(rs *sql.Rows) ([]Workgroup, error) {
 		var s Workgroup
 		if err = rs.Scan(
 			&s.Id,
+			&s.Type,
 			&s.Name,
 			&s.Description,
 			&s.Created,
@@ -244,6 +244,7 @@ func ScanIdentityAndPassword(r *sql.Row) (IdentityAndPassword, error) {
 		&s.Id,
 		&s.Name,
 		&s.Password,
+		&s.WorkgroupId,
 		&s.IsActive,
 		&s.LastLogin,
 		&s.Created,
@@ -262,6 +263,7 @@ func ScanIdentityAndPasswords(rs *sql.Rows) ([]IdentityAndPassword, error) {
 			&s.Id,
 			&s.Name,
 			&s.Password,
+			&s.WorkgroupId,
 			&s.IsActive,
 			&s.LastLogin,
 			&s.Created,
