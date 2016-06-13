@@ -14,11 +14,10 @@ type Meta struct {
 }
 
 type Privilege struct {
-	Type         string
-	IdentityType string
-	IdentityId   int64
-	EntityType   int64
-	EntityId     int64
+	Type        string
+	WorkgroupId int64
+	EntityType  int64
+	EntityId    int64
 }
 
 type Permission struct {
@@ -41,6 +40,7 @@ type Role struct {
 
 type Workgroup struct {
 	Id          int64
+	Type        string
 	Name        string
 	Description string
 	Created     time.Time
@@ -55,10 +55,11 @@ type Identity struct {
 }
 
 type IdentityAndPassword struct {
-	Id        int64
-	Name      string
-	Password  string
-	IsActive  bool
-	LastLogin pq.NullTime
-	Created   time.Time
+	Id          int64
+	Name        string
+	Password    string
+	WorkgroupId int64
+	IsActive    bool
+	LastLogin   pq.NullTime
+	Created     time.Time
 }
