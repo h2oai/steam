@@ -71,19 +71,23 @@ const (
 	ForIdentity  = "identity"
 	ForWorkgroup = "workgroup"
 
-	OnRole      = "role"
-	OnWorkgroup = "workgroup"
-	OnIdentity  = "identity"
-	OnEngine    = "engine"
-	OnCluster   = "cluster"
-	OnProject   = "project"
-	OnModel     = "model"
+	RoleEntity      = "role"
+	WorkgroupEntity = "workgroup"
+	IdentityEntity  = "identity"
+	EngineEntity    = "engine"
+	ClusterEntity   = "cluster"
+	ProjectEntity   = "project"
+	ModelEntity     = "model"
+
+	ClusterExternal = "external"
+	ClusterYarn     = "yarn"
 )
 
 var (
-	Privileges  map[string]int
-	Permissions []Permission
-	EntityTypes []EntityType
+	Privileges   map[string]int
+	Permissions  []Permission
+	EntityTypes  []EntityType
+	ClusterTypes []ClusterType
 )
 
 func init() {
@@ -91,16 +95,6 @@ func init() {
 		CanView: View,
 		CanEdit: Edit,
 		Owns:    Own,
-	}
-
-	EntityTypes = []EntityType{
-		{0, OnRole},
-		{0, OnWorkgroup},
-		{0, OnIdentity},
-		{0, OnEngine},
-		{0, OnCluster},
-		{0, OnProject},
-		{0, OnModel},
 	}
 
 	Permissions = []Permission{
@@ -119,11 +113,26 @@ func init() {
 		{0, "model.manage", "Manage models"},
 		{0, "model.view", "View models"},
 	}
+
+	EntityTypes = []EntityType{
+		{0, RoleEntity},
+		{0, WorkgroupEntity},
+		{0, IdentityEntity},
+		{0, EngineEntity},
+		{0, ClusterEntity},
+		{0, ProjectEntity},
+		{0, ModelEntity},
+	}
+
+	ClusterTypes = []ClusterType{
+		{0, ClusterExternal},
+		{0, ClusterYarn},
+	}
 }
 
 type metadata map[string]string
 
-type Keys struct {
+type EntityTypeKeys struct {
 	Role      int64
 	Workgroup int64
 	Identity  int64
@@ -133,30 +142,48 @@ type Keys struct {
 	Model     int64
 }
 
-func toKeys(entityTypes []EntityType) *Keys {
+type ClusterTypeKeys struct {
+	External int64
+	Yarn     int64
+}
+
+func toEntityTypeKeys(entityTypes []EntityType) *EntityTypeKeys {
 	m := make(map[string]int64)
-	for _, entityType := range entityTypes {
-		m[entityType.Name] = entityType.Id
+	for _, et := range entityTypes {
+		m[et.Name] = et.Id
 	}
 
-	return &Keys{
-		m[OnRole],
-		m[OnWorkgroup],
-		m[OnIdentity],
-		m[OnEngine],
-		m[OnCluster],
-		m[OnProject],
-		m[OnModel],
+	return &EntityTypeKeys{
+		m[RoleEntity],
+		m[WorkgroupEntity],
+		m[IdentityEntity],
+		m[EngineEntity],
+		m[ClusterEntity],
+		m[ProjectEntity],
+		m[ModelEntity],
+	}
+}
+
+func toClusterTypeKeys(clusterTypes []ClusterType) *ClusterTypeKeys {
+	m := make(map[string]int64)
+	for _, ct := range clusterTypes {
+		m[ct.Name] = ct.Id
+	}
+	return &ClusterTypeKeys{
+		m[ClusterExternal],
+		m[ClusterYarn],
 	}
 }
 
 type Datastore struct {
-	db            *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
-	metadata      metadata
-	permissions   []Permission
-	permissionMap map[int64]Permission
-	entityTypeMap map[int64]EntityType
-	On            *Keys
+	db             *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
+	metadata       metadata
+	permissions    []Permission
+	permissionMap  map[int64]Permission
+	entityTypeMap  map[int64]EntityType
+	EntityTypes    *EntityTypeKeys
+	clusterTypeMap map[int64]ClusterType
+	ClusterTypes   *ClusterTypeKeys
 }
 
 func Connect(username, dbname, sslmode string) (*sql.DB, error) {
@@ -227,13 +254,25 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		entityTypeMap[et.Id] = et
 	}
 
+	clusterTypes, err := readClusterTypes(db)
+	if err != nil {
+		return nil, err
+	}
+
+	clusterTypeMap := make(map[int64]ClusterType)
+	for _, ct := range clusterTypes {
+		clusterTypeMap[ct.Id] = ct
+	}
+
 	return &Datastore{
 		db,
 		metadata,
 		permissions,
 		permissionMap,
 		entityTypeMap,
-		toKeys(entityTypes),
+		toEntityTypeKeys(entityTypes),
+		clusterTypeMap,
+		toClusterTypeKeys(clusterTypes),
 	}, nil
 }
 
@@ -367,15 +406,6 @@ func (ds *Datastore) SetupSuperuser(principal *az.Principal) error {
 		return err
 	}
 
-	if err := ds.CreatePrivilege(principal, Privilege{
-		Owns,
-		principal.WorkgroupId,
-		ds.On.Role,
-		roleId,
-	}); err != nil {
-		return err
-	}
-
 	allPerms := make([]int64, len(ds.permissions))
 	for i, permission := range ds.permissions {
 		allPerms[i] = permission.Id
@@ -434,6 +464,21 @@ func readEntityTypes(db *sql.DB) ([]EntityType, error) {
 	return ScanEntityTypes(rows)
 }
 
+func readClusterTypes(db *sql.DB) ([]ClusterType, error) {
+	rows, err := db.Query(`
+		SELECT
+			id, name
+		FROM
+			cluster_type
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanClusterTypes(rows)
+}
+
 func executeTransaction(db *sql.DB, f func(*sql.Tx) error) (err error) {
 	var (
 		tx     *sql.Tx
@@ -459,7 +504,6 @@ func executeTransaction(db *sql.DB, f func(*sql.Tx) error) (err error) {
 		commit = true
 	}
 	return err
-
 }
 
 func (ds *Datastore) exec(f func(*sql.Tx) error) (err error) {
@@ -624,7 +668,16 @@ func (ds *Datastore) CreateRole(principal *az.Principal, name, description strin
 			return err
 		}
 
-		return ds.audit(principal, tx, CreateOp, ds.On.Role, id, metadata{"name": name, "description": description})
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Role,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Role, id, metadata{"name": name, "description": description})
 	})
 	return id, err
 }
@@ -650,7 +703,7 @@ func (ds *Datastore) ReadRoles(principal *az.Principal, offset, limit int64) ([]
 			name
 		OFFSET $1
 		LIMIT $2
-		`, offset, limit, principal.Id, ds.On.Role)
+		`, offset, limit, principal.Id, ds.EntityTypes.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -681,7 +734,7 @@ func (ds *Datastore) ReadRolesForIdentity(principal *az.Principal, identityId in
 			)
 		ORDER BY
 			r.name
-		`, identityId, principal.Id, ds.On.Role)
+		`, identityId, principal.Id, ds.EntityTypes.Role)
 
 	if err != nil {
 		return nil, err
@@ -715,7 +768,7 @@ func (ds *Datastore) UpdateRole(principal *az.Principal, roleId int64, name stri
 			`, name, roleId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, UpdateOp, ds.On.Role, roleId, metadata{"name": name})
+		return ds.audit(principal, tx, UpdateOp, ds.EntityTypes.Role, roleId, metadata{"name": name})
 	})
 }
 
@@ -749,7 +802,7 @@ func (ds *Datastore) SetRolePermissions(principal *az.Principal, roleId int64, p
 		if err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, UpdateOp, ds.On.Role, roleId, metadata{"permissions": string(permissions)})
+		return ds.audit(principal, tx, UpdateOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
 	})
 }
 
@@ -764,10 +817,10 @@ func (ds *Datastore) DeleteRole(principal *az.Principal, roleId int64) error {
 		); err != nil {
 			return err
 		}
-		if err := deletePrivilegesOn(tx, ds.On.Role, roleId); err != nil {
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Role, roleId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, DeleteOp, ds.On.Role, roleId, metadata{})
+		return ds.audit(principal, tx, DeleteOp, ds.EntityTypes.Role, roleId, metadata{})
 	})
 }
 
@@ -787,7 +840,15 @@ func (ds *Datastore) CreateWorkgroup(principal *az.Principal, name, description 
 		if err := row.Scan(&id); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, CreateOp, ds.On.Workgroup, id, metadata{
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Workgroup,
+			id,
+		}); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Workgroup, id, metadata{
 			"name":        name,
 			"description": description,
 		})
@@ -816,7 +877,7 @@ func (ds *Datastore) ReadWorkgroups(principal *az.Principal, offset, limit int64
 		ORDER BY name
 		OFFSET $1
 		LIMIT $2
-		`, offset, limit, principal.Id, ds.On.Workgroup)
+		`, offset, limit, principal.Id, ds.EntityTypes.Workgroup)
 	if err != nil {
 		return nil, err
 	}
@@ -848,7 +909,7 @@ func (ds *Datastore) ReadWorkgroupsForIdentity(principal *az.Principal, identity
 			)
 		ORDER BY
 			w.name
-		`, identityId, principal.Id, ds.On.Workgroup)
+		`, identityId, principal.Id, ds.EntityTypes.Workgroup)
 
 	if err != nil {
 		return nil, err
@@ -886,7 +947,7 @@ func (ds *Datastore) UpdateWorkgroup(principal *az.Principal, workgroupId int64,
 			`, name, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, UpdateOp, ds.On.Workgroup, workgroupId, metadata{"name": name})
+		return ds.audit(principal, tx, UpdateOp, ds.EntityTypes.Workgroup, workgroupId, metadata{"name": name})
 	})
 }
 
@@ -900,13 +961,13 @@ func (ds *Datastore) DeleteWorkgroup(principal *az.Principal, workgroupId int64)
 			`, workgroupId); err != nil {
 			return err
 		}
-		if err := deletePrivilegesOn(tx, ds.On.Workgroup, workgroupId); err != nil {
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Workgroup, workgroupId); err != nil {
 			return err
 		}
 		if err := deletePrivilegesFor(tx, ForWorkgroup, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, DeleteOp, ds.On.Workgroup, workgroupId, metadata{})
+		return ds.audit(principal, tx, DeleteOp, ds.EntityTypes.Workgroup, workgroupId, metadata{})
 	})
 }
 
@@ -980,18 +1041,12 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 			return err
 		}
 
-		_, err = tx.Exec(`
-			INSERT INTO
-				privilege
-			VALUES
-				($1, $2, $3, $4)
-			`,
+		return createPrivilege(tx, Privilege{
 			Owns,
 			workgroupId,
-			ds.On.Identity,
+			ds.EntityTypes.Identity,
 			id,
-		)
-		return err
+		})
 	})
 	return id, workgroupId, err
 }
@@ -1015,7 +1070,16 @@ func (ds *Datastore) CreateIdentity(principal *az.Principal, name, password stri
 			return err
 		}
 
-		return ds.audit(principal, tx, CreateOp, ds.On.Identity, id, metadata{"name": name})
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			workgroupId,
+			ds.EntityTypes.Identity,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Identity, id, metadata{"name": name})
 	})
 	return id, workgroupId, err
 }
@@ -1040,7 +1104,7 @@ func (ds *Datastore) ReadIdentities(principal *az.Principal, offset, limit int64
 		ORDER BY name
 		OFFSET $1
 		LIMIT $2
-		`, offset, limit, principal.Id, ds.On.Identity)
+		`, offset, limit, principal.Id, ds.EntityTypes.Identity)
 	if err != nil {
 		return nil, err
 	}
@@ -1096,7 +1160,7 @@ func (ds *Datastore) ReadIdentitiesForWorkgroup(principal *az.Principal, workgro
 			)
 		ORDER BY
 			i.name
-		`, workgroupId, principal.Id, ds.On.Identity)
+		`, workgroupId, principal.Id, ds.EntityTypes.Identity)
 
 	if err != nil {
 		return nil, err
@@ -1128,7 +1192,7 @@ func (ds *Datastore) ReadIdentitiesForRole(principal *az.Principal, roleId int64
 			)
 		ORDER BY
 			i.name
-		`, roleId, principal.Id, ds.On.Identity)
+		`, roleId, principal.Id, ds.EntityTypes.Identity)
 
 	if err != nil {
 		return nil, err
@@ -1137,9 +1201,6 @@ func (ds *Datastore) ReadIdentitiesForRole(principal *az.Principal, roleId int64
 
 	return ScanIdentitys(rows)
 }
-
-// XXX call this after creating superusers / identities
-// XXX put type='workgroup' checks for all queries
 
 func (ds *Datastore) LinkIdentityAndWorkgroup(principal *az.Principal, identityId, workgroupId int64) error {
 	workgroup, err := ds.ReadWorkgroup(principal, workgroupId)
@@ -1151,8 +1212,8 @@ func (ds *Datastore) LinkIdentityAndWorkgroup(principal *az.Principal, identityI
 		if err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, LinkOp, ds.On.Identity, identityId, metadata{
-			"type": OnWorkgroup,
+		return ds.audit(principal, tx, LinkOp, ds.EntityTypes.Identity, identityId, metadata{
+			"type": WorkgroupEntity,
 			"id":   strconv.FormatInt(workgroupId, 10),
 			"name": workgroup.Name,
 		})
@@ -1169,8 +1230,8 @@ func (ds *Datastore) UnlinkIdentityAndWorkgroup(principal *az.Principal, identit
 		if err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, UnlinkOp, ds.On.Identity, identityId, metadata{
-			"type": OnWorkgroup,
+		return ds.audit(principal, tx, UnlinkOp, ds.EntityTypes.Identity, identityId, metadata{
+			"type": WorkgroupEntity,
 			"id":   strconv.FormatInt(workgroupId, 10),
 			"name": workgroup.Name,
 		})
@@ -1191,8 +1252,8 @@ func (ds *Datastore) LinkIdentityAndRole(principal *az.Principal, identityId, ro
 			`, identityId, roleId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, LinkOp, ds.On.Identity, identityId, metadata{
-			"type": OnRole,
+		return ds.audit(principal, tx, LinkOp, ds.EntityTypes.Identity, identityId, metadata{
+			"type": RoleEntity,
 			"id":   strconv.FormatInt(roleId, 10),
 			"name": role.Name,
 		})
@@ -1214,8 +1275,8 @@ func (ds *Datastore) UnlinkIdentityAndRole(principal *az.Principal, identityId, 
 			`, identityId, roleId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, UnlinkOp, ds.On.Identity, identityId, metadata{
-			"type": OnRole,
+		return ds.audit(principal, tx, UnlinkOp, ds.EntityTypes.Identity, identityId, metadata{
+			"type": RoleEntity,
 			"id":   strconv.FormatInt(roleId, 10),
 			"name": role.Name,
 		})
@@ -1238,7 +1299,7 @@ func (ds *Datastore) DeactivateIdentity(principal *az.Principal, identityId int6
 			`, identityId); err != nil {
 			return err
 		}
-		return ds.audit(principal, tx, DisableOp, ds.On.Identity, identityId, metadata{"name": identity.Name})
+		return ds.audit(principal, tx, DisableOp, ds.EntityTypes.Identity, identityId, metadata{"name": identity.Name})
 	})
 	return nil
 }
@@ -1254,17 +1315,7 @@ func readWorkgroupName(tx *sql.Tx, workgroupId int64) (string, error) {
 
 func (ds *Datastore) CreatePrivilege(principal *az.Principal, privilege Privilege) error {
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
-			INSERT INTO
-				privilege
-			VALUES
-				($1, $2, $3, $4)
-			`,
-			privilege.Type,
-			privilege.WorkgroupId,
-			privilege.EntityType,
-			privilege.EntityId,
-		); err != nil {
+		if err := createPrivilege(tx, privilege); err != nil {
 			return err
 		}
 
@@ -1330,6 +1381,21 @@ func (ds *Datastore) DeletePrivilege(principal *az.Principal, privilege Privileg
 	})
 }
 
+func createPrivilege(tx *sql.Tx, privilege Privilege) error {
+	_, err := tx.Exec(`
+			INSERT INTO
+				privilege
+			VALUES
+				($1, $2, $3, $4)
+			`,
+		privilege.Type,
+		privilege.WorkgroupId,
+		privilege.EntityType,
+		privilege.EntityId,
+	)
+	return err
+}
+
 func deletePrivilegesOn(tx *sql.Tx, entityTypeId, entityId int64) error {
 	_, err := tx.Exec(`
 		DELETE FROM
@@ -1350,3 +1416,289 @@ func deletePrivilegesFor(tx *sql.Tx, identityType string, identityId int64) erro
 		`, identityId)
 	return err
 }
+
+// --- Engine ---
+
+func (ds *Datastore) CreateEngine(principal *az.Principal, name, location string) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				engine
+				(name, location, created)
+			VALUES
+				($1,   $2,       now())
+			RETURNING id
+			`, name, location)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Engine,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Engine, id, metadata{
+			"name":     name,
+			"location": location,
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) ReadEngine(principal *az.Principal, engineId int64) (Engine, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, location, created
+		FROM
+			engine
+		WHERE
+			id = $1
+		`, engineId)
+	return ScanEngine(row)
+}
+
+func (ds *Datastore) ReadEngines(principal *az.Principal) ([]Engine, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, location, created
+		FROM
+			engine
+		WHERE
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
+					entity_type_id = $2
+			)
+		ORDER BY
+			name
+		`, principal.Id, ds.EntityTypes.Engine)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanEngines(rows)
+}
+
+func (ds *Datastore) DeleteEngine(principal *az.Principal, engineId int64) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				engine
+			WHERE
+				id = $1
+			`, engineId,
+		); err != nil {
+			return err
+		}
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Engine, engineId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, DeleteOp, ds.EntityTypes.Engine, engineId, metadata{})
+	})
+}
+
+// --- Cluster ---
+
+func (ds *Datastore) CreateExternalCluster(principal *az.Principal, name, address, state string) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				cluster
+				(name, type_id, address, state, created)
+			VALUES
+				($1,   $2,      $3,      $4,    now())
+			RETURNING id
+			`, name, ds.ClusterTypes.External, address, state)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Cluster,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Cluster, id, metadata{
+			"name":    name,
+			"type":    ClusterExternal,
+			"address": address,
+			"state":   state,
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) CreateYarnCluster(principal *az.Principal, name, address, state string, cluster YarnCluster) (int64, error) {
+	var id int64
+	engine, err := ds.ReadEngine(principal, cluster.EngineId)
+	if err != nil {
+		return id, err
+	}
+	err = ds.exec(func(tx *sql.Tx) error {
+		var yarnClusterId int64
+		row := tx.QueryRow(`
+			INSERT INTO
+				cluster_yarn
+				(engine_id, size, application_id, memory, username, output_dir)
+			VALUES
+				($1,        $2,   $3,             $4,     $4,       $6)
+			RETURNING id
+			`,
+			cluster.EngineId,
+			cluster.Size,
+			cluster.ApplicationId,
+			cluster.Memory,
+			cluster.Username,
+			cluster.OutputDir,
+		)
+		if err := row.Scan(&yarnClusterId); err != nil {
+			return err
+		}
+
+		row = tx.QueryRow(`
+			INSERT INTO
+				cluster
+				(name, type_id, detail_id, address, state, created)
+			VALUES
+				($1,   $2,      $3,      $4,    now())
+			RETURNING id
+			`, name, ds.ClusterTypes.Yarn, yarnClusterId, address, state)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Cluster,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Cluster, id, metadata{
+			"name":            name,
+			"type":            ClusterYarn,
+			"address":         address,
+			"state":           state,
+			"engine":          engine.Name,
+			"size":            strconv.FormatInt(cluster.Size, 10),
+			"applicationId":   cluster.ApplicationId,
+			"memory":          cluster.Memory,
+			"username":        cluster.Username,
+			"outputDirectory": cluster.OutputDir,
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) ReadClusters(principal *az.Principal) ([]Cluster, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, type_id, detail_id, address, state, created
+		FROM
+			cluster
+		WHERE
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
+					entity_type_id = $2
+			)
+		ORDER BY
+			name
+		`, principal.Id, ds.EntityTypes.Cluster)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanClusters(rows)
+}
+
+func (ds *Datastore) ReadCluster(principal *az.Principal, clusterId int64) (Cluster, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, type_id, detail_id, address, state, created
+		FROM
+			cluster
+		WHERE
+			id = $1
+		`, clusterId)
+
+	return ScanCluster(row)
+}
+
+func (ds *Datastore) ReadYarnCluster(principal *az.Principal, clusterId int64) (YarnCluster, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			engine_id, size, application_id, memory, username, output_dir
+		FROM
+			cluster_yarn
+		WHERE
+			id = $1
+		`, clusterId)
+
+	return ScanYarnCluster(row)
+}
+
+func (ds *Datastore) DeleteExternalCluster(principal *az.Principal, clusterId int64) error {
+	cluster, err := ds.ReadCluster(principal, clusterId)
+	if err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if cluster.TypeId == ds.ClusterTypes.Yarn {
+			if _, err := tx.Exec(`
+				DELETE FROM
+					cluster_yarn
+				WHERE
+					id = $1
+				`, cluster.DetailId,
+			); err != nil {
+				return err
+			}
+		}
+
+		if _, err := tx.Exec(`
+			DELETE FROM
+				cluster
+			WHERE
+				id = $1
+			`, clusterId,
+		); err != nil {
+			return err
+		}
+
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Cluster, clusterId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, DeleteOp, ds.EntityTypes.Cluster, clusterId, metadata{})
+	})
+}
+
+// --- Project ---
+
+// --- Model ---
+
+// --- Service ---

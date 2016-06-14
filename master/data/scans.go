@@ -282,6 +282,7 @@ func ScanEngine(r *sql.Row) (Engine, error) {
 	var s Engine
 	if err := r.Scan(
 		&s.Id,
+		&s.Name,
 		&s.Location,
 		&s.Created,
 	); err != nil {
@@ -297,8 +298,39 @@ func ScanEngines(rs *sql.Rows) ([]Engine, error) {
 		var s Engine
 		if err = rs.Scan(
 			&s.Id,
+			&s.Name,
 			&s.Location,
 			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanClusterType(r *sql.Row) (ClusterType, error) {
+	var s ClusterType
+	if err := r.Scan(
+		&s.Id,
+		&s.Name,
+	); err != nil {
+		return ClusterType{}, err
+	}
+	return s, nil
+}
+
+func ScanClusterTypes(rs *sql.Rows) ([]ClusterType, error) {
+	structs := make([]ClusterType, 0, 16)
+	var err error
+	for rs.Next() {
+		var s ClusterType
+		if err = rs.Scan(
+			&s.Id,
+			&s.Name,
 		); err != nil {
 			return nil, err
 		}
@@ -314,6 +346,7 @@ func ScanCluster(r *sql.Row) (Cluster, error) {
 	var s Cluster
 	if err := r.Scan(
 		&s.Id,
+		&s.Name,
 		&s.TypeId,
 		&s.DetailId,
 		&s.Address,
@@ -332,6 +365,7 @@ func ScanClusters(rs *sql.Rows) ([]Cluster, error) {
 		var s Cluster
 		if err = rs.Scan(
 			&s.Id,
+			&s.Name,
 			&s.TypeId,
 			&s.DetailId,
 			&s.Address,
