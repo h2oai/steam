@@ -243,6 +243,9 @@ public class PredictPythonServlet extends HttpServlet {
           System.out.println("null result from python");
         }
       }
+      if (result.startsWith("ERROR"))
+        throw new Exception(result);
+
       // should now be in sparse format from python
       RowData row = sparseToRowData(colNames, result);
       if (VERBOSE) System.out.println("row: " + row);
