@@ -63,3 +63,58 @@ type IdentityAndPassword struct {
 	LastLogin   pq.NullTime
 	Created     time.Time
 }
+
+type Engine struct {
+	Id       int64
+	Location string
+	Created  time.Time
+}
+
+type Cluster struct {
+	Id       int64
+	TypeId   int64
+	DetailId int64
+	Address  string
+	State    string
+	Created  time.Time
+}
+
+type YarnCluster struct {
+	Id            int64
+	EngineId      int64
+	Size          int64
+	ApplicationId string
+	Memory        string
+	Username      string
+	OutputDir     string
+}
+
+type Project struct {
+	Id          int64
+	Name        string
+	Description string
+	Created     time.Time
+}
+
+type Model struct {
+	Id                 int64
+	Name               string
+	ClusterName        string
+	Algorithm          string
+	DatasetName        string
+	ResponseColumnName string
+	LogicalName        string
+	Location           string
+	MaxRunTime         int64
+	Created            time.Time
+}
+
+type Service struct {
+	Id        int64
+	ModelId   int64
+	Address   string
+	Port      int64
+	ProcessId int64
+	State     string
+	Created   time.Time
+}

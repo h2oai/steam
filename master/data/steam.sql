@@ -452,17 +452,17 @@ CREATE TABLE model (
 ALTER TABLE model OWNER TO steam;
 
 --
--- Name: COLUMN model.cluster_name; Type: COMMENT; Schema: public; Owner: steam
---
-
-COMMENT ON COLUMN model.cluster_name IS 'The name of the cluster this model was sourced from.';
-
-
---
 -- Name: COLUMN model.name; Type: COMMENT; Schema: public; Owner: steam
 --
 
 COMMENT ON COLUMN model.name IS 'The physical name of this model as stored on disk.';
+
+
+--
+-- Name: COLUMN model.cluster_name; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.cluster_name IS 'The name of the cluster this model was sourced from.';
 
 
 --
@@ -652,7 +652,8 @@ CREATE TABLE service (
     address text NOT NULL,
     port integer NOT NULL,
     process_id integer NOT NULL,
-    state job_state NOT NULL
+    state job_state NOT NULL,
+    created timestamp with time zone NOT NULL
 );
 
 

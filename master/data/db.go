@@ -76,6 +76,7 @@ const (
 	OnIdentity  = "identity"
 	OnEngine    = "engine"
 	OnCluster   = "cluster"
+	OnProject   = "project"
 	OnModel     = "model"
 )
 
@@ -98,6 +99,7 @@ func init() {
 		{0, OnIdentity},
 		{0, OnEngine},
 		{0, OnCluster},
+		{0, OnProject},
 		{0, OnModel},
 	}
 
@@ -112,6 +114,8 @@ func init() {
 		{0, "engine.view", "View engines"},
 		{0, "cluster.manage", "Manage clusters"},
 		{0, "cluster.view", "View clusters"},
+		{0, "project.manage", "Manage projects"},
+		{0, "project.view", "View projects"},
 		{0, "model.manage", "Manage models"},
 		{0, "model.view", "View models"},
 	}
@@ -125,6 +129,7 @@ type Keys struct {
 	Identity  int64
 	Engine    int64
 	Cluster   int64
+	Project   int64
 	Model     int64
 }
 
@@ -140,6 +145,7 @@ func toKeys(entityTypes []EntityType) *Keys {
 		m[OnIdentity],
 		m[OnEngine],
 		m[OnCluster],
+		m[OnProject],
 		m[OnModel],
 	}
 }
@@ -335,6 +341,13 @@ func truncate(db *sql.DB) error {
 			"role",
 			"permission",
 			"entity_type",
+			"project_model",
+			"model",
+			"project",
+			"cluster",
+			"cluster_yarn",
+			"cluster_type",
+			"engine",
 			"meta",
 		}
 		for _, table := range tables {
