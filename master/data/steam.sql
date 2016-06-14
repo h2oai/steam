@@ -121,6 +121,7 @@ SET default_with_oids = false;
 
 CREATE TABLE cluster (
     id integer NOT NULL,
+    name text NOT NULL,
     type_id integer NOT NULL,
     detail_id integer,
     address text NOT NULL,

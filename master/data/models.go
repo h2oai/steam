@@ -66,12 +66,19 @@ type IdentityAndPassword struct {
 
 type Engine struct {
 	Id       int64
+	Name     string
 	Location string
 	Created  time.Time
 }
 
+type ClusterType struct {
+	Id   int64
+	Name string
+}
+
 type Cluster struct {
 	Id       int64
+	Name     string
 	TypeId   int64
 	DetailId int64
 	Address  string

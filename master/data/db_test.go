@@ -57,14 +57,14 @@ func TestPrivilegesForIdentity(t *testing.T) {
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
 		uwgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	}); err != nil {
 		t.Fatal(err)
 	}
 
 	// Get user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
+	privileges, err := ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,12 +79,12 @@ func TestPrivilegesForIdentity(t *testing.T) {
 	ds.DeletePrivilege(p, Privilege{
 		Owns,
 		uwgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,14 +130,14 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 	if err := ds.CreatePrivilege(p, Privilege{
 		CanEdit,
 		wgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	}); err != nil {
 		t.Fatal(err)
 	}
 
 	// Read user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
+	privileges, err := ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,12 +152,12 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 	ds.DeletePrivilege(p, Privilege{
 		CanEdit,
 		wgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	})
 
 	// Read user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +202,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
 		uwgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	}); err != nil {
 		t.Fatal(err)
@@ -212,14 +212,14 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	if err := ds.CreatePrivilege(p, Privilege{
 		CanEdit,
 		wgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	}); err != nil {
 		t.Fatal(err)
 	}
 
 	// Get user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
+	privileges, err := ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,12 +234,12 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	ds.DeletePrivilege(p, Privilege{
 		CanEdit,
 		wgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,12 +254,12 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	ds.DeletePrivilege(p, Privilege{
 		Owns,
 		uwgid,
-		ds.On.Workgroup,
+		ds.EntityTypes.Workgroup,
 		eid,
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.On.Workgroup, eid)
+	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -289,29 +289,11 @@ func TestSecurity(t *testing.T) {
 	}
 	t.Log(role1Id)
 
-	if err := ds.CreatePrivilege(p, Privilege{
-		Owns,
-		p.WorkgroupId,
-		ds.On.Role,
-		role1Id,
-	}); err != nil {
-		t.Fatal(err)
-	}
-
 	role2Id, err := ds.CreateRole(p, "role2", "a role")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(role2Id)
-
-	if err := ds.CreatePrivilege(p, Privilege{
-		Owns,
-		p.WorkgroupId,
-		ds.On.Role,
-		role2Id,
-	}); err != nil {
-		t.Fatal(err)
-	}
 
 	// read roles
 
@@ -404,29 +386,11 @@ func TestSecurity(t *testing.T) {
 	}
 	t.Log(group1Id)
 
-	if err := ds.CreatePrivilege(p, Privilege{
-		Owns,
-		p.WorkgroupId,
-		ds.On.Workgroup,
-		group1Id,
-	}); err != nil {
-		t.Fatal(err)
-	}
-
 	group2Id, err := ds.CreateWorkgroup(p, "group2", "a group")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(group2Id)
-
-	if err := ds.CreatePrivilege(p, Privilege{
-		Owns,
-		p.WorkgroupId,
-		ds.On.Workgroup,
-		group2Id,
-	}); err != nil {
-		t.Fatal(err)
-	}
 
 	// read workgroups
 	group1, err := ds.ReadWorkgroup(p, group1Id)
@@ -483,7 +447,7 @@ func TestSecurity(t *testing.T) {
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
 		p.WorkgroupId,
-		ds.On.Identity,
+		ds.EntityTypes.Identity,
 		user1Id,
 	}); err != nil {
 		t.Fatal(err)
