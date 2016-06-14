@@ -106,8 +106,9 @@ public class MakeWarServlet extends HttpServlet {
       copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "custom.css", "custom.css");
-      copyExtraFile(servletPath, webInfPath, webInfDir, "web-predict.xml", "web.xml");
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
+      FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "bootstrap"), tmpDir);
+      FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "fonts"), tmpDir);
 
       // change the class name in the predictor template file to the predictor we have
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
@@ -126,6 +127,10 @@ public class MakeWarServlet extends HttpServlet {
       filesc.add(new File(tmpDir, "jquery.js"));
       filesc.add(new File(tmpDir, "predict.js"));
       filesc.add(new File(tmpDir, "custom.css"));
+      Collection<File> dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "bootstrap"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+      filesc.addAll(dirc);
+      dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "fonts"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+      filesc.addAll(dirc);
 
       File[] files = filesc.toArray(new File[]{});
       if (files.length == 0)
