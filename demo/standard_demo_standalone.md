@@ -86,7 +86,7 @@ The steps below show how to build model using the Iris dataset and the GBM algor
 
 2. Initialize H2O using localhost and port 54321. (Note that if started Steam on a different machine, then replace `localhost` with the IP address of that machine.)
 
-		>>> h2o.init(ip=“localhost”, port=54321)
+		>>> h2o.init(ip="localhost", port=54321)
 		------------------------------  -------------------------------------
 		H2O cluster uptime:             2 minutes 37 seconds 168 milliseconds
 		H2O cluster version:            3.8.2.8
