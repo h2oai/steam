@@ -565,6 +565,15 @@ func (s *Service) GetModels() ([]*web.Model, error) {
 	return models, nil
 }
 
+// Use this instead of model.DataFrame.Name because model.DataFrame can be nil
+func dataFrameName(m *bindings.ModelSchemaBase) string {
+	if m.DataFrame != nil {
+		return m.DataFrame.Name
+	}
+
+	return ""
+}
+
 func (s *Service) GetCloudModels(cloudName string) ([]*web.Model, error) {
 	c, err := s.getCloud(cloudName)
 	if err != nil {
@@ -583,7 +592,7 @@ func (s *Service) GetCloudModels(cloudName string) ([]*web.Model, error) {
 			Name:       m.ModelId.Name,
 			CloudName:  cloudName,
 			Algo:       m.AlgoFullName,
-			Dataset:    m.DataFrame.Name,
+			Dataset:    dataFrameName(m),
 			TargetName: m.ResponseColumnName,
 			CreatedAt:  web.Timestamp(m.Timestamp),
 		}
@@ -624,7 +633,7 @@ func (s *Service) GetModelFromCloud(cloudName string, modelName string) (*web.Mo
 		modelName,
 		cloudName,
 		m.AlgoFullName,
-		m.DataFrame.Name,
+		dataFrameName(m),
 		m.ResponseColumnName,
 		-1,
 		jm,
@@ -634,10 +643,7 @@ func (s *Service) GetModelFromCloud(cloudName string, modelName string) (*web.Mo
 		return nil, err //FIXME fmt error
 	}
 
-	mod := toModel(model)
-	mod.Algo = m.AlgoFullName
-
-	return mod, nil
+	return toModel(model), nil
 }
 
 func (s *Service) DeleteModel(modelName string) error {

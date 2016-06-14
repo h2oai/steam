@@ -243,7 +243,7 @@ func (h *H2O) GetModels() (*bindings.ModelsV3, error) {
 }
 
 func (h *H2O) GetModel(modelName string) (*bindings.ModelsV3, error) {
-	b, err := h.get("/3/Models", url.Values{"model_id": {modelName}})
+	b, err := h.get("/3/Models/"+url.QueryEscape(modelName), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error from get in GetModels:\n%v", err)
 	}
@@ -271,7 +271,7 @@ func (h *H2O) GetJobs() (*bindings.JobsV3, error) {
 }
 
 func (h *H2O) GetJob(jobName string) (*bindings.JobsV3, error) {
-	b, err := h.get("/3/Jobs", url.Values{"job_id": {jobName}})
+	b, err := h.get("/3/Jobs/"+url.QueryEscape(jobName), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting job %s: \n%v", jobName, err)
 	}
