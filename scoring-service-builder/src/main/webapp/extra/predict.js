@@ -114,14 +114,14 @@ function showResult(div, status, data) {
 function showUrl(pardiv, params) {
   // remove empty parameters returned by serialize.
   params = params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
-  url = window.location.href + "predict?" + params;
+  url = window.location.host + "/predict?" + params;
   pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
 }
 
 function showCurl(pardiv, params) {
   // remove empty parameters returned by serialize.
   params = params.replace(/'/g, "\\'") // quote quotes
-  url = window.location.href + "pypredict";
+  url = window.location.host + "/pypredict";
   pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
 }
 
@@ -233,7 +233,7 @@ function showStats(div, data) {
         showStat(data['pythonget'], 'Python Get');
         showStat(data['pythonpost'], 'Python Post');
     }
-    url = window.location.href + "stats";
+    url = window.location.host + "/stats";
     s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
     div.innerHTML = s;
 }

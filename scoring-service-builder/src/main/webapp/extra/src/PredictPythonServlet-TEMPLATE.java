@@ -108,6 +108,8 @@ public class PredictPythonServlet extends HttpServlet {
       }
       catch (IOException e) {
         System.out.println("IOException in sendPython restarting python");
+        e.printStackTrace();
+        showStderr();
         // it failed so we restart it and retry
         if (p != null) p.destroy();
         startPython();
