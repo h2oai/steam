@@ -66,6 +66,27 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 SET search_path = public, pg_catalog;
 
 --
+-- Name: job_state; Type: TYPE; Schema: public; Owner: steam
+--
+
+CREATE TYPE job_state AS ENUM (
+    'idle',
+    'starting',
+    'started',
+    'suspending',
+    'suspended',
+    'stopping',
+    'stopped',
+    'blocked',
+    'disconnected',
+    'failed',
+    'completed'
+);
+
+
+ALTER TYPE job_state OWNER TO steam;
+
+--
 -- Name: privilege_type; Type: TYPE; Schema: public; Owner: steam
 --
 
@@ -99,7 +120,12 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE cluster (
-    id integer NOT NULL
+    id integer NOT NULL,
+    type_id integer NOT NULL,
+    detail_id integer,
+    address text NOT NULL,
+    state job_state NOT NULL,
+    created timestamp with time zone NOT NULL
 );
 
 
@@ -127,11 +153,91 @@ ALTER SEQUENCE cluster_id_seq OWNED BY cluster.id;
 
 
 --
+-- Name: cluster_type; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE cluster_type (
+    id integer NOT NULL,
+    name text NOT NULL
+);
+
+
+ALTER TABLE cluster_type OWNER TO steam;
+
+--
+-- Name: cluster_type_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE cluster_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE cluster_type_id_seq OWNER TO steam;
+
+--
+-- Name: cluster_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE cluster_type_id_seq OWNED BY cluster_type.id;
+
+
+--
+-- Name: cluster_yarn; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE cluster_yarn (
+    id integer NOT NULL,
+    engine_id integer NOT NULL,
+    size integer NOT NULL,
+    application_id text NOT NULL,
+    memory text NOT NULL,
+    username text NOT NULL,
+    output_dir text NOT NULL
+);
+
+
+ALTER TABLE cluster_yarn OWNER TO steam;
+
+--
+-- Name: TABLE cluster_yarn; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON TABLE cluster_yarn IS 'Launch parameters for YARN clusters.';
+
+
+--
+-- Name: cluster_yarn_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE cluster_yarn_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE cluster_yarn_id_seq OWNER TO steam;
+
+--
+-- Name: cluster_yarn_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE cluster_yarn_id_seq OWNED BY cluster_yarn.id;
+
+
+--
 -- Name: engine; Type: TABLE; Schema: public; Owner: steam
 --
 
 CREATE TABLE engine (
-    id integer NOT NULL
+    id integer NOT NULL,
+    location text NOT NULL,
+    created timestamp with time zone NOT NULL
 );
 
 
@@ -330,11 +436,48 @@ ALTER SEQUENCE meta_id_seq OWNED BY meta.id;
 --
 
 CREATE TABLE model (
-    id integer NOT NULL
+    id integer NOT NULL,
+    name text NOT NULL,
+    cluster_name text NOT NULL,
+    algorithm text NOT NULL,
+    dataset_name text NOT NULL,
+    response_column_name text NOT NULL,
+    logical_name text NOT NULL,
+    location text NOT NULL,
+    max_run_time integer,
+    created timestamp with time zone NOT NULL
 );
 
 
 ALTER TABLE model OWNER TO steam;
+
+--
+-- Name: COLUMN model.cluster_name; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.cluster_name IS 'The name of the cluster this model was sourced from.';
+
+
+--
+-- Name: COLUMN model.name; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.name IS 'The physical name of this model as stored on disk.';
+
+
+--
+-- Name: COLUMN model.logical_name; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.logical_name IS 'The logical name of the model (typically the Java language class name).';
+
+
+--
+-- Name: COLUMN model.location; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.location IS 'The location of this model''s saved assets (e.g. /var/master/model).';
+
 
 --
 -- Name: model_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
@@ -406,6 +549,53 @@ CREATE TABLE privilege (
 ALTER TABLE privilege OWNER TO steam;
 
 --
+-- Name: project; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE project (
+    id integer NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    created timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE project OWNER TO steam;
+
+--
+-- Name: project_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE project_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE project_id_seq OWNER TO steam;
+
+--
+-- Name: project_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE project_id_seq OWNED BY project.id;
+
+
+--
+-- Name: project_model; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE project_model (
+    project_id integer NOT NULL,
+    model_id integer NOT NULL
+);
+
+
+ALTER TABLE project_model OWNER TO steam;
+
+--
 -- Name: role; Type: TABLE; Schema: public; Owner: steam
 --
 
@@ -457,7 +647,12 @@ ALTER TABLE role_permission OWNER TO steam;
 --
 
 CREATE TABLE service (
-    id integer NOT NULL
+    id integer NOT NULL,
+    model_id integer NOT NULL,
+    address text NOT NULL,
+    port integer NOT NULL,
+    process_id integer NOT NULL,
+    state job_state NOT NULL
 );
 
 
@@ -531,6 +726,20 @@ ALTER TABLE ONLY cluster ALTER COLUMN id SET DEFAULT nextval('cluster_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: steam
 --
 
+ALTER TABLE ONLY cluster_type ALTER COLUMN id SET DEFAULT nextval('cluster_type_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY cluster_yarn ALTER COLUMN id SET DEFAULT nextval('cluster_yarn_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
 ALTER TABLE ONLY engine ALTER COLUMN id SET DEFAULT nextval('engine_id_seq'::regclass);
 
 
@@ -580,6 +789,13 @@ ALTER TABLE ONLY permission ALTER COLUMN id SET DEFAULT nextval('permission_id_s
 -- Name: id; Type: DEFAULT; Schema: public; Owner: steam
 --
 
+ALTER TABLE ONLY project ALTER COLUMN id SET DEFAULT nextval('project_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
 ALTER TABLE ONLY role ALTER COLUMN id SET DEFAULT nextval('role_id_seq'::regclass);
 
 
@@ -603,6 +819,22 @@ ALTER TABLE ONLY workgroup ALTER COLUMN id SET DEFAULT nextval('workgroup_id_seq
 
 ALTER TABLE ONLY cluster
     ADD CONSTRAINT pk_cluster PRIMARY KEY (id);
+
+
+--
+-- Name: pk_cluster_type; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY cluster_type
+    ADD CONSTRAINT pk_cluster_type PRIMARY KEY (id);
+
+
+--
+-- Name: pk_cluster_yarn; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY cluster_yarn
+    ADD CONSTRAINT pk_cluster_yarn PRIMARY KEY (id);
 
 
 --
@@ -686,6 +918,22 @@ ALTER TABLE ONLY privilege
 
 
 --
+-- Name: pk_project; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY project
+    ADD CONSTRAINT pk_project PRIMARY KEY (id);
+
+
+--
+-- Name: pk_project_model; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY project_model
+    ADD CONSTRAINT pk_project_model PRIMARY KEY (project_id, model_id);
+
+
+--
 -- Name: pk_role; Type: CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -715,6 +963,14 @@ ALTER TABLE ONLY service
 
 ALTER TABLE ONLY workgroup
     ADD CONSTRAINT pk_workgroup PRIMARY KEY (id);
+
+
+--
+-- Name: uq_cluster_type_name; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY cluster_type
+    ADD CONSTRAINT uq_cluster_type_name UNIQUE (name);
 
 
 --
@@ -766,6 +1022,20 @@ ALTER TABLE ONLY workgroup
 
 
 --
+-- Name: fki_cluster__cluster_type_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_cluster__cluster_type_id ON cluster USING btree (type_id);
+
+
+--
+-- Name: fki_cluster_yarn__engine_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_cluster_yarn__engine_id ON cluster_yarn USING btree (engine_id);
+
+
+--
 -- Name: fki_history__entity_type_id; Type: INDEX; Schema: public; Owner: steam
 --
 
@@ -794,6 +1064,13 @@ CREATE INDEX fki_identity_workgroup__workgroup_id ON identity_workgroup USING bt
 
 
 --
+-- Name: fki_model_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_model_id ON service USING btree (model_id);
+
+
+--
 -- Name: fki_privilege__entity_type_id; Type: INDEX; Schema: public; Owner: steam
 --
 
@@ -805,6 +1082,13 @@ CREATE INDEX fki_privilege__entity_type_id ON privilege USING btree (entity_type
 --
 
 CREATE INDEX fki_privilege__workgroup_id ON privilege USING btree (workgroup_id);
+
+
+--
+-- Name: fki_project_model__model_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_project_model__model_id ON project_model USING btree (model_id);
 
 
 --
@@ -826,6 +1110,22 @@ CREATE INDEX fki_role_permission__role_id ON role_permission USING btree (role_i
 --
 
 CREATE INDEX fki_workgroup_id ON identity USING btree (workgroup_id);
+
+
+--
+-- Name: fk_cluster__cluster_type_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY cluster
+    ADD CONSTRAINT fk_cluster__cluster_type_id FOREIGN KEY (type_id) REFERENCES cluster_type(id);
+
+
+--
+-- Name: fk_cluster_yarn__engine_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY cluster_yarn
+    ADD CONSTRAINT fk_cluster_yarn__engine_id FOREIGN KEY (engine_id) REFERENCES engine(id);
 
 
 --
@@ -877,6 +1177,22 @@ ALTER TABLE ONLY privilege
 
 
 --
+-- Name: fk_project_model__model_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY project_model
+    ADD CONSTRAINT fk_project_model__model_id FOREIGN KEY (model_id) REFERENCES model(id);
+
+
+--
+-- Name: fk_project_model__project_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY project_model
+    ADD CONSTRAINT fk_project_model__project_id FOREIGN KEY (project_id) REFERENCES project(id);
+
+
+--
 -- Name: fk_role_permission__permission_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -890,6 +1206,14 @@ ALTER TABLE ONLY role_permission
 
 ALTER TABLE ONLY role_permission
     ADD CONSTRAINT fk_role_permission__role_id FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE;
+
+
+--
+-- Name: fk_service__model_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY service
+    ADD CONSTRAINT fk_service__model_id FOREIGN KEY (model_id) REFERENCES model(id);
 
 
 --
