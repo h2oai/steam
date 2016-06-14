@@ -278,3 +278,233 @@ func ScanIdentityAndPasswords(rs *sql.Rows) ([]IdentityAndPassword, error) {
 	return structs, nil
 }
 
+func ScanEngine(r *sql.Row) (Engine, error) {
+	var s Engine
+	if err := r.Scan(
+		&s.Id,
+		&s.Location,
+		&s.Created,
+	); err != nil {
+		return Engine{}, err
+	}
+	return s, nil
+}
+
+func ScanEngines(rs *sql.Rows) ([]Engine, error) {
+	structs := make([]Engine, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Engine
+		if err = rs.Scan(
+			&s.Id,
+			&s.Location,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanCluster(r *sql.Row) (Cluster, error) {
+	var s Cluster
+	if err := r.Scan(
+		&s.Id,
+		&s.TypeId,
+		&s.DetailId,
+		&s.Address,
+		&s.State,
+		&s.Created,
+	); err != nil {
+		return Cluster{}, err
+	}
+	return s, nil
+}
+
+func ScanClusters(rs *sql.Rows) ([]Cluster, error) {
+	structs := make([]Cluster, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Cluster
+		if err = rs.Scan(
+			&s.Id,
+			&s.TypeId,
+			&s.DetailId,
+			&s.Address,
+			&s.State,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanYarnCluster(r *sql.Row) (YarnCluster, error) {
+	var s YarnCluster
+	if err := r.Scan(
+		&s.Id,
+		&s.EngineId,
+		&s.Size,
+		&s.ApplicationId,
+		&s.Memory,
+		&s.Username,
+		&s.OutputDir,
+	); err != nil {
+		return YarnCluster{}, err
+	}
+	return s, nil
+}
+
+func ScanYarnClusters(rs *sql.Rows) ([]YarnCluster, error) {
+	structs := make([]YarnCluster, 0, 16)
+	var err error
+	for rs.Next() {
+		var s YarnCluster
+		if err = rs.Scan(
+			&s.Id,
+			&s.EngineId,
+			&s.Size,
+			&s.ApplicationId,
+			&s.Memory,
+			&s.Username,
+			&s.OutputDir,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanProject(r *sql.Row) (Project, error) {
+	var s Project
+	if err := r.Scan(
+		&s.Id,
+		&s.Name,
+		&s.Description,
+		&s.Created,
+	); err != nil {
+		return Project{}, err
+	}
+	return s, nil
+}
+
+func ScanProjects(rs *sql.Rows) ([]Project, error) {
+	structs := make([]Project, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Project
+		if err = rs.Scan(
+			&s.Id,
+			&s.Name,
+			&s.Description,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanModel(r *sql.Row) (Model, error) {
+	var s Model
+	if err := r.Scan(
+		&s.Id,
+		&s.Name,
+		&s.ClusterName,
+		&s.Algorithm,
+		&s.DatasetName,
+		&s.ResponseColumnName,
+		&s.LogicalName,
+		&s.Location,
+		&s.MaxRunTime,
+		&s.Created,
+	); err != nil {
+		return Model{}, err
+	}
+	return s, nil
+}
+
+func ScanModels(rs *sql.Rows) ([]Model, error) {
+	structs := make([]Model, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Model
+		if err = rs.Scan(
+			&s.Id,
+			&s.Name,
+			&s.ClusterName,
+			&s.Algorithm,
+			&s.DatasetName,
+			&s.ResponseColumnName,
+			&s.LogicalName,
+			&s.Location,
+			&s.MaxRunTime,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanService(r *sql.Row) (Service, error) {
+	var s Service
+	if err := r.Scan(
+		&s.Id,
+		&s.ModelId,
+		&s.Address,
+		&s.Port,
+		&s.ProcessId,
+		&s.State,
+		&s.Created,
+	); err != nil {
+		return Service{}, err
+	}
+	return s, nil
+}
+
+func ScanServices(rs *sql.Rows) ([]Service, error) {
+	structs := make([]Service, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Service
+		if err = rs.Scan(
+			&s.Id,
+			&s.ModelId,
+			&s.Address,
+			&s.Port,
+			&s.ProcessId,
+			&s.State,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
