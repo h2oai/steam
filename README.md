@@ -81,7 +81,9 @@ Perform the following steps to install Steam.
 
 3. Create the directory where Steam will reside. This must be in GOPATH location. For example:
 
-	`mkdir -p Desktop/src/github.com/h2oai`
+	`mkdir -p $GOPATH/src/github.com/h2oai`
+	
+	>**Note**: The path MUST include `/src/github.com/h2o.ai`. 
 
 4. Change directories to the new **h2oai** folder, and clone the repository in this folder. Enter your git username and password when prompted. 
 

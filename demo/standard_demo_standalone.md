@@ -53,20 +53,22 @@ The following are required if you use the Python demo included in this document.
 		user$ cd steam-master-darwin-amd64/
 		user$ ./steam serve master
 
-	>***Note***: This starts the compilation service on `localhost:8080` and the scoring service on `localhost`. You can change these using `--compilation-service-address=<ip_address:port>` and `--scoring-service-address=<ip_address>`. Use `./steam help serve master` or `./steam serve master -h` to view additional options.
+	>***Note***: This starts the Steam web service on `localhost:9000`, the compilation service on `localhost:8080` (same as the Jetty server), and the scoring service on `localhost`. You can change these using `--compilation-service-address=<ip_address:port>` and `--scoring-service-address=<ip_address>`. Use `./steam help serve master` or `./steam serve master -h` to view additional options.
 
 5. Open another terminal window. Navigate to the folder with your H2O jar file and start H2O. This will create a one-node cluster on your local machine.
 
 		user$ cd ~/Downloads/h2o-3.8.2.8
 		user$ java -jar h2o.jar 
 		
-6. Point you browser to the Steam URL, for example, http://localhost:9000/.
+6. Point your browser to the Steam URL, for example, http://localhost:9000/.
  
-7. In left pane, select the **Clusters** tab, then click the **Connect To Cluster** button to setup Steam with H2O. Specify the IP address and port of the cluster currently running H2O (for example, 192.16.2.119:54321), then click **Register Cluster**. 
+7. In the left pane, select the **Clusters** tab, then click the **Connect To Cluster** button to setup Steam with H2O. Specify the IP address and port of the cluster currently running H2O (for example, localhost:54321), then click **Register Cluster**. 
 
 	![](images/register_cluster.png)
 
 You are now ready to build a model on this cluster in Python. 
+
+>***Note***: After you connect to a cluster, click on **Cluster Details**, select your cluster, then click the **Address** link on that page to launch H2O Flow. 
 
 ## Building a Model in Python (Optional)
 
@@ -147,7 +149,7 @@ Also note that for backward
     
     >***Notes***:
     
-	- Click the **URL** link below a prediction result. The predict variables will display in the URL (for example, `http://172.16.2.119:8000/?p=petal_len%3D5%26sepal_wid%3D3predict?sepal_wid=3&petal_len=5`) 
+	- Click the **URL** link below a prediction result. The predict variables will display in the URL (for example, `http://192.16.2.119:8000/?p=petal_len%3D5%26sepal_wid%3D3predict?sepal_wid=3&petal_len=5`) 
 
 	- 	Use the **Clear** buttons to clear all entries and begin a new prediction.
      

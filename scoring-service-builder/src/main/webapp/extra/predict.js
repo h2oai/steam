@@ -145,25 +145,21 @@ function showResult(div, status, data) {
     // result += "<p><code>" + JSON.stringify(data) + "</code>";
 
     div.innerHTML = result;
-<<<<<<< HEAD
 
     $('#results').show();
-    showStatistics();
-=======
->>>>>>> 4a7c8c1cf09130e8ea2193afd3d3f71bafbdfe3a
 }
 
 function showUrl(pardiv, params) {
   // remove empty parameters returned by serialize.
   params = params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
-  url = window.location.href + "predict?" + params;
+  url = window.location.host + "/predict?" + params;
   pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
 }
 
 function showCurl(pardiv, params) {
   // remove empty parameters returned by serialize.
   params = params.replace(/'/g, "\\'") // quote quotes
-  url = window.location.href + "pypredict";
+  url = window.location.host + "/pypredict";
   pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
 }
 
@@ -188,7 +184,6 @@ function predResults(params) {
 
 }
 
-<<<<<<< HEAD
 // function runpred(form) {
 //   predResults(form.p.value);
 // }
@@ -199,19 +194,17 @@ function runpred2(form) {
     predResults( $('#queryParams').val() )
   } else {
     predResults($('#allparams').serialize());
-  }
+  showStatistics();
+}
   
-=======
 function runpred(form) {
   predResults(form.p.value);
   showStatistics();
 }
 
-function runpred2(form) {
-  predResults($('#allparams').serialize());
-  showStatistics();
->>>>>>> 4a7c8c1cf09130e8ea2193afd3d3f71bafbdfe3a
-}
+//function runpred2(form) {
+//  predResults($('#allparams').serialize());
+//}
 
 function predResultsPost(params) {
   pardiv = document.querySelector(".curl");
@@ -333,10 +326,15 @@ function showStats(div, data) {
         showStat(data['pythonget'], 'Python Get');
         showStat(data['pythonpost'], 'Python Post');
     }
+
     // url = window.location.href + "stats";
     //s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
     
     s+= '</tbody></table>'
+
+//    url = window.location.host + "/stats";
+//    s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
+
     div.innerHTML = s;
 }
 

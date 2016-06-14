@@ -660,6 +660,10 @@ func (s *Service) DeleteModel(modelName string) error {
 func (s *Service) compileModel(modelName string) (string, error) {
 	c := comp.NewServer(s.compilationServiceAddress)
 
+	if err := c.Ping(); err != nil {
+		return "", fmt.Errorf("Cannot reach compilation service at %s, is it still running?", s.compilationServiceAddress)
+	}
+
 	m, err := s.getModel(modelName)
 	if err != nil {
 		return "", err
@@ -689,7 +693,6 @@ func (s *Service) StartScoringService(modelName string, port int) (*web.ScoringS
 	}
 
 	const jetty = "jetty-runner.jar"
-
 	j := fs.GetAssetsPath(s.workingDir, jetty)
 
 	pid, err := svc.Start(w, j, s.scoringServiceAddress, port)
