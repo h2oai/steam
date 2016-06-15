@@ -237,6 +237,7 @@ ALTER SEQUENCE cluster_yarn_id_seq OWNED BY cluster_yarn.id;
 
 CREATE TABLE engine (
     id integer NOT NULL,
+    name text NOT NULL,
     location text NOT NULL,
     created timestamp with time zone NOT NULL
 );
