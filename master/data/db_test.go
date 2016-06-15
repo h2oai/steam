@@ -3,6 +3,7 @@ package data
 import (
 	"github.com/h2oai/steamY/master/az"
 	"testing"
+	"time"
 )
 
 func connect(t *testing.T) (*Datastore, *az.Principal) {
@@ -869,4 +870,252 @@ func TestYarnClusters(t *testing.T) {
 	if len(clusters) != 0 {
 		t.Fatal("expected 0 cluster")
 	}
+}
+
+func TestProjects(t *testing.T) {
+	ds, p := connect(t)
+
+	id1, err := ds.CreateProject(p, "project1", "description1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id1)
+
+	id2, err := ds.CreateProject(p, "project2", "description2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id2)
+
+	projects, err := ds.ReadProjects(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(projects) != 2 {
+		t.Fatal("expected 2 projects")
+	}
+
+	p1, err := ds.ReadProject(p, id1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p1.Id != id1 || p1.Name != "project1" || p1.Description != "description1" {
+		t.Fatal("wrong project")
+	}
+
+	p2, err := ds.ReadProject(p, id2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p2.Id != id2 || p2.Name != "project2" || p2.Description != "description2" {
+		t.Fatal("wrong project")
+	}
+
+	if err := ds.DeleteProject(p, id1); err != nil {
+		t.Fatal(err)
+	}
+
+	projects, err = ds.ReadProjects(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(projects) != 1 {
+		t.Fatal("expected 1 project")
+	}
+
+	if err := ds.DeleteProject(p, id2); err != nil {
+		t.Fatal(err)
+	}
+
+	projects, err = ds.ReadProjects(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(projects) != 0 {
+		t.Fatal("expected 0 project")
+	}
+}
+
+func TestModels(t *testing.T) {
+	ds, p := connect(t)
+
+	id1, err := ds.CreateModel(p, Model{
+		0,
+		"model1",
+		"cluster1",
+		"algo1",
+		"dataset1",
+		"column1",
+		"name1",
+		"location1",
+		0,
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id1)
+
+	id2, err := ds.CreateModel(p, Model{
+		0,
+		"model2",
+		"cluster2",
+		"algo2",
+		"dataset2",
+		"column2",
+		"name2",
+		"location2",
+		0,
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id2)
+
+	models, err := ds.ReadModels(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(models) != 2 {
+		t.Fatal("expected 2 models")
+	}
+
+	m1, err := ds.ReadModel(p, id1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if m1.Id != id1 || m1.Name != "model1" {
+		t.Fatal("wrong model")
+	}
+
+	m2, err := ds.ReadModel(p, id2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if m2.Id != id2 || m2.Name != "model2" {
+		t.Fatal("wrong model")
+	}
+
+	if err := ds.DeleteModel(p, id1); err != nil {
+		t.Fatal(err)
+	}
+
+	models, err = ds.ReadModels(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(models) != 1 {
+		t.Fatal("expected 1 model")
+	}
+
+	if err := ds.DeleteModel(p, id2); err != nil {
+		t.Fatal(err)
+	}
+
+	models, err = ds.ReadModels(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(models) != 0 {
+		t.Fatal("expected 0 model")
+	}
+}
+
+func TestProjectModels(t *testing.T) {
+	ds, p := connect(t)
+
+	pid, err := ds.CreateProject(p, "project1", "description1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(pid)
+
+	mid1, err := ds.CreateModel(p, Model{
+		0,
+		"model1",
+		"cluster1",
+		"algo1",
+		"dataset1",
+		"column1",
+		"name1",
+		"location1",
+		0,
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(mid1)
+
+	mid2, err := ds.CreateModel(p, Model{
+		0,
+		"model2",
+		"cluster2",
+		"algo2",
+		"dataset2",
+		"column2",
+		"name2",
+		"location2",
+		0,
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(mid2)
+
+	if err := ds.LinkProjectAndModel(p, pid, mid1); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ds.LinkProjectAndModel(p, pid, mid2); err != nil {
+		t.Fatal(err)
+	}
+
+	models, err := ds.ReadModelsForProject(p, pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(models) != 2 {
+		t.Fatal("expected 2 models")
+	}
+
+	if err := ds.UnlinkProjectAndModel(p, pid, mid1); err != nil {
+		t.Fatal(err)
+	}
+
+	models, err = ds.ReadModelsForProject(p, pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(models) != 1 {
+		t.Fatal("expected 1 model")
+	}
+
+	if err := ds.UnlinkProjectAndModel(p, pid, mid2); err != nil {
+		t.Fatal(err)
+	}
+
+	models, err = ds.ReadModelsForProject(p, pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(models) != 0 {
+		t.Fatal("expected 0 models")
+	}
+
 }
