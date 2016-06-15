@@ -693,3 +693,180 @@ func TestEngines(t *testing.T) {
 		t.Fatal("expected 0 engine")
 	}
 }
+
+func TestExternalClusters(t *testing.T) {
+	ds, p := connect(t)
+
+	id1, err := ds.CreateExternalCluster(p, "cluster1", "address1", "started")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id1)
+
+	id2, err := ds.CreateExternalCluster(p, "cluster2", "address2", "started")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id2)
+
+	clusters, err := ds.ReadClusters(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(clusters) != 2 {
+		t.Fatal("expected 2 clusters")
+	}
+
+	c1, err := ds.ReadCluster(p, id1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c1.Id != id1 || c1.Name != "cluster1" || c1.Address != "address1" || c1.State != "started" {
+		t.Fatal("wrong cluster")
+	}
+
+	c2, err := ds.ReadCluster(p, id2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c2.Id != id2 || c2.Name != "cluster2" || c2.Address != "address2" || c2.State != "started" {
+		t.Fatal("wrong cluster")
+	}
+
+	if err := ds.DeleteCluster(p, id1); err != nil {
+		t.Fatal(err)
+	}
+
+	clusters, err = ds.ReadClusters(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(clusters) != 1 {
+		t.Fatal("expected 1 cluster")
+	}
+
+	if err := ds.DeleteCluster(p, id2); err != nil {
+		t.Fatal(err)
+	}
+
+	clusters, err = ds.ReadClusters(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(clusters) != 0 {
+		t.Fatal("expected 0 cluster")
+	}
+}
+
+func TestYarnClusters(t *testing.T) {
+	ds, p := connect(t)
+
+	eid, err := ds.CreateEngine(p, "engine", "location")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	id1, err := ds.CreateYarnCluster(p, "cluster1", "address1", "started", YarnCluster{
+		0,
+		eid,
+		4,
+		"applicationId1",
+		"memory1",
+		"username1",
+		"outputDir1",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id1)
+
+	id2, err := ds.CreateYarnCluster(p, "cluster2", "address2", "started", YarnCluster{
+		0,
+		eid,
+		4,
+		"applicationId2",
+		"memory2",
+		"username2",
+		"outputDir2",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id2)
+
+	clusters, err := ds.ReadClusters(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(clusters) != 2 {
+		t.Fatal("expected 2 clusters")
+	}
+
+	c1, err := ds.ReadCluster(p, id1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c1.Id != id1 || c1.Name != "cluster1" || c1.Address != "address1" || c1.State != "started" {
+		t.Fatal("wrong cluster")
+	}
+
+	y1, err := ds.ReadYarnCluster(p, c1.DetailId)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if y1.Memory != "memory1" {
+		t.Fatal("wrong yarn cluster")
+	}
+
+	c2, err := ds.ReadCluster(p, id2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c2.Id != id2 || c2.Name != "cluster2" || c2.Address != "address2" || c2.State != "started" {
+		t.Fatal("wrong cluster")
+	}
+
+	y2, err := ds.ReadYarnCluster(p, c2.DetailId)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if y2.Memory != "memory2" {
+		t.Fatal("wrong yarn cluster")
+	}
+
+	if err := ds.DeleteCluster(p, id1); err != nil {
+		t.Fatal(err)
+	}
+
+	clusters, err = ds.ReadClusters(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(clusters) != 1 {
+		t.Fatal("expected 1 cluster")
+	}
+
+	if err := ds.DeleteCluster(p, id2); err != nil {
+		t.Fatal(err)
+	}
+
+	clusters, err = ds.ReadClusters(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(clusters) != 0 {
+		t.Fatal("expected 0 cluster")
+	}
+}
