@@ -624,3 +624,72 @@ func TestSecurity(t *testing.T) {
 		t.Fatal("expected user to be inactive")
 	}
 }
+
+func TestEngines(t *testing.T) {
+	ds, p := connect(t)
+
+	id1, err := ds.CreateEngine(p, "engine1", "location1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id1)
+
+	id2, err := ds.CreateEngine(p, "engine2", "location2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id2)
+
+	engines, err := ds.ReadEngines(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(engines) != 2 {
+		t.Fatal("expected 2 engines")
+	}
+
+	e1, err := ds.ReadEngine(p, id1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if e1.Id != id1 || e1.Name != "engine1" || e1.Location != "location1" {
+		t.Fatal("wrong engine")
+	}
+
+	e2, err := ds.ReadEngine(p, id2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if e2.Id != id2 || e2.Name != "engine2" || e2.Location != "location2" {
+		t.Fatal("wrong engine")
+	}
+
+	if err := ds.DeleteEngine(p, id1); err != nil {
+		t.Fatal(err)
+	}
+
+	engines, err = ds.ReadEngines(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(engines) != 1 {
+		t.Fatal("expected 1 engine")
+	}
+
+	if err := ds.DeleteEngine(p, id2); err != nil {
+		t.Fatal(err)
+	}
+
+	engines, err = ds.ReadEngines(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(engines) != 0 {
+		t.Fatal("expected 0 engine")
+	}
+}
