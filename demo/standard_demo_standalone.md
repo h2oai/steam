@@ -28,7 +28,7 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 
 The following are required if you use the Python demo included in this document. 
 
-- A dataset that will be used to generate a model. This demo uses the well-known iris.csv dataset, and the dataset is saved onto the desktop. 
+- A dataset that will be used to generate a model. This demo uses the well-known iris.csv dataset with headers (available online), and the dataset is saved onto the desktop. 
 - Python 2.7
 
 ## Installing and Starting Steam, the Compilation Service, and H2O
@@ -119,7 +119,6 @@ The steps below show how to build model using the Iris dataset and the GBM algor
 		>>> gbm_regressor
 
 Once created, the model will be visible in the Steam UI. 
-Also note that for backward 
 
 ## Deploying a Model in Steam
 
