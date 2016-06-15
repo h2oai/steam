@@ -1119,3 +1119,122 @@ func TestProjectModels(t *testing.T) {
 	}
 
 }
+
+func TestServices(t *testing.T) {
+	ds, p := connect(t)
+
+	mid1, err := ds.CreateModel(p, Model{
+		0,
+		"model1",
+		"cluster1",
+		"algo1",
+		"dataset1",
+		"column1",
+		"name1",
+		"location1",
+		0,
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(mid1)
+
+	mid2, err := ds.CreateModel(p, Model{
+		0,
+		"model2",
+		"cluster2",
+		"algo2",
+		"dataset2",
+		"column2",
+		"name2",
+		"location2",
+		0,
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(mid2)
+
+	id1, err := ds.CreateService(p, Service{
+		0,
+		mid1,
+		"address1",
+		9001,
+		1111,
+		"started",
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id1)
+
+	id2, err := ds.CreateService(p, Service{
+		0,
+		mid2,
+		"address2",
+		9002,
+		2222,
+		"started",
+		time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(id2)
+
+	services, err := ds.ReadServices(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(services) != 2 {
+		t.Fatal("expected 2 services")
+	}
+
+	s1, err := ds.ReadService(p, id1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s1.Id != id1 || s1.ModelId != mid1 {
+		t.Fatal("wrong service")
+	}
+
+	s2, err := ds.ReadService(p, id2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s2.Id != id2 || s2.ModelId != mid2 {
+		t.Fatal("wrong service")
+	}
+
+	if err := ds.DeleteService(p, id1); err != nil {
+		t.Fatal(err)
+	}
+
+	services, err = ds.ReadServices(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(services) != 1 {
+		t.Fatal("expected 1 service")
+	}
+
+	if err := ds.DeleteService(p, id2); err != nil {
+		t.Fatal(err)
+	}
+
+	services, err = ds.ReadServices(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(services) != 0 {
+		t.Fatal("expected 0 service")
+	}
+}
