@@ -293,6 +293,9 @@ func prime(db *sql.DB) error {
 	if err := primeEntityTypes(db, EntityTypes); err != nil {
 		return err
 	}
+	if err := primeClusterTypes(db, ClusterTypes); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -342,6 +345,18 @@ func primeEntityTypes(db *sql.DB, entityTypes []EntityType) error {
 	return bulkInsert(db, "entity_type", []string{"name"}, func(stmt *sql.Stmt) error {
 		for _, entityType := range entityTypes {
 			_, err := stmt.Exec(entityType.Name)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func primeClusterTypes(db *sql.DB, clusterTypes []ClusterType) error {
+	return bulkInsert(db, "cluster_type", []string{"name"}, func(stmt *sql.Stmt) error {
+		for _, clusterType := range clusterTypes {
+			_, err := stmt.Exec(clusterType.Name)
 			if err != nil {
 				return err
 			}
@@ -1522,9 +1537,9 @@ func (ds *Datastore) CreateExternalCluster(principal *az.Principal, name, addres
 		row := tx.QueryRow(`
 			INSERT INTO
 				cluster
-				(name, type_id, address, state, created)
+				(name, type_id, detail_id, address, state, created)
 			VALUES
-				($1,   $2,      $3,      $4,    now())
+				($1,   $2,      0,         $3,      $4,    now())
 			RETURNING id
 			`, name, ds.ClusterTypes.External, address, state)
 		if err := row.Scan(&id); err != nil {
@@ -1559,7 +1574,7 @@ func (ds *Datastore) CreateYarnCluster(principal *az.Principal, name, address, s
 				cluster_yarn
 				(engine_id, size, application_id, memory, username, output_dir)
 			VALUES
-				($1,        $2,   $3,             $4,     $4,       $6)
+				($1,        $2,   $3,             $4,     $5,       $6)
 			RETURNING id
 			`,
 			cluster.EngineId,
@@ -1578,7 +1593,7 @@ func (ds *Datastore) CreateYarnCluster(principal *az.Principal, name, address, s
 				cluster
 				(name, type_id, detail_id, address, state, created)
 			VALUES
-				($1,   $2,      $3,      $4,    now())
+				($1,   $2,      $3,        $4,      $5,    now())
 			RETURNING id
 			`, name, ds.ClusterTypes.Yarn, yarnClusterId, address, state)
 		if err := row.Scan(&id); err != nil {
@@ -1653,7 +1668,7 @@ func (ds *Datastore) ReadCluster(principal *az.Principal, clusterId int64) (Clus
 func (ds *Datastore) ReadYarnCluster(principal *az.Principal, clusterId int64) (YarnCluster, error) {
 	row := ds.db.QueryRow(`
 		SELECT
-			engine_id, size, application_id, memory, username, output_dir
+			id, engine_id, size, application_id, memory, username, output_dir
 		FROM
 			cluster_yarn
 		WHERE
@@ -1663,7 +1678,7 @@ func (ds *Datastore) ReadYarnCluster(principal *az.Principal, clusterId int64) (
 	return ScanYarnCluster(row)
 }
 
-func (ds *Datastore) DeleteExternalCluster(principal *az.Principal, clusterId int64) error {
+func (ds *Datastore) DeleteCluster(principal *az.Principal, clusterId int64) error {
 	cluster, err := ds.ReadCluster(principal, clusterId)
 	if err != nil {
 		return err
