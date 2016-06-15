@@ -78,6 +78,7 @@ const (
 	ClusterEntity   = "cluster"
 	ProjectEntity   = "project"
 	ModelEntity     = "model"
+	ServiceEntity   = "service"
 
 	ClusterExternal = "external"
 	ClusterYarn     = "yarn"
@@ -112,6 +113,8 @@ func init() {
 		{0, "project.view", "View projects"},
 		{0, "model.manage", "Manage models"},
 		{0, "model.view", "View models"},
+		{0, "service.manage", "Manage services"},
+		{0, "service.view", "View services"},
 	}
 
 	EntityTypes = []EntityType{
@@ -122,6 +125,7 @@ func init() {
 		{0, ClusterEntity},
 		{0, ProjectEntity},
 		{0, ModelEntity},
+		{0, ServiceEntity},
 	}
 
 	ClusterTypes = []ClusterType{
@@ -140,6 +144,7 @@ type EntityTypeKeys struct {
 	Cluster   int64
 	Project   int64
 	Model     int64
+	Service   int64
 }
 
 type ClusterTypeKeys struct {
@@ -161,6 +166,7 @@ func toEntityTypeKeys(entityTypes []EntityType) *EntityTypeKeys {
 		m[ClusterEntity],
 		m[ProjectEntity],
 		m[ModelEntity],
+		m[ServiceEntity],
 	}
 }
 
@@ -1451,18 +1457,6 @@ func (ds *Datastore) CreateEngine(principal *az.Principal, name, location string
 	return id, err
 }
 
-func (ds *Datastore) ReadEngine(principal *az.Principal, engineId int64) (Engine, error) {
-	row := ds.db.QueryRow(`
-		SELECT
-			id, name, location, created
-		FROM
-			engine
-		WHERE
-			id = $1
-		`, engineId)
-	return ScanEngine(row)
-}
-
 func (ds *Datastore) ReadEngines(principal *az.Principal) ([]Engine, error) {
 	rows, err := ds.db.Query(`
 		SELECT
@@ -1488,6 +1482,18 @@ func (ds *Datastore) ReadEngines(principal *az.Principal) ([]Engine, error) {
 	}
 	defer rows.Close()
 	return ScanEngines(rows)
+}
+
+func (ds *Datastore) ReadEngine(principal *az.Principal, engineId int64) (Engine, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, location, created
+		FROM
+			engine
+		WHERE
+			id = $1
+		`, engineId)
+	return ScanEngine(row)
 }
 
 func (ds *Datastore) DeleteEngine(principal *az.Principal, engineId int64) error {
@@ -1546,11 +1552,7 @@ func (ds *Datastore) CreateExternalCluster(principal *az.Principal, name, addres
 
 func (ds *Datastore) CreateYarnCluster(principal *az.Principal, name, address, state string, cluster YarnCluster) (int64, error) {
 	var id int64
-	engine, err := ds.ReadEngine(principal, cluster.EngineId)
-	if err != nil {
-		return id, err
-	}
-	err = ds.exec(func(tx *sql.Tx) error {
+	err := ds.exec(func(tx *sql.Tx) error {
 		var yarnClusterId int64
 		row := tx.QueryRow(`
 			INSERT INTO
@@ -1597,7 +1599,7 @@ func (ds *Datastore) CreateYarnCluster(principal *az.Principal, name, address, s
 			"type":            ClusterYarn,
 			"address":         address,
 			"state":           state,
-			"engine":          engine.Name,
+			"engineId":        strconv.FormatInt(cluster.EngineId, 10),
 			"size":            strconv.FormatInt(cluster.Size, 10),
 			"applicationId":   cluster.ApplicationId,
 			"memory":          cluster.Memory,
@@ -1699,6 +1701,360 @@ func (ds *Datastore) DeleteExternalCluster(principal *az.Principal, clusterId in
 
 // --- Project ---
 
+func (ds *Datastore) CreateProject(principal *az.Principal, name, description string) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				project
+				(name, description, created)
+			VALUES
+				($1,   $2,       now())
+			RETURNING id
+			`, name, description)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Project,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Project, id, metadata{
+			"name":        name,
+			"description": description,
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) LinkProjectAndModel(principal *az.Principal, projectId, modelId int64) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			INSERT INTO
+				project_model
+			VALUES
+				($1, $2)
+			`, projectId, modelId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, LinkOp, ds.EntityTypes.Project, projectId, metadata{
+			"id": strconv.FormatInt(modelId, 10),
+		})
+	})
+}
+
+func (ds *Datastore) UnlinkProjectAndModel(principal *az.Principal, projectId, modelId int64) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				project_model
+			WHERE
+				project_id = $1 AND
+				model_id = $2
+			`, projectId, modelId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, UnlinkOp, ds.EntityTypes.Project, projectId, metadata{
+			"id": strconv.FormatInt(modelId, 10),
+		})
+	})
+}
+
+func (ds *Datastore) ReadProjects(principal *az.Principal) ([]Project, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, description, created
+		FROM
+			project
+		WHERE
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
+					entity_type_id = $2
+			)
+		ORDER BY
+			name
+		`, principal.Id, ds.EntityTypes.Project)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanProjects(rows)
+}
+
+func (ds *Datastore) ReadProject(principal *az.Principal, projectId int64) (Project, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, description, created
+		FROM
+			project
+		WHERE
+			id = $1
+		`, projectId)
+	return ScanProject(row)
+}
+
+func (ds *Datastore) DeleteProject(principal *az.Principal, projectId int64) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				project
+			WHERE
+				id = $1
+			`, projectId,
+		); err != nil {
+			return err
+		}
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Project, projectId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, DeleteOp, ds.EntityTypes.Project, projectId, metadata{})
+	})
+}
+
 // --- Model ---
 
+func (ds *Datastore) CreateModel(principal *az.Principal, model Model) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				model
+				(name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, created)
+			VALUES
+				($1,   $2,           $3,        $4,           $5,                   $6,           $7,       $8,           now())
+			RETURNING id
+			`,
+			model.Name,
+			model.ClusterName,
+			model.Algorithm,
+			model.DatasetName,
+			model.ResponseColumnName,
+			model.LogicalName,
+			model.Location,
+			model.MaxRunTime,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Model,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Model, id, metadata{
+			"name":               model.Name,
+			"clusterName":        model.ClusterName,
+			"algorithm":          model.Algorithm,
+			"datasetName":        model.DatasetName,
+			"responseColumnName": model.ResponseColumnName,
+			"logicalName":        model.LogicalName,
+			"location":           model.Location,
+			"maxRunTime":         strconv.FormatInt(model.MaxRunTime, 10),
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) ReadModels(principal *az.Principal) ([]Model, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, created
+		FROM
+			model
+		WHERE
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
+					entity_type_id = $2
+			)
+		ORDER BY
+			name
+		`, principal.Id, ds.EntityTypes.Model)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanModels(rows)
+}
+
+func (ds *Datastore) ReadModelsForProject(principal *az.Principal, projectId int64) ([]Model, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			m.id, m.name, m.cluster_name, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.created
+		FROM
+			model m,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = m.id AND
+			m.id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND
+					entity_type_id = $3
+			)
+		ORDER BY
+			m.name
+		`, projectId, principal.Id, ds.EntityTypes.Model)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanModels(rows)
+}
+
+func (ds *Datastore) ReadModel(principal *az.Principal, modelId int64) (Model, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, created
+		FROM
+			model
+		WHERE
+			id = $1
+		`, modelId)
+	return ScanModel(row)
+}
+
+func (ds *Datastore) DeleteModel(principal *az.Principal, modelId int64) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				model
+			WHERE
+				id = $1
+			`, modelId,
+		); err != nil {
+			return err
+		}
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Model, modelId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, DeleteOp, ds.EntityTypes.Model, modelId, metadata{})
+	})
+}
+
 // --- Service ---
+
+func (ds *Datastore) CreateService(principal *az.Principal, service Service) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				service
+				(model_id, address, port, process_id, state, created)
+			VALUES
+				($1,       $2,      $3,   $4,         $5,    now())
+			RETURNING id
+			`,
+			service.ModelId,
+			service.Address,
+			service.Port,
+			service.ProcessId,
+			service.State,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			principal.WorkgroupId,
+			ds.EntityTypes.Service,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(principal, tx, CreateOp, ds.EntityTypes.Service, id, metadata{
+			"modelId":   strconv.FormatInt(service.ModelId, 10),
+			"address":   service.Address,
+			"port":      strconv.FormatInt(service.Port, 10),
+			"processId": strconv.FormatInt(service.ProcessId, 10),
+			"state":     service.State,
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) ReadServices(principal *az.Principal) ([]Service, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, model_id, address, port, process_id, state, created
+		FROM
+			service
+		WHERE
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
+					entity_type_id = $2
+			)
+		ORDER BY
+			name
+		`, principal.Id, ds.EntityTypes.Service)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanServices(rows)
+}
+
+func (ds *Datastore) ReadService(principal *az.Principal, serviceId int64) (Service, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, model_id, address, port, process_id, state, created
+		FROM
+			service
+		WHERE
+			id = $1
+		`, serviceId)
+	return ScanService(row)
+}
+
+func (ds *Datastore) DeleteService(principal *az.Principal, serviceId int64) error {
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				service
+			WHERE
+				id = $1
+			`, serviceId,
+		); err != nil {
+			return err
+		}
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Service, serviceId); err != nil {
+			return err
+		}
+		return ds.audit(principal, tx, DeleteOp, ds.EntityTypes.Service, serviceId, metadata{})
+	})
+}
