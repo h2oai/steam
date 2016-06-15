@@ -121,7 +121,7 @@ function showResult(div, status, data) {
                   `
 
         for (label_i in outputDomain ){
-            result += '<tr><td>' + outputDomain[label_i] + '</td> <td>' + probs[label_i] +'</td></tr>';
+            result += '<tr><td>' + outputDomain[label_i] + '</td> <td>' + probs[label_i].toFixed(4) +'</td></tr>';
         }
 
         result += '</tbody></table>';
@@ -194,6 +194,7 @@ function runpred2(form) {
     predResults( $('#queryParams').val() )
   } else {
     predResults($('#allparams').serialize());
+  }
   showStatistics();
 }
   
@@ -315,7 +316,7 @@ function showStats(div, data) {
     warmupCount = data['warmUpCount'];
     if (n > 0) {
         s += '<tr><td> Last prediction</td><td>' +     data['lastTimeUTC']         +'</td></tr>';
-        s += '<tr><td> </td><td>' +                    duration(lastTimeAgoDays)   +' days ago</td></tr>';
+        s += '<tr><td> </td><td>' +                    duration(lastTimeAgoDays)   +' ago</td></tr>';
         s += '<tr><td> </td></tr>'
     //     s +=  '<br>'
     //     + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'

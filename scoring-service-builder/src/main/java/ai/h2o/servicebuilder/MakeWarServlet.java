@@ -106,6 +106,7 @@ public class MakeWarServlet extends HttpServlet {
       copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "custom.css", "custom.css");
+      copyExtraFile(servletPath, webInfPath, webInfDir, "web-predict.xml", "web.xml");
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
       FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "bootstrap"), tmpDir);
       FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "fonts"), tmpDir);
