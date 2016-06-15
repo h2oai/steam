@@ -401,6 +401,7 @@ func truncate(db *sql.DB) error {
 			"role",
 			"permission",
 			"entity_type",
+			"service",
 			"project_model",
 			"model",
 			"project",
@@ -2035,7 +2036,7 @@ func (ds *Datastore) ReadServices(principal *az.Principal) ([]Service, error) {
 					entity_type_id = $2
 			)
 		ORDER BY
-			name
+			address, port
 		`, principal.Id, ds.EntityTypes.Service)
 	if err != nil {
 		return nil, err
