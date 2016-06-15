@@ -1,27 +1,27 @@
 package bindings
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type ModelSchemaBase struct {
 	*Schema
 	/** Model key */
 	ModelId *ModelKeyV3 `json:"model_id"`
-
 	/** The algo name for this Model. */
-	Algo string `json:"algo"`
-
+	Algo string `json:"algo,omitempty"`
 	/** The pretty algo name for this Model (e.g., Generalized Linear Model, rather than GLM). */
-	AlgoFullName string `json:"algo_full_name"`
-
+	AlgoFullName string `json:"algo_full_name,omitempty"`
 	/** The response column name for this Model (if applicable). Is null otherwise. */
-	ResponseColumnName string `json:"response_column_name"`
-
+	ResponseColumnName string `json:"response_column_name,omitempty"`
 	/** The Model's training frame key */
-	DataFrame *FrameKeyV3 `json:"data_frame"`
-
+	DataFrame *FrameKeyV3 `json:"data_frame,omitempty"`
 	/** Timestamp for when this model was completed */
-	Timestamp int64 `json:"timestamp"`
+	Timestamp int64 `json:"timestamp,omitempty"`
 }
 
-func newModelSchemaBase() *ModelSchemaBase {
+func NewModelSchemaBase() *ModelSchemaBase {
 	return &ModelSchemaBase{
 		ModelId:            nil,
 		Algo:               "",
@@ -29,5 +29,15 @@ func newModelSchemaBase() *ModelSchemaBase {
 		ResponseColumnName: "",
 		DataFrame:          nil,
 		Timestamp:          0,
+		Schema:             &Schema{},
 	}
+}
+
+// ToString returns the contents of this object as a JSON String.
+func (o *ModelSchemaBase) ToString() string {
+	j, err := json.MarshalIndent(o, "", "    ")
+	if err != nil {
+		return fmt.Sprint(err)
+	}
+	return string(j)
 }
