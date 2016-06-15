@@ -1626,7 +1626,7 @@ func (ds *Datastore) CreateYarnCluster(principal *az.Principal, name, address, s
 	return id, err
 }
 
-func (ds *Datastore) ReadClusters(principal *az.Principal) ([]Cluster, error) {
+func (ds *Datastore) ReadClusters(principal *az.Principal, offset, limit int64) ([]Cluster, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			id, name, type_id, detail_id, address, state, created
@@ -1645,7 +1645,9 @@ func (ds *Datastore) ReadClusters(principal *az.Principal) ([]Cluster, error) {
 			)
 		ORDER BY
 			name
-		`, principal.Id, ds.EntityTypes.Cluster)
+		OFFSET $3
+		LIMIT $4
+		`, principal.Id, ds.EntityTypes.Cluster, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1782,7 +1784,7 @@ func (ds *Datastore) UnlinkProjectAndModel(principal *az.Principal, projectId, m
 	})
 }
 
-func (ds *Datastore) ReadProjects(principal *az.Principal) ([]Project, error) {
+func (ds *Datastore) ReadProjects(principal *az.Principal, offset, limit int64) ([]Project, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			id, name, description, created
@@ -1801,7 +1803,9 @@ func (ds *Datastore) ReadProjects(principal *az.Principal) ([]Project, error) {
 			)
 		ORDER BY
 			name
-		`, principal.Id, ds.EntityTypes.Project)
+		OFFSET $3
+		LIMIT $4
+		`, principal.Id, ds.EntityTypes.Project, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1888,7 +1892,7 @@ func (ds *Datastore) CreateModel(principal *az.Principal, model Model) (int64, e
 	return id, err
 }
 
-func (ds *Datastore) ReadModels(principal *az.Principal) ([]Model, error) {
+func (ds *Datastore) ReadModels(principal *az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			id, name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, created
@@ -1907,7 +1911,9 @@ func (ds *Datastore) ReadModels(principal *az.Principal) ([]Model, error) {
 			)
 		ORDER BY
 			name
-		`, principal.Id, ds.EntityTypes.Model)
+		OFFSET $3
+		LIMIT $4
+		`, principal.Id, ds.EntityTypes.Model, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -1915,7 +1921,7 @@ func (ds *Datastore) ReadModels(principal *az.Principal) ([]Model, error) {
 	return ScanModels(rows)
 }
 
-func (ds *Datastore) ReadModelsForProject(principal *az.Principal, projectId int64) ([]Model, error) {
+func (ds *Datastore) ReadModelsForProject(principal *az.Principal, projectId, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			m.id, m.name, m.cluster_name, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.created
@@ -1937,7 +1943,9 @@ func (ds *Datastore) ReadModelsForProject(principal *az.Principal, projectId int
 			)
 		ORDER BY
 			m.name
-		`, projectId, principal.Id, ds.EntityTypes.Model)
+		OFFSET $4
+		LIMIT $5
+		`, projectId, principal.Id, ds.EntityTypes.Model, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -2018,7 +2026,7 @@ func (ds *Datastore) CreateService(principal *az.Principal, service Service) (in
 	return id, err
 }
 
-func (ds *Datastore) ReadServices(principal *az.Principal) ([]Service, error) {
+func (ds *Datastore) ReadServices(principal *az.Principal, offset, limit int64) ([]Service, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			id, model_id, address, port, process_id, state, created
@@ -2037,7 +2045,9 @@ func (ds *Datastore) ReadServices(principal *az.Principal) ([]Service, error) {
 			)
 		ORDER BY
 			address, port
-		`, principal.Id, ds.EntityTypes.Service)
+		OFFSET $3
+		LIMIT $4
+		`, principal.Id, ds.EntityTypes.Service, offset, limit)
 	if err != nil {
 		return nil, err
 	}
