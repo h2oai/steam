@@ -2,10 +2,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
@@ -20,19 +17,19 @@ import com.google.gson.Gson;
 
 public class PredictServlet extends HttpServlet {
 
-  private static boolean VERBOSE = false;
-  public static int warmUpCount = 5;
+  private static final boolean VERBOSE = false;
+  public static final int WARM_UP_COUNT = 5;
 
   public static Gson gson = new Gson();
-  public static Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
+  public static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
 
   public static class Times {
-    public long count = 0;
-    public double totalTimeMs = 0;
-    public double totalTimeSquaredMs = 0;
-    public double warmupTimeMs = 0;
-    public double warmupTimeSquaredMs = 0;
-    public double lastMs = 0;
+    private long count = 0;
+    private double totalTimeMs = 0;
+    private double totalTimeSquaredMs = 0;
+    private double warmupTimeMs = 0;
+    private double warmupTimeSquaredMs = 0;
+    private double lastMs = 0;
 
     public void add(long startNs, long endNs) {
       double elapsed = (endNs - startNs) / 1.0e6;
@@ -44,7 +41,7 @@ public class PredictServlet extends HttpServlet {
       totalTimeMs += timeMs;
       double tt = timeMs * timeMs;
       totalTimeSquaredMs += tt;
-      if (count <= warmUpCount) {
+      if (count <= WARM_UP_COUNT) {
         warmupTimeMs += timeMs;
         warmupTimeSquaredMs += tt;
       }
@@ -56,7 +53,7 @@ public class PredictServlet extends HttpServlet {
     }
 
     public double avgAfterWarmup() {
-      return count > warmUpCount ? (totalTimeMs - warmupTimeMs) / (count - warmUpCount) : 0.0;
+      return count > WARM_UP_COUNT ? (totalTimeMs - warmupTimeMs) / (count - WARM_UP_COUNT) : 0.0;
     }
 
     public String toJson() {
@@ -158,12 +155,13 @@ public class PredictServlet extends HttpServlet {
     if (VERBOSE) System.out.println("Get time " + getTimes);
   }
 
-  public static AbstractPrediction predict(RowData row) throws PredictException {
+  public static synchronized AbstractPrediction predict(RowData row) throws PredictException {
     long start = System.nanoTime();
     AbstractPrediction p = model.predict(row);
     long done = System.nanoTime();
     lastTime = System.currentTimeMillis();
     predictionTimes.add(start, done);
+
     if (VERBOSE) System.out.println("Prediction time " + predictionTimes);
     return p;
   }

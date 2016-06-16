@@ -86,20 +86,15 @@ public class PredictPythonServlet extends HttpServlet {
     return modelJson;
   }
 
-  static final byte[] NewlineByteArray = "\n".getBytes();
+  private static final byte[] NewlineByteArray = "\n".getBytes();
 
-  public synchronized String sendPython(String queryString) {
+  private synchronized String sendPython(String queryString) {
     String result = null;
 
     try {
       // restart if python failed
       if (p == null)
         startPython();
-//      else if (stdin == null || stdin.|| !reader.ready() || !err_reader.ready()) {
-//        p.destroy();
-//        startPython();
-//      }
-      // send to python
       try {
         stdin.write(queryString.getBytes());
         stdin.write(NewlineByteArray);
@@ -111,12 +106,12 @@ public class PredictPythonServlet extends HttpServlet {
         e.printStackTrace();
         showStderr();
         // it failed so we restart it and retry
-        if (p != null) p.destroy();
-        startPython();
-        stdin.write(queryString.getBytes());
-        stdin.write(NewlineByteArray);
-        stdin.flush();
-        result = reader.readLine();
+//        if (p != null) p.destroy();
+//        startPython();
+//        stdin.write(queryString.getBytes());
+//        stdin.write(NewlineByteArray);
+//        stdin.flush();
+//        result = reader.readLine();
       }
 //        showStderr();
     }
@@ -231,15 +226,13 @@ public class PredictPythonServlet extends HttpServlet {
 
       String result = "";
       if (line == null) {
-        line = "";
-//        throw new Exception("null input to python");
-        System.out.println("null input to python");
+        System.out.println("null input to python, not sent");
       }
       else {
         result = sendPython(line);
         if (VERBOSE) System.out.println("from python: " + result);
         if (result == null) {
-//        throw new Exception("null result from python");
+          result = "";
           System.out.println("null result from python");
         }
       }
