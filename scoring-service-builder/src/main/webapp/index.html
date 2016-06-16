@@ -63,6 +63,7 @@
         </section>
 
         <section class="col-md-1">
+
           
         </section>
         <section id="java" class="col-md-4 col-sm-12" >
@@ -122,7 +123,8 @@
             // ELSE IF there are some python files, do a python make war
             else if ( $('input[name="python"]').val() || $('input[name="pythonextra"]').val() ){
 
-                $('#python form input[name="pojo"]')
+                $('#python form input[name="pojo"]').get(0).files = $('#java form input[name="pojo"]').get(0).files;
+                $('#python form input[name="jar"]').get(0).files = $('#java form input[name="jar"]').get(0).files;
 
                 $('#python form').submit();
             }

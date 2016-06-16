@@ -40,6 +40,8 @@ function showModel(model, element) {
 
     form = '<legend>Parameters</legend>'
 
+    debugger;
+
     for(i in names) {
         n = names[i];
         i1 = Number(i) + 1;
@@ -86,9 +88,9 @@ function showModel(model, element) {
 
     element.innerHTML = form;
 
-    if (element != null) {
-        element.innerHTML += form;
-    }
+    // if (element != null) {
+    //     element.innerHTML += form;
+    // }
 }
 
 function showInputParameters() {
@@ -103,6 +105,8 @@ function showInputParameters() {
 function showResult(div, status, data) {
 
     result = '<legend>Model Predictions</legend>'
+    
+
     if ("classProbabilities" in data) {
         // binomial and multinomial
         label = data["label"];
