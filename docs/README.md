@@ -158,10 +158,15 @@ After a model is built, the next step is to deploy the model in order to make/vi
 
 Successfully deployed models can be viewed on the **Services** page. On this page, click the Endpoint link to launch the H2O Prediction Services UI. From this page, you can make predictions using one of the following methods:
 
-   - Specify input values based on column data from the original dataset, and then press the first **Predict** button.
-   - Enter a query string using the format `field1=value1&field2=value2` (for example, `C2=2.5&C3=3.4`), and then press the second **Predict** button.
+   - Specify input values based on column data from the original dataset
+    
+     OR
+    
+   - Enter a query string using the format `field1=value1&field2=value2` (for example, `sepal_width=3&petal_len=5`)
 
-![](images/prediction_service.png)
+Use the **Clear** button to clear all entries and begin a new prediction.
+     
+You can view additional statistics about the scoring service by clicking the **More Stats** button.
 
 ## Using Steam with H2O Flow
 
