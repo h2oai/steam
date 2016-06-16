@@ -18,7 +18,7 @@ import com.google.gson.Gson;
 public class PredictServlet extends HttpServlet {
 
   private static final boolean VERBOSE = false;
-  public static final int WARM_UP_COUNT = 5;
+  public static final int warmUpCount = 5;
 
   public static Gson gson = new Gson();
   public static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
@@ -41,7 +41,7 @@ public class PredictServlet extends HttpServlet {
       totalTimeMs += timeMs;
       double tt = timeMs * timeMs;
       totalTimeSquaredMs += tt;
-      if (count <= WARM_UP_COUNT) {
+      if (count <= warmUpCount) {
         warmupTimeMs += timeMs;
         warmupTimeSquaredMs += tt;
       }
@@ -53,7 +53,7 @@ public class PredictServlet extends HttpServlet {
     }
 
     public double avgAfterWarmup() {
-      return count > WARM_UP_COUNT ? (totalTimeMs - warmupTimeMs) / (count - WARM_UP_COUNT) : 0.0;
+      return count > warmUpCount ? (totalTimeMs - warmupTimeMs) / (count - warmUpCount) : 0.0;
     }
 
     public String toJson() {
