@@ -116,6 +116,7 @@ public class MakePythonWarServlet extends HttpServlet {
       copyExtraFile(servletPath, extraPath, tmpDir, "pyindex.html", "index.html");
       copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
+      copyExtraFile(servletPath, extraPath, tmpDir, "custom.css", "custom.css");
       copyExtraFile(servletPath, webInfPath, webInfDir, "web-pythonpredict.xml", "web.xml");
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
       FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "bootstrap"), tmpDir);
