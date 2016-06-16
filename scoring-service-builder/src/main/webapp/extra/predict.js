@@ -40,8 +40,6 @@ function showModel(model, element) {
 
     form = '<legend>Parameters</legend>'
 
-    debugger;
-
     for(i in names) {
         n = names[i];
         i1 = Number(i) + 1;
@@ -71,26 +69,11 @@ function showModel(model, element) {
         form += '</div></div>\n';
     }
 
-    // form += '</fieldset>';
 
     outputDomain = domains[i1];
 
-    // form += '<div class="btnContainer">'
-    // form += ' <input type="button" class="btn btn-primary" name="okbutton" value="PREDICT" onClick="runpred2(this.form)">';
-
-    // form += ' <input type="reset" class="btn btn-default" value="CLEAR">';
-    // form += '</div>'
-
-    // form += '</form>';
-
-    console.log(form);
-    console.log(element);
-
     element.innerHTML = form;
 
-    // if (element != null) {
-    //     element.innerHTML += form;
-    // }
 }
 
 function showInputParameters() {
@@ -345,7 +328,6 @@ function showStats(div, data) {
 
 
 
-
 function showStatistics() {
     cmd = '/stats';
     res = $.get(cmd, function(data, status) {
@@ -362,15 +344,15 @@ $(document).ready(function(){
 
   $('#url-prefix').append( window.location.href + 'predict?');
 
-  $('#results').hide();
+  // $('#results').hide();
 
   showInputParameters();
 
   showStatistics();
 
-  $('#reset-btn').click(function(){
-    $('#results').hide();
-  })
+  // $('#reset-btn').click(function(){
+  //   $('#results').hide();
+  // })
 
   $('#stats-btn').click(function(){
     window.open('/stats', '_blank');
