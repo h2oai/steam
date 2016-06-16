@@ -133,7 +133,7 @@ function showResult(div, status, data) {
 
     div.innerHTML = result;
 
-    $('#results').show();
+   // $('#results').show();
 }
 
 function showUrl(pardiv, params) {

@@ -97,9 +97,9 @@ header .glyphicon {
 
 header .subtitle {
 	vertical-align: super;
-	font-size: 0.6em;
+	font-size: 0.8em;
 	padding-left: 0.4em;
-	color: rgba(23,23,23, 0.3);
+	color: rgba(23,23,23, 0.5);
 }
 
 section{
