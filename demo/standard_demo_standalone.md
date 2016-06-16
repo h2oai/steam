@@ -141,15 +141,12 @@ Once created, the model will be visible in the Steam UI.
 
 6. Make predictions using one of the following methods:
     
-    - Specify input values based on column data from the original dataset, and then press the first **Predict** button.
-    - Enter a query string using the format `field1=value1&field2=value2` (for example, `sepal_width=3&petal_len=5`), and then press the second **Predict** button.
+    - Specify input values based on column data from the original dataset
     
-    ![](images/prediction_service.png)
+     OR
     
-    >***Notes***:
-    
-	- Click the **URL** link below a prediction result. The predict variables will display in the URL (for example, `http://192.16.2.119:8000/?p=petal_len%3D5%26sepal_wid%3D3predict?sepal_wid=3&petal_len=5`) 
+    - Enter a query string using the format `field1=value1&field2=value2` (for example, `sepal_width=3&petal_len=5`)
 
-	- 	Use the **Clear** buttons to clear all entries and begin a new prediction.
+ Use the **Clear** button to clear all entries and begin a new prediction.
      
-	- You can view additional statistics about the scoring service by clicking the **More statistics at** link.
+ You can view additional statistics about the scoring service by clicking the **More Stats** button.

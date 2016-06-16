@@ -51,7 +51,7 @@ Click **Upload** to upload the files to the Prediction Service Builder and creat
 
 Note that when the Builder Service is running, you can also make a war file using command line arguments. For example:
 
-		curl curl -X POST --form pojo=@examples/example-pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@examples/example-pojo/h2o-genmodel.jar localhost:55000/makewar > example.war
+	curl -X POST --form pojo=@examples/example-pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@examples/example-pojo/h2o-genmodel.jar localhost:55000/makewar > example.war
 
  where:
  
@@ -83,7 +83,7 @@ This starts the H2O Prediction Service at localhost:55001. You can this web serv
 
 ### Using example.sh
 
-This distribution includes an **example.sh** file, which can be run to quickly get your prediction service up and running. 
+This distribution includes scripts that can be used to quickly get your prediction service up and running. 
 
 Open a terminal window and run the following commands from the **steamY/steam-scoring-service** folder. 
 
@@ -118,6 +118,7 @@ This returns a JSON result:
 The predictor has two classes. "Y" was predicted with a probability of 97%.
 
 **POST**
+
 JSON can be sent using a POST request. 
 
 	curl POST -d '{Dest: JFK}' localhost:55001/predict
@@ -135,4 +136,4 @@ Prediction statistics are provided as a web service and in the web page for the 
 - How long time the last prediction took in milliseconds
 - Total and average prediction time, with and without skipping the first 5 predictions (warmup)
 
-Click the **More Stats** button to view more Prediction Service stats.
+Click the **More Stats** button to view more Prediction Service statistics.
