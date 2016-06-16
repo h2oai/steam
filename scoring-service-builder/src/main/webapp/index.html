@@ -43,7 +43,7 @@
               <div class="input-inline-row">
                     <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
                     <div class="file-input-div">
-                        <input class="form-control file-input" type="text" id="python1" placeholder="Select a Python file"/>
+                        <input class="form-control file-input" type="text" id="python1" placeholder="Select a Python pre-processing file "/>
                         <input type="file" name="python"/>
                     </div>
               </div>
@@ -51,7 +51,7 @@
               <div class="input-inline-row">
                     <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
                     <div class="file-input-div">
-                        <input class="form-control file-input" type="text" id="python1" placeholder="Select extra Python file(s)"/>
+                        <input class="form-control file-input" type="text" id="python1" placeholder="Select extra Python library file(s)"/>
                         <input type="file" name="pythonextra" multiple />
                     </div>
               </div>
@@ -63,6 +63,7 @@
         </section>
 
         <section class="col-md-1">
+
           
         </section>
         <section id="java" class="col-md-4 col-sm-12" >
@@ -122,7 +123,8 @@
             // ELSE IF there are some python files, do a python make war
             else if ( $('input[name="python"]').val() || $('input[name="pythonextra"]').val() ){
 
-                $('#python form input[name="pojo"]')
+                $('#python form input[name="pojo"]').get(0).files = $('#java form input[name="pojo"]').get(0).files;
+                $('#python form input[name="jar"]').get(0).files = $('#java form input[name="jar"]').get(0).files;
 
                 $('#python form').submit();
             }
