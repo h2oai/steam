@@ -26,3 +26,12 @@ echo "Post"
 echo "curl -X Post --data \"$text\" http://localhost:55001/pypredict"
 curl -X Post --data "$text" http://localhost:55001/pypredict
 echo
+
+
+echo "Batch Post"
+cat jsonlines-python.txt
+echo 'curl -X POST --data-binary @jsonlines-python.txt  http://localhost:55001/predict'
+curl -X POST --data-binary @jsonlines-python.txt  http://localhost:55001/pypredict
+echo
+echo
+

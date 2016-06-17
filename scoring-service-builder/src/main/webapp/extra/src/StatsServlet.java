@@ -21,7 +21,7 @@ public class StatsServlet extends HttpServlet {
       sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
       final String startUTC = sdf.format(new Date(PredictServlet.startTime));
       final String lastPredictionUTC = PredictServlet.lastTime > 0 ? sdf.format(new Date(PredictServlet.lastTime)) : "";
-      final long warmUpCount = PredictServlet.WARM_UP_COUNT;
+      final long warmUpCount = PredictServlet.warmUpCount;
 
       Map<String, Object> js = new HashMap<String, Object>() {
         {
@@ -32,7 +32,7 @@ public class StatsServlet extends HttpServlet {
           put("upTimeMs", upTimeMs);
           put("lastTimeAgoMs", lastTimeAgoMs);
           put("lastTimeAgoMs", lastTimeAgoMs);
-          put("WARM_UP_COUNT", warmUpCount);
+          put("warmUpCount", warmUpCount);
 
           put("prediction", PredictServlet.predictionTimes.toMap());
           put("get", PredictServlet.getTimes.toMap());

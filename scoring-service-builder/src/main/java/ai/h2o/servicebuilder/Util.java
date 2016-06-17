@@ -15,8 +15,8 @@ import java.util.jar.Manifest;
  */
 class Util {
 
-  public static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
-  public static final String JAVA_TARGET_VERSION = "1.6";
+  protected static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
+  protected static final String JAVA_TARGET_VERSION = "1.6";
 
   /**
    * Run command cmd in separate process in directory
@@ -65,7 +65,7 @@ class Util {
 
     for (File t : tobeJared) {
       if (t == null || !t.exists() || t.isDirectory()) {
-        if (!t.isDirectory())
+        if (t != null && !t.isDirectory())
           System.out.println("Can't add to jar " + t);
         continue;
       }
