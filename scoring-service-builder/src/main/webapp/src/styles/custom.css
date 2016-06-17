@@ -1,42 +1,42 @@
 @font-face {
 	font-family: 'Borda';
-	src: url('fonts/Borda.ttf');
+	src: url('../fonts/Borda.ttf');
 	font-weight: normal;
 }
 
 @font-face {
 	font-family: 'Borda';
-	src: url('fonts/Borda Light.ttf');
+	src: url('../fonts/Borda Light.ttf');
 	font-weight: lighter;
 }
 
 @font-face {
 	font-family: 'Borda';
-	src: url('fonts/Borda Bold.ttf');
+	src: url('../fonts/Borda Bold.ttf');
 	font-weight: bold;
 }
 
 @font-face {
 	font-family: 'DINPro';
-	src: url('fonts/DINPro-Regular.ttf');
+	src: url('../fonts/DINPro-Regular.ttf');
 	font-weight: normal;
 }
 
 @font-face {
 	font-family: 'DINPro';
-	src: url('fonts/DINPro-Light.ttf');
+	src: url('../fonts/DINPro-Light.ttf');
 	font-weight: 200;
 }
 
 @font-face {
 	font-family: 'DINPro';
-	src: url('fonts/DINPro-Bold.ttf');
+	src: url('../fonts/DINPro-Bold.ttf');
 	font-weight: bold;
 }
 
 @font-face {
 	font-family: 'DINPro';
-	src: url('fonts/DINPro-Medium.ttf');
+	src: url('../fonts/DINPro-Medium.ttf');
 	font-weight: 600;
 }
 
@@ -64,6 +64,7 @@ main{
 	background-color: rgba(36, 67, 90, 0.8);
 	font-family: 'Borda';
 	font-weight: lighter;
+	margin-top: 0;
 
 }
 
@@ -229,4 +230,9 @@ form {
 
 .noBorders > tbody > tr > td {
 	border: none;
+}
+
+.body-container {
+	margin-top: 0;
+	padding: 0 !important;
 }
