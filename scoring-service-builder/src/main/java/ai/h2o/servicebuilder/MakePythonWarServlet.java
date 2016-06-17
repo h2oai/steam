@@ -139,6 +139,8 @@ public class MakePythonWarServlet extends HttpServlet {
       filesc.add(new File(tmpDir, "index.html"));
       filesc.add(new File(tmpDir, "jquery.js"));
       filesc.add(new File(tmpDir, "predict.js"));
+      filesc.add(new File(tmpDir, "custom.css"));
+
       Collection<File> dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "bootstrap"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
       filesc.addAll(dirc);
       dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "fonts"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
