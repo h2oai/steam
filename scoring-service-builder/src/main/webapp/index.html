@@ -23,7 +23,7 @@
 
 
     </head>
- 
+
   <body>
 
       <div class="title grad container-fluid">
@@ -58,13 +58,13 @@
 
               <input type="file" name="pojo"/>
               <input type="file" name="jar"/>
-          </form>    
+          </form>
 
         </section>
 
         <section class="col-md-1">
 
-          
+
         </section>
         <section id="java" class="col-md-4 col-sm-12" >
           <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Java Prediction Files<span class="subtitle">*required</span></header>
@@ -85,16 +85,16 @@
                         <input type="file" name="jar" />
                     </div>
               </div>
-          </form>   
+          </form>
         </section>
 
         <div class="btnContainer col-md-12">
           <input id="upload" class="btn btn-primary" type="submit" value="Upload"></input>
           <input id="reset" class="btn btn-default" type="reset"></input>
         </div>
-  
+
       </main>
-      
+
       <script>
         $('.file-icon').click(function(){
             $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
@@ -104,7 +104,7 @@
             $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
         });
 
-        $('input[type="file"').change(function(){
+        $('input[type="file"]').change(function(){
 
             var names = [];
             for (var i = 0; i < $(this).get(0).files.length; ++i) {
@@ -119,10 +119,11 @@
             // IF POJO/JAR, gives error
             if ( !$('#java form input[name="pojo"]').val() || !$('#java form input[name="jar"]').val()){
                alert('You must select at least a POJO file, and a JAR to make a WAR service. Python files are optional though.');
-            } 
+            }
             // ELSE IF there are some python files, do a python make war
             else if ( $('input[name="python"]').val() || $('input[name="pythonextra"]').val() ){
-
+                console.log($('#java form input[name="pojo"]').get(0).files);
+                console.log($('#java form input[name="jar"]').get(0).files);
                 $('#python form input[name="pojo"]').get(0).files = $('#java form input[name="pojo"]').get(0).files;
                 $('#python form input[name="jar"]').get(0).files = $('#java form input[name="jar"]').get(0).files;
 
@@ -134,7 +135,7 @@
               $('#java form').submit();
             }
 
-            
+
         });
 
         $('#reset').click(function(){
