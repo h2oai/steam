@@ -40,9 +40,6 @@ The following screenshot shows how to make a War file using a POJO file and a Ja
 
 ![Make War](scoring-service-builder/images/make_war.png)
 
-You will be prompted to save the War file upon completion. 
-
-![Save War](scoring-service-builder/images/save_war.png)
 
 **Using the CLI**
 
