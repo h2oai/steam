@@ -197,6 +197,10 @@ select:-moz-focusring {
     text-shadow: 0 0 0 #000;
 }
 
+.glyphicon.glyphicon-new-window {
+    color: rgba(36, 67, 90, 0.8);
+}
+
 @-moz-document url-prefix() {
     ::-moz-focus-inner {
         border: none

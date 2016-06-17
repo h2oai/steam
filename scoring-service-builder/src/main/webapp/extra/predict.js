@@ -82,7 +82,6 @@
   var params = {};
   window.updateUrl = function(event) {
     params[event.target.name] = event.target.value;
-    // console.log(params);
     var queryString = '';
     for (var key in params) {
       if (params.hasOwnProperty(key) && params[key] !== '') {
@@ -90,9 +89,8 @@
       }
     }
     queryString = queryString.substring(0, queryString.length - 1);
-    console.log(queryString);
     $('#queryParams').val(queryString);
-    $('#query-link').attr('href', '?' + queryString);
+    $('#query-link').attr('href', 'predict?' + queryString);
   };
 
   function showInputParameters() {
