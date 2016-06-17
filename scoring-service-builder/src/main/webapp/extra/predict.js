@@ -259,25 +259,26 @@
     return s;
   }
 
-  function showOneStat(label, data, s, warmupCount) {
+  function showOneStat(label, data, warmupCount) {
     // s = label + ' (' + data['count'] + ') Last took ' + Number(data['lastMs']).toFixed(3) + ' ms. '
     // + 'Average time ' + Number(data['averageTime']).toFixed(3)
     // + ' (after ' + warmUpCount + ' warmups ' + Number(data['averageAfterWarmupTime']).toFixed(3) + ') ms.';
+    var newRow = '';
+    newRow += '<tr></tr>';
+    newRow += '<tr><td>' + label + '</td><td>Last took: </td><td>' + Number(data['lastMs']).toFixed(3) + ' ms</td></tr>';
+    newRow += '<tr><td>(n=' + data['count'] + ')</td><td>Average time </td><td>' + Number(data['averageTime']).toFixed(3) + ' ms </td></tr>';
+    newRow += '<tr><td></td><td>After ' + warmupCount + ' warmups: </td><td>' + Number(data['averageAfterWarmupTime']).toFixed(3) + ' ms</td></tr>';
+    newRow += '<tr></tr>';
 
-    s += '<tr></tr>';
-    s += '<tr><td>' + label + '</td><td>Last took: </td><td>' + Number(data['lastMs']).toFixed(3) + ' ms</td></tr>';
-    s += '<tr><td>(n=' + data['count'] + ')</td><td>Average time </td><td>' + Number(data['averageTime']).toFixed(3) + ' ms </td></tr>';
-    s += '<tr><td></td><td>After ' + warmupCount + ' warmups: </td><td>' + Number(data['averageAfterWarmupTime']).toFixed(3) + ' ms</td></tr>';
-    s += '<tr></tr>';
-
-    return s;
+    return newRow;
   }
 
-  function showStat(stat, textlabel, s, warmupCount) {
+  function showStat(stat, textlabel, warmupCount) {
     if (stat['count'] > 0) {
       //s +=  '<p>'
-      return showOneStat(textlabel, stat, s, warmupCount);
+      return showOneStat(textlabel, stat, warmupCount);
     }
+    return '';
   }
 
 // function showStats(div, data) {
@@ -317,7 +318,7 @@
 
     // s = 'Service started ' + data['startTimeUTC'] + '. Uptime ' + duration(upDays) + "."; //upDays.toFixed(3) + ' days. ';
     var n = Number(data.prediction.count);
-    var warmupCount = data.WARM_UP_COUNT;
+    var warmupCount = data.warmUpCount;
     if (n > 0) {
       s += '<tr><td> Last prediction</td><td>' + data.lastTimeUTC + '</td></tr>';
       s += '<tr><td> </td><td>' + duration(lastTimeAgoDays) + ' ago</td></tr>';
@@ -325,11 +326,11 @@
       //     s +=  '<br>'
       //     + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'
       //     +  '<p>'
-      showOneStat('Prediction', data.prediction, s, warmupCount);
-      showStat(data.get, 'Get', s, warmupCount);
-      showStat(data.post, 'Post', s, warmupCount);
-      showStat(data.pythonget, 'Python Get', s, warmupCount);
-      showStat(data.pythonpost, 'Python Post', s, warmupCount);
+      s +=showOneStat('Prediction', data.prediction, warmupCount);
+      s += showStat(data.get, 'Get', warmupCount);
+      s += showStat(data.post, 'Post', warmupCount);
+      s += showStat(data.pythonget, 'Python Get', warmupCount);
+      s += showStat(data.pythonpost, 'Python Post', warmupCount);
     }
 
     // url = window.location.href + "stats";

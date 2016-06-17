@@ -197,11 +197,6 @@ select:-moz-focusring {
     text-shadow: 0 0 0 #000;
 }
 
-select {
-    -moz-appearance: none;
-    -webkit-appearance: none;
-}
-
 @-moz-document url-prefix() {
     ::-moz-focus-inner {
         border: none
