@@ -90,7 +90,30 @@
     }
     queryString = queryString.substring(0, queryString.length - 1);
     $('#queryParams').val(queryString);
-    $('#query-link').attr('href', 'predict?' + queryString);
+    if (queryString === '') {
+      window.setEmptyUrl();
+    } else {
+      $('#query-link').css({
+        cursor: 'pointer'
+      })
+      .unbind('click')
+      .attr('href', 'predict?' + queryString);
+    }
+  };
+
+  window.setEmptyUrl = function() {
+    for (var key in params) {
+      if (params.hasOwnProperty(key) && params[key] !== '') {
+        params[key] = '';
+      }
+    }
+    $('#query-link').css({
+      cursor: 'not-allowed'
+    })
+    .bind('click', function(e) {
+      e.preventDefault();
+    })
+    .attr('href', '');
   };
 
   function showInputParameters() {
@@ -324,7 +347,7 @@
       //     s +=  '<br>'
       //     + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'
       //     +  '<p>'
-      s +=showOneStat('Prediction', data.prediction, warmupCount);
+      s += showOneStat('Prediction', data.prediction, warmupCount);
       s += showStat(data.get, 'Get', warmupCount);
       s += showStat(data.post, 'Post', warmupCount);
       s += showStat(data.pythonget, 'Python Get', warmupCount);
@@ -358,6 +381,7 @@
   $(document).ready(function() {
 
     $('#url-prefix').append(window.location.href + 'predict?');
+    window.setEmptyUrl();
 
     // $('#results').hide();
 
@@ -372,5 +396,5 @@
     $('#stats-btn').click(function() {
       window.open('/stats', '_blank');
     });
-  })
+  });
 })(window);
