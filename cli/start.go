@@ -18,7 +18,7 @@ Examples:
 func start(c *context) *cobra.Command {
 	cmd := newCmd(c, startHelp, nil)
 	cmd.AddCommand(startCloud(c))
-	// cmd.AddCommand(startService(c))
+	cmd.AddCommand(startService(c))
 	return cmd
 }
 

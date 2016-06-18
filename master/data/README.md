@@ -1,4 +1,4 @@
-# OSX Installation
+# Development Notes
 
 ## Install postgresql
 
@@ -11,7 +11,7 @@ Install using `brew`:
 
 Download and install from here: https://www.pgadmin.org/download/macosx.php
 
-## Configuration (development only)
+## Configuration
 
 Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
 
@@ -19,25 +19,29 @@ Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
 
 ## Start postgresql
 
+For development:
+
+    postgres -D /usr/local/var/postgres
+
+OR
+
 To have launchd start postgresql at login:
 
     ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents
-
-Then to load postgresql now:
-
     launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-
-Or, if you don't want/need launchctl, you can just run:
-
-    postgres -D /usr/local/var/postgres
 
 ## Create application user
 
     createuser -P steam
 
-## Set up steam database
+## Create steam database
 
-    psql -U su_name postgres -a -f init.sql
+    psql -U su_name postgres -a -f create-database.sql
 
 (On OSX, `su_name` will be your OSX username)
+
+## Drop steam database
+
+    psql -U su_name postgres -a -f drop-database.sql
+
 
