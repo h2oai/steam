@@ -5,12 +5,12 @@ import (
 	"log"
 	"sort"
 	"strconv"
-	"sync"
+	// "sync"
 	"time"
 
 	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/lib/proxy"
+	// "github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/az"
@@ -82,10 +82,10 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 	if err != nil {
 		return 0, fmt.Errorf("Failed storing cluster:", err)
 	}
-	s.clusterProxy.NewProxy(c.ID, c.Address)
-	if err := s.pollCloud(toCloud(c)); err != nil {
-		return nil, err
-	}
+	// s.clusterProxy.NewProxy(c.ID, c.Address)
+	// if err := s.pollCloud(toCloud(c)); err != nil {
+	// 	return nil, err
+	// }
 
 	return clusterId, nil
 }
@@ -622,9 +622,9 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 	// 2. attempt to compile and start the service
 	// 3. update the Service record state to "started" if successful, or "failed" if not.
 
-	if err := c.Ping(); err != nil {
-		return "", fmt.Errorf("Cannot reach compilation service at %s, is it still running?", s.compilationServiceAddress)
-	}
+	// if err := c.Ping(); err != nil {
+	// 	return "", fmt.Errorf("Cannot reach compilation service at %s, is it still running?", s.compilationServiceAddress)
+	// }
 
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
