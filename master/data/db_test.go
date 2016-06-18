@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func connect(t *testing.T) (*Datastore, *az.Principal) {
+func connect(t *testing.T) (*Datastore, az.Principal) {
 	db, err := Connect("steam", "steam", "disable")
 	if err != nil {
 		t.Error(err)
@@ -23,18 +23,32 @@ func connect(t *testing.T) (*Datastore, *az.Principal) {
 		t.Error(err)
 	}
 
-	uid, wgid, err := ds.CreateSuperuser("Superuser", "")
+	const suName = "Superuser"
+	const suPassword = "Password"
+	uid, wgid, err := ds.CreateSuperuser(suName, suPassword)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := &az.Principal{uid, wgid}
+	p := ds.NewSuperuserPrincipal(uid, wgid, suName, suPassword)
 
 	if err := ds.SetupSuperuser(p); err != nil {
 		t.Fatal(err)
 	}
 
 	return ds, p
+}
+
+func TestInvalidIdentity(t *testing.T) {
+	ds, p := connect(t)
+
+	userpwd, err := ds.ReadIdentityAndPassword(p, "user1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(userpwd)
+
 }
 
 func TestPrivilegesForIdentity(t *testing.T) {
@@ -447,7 +461,7 @@ func TestSecurity(t *testing.T) {
 	}
 	if err := ds.CreatePrivilege(p, Privilege{
 		Owns,
-		p.WorkgroupId,
+		p.WorkgroupId(),
 		ds.EntityTypes.Identity,
 		user1Id,
 	}); err != nil {
@@ -462,9 +476,12 @@ func TestSecurity(t *testing.T) {
 	if len(users) == 0 {
 		t.Fatal("expected > 0 users")
 	}
-	userpwd, err := ds.ReadIdentityAndPassword(p, user1Id)
+	userpwd, err := ds.ReadIdentityAndPassword(p, "user1")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if userpwd == nil {
+		t.Fatal("user not saved correctly")
 	}
 	if userpwd.Id != user1Id || userpwd.Name != "user1" || userpwd.Password != "password1" {
 		t.Fatal("user not saved correctly")
@@ -818,7 +835,7 @@ func TestYarnClusters(t *testing.T) {
 		t.Fatal("wrong cluster")
 	}
 
-	y1, err := ds.ReadYarnCluster(p, c1.DetailId)
+	y1, err := ds.ReadYarnCluster(p, c1.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -836,7 +853,7 @@ func TestYarnClusters(t *testing.T) {
 		t.Fatal("wrong cluster")
 	}
 
-	y2, err := ds.ReadYarnCluster(p, c2.DetailId)
+	y2, err := ds.ReadYarnCluster(p, c2.Id)
 	if err != nil {
 		t.Fatal(err)
 	}

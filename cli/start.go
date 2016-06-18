@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -18,7 +18,7 @@ Examples:
 func start(c *context) *cobra.Command {
 	cmd := newCmd(c, startHelp, nil)
 	cmd.AddCommand(startCloud(c))
-	cmd.AddCommand(startService(c))
+	// cmd.AddCommand(startService(c))
 	return cmd
 }
 
@@ -44,35 +44,36 @@ func startCloud(c *context) *cobra.Command {
 			log.Fatalln("Incorrect number of arguments. See 'steam help start cloud'.")
 		}
 
-		name := args[0]
-		engine := args[1]
+		// FIXME
+
+		// name := args[0]
+		// engine := args[1]
 
 		// --- add additional args here ---
 
-		log.Println("Attempting to start cluster...")
-		cloud, err := c.remote.StartCloud(name, engine, size, mem, username)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		// log.Println("Attempting to start cluster...")
+		// cloud, err := c.remote.StartCloud(name, engine, size, mem, username)
+		// if err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		fmt.Println("Cluster started at:", cloud.Address)
+		// fmt.Println("Cluster started at:", cloud.Address)
 
-		if details {
-			info, err := c.remote.GetCloudStatus(cloud.Name)
-			if err != nil {
-				log.Fatalln(err)
-			}
+		// if details {
+		// 	info, err := c.remote.GetCloudStatus(cloud.Name)
+		// 	if err != nil {
+		// 		log.Fatalln(err)
+		// 	}
 
-			fmt.Printf(
-				`
-	      Engine: %v
-	     Version: %v
-	 Total Nodes: %v
-	Total Memory: %v
-`, info.EngineName, info.EngineVersion, info.Size, info.Memory)
-		}
-		// TODO: name corresponds to id for purpose of stopCloud
-
+		// 	fmt.Printf(
+		// 		`
+		// Engine: %v
+		// Version: %v
+		// Total Nodes: %v
+		// Total Memory: %v
+		// `, info.EngineName, info.EngineVersion, info.Size, info.Memory)
+		// }
+		// // TODO: name corresponds to id for purpose of stopCloud
 	})
 
 	cmd.Flags().IntVarP(&size, "size", "n", 1, "The number of nodes to provision.")

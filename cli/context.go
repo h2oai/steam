@@ -106,6 +106,6 @@ func (c *context) printt(header string, lines []string) {
 	w.Flush()
 }
 
-func fmtAgo(ts web.Timestamp) string {
-	return fmt.Sprint(time.Unix(int64(ts), 0))
+func fmtAgo(ts int64) string {
+	return fmt.Sprint(time.Unix(ts, 0))
 }

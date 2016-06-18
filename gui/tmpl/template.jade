@@ -93,8 +93,8 @@ html.no-js
         .form-field-label Which version of H2O should this cluster run?
         .form-field
           span.dropdown
-            select.dropdown-select(data-bind="options:engineNames, value:engineName, optionsCaption:'Choose Version...'")
-        .form-field-error(data-bind="text:engineNameError")
+            select.dropdown-select(data-bind="options:engines, value:engine, optionsText:'name', optionsCaption:'Choose Version...'")
+        .form-field-error(data-bind="text:engineError")
 
         .form-field-label How many nodes should this cluster have?
         .form-field
@@ -235,17 +235,11 @@ html.no-js
               tr
                 th State
                 td(data-bind="text:state")
-              tr
-                th Engine
-                td(data-bind="text:engineName")
               // ko with: cloudDetails
               tr
                 th Version
                 td(data-bind="text:engineVersion")
               // /ko
-              tr
-                th Total Nodes
-                td(data-bind="text:size")
               // ko with: cloudDetails
               tr
                 th Total Memory
@@ -261,12 +255,20 @@ html.no-js
                 th Address
                 td
                   a(target="_blank" data-bind="attr:{ href:address }, text:address")
+              // ko with:yarnCluster
+              tr
+                th Engine
+                td(data-bind="text:engine_id")
+              tr
+                th Total Nodes
+                td(data-bind="text:size")
               tr
                 th Application ID
-                td(data-bind="text:applicationId")
+                td(data-bind="text:application_id")
               tr
                 th Username
                 td(data-bind="text:username")             
+              // /ko
               tr
                 th Created
                 td(data-bind="text:createdAt")
@@ -396,9 +398,6 @@ html.no-js
           table
             tbody
               tr
-                th Cluster
-                td(data-bind="text: cloud")
-              tr
                 th Algo
                 td(data-bind="text: algo")
               tr
@@ -410,9 +409,6 @@ html.no-js
               tr
                 th Max Run Time
                 td(data-bind="text: maxRunTime")
-              tr
-                th Java Model Location
-                td(data-bind="text: javaModelPath")
               tr
                 th Created
                 td(data-bind="text:createdAt")
