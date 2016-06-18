@@ -22,7 +22,7 @@ type Privilege struct {
 
 type Permission struct {
 	Id          int64
-	Name        string
+	Code        int64
 	Description string
 }
 

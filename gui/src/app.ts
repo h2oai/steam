@@ -571,6 +571,7 @@ module Main {
         template: string
     }
 
+    // FIXME: Get rid of the "I" postfix -- what is this for?
     interface FolderI extends Folder {
         isActive: Sig<boolean>
         subheadI: string
@@ -593,13 +594,13 @@ module Main {
     }
 
     interface RegisterCloudDialogResult {
-        cloud: Proxy.Cloud
+        clusterId: int
     }
 
     interface StartCloudDialog extends Dialog {
-        engineNames: Sigs<string>
-        engineName: Sig<string>
-        engineNameError: Sig<string>
+        engines: Sigs<Proxy.Engine>
+        engine: Sig<Proxy.Engine>
+        engineError: Sig<string>
         cloudId: Sig<string>
         cloudIdError: Sig<string>
         cloudSize: Sig<string>
@@ -612,7 +613,7 @@ module Main {
     }
 
     interface StartCloudDialogResult {
-        cloud: Proxy.Cloud
+        clusterId: int
     }
 
     interface BuildModelDialog extends Dialog {
@@ -667,15 +668,16 @@ module Main {
     }
 
     interface CloudDetailsPane extends Pane {
-        engineName: string
-        size: string
-        applicationId: string
+        // engineName: string
+        // size: string
+        // applicationId: string
+        // memory: string
+        // username: string
         address: string
-        memory: string
-        username: string
         state: Sig<string>
         createdAt: string
         cloudDetails: Sig<CloudDetail>
+        yarnCluster: Sig<Proxy.YarnCluster>
         error: Sig<string>
         canStopCloud: boolean
         stopCloud: Act
@@ -715,12 +717,12 @@ module Main {
     }
 
     interface ModelBasePane extends Pane {
-        cloud: string
+        // cloud: string
         algo: string
         frame: string
         responseColumn: string
         maxRunTime: string
-        javaModelPath: string
+        // javaModelPath: string
         createdAt: string
     }
 
@@ -771,7 +773,7 @@ module Main {
     //
 
     function newRegisterCloudDialog(ctx: Context, go: Eff<RegisterCloudDialogResult>): RegisterCloudDialog {
-        const 
+        const
             error = sig<string>(''),
             address = sig<string>(void 0),
             addressError = lift(address, (address): string => address ? '' : 'Enter a valid IP:Port'),
@@ -781,11 +783,11 @@ module Main {
                     return
                 }
                 ctx.setBusy('Connecting to cluster...')
-                ctx.remote.registerCloud(address(), (err, cloud) => {
+                ctx.remote.registerCluster(address(), (err, clusterId) => {
                     if (err) {
                         error(err.message)
                     } else {
-                        go({ cloud: cloud })
+                        go({ clusterId: clusterId })
                     }
                     ctx.setFree()
                 })
@@ -813,10 +815,10 @@ module Main {
 
         const error = sig<string>('')
 
-        const engineNames = sigs<string>([])
-        const engineName = sig<string>(void 0)
-        const engineNameError = lift(engineName, (engineName): string =>
-            engineName
+        const engines = sigs<Proxy.Engine>([])
+        const engine = sig<Proxy.Engine>(void 0)
+        const engineError = lift(engine, (engine): string =>
+            engine
                 ? ''
                 : "Select a H2O version"
         )
@@ -846,7 +848,7 @@ module Main {
 
         )
 
-        const canStartCloud = lift4(engineNameError, cloudIdError, cloudSizeError, cloudMemoryError, (e1, e2, e3, e4): boolean =>
+        const canStartCloud = lift4(engineError, cloudIdError, cloudSizeError, cloudMemoryError, (e1, e2, e3, e4): boolean =>
             e1 === '' && e2 === '' && e3 === '' && e4 === ''
         )
 
@@ -855,11 +857,11 @@ module Main {
                 return
             }
             ctx.setBusy('Creating cluster...')
-            ctx.remote.startCloud(cloudId(), engineName(), cloudSizeNum(), cloudMemory(), ctx.principal.username, (err, cloud) => {
+            ctx.remote.startYarnCluster(cloudId(), engine().id, cloudSizeNum(), cloudMemory(), ctx.principal.username, (err, clusterId) => {
                 if (err) {
                     error(err.message)
                 } else {
-                    go({ cloud: cloud })
+                    go({ clusterId: clusterId })
                 }
                 ctx.setFree()
             })
@@ -868,19 +870,18 @@ module Main {
             go(null)
         }
 
-        ctx.remote.getEngines((err, engines) => {
+        ctx.remote.getEngines((err, items) => {
             if (err) {
                 return
             }
-
-            engineNames(_.map(engines, (engine) => engine.name))
+            engines(items)
         })
 
         return {
             title: 'Start a new cluster',
-            engineNames: engineNames,
-            engineName: engineName,
-            engineNameError: engineNameError,
+            engines: engines,
+            engine: engine,
+            engineError: engineError,
             cloudId: cloudId,
             cloudIdError: cloudIdError,
             cloudSize: cloudSize,
@@ -896,7 +897,7 @@ module Main {
         }
     }
 
-    function newBuildModelDialog(ctx: Context, cloudId: string, go: Eff<BuildModelDialogResult>): BuildModelDialog {
+    function newBuildModelDialog(ctx: Context, cloudId: int, go: Eff<BuildModelDialogResult>): BuildModelDialog {
 
         const error = sig<string>('')
 
@@ -959,7 +960,7 @@ module Main {
         }
     }
 
-    function newDeployModelDialog(ctx: Context, modelId: string, go: Eff<DeployModelDialogResult>): DeployModelDialog {
+    function newDeployModelDialog(ctx: Context, model: Proxy.Model, go: Eff<DeployModelDialogResult>): DeployModelDialog {
 
         const error = sig<string>('')
 
@@ -979,7 +980,7 @@ module Main {
 
         const deployModel: Act = () => {
             ctx.setBusy('Deploying model...')
-            ctx.remote.startScoringService(modelId, portNum(), (err) => {
+            ctx.remote.startScoringService(model.id, portNum(), (err) => {
                 if (err) {
                     error(err.message)
                 } else {
@@ -993,7 +994,7 @@ module Main {
         }
 
         return {
-            title: `Deploy Model ${modelId}`,
+            title: `Deploy Model ${model.name}`,
             port: port,
             portError: portError,
             canDeployModel: canDeployModel,
@@ -1077,22 +1078,22 @@ module Main {
             ctx.pushDialog(dialog)
         }
 
-        ctx.remote.getClouds((err, clouds) => {
+        ctx.remote.getClusters(0, 10000, (err, clouds) => {
             if (err) {
                 error(err.message)
                 return
             }
             items(_.map(clouds, (cloud): FolderI => {
                 const slugI = sig<string>('NA')
-                const isActive = sig<boolean>(cloud.state !== 'Stopped')
+                const isActive = sig<boolean>(cloud.state !== 'stopped')
 
-                if (cloud.state !== 'Stopped') {
-                    slugI(timestampToAge(cloud.activity))
+                if (cloud.state !== 'stopped') {
+                    // slugI(timestampToAge(cloud.activity))
                 }
                 return {
                     title: cloud.name,
                     subhead: 'State:',
-                    slug: String(cloud.state),
+                    slug: cloud.state,
                     execute: () => { ctx.showCloud(cloud) },
                     template: 'folderI',
                     isActive: isActive,
@@ -1114,14 +1115,14 @@ module Main {
         }
     }
 
-    function newCloudPane(ctx: Context, cloud: Proxy.Cloud): CloudPane {
+    function newCloudPane(ctx: Context, cloud: Proxy.Cluster): CloudPane {
         const error = sig<string>('')
         const slugI = sig<string>('')
         const items: FolderI[] = [
             {
                 title: 'Cluster Details',
-                subhead: 'Size:',
-                slug: String(cloud.size),
+                subhead: 'State:',
+                slug: cloud.state,
                 execute: () => { ctx.showCloudDetails(cloud) },
                 template: 'folder',
                 isActive: sig<boolean>(false),
@@ -1130,19 +1131,19 @@ module Main {
             }
         ]
 
-        if (cloud.state !== 'Stopped') {
+        if (cloud.state !== 'stopped') {
             const modelSlug = sig<string>('')
             const jobSlug = sig<string>('')
             const isActive = sig<boolean>(true)
 
-            ctx.remote.getCloudModels(cloud.name, (err, models) => {
+            ctx.remote.getClusterModels(cloud.id, (err, models) => {
                 if (err) {
                     alert(err.message)
                     return
                 }
                 modelSlug(String(models.length))
             })
-            ctx.remote.getJobs(cloud.name, (err, jobs) => {
+            ctx.remote.getJobs(cloud.id, (err, jobs) => {
                 if (err) {
                     alert(err.message)
                     return
@@ -1182,14 +1183,16 @@ module Main {
         }
     }
 
-    function newCloudDetailsPane(ctx: Context, cloud: Proxy.Cloud): CloudDetailsPane {
+    function newCloudDetailsPane(ctx: Context, cloud: Proxy.Cluster): CloudDetailsPane {
         const error = sig<string>('')
         const state = sig<string>(cloud.state)
         const cloudDetails = sig<CloudDetail>(null)
+        const yarnClusterDetails = sig<Proxy.YarnCluster>(null)
         const canStopCloud = !isExternalCluster(cloud)
+        const canStop = sig<boolean>(cloud.state !== 'stopped')
         function stopCloud(): void {
             ctx.setBusy('Stopping cluster...')
-            ctx.remote.stopCloud(cloud.name, (err) => {
+            ctx.remote.stopYarnCluster(cloud.id, (err) => {
                 ctx.setFree()
                 if (err) {
                     error(err.message)
@@ -1201,7 +1204,7 @@ module Main {
 
         function unregisterCloud(): void {
             ctx.setBusy('Disconnecting from cluster...')
-            ctx.remote.unregisterCloud(cloud.name, (err) => {
+            ctx.remote.unregisterCluster(cloud.id, (err) => {
                 ctx.setFree()
                 if (err) {
                     error(err.message)
@@ -1211,37 +1214,48 @@ module Main {
             })
         }
 
-        if (cloud.state != 'Stopped') {
-            ctx.remote.getCloudStatus(cloud.name, (err, h2oCloud) => {
+        if (cloud.state != 'stopped') {
+            ctx.remote.getClusterStatus(cloud.id, (err, h2oCloud) => {
                 if (err) {
-                    state('Unknown')
+                    state('unknown')
                     error(err.message)
                     return
                 }
                 const cloudDetail = {
-                    engineVersion: h2oCloud.engine_version,
-                    totalMemory: h2oCloud.memory,
-                    totalCores: String(h2oCloud.total_cores),
-                    allowedCores: String(h2oCloud.allowed_cores)
+                    engineVersion: h2oCloud.version,
+                    totalMemory: h2oCloud.max_memory,
+                    totalCores: String(h2oCloud.total_cpu_count),
+                    allowedCores: String(h2oCloud.total_allowed_cpu_count)
                 }
                 cloudDetails(cloudDetail)
-                state(h2oCloud.state)
+                state(h2oCloud.status)
+            })
+        }
+
+        if (!isExternalCluster(cloud)) {
+            ctx.remote.getYarnCluster(cloud.id, (err, yarnCluster) => {
+                if (err) {
+                    error(err.message)
+                    return
+                }
+                yarnClusterDetails(yarnCluster)
             })
         }
         return {
             title: 'Cluster Details',
-            engineName: cloud.engine_name,
-            size: String(cloud.size),
-            memory: cloud.memory,
-            applicationId: cloud.application_id,
+            // engineName: cloud.engine_name,
+            // size: String(cloud.size),
+            // memory: cloud.memory,
+            // applicationId: cloud.application_id,
+            // username: cloud.username,
             address: `http://${cloud.address}/`,
-            username: cloud.username,
             state: state,
             createdAt: timestampToAge(cloud.created_at),
             canStopCloud: canStopCloud,
             stopCloud: stopCloud,
             unregisterCloud: unregisterCloud,
             cloudDetails: cloudDetails,
+            yarnCluster: yarnClusterDetails,
             template: 'cloudInfo',
             error: error,
             dispose: noop,
@@ -1249,12 +1263,12 @@ module Main {
         }
     }
 
-    function newCloudJobsPane(ctx: Context, cloud: Proxy.Cloud): JobsPane {
+    function newCloudJobsPane(ctx: Context, cloud: Proxy.Cluster): JobsPane {
         const error = sig<string>('')
         const items = sigs<Folder>([])
         const hasItems = lifts(items, (items) => items.length > 0)
 
-        ctx.remote.getJobs(cloud.name, (err, jobs) => {
+        ctx.remote.getJobs(cloud.id, (err, jobs) => {
             if (err) {
                 error(err.message)
                 return
@@ -1281,25 +1295,25 @@ module Main {
         }
     }
 
-    function isExternalCluster(cloud: Proxy.Cloud): boolean {
-        return cloud.engine_name === ""
+    function isExternalCluster(cloud: Proxy.Cluster): boolean {
+        return cloud.detail_id === 0
     }
 
-    function newCloudModelsPane(ctx: Context, cloud: Proxy.Cloud): CloudModelsPane {
+    function newCloudModelsPane(ctx: Context, cloud: Proxy.Cluster): CloudModelsPane {
         const error = sig<string>('')
         const items = sigs<Folder>([])
         const hasItems = lifts(items, (items) => items.length > 0)
         const canBuildModel = !isExternalCluster(cloud)
         function buildModel(): void {
-            const dialog = newBuildModelDialog(ctx, cloud.name, (result: BuildModelDialogResult) => {
+            const dialog = newBuildModelDialog(ctx, cloud.id, (result: BuildModelDialogResult) => {
                 ctx.popDialog()
                 if (result) {
                     ctx.showModels()
                 }
             })
             ctx.pushDialog(dialog)
-        } 
-        ctx.remote.getCloudModels(cloud.name, (err, models) => {
+        }
+        ctx.remote.getClusterModels(cloud.id, (err, models) => {
             if (err) {
                 error(err.message)
                 return
@@ -1307,9 +1321,9 @@ module Main {
             items(_.map(models, (model): Folder => {
                 return {
                     title: model.name,
-                    subhead: model.dataset,
-                    slug: model.target_name,
-                    execute: () => { ctx.showCloudModel(model) },
+                    subhead: model.dataset_name,
+                    slug: model.response_column_name,
+                    execute: () => { ctx.showCloudModel(cloud.id, model) },
                     template: 'folder'
                 }
             }))
@@ -1332,13 +1346,13 @@ module Main {
         const error = sig<string>('')
         const finishedAt = sig<string>('')
         if (job.progress == "DONE") {
-            finishedAt(timestampToAge(job.finished_at/1000))
+            finishedAt(timestampToAge(job.completed_at / 1000))
         }
         return {
             title: job.name,
             description: job.description,
             progress: job.progress,
-            createdAt: timestampToAge(job.created_at/1000),
+            createdAt: timestampToAge(job.started_at / 1000),
             finishedAt: finishedAt,
             error: error,
             template: 'cloudJob',
@@ -1347,10 +1361,10 @@ module Main {
         }
     }
 
-    function newCloudModelPane(ctx: Context, model: Proxy.Model): CloudModelPane {
+    function newCloudModelPane(ctx: Context, clusterId: int, model: Proxy.Model): CloudModelPane {
         const getModel: Act = () => {
             ctx.setBusy('Getting model from h2o...')
-            ctx.remote.getModelFromCloud(model.cloud_name, model.name, (err, model) => {
+            ctx.remote.getModelFromCluster(clusterId, model.name, (err, model) => {
                 ctx.setFree()
                 if (err) {
                     alert(err.message)
@@ -1363,13 +1377,13 @@ module Main {
 
         return {
             title: model.name,
-            cloud: model.cloud_name,
-            algo: model.algo,
-            frame: model.dataset,
-            responseColumn: model.target_name,
+            // cloud: model.cloud_name,
+            algo: model.algorithm,
+            frame: model.dataset_name,
+            responseColumn: model.response_column_name,
             maxRunTime: String(model.max_runtime),
-            javaModelPath: model.java_model_path,
-            createdAt: timestampToAge(model.created_at/1000),
+            // javaModelPath: model.java_model_path,
+            createdAt: timestampToAge(model.created_at / 1000),
             getModel: getModel,
             template: 'cloudModel',
             dispose: noop,
@@ -1381,7 +1395,7 @@ module Main {
         const error = sig<string>('')
         const items = sigs<Folder>([])
         const hasItems = lifts(items, (items) => items.length > 0)
-        ctx.remote.getModels((err, models) => {
+        ctx.remote.getModels(0, 10000, (err, models) => {
             if (err) {
                 error(err.message)
                 return
@@ -1389,8 +1403,8 @@ module Main {
             items(_.map(models, (model): Folder => {
                 return {
                     title: model.name,
-                    subhead: model.dataset,
-                    slug: model.target_name,
+                    subhead: model.dataset_name,
+                    slug: model.response_column_name,
                     execute: () => { ctx.showModel(model) },
                     template: 'folder'
                 }
@@ -1410,7 +1424,7 @@ module Main {
 
     function newModelPane(ctx: Context, model: Proxy.Model): ModelPane {
         const deployModel: Act = () => {
-            const dialog = newDeployModelDialog(ctx, model.name, (result: DeployModelDialogResult) => {
+            const dialog = newDeployModelDialog(ctx, model, (result: DeployModelDialogResult) => {
                 ctx.popDialog()
                 if (result) {
                     ctx.showServices()
@@ -1420,7 +1434,7 @@ module Main {
         }
         const deleteModel: Act = () => {
             ctx.setBusy('Deleting model...')
-            ctx.remote.deleteModel(model.name, (err) => {
+            ctx.remote.deleteModel(model.id, (err) => {
                 ctx.setFree()
                 if (err) {
                     alert(err.message) // FIXME
@@ -1431,12 +1445,12 @@ module Main {
         }
         return {
             title: model.name,
-            cloud: model.cloud_name,
-            algo: model.algo,
-            frame: model.dataset,
-            responseColumn: model.target_name,
+            //cloud: model.cloud_name,
+            algo: model.algorithm,
+            frame: model.dataset_name,
+            responseColumn: model.response_column_name,
             maxRunTime: String(model.max_runtime),
-            javaModelPath: model.java_model_path,
+            // javaModelPath: model.java_model_path,
             createdAt: timestampToAge(model.created_at),
             deployModel: deployModel,
             deleteModel: deleteModel,
@@ -1450,20 +1464,20 @@ module Main {
         const error = sig<string>('')
         const items = sigs<FolderI>([])
         const hasItems = lifts(items, (items) => items.length > 0)
-        ctx.remote.getScoringServices((err, services) => {
+        ctx.remote.getScoringServices(0, 10000, (err, services) => {
             if (err) {
                 error(err.message)
                 return
             }
             items(_.map(services, (service): FolderI => {
                 const slugI = sig<string>('')
-                const isActive = sig<boolean>(service.state !== 'Stopped')
+                const isActive = sig<boolean>(service.state !== 'stopped')
 
-                if (service.state !== 'Stopped') {
-                    slugI(timestampToAge(service.activity))
+                if (service.state !== 'stopped') {
+                    // slugI(timestampToAge(service.activity))
                 }
                 return {
-                    title: service.model_name,
+                    title: String(service.model_id), // FIXME
                     subhead: 'State:',
                     slug: service.state,
                     execute: () => { ctx.showService(service) },
@@ -1486,9 +1500,10 @@ module Main {
     }
 
     function newServicePane(ctx: Context, service: Proxy.ScoringService): ServicePane {
+        const canStop = sig<boolean>(service.state !== 'stopped')
         const stopService: Act = () => {
             ctx.setBusy('Stopping service...')
-            ctx.remote.stopScoringService(service.model_name, service.port, (err) => {
+            ctx.remote.stopScoringService(service.id, (err) => {
                 ctx.setFree()
                 if (err) {
                     alert(err.message)
@@ -1498,12 +1513,12 @@ module Main {
             })
         }
         return {
-            title: service.model_name,
+            title: String(service.model_id), // FIXME
             state: service.state,
             address: service.address,
             port: String(service.port),
             url: `http://${service.address}:${service.port}/`,
-            pid: String(service.pid),
+            pid: String(service.process_id),
             createdAt: timestampToAge(service.created_at),
             stopService: stopService,
             template: 'service',
@@ -1580,7 +1595,7 @@ module Main {
     function newEnginePane(ctx: Context, engine: Proxy.Engine): EnginePane {
         const deleteEngine: Act = () => {
             ctx.setBusy('Deleting engine...')
-            ctx.remote.deleteEngine(engine.name, (err) => {
+            ctx.remote.deleteEngine(engine.id, (err) => {
                 ctx.setFree()
                 if (err) {
                     alert(err.message) // FIXME
@@ -1591,7 +1606,7 @@ module Main {
         }
         return {
             title: engine.name,
-            path: engine.path,
+            path: engine.location,
             createdAt: timestampToAge(engine.created_at),
             deleteEngine: deleteEngine,
             template: 'engine',
@@ -1613,12 +1628,12 @@ module Main {
         public popDialog = uni()
         public showPane = uni2<int, Pane>()
         public showClouds = uni()
-        public showCloud = uni1<Proxy.Cloud>()
-        public showCloudDetails = uni1<Proxy.Cloud>()
-        public showCloudJobs = uni1<Proxy.Cloud>()
-        public showCloudModels = uni1<Proxy.Cloud>()
+        public showCloud = uni1<Proxy.Cluster>()
+        public showCloudDetails = uni1<Proxy.Cluster>()
+        public showCloudJobs = uni1<Proxy.Cluster>()
+        public showCloudModels = uni1<Proxy.Cluster>()
         public showCloudJob = uni1<Proxy.Job>()
-        public showCloudModel = uni1<Proxy.Model>()
+        public showCloudModel = uni2<int, Proxy.Model>()
         public showModels = uni()
         public showModel = uni1<Proxy.Model>()
         public showServices = uni()
@@ -1708,24 +1723,24 @@ module Main {
             ctx.showPane(0, newCloudsPane(ctx))
         })
 
-        ctx.showCloud.on((cloud: Proxy.Cloud) => {
+        ctx.showCloud.on((cloud: Proxy.Cluster) => {
             ctx.showPane(1, newCloudPane(ctx, cloud))
         })
 
-        ctx.showCloudDetails.on((cloud: Proxy.Cloud) => {
+        ctx.showCloudDetails.on((cloud: Proxy.Cluster) => {
             ctx.showPane(2, newCloudDetailsPane(ctx, cloud))
         })
 
-        ctx.showCloudModels.on((cloud: Proxy.Cloud) => {
+        ctx.showCloudModels.on((cloud: Proxy.Cluster) => {
             ctx.showPane(2, newCloudModelsPane(ctx, cloud))
         })
 
-        ctx.showCloudJobs.on((cloud: Proxy.Cloud) => {
+        ctx.showCloudJobs.on((cloud: Proxy.Cluster) => {
             ctx.showPane(2, newCloudJobsPane(ctx, cloud))
         })
 
-        ctx.showCloudModel.on((model: Proxy.Model) => {
-            ctx.showPane(3, newCloudModelPane(ctx, model))
+        ctx.showCloudModel.on((clusterId: int, model: Proxy.Model) => {
+            ctx.showPane(3, newCloudModelPane(ctx, clusterId, model))
         })
 
         ctx.showCloudJob.on((job: Proxy.Job) => {

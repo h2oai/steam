@@ -2,6 +2,8 @@
 -- PostgreSQL database dump
 --
 
+\set ON_ERROR_STOP on
+
 -- Dumped from database version 9.5.0
 -- Dumped by pg_dump version 9.5.1
 
@@ -13,7 +15,8 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
 
-DROP DATABASE steam;
+DROP DATABASE IF EXISTS steam;
+
 --
 -- Name: steam; Type: DATABASE; Schema: -; Owner: steam
 --
@@ -37,7 +40,7 @@ SET row_security = off;
 -- Name: public; Type: SCHEMA; Schema: -; Owner: steam
 --
 
-CREATE SCHEMA public;
+CREATE SCHEMA IF NOT EXISTS public;
 
 
 ALTER SCHEMA public OWNER TO steam;
@@ -508,7 +511,7 @@ ALTER SEQUENCE model_id_seq OWNED BY model.id;
 
 CREATE TABLE permission (
     id integer NOT NULL,
-    name text NOT NULL,
+    code integer NOT NULL,
     description text NOT NULL
 );
 
@@ -1005,7 +1008,7 @@ ALTER TABLE ONLY meta
 --
 
 ALTER TABLE ONLY permission
-    ADD CONSTRAINT uq_permission_name UNIQUE (name);
+    ADD CONSTRAINT uq_permission_name UNIQUE (code);
 
 
 --

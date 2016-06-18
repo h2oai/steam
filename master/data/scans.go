@@ -74,7 +74,7 @@ func ScanPermission(r *sql.Row) (Permission, error) {
 	var s Permission
 	if err := r.Scan(
 		&s.Id,
-		&s.Name,
+		&s.Code,
 		&s.Description,
 	); err != nil {
 		return Permission{}, err
@@ -89,7 +89,7 @@ func ScanPermissions(rs *sql.Rows) ([]Permission, error) {
 		var s Permission
 		if err = rs.Scan(
 			&s.Id,
-			&s.Name,
+			&s.Code,
 			&s.Description,
 		); err != nil {
 			return nil, err

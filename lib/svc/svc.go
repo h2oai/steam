@@ -126,9 +126,9 @@ func Stop(pid int) error {
 
 // Polls a scoring service to determine the last time it was used
 //
-// Returns a Timestamp(int64) of the Unix time since the scoring services was
+// Returns a timestamp (int64) of the Unix time since the scoring services was
 //		created or last used.
-func Poll(s *web.ScoringService) (web.Timestamp, error) {
+func Poll(s *web.ScoringService) (int64, error) {
 	u := (&url.URL{
 		Scheme: "http",
 		Host:   s.Address + ":" + strconv.Itoa(s.Port),
@@ -150,12 +150,9 @@ func Poll(s *web.ScoringService) (web.Timestamp, error) {
 		return 0, fmt.Errorf("Error unmarshaling response: %s: %v", string(b), err)
 	}
 
-	last, err := int64(m["lastTime"].(float64))
-	if err != nil {
-		return 0, fmt.Errorf("Error extracting \"lastTime\" from json: %v: %v", m, err)
-	}
+	last := int64(m["lastTime"].(float64))
 
-	return web.Timestamp(last / 1000), nil
+	return last / 1000, nil
 }
 
 func getProcessCommand(pid int) (string, error) {
