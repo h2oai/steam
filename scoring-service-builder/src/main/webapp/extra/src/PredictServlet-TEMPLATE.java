@@ -16,7 +16,7 @@ import hex.genmodel.*;
 import com.google.gson.Gson;
 
 public class PredictServlet extends HttpServlet {
-  private static final boolean VERBOSE = false;
+  private static final boolean VERBOSE = true;
   public static final int warmUpCount = 5;
   private static final Class ROW_DATA_TYPE = new RowData().getClass();
 

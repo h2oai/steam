@@ -13,7 +13,7 @@ import com.google.gson.Gson;
 public class PredictPythonServlet extends HttpServlet {
   // Set to true for demo mode (to print the predictions to stdout).
   // Set to false to get better throughput.
-  private static boolean VERBOSE = false;
+  private static boolean VERBOSE = true;
 
   public static GenModel rawModel;
   public static EasyPredictModelWrapper model;
@@ -174,13 +174,25 @@ public class PredictPythonServlet extends HttpServlet {
     RowData row = new RowData();
     if (result == null || result.length() == 0)
       return row;
-    String[] pairs = result.split(" ");
+    String[] pairs = result.split(",");
+    if (VERBOSE) System.out.println("KV pairs: " + pairs.toString());
     try {
+      /*
       for (String p : pairs) {
         String[] a = p.split(":");
         int index = Integer.parseInt(a[0]);
         double value = Float.parseFloat(a[1]);
         row.put(colNames[index], value);
+      }
+     */
+      for (String kv : pairs) {
+        String[] kvspl = kv.split(":");
+        String key = kvspl[0].replaceAll("'","").replaceAll(" ","");
+        if(kvspl[1].contains("'")) {
+          row.put(key, ((String) kvspl[1]).replaceAll("'","").replaceAll(" ",""));
+        } else {
+          row.put(key, Double.parseDouble(kvspl[1]));
+        }
       }
     }
     catch (NumberFormatException e) {
