@@ -124,7 +124,7 @@ func (pz *Principal) checkPrivilege(entityTypeId, entityId int64, expectedPrivil
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("Identity %s does not have privilege '%s' on the entity", pz.Name(), expectedPrivilege)
+		return fmt.Errorf("Identity %s does not have privilege '%s' on the entity %d:%d", pz.Name(), expectedPrivilege, entityTypeId, entityId)
 	}
 	return nil
 }

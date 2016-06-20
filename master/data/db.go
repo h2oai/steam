@@ -488,12 +488,25 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 			return err
 		}
 
-		return createPrivilege(tx, Privilege{
+		if err := createPrivilege(tx, Privilege{
 			Owns,
 			workgroupId,
 			ds.EntityTypes.Identity,
 			id,
-		})
+		}); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			workgroupId,
+			ds.EntityTypes.Workgroup,
+			workgroupId,
+		}); err != nil {
+			return err
+		}
+
+		return nil
 	})
 	return id, workgroupId, err
 }
@@ -1216,6 +1229,15 @@ func (ds *Datastore) CreateIdentity(pz az.Principal, name, password string) (int
 			workgroupId,
 			ds.EntityTypes.Identity,
 			id,
+		}); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			workgroupId,
+			ds.EntityTypes.Workgroup,
+			workgroupId,
 		}); err != nil {
 			return err
 		}
