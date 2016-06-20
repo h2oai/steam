@@ -60,24 +60,17 @@ Note that when the Builder Service is running, you can also make a war file usin
 
 The POJO and Jar files are included in the **steamY/scoring-service-builder/examples/example-pojo** folder. 
 
-When the H2O Scoring Service Builder is up and running, open another terminal window, navigate to the **steamY/scoring-service-builder** folder, and run the following command to import the war file into the H2O Prediction service.
-
-		java -jar jetty-runner-9.3.9.M1.jar --port 55001 exmaple.war
-
-This starts the H2O Prediction Service at localhost:55001. You can this web service at http://localhost:55001.
-
-![Example Service](images/example_service.png)
 
 
 ## Starting the H2O Prediction Service
 
 ### Using the CLI
 
-When the H2O Scoring Service Builder is up and running, open another terminal window, navigate to the **steamY/scoring-service-builder** folder, and run the following command to import the war file into the H2O Prediction service.
+Open a terminal window and run the following command to run the scoring service:
 
 		java -jar jetty-runner-9.3.9.M1.jar --port 55001 exmaple.war
 
-This starts the H2O Prediction Service at localhost:55001. You can this web service at http://localhost:55001.
+This starts the H2O Prediction Service at localhost:55001. You can use this web service at http://localhost:55001.
 
 ![Example Service](images/example_service.png)
 
@@ -90,14 +83,16 @@ Open a terminal window and run the following commands from the **steamY/steam-sc
 	example.sh
 	run-example.sh
 
-These example scripts generate a War file and then start the prediction service. 
+These example scripts generate a War file and then start the prediction service at http://localhost:55001
+using a subset of the airline dataset.
 
 
 ## Making Predictions
 
 ### Using the Web UI
 
-The Prediction Service includes a list of the model input parameters that you can specify when making a prediction. The parameters are based on the column headers from the dataset that was used to build the model.
+The Prediction Service includes a list of the model input parameters that you can specify when making a prediction.
+The parameters are based on the column headers from the dataset that was used to build the model.
 
 Specify a set of prediction values OR enter an input values query string, then click **Predict** to view the prediction.
 
@@ -109,7 +104,7 @@ Specify a set of prediction values OR enter an input values query string, then c
 
 You can send a GET request with the input variables as the query string. 
 	
-	curl GET "localhost:55001/predict?Dest=JFK"
+	curl "localhost:55001/predict?Dest=JFK"
 
 This returns a JSON result:
 
@@ -121,19 +116,47 @@ The predictor has two classes. "Y" was predicted with a probability of 97%.
 
 JSON can be sent using a POST request. 
 
-	curl POST -d '{Dest: JFK}' localhost:55001/predict
+	curl -X POST --data '{Dest: JFK}' localhost:55001/predict
 
 This returns a JSON result:
 
 	{"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]} 
 
+**Batch POST**
+
+You can also send multiple JSON inputs at the same time as a batch. Each JSON input has to be on a separate line.
+If the file `jsonlines.txt` contains
+
+    {"Dest":"JFK"}
+    {"Dest":"SFO"}
+    {"Dest":"JFK"}
+
+The command
+
+    curl -X POST --data-binary @jsonlines.txt  http://localhost:55001/predict
+
+then returns
+
+    {"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]}
+    {"labelIndex":1,"label":"Y","classProbabilities":[0.008905417583984554,0.9910945824160154]}
+    {"labelIndex":1,"label":"Y","classProbabilities":[0.026513747179178093,0.9734862528208219]}
+
+
 ## H2O Prediction Run-Time Stats
 
-Prediction statistics are provided as a web service and in the web page for the predictor:
+Prediction statistics are provided in the web page for the predictor and as a web service in JSON at
 
-- When the service was started and its uptime in days
-- When the last prediction was run and how long ago that was in days
+    http://localhost:55001/stats
+
+- When the service was started in UTC and its uptime in days
+- When the last prediction was run in UTC and how long ago that was in days
 - How long time the last prediction took in milliseconds
 - Total and average prediction time, with and without skipping the first 5 predictions (warmup)
+- There are separate sections for
+    - pure predictions using the pojo
+    - GET and POST for POJOs
+    - GET and POST for POJOs with Python preprocessing
+- GET and POST statistics include the time from when the service recieves the input until it returns the result
 
 Click the **More Stats** button to view more Prediction Service statistics.
+

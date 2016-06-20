@@ -23,7 +23,7 @@ func genStruct(s *parser.Struct) string {
 }
 
 func genFunc(f *parser.Func) string {
-	c := "\t" + f.Name + "("
+	c := "\t" + f.Name + "(pz az.Principal,"
 	l := len(f.Params) - 1
 	for i, p := range f.Params {
 		c += genParam(p)
@@ -82,7 +82,7 @@ type Proc interface {
 
 func genServerDefs(i *parser.Interface) string {
 	c := "type Impl struct {\n"
-	c += "\tService " + i.Name + "\n}\n\n"
+	c += "\tService " + i.Name + "\n\tAz az.Az\n}\n\n"
 	return c
 }
 
@@ -122,10 +122,17 @@ func genClientStub(f *parser.Func) string {
 func genServerStub(f *parser.Func) string {
 	c := "func (this *Impl) " + f.Name + "(r *http.Request, in *" + f.Name + "In, out *" + f.Name + "Out) error {\n\t"
 
+	c += `
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	`
+
 	if f.Return != nil {
 		c += "it, "
 	}
-	c += "err := this.Service." + f.Name + "("
+	c += "err := this.Service." + f.Name + "(pz,"
 	if len(f.Params) != 0 {
 		params := make([]string, len(f.Params))
 		for i, p := range f.Params {
@@ -203,6 +210,13 @@ func Generate(i *parser.Interface) string {
 
 	if len(i.Funcs) > 0 {
 		c += "// --- Interfaces ---\n\n"
+
+		c += `
+		type Az interface {
+			Identify(r *http.Request) (az.Principal, error)
+		}
+
+		`
 
 		c += "type " + i.Name + " interface {\n"
 		for _, f := range i.Funcs {

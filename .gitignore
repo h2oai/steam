@@ -28,6 +28,7 @@ _testmain.go
 # debris
 .DS_Store
 *.swp
+coverage.out
 
 # ignore list
 /dist/

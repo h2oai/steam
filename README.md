@@ -40,9 +40,6 @@ The following screenshot shows how to make a War file using a POJO file and a Ja
 
 ![Make War](scoring-service-builder/images/make_war.png)
 
-You will be prompted to save the War file upon completion. 
-
-![Save War](scoring-service-builder/images/save_war.png)
 
 **Using the CLI**
 
@@ -93,6 +90,7 @@ Perform the following steps to install Steam.
 5. Change directories to **steamY** and then run `make linux`.
 
 		cd steamY
+                make
 		make linux
 
 	>***Note***: If you are building this on your own local machine, then you can run `make` instead of `make linux`. This will only work if your local machine has YARN. 

@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"log"
-	"strconv"
+	// "strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -41,9 +41,11 @@ func deleteCloud(c *context) *cobra.Command {
 
 		cloudName := args[0]
 
-		if err := c.remote.DeleteCloud(cloudName); err != nil {
-			log.Fatalln(err)
-		}
+		// FIXME
+
+		// if err := c.remote.DeleteCloud(cloudName); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		fmt.Println("Cloud deleted:", cloudName)
 	})
@@ -67,9 +69,11 @@ func deleteEngine(c *context) *cobra.Command {
 
 		engineName := args[0]
 
-		if err := c.remote.DeleteEngine(engineName); err != nil {
-			log.Fatalln(err)
-		}
+		// FIXME
+
+		// if err := c.remote.DeleteEngine(engineName); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		fmt.Println("Engine deleted:", engineName)
 	})
@@ -93,9 +97,11 @@ func deleteModel(c *context) *cobra.Command {
 
 		modelName := args[0]
 
-		if err := c.remote.DeleteModel(modelName); err != nil {
-			log.Fatalln(err)
-		}
+		// FIXME
+
+		// if err := c.remote.DeleteModel(modelName); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		fmt.Println("Model deleted:", modelName)
 	})
@@ -118,17 +124,19 @@ func deleteService(c *context) *cobra.Command {
 
 		}
 
-		modelName := args[0]
-		port, err := strconv.Atoi(args[1])
-		if err != nil {
-			log.Fatalln(err)
-		}
+		// FIXME
 
-		if err := c.remote.DeleteScoringService(modelName, port); err != nil {
-			log.Fatalln(err)
-		}
+		// modelName := args[0]
+		// port, err := strconv.Atoi(args[1])
+		// if err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		fmt.Println("Service deleted on:", modelName)
+		// if err := c.remote.DeleteScoringService(modelName, port); err != nil {
+		// 	log.Fatalln(err)
+		// }
+
+		// fmt.Println("Service deleted on:", modelName)
 	})
 
 	return cmd

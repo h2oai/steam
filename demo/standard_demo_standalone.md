@@ -16,7 +16,13 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 - Web browser with an Internet connection
 - s3cmd
 	- available from <a href="http://s3tools.org/s3cmd" target="_blank">s3tools.org</a>
-	- Requires AWS credentials
+	- Requires AWS credentials. Contact your internal support for access.
+	- Requires <a href="http://brew.sh/" target="_blank">Homebrew</a> to install to run the s3 commands:
+	
+	```
+		brew install s3cmd
+		s3cmd --configure
+	```
 - JDK 1.7 or greater
 - Steam binary for Linux or OS X 
 	- `s3cmd get s3://steam-release/steamY-master-linux-amd64.tar.gz`

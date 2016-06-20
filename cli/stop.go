@@ -2,7 +2,7 @@ package cli
 
 import (
 	"log"
-	"strconv"
+	// "strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -41,13 +41,12 @@ func stopCloud(c *context) *cobra.Command {
 			log.Fatalln("Missing cloudName. See 'steam help stop cloud'.")
 		}
 
-		name := args[0]
-		// --- add additional args here ---
+		// FIXME
 
-		if err := c.remote.StopCloud(name); err != nil {
-			log.Fatalln(err)
-		}
-		// if err := yarn.StopCloud(kerberos, name, id, job, username, keytab); err != nil {
+		// name := args[0]
+		// // --- add additional args here ---
+
+		// if err := c.remote.StopCloud(name); err != nil {
 		// 	log.Fatalln(err)
 		// }
 
@@ -75,17 +74,19 @@ func stopService(c *context) *cobra.Command {
 			log.Fatalln("Invalid number of arguments. See 'steam help stop service'.")
 		}
 
-		modelName := args[0]
-		port, err := strconv.Atoi(args[1])
-		if err != nil {
-			log.Fatalln(err)
-		}
+		// FIXME
 
-		if err := c.remote.StopScoringService(modelName, port); err != nil {
-			log.Fatalln(err)
-		}
+		// modelName := args[0]
+		// port, err := strconv.Atoi(args[1])
+		// if err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		log.Println("Service stopped on:", modelName)
+		// if err := c.remote.StopScoringService(modelName, port); err != nil {
+		// 	log.Fatalln(err)
+		// }
+
+		// log.Println("Service stopped on:", modelName)
 	})
 
 	return cmd

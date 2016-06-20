@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -35,14 +35,16 @@ func retrieveModel(c *context) *cobra.Command {
 			log.Fatalln("Incorrect number of arguments. See 'steam help retrieve model'.")
 		}
 
-		modelName := args[0]
-		cloudName := args[1]
+		// FIXME
 
-		if _, err := c.remote.GetModelFromCloud(cloudName, modelName); err != nil {
-			log.Fatalln(err)
-		}
+		// modelName := args[0]
+		// cloudName := args[1]
 
-		fmt.Println("Retireved model:", modelName)
+		// if _, err := c.remote.GetModelFromCloud(cloudName, modelName); err != nil {
+		// 	log.Fatalln(err)
+		// }
+
+		// fmt.Println("Retireved model:", modelName)
 	})
 
 	return cmd

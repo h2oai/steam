@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/h2oai/steamY/srv/web"
+	// "github.com/h2oai/steamY/srv/web"
 	"github.com/spf13/cobra"
 )
 
@@ -36,37 +36,40 @@ Examples:
 func getClouds(c *context) *cobra.Command {
 	var details, silent bool
 	cmd := newCmd(c, getCloudsHelp, func(c *context, args []string) {
-		cs, err := c.remote.GetClouds()
-		if err != nil {
-			log.Fatalln(err)
-		}
 
-		lines := make([]string, len(cs))
-		if details {
-			for i, cl := range cs {
-				var info *web.Cloud
-				if cl.State == web.CloudStopped {
-					info = cl
-				} else {
-					info, err = c.remote.GetCloudStatus(cl.Name)
-					if err != nil && silent {
-						log.Println(err)
-						info = cl
-						info.State = web.CloudUnknown
-					} else if err != nil {
-						log.Fatalln(err)
-					}
-				}
-				lines[i] = fmt.Sprintf("%s\t%s\t%s\t%d\t%s", info.Name, info.EngineName, info.Memory, info.Size, info.State)
-			}
-			c.printt("NAME\tENGINE\tMEMORY\tSIZE\tSTATE", lines)
-		} else {
-			lines := make([]string, len(cs))
-			for i, cl := range cs {
-				lines[i] = fmt.Sprintf("%s\t%s\t%s", cl.Name, cl.EngineName, cl.State)
-			}
-			c.printt("NAME\tENGINE\tSTATE", lines)
-		}
+		// FIXME
+
+		// cs, err := c.remote.GetClouds()
+		// if err != nil {
+		// 	log.Fatalln(err)
+		// }
+
+		// lines := make([]string, len(cs))
+		// if details {
+		// 	for i, cl := range cs {
+		// 		var info *web.Cloud
+		// 		if cl.State == web.CloudStopped {
+		// 			info = cl
+		// 		} else {
+		// 			info, err = c.remote.GetCloudStatus(cl.Name)
+		// 			if err != nil && silent {
+		// 				log.Println(err)
+		// 				info = cl
+		// 				info.State = web.CloudUnknown
+		// 			} else if err != nil {
+		// 				log.Fatalln(err)
+		// 			}
+		// 		}
+		// 		lines[i] = fmt.Sprintf("%s\t%s\t%s\t%d\t%s", info.Name, info.EngineName, info.Memory, info.Size, info.State)
+		// 	}
+		// 	c.printt("NAME\tENGINE\tMEMORY\tSIZE\tSTATE", lines)
+		// } else {
+		// 	lines := make([]string, len(cs))
+		// 	for i, cl := range cs {
+		// 		lines[i] = fmt.Sprintf("%s\t%s\t%s", cl.Name, cl.EngineName, cl.State)
+		// 	}
+		// 	c.printt("NAME\tENGINE\tSTATE", lines)
+		// }
 	})
 
 	cmd.Flags().BoolVarP(&details, "details", "d", false, "Detailed cluster information")
@@ -112,16 +115,19 @@ Examples:
 
 func getModels(c *context) *cobra.Command {
 	cmd := newCmd(c, getModelsHelp, func(c *context, args []string) {
-		ms, err := c.remote.GetModels()
-		if err != nil {
-			log.Fatalln(err)
-		}
 
-		lines := make([]string, len(ms))
-		for i, m := range ms {
-			lines[i] = fmt.Sprintf("%s\t%s\t%s\t%s\t%s", m.Name, m.Algo, m.Dataset, m.TargetName, fmtAgo(m.CreatedAt))
-		}
-		c.printt("NAME\tALGO\tDATASET\tTARGET\tAGE", lines)
+		// FIXME
+
+		// ms, err := c.remote.GetModels()
+		// if err != nil {
+		// 	log.Fatalln(err)
+		// }
+
+		// lines := make([]string, len(ms))
+		// for i, m := range ms {
+		// 	lines[i] = fmt.Sprintf("%s\t%s\t%s\t%s\t%s", m.Name, m.Algo, m.Dataset, m.TargetName, fmtAgo(m.CreatedAt))
+		// }
+		// c.printt("NAME\tALGO\tDATASET\tTARGET\tAGE", lines)
 	})
 
 	return cmd
@@ -137,17 +143,20 @@ Examples:
 
 func getServices(c *context) *cobra.Command {
 	cmd := newCmd(c, getServicesHelp, func(c *context, args []string) {
-		ss, err := c.remote.GetScoringServices()
-		if err != nil {
-			log.Fatalln(err)
-		}
 
-		lines := make([]string, len(ss))
-		for i, s := range ss {
-			lines[i] = fmt.Sprintf("%s\t%s\t%d\t%s\t%s", s.ModelName, s.Address, s.ModelName, s.Port, fmtAgo(s.CreatedAt))
-		}
+		// FIXME
 
-		c.printt("M.NAME\tADDRESS\tPORT\tSTATE\tAGE", lines)
+		// ss, err := c.remote.GetScoringServices()
+		// if err != nil {
+		// 	log.Fatalln(err)
+		// }
+
+		// lines := make([]string, len(ss))
+		// for i, s := range ss {
+		// 	lines[i] = fmt.Sprintf("%s\t%s\t%d\t%s\t%s", s.ModelName, s.Address, s.ModelName, s.Port, fmtAgo(s.CreatedAt))
+		// }
+
+		// c.printt("M.NAME\tADDRESS\tPORT\tSTATE\tAGE", lines)
 	})
 
 	return cmd

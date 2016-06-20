@@ -1,93 +1,97 @@
 package web
 
+import github.com/h2oai/steamY/master/az
+
 service Service
 
-alias CloudState string
-const CloudState Cloud Started Healthy Stopped Unknown
- 
-alias ScoringServiceState string
-const ScoringServiceState ScoringService Started Stopped
-
-alias Timestamp int64
-
-type Cloud
- CreatedAt Timestamp
+type Cluster
+ Id int64
  Name string
- EngineName string
- EngineVersion string
- Size int
- Memory string
- TotalCores int
- AllowedCores int
- State CloudState
+ TypeId int64
+ DetailId int64
  Address string
+ State string
+ CreatedAt int64
+
+type YarnCluster
+ Id int64
+ EngineId int64
+ Size int
+ ApplicationId string
+ Memory string
  Username string
- ApplicationID string
- Activity Timestamp
+
+type ClusterStatus
+ Version string
+ Status string
+ MaxMemory string
+ TotalCpuCount int
+ TotalAllowedCpuCount int
 
 type Job
  Name string
- CloudName string
+ ClusterName string
  Description string
  Progress string
- CreatedAt Timestamp
- FinishedAt Timestamp
+ StartedAt int64
+ CompletedAt int64
 
 type Model
+ Id int64
  Name string
- CloudName string
- Algo string
- Dataset string
- TargetName string
+ ClusterName string
+ Algorithm string
+ DatasetName string
+ ResponseColumnName string
+ LogicalName string
+ Location string
  MaxRuntime int
- JavaModelPath string
- GenModelPath string
- CreatedAt Timestamp
+ CreatedAt int64
 
 type ScoringService
- ModelName string
+ Id int64
+ ModelId int64
  Address string
  Port int
- State ScoringServiceState
- Pid int
- CreatedAt Timestamp
- Activity Timestamp
+ ProcessId int
+ State string
+ CreatedAt int64
 
 type Engine
+ Id int64
  Name string
- Path string
- CreatedAt Timestamp
+ Location string
+ CreatedAt int64
 
 Ping(status bool) status bool
-ActivityPoll(status bool) status bool
-InitClusterProxy() status bool
 
-RegisterCloud(address string) cloud *Cloud
-UnregisterCloud(cloudName string)
-StartCloud(cloudName string, engineName string, size int, memory string, username string) cloud *Cloud
-StopCloud(cloudName string)
-GetCloud(cloudName string) cloud *Cloud
-GetClouds() clouds []*Cloud
-GetCloudStatus(cloudName string) cloud *Cloud
-DeleteCloud(cloudName string)
+RegisterCluster(address string) clusterId int64
+UnregisterCluster(clusterId int64)
+StartYarnCluster(clusterName string, engineId int64, size int, memory string, username string) clusterId int64 
+StopYarnCluster(clusterId int64)
+GetCluster(clusterId int64) cluster *Cluster
+GetYarnCluster(clusterId int64) cluster *YarnCluster
+GetClusters(offset int64, limit int64) clusters []*Cluster
+GetClusterStatus(clusterId int64) clusterStatus *ClusterStatus
+DeleteCluster(clusterId int64)
 
-GetJob(cloudName string, jobName string) job *Job
-GetJobs(cloudName string) jobs []*Job
+GetJob(clusterId int64, jobName string) job *Job
+GetJobs(clusterId int64) jobs []*Job
 
-BuildModel(cloudName string, dataset string, targetName string, maxRunTime int) model *Model
-GetModel(modelName string) model *Model
-GetModels() models []*Model
-GetCloudModels(cloudName string) models []*Model
-GetModelFromCloud(cloudName string, modelName string) model *Model
-DeleteModel(modelName string)
+BuildModel(clusterId int64, dataset string, targetName string, maxRunTime int) model *Model
+GetModel(modelId int64) model *Model
+GetModels(offset int64, limit int64) models []*Model
+GetClusterModels(clusterId int64) models []*Model
+GetModelFromCluster(clusterId int64, modelName string) model *Model
+DeleteModel(modelId int64)
 
-StartScoringService(modelName string, port int) service *ScoringService
-StopScoringService(modelName string, port int)
-GetScoringService(modelName string) service *ScoringService
-GetScoringServices() services []*ScoringService
-DeleteScoringService(modelName string, port int)
+StartScoringService(modelId int64, port int) service *ScoringService
+StopScoringService(serviceId int64)
+GetScoringService(serviceId int64) service *ScoringService
+GetScoringServices(offset int64, limit int64) services []*ScoringService
+DeleteScoringService(serviceId int64)
 
-AddEngine(engineName string, enginePath string)
-GetEngine(engineName string) engine *Engine
+AddEngine(engineName string, enginePath string) engineId int64
+GetEngine(engineId int64) engine *Engine
 GetEngines() engines []*Engine
-DeleteEngine(engineName string)
+DeleteEngine(engineId int64)

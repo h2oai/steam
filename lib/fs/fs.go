@@ -148,6 +148,7 @@ func GetPacks(wd, kind string) ([]*Package, error) {
 	return packs, nil
 }
 
+// FIXME obsolete
 func GetDbPath(wd string) string {
 	return path.Join(wd, DbDir, "steam.db")
 }
@@ -156,8 +157,20 @@ func GetWwwRoot(wd string) string {
 	return path.Join(wd, WwwDir)
 }
 
-func GetModelPath(wd, modelName, dir string) string {
-	return path.Join(wd, ModelDir, modelName, dir)
+func GetModelPath(wd, modelName string) string {
+	return path.Join(wd, ModelDir, modelName)
+}
+
+func GetJavaModelPath(wd, modelName, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelName), logicalName) + ".java"
+}
+
+func GetWarFilePath(wd, modelName, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelName), logicalName) + ".war"
+}
+
+func GetGenModelPath(wd, modelName string) string {
+	return path.Join(GetModelPath(wd, modelName), "h2o-genmodel.jar")
 }
 
 func GetAssetsPath(wd, asset string) string {
@@ -240,9 +253,13 @@ func GetPackPath(wd, kind, pack string) string {
 	return path.Join(wd, LibDir, kind, pack+PackExt)
 }
 
+func GetBasenameWithoutExt(p string) string {
+	basename := path.Base(p)
+	return basename[0 : len(basename)-len(path.Ext(basename))]
+}
+
 func GetPackDir(packPath string) string {
-	basename := path.Base(packPath)
-	return path.Join(path.Dir(packPath), basename[0:len(basename)-len(path.Ext(basename))])
+	return path.Join(path.Dir(packPath), GetBasenameWithoutExt(packPath))
 }
 
 func GetPackUrl(host, kind, pack string) string {

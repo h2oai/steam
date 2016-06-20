@@ -213,45 +213,53 @@ public class PredictPythonServlet extends HttpServlet {
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     long start = System.nanoTime();
+    int count = 0;
     try {
       if (model == null)
         throw new Exception("No predictor model");
 
-      System.out.println(request);
-
       BufferedReader r = request.getReader();
-      String line = r.readLine();
-      r.close();
-      if (VERBOSE) System.out.println("to python: " + line);
+      PrintWriter writer = response.getWriter();
+      String line;
+      RowData row;
+      AbstractPrediction pr;
+      String prJson;
+      String result;
+      while (r.ready()) {
+        line = r.readLine();
+        if (VERBOSE) System.out.println("line " + line);
 
-      String result = "";
-      if (line == null) {
-        System.out.println("null input to python, not sent");
-      }
-      else {
-        result = sendPython(line);
-        if (VERBOSE) System.out.println("from python: " + result);
-        if (result == null) {
-          result = "";
-          System.out.println("null result from python");
+        result = "";
+        if (line == null) {
+          System.out.println("null input to python, not sent");
         }
+        else {
+          result = sendPython(line);
+          if (VERBOSE) System.out.println("from python: " + result);
+          if (result == null) {
+            result = "";
+            System.out.println("null result from python");
+          }
+        }
+        if (result.startsWith("ERROR"))
+          throw new Exception(result);
+
+        // should now be in sparse format from python
+        row = sparseToRowData(colNames, result);
+        if (VERBOSE) System.out.println("row: " + row);
+
+        // do the prediction
+        pr = PredictServlet.predict(row);
+
+        // assemble json result
+        prJson = gson.toJson(pr);
+        if (VERBOSE) System.out.println("prJson: " + prJson);
+
+        // Emit the prediction to the servlet response.
+        writer.write(prJson);
+        writer.write('\n');
+        count += 1;
       }
-      if (result.startsWith("ERROR"))
-        throw new Exception(result);
-
-      // should now be in sparse format from python
-      RowData row = sparseToRowData(colNames, result);
-      if (VERBOSE) System.out.println("row: " + row);
-
-      // do the prediction
-      AbstractPrediction pr = PredictServlet.predict(row);
-
-      // assemble json result
-      String prJson = gson.toJson(pr);
-      if (VERBOSE) System.out.println("prJson: " + prJson);
-
-      // Emit the prediction to the servlet response.
-      response.getWriter().write(prJson);
       response.setStatus(HttpServletResponse.SC_OK);
     }
     catch (Exception e) {
@@ -261,8 +269,8 @@ public class PredictPythonServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
     long done = System.nanoTime();
-    PredictServlet.postPythonTimes.add(start, done);
-    if (VERBOSE) System.out.println("Python Get time " + PredictServlet.postPythonTimes);
+    PredictServlet.postPythonTimes.add(start, done, count);
+    if (VERBOSE) System.out.println("Python Post time " + PredictServlet.postPythonTimes);
 
   }
 
