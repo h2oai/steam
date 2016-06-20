@@ -26,12 +26,16 @@ type context struct {
 	trace     *log.Logger
 }
 
-func (c *context) configure(verbose bool) {
+func (c *context) getConfigPath() string {
+	return path.Join(os.ExpandEnv("$HOME"), ".steam", "config")
+}
+
+func (c *context) configure(verbose, requiresAuth bool) {
 	if verbose {
 		c.trace = log.New(os.Stdout, "", 0)
 	}
 
-	confPath = path.Join(os.ExpandEnv("$HOME"), ".steam", "config")
+	confPath = c.getConfigPath()
 	c.traceln("Config path:", confPath)
 
 	var conf *Config
@@ -48,12 +52,19 @@ func (c *context) configure(verbose bool) {
 		conf = c.loadConfig(confPath)
 	}
 
-	addr := conf.CurrentHost
-
 	c.config = conf
+	addr := conf.CurrentHost
+	if !requiresAuth {
+		return
+	}
+	host, ok := conf.Hosts[addr]
+	if !ok {
+		log.Fatalln("You are not authenticated to a Steam server. See 'steam help login' for more details.")
+	}
 	httpScheme := "http"
 	c.remote = &web.Remote{rpc.NewProc(httpScheme, "/web", "web", addr, host.Username, host.Password)}
 	c.uploadURL = (&url.URL{Scheme: httpScheme, Host: addr, Path: "/upload"}).String()
+
 }
 
 func (c *context) loadConfig(confPath string) *Config {
@@ -81,6 +92,14 @@ func (c *context) saveConfig(conf *Config) {
 	if err := ioutil.WriteFile(confPath, data, 0755); err != nil {
 		log.Fatalln(fmt.Sprintf("Failed writing config file %s:", confPath), err)
 	}
+}
+
+func (c *context) resetConfig() error {
+	confPath = c.getConfigPath()
+	if _, err := os.Stat(confPath); err == nil {
+		return os.Remove(confPath)
+	}
+	return nil
 }
 
 func (c *context) uploadFile(filepath, kind string) error {

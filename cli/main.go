@@ -98,14 +98,15 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	cmd.AddCommand(
-		delete(c),
-		deploy(c),
-		get(c),
 		login(c),
+		reset(c),
 		retrieve(c),
 		serve(c),
 		start(c),
 		stop(c),
+		deploy(c),
+		get(c),
+		delete(c),
 	)
 	return cmd
 }
