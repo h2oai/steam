@@ -1,0 +1,3 @@
+export const FETCH_MODEL = 'FETCH_MODEL';
+export const REQUEST_MODEL = 'REQUEST_MODEL';
+export const RECEIVE_MODEL = 'RECEIVE_MODEL';
