@@ -1,3 +1,4 @@
 export const FETCH_MODEL = 'FETCH_MODEL';
 export const REQUEST_MODEL = 'REQUEST_MODEL';
 export const RECEIVE_MODEL = 'RECEIVE_MODEL';
+export const UPDATE_QUERY_STRING = 'UPDATE_QUERY_STRING';

@@ -15,14 +15,16 @@ import { fetchModel } from "../reducers/modelReducer";
 
 
 interface Props {
-  fetchStatistics: Function,
-  fetchModel: Function,
   statistics?: any,
   model?: any
 }
 
+interface DispatchProps {
+  fetchStatistics: Function,
+  fetchModel: Function
+}
 
-export class App extends React.Component<Props, any> {
+export class App extends React.Component<Props & DispatchProps, any> {
   componentWillMount() {
     this.props.fetchStatistics();
     this.props.fetchModel();
@@ -65,4 +67,4 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(App)
