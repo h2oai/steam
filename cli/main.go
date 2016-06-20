@@ -22,6 +22,14 @@ type Config struct {
 	Version     string
 	Kind        string
 	CurrentHost string
+	Hosts       map[string]*Host
+}
+
+type Host struct {
+	Username             string
+	Password             string
+	AuthenticationMethod string
+	EnableTLS            bool
 }
 
 func newConfig() *Config {
@@ -29,6 +37,7 @@ func newConfig() *Config {
 		"1.0.0",
 		"Config",
 		"",
+		make(map[string]*Host),
 	}
 }
 
@@ -40,12 +49,36 @@ func Run(version, buildDate string) {
 	}
 }
 
+var unauthenticatedCommands = []string{
+	"steam reset",
+	"steam login",
+	"steam serve",
+}
+
+func requiresAuth(seq string) bool {
+	log.Println(seq)
+	for _, c := range unauthenticatedCommands {
+		if strings.Contains(seq, c) {
+			return false
+		}
+	}
+	return true
+}
+
+func getCommandSequence(cmd *cobra.Command, seq *string) {
+	*seq = cmd.Use + " " + *seq
+	if cmd.HasParent() {
+		cmd.VisitParents(func(p *cobra.Command) {
+			getCommandSequence(p, seq)
+		})
+	}
+}
+
 func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Command {
 	c := &context{
 		version:   version,
 		buildDate: buildDate,
 		trace:     log.New(trace, "", 0),
-		// remote:    &web.Remote{rpc.NewProc("http", "/web", "web", "172.16.2.103:9000", "", "")},
 	}
 
 	var verbose bool
@@ -54,8 +87,12 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		Short:             fmt.Sprintf("%s v%s build %s: Command Line Interface to Steam", steam, version, buildDate),
 		DisableAutoGenTag: true,
 
+		// CLI configuration / init is in here as a pre-run routine so that
+		//   -v / --verbose is captured properly and used during config parsing.
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			c.configure(verbose)
+			var seq string
+			getCommandSequence(cmd, &seq)
+			c.configure(verbose, requiresAuth(seq))
 		},
 	}
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")

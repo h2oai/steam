@@ -52,7 +52,7 @@ func (c *context) configure(verbose bool) {
 
 	c.config = conf
 	httpScheme := "http"
-	c.remote = &web.Remote{rpc.NewProc(httpScheme, "/web", "web", addr, "", "")}
+	c.remote = &web.Remote{rpc.NewProc(httpScheme, "/web", "web", addr, host.Username, host.Password)}
 	c.uploadURL = (&url.URL{Scheme: httpScheme, Host: addr, Path: "/upload"}).String()
 }
 
