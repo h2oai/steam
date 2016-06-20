@@ -56,7 +56,6 @@ var unauthenticatedCommands = []string{
 }
 
 func requiresAuth(seq string) bool {
-	log.Println(seq)
 	for _, c := range unauthenticatedCommands {
 		if strings.Contains(seq, c) {
 			return false
