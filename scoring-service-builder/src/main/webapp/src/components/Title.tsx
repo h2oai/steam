@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import * as classNames from 'classnames';
-import ContainerFluid from '../components/ContainerFluid';
+import ContainerFluid from './ContainerFluid';
 
 interface Props {
   className?: string,

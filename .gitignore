@@ -38,4 +38,4 @@ _testmain.go
 /var/master/assets/*.war
 /var/master/assets/*.jar
 /var/master/model
-
+.idea/

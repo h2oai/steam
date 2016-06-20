@@ -135,8 +135,8 @@ input[type='file']{
 }
 
 form {
-	padding: 1em 3em;
-	margin: 1em 0em;
+	/*padding: 1em 3em;*/
+	/*margin: 1em 0em;*/
 }
 
 #python form{
