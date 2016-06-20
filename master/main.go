@@ -153,17 +153,6 @@ func Run(version, buildDate string, opts *Opts) {
 		}
 	}
 
-	// --- create proxy services ---
-	// rp := proxy.NewRProxy()
-	// rpFailch := make(chan error)
-
-	// go func() {
-	// 	log.Println()
-	// 	if err := http.ListenAndServe(proxAddress, rp); err != nil {
-	// 		rpFailch <- err
-	// 	}
-	// }()
-
 	// --- create basic auth service ---
 
 	defaultAz := newDefaultAz(ds, systemIdentity)
@@ -173,7 +162,6 @@ func Run(version, buildDate string, opts *Opts) {
 	rpFailch := make(chan error)
 
 	go func() {
-		log.Println()
 		if err := http.ListenAndServe(proxAddress, rp); err != nil {
 			rpFailch <- err
 		}
