@@ -7,32 +7,32 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var retrieveHelp = `
-retrieve
-Retrieve a resource of the specified type into steam.
+var importHelp = `
+import
+Import a resource of the specified type into steam.
 Examples:
 
 	$ steam import model
 `
 
-func retrieve(c *context) *cobra.Command {
-	cmd := newCmd(c, retrieveHelp, nil)
-	cmd.AddCommand(retrieveModel(c))
+func import_(c *context) *cobra.Command {
+	cmd := newCmd(c, importHelp, nil)
+	cmd.AddCommand(importModel(c))
 	return cmd
 }
 
-var retrieveModelHelp = `
+var importModelHelp = `
 model [modelName] [cloudName]
-Retrieve a model from an H2O cluster into steam
+Import a model from an H2O cluster into steam
 Examples:
 
-	$ steam retrieve model model3 cloud42
+	$ steam import model model3 cloud42
 `
 
-func retrieveModel(c *context) *cobra.Command {
-	cmd := newCmd(c, retrieveModelHelp, func(c *context, args []string) {
+func importModel(c *context) *cobra.Command {
+	cmd := newCmd(c, importModelHelp, func(c *context, args []string) {
 		if len(args) != 2 {
-			log.Fatalln("Incorrect number of arguments. See 'steam help retrieve model'.")
+			log.Fatalln("Incorrect number of arguments. See 'steam help import model'.")
 		}
 
 		// FIXME

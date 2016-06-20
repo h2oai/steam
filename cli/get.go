@@ -118,16 +118,16 @@ func getModels(c *context) *cobra.Command {
 
 		// FIXME
 
-		// ms, err := c.remote.GetModels()
-		// if err != nil {
-		// 	log.Fatalln(err)
-		// }
+		ms, err := c.remote.GetModels(0, 10000)
+		if err != nil {
+			log.Fatalln(err)
+		}
 
-		// lines := make([]string, len(ms))
-		// for i, m := range ms {
-		// 	lines[i] = fmt.Sprintf("%s\t%s\t%s\t%s\t%s", m.Name, m.Algo, m.Dataset, m.TargetName, fmtAgo(m.CreatedAt))
-		// }
-		// c.printt("NAME\tALGO\tDATASET\tTARGET\tAGE", lines)
+		lines := make([]string, len(ms))
+		for i, m := range ms {
+			lines[i] = fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t", m.Name, m.Algorithm, m.DatasetName, m.ResponseColumnName, fmtAgo(m.CreatedAt))
+		}
+		c.printt("NAME\tALGO\tDATASET\tTARGET\tAGE\t", lines)
 	})
 
 	return cmd

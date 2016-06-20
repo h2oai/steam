@@ -100,13 +100,13 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 	cmd.AddCommand(
 		login(c),
 		reset(c),
-		retrieve(c),
 		serve(c),
 		start(c),
 		stop(c),
 		deploy(c),
 		get(c),
 		delete(c),
+		import_(c),
 	)
 	return cmd
 }
