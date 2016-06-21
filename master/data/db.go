@@ -217,15 +217,17 @@ func toClusterTypeKeys(clusterTypes []ClusterType) *ClusterTypeKeys {
 }
 
 type Datastore struct {
-	db             *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
-	metadata       metadata
-	permissions    []Permission
-	permissionMap  map[int64]Permission
-	entityTypes    []EntityType
-	entityTypeMap  map[int64]EntityType
-	EntityTypes    *EntityTypeKeys
-	clusterTypeMap map[int64]ClusterType
-	ClusterTypes   *ClusterTypeKeys
+	db                *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
+	metadata          metadata
+	permissions       []Permission
+	permissionMap     map[int64]Permission
+	entityTypes       []EntityType
+	entityTypeMap     map[int64]EntityType
+	EntityTypes       *EntityTypeKeys
+	clusterTypeMap    map[int64]ClusterType
+	ClusterTypes      *ClusterTypeKeys
+	ViewPermissions   map[int64]int64
+	ManagePermissions map[int64]int64
 }
 
 func Connect(username, dbname, sslmode string) (*sql.DB, error) {
@@ -296,6 +298,8 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		entityTypeMap[et.Id] = et
 	}
 
+	entityTypeKeys := toEntityTypeKeys(entityTypes)
+
 	clusterTypes, err := readClusterTypes(db)
 	if err != nil {
 		return nil, err
@@ -306,6 +310,28 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		clusterTypeMap[ct.Id] = ct
 	}
 
+	viewPermissions := map[int64]int64{
+		entityTypeKeys.Cluster:   ViewCluster,
+		entityTypeKeys.Engine:    ViewEngine,
+		entityTypeKeys.Identity:  ViewIdentity,
+		entityTypeKeys.Model:     ViewModel,
+		entityTypeKeys.Project:   ViewProject,
+		entityTypeKeys.Role:      ViewRole,
+		entityTypeKeys.Service:   ViewService,
+		entityTypeKeys.Workgroup: ViewWorkgroup,
+	}
+
+	managePermissions := map[int64]int64{
+		entityTypeKeys.Cluster:   ManageCluster,
+		entityTypeKeys.Engine:    ManageEngine,
+		entityTypeKeys.Identity:  ManageIdentity,
+		entityTypeKeys.Model:     ManageModel,
+		entityTypeKeys.Project:   ManageProject,
+		entityTypeKeys.Role:      ManageRole,
+		entityTypeKeys.Service:   ManageService,
+		entityTypeKeys.Workgroup: ManageWorkgroup,
+	}
+
 	return &Datastore{
 		db,
 		metadata,
@@ -313,9 +339,11 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		permissionMap,
 		entityTypes,
 		entityTypeMap,
-		toEntityTypeKeys(entityTypes),
+		entityTypeKeys,
 		clusterTypeMap,
 		toClusterTypeKeys(clusterTypes),
+		viewPermissions,
+		managePermissions,
 	}, nil
 }
 

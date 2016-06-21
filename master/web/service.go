@@ -821,95 +821,185 @@ func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
 }
 
 func (s *Service) GetSupportedEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+
+	// No permission checks required
+
 	return toEntityTypes(s.ds.ReadEntityTypes(pz)), nil
 }
 
 func (s *Service) GetSupportedPermissions(pz az.Principal) ([]*web.Permission, error) {
+
+	// No permission checks required
+
 	permissions, err := s.ds.ReadAllPermissions(pz)
 	if err != nil {
 		return nil, err
 	}
 	return toPermissions(permissions), nil
 }
+
 func (s *Service) GetPermissionsForRole(pz az.Principal, roleId int64) ([]*web.Permission, error) {
+	if err := pz.CheckPermission(data.ViewRole); err != nil {
+		return nil, err
+	}
+
 	permissions, err := s.ds.ReadPermissionsForRole(pz, roleId)
 	if err != nil {
 		return nil, err
 	}
 	return toPermissions(permissions), nil
 }
+
 func (s *Service) GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*web.Permission, error) {
+	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+		return nil, err
+	}
+
 	permissions, err := s.ds.ReadPermissionsForIdentity(pz, identityId)
 	if err != nil {
 		return nil, err
 	}
 	return toPermissions(permissions), nil
 }
+
 func (s *Service) CreateRole(pz az.Principal, name string, description string) (int64, error) {
+	if err := pz.CheckPermission(data.ManageRole); err != nil {
+		return 0, err
+	}
 	return s.ds.CreateRole(pz, name, description)
 }
+
 func (s *Service) GetRoles(pz az.Principal, offset, limit int64) ([]*web.Role, error) {
+	if err := pz.CheckPermission(data.ViewRole); err != nil {
+		return nil, err
+	}
+
 	roles, err := s.ds.ReadRoles(pz, offset, limit)
 	if err != nil {
 		return nil, err
 	}
 	return toRoles(roles), nil
 }
+
 func (s *Service) GetRolesForIdentity(pz az.Principal, identityId int64) ([]*web.Role, error) {
+	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+		return nil, err
+	}
+	if err := pz.CheckPermission(data.ViewRole); err != nil {
+		return nil, err
+	}
+
 	roles, err := s.ds.ReadRolesForIdentity(pz, identityId)
 	if err != nil {
 		return nil, err
 	}
 	return toRoles(roles), nil
 }
+
 func (s *Service) GetRole(pz az.Principal, roleId int64) (*web.Role, error) {
+	if err := pz.CheckPermission(data.ViewRole); err != nil {
+		return nil, err
+	}
+
 	role, err := s.ds.ReadRole(pz, roleId)
 	if err != nil {
 		return nil, err
 	}
 	return toRole(role), nil
 }
+
 func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, description string) error {
+	if err := pz.CheckPermission(data.ManageRole); err != nil {
+		return err
+	}
+
 	return s.ds.UpdateRole(pz, roleId, name, description)
 }
+
 func (s *Service) LinkRoleAndPermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
+	if err := pz.CheckPermission(data.ManageRole); err != nil {
+		return err
+	}
+
 	return s.ds.LinkRoleAndPermissions(pz, roleId, permissionIds)
 }
+
 func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
+	if err := pz.CheckPermission(data.ManageRole); err != nil {
+		return err
+	}
+
 	return s.ds.DeleteRole(pz, roleId)
 }
 
 func (s *Service) CreateWorkgroup(pz az.Principal, name string, description string) (int64, error) {
+	if err := pz.CheckPermission(data.ManageWorkgroup); err != nil {
+		return 0, err
+	}
+
 	return s.ds.CreateWorkgroup(pz, name, description)
 }
+
 func (s *Service) GetWorkgroups(pz az.Principal, offset, limit int64) ([]*web.Workgroup, error) {
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return nil, err
+	}
+
 	workgroups, err := s.ds.ReadWorkgroups(pz, offset, limit)
 	if err != nil {
 		return nil, err
 	}
 	return toWorkgroups(workgroups), nil
 }
+
 func (s *Service) GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*web.Workgroup, error) {
+	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+		return nil, err
+	}
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return nil, err
+	}
+
 	workgroups, err := s.ds.ReadWorkgroupsForIdentity(pz, identityId)
 	if err != nil {
 		return nil, err
 	}
 	return toWorkgroups(workgroups), nil
 }
+
 func (s *Service) GetWorkgroup(pz az.Principal, workgroupId int64) (*web.Workgroup, error) {
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return nil, err
+	}
+
 	workgroup, err := s.ds.ReadWorkgroup(pz, workgroupId)
 	if err != nil {
 		return nil, err
 	}
 	return toWorkgroup(workgroup), nil
 }
+
 func (s *Service) UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) error {
+	if err := pz.CheckPermission(data.ManageWorkgroup); err != nil {
+		return err
+	}
+
 	return s.ds.UpdateWorkgroup(pz, workgroupId, name, description)
 }
+
 func (s *Service) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
+	if err := pz.CheckPermission(data.ManageWorkgroup); err != nil {
+		return err
+	}
+
 	return s.ds.DeleteWorkgroup(pz, workgroupId)
 }
+
 func (s *Service) CreateIdentity(pz az.Principal, name string, password string) (int64, error) {
+	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+		return 0, err
+	}
+
 	hash, err := auth.HashPassword(password)
 	if err != nil {
 		return 0, fmt.Errorf("Failed hashing password: %s", err)
@@ -920,50 +1010,121 @@ func (s *Service) CreateIdentity(pz az.Principal, name string, password string) 
 	}
 	return id, nil
 }
+
 func (s *Service) GetIdentities(pz az.Principal, offset, limit int64) ([]*web.Identity, error) {
+	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+		return nil, err
+	}
+
 	identities, err := s.ds.ReadIdentities(pz, offset, limit)
 	if err != nil {
 		return nil, err
 	}
 	return toIdentities(identities), nil
 }
+
 func (s *Service) GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*web.Identity, error) {
+	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+		return nil, err
+	}
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return nil, err
+	}
+
 	identities, err := s.ds.ReadIdentitiesForWorkgroup(pz, workgroupId)
 	if err != nil {
 		return nil, err
 	}
 	return toIdentities(identities), nil
 }
+
 func (s *Service) GetIdentititesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
+	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+		return nil, err
+	}
+	if err := pz.CheckPermission(data.ViewRole); err != nil {
+		return nil, err
+	}
+
 	identities, err := s.ds.ReadIdentitiesForRole(pz, roleId)
 	if err != nil {
 		return nil, err
 	}
 	return toIdentities(identities), nil
 }
+
 func (s *Service) GetIdentity(pz az.Principal, identityId int64) (*web.Identity, error) {
+	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+		return nil, err
+	}
+
 	identity, err := s.ds.ReadIdentity(pz, identityId)
 	if err != nil {
 		return nil, err
 	}
 	return toIdentity(identity), err
 }
+
 func (s *Service) LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return err
+	}
+
 	return s.ds.LinkIdentityAndWorkgroup(pz, identityId, workgroupId)
 }
+
 func (s *Service) UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return err
+	}
+
 	return s.ds.UnlinkIdentityAndWorkgroup(pz, identityId, workgroupId)
 }
+
 func (s *Service) LinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
+	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(data.ViewRole); err != nil {
+		return err
+	}
+
 	return s.ds.LinkIdentityAndRole(pz, identityId, roleId)
 }
+
 func (s *Service) UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
+	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(data.ViewRole); err != nil {
+		return err
+	}
+
 	return s.ds.UnlinkIdentityAndRole(pz, identityId, roleId)
 }
+
 func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
+	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+		return err
+	}
+
 	return s.ds.DeactivateIdentity(pz, identityId)
 }
+
 func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityTypeId, entityId int64) error {
+	if err := pz.CheckPermission(s.ds.ManagePermissions[entityTypeId]); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return err
+	}
+
 	return s.ds.CreatePrivilege(pz, data.Privilege{
 		kind,
 		workgroupId,
@@ -971,14 +1132,30 @@ func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityT
 		entityId,
 	})
 }
+
 func (s *Service) GetEntityPrivileges(pz az.Principal, entityTypeId, entityId int64) ([]*web.EntityPrivilege, error) {
+	if err := pz.CheckPermission(s.ds.ViewPermissions[entityTypeId]); err != nil {
+		return nil, err
+	}
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return nil, err
+	}
+
 	privileges, err := s.ds.ReadEntityPrivileges(pz, entityTypeId, entityId)
 	if err != nil {
 		return nil, err
 	}
 	return toEntityPrivileges(privileges), nil
 }
+
 func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entityTypeId, entityId int64) error {
+	if err := pz.CheckPermission(s.ds.ManagePermissions[entityTypeId]); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+		return err
+	}
+
 	return s.ds.DeletePrivilege(pz, data.Privilege{
 		kind,
 		workgroupId,
@@ -986,7 +1163,12 @@ func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entit
 		entityId,
 	})
 }
+
 func (s *Service) GetEntityHistory(pz az.Principal, entityTypeId, entityId, offset, limit int64) ([]*web.EntityHistory, error) {
+	if err := pz.CheckPermission(s.ds.ViewPermissions[entityTypeId]); err != nil {
+		return nil, err
+	}
+
 	history, err := s.ds.ReadHistoryForEntity(pz, entityTypeId, entityId, offset, limit)
 	if err != nil {
 		return nil, err
