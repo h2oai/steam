@@ -28,7 +28,7 @@ func importModel(c *context) *cobra.Command {
 		}
 		modelName := args[1]
 
-		if _, err := c.remote.GetModelFromCluster(clusterId, modelName); err != nil {
+		if _, err := c.remote.ImportModelFromCluster(clusterId, modelName); err != nil {
 			log.Fatalln(err)
 		}
 
