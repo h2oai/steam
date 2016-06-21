@@ -165,8 +165,12 @@
       // regression result
       result = "Value <b>" + data["value"] + "</b>";
     }
+    else if ("dimensions" in data) {
+      // dimensionality reduction result
+      result = "Dimensions <b>" + data["dimensions"] + "</b>";
+    }
     else
-      result = "Can't parse result";
+      result = "Can't parse result: " + data;
 
     // result += "<p><code>" + JSON.stringify(data) + "</code>";
 
