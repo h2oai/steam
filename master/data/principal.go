@@ -1,7 +1,6 @@
 package data
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/h2oai/steamY/master/az"
 )
@@ -18,6 +17,19 @@ func (ds *Datastore) NewPrincipal(name string) (az.Principal, error) {
 		return nil, nil
 	}
 
+	roleNames, err := ds.readRoleNamesForIdentity(identity.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	isSuperuser := false
+	for _, roleName := range roleNames {
+		if roleName == SuperuserRoleName {
+			isSuperuser = true
+			break
+		}
+	}
+
 	permissionIds, err := ds.readPermissionsForIdentity(identity.Id)
 	if err != nil {
 		return nil, err
@@ -29,13 +41,14 @@ func (ds *Datastore) NewPrincipal(name string) (az.Principal, error) {
 		permissions[permissionMap[permissionId].Code] = true
 	}
 
-	return &Principal{ds, identity, permissions}, nil
+	return &Principal{ds, identity, permissions, isSuperuser}, nil
 }
 
 type Principal struct {
 	ds          *Datastore
 	identity    *IdentityAndPassword
 	permissions map[int64]bool
+	isSuperuser bool
 }
 
 func (pz *Principal) Id() int64 {
@@ -58,7 +71,14 @@ func (pz *Principal) IsActive() bool {
 	return pz.identity.IsActive
 }
 
+func (pz *Principal) IsSuperuser() bool {
+	return pz.isSuperuser
+}
+
 func (pz *Principal) HasPermission(code int64) bool {
+	if pz.IsSuperuser() {
+		return true
+	}
 	_, ok := pz.permissions[code]
 	return ok
 }
@@ -67,12 +87,14 @@ func (pz *Principal) CheckPermission(code int64) error {
 	if pz.HasPermission(code) {
 		return nil
 	}
-	// FIXME return string representation of permission code
-	return fmt.Errorf("Identity %s does not have permission %d to perform this operation", pz.Name(), code)
+	return fmt.Errorf("Identity %s does not have permission '%s' to perform this operation", pz.Name(), pz.ds.permissionMap[code].Description)
 }
 
 // TODO use bitwise ops to simplify this
 func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivilege string) (bool, error) {
+	if pz.IsSuperuser() {
+		return true, nil
+	}
 
 	owns := false
 	canEdit := false
@@ -124,122 +146,31 @@ func (pz *Principal) checkPrivilege(entityTypeId, entityId int64, expectedPrivil
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("Identity %s does not have privilege '%s' on the entity %d:%d", pz.Name(), expectedPrivilege, entityTypeId, entityId)
+		return fmt.Errorf("Identity %s does not have privilege '%s' on the entity %s:%d", pz.Name(), expectedPrivilege, pz.ds.entityTypeMap[entityTypeId].Name, entityId)
 	}
 	return nil
 }
 
 func (pz *Principal) Owns(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityId, entityId, Owns)
+	return pz.hasPrivilege(entityTypeId, entityId, Owns)
 }
 
 func (pz *Principal) CanEdit(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityId, entityId, CanEdit)
+	return pz.hasPrivilege(entityTypeId, entityId, CanEdit)
 }
 
 func (pz *Principal) CanView(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityId, entityId, CanView)
+	return pz.hasPrivilege(entityTypeId, entityId, CanView)
 }
 
 func (pz *Principal) CheckOwns(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityId, entityId, Owns)
+	return pz.checkPrivilege(entityTypeId, entityId, Owns)
 }
 
 func (pz *Principal) CheckEdit(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityId, entityId, CanEdit)
+	return pz.checkPrivilege(entityTypeId, entityId, CanEdit)
 }
 
 func (pz *Principal) CheckView(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityId, entityId, CanView)
-}
-
-const SystemIdentityName = "system"
-
-func CreateSystemIdentity(db *sql.DB) (int64, int64, error) {
-	var id, workgroupId int64
-	err := executeTransaction(db, func(tx *sql.Tx) error {
-		var err error
-
-		workgroupId, err = createDefaultWorkgroup(tx, SystemIdentityName)
-		if err != nil {
-			return err
-		}
-
-		id, err = createIdentity(tx, SystemIdentityName, "", workgroupId)
-		if err != nil {
-			return err
-		}
-
-		return linkIdentityAndWorkgroup(tx, id, workgroupId)
-	})
-	return id, workgroupId, err
-}
-
-type SystemPrincipal struct {
-	identity *IdentityAndPassword
-}
-
-func (ds *Datastore) NewSystemPrincipal() (az.Principal, error) {
-	identity, err := ds.readIdentityAndPassword(SystemIdentityName)
-	if err != nil {
-		return nil, err
-	}
-
-	if identity == nil {
-		return nil, nil
-	}
-
-	return &SystemPrincipal{identity}, nil
-}
-
-func (pz *SystemPrincipal) Id() int64 {
-	return pz.identity.Id
-}
-
-func (pz *SystemPrincipal) WorkgroupId() int64 {
-	return pz.identity.WorkgroupId
-}
-
-func (pz *SystemPrincipal) Name() string {
-	return pz.identity.Name
-}
-
-func (pz *SystemPrincipal) Password() string {
-	return pz.identity.Password
-}
-
-func (pz *SystemPrincipal) IsActive() bool {
-	return true
-}
-
-func (pz *SystemPrincipal) HasPermission(code int64) bool {
-	return true
-}
-
-func (pz *SystemPrincipal) CheckPermission(code int64) error {
-	return nil
-}
-
-func (pz *SystemPrincipal) Owns(entityTypeId, entityId int64) (bool, error) {
-	return true, nil
-}
-
-func (pz *SystemPrincipal) CanEdit(entityTypeId, entityId int64) (bool, error) {
-	return true, nil
-}
-
-func (pz *SystemPrincipal) CanView(entityTypeId, entityId int64) (bool, error) {
-	return true, nil
-}
-
-func (pz *SystemPrincipal) CheckOwns(entityTypeId, entityId int64) error {
-	return nil
-}
-
-func (pz *SystemPrincipal) CheckEdit(entityTypeId, entityId int64) error {
-	return nil
-}
-
-func (pz *SystemPrincipal) CheckView(entityTypeId, entityId int64) error {
-	return nil
+	return pz.checkPrivilege(entityTypeId, entityId, CanView)
 }

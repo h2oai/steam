@@ -10,11 +10,10 @@ import (
 
 type DefaultAz struct {
 	ds *data.Datastore
-	pz az.Principal
 }
 
-func newDefaultAz(ds *data.Datastore, pz az.Principal) *DefaultAz {
-	return &DefaultAz{ds, pz}
+func newDefaultAz(ds *data.Datastore) *DefaultAz {
+	return &DefaultAz{ds}
 }
 
 func (a *DefaultAz) Authenticate(username string) string {

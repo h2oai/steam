@@ -13,6 +13,7 @@ import (
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/rpc"
+	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/data"
 	"github.com/h2oai/steamY/master/web"
 )
@@ -105,21 +106,16 @@ func Run(version, buildDate string, opts *Opts) {
 			log.Fatalln("Starting Steam for the first time requires both --superuser-name and --superuser-password arguments to \"steam serve master\".")
 		}
 
-		if err := validateUsername(opts.SuperuserName); err != nil {
+		if err := auth.ValidateUsername(opts.SuperuserName); err != nil {
 			log.Fatalln("Invalid superuser username:", err)
 		}
 
-		if err := validatePassword(opts.SuperuserPassword); err != nil {
+		if err := auth.ValidatePassword(opts.SuperuserPassword); err != nil {
 			log.Fatalln("Invalid superuser password:", err)
 		}
 
 		if err := data.Prime(db); err != nil {
 			log.Fatalln("Failed priming database:", err)
-		}
-
-		_, _, err := data.CreateSystemIdentity(db)
-		if err != nil {
-			log.Fatalln("Failed system identity setup:", err)
 		}
 	}
 
@@ -128,13 +124,8 @@ func Run(version, buildDate string, opts *Opts) {
 		log.Fatalln("Failed initializing from database:", err)
 	}
 
-	systemIdentity, err := ds.NewSystemPrincipal()
-	if err != nil {
-		log.Fatalln("Failed reading system identity:", err)
-	}
-
 	if !isPrimed {
-		passwordHash, err := hashPassword(opts.SuperuserPassword)
+		passwordHash, err := auth.HashPassword(opts.SuperuserPassword)
 		if err != nil {
 			log.Fatalln("Failed hashing superuser password:", err)
 		}
@@ -143,19 +134,15 @@ func Run(version, buildDate string, opts *Opts) {
 			log.Fatalln("Failed superuser identity setup:", err)
 		}
 
-		su, err := ds.NewPrincipal(opts.SuperuserName)
+		_, err = ds.NewPrincipal(opts.SuperuserName)
 		if err != nil {
 			log.Fatalln("Failed reading superuser principal:", err)
-		}
-
-		if err := ds.CreateSuperuserRole(su); err != nil {
-			log.Fatalln("Failed superuser role setup:", err)
 		}
 	}
 
 	// --- create basic auth service ---
 
-	defaultAz := newDefaultAz(ds, systemIdentity)
+	defaultAz := newDefaultAz(ds)
 
 	// --- create proxy services ---
 	rp := proxy.NewRProxy()

@@ -1,19 +1,20 @@
-package master
+package auth
 
 import (
 	"fmt"
-	"github.com/h2oai/steamY/master/data"
 	"golang.org/x/crypto/bcrypt"
 	_ "net/http/pprof"
 	"regexp"
 )
 
+const SystemIdentityName = "system"
+
 var usernameRegexp = regexp.MustCompile(`^\S+$`) // no whitespace
 var passwordRegexp = regexp.MustCompile(`^\S+$`) // non-empty
 
-func validateUsername(name string) error {
-	if name == data.SystemIdentityName {
-		return fmt.Errorf("\"system\" is a reserved username")
+func ValidateUsername(name string) error {
+	if name == SystemIdentityName {
+		return fmt.Errorf("\"%s\" is a reserved username", SystemIdentityName)
 	}
 	if !usernameRegexp.MatchString(name) {
 		return fmt.Errorf("Username cannot contain whitespace characters")
@@ -24,7 +25,7 @@ func validateUsername(name string) error {
 	return nil
 }
 
-func validatePassword(password string) error {
+func ValidatePassword(password string) error {
 	if !passwordRegexp.MatchString(password) {
 		return fmt.Errorf("Password cannot contain whitespace characters")
 	}
@@ -34,7 +35,7 @@ func validatePassword(password string) error {
 	return nil
 }
 
-func hashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", fmt.Errorf("Password encryption failed: %s", err)
@@ -42,7 +43,7 @@ func hashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
-func verifyPassword(hash, password string) bool {
+func VerifyPassword(hash, password string) bool {
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
 		return false
 	}
