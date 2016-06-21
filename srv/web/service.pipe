@@ -63,6 +63,50 @@ type Engine
  Location string
  CreatedAt int64
 
+type EntityType
+ Id int64
+ Name string
+
+type EntityHistory
+ IdentityId int64
+ Action string
+ Description string
+ CreatedAt int64
+
+type Permission
+ Id int64
+ Code int64
+ Description string
+
+type Privilege
+ Kind string
+ WorkgroupId int64
+
+type EntityPrivilege
+ Kind string
+ WorkgroupId int64
+ WorkgroupName string
+ WorkgroupDescription string
+
+type Role
+ Id int64
+ Name string
+ Description string
+ Created int64
+
+type Identity
+ Id int64
+ Name string
+ IsActive bool
+ LastLogin int64
+ Created int64
+
+type Workgroup
+ Id int64
+ Name string
+ Description string
+ Created int64
+
 Ping(status bool) status bool
 
 RegisterCluster(address string) clusterId int64
@@ -95,3 +139,40 @@ AddEngine(engineName string, enginePath string) engineId int64
 GetEngine(engineId int64) engine *Engine
 GetEngines() engines []*Engine
 DeleteEngine(engineId int64)
+
+GetSupportedEntityTypes() entityTypes []*EntityType
+GetSupportedPermissions() permissions []*Permission
+GetPermissionsForRole(roleId int64) permissions []*Permission
+GetPermissionsForIdentity(identityId int64) permissions []*Permission
+
+CreateRole(name string, description string) roleId int64
+GetRoles(offset int64, limit int64) roles []*Role
+GetRolesForIdentity(identityId int64) roles []*Role
+GetRole(roleId int64) role *Role
+UpdateRole(roleId int64, name string, description string)
+LinkRoleAndPermissions(roleId int64, permissionIds []int64)
+DeleteRole(roleId int64)
+
+CreateWorkgroup(name string, description string) workgroupId int64
+GetWorkgroups(offset int64, limit int64) workgroups []*Workgroup
+GetWorkgroupsForIdentity(identityId int64) workgroups []*Workgroup
+GetWorkgroup(workgroupId int64) workgroup *Workgroup
+UpdateWorkgroup(workgroupId int64, name string, description string)
+DeleteWorkgroup(workgroupId int64)
+
+CreateIdentity(name string, password string) identityId int64
+GetIdentities(offset int64, limit int64) identities []*Identity
+GetIdentitiesForWorkgroup(workgroupId int64) identities []*Identity
+GetIdentititesForRole(roleId int64) identities []*Identity
+GetIdentity(identityId int64) identity *Identity
+LinkIdentityAndWorkgroup(identityId int64, workgroupId int64)
+UnlinkIdentityAndWorkgroup(identityId int64, workgroupId int64)
+LinkIdentityAndRole(identityId int64, roleId int64)
+UnlinkIdentityAndRole(identityId int64, roleId int64)
+DeactivateIdentity(identityId int64)
+
+ShareEntity(kind string, workgroupId int64, entityTypeId int64, entityId int64)
+GetEntityPrivileges(entityTypeId int64, entityId int64) privileges []*EntityPrivilege
+UnshareEntity(kind string, workgroupId int64, entityTypeId int64, entityId int64)
+
+GetEntityHistory(entityTypeId int64, entityId int64, offset int64, limit int64) history []*EntityHistory

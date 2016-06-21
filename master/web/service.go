@@ -13,6 +13,7 @@ import (
 	// "github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
+	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/master/data"
 	"github.com/h2oai/steamY/srv/comp" // FIXME rename comp to compiler
@@ -819,6 +820,180 @@ func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
 	return s.ds.DeleteEngine(pz, engineId)
 }
 
+func (s *Service) GetSupportedEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+	return toEntityTypes(s.ds.ReadEntityTypes(pz)), nil
+}
+
+func (s *Service) GetSupportedPermissions(pz az.Principal) ([]*web.Permission, error) {
+	permissions, err := s.ds.ReadAllPermissions(pz)
+	if err != nil {
+		return nil, err
+	}
+	return toPermissions(permissions), nil
+}
+func (s *Service) GetPermissionsForRole(pz az.Principal, roleId int64) ([]*web.Permission, error) {
+	permissions, err := s.ds.ReadPermissionsForRole(pz, roleId)
+	if err != nil {
+		return nil, err
+	}
+	return toPermissions(permissions), nil
+}
+func (s *Service) GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*web.Permission, error) {
+	permissions, err := s.ds.ReadPermissionsForIdentity(pz, identityId)
+	if err != nil {
+		return nil, err
+	}
+	return toPermissions(permissions), nil
+}
+func (s *Service) CreateRole(pz az.Principal, name string, description string) (int64, error) {
+	return s.ds.CreateRole(pz, name, description)
+}
+func (s *Service) GetRoles(pz az.Principal, offset, limit int64) ([]*web.Role, error) {
+	roles, err := s.ds.ReadRoles(pz, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return toRoles(roles), nil
+}
+func (s *Service) GetRolesForIdentity(pz az.Principal, identityId int64) ([]*web.Role, error) {
+	roles, err := s.ds.ReadRolesForIdentity(pz, identityId)
+	if err != nil {
+		return nil, err
+	}
+	return toRoles(roles), nil
+}
+func (s *Service) GetRole(pz az.Principal, roleId int64) (*web.Role, error) {
+	role, err := s.ds.ReadRole(pz, roleId)
+	if err != nil {
+		return nil, err
+	}
+	return toRole(role), nil
+}
+func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, description string) error {
+	return s.ds.UpdateRole(pz, roleId, name, description)
+}
+func (s *Service) LinkRoleAndPermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
+	return s.ds.LinkRoleAndPermissions(pz, roleId, permissionIds)
+}
+func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
+	return s.ds.DeleteRole(pz, roleId)
+}
+
+func (s *Service) CreateWorkgroup(pz az.Principal, name string, description string) (int64, error) {
+	return s.ds.CreateWorkgroup(pz, name, description)
+}
+func (s *Service) GetWorkgroups(pz az.Principal, offset, limit int64) ([]*web.Workgroup, error) {
+	workgroups, err := s.ds.ReadWorkgroups(pz, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return toWorkgroups(workgroups), nil
+}
+func (s *Service) GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*web.Workgroup, error) {
+	workgroups, err := s.ds.ReadWorkgroupsForIdentity(pz, identityId)
+	if err != nil {
+		return nil, err
+	}
+	return toWorkgroups(workgroups), nil
+}
+func (s *Service) GetWorkgroup(pz az.Principal, workgroupId int64) (*web.Workgroup, error) {
+	workgroup, err := s.ds.ReadWorkgroup(pz, workgroupId)
+	if err != nil {
+		return nil, err
+	}
+	return toWorkgroup(workgroup), nil
+}
+func (s *Service) UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) error {
+	return s.ds.UpdateWorkgroup(pz, workgroupId, name, description)
+}
+func (s *Service) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
+	return s.ds.DeleteWorkgroup(pz, workgroupId)
+}
+func (s *Service) CreateIdentity(pz az.Principal, name string, password string) (int64, error) {
+	hash, err := auth.HashPassword(password)
+	if err != nil {
+		return 0, fmt.Errorf("Failed hashing password: %s", err)
+	}
+	id, _, err := s.ds.CreateIdentity(pz, name, hash)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+func (s *Service) GetIdentities(pz az.Principal, offset, limit int64) ([]*web.Identity, error) {
+	identities, err := s.ds.ReadIdentities(pz, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return toIdentities(identities), nil
+}
+func (s *Service) GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*web.Identity, error) {
+	identities, err := s.ds.ReadIdentitiesForWorkgroup(pz, workgroupId)
+	if err != nil {
+		return nil, err
+	}
+	return toIdentities(identities), nil
+}
+func (s *Service) GetIdentititesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
+	identities, err := s.ds.ReadIdentitiesForRole(pz, roleId)
+	if err != nil {
+		return nil, err
+	}
+	return toIdentities(identities), nil
+}
+func (s *Service) GetIdentity(pz az.Principal, identityId int64) (*web.Identity, error) {
+	identity, err := s.ds.ReadIdentity(pz, identityId)
+	if err != nil {
+		return nil, err
+	}
+	return toIdentity(identity), err
+}
+func (s *Service) LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+	return s.ds.LinkIdentityAndWorkgroup(pz, identityId, workgroupId)
+}
+func (s *Service) UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+	return s.ds.UnlinkIdentityAndWorkgroup(pz, identityId, workgroupId)
+}
+func (s *Service) LinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
+	return s.ds.LinkIdentityAndRole(pz, identityId, roleId)
+}
+func (s *Service) UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
+	return s.ds.UnlinkIdentityAndRole(pz, identityId, roleId)
+}
+func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
+	return s.ds.DeactivateIdentity(pz, identityId)
+}
+func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityTypeId, entityId int64) error {
+	return s.ds.CreatePrivilege(pz, data.Privilege{
+		kind,
+		workgroupId,
+		entityTypeId,
+		entityId,
+	})
+}
+func (s *Service) GetEntityPrivileges(pz az.Principal, entityTypeId, entityId int64) ([]*web.EntityPrivilege, error) {
+	privileges, err := s.ds.ReadEntityPrivileges(pz, entityTypeId, entityId)
+	if err != nil {
+		return nil, err
+	}
+	return toEntityPrivileges(privileges), nil
+}
+func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entityTypeId, entityId int64) error {
+	return s.ds.DeletePrivilege(pz, data.Privilege{
+		kind,
+		workgroupId,
+		entityTypeId,
+		entityId,
+	})
+}
+func (s *Service) GetEntityHistory(pz az.Principal, entityTypeId, entityId, offset, limit int64) ([]*web.EntityHistory, error) {
+	history, err := s.ds.ReadHistoryForEntity(pz, entityTypeId, entityId, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return toEntityHistory(history), nil
+}
+
 // Helper function to convert from int to bytes
 func toSizeBytes(i int64) string {
 	f := float64(i)
@@ -909,6 +1084,111 @@ func toEngine(e data.Engine) *web.Engine {
 		e.Location,
 		toTimestamp(e.Created),
 	}
+}
+
+func toEntityTypes(entityTypes []data.EntityType) []*web.EntityType {
+	array := make([]*web.EntityType, len(entityTypes))
+	for _, et := range entityTypes {
+		array = append(array, &web.EntityType{
+			et.Id,
+			et.Name,
+		})
+	}
+	return array
+}
+
+func toPermissions(permissions []data.Permission) []*web.Permission {
+	array := make([]*web.Permission, len(permissions))
+	for _, p := range permissions {
+		array = append(array, &web.Permission{
+			p.Id,
+			p.Code,
+			p.Description,
+		})
+	}
+	return array
+}
+
+func toRole(r data.Role) *web.Role {
+	return &web.Role{
+		r.Id,
+		r.Name,
+		r.Description,
+		toTimestamp(r.Created),
+	}
+}
+
+func toRoles(roles []data.Role) []*web.Role {
+	array := make([]*web.Role, len(roles))
+	for _, r := range roles {
+		array = append(array, toRole(r))
+	}
+	return array
+}
+
+func toWorkgroup(w data.Workgroup) *web.Workgroup {
+	return &web.Workgroup{
+		w.Id,
+		w.Name,
+		w.Description,
+		toTimestamp(w.Created),
+	}
+}
+
+func toWorkgroups(workgroups []data.Workgroup) []*web.Workgroup {
+	array := make([]*web.Workgroup, len(workgroups))
+	for _, r := range workgroups {
+		array = append(array, toWorkgroup(r))
+	}
+	return array
+}
+
+func toIdentity(u data.Identity) *web.Identity {
+	var lastLogin time.Time
+	if u.LastLogin.Valid {
+		lastLogin = u.LastLogin.Time
+	}
+	return &web.Identity{
+		u.Id,
+		u.Name,
+		u.IsActive,
+		toTimestamp(lastLogin),
+		toTimestamp(u.Created),
+	}
+}
+
+func toIdentities(workgroups []data.Identity) []*web.Identity {
+	array := make([]*web.Identity, len(workgroups))
+	for _, r := range workgroups {
+		array = append(array, toIdentity(r))
+	}
+	return array
+}
+
+func toEntityPrivileges(entityPrivileges []data.EntityPrivilege) []*web.EntityPrivilege {
+	array := make([]*web.EntityPrivilege, len(entityPrivileges))
+	for _, ep := range entityPrivileges {
+		array = append(array, &web.EntityPrivilege{
+			ep.Type,
+			ep.WorkgroupId,
+			ep.WorkgroupName,
+			ep.WorkgroupDescription,
+		})
+	}
+	return array
+}
+
+func toEntityHistory(entityHistory []data.EntityHistory) []*web.EntityHistory {
+	array := make([]*web.EntityHistory, len(entityHistory))
+	for _, h := range entityHistory {
+		array = append(array, &web.EntityHistory{
+			h.IdentityId,
+			h.Action,
+			h.Description,
+			toTimestamp(h.Created),
+		})
+	}
+	return array
 }
 
 //

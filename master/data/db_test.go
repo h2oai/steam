@@ -14,7 +14,7 @@ func connect(t *testing.T) (*Datastore, az.Principal) {
 	if err := truncate(db); err != nil {
 		t.Error(err)
 	}
-	if err := prime(db); err != nil {
+	if err := Prime(db); err != nil {
 		t.Error(err)
 	}
 
@@ -25,24 +25,20 @@ func connect(t *testing.T) (*Datastore, az.Principal) {
 
 	const suName = "Superuser"
 	const suPassword = "Password"
-	uid, wgid, err := ds.CreateSuperuser(suName, suPassword)
+	_, _, err = ds.CreateSuperuser(suName, suPassword)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := ds.NewSuperuserPrincipal(uid, wgid, suName, suPassword)
-
-	if err := ds.SetupSuperuser(p); err != nil {
-		t.Fatal(err)
-	}
+	p, err := ds.NewPrincipal(suName)
 
 	return ds, p
 }
 
 func TestInvalidIdentity(t *testing.T) {
-	ds, p := connect(t)
+	ds, _ := connect(t)
 
-	userpwd, err := ds.ReadIdentityAndPassword(p, "user1")
+	userpwd, err := ds.readIdentityAndPassword("user1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +50,9 @@ func TestInvalidIdentity(t *testing.T) {
 func TestPrivilegesForIdentity(t *testing.T) {
 	ds, p := connect(t)
 
-	// Create user
+	t.Log("superuser=", p.IsSuperuser())
+
+	// Create identity
 	uid, uwgid, err := ds.CreateIdentity(p, "user", "password1")
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +77,7 @@ func TestPrivilegesForIdentity(t *testing.T) {
 	}
 
 	// Get user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
+	privileges, err := ds.readPrivileges(uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +97,7 @@ func TestPrivilegesForIdentity(t *testing.T) {
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
+	privileges, err = ds.readPrivileges(uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +150,7 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 	}
 
 	// Read user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
+	privileges, err := ds.readPrivileges(uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,7 +170,7 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 	})
 
 	// Read user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
+	privileges, err = ds.readPrivileges(uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +232,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	}
 
 	// Get user's privilege on entity
-	privileges, err := ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
+	privileges, err := ds.readPrivileges(uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,7 +252,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
+	privileges, err = ds.readPrivileges(uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,7 +272,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 	})
 
 	// Get user's privilege on entity
-	privileges, err = ds.ReadPrivileges(p, uid, ds.EntityTypes.Workgroup, eid)
+	privileges, err = ds.readPrivileges(uid, ds.EntityTypes.Workgroup, eid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -362,7 +360,7 @@ func TestSecurity(t *testing.T) {
 
 	// rename role
 
-	if err := ds.UpdateRole(p, role1Id, "role1"); err != nil {
+	if err := ds.UpdateRole(p, role1Id, "role1", "description1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -381,7 +379,7 @@ func TestSecurity(t *testing.T) {
 	for i := 0; i < permCount; i++ {
 		perms[i] = permissions[i].Id
 	}
-	if err := ds.SetRolePermissions(p, role1Id, perms); err != nil {
+	if err := ds.LinkRoleAndPermissions(p, role1Id, perms); err != nil {
 		t.Fatal(err)
 	}
 	pr, err := ds.ReadPermissionsForRole(p, role1Id)
@@ -442,7 +440,7 @@ func TestSecurity(t *testing.T) {
 
 	// rename workgroup
 
-	if err := ds.UpdateWorkgroup(p, group1Id, "group1"); err != nil {
+	if err := ds.UpdateWorkgroup(p, group1Id, "group1", "description"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -476,7 +474,7 @@ func TestSecurity(t *testing.T) {
 	if len(users) == 0 {
 		t.Fatal("expected > 0 users")
 	}
-	userpwd, err := ds.ReadIdentityAndPassword(p, "user1")
+	userpwd, err := ds.readIdentityAndPassword("user1")
 	if err != nil {
 		t.Fatal(err)
 	}
