@@ -1270,23 +1270,23 @@ func toEngine(e data.Engine) *web.Engine {
 
 func toEntityTypes(entityTypes []data.EntityType) []*web.EntityType {
 	array := make([]*web.EntityType, len(entityTypes))
-	for _, et := range entityTypes {
-		array = append(array, &web.EntityType{
+	for i, et := range entityTypes {
+		array[i] = &web.EntityType{
 			et.Id,
 			et.Name,
-		})
+		}
 	}
 	return array
 }
 
 func toPermissions(permissions []data.Permission) []*web.Permission {
 	array := make([]*web.Permission, len(permissions))
-	for _, p := range permissions {
-		array = append(array, &web.Permission{
+	for i, p := range permissions {
+		array[i] = &web.Permission{
 			p.Id,
 			p.Code,
 			p.Description,
-		})
+		}
 	}
 	return array
 }
@@ -1302,8 +1302,8 @@ func toRole(r data.Role) *web.Role {
 
 func toRoles(roles []data.Role) []*web.Role {
 	array := make([]*web.Role, len(roles))
-	for _, r := range roles {
-		array = append(array, toRole(r))
+	for i, r := range roles {
+		array[i] = toRole(r)
 	}
 	return array
 }
@@ -1319,8 +1319,8 @@ func toWorkgroup(w data.Workgroup) *web.Workgroup {
 
 func toWorkgroups(workgroups []data.Workgroup) []*web.Workgroup {
 	array := make([]*web.Workgroup, len(workgroups))
-	for _, r := range workgroups {
-		array = append(array, toWorkgroup(r))
+	for i, r := range workgroups {
+		array[i] = toWorkgroup(r)
 	}
 	return array
 }
@@ -1341,34 +1341,34 @@ func toIdentity(u data.Identity) *web.Identity {
 
 func toIdentities(workgroups []data.Identity) []*web.Identity {
 	array := make([]*web.Identity, len(workgroups))
-	for _, r := range workgroups {
-		array = append(array, toIdentity(r))
+	for i, r := range workgroups {
+		array[i] = toIdentity(r)
 	}
 	return array
 }
 
 func toEntityPrivileges(entityPrivileges []data.EntityPrivilege) []*web.EntityPrivilege {
 	array := make([]*web.EntityPrivilege, len(entityPrivileges))
-	for _, ep := range entityPrivileges {
-		array = append(array, &web.EntityPrivilege{
+	for i, ep := range entityPrivileges {
+		array[i] = &web.EntityPrivilege{
 			ep.Type,
 			ep.WorkgroupId,
 			ep.WorkgroupName,
 			ep.WorkgroupDescription,
-		})
+		}
 	}
 	return array
 }
 
 func toEntityHistory(entityHistory []data.EntityHistory) []*web.EntityHistory {
 	array := make([]*web.EntityHistory, len(entityHistory))
-	for _, h := range entityHistory {
-		array = append(array, &web.EntityHistory{
+	for i, h := range entityHistory {
+		array[i] = &web.EntityHistory{
 			h.IdentityId,
 			h.Action,
 			h.Description,
 			toTimestamp(h.Created),
-		})
+		}
 	}
 	return array
 }
