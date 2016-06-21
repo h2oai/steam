@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/h2oai/steamY/lib/svc"
-	// "github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master"
 	"github.com/spf13/cobra"
 )

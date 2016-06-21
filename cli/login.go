@@ -3,12 +3,13 @@ package cli
 import (
 	"bufio"
 	"fmt"
-	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
 	"strings"
 	"syscall"
+
+	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var loginHelp = `
