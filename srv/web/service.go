@@ -153,7 +153,7 @@ type Service interface {
 	GetModel(pz az.Principal, modelId int64) (*Model, error)
 	GetModels(pz az.Principal, offset int64, limit int64) ([]*Model, error)
 	GetClusterModels(pz az.Principal, clusterId int64) ([]*Model, error)
-	GetModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*Model, error)
+	ImportModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*Model, error)
 	DeleteModel(pz az.Principal, modelId int64) error
 	StartScoringService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
 	StopScoringService(pz az.Principal, serviceId int64) error
@@ -334,12 +334,12 @@ type GetClusterModelsOut struct {
 	Models []*Model `json:"models"`
 }
 
-type GetModelFromClusterIn struct {
+type ImportModelFromClusterIn struct {
 	ClusterId int64  `json:"cluster_id"`
 	ModelName string `json:"model_name"`
 }
 
-type GetModelFromClusterOut struct {
+type ImportModelFromClusterOut struct {
 	Model *Model `json:"model"`
 }
 
@@ -850,10 +850,10 @@ func (this *Remote) GetClusterModels(clusterId int64) ([]*Model, error) {
 	return out.Models, nil
 }
 
-func (this *Remote) GetModelFromCluster(clusterId int64, modelName string) (*Model, error) {
-	in := GetModelFromClusterIn{clusterId, modelName}
-	var out GetModelFromClusterOut
-	err := this.Proc.Call("GetModelFromCluster", &in, &out)
+func (this *Remote) ImportModelFromCluster(clusterId int64, modelName string) (*Model, error) {
+	in := ImportModelFromClusterIn{clusterId, modelName}
+	var out ImportModelFromClusterOut
+	err := this.Proc.Call("ImportModelFromCluster", &in, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -1498,13 +1498,13 @@ func (this *Impl) GetClusterModels(r *http.Request, in *GetClusterModelsIn, out 
 	return nil
 }
 
-func (this *Impl) GetModelFromCluster(r *http.Request, in *GetModelFromClusterIn, out *GetModelFromClusterOut) error {
+func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClusterIn, out *ImportModelFromClusterOut) error {
 
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	it, err := this.Service.GetModelFromCluster(pz, in.ClusterId, in.ModelName)
+	it, err := this.Service.ImportModelFromCluster(pz, in.ClusterId, in.ModelName)
 	if err != nil {
 		return err
 	}

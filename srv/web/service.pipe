@@ -126,7 +126,7 @@ BuildModel(clusterId int64, dataset string, targetName string, maxRunTime int) m
 GetModel(modelId int64) model *Model
 GetModels(offset int64, limit int64) models []*Model
 GetClusterModels(clusterId int64) models []*Model
-GetModelFromCluster(clusterId int64, modelName string) model *Model
+ImportModelFromCluster(clusterId int64, modelName string) model *Model
 DeleteModel(modelId int64)
 
 StartScoringService(modelId int64, port int) service *ScoringService

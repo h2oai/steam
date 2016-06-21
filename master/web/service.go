@@ -535,7 +535,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	return models, nil
 }
 
-func (s *Service) GetModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*web.Model, error) {
+func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*web.Model, error) {
 	if err := pz.CheckPermission(data.ViewModel); err != nil {
 		return nil, err
 	}

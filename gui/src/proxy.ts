@@ -145,7 +145,7 @@ module Proxy {
 		getModel: (modelId: number, go: (error: Error, model: Model) => void) => void
 		getModels: (offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
 		getClusterModels: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
-		getModelFromCluster: (clusterId: number, modelName: string, go: (error: Error, model: Model) => void) => void
+		importModelFromCluster: (clusterId: number, modelName: string, go: (error: Error, model: Model) => void) => void
 		deleteModel: (modelId: number, go: (error: Error) => void) => void
 		startScoringService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
 		stopScoringService: (serviceId: number, go: (error: Error) => void) => void
@@ -326,12 +326,12 @@ module Proxy {
 		models: Model[]
 	}
 
-	interface GetModelFromClusterIn {
+	interface ImportModelFromClusterIn {
 		cluster_id: number
 		model_name: string
 	}
 
-	interface GetModelFromClusterOut {
+	interface ImportModelFromClusterOut {
 		model: Model
 	}
 
@@ -828,13 +828,13 @@ module Proxy {
 		})
 
 	}
-	export function getModelFromCluster(clusterId: number, modelName: string, go: (error: Error, model: Model) => void): void {
-		var req: GetModelFromClusterIn = {
+	export function importModelFromCluster(clusterId: number, modelName: string, go: (error: Error, model: Model) => void): void {
+		var req: ImportModelFromClusterIn = {
 			cluster_id: clusterId,
 			model_name: modelName
 		}
-		Proxy.Call("GetModelFromCluster", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<GetModelFromClusterOut>data).model)
+		Proxy.Call("ImportModelFromCluster", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<ImportModelFromClusterOut>data).model)
 		})
 
 	}

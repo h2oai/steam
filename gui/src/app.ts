@@ -1367,7 +1367,7 @@ module Main {
     function newCloudModelPane(ctx: Context, clusterId: int, model: Proxy.Model): CloudModelPane {
         const getModel: Act = () => {
             ctx.setBusy('Getting model from h2o...')
-            ctx.remote.getModelFromCluster(clusterId, model.name, (err, model) => {
+            ctx.remote.importModelFromCluster(clusterId, model.name, (err, model) => {
                 ctx.setFree()
                 if (err) {
                     alert(err.message)
