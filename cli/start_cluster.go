@@ -1,7 +1,9 @@
 package cli
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -18,9 +20,8 @@ Start a 4 node H2O 3.2.0.9 cluster
 
 func startCluster(c *context) *cobra.Command {
 	var (
-		size     int
-		memory   string
-		kerberos bool
+		size   int
+		memory string
 	)
 
 	cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
@@ -28,18 +29,26 @@ func startCluster(c *context) *cobra.Command {
 			log.Fatalln("Incorrect number of arguments. See 'steam help start cluster'.")
 		}
 
-		// clusterName := args[0]
-		// engineId, err := strconv.ParseInt(args[1], 10, 64)
-		// if err != nil {
-		// 	log.Fatalf("Incorrect usage of engineId: %s: %v", args[1], err)
-		// }
+		clusterName := args[0]
+		engineId, err := strconv.ParseInt(args[1], 10, 64)
+		if err != nil {
+			log.Fatalf("Ivalid usage of engineId %q: expecting integer: %v", args[1], err)
+		}
 
-		// // --- add additional args here ---
+		// --- add additional args here ---
 
-		// log.Println("Attempting to start cluster...")
-		// cluser, err := c.remote.StartYarnCluster(clusterName, engineId, size, memory, username)
+		log.Println("Attempting to start cluster...")
+		clusterId, err := c.remote.StartYarnCluster(clusterName, engineId, size, memory, "")
+		if err != nil {
+			log.Fatalln(err)
+		}
 
-		// fmt.Println("Cluster started at:", cluster.Address)
+		cluster, err := c.remote.GetCluster(clusterId)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		fmt.Printf("Cluster %d started at: %s", clusterId, cluster.Address)
 
 		// if details {
 		// 	info, err := c.remote.GetClusterStatus(cluster.Name)
@@ -60,7 +69,6 @@ func startCluster(c *context) *cobra.Command {
 
 	cmd.Flags().IntVarP(&size, "size", "n", 1, "The number of nodes to provision.")
 	cmd.Flags().StringVarP(&memory, "memory", "m", "10g", "The max amount of memory to use per node.")
-	cmd.Flags().BoolVar(&kerberos, "kerberos", true, "Set false on systems with no kerberos authentication.")
 
 	return cmd
 }

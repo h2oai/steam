@@ -25,7 +25,7 @@ func deleteService(c *context) *cobra.Command {
 
 		serviceId, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {
-			log.Fatalf("Invalid usage of serviceId %s: Integer value required: %v", args[0], err)
+			log.Fatalf("Invalid usage of serviceId %q: expecting integer: %v", args[0], err)
 		}
 
 		if err := c.remote.DeleteScoringService(serviceId); err != nil {

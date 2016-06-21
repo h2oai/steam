@@ -24,7 +24,7 @@ func deleteEngine(c *context) *cobra.Command {
 
 		engineId, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {
-			log.Fatalf("Invalid usage of engineId %s: Integer value required: %v", args[0], err)
+			log.Fatalf("Invalid usage of engineId %q: expecting integer: %v", args[0], err)
 		}
 
 		if err := c.remote.DeleteEngine(engineId); err != nil {

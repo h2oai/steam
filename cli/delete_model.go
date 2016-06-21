@@ -24,7 +24,7 @@ func deleteModel(c *context) *cobra.Command {
 
 		modelId, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {
-			log.Fatalf("Invalid usage of modelId %s: Integer value required: %v", args[0], err)
+			log.Fatalf("Invalid usage of modelId %q: expecting integer: %v", args[0], err)
 		}
 
 		if err := c.remote.DeleteModel(modelId); err != nil {

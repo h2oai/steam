@@ -24,7 +24,7 @@ func deleteCluster(c *context) *cobra.Command {
 
 		clusterId, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {
-			log.Fatalf("Invalid usage of clusterId %s: Integer value required: %v", args[0], err)
+			log.Fatalf("Invalid usage of clusterId %q: expecting integer: %v", args[0], err)
 		}
 
 		if err := c.remote.DeleteCluster(clusterId); err != nil {
