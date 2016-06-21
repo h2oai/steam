@@ -13,7 +13,7 @@ Examples:
 
 Start a 4 node H2O 3.2.0.9 cluster
 
-    $ steam start cloud42 h2odriver.jar --size=4
+    $ steam start cluster42 2 --size=4
 `
 
 func startCluster(c *context) *cobra.Command {

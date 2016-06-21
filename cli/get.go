@@ -7,7 +7,7 @@ get [resource-type]
 List or view resources of the specified type.
 Examples:
 
-    $ steam get clouds
+    $ steam get clusters
 `
 
 func get(c *context) *cobra.Command {

@@ -7,7 +7,7 @@ start [resource-type]
 Start a new resource.
 Examples:
 
-    $ steam start cloud
+    $ steam start cluster
 `
 
 func start(c *context) *cobra.Command {

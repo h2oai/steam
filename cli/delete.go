@@ -7,7 +7,7 @@ delete [resource-type]
 Deletes the specified resource from the database.
 Examples:
 
-    $ steam delete cloud
+    $ steam delete cluster
 `
 
 func delete(c *context) *cobra.Command {
