@@ -270,6 +270,7 @@ type Datastore struct {
 	entityTypes       []EntityType
 	entityTypeMap     map[int64]EntityType
 	EntityTypes       *EntityTypeKeys
+	clusterTypes      []ClusterType
 	clusterTypeMap    map[int64]ClusterType
 	ClusterTypes      *ClusterTypeKeys
 	ViewPermissions   map[int64]int64
@@ -389,6 +390,7 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		entityTypes,
 		entityTypeMap,
 		entityTypeKeys,
+		clusterTypes,
 		clusterTypeMap,
 		toClusterTypeKeys(clusterTypes),
 		viewPermissions,
@@ -1060,6 +1062,28 @@ func (ds *Datastore) ReadRole(pz az.Principal, roleId int64) (Role, error) {
 	return ScanRole(row)
 }
 
+func (ds *Datastore) ReadRoleByName(pz az.Principal, name string) (Role, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, description, created
+		FROM
+			role
+		WHERE
+			name = $1
+		`, name)
+
+	role, err := ScanRole(row)
+	if err != nil {
+		return Role{}, err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Role, role.Id); err != nil {
+		return Role{}, err
+	}
+
+	return role, nil
+}
+
 func (ds *Datastore) UpdateRole(pz az.Principal, roleId int64, name, description string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
 		return err
@@ -1263,6 +1287,28 @@ func (ds *Datastore) ReadWorkgroup(pz az.Principal, workgroupId int64) (Workgrou
 	return ScanWorkgroup(row)
 }
 
+func (ds *Datastore) ReadWorkgroupByName(pz az.Principal, name string) (Workgroup, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, description, created
+		FROM
+			workgroup
+		WHERE
+			name = $1
+		`, name)
+
+	workgroup, err := ScanWorkgroup(row)
+	if err != nil {
+		return Workgroup{}, err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Workgroup, workgroup.Id); err != nil {
+		return Workgroup{}, err
+	}
+
+	return workgroup, nil
+}
+
 func (ds *Datastore) UpdateWorkgroup(pz az.Principal, workgroupId int64, name, description string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Workgroup, workgroupId); err != nil {
 		return err
@@ -1443,6 +1489,28 @@ func (ds *Datastore) ReadIdentity(pz az.Principal, identityId int64) (Identity, 
 		`, identityId)
 
 	return ScanIdentity(row)
+}
+
+func (ds *Datastore) ReadIdentityByName(pz az.Principal, name string) (Identity, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, is_active, last_login, created
+		FROM
+			identity
+		WHERE
+			name = $1
+		`, name)
+
+	identity, err := ScanIdentity(row)
+	if err != nil {
+		return Identity{}, err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Identity, identity.Id); err != nil {
+		return Identity{}, err
+	}
+
+	return identity, nil
 }
 
 func (ds *Datastore) readIdentityAndPassword(name string) (*IdentityAndPassword, error) {
@@ -2027,6 +2095,10 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 		})
 	})
 	return clusterId, err
+}
+
+func (ds *Datastore) ReadClusterTypes(pz az.Principal) []ClusterType {
+	return ds.clusterTypes
 }
 
 func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Cluster, error) {

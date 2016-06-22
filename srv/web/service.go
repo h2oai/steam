@@ -83,6 +83,11 @@ type EntityType struct {
 	Name string `json:"name"`
 }
 
+type ClusterType struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 type EntityHistory struct {
 	IdentityId  int64  `json:"identity_id"`
 	Action      string `json:"action"`
@@ -166,12 +171,14 @@ type Service interface {
 	DeleteEngine(pz az.Principal, engineId int64) error
 	GetSupportedEntityTypes(pz az.Principal) ([]*EntityType, error)
 	GetSupportedPermissions(pz az.Principal) ([]*Permission, error)
+	GetSupportedClusterTypes(pz az.Principal) ([]*ClusterType, error)
 	GetPermissionsForRole(pz az.Principal, roleId int64) ([]*Permission, error)
 	GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*Permission, error)
 	CreateRole(pz az.Principal, name string, description string) (int64, error)
 	GetRoles(pz az.Principal, offset int64, limit int64) ([]*Role, error)
 	GetRolesForIdentity(pz az.Principal, identityId int64) ([]*Role, error)
 	GetRole(pz az.Principal, roleId int64) (*Role, error)
+	GetRoleByName(pz az.Principal, name string) (*Role, error)
 	UpdateRole(pz az.Principal, roleId int64, name string, description string) error
 	LinkRoleAndPermissions(pz az.Principal, roleId int64, permissionIds []int64) error
 	DeleteRole(pz az.Principal, roleId int64) error
@@ -179,6 +186,7 @@ type Service interface {
 	GetWorkgroups(pz az.Principal, offset int64, limit int64) ([]*Workgroup, error)
 	GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*Workgroup, error)
 	GetWorkgroup(pz az.Principal, workgroupId int64) (*Workgroup, error)
+	GetWorkgroupByName(pz az.Principal, name string) (*Workgroup, error)
 	UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) error
 	DeleteWorkgroup(pz az.Principal, workgroupId int64) error
 	CreateIdentity(pz az.Principal, name string, password string) (int64, error)
@@ -186,6 +194,7 @@ type Service interface {
 	GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*Identity, error)
 	GetIdentititesForRole(pz az.Principal, roleId int64) ([]*Identity, error)
 	GetIdentity(pz az.Principal, identityId int64) (*Identity, error)
+	GetIdentityByName(pz az.Principal, name string) (*Identity, error)
 	LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error
 	UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error
 	LinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error
@@ -435,6 +444,13 @@ type GetSupportedPermissionsOut struct {
 	Permissions []*Permission `json:"permissions"`
 }
 
+type GetSupportedClusterTypesIn struct {
+}
+
+type GetSupportedClusterTypesOut struct {
+	ClusterTypes []*ClusterType `json:"cluster_types"`
+}
+
 type GetPermissionsForRoleIn struct {
 	RoleId int64 `json:"role_id"`
 }
@@ -482,6 +498,14 @@ type GetRoleIn struct {
 }
 
 type GetRoleOut struct {
+	Role *Role `json:"role"`
+}
+
+type GetRoleByNameIn struct {
+	Name string `json:"name"`
+}
+
+type GetRoleByNameOut struct {
 	Role *Role `json:"role"`
 }
 
@@ -543,6 +567,14 @@ type GetWorkgroupOut struct {
 	Workgroup *Workgroup `json:"workgroup"`
 }
 
+type GetWorkgroupByNameIn struct {
+	Name string `json:"name"`
+}
+
+type GetWorkgroupByNameOut struct {
+	Workgroup *Workgroup `json:"workgroup"`
+}
+
 type UpdateWorkgroupIn struct {
 	WorkgroupId int64  `json:"workgroup_id"`
 	Name        string `json:"name"`
@@ -598,6 +630,14 @@ type GetIdentityIn struct {
 }
 
 type GetIdentityOut struct {
+	Identity *Identity `json:"identity"`
+}
+
+type GetIdentityByNameIn struct {
+	Name string `json:"name"`
+}
+
+type GetIdentityByNameOut struct {
 	Identity *Identity `json:"identity"`
 }
 
@@ -980,6 +1020,16 @@ func (this *Remote) GetSupportedPermissions() ([]*Permission, error) {
 	return out.Permissions, nil
 }
 
+func (this *Remote) GetSupportedClusterTypes() ([]*ClusterType, error) {
+	in := GetSupportedClusterTypesIn{}
+	var out GetSupportedClusterTypesOut
+	err := this.Proc.Call("GetSupportedClusterTypes", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.ClusterTypes, nil
+}
+
 func (this *Remote) GetPermissionsForRole(roleId int64) ([]*Permission, error) {
 	in := GetPermissionsForRoleIn{roleId}
 	var out GetPermissionsForRoleOut
@@ -1034,6 +1084,16 @@ func (this *Remote) GetRole(roleId int64) (*Role, error) {
 	in := GetRoleIn{roleId}
 	var out GetRoleOut
 	err := this.Proc.Call("GetRole", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Role, nil
+}
+
+func (this *Remote) GetRoleByName(name string) (*Role, error) {
+	in := GetRoleByNameIn{name}
+	var out GetRoleByNameOut
+	err := this.Proc.Call("GetRoleByName", &in, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -1110,6 +1170,16 @@ func (this *Remote) GetWorkgroup(workgroupId int64) (*Workgroup, error) {
 	return out.Workgroup, nil
 }
 
+func (this *Remote) GetWorkgroupByName(name string) (*Workgroup, error) {
+	in := GetWorkgroupByNameIn{name}
+	var out GetWorkgroupByNameOut
+	err := this.Proc.Call("GetWorkgroupByName", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Workgroup, nil
+}
+
 func (this *Remote) UpdateWorkgroup(workgroupId int64, name string, description string) error {
 	in := UpdateWorkgroupIn{workgroupId, name, description}
 	var out UpdateWorkgroupOut
@@ -1174,6 +1244,16 @@ func (this *Remote) GetIdentity(identityId int64) (*Identity, error) {
 	in := GetIdentityIn{identityId}
 	var out GetIdentityOut
 	err := this.Proc.Call("GetIdentity", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Identity, nil
+}
+
+func (this *Remote) GetIdentityByName(name string) (*Identity, error) {
+	in := GetIdentityByNameIn{name}
+	var out GetIdentityByNameOut
+	err := this.Proc.Call("GetIdentityByName", &in, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -1676,6 +1756,20 @@ func (this *Impl) GetSupportedPermissions(r *http.Request, in *GetSupportedPermi
 	return nil
 }
 
+func (this *Impl) GetSupportedClusterTypes(r *http.Request, in *GetSupportedClusterTypesIn, out *GetSupportedClusterTypesOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	it, err := this.Service.GetSupportedClusterTypes(pz)
+	if err != nil {
+		return err
+	}
+	out.ClusterTypes = it
+	return nil
+}
+
 func (this *Impl) GetPermissionsForRole(r *http.Request, in *GetPermissionsForRoleIn, out *GetPermissionsForRoleOut) error {
 
 	pz, azerr := this.Az.Identify(r)
@@ -1753,6 +1847,20 @@ func (this *Impl) GetRole(r *http.Request, in *GetRoleIn, out *GetRoleOut) error
 		return azerr
 	}
 	it, err := this.Service.GetRole(pz, in.RoleId)
+	if err != nil {
+		return err
+	}
+	out.Role = it
+	return nil
+}
+
+func (this *Impl) GetRoleByName(r *http.Request, in *GetRoleByNameIn, out *GetRoleByNameOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	it, err := this.Service.GetRoleByName(pz, in.Name)
 	if err != nil {
 		return err
 	}
@@ -1855,6 +1963,20 @@ func (this *Impl) GetWorkgroup(r *http.Request, in *GetWorkgroupIn, out *GetWork
 	return nil
 }
 
+func (this *Impl) GetWorkgroupByName(r *http.Request, in *GetWorkgroupByNameIn, out *GetWorkgroupByNameOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	it, err := this.Service.GetWorkgroupByName(pz, in.Name)
+	if err != nil {
+		return err
+	}
+	out.Workgroup = it
+	return nil
+}
+
 func (this *Impl) UpdateWorkgroup(r *http.Request, in *UpdateWorkgroupIn, out *UpdateWorkgroupOut) error {
 
 	pz, azerr := this.Az.Identify(r)
@@ -1944,6 +2066,20 @@ func (this *Impl) GetIdentity(r *http.Request, in *GetIdentityIn, out *GetIdenti
 		return azerr
 	}
 	it, err := this.Service.GetIdentity(pz, in.IdentityId)
+	if err != nil {
+		return err
+	}
+	out.Identity = it
+	return nil
+}
+
+func (this *Impl) GetIdentityByName(r *http.Request, in *GetIdentityByNameIn, out *GetIdentityByNameOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	it, err := this.Service.GetIdentityByName(pz, in.Name)
 	if err != nil {
 		return err
 	}

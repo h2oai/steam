@@ -79,6 +79,11 @@ module Proxy {
 		name: string
 	}
 
+	export interface ClusterType {
+		id: number
+		name: string
+	}
+
 	export interface EntityHistory {
 		identity_id: number
 		action: string
@@ -158,12 +163,14 @@ module Proxy {
 		deleteEngine: (engineId: number, go: (error: Error) => void) => void
 		getSupportedEntityTypes: (go: (error: Error, entityTypes: EntityType[]) => void) => void
 		getSupportedPermissions: (go: (error: Error, permissions: Permission[]) => void) => void
+		getSupportedClusterTypes: (go: (error: Error, clusterTypes: ClusterType[]) => void) => void
 		getPermissionsForRole: (roleId: number, go: (error: Error, permissions: Permission[]) => void) => void
 		getPermissionsForIdentity: (identityId: number, go: (error: Error, permissions: Permission[]) => void) => void
 		createRole: (name: string, description: string, go: (error: Error, roleId: number) => void) => void
 		getRoles: (offset: number, limit: number, go: (error: Error, roles: Role[]) => void) => void
 		getRolesForIdentity: (identityId: number, go: (error: Error, roles: Role[]) => void) => void
 		getRole: (roleId: number, go: (error: Error, role: Role) => void) => void
+		getRoleByName: (name: string, go: (error: Error, role: Role) => void) => void
 		updateRole: (roleId: number, name: string, description: string, go: (error: Error) => void) => void
 		linkRoleAndPermissions: (roleId: number, permissionIds: number[], go: (error: Error) => void) => void
 		deleteRole: (roleId: number, go: (error: Error) => void) => void
@@ -171,6 +178,7 @@ module Proxy {
 		getWorkgroups: (offset: number, limit: number, go: (error: Error, workgroups: Workgroup[]) => void) => void
 		getWorkgroupsForIdentity: (identityId: number, go: (error: Error, workgroups: Workgroup[]) => void) => void
 		getWorkgroup: (workgroupId: number, go: (error: Error, workgroup: Workgroup) => void) => void
+		getWorkgroupByName: (name: string, go: (error: Error, workgroup: Workgroup) => void) => void
 		updateWorkgroup: (workgroupId: number, name: string, description: string, go: (error: Error) => void) => void
 		deleteWorkgroup: (workgroupId: number, go: (error: Error) => void) => void
 		createIdentity: (name: string, password: string, go: (error: Error, identityId: number) => void) => void
@@ -178,6 +186,7 @@ module Proxy {
 		getIdentitiesForWorkgroup: (workgroupId: number, go: (error: Error, identities: Identity[]) => void) => void
 		getIdentititesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
 		getIdentity: (identityId: number, go: (error: Error, identity: Identity) => void) => void
+		getIdentityByName: (name: string, go: (error: Error, identity: Identity) => void) => void
 		linkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
 		unlinkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
 		linkIdentityAndRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
@@ -427,6 +436,13 @@ module Proxy {
 		permissions: Permission[]
 	}
 
+	interface GetSupportedClusterTypesIn {
+	}
+
+	interface GetSupportedClusterTypesOut {
+		cluster_types: ClusterType[]
+	}
+
 	interface GetPermissionsForRoleIn {
 		role_id: number
 	}
@@ -474,6 +490,14 @@ module Proxy {
 	}
 
 	interface GetRoleOut {
+		role: Role
+	}
+
+	interface GetRoleByNameIn {
+		name: string
+	}
+
+	interface GetRoleByNameOut {
 		role: Role
 	}
 
@@ -535,6 +559,14 @@ module Proxy {
 		workgroup: Workgroup
 	}
 
+	interface GetWorkgroupByNameIn {
+		name: string
+	}
+
+	interface GetWorkgroupByNameOut {
+		workgroup: Workgroup
+	}
+
 	interface UpdateWorkgroupIn {
 		workgroup_id: number
 		name: string
@@ -590,6 +622,14 @@ module Proxy {
 	}
 
 	interface GetIdentityOut {
+		identity: Identity
+	}
+
+	interface GetIdentityByNameIn {
+		name: string
+	}
+
+	interface GetIdentityByNameOut {
 		identity: Identity
 	}
 
@@ -946,6 +986,14 @@ module Proxy {
 		})
 
 	}
+	export function getSupportedClusterTypes(go: (error: Error, clusterTypes: ClusterType[]) => void): void {
+		var req: GetSupportedClusterTypesIn = {
+		}
+		Proxy.Call("GetSupportedClusterTypes", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetSupportedClusterTypesOut>data).cluster_types)
+		})
+
+	}
 	export function getPermissionsForRole(roleId: number, go: (error: Error, permissions: Permission[]) => void): void {
 		var req: GetPermissionsForRoleIn = {
 			role_id: roleId
@@ -999,6 +1047,15 @@ module Proxy {
 		}
 		Proxy.Call("GetRole", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetRoleOut>data).role)
+		})
+
+	}
+	export function getRoleByName(name: string, go: (error: Error, role: Role) => void): void {
+		var req: GetRoleByNameIn = {
+			name: name
+		}
+		Proxy.Call("GetRoleByName", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetRoleByNameOut>data).role)
 		})
 
 	}
@@ -1070,6 +1127,15 @@ module Proxy {
 		})
 
 	}
+	export function getWorkgroupByName(name: string, go: (error: Error, workgroup: Workgroup) => void): void {
+		var req: GetWorkgroupByNameIn = {
+			name: name
+		}
+		Proxy.Call("GetWorkgroupByName", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetWorkgroupByNameOut>data).workgroup)
+		})
+
+	}
 	export function updateWorkgroup(workgroupId: number, name: string, description: string, go: (error: Error) => void): void {
 		var req: UpdateWorkgroupIn = {
 			workgroup_id: workgroupId,
@@ -1134,6 +1200,15 @@ module Proxy {
 		}
 		Proxy.Call("GetIdentity", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetIdentityOut>data).identity)
+		})
+
+	}
+	export function getIdentityByName(name: string, go: (error: Error, identity: Identity) => void): void {
+		var req: GetIdentityByNameIn = {
+			name: name
+		}
+		Proxy.Call("GetIdentityByName", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetIdentityByNameOut>data).identity)
 		})
 
 	}

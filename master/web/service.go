@@ -820,6 +820,13 @@ func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
 	return s.ds.DeleteEngine(pz, engineId)
 }
 
+func (s *Service) GetSupportedClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
+
+	// No permission checks required
+
+	return toClusterTypes(s.ds.ReadClusterTypes(pz)), nil
+}
+
 func (s *Service) GetSupportedEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
 
 	// No permission checks required
@@ -908,6 +915,18 @@ func (s *Service) GetRole(pz az.Principal, roleId int64) (*web.Role, error) {
 	return toRole(role), nil
 }
 
+func (s *Service) GetRoleByName(pz az.Principal, name string) (*web.Role, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
+		return nil, err
+	}
+
+	role, err := s.ds.ReadRoleByName(pz, name)
+	if err != nil {
+		return nil, err
+	}
+	return toRole(role), nil
+}
+
 func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, description string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
 		return err
@@ -973,6 +992,18 @@ func (s *Service) GetWorkgroup(pz az.Principal, workgroupId int64) (*web.Workgro
 	}
 
 	workgroup, err := s.ds.ReadWorkgroup(pz, workgroupId)
+	if err != nil {
+		return nil, err
+	}
+	return toWorkgroup(workgroup), nil
+}
+
+func (s *Service) GetWorkgroupByName(pz az.Principal, name string) (*web.Workgroup, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
+		return nil, err
+	}
+
+	workgroup, err := s.ds.ReadWorkgroupByName(pz, name)
 	if err != nil {
 		return nil, err
 	}
@@ -1059,6 +1090,18 @@ func (s *Service) GetIdentity(pz az.Principal, identityId int64) (*web.Identity,
 	}
 
 	identity, err := s.ds.ReadIdentity(pz, identityId)
+	if err != nil {
+		return nil, err
+	}
+	return toIdentity(identity), err
+}
+
+func (s *Service) GetIdentityByName(pz az.Principal, name string) (*web.Identity, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
+		return nil, err
+	}
+
+	identity, err := s.ds.ReadIdentityByName(pz, name)
 	if err != nil {
 		return nil, err
 	}
@@ -1266,6 +1309,17 @@ func toEngine(e data.Engine) *web.Engine {
 		e.Location,
 		toTimestamp(e.Created),
 	}
+}
+
+func toClusterTypes(entityTypes []data.ClusterType) []*web.ClusterType {
+	array := make([]*web.ClusterType, len(entityTypes))
+	for i, ct := range entityTypes {
+		array[i] = &web.ClusterType{
+			ct.Id,
+			ct.Name,
+		}
+	}
+	return array
 }
 
 func toEntityTypes(entityTypes []data.EntityType) []*web.EntityType {

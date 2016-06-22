@@ -376,6 +376,15 @@ class RPCClient:
 		response = self.connection.call("GetSupportedPermissions", request)
 		return [View(o) for o in response['permissions']]
 
+	def get_supported_cluster_types(self):
+		"""
+		Returns clusterTypes ([]*ClusterType)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetSupportedClusterTypes", request)
+		return [View(o) for o in response['cluster_types']]
+
 	def get_permissions_for_role(self, role_id):
 		"""
 		Returns permissions ([]*Permission)
@@ -436,6 +445,16 @@ class RPCClient:
 			'role_id': role_id
 		}
 		response = self.connection.call("GetRole", request)
+		return View(response['role'])
+
+	def get_role_by_name(self, name):
+		"""
+		Returns role (*Role)
+		"""
+		request = {
+			'name': name
+		}
+		response = self.connection.call("GetRoleByName", request)
 		return View(response['role'])
 
 	def update_role(self, role_id, name, description):
@@ -513,6 +532,16 @@ class RPCClient:
 		response = self.connection.call("GetWorkgroup", request)
 		return View(response['workgroup'])
 
+	def get_workgroup_by_name(self, name):
+		"""
+		Returns workgroup (*Workgroup)
+		"""
+		request = {
+			'name': name
+		}
+		response = self.connection.call("GetWorkgroupByName", request)
+		return View(response['workgroup'])
+
 	def update_workgroup(self, workgroup_id, name, description):
 		"""
 		Returns None
@@ -585,6 +614,16 @@ class RPCClient:
 			'identity_id': identity_id
 		}
 		response = self.connection.call("GetIdentity", request)
+		return View(response['identity'])
+
+	def get_identity_by_name(self, name):
+		"""
+		Returns identity (*Identity)
+		"""
+		request = {
+			'name': name
+		}
+		response = self.connection.call("GetIdentityByName", request)
 		return View(response['identity'])
 
 	def link_identity_and_workgroup(self, identity_id, workgroup_id):
