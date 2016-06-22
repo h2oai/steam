@@ -9,6 +9,7 @@ import base64
 import string
 import json
 import sys
+import logging
 from collections import namedtuple
 
 class RPCError(Exception):
@@ -47,6 +48,8 @@ class HTTPConnection:
 
 		ws.send(payload)
 
+		logging.info('%s@%s:%d %s(%s)', self.username, self.host, self.port, method, json.dumps(params))
+
 		code, status, header = ws.getreply()
 		reply = ws.getfile().read()
 
@@ -55,14 +58,19 @@ class HTTPConnection:
 		# print 'reply:', reply
 
 		if code != 200:
+			logging.exception('%s %s %s', code, status, reply)
 			raise RPCError(reply)
 
 		response = json.loads(reply)
+		error = response['error']
 
-		if response['error'] is None:
-			return response['result']
+		if error is None:
+			result = response['result']
+			logging.info('%s %s %s', code, status, json.dumps(result))
+			return result
 		else:
-			raise RPCError(response['error'])
+			logging.exception('%s %s %s', code, status, error)
+			raise RPCError(error)
 
 class View(object):
 	def __init__(self, d):
