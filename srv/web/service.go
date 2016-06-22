@@ -92,7 +92,7 @@ type EntityHistory struct {
 
 type Permission struct {
 	Id          int64  `json:"id"`
-	Code        int64  `json:"code"`
+	Code        string `json:"code"`
 	Description string `json:"description"`
 }
 

@@ -88,7 +88,7 @@ module Proxy {
 
 	export interface Permission {
 		id: number
-		code: number
+		code: string
 		description: string
 	}
 

@@ -60,7 +60,7 @@ func (s *Service) Ping(pz az.Principal, status bool) (bool, error) {
 
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
 
-	if err := pz.CheckPermission(data.ManageCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return 0, err
 	}
 
@@ -93,7 +93,7 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 
 func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 
-	if err := pz.CheckPermission(data.ManageCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
 
@@ -115,7 +115,7 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 
 func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId int64, size int, memory, username string) (int64, error) {
 
-	if err := pz.CheckPermission(data.ManageCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return 0, err
 	}
 
@@ -168,7 +168,7 @@ func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId
 }
 
 func (s *Service) StopYarnCluster(pz az.Principal, clusterId int64) error {
-	if err := pz.CheckPermission(data.ManageCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
 
@@ -213,7 +213,7 @@ func (s *Service) StopYarnCluster(pz az.Principal, clusterId int64) error {
 // }
 
 func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, error) {
-	if err := pz.CheckPermission(data.ViewCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
 		return nil, err
 	}
 
@@ -225,7 +225,7 @@ func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, er
 }
 
 func (s *Service) GetYarnCluster(pz az.Principal, clusterId int64) (*web.YarnCluster, error) {
-	if err := pz.CheckPermission(data.ViewCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
 		return nil, err
 	}
 	cluster, err := s.ds.ReadYarnCluster(pz, clusterId)
@@ -247,7 +247,7 @@ func (s *Service) GetYarnCluster(pz az.Principal, clusterId int64) (*web.YarnClu
 // }
 
 func (s *Service) GetClusters(pz az.Principal, offset, limit int64) ([]*web.Cluster, error) {
-	if err := pz.CheckPermission(data.ViewCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
 		return nil, err
 	}
 	clusters, err := s.ds.ReadClusters(pz, offset, limit)
@@ -270,7 +270,7 @@ func (s *Service) GetClusters(pz az.Principal, offset, limit int64) ([]*web.Clus
 // TODO: Maybe this should only report if non-Stopped,non-Unknown status
 //       In the case of Unknown, should only check if forced?
 func (s *Service) GetClusterStatus(pz az.Principal, cloudId int64) (*web.ClusterStatus, error) { // Only called if cloud status != found
-	if err := pz.CheckPermission(data.ViewCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
 		return nil, err
 	}
 
@@ -311,7 +311,7 @@ func (s *Service) GetClusterStatus(pz az.Principal, cloudId int64) (*web.Cluster
 }
 
 func (s *Service) DeleteCluster(pz az.Principal, clusterId int64) error {
-	if err := pz.CheckPermission(data.ManageCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
 
@@ -352,7 +352,7 @@ func (k Jobs) Swap(i, j int) {
 
 // FIXME where is this API used?
 func (s *Service) GetJob(pz az.Principal, clusterId int64, jobName string) (*web.Job, error) {
-	if err := pz.CheckPermission(data.ViewCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
 		return nil, err
 	}
 
@@ -373,7 +373,7 @@ func (s *Service) GetJob(pz az.Principal, clusterId int64, jobName string) (*web
 }
 
 func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) {
-	if err := pz.CheckPermission(data.ViewCluster); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
 		return nil, err
 	}
 
@@ -420,7 +420,7 @@ func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string) (string, string,
 }
 
 func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
-	if err := pz.CheckPermission(data.ManageModel); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return nil, err
 	}
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
@@ -468,7 +468,7 @@ func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetNa
 }
 
 func (s *Service) GetModel(pz az.Principal, modelId int64) (*web.Model, error) {
-	if err := pz.CheckPermission(data.ViewModel); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
 	model, err := s.ds.ReadModel(pz, modelId)
@@ -479,7 +479,7 @@ func (s *Service) GetModel(pz az.Principal, modelId int64) (*web.Model, error) {
 }
 
 func (s *Service) GetModels(pz az.Principal, offset, limit int64) ([]*web.Model, error) {
-	if err := pz.CheckPermission(data.ViewModel); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
 	ms, err := s.ds.ReadModels(pz, offset, limit)
@@ -536,7 +536,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 }
 
 func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*web.Model, error) {
-	if err := pz.CheckPermission(data.ViewModel); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
@@ -586,7 +586,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
-	if err := pz.CheckPermission(data.ManageModel); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return err
 	}
 
@@ -614,7 +614,7 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 }
 
 func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
-	if err := pz.CheckPermission(data.ManageService); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return nil, err
 	}
 
@@ -694,7 +694,7 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 }
 
 func (s *Service) StopScoringService(pz az.Principal, serviceId int64) error {
-	if err := pz.CheckPermission(data.ManageService); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return err
 	}
 	service, err := s.ds.ReadService(pz, serviceId)
@@ -718,7 +718,7 @@ func (s *Service) StopScoringService(pz az.Principal, serviceId int64) error {
 }
 
 func (s *Service) GetScoringService(pz az.Principal, serviceId int64) (*web.ScoringService, error) {
-	if err := pz.CheckPermission(data.ViewService); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
 		return nil, err
 	}
 
@@ -730,7 +730,7 @@ func (s *Service) GetScoringService(pz az.Principal, serviceId int64) (*web.Scor
 }
 
 func (s *Service) GetScoringServices(pz az.Principal, offset, limit int64) ([]*web.ScoringService, error) {
-	if err := pz.CheckPermission(data.ViewService); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
 		return nil, err
 	}
 
@@ -747,7 +747,7 @@ func (s *Service) GetScoringServices(pz az.Principal, offset, limit int64) ([]*w
 }
 
 func (s *Service) DeleteScoringService(pz az.Principal, serviceId int64) error {
-	if err := pz.CheckPermission(data.ManageService); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return err
 	}
 
@@ -769,7 +769,7 @@ func (s *Service) DeleteScoringService(pz az.Principal, serviceId int64) error {
 
 // FIXME this should not be here - not an client-facing API
 func (s *Service) AddEngine(pz az.Principal, engineName, enginePath string) (int64, error) {
-	if err := pz.CheckPermission(data.ManageEngine); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageEngine); err != nil {
 		return 0, err
 	}
 
@@ -777,7 +777,7 @@ func (s *Service) AddEngine(pz az.Principal, engineName, enginePath string) (int
 }
 
 func (s *Service) GetEngine(pz az.Principal, engineId int64) (*web.Engine, error) {
-	if err := pz.CheckPermission(data.ViewEngine); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewEngine); err != nil {
 		return nil, err
 	}
 	engine, err := s.ds.ReadEngine(pz, engineId)
@@ -788,7 +788,7 @@ func (s *Service) GetEngine(pz az.Principal, engineId int64) (*web.Engine, error
 }
 
 func (s *Service) GetEngines(pz az.Principal) ([]*web.Engine, error) {
-	if err := pz.CheckPermission(data.ViewEngine); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewEngine); err != nil {
 		return nil, err
 	}
 
@@ -806,7 +806,7 @@ func (s *Service) GetEngines(pz az.Principal) ([]*web.Engine, error) {
 }
 
 func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
-	if err := pz.CheckPermission(data.ManageEngine); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageEngine); err != nil {
 		return err
 	}
 
@@ -839,7 +839,7 @@ func (s *Service) GetSupportedPermissions(pz az.Principal) ([]*web.Permission, e
 }
 
 func (s *Service) GetPermissionsForRole(pz az.Principal, roleId int64) ([]*web.Permission, error) {
-	if err := pz.CheckPermission(data.ViewRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
 		return nil, err
 	}
 
@@ -851,7 +851,7 @@ func (s *Service) GetPermissionsForRole(pz az.Principal, roleId int64) ([]*web.P
 }
 
 func (s *Service) GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*web.Permission, error) {
-	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
 
@@ -863,14 +863,14 @@ func (s *Service) GetPermissionsForIdentity(pz az.Principal, identityId int64) (
 }
 
 func (s *Service) CreateRole(pz az.Principal, name string, description string) (int64, error) {
-	if err := pz.CheckPermission(data.ManageRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
 		return 0, err
 	}
 	return s.ds.CreateRole(pz, name, description)
 }
 
 func (s *Service) GetRoles(pz az.Principal, offset, limit int64) ([]*web.Role, error) {
-	if err := pz.CheckPermission(data.ViewRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
 		return nil, err
 	}
 
@@ -882,10 +882,10 @@ func (s *Service) GetRoles(pz az.Principal, offset, limit int64) ([]*web.Role, e
 }
 
 func (s *Service) GetRolesForIdentity(pz az.Principal, identityId int64) ([]*web.Role, error) {
-	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
-	if err := pz.CheckPermission(data.ViewRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
 		return nil, err
 	}
 
@@ -897,7 +897,7 @@ func (s *Service) GetRolesForIdentity(pz az.Principal, identityId int64) ([]*web
 }
 
 func (s *Service) GetRole(pz az.Principal, roleId int64) (*web.Role, error) {
-	if err := pz.CheckPermission(data.ViewRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
 		return nil, err
 	}
 
@@ -909,7 +909,7 @@ func (s *Service) GetRole(pz az.Principal, roleId int64) (*web.Role, error) {
 }
 
 func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, description string) error {
-	if err := pz.CheckPermission(data.ManageRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
 		return err
 	}
 
@@ -917,7 +917,7 @@ func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, descrip
 }
 
 func (s *Service) LinkRoleAndPermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
-	if err := pz.CheckPermission(data.ManageRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
 		return err
 	}
 
@@ -925,7 +925,7 @@ func (s *Service) LinkRoleAndPermissions(pz az.Principal, roleId int64, permissi
 }
 
 func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
-	if err := pz.CheckPermission(data.ManageRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
 		return err
 	}
 
@@ -933,7 +933,7 @@ func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
 }
 
 func (s *Service) CreateWorkgroup(pz az.Principal, name string, description string) (int64, error) {
-	if err := pz.CheckPermission(data.ManageWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageWorkgroup); err != nil {
 		return 0, err
 	}
 
@@ -941,7 +941,7 @@ func (s *Service) CreateWorkgroup(pz az.Principal, name string, description stri
 }
 
 func (s *Service) GetWorkgroups(pz az.Principal, offset, limit int64) ([]*web.Workgroup, error) {
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return nil, err
 	}
 
@@ -953,10 +953,10 @@ func (s *Service) GetWorkgroups(pz az.Principal, offset, limit int64) ([]*web.Wo
 }
 
 func (s *Service) GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*web.Workgroup, error) {
-	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return nil, err
 	}
 
@@ -968,7 +968,7 @@ func (s *Service) GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([
 }
 
 func (s *Service) GetWorkgroup(pz az.Principal, workgroupId int64) (*web.Workgroup, error) {
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return nil, err
 	}
 
@@ -980,7 +980,7 @@ func (s *Service) GetWorkgroup(pz az.Principal, workgroupId int64) (*web.Workgro
 }
 
 func (s *Service) UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) error {
-	if err := pz.CheckPermission(data.ManageWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageWorkgroup); err != nil {
 		return err
 	}
 
@@ -988,7 +988,7 @@ func (s *Service) UpdateWorkgroup(pz az.Principal, workgroupId int64, name strin
 }
 
 func (s *Service) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
-	if err := pz.CheckPermission(data.ManageWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageWorkgroup); err != nil {
 		return err
 	}
 
@@ -996,7 +996,7 @@ func (s *Service) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
 }
 
 func (s *Service) CreateIdentity(pz az.Principal, name string, password string) (int64, error) {
-	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return 0, err
 	}
 
@@ -1012,7 +1012,7 @@ func (s *Service) CreateIdentity(pz az.Principal, name string, password string) 
 }
 
 func (s *Service) GetIdentities(pz az.Principal, offset, limit int64) ([]*web.Identity, error) {
-	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
 
@@ -1024,10 +1024,10 @@ func (s *Service) GetIdentities(pz az.Principal, offset, limit int64) ([]*web.Id
 }
 
 func (s *Service) GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*web.Identity, error) {
-	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return nil, err
 	}
 
@@ -1039,10 +1039,10 @@ func (s *Service) GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) 
 }
 
 func (s *Service) GetIdentititesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
-	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
-	if err := pz.CheckPermission(data.ViewRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
 		return nil, err
 	}
 
@@ -1054,7 +1054,7 @@ func (s *Service) GetIdentititesForRole(pz az.Principal, roleId int64) ([]*web.I
 }
 
 func (s *Service) GetIdentity(pz az.Principal, identityId int64) (*web.Identity, error) {
-	if err := pz.CheckPermission(data.ViewIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
 
@@ -1066,10 +1066,10 @@ func (s *Service) GetIdentity(pz az.Principal, identityId int64) (*web.Identity,
 }
 
 func (s *Service) LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
-	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return err
 	}
 
@@ -1077,10 +1077,10 @@ func (s *Service) LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, wo
 }
 
 func (s *Service) UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
-	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return err
 	}
 
@@ -1088,10 +1088,10 @@ func (s *Service) UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, 
 }
 
 func (s *Service) LinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
-	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
-	if err := pz.CheckPermission(data.ViewRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
 		return err
 	}
 
@@ -1099,10 +1099,10 @@ func (s *Service) LinkIdentityAndRole(pz az.Principal, identityId int64, roleId 
 }
 
 func (s *Service) UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
-	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
-	if err := pz.CheckPermission(data.ViewRole); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
 		return err
 	}
 
@@ -1110,7 +1110,7 @@ func (s *Service) UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleI
 }
 
 func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
-	if err := pz.CheckPermission(data.ManageIdentity); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
 
@@ -1121,7 +1121,7 @@ func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityT
 	if err := pz.CheckPermission(s.ds.ManagePermissions[entityTypeId]); err != nil {
 		return err
 	}
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return err
 	}
 
@@ -1137,7 +1137,7 @@ func (s *Service) GetEntityPrivileges(pz az.Principal, entityTypeId, entityId in
 	if err := pz.CheckPermission(s.ds.ViewPermissions[entityTypeId]); err != nil {
 		return nil, err
 	}
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return nil, err
 	}
 
@@ -1152,7 +1152,7 @@ func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entit
 	if err := pz.CheckPermission(s.ds.ManagePermissions[entityTypeId]); err != nil {
 		return err
 	}
-	if err := pz.CheckPermission(data.ViewWorkgroup); err != nil {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewWorkgroup); err != nil {
 		return err
 	}
 

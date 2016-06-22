@@ -35,10 +35,9 @@ func (ds *Datastore) NewPrincipal(name string) (az.Principal, error) {
 		return nil, err
 	}
 
-	permissionMap := ds.permissionMap
 	permissions := make(map[int64]bool)
 	for _, permissionId := range permissionIds {
-		permissions[permissionMap[permissionId].Code] = true
+		permissions[permissionId] = true
 	}
 
 	return &Principal{ds, identity, permissions, isSuperuser}, nil

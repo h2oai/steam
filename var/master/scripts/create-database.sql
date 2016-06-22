@@ -511,7 +511,7 @@ ALTER SEQUENCE model_id_seq OWNED BY model.id;
 
 CREATE TABLE permission (
     id integer NOT NULL,
-    code integer NOT NULL,
+    code text NOT NULL,
     description text NOT NULL
 );
 

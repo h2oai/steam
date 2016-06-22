@@ -100,23 +100,23 @@ const (
 	CompletedState    = "completed"
 )
 
-const ( // FIXME change to int64 in postgres
-	ManageRole int64 = 1 + iota
-	ViewRole
-	ManageWorkgroup
-	ViewWorkgroup
-	ManageIdentity
-	ViewIdentity
-	ManageEngine
-	ViewEngine
-	ManageCluster
-	ViewCluster
-	ManageProject
-	ViewProject
-	ManageModel
-	ViewModel
-	ManageService
-	ViewService
+const (
+	ManageRole      = "ManageRole"
+	ViewRole        = "ViewRole"
+	ManageWorkgroup = "ManageWorkgroup"
+	ViewWorkgroup   = "ViewWorkgroup"
+	ManageIdentity  = "ManageIdentity"
+	ViewIdentity    = "ViewIdentity"
+	ManageEngine    = "ManageEngine"
+	ViewEngine      = "ViewEngine"
+	ManageCluster   = "ManageCluster"
+	ViewCluster     = "ViewCluster"
+	ManageProject   = "ManageProject"
+	ViewProject     = "ViewProject"
+	ManageModel     = "ManageModel"
+	ViewModel       = "ViewModel"
+	ManageService   = "ManageService"
+	ViewService     = "ViewService"
 )
 
 var (
@@ -171,6 +171,25 @@ func init() {
 
 type metadata map[string]string
 
+type PermissionKeys struct {
+	ManageRole      int64
+	ViewRole        int64
+	ManageWorkgroup int64
+	ViewWorkgroup   int64
+	ManageIdentity  int64
+	ViewIdentity    int64
+	ManageEngine    int64
+	ViewEngine      int64
+	ManageCluster   int64
+	ViewCluster     int64
+	ManageProject   int64
+	ViewProject     int64
+	ManageModel     int64
+	ViewModel       int64
+	ManageService   int64
+	ViewService     int64
+}
+
 type EntityTypeKeys struct {
 	Role      int64
 	Workgroup int64
@@ -185,6 +204,32 @@ type EntityTypeKeys struct {
 type ClusterTypeKeys struct {
 	External int64
 	Yarn     int64
+}
+
+func toPermissionKeys(permissions []Permission) *PermissionKeys {
+	m := make(map[string]int64)
+	for _, p := range permissions {
+		m[p.Code] = p.Id
+	}
+
+	return &PermissionKeys{
+		m[ManageRole],
+		m[ViewRole],
+		m[ManageWorkgroup],
+		m[ViewWorkgroup],
+		m[ManageIdentity],
+		m[ViewIdentity],
+		m[ManageEngine],
+		m[ViewEngine],
+		m[ManageCluster],
+		m[ViewCluster],
+		m[ManageProject],
+		m[ViewProject],
+		m[ManageModel],
+		m[ViewModel],
+		m[ManageService],
+		m[ViewService],
+	}
 }
 
 func toEntityTypeKeys(entityTypes []EntityType) *EntityTypeKeys {
@@ -221,6 +266,7 @@ type Datastore struct {
 	metadata          metadata
 	permissions       []Permission
 	permissionMap     map[int64]Permission
+	Permissions       *PermissionKeys
 	entityTypes       []EntityType
 	entityTypeMap     map[int64]EntityType
 	EntityTypes       *EntityTypeKeys
@@ -288,6 +334,8 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		permissionMap[permission.Id] = permission
 	}
 
+	permissionKeys := toPermissionKeys(permissions)
+
 	entityTypes, err := readEntityTypes(db)
 	if err != nil {
 		return nil, err
@@ -311,25 +359,25 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 	}
 
 	viewPermissions := map[int64]int64{
-		entityTypeKeys.Cluster:   ViewCluster,
-		entityTypeKeys.Engine:    ViewEngine,
-		entityTypeKeys.Identity:  ViewIdentity,
-		entityTypeKeys.Model:     ViewModel,
-		entityTypeKeys.Project:   ViewProject,
-		entityTypeKeys.Role:      ViewRole,
-		entityTypeKeys.Service:   ViewService,
-		entityTypeKeys.Workgroup: ViewWorkgroup,
+		entityTypeKeys.Cluster:   permissionKeys.ViewCluster,
+		entityTypeKeys.Engine:    permissionKeys.ViewEngine,
+		entityTypeKeys.Identity:  permissionKeys.ViewIdentity,
+		entityTypeKeys.Model:     permissionKeys.ViewModel,
+		entityTypeKeys.Project:   permissionKeys.ViewProject,
+		entityTypeKeys.Role:      permissionKeys.ViewRole,
+		entityTypeKeys.Service:   permissionKeys.ViewService,
+		entityTypeKeys.Workgroup: permissionKeys.ViewWorkgroup,
 	}
 
 	managePermissions := map[int64]int64{
-		entityTypeKeys.Cluster:   ManageCluster,
-		entityTypeKeys.Engine:    ManageEngine,
-		entityTypeKeys.Identity:  ManageIdentity,
-		entityTypeKeys.Model:     ManageModel,
-		entityTypeKeys.Project:   ManageProject,
-		entityTypeKeys.Role:      ManageRole,
-		entityTypeKeys.Service:   ManageService,
-		entityTypeKeys.Workgroup: ManageWorkgroup,
+		entityTypeKeys.Cluster:   permissionKeys.ManageCluster,
+		entityTypeKeys.Engine:    permissionKeys.ManageEngine,
+		entityTypeKeys.Identity:  permissionKeys.ManageIdentity,
+		entityTypeKeys.Model:     permissionKeys.ManageModel,
+		entityTypeKeys.Project:   permissionKeys.ManageProject,
+		entityTypeKeys.Role:      permissionKeys.ManageRole,
+		entityTypeKeys.Service:   permissionKeys.ManageService,
+		entityTypeKeys.Workgroup: permissionKeys.ManageWorkgroup,
 	}
 
 	return &Datastore{
@@ -337,6 +385,7 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		metadata,
 		permissions,
 		permissionMap,
+		permissionKeys,
 		entityTypes,
 		entityTypeMap,
 		entityTypeKeys,

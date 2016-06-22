@@ -75,7 +75,7 @@ type EntityHistory
 
 type Permission
  Id int64
- Code int64
+ Code string
  Description string
 
 type Privilege

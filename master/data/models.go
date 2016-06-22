@@ -36,7 +36,7 @@ type EntityPrivilege struct {
 
 type Permission struct {
 	Id          int64
-	Code        int64
+	Code        string
 	Description string
 }
 
