@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	defaultWebAddress          = "0.0.0.0:9000"
-	defaultClusterProxyAddress = "0.0.0.0:9001"
-	defaultCompilationAddress  = "0.0.0.0:8080"
-	defaultScoringService      = "0.0.0.0"
+	defaultWebAddress          = ":9000"
+	defaultClusterProxyAddress = ":9001"
+	defaultCompilationAddress  = ":8080"
+	defaultScoringServiceHost  = ""
 )
 
 type Opts struct {
@@ -30,7 +30,7 @@ type Opts struct {
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
-	ScoringServiceAddress     string
+	ScoringServiceHost        string
 	EnableProfiler            bool
 	YarnKerberosEnabled       bool
 	YarnUserName              string
@@ -47,7 +47,7 @@ var DefaultOpts = &Opts{
 	path.Join(".", fs.VarDir, "master"),
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
-	defaultScoringService,
+	defaultScoringServiceHost,
 	false,
 	false,
 	"",
@@ -69,11 +69,7 @@ func Run(version, buildDate string, opts *Opts) {
 
 	// --- external ip for base and proxy ---
 	webAddress := opts.WebAddress
-	proxAddress := opts.ClusterProxyAddress
-	if webAddress == defaultWebAddress {
-		webAddress = fs.GetExternalIP(webAddress)
-		proxAddress = fs.GetExternalIP(proxAddress)
-	}
+	proxyAddress := opts.ClusterProxyAddress
 
 	// --- set up wd ---
 	wd, err := fs.MkWorkingDirectory(opts.WorkingDirectory)
@@ -141,7 +137,6 @@ func Run(version, buildDate string, opts *Opts) {
 	}
 
 	// --- create basic auth service ---
-
 	defaultAz := newDefaultAz(ds)
 
 	// --- create proxy services ---
@@ -149,7 +144,7 @@ func Run(version, buildDate string, opts *Opts) {
 	rpFailch := make(chan error)
 
 	go func() {
-		if err := http.ListenAndServe(proxAddress, rp); err != nil {
+		if err := http.ListenAndServe(proxyAddress, rp); err != nil {
 			rpFailch <- err
 		}
 	}()
@@ -162,7 +157,7 @@ func Run(version, buildDate string, opts *Opts) {
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
-		opts.ScoringServiceAddress,
+		opts.ScoringServiceHost,
 		opts.YarnKerberosEnabled,
 		opts.YarnUserName,
 		opts.YarnKeytab,
@@ -193,7 +188,11 @@ func Run(version, buildDate string, opts *Opts) {
 
 	go func() {
 		log.Println("Web server listening at", webAddress)
-		log.Printf("Point your web browser to http://%s/\n", webAddress)
+		prefix := ""
+		if len(webAddress) > 1 && webAddress[:1] == ":" {
+			prefix = "localhost"
+		}
+		log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
 		if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
 			failch <- err
 		}

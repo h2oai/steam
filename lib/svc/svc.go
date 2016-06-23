@@ -20,17 +20,15 @@ import (
 )
 
 // Start starts a scoring service.
-func Start(warfile, jetty, address string, port int) (int, error) {
+func Start(warfile, jetty, host string, port int) (int, error) {
 
-	argv := []string{
-		"-jar",
-		jetty,
-		"--host",
-		address,
-		"--port",
-		strconv.Itoa(port),
-		warfile,
+	argv := []string{"-jar", jetty, "--port", strconv.Itoa(port)}
+
+	if len(host) > 0 {
+		argv = append(argv, "--host", host)
 	}
+
+	argv = append(argv, warfile)
 
 	cmd := exec.Command("java", argv...)
 	stdErr, err := cmd.StderrPipe()
@@ -68,8 +66,8 @@ func Start(warfile, jetty, address string, port int) (int, error) {
 	go func() { // This is the fail condition
 		if err := cmd.Wait(); err != nil {
 			if !success {
-				log.Printf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
-				e <- fmt.Errorf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, address, port, errText)
+				log.Printf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, host, port, errText)
+				e <- fmt.Errorf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, host, port, errText)
 			}
 		}
 	}()

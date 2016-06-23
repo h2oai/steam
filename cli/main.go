@@ -177,7 +177,7 @@ func serveMaster(c *context) *cobra.Command {
 		workingDirectory          string
 		clusterProxyAddress       string
 		compilationServiceAddress string
-		scoringServiceAddress     string
+		scoringServiceHost        string
 		enableProfiler            bool
 		yarnEnableKerberos        bool
 		yarnUserName              string
@@ -197,7 +197,7 @@ func serveMaster(c *context) *cobra.Command {
 			workingDirectory,
 			clusterProxyAddress,
 			compilationServiceAddress,
-			scoringServiceAddress,
+			scoringServiceHost,
 			enableProfiler,
 			yarnEnableKerberos,
 			yarnUserName,
@@ -210,11 +210,11 @@ func serveMaster(c *context) *cobra.Command {
 		})
 	})
 
-	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address.")
+	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
-	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Address for cluster proxy")
-	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Compilation service address")
-	cmd.Flags().StringVar(&scoringServiceAddress, "scoring-service-address", opts.ScoringServiceAddress, "Address to start scoring service on")
+	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
+	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
+	cmd.Flags().StringVar(&scoringServiceHost, "scoring-service-address", opts.ScoringServiceHost, "Address to start scoring services on (\"<ip>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.YarnKerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
 	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.YarnUserName, "Username to enable Kerberos")
