@@ -103,7 +103,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		stop(c),
 		deploy(c),
 		get(c),
-		delete(c),
+		delete_(c),
 		import_(c),
 	)
 	return cmd
@@ -228,6 +228,8 @@ func serveMaster(c *context) *cobra.Command {
 	return cmd
 
 }
+
+// FIXME - get rid of this: should never be started directly from CLI
 
 var startServiceHelp = `
 service

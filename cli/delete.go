@@ -10,7 +10,7 @@ Examples:
     $ steam delete cluster
 `
 
-func delete(c *context) *cobra.Command {
+func delete_(c *context) *cobra.Command {
 	cmd := newCmd(c, deleteHelp, nil)
 	cmd.AddCommand(deleteCluster(c))
 	cmd.AddCommand(deleteEngine(c))
