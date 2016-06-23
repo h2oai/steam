@@ -49,9 +49,7 @@ Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
 
         ./steam serve master \
             --superuser-username=superuser \
-            --superuser-password=superuser \
-            --compilation-service-address=172.16.2.76:8080 \
-            --scoring-service-address=172.16.2.76
+            --superuser-password=superuser
 
 ## Running tests
 

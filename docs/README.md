@@ -62,7 +62,7 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 
 		ssh <user>@<yarn_edge_node>
 
-3. Change directories to the Steam directory (either **steam-master-linux-amd64** or **steam-master-darwin-amd64**), then start Steam on the master server (the compilation server that will run the POJOs). For example, the following commands will start Steam on localhost. Note that the port value must match the port running the Jetty server, which defaults to 8080. 
+3. Change directories to the Steam directory (either **steam-master-linux-amd64** or **steam-master-darwin-amd64**), then start the Steam master node. For example, the following commands will start Steam on localhost. Note that the port value must match the port running the Jetty server, which defaults to 8080. 
 
 		./steam serve master --compilation-service-address="localhost:8080"
 		

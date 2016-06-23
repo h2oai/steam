@@ -127,10 +127,10 @@ When Steam is installed, perform the following steps to start and use Steam. Not
 
 	`tar -xzf steam--linux-amd64.tar.gz`
 
-6. Change directories to the new **steam--linux-amd64** folder, then start Steam on the master server (the compilation server that will run the POJOs). For example, the following commands will start Steam on localhost.
+6. Change directories to the new **steam--linux-amd64** folder, then start the Steam master node. For example, the following commands will start Steam on localhost.
 
 		cd steam--linux-amd64
-		./steam serve master --compilation-service-address="localhost:8080"
+		./steam serve master
 		
 	>**Note**: You can view all available options for starting Steam on the master using `./steam help serve master`
 
@@ -141,8 +141,8 @@ When Steam is installed, perform the following steps to start and use Steam. Not
 		2016/04/28 13:34:56 WWW root: /home/seb/steam--linux-amd64/var/master/www
 		2016/04/28 13:34:57 Priming datastore for first time use...
 		2016/04/28 13:34:57 Datastore location: /home/seb/steam--linux-amd64/var/master/db/steam.db
-		2016/04/28 13:34:57 Web server listening at 172.16.2.182:9000
-		2016/04/28 13:34:57 Point your web browser to http://172.16.2.182:9000/
+		2016/04/28 13:34:57 Web server listening at :9000
+		2016/04/28 13:34:57 Point your web browser to http://localhost:9000/
 
 ## Using Steam
 
