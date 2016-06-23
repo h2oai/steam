@@ -37,7 +37,9 @@ Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
 
 1. Create the Steam database:
 
-        ./var/master/scripts/create-database.sh
+        cd var/master/scripts
+        ./create-database.sh
+        cd ../../..
 
 1. Start the compilation service:
 
@@ -48,7 +50,7 @@ Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
 1. Start Steam
 
         ./steam serve master \
-            --superuser-username=superuser \
+            --superuser-name=superuser \
             --superuser-password=superuser
 
 ## Running tests
