@@ -25,7 +25,7 @@ DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 SSB=./scoring-service-builder
 WWW=./var/master/www
 ASSETS = ./var/master/assets
-SCRIPTS = ./var/master/scripts
+SCRIPTS = ./scripts
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
 
 all: build gui ssb
@@ -97,7 +97,7 @@ darwin:
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: gui ssb ssb linux darwin
+release: gui ssb linux darwin
 	rm -rf ./dist/$(DIST_LINUX)
 	rm -rf ./dist/$(DIST_DARWIN)
 
