@@ -105,6 +105,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		get(c),
 		delete_(c),
 		import_(c),
+		create(c),
 	)
 	return cmd
 }
