@@ -11,10 +11,10 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/rpc"
 	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/data"
+	"github.com/h2oai/steamY/master/proxy"
 	"github.com/h2oai/steamY/master/web"
 )
 
@@ -138,18 +138,11 @@ func Run(version, buildDate string, opts *Opts) {
 
 	// --- create basic auth service ---
 	defaultAz := newDefaultAz(ds)
+	// TODO add CLI args for other other providers
+	// TODO conditionally instantiate auth provider based on CLI arg
+	authProvider := newBasicAuthProvider(defaultAz, webAddress)
 
-	// --- create proxy services ---
-	rp := proxy.NewRProxy()
-	rpFailch := make(chan error)
-
-	go func() {
-		if err := http.ListenAndServe(proxyAddress, rp); err != nil {
-			rpFailch <- err
-		}
-	}()
-
-	// --- create front end api services ---
+	// --- create web services ---
 
 	webServeMux := http.NewServeMux()
 	webServiceImpl := web.NewService(
@@ -162,10 +155,6 @@ func Run(version, buildDate string, opts *Opts) {
 		opts.YarnUserName,
 		opts.YarnKeytab,
 	)
-
-	// TODO add CLI args for other other providers
-	// TODO conditionally instantiate auth provider based on CLI arg
-	authProvider := newBasicAuthProvider(defaultAz, webAddress)
 
 	webServeMux.Handle("/logout", authProvider.Logout())
 	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))
@@ -180,11 +169,11 @@ func Run(version, buildDate string, opts *Opts) {
 		webServeMux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
 	}
 
-	// --- start http servers ---
+	// --- start web server ---
 
-	failch := make(chan error)
-	sigch := make(chan os.Signal)
-	signal.Notify(sigch, syscall.SIGINT, syscall.SIGTERM)
+	serverFailChan := make(chan error)
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		log.Println("Web server listening at", webAddress)
@@ -194,20 +183,33 @@ func Run(version, buildDate string, opts *Opts) {
 		}
 		log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
 		if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
-			failch <- err
+			serverFailChan <- err
 		}
 	}()
 
+	// --- start reverse proxy ---
+
+	proxyHandler := authProvider.Secure(proxy.NewProxy(defaultAz, ds))
+	proxyFailChan := make(chan error)
+	go func() {
+		log.Println("Cluster reverse proxy listening at", proxyAddress)
+		if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
+			proxyFailChan <- err
+		}
+	}()
+
+	// --- wait for termination ---
+
 	for {
 		select {
-		case err := <-rpFailch:
-			log.Fatalln("HTTP proxy server startup failed:", err)
-			return
-		case err := <-failch:
+		case err := <-serverFailChan:
 			log.Fatalln("HTTP server startup failed:", err)
 			return
-		case sig := <-sigch:
-			log.Println(sig)
+		case err := <-proxyFailChan:
+			log.Fatalln("Cluster reverse proxy startup failed:", err)
+			return
+		case sig := <-sigChan:
+			log.Println("Caught signal", sig)
 			log.Println("Shut down gracefully.")
 			return
 		}
