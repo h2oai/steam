@@ -189,7 +189,7 @@ func Run(version, buildDate string, opts *Opts) {
 
 	// --- start reverse proxy ---
 
-	proxyHandler := authProvider.Secure(proxy.NewProxy(defaultAz, ds))
+	proxyHandler := authProvider.Secure(proxy.NewProxyHandler(defaultAz, ds))
 	proxyFailChan := make(chan error)
 	go func() {
 		log.Println("Cluster reverse proxy listening at", proxyAddress)

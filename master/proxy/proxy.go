@@ -10,14 +10,14 @@ import (
 	"sync"
 )
 
-type ReverseProxy struct {
+type reverseProxy struct {
 	clusterId int64
 	host      string
 	proxy     *httputil.ReverseProxy
 }
 
-func NewReverseProxy(clusterId int64, host string) *ReverseProxy {
-	return &ReverseProxy{
+func newReverseProxy(clusterId int64, host string) *reverseProxy {
+	return &reverseProxy{
 		clusterId,
 		host,
 		httputil.NewSingleHostReverseProxy(&url.URL{
@@ -27,23 +27,23 @@ func NewReverseProxy(clusterId int64, host string) *ReverseProxy {
 	}
 }
 
-func NewProxy(az az.Az, ds *data.Datastore) *ProxyManager {
-	return &ProxyManager{
+type ProxyHandler struct {
+	mu      *sync.RWMutex
+	proxies map[int64]*reverseProxy
+	az      az.Az
+	ds      *data.Datastore
+}
+
+func NewProxyHandler(az az.Az, ds *data.Datastore) *ProxyHandler {
+	return &ProxyHandler{
 		&sync.RWMutex{},
-		make(map[int64]*ReverseProxy),
+		make(map[int64]*reverseProxy),
 		az,
 		ds,
 	}
 }
 
-type ProxyManager struct {
-	mu      *sync.RWMutex
-	proxies map[int64]*ReverseProxy
-	az      az.Az
-	ds      *data.Datastore
-}
-
-func (pm *ProxyManager) getOrCreateReverseProxy(clusterId int64, host string) *ReverseProxy {
+func (pm *ProxyHandler) getOrCreateReverseProxy(clusterId int64, host string) *reverseProxy {
 	pm.mu.RLock()
 	rp, ok := pm.proxies[clusterId]
 	pm.mu.RUnlock()
@@ -52,14 +52,14 @@ func (pm *ProxyManager) getOrCreateReverseProxy(clusterId int64, host string) *R
 		return rp
 	}
 
-	rp = NewReverseProxy(clusterId, host)
+	rp = newReverseProxy(clusterId, host)
 	pm.mu.Lock()
 	pm.proxies[clusterId] = rp
 	pm.mu.Unlock()
 	return rp
 }
 
-func (pm *ProxyManager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (pm *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// All proxy requests require a header with key=X-Cluster; value=cluster-id (in)
 
