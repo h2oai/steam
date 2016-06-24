@@ -21,5 +21,6 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getWorkgroups(c))
 	cmd.AddCommand(getPermissions(c))
 	cmd.AddCommand(getEntities(c))
+	cmd.AddCommand(getHistory(c))
 	return cmd
 }
