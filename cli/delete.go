@@ -16,5 +16,7 @@ func delete_(c *context) *cobra.Command {
 	cmd.AddCommand(deleteEngine(c))
 	cmd.AddCommand(deleteModel(c))
 	cmd.AddCommand(deleteService(c))
+	cmd.AddCommand(deleteRole(c))
+	cmd.AddCommand(deleteWorkgroup(c))
 	return cmd
 }
