@@ -16,5 +16,10 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getEngines(c))
 	cmd.AddCommand(getModels(c))
 	cmd.AddCommand(getServices(c))
+	cmd.AddCommand(getIdentities(c))
+	cmd.AddCommand(getRoles(c))
+	cmd.AddCommand(getWorkgroups(c))
+	cmd.AddCommand(getPermissions(c))
+	cmd.AddCommand(getEntities(c))
 	return cmd
 }
