@@ -39,6 +39,7 @@ import (
 //
 // Cluster
 //   Read               x    x    x
+//   Start/Stop         x
 //
 // Project
 //   Read               x    x    x

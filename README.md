@@ -2,6 +2,7 @@
 
 This document is meant for H2O developers and describes how to install, start, and use Steam on an in-house YARN cluster. External users should review the [README.md](docs/README.md) file within the **/docs** folder.
 
+
 ## Requirements
 - Web browser and an Internet connection
 - Go (available from <a href="https://golang.org">golang.org</a>) 
@@ -243,3 +244,109 @@ When you are finished, use the following process to safely shut down Steam:
 1. On the Services page, stop all running services.
 
 2. Stop all running clouds.
+
+
+## User Management
+
+### Terms
+
+**Entities** represent *objects* in Steam. Examples of entities include Clusters, Projects, Models, Services, Identities, Roles and Workgroups.
+
+**Identities** represent *users* in Steam. You sign in using an Identity, and then perform operations in Steam.
+
+**Permissions** determine what operations you can perform. Examples of permissions include *Manage Clusters*, *View Clusters*, *Manage Models*, *View Models*, and so on.
+
+**Privileges** determine which entities you can perform operations on (data / access control).
+
+### Privileges / Access Control
+
+Privileges are uniquely identified by the entity in question, and the kind of privilege you have on the entity.
+
+A privilege on an entity can be one of *Own*, *Edit* or *View*.
+
+When you create an entity, you start off *Owning* it. You can then *share* this entity with others, and award them *Edit* or *View* privileges.
+
+- **Own** privileges allow you to share, view, edit or delete entities.
+
+- **Edit** privileges allow you to view or edit entities, but not share or delete them.
+
+- **View** privileges allow you to view entities, but not share or edit or delete them.
+
+Entities are allowed to have more than one owner, so you can also add additional owners to entities. 
+
+The following table lists the kind of privileges you need to perform specific operations on entities:
+
+
+        Entity               Own  Edit View
+        -----------------------------------
+        Role
+          Read               x    x    x
+          Update             x    x
+          Assign Permission  x    x
+          Delete             x
+          Share              x
+          
+        Workgroup
+          Read               x    x    x
+          Update             x    x
+          Delete             x
+          Share              x
+        
+        Identity
+          Read               x    x    x
+          Assign Role        x    x
+          Assign Workgroup   x    x
+          Update             x    x
+          Delete             x
+          Share              x
+        
+        Cluster
+          Read               x    x    x
+          Start/Stop         x
+        
+        Project
+          Read               x    x    x
+          Assign Model       x    x
+          Update             x    x
+          Delete             x
+          Share              x
+        
+        Engine, Model
+          Read               x    x    x
+          Update             x    x
+          Delete             x
+          Share              x
+        
+
+### Authorization
+
+Identities cannot be linked directly to permissions. For that, you'll need Roles.
+
+Identities cannot be linked directly to privileges on entities. For that, you'll need Workgroups, i.e. when you share entities with others, you would be sharing those entities with workgroups, not individuals.
+
+In effect, your permissions and privileges are set up using Roles and Workgroups, respectively.
+
+A **Role** is a named set of permissions. Roles allow you define a cohesive set of permissions into operational roles, and then have multiple identities *play* those roles, regardless of access control.
+For example:
+
+- a *Data Scientist* role can be composed of the permissions *View Clusters*, *Manage Models*, *View Models*.
+- a *Operations* role can be composed of the permissions *View Models*, *View Services*, *Manage Services*,
+- a *Manager* role can be composed of the permissions *Manage Roles*, *View Roles*, *Manage Workgroups*, *View Workgroups*
+
+A **Workgroup** is a named set of identities. Workgroups allow you to form collections of identities for access control purposes.
+For example, a *Demand Forecasting* workgroup can be composed of all the users working on demand forecasting, regardless of their role. This workgroup can be then used to control access to all the clusters, projects, models and services that are used for demand forecasting. 
+
+### Summary
+
+After installing Steam, you would:
+
+1. Define roles based on operational needs.
+2. Define workgroups based on data / access control needs.
+
+To "add" a new user to Steam, you would:
+
+1. Create the user's identity
+2. Associate the user with one or more roles.
+3. Optionally, associate the user with one or more workgroups.
+
+
