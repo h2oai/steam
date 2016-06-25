@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/h2oai/steamY/master/az"
-	"github.com/lib/pq"
 	"log"
 	"strconv"
+
+	"github.com/h2oai/steamY/master/az"
+	"github.com/lib/pq"
 )
 
 //
@@ -1291,7 +1292,7 @@ func (ds *Datastore) ReadWorkgroup(pz az.Principal, workgroupId int64) (Workgrou
 func (ds *Datastore) ReadWorkgroupByName(pz az.Principal, name string) (Workgroup, error) {
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, description, created
+			id, type, name, description, created
 		FROM
 			workgroup
 		WHERE
