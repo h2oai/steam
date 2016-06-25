@@ -1,13 +1,14 @@
 package proxy
 
 import (
-	"github.com/h2oai/steamY/master/az"
-	"github.com/h2oai/steamY/master/data"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"sync"
+
+	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steamY/master/data"
 )
 
 type reverseProxy struct {
@@ -80,12 +81,14 @@ func (pm *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pz, azerr := pm.az.Identify(r)
 	if azerr != nil {
 		http.Error(w, azerr.Error(), http.StatusForbidden)
+		return
 	}
 
 	// Check if principal is allowed to use clusters
 
 	if err := pz.CheckPermission(pm.ds.Permissions.ViewCluster); err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
+		return
 	}
 
 	// Read cluster from database.
@@ -94,6 +97,7 @@ func (pm *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cluster, err := pm.ds.ReadCluster(pz, clusterId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
+		return
 	}
 
 	// Get existing proxy, or create one if missing.
