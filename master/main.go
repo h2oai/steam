@@ -180,22 +180,24 @@ func Run(version, buildDate string, opts *Opts) {
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
+	certFile := strings.TrimSpace(opts.WebTLSCertPath)
+	keyFile := strings.TrimSpace(opts.WebTLSKeyPath)
+	enableTLS := !(len(certFile) == 0 && len(keyFile) == 0)
+
 	go func() {
 		log.Println("Web server listening at", webAddress)
 		prefix := ""
 		if len(webAddress) > 1 && webAddress[:1] == ":" {
 			prefix = "localhost"
 		}
-		certFile := strings.TrimSpace(opts.WebTLSCertPath)
-		keyFile := strings.TrimSpace(opts.WebTLSKeyPath)
-		if len(certFile) == 0 && len(keyFile) == 0 {
-			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+		if enableTLS {
+			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
 				serverFailChan <- err
 			}
 		} else {
-			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
 				serverFailChan <- err
 			}
 		}
@@ -207,8 +209,21 @@ func Run(version, buildDate string, opts *Opts) {
 	proxyFailChan := make(chan error)
 	go func() {
 		log.Println("Cluster reverse proxy listening at", proxyAddress)
-		if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
-			proxyFailChan <- err
+		prefix := ""
+		if len(proxyAddress) > 1 && proxyAddress[:1] == ":" {
+			prefix = "localhost"
+		}
+		if enableTLS {
+			log.Printf("Point H2O client libraries to https://%s%s/\n", prefix, proxyAddress)
+			if err := http.ListenAndServeTLS(proxyAddress, certFile, keyFile, proxyHandler); err != nil {
+				proxyFailChan <- err
+			}
+
+		} else {
+			log.Printf("Point H2O client libraries to http://%s%s/\n", prefix, proxyAddress)
+			if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
+				proxyFailChan <- err
+			}
 		}
 	}()
 
