@@ -44,12 +44,12 @@
             POST Input
         </header>
         <form name="params" action="" method="post" onsubmit="event.preventDefault(); runpredpost(this)">
-            <fieldset>
+            <fieldset class="python-input">
                 <legend>Python input</legend>
                 <div class="form-group">
                     <label class="sr-only"></label>
                     <div class="input-group">
-                        <input type="text" class="form-control" name="p" size="140"><br>
+                        <input type="text" class="form-control" name="p" size="140" placeholder="Enter sample text to predict spam or ham"><br>
                     </div>
                 </div>
             </fieldset>
@@ -59,7 +59,7 @@
                 <input id="reset-btn" class="btn btn-default" type="reset" value="CLEAR">
             </div>
         </form>
-        <header>Command line</header>
+        <header class="command-line">Command line</header>
         <div class="curl"></div>
     </section>
 
@@ -73,7 +73,6 @@
         <fieldset class="results">
         </fieldset>
 
-        <header>Statistics</header>
         <fieldset id="modelStats">
         </fieldset>
 

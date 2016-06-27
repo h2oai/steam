@@ -289,10 +289,10 @@
     // + 'Average time ' + Number(data['averageTime']).toFixed(3)
     // + ' (after ' + warmUpCount + ' warmups ' + Number(data['averageAfterWarmupTime']).toFixed(3) + ') ms.';
     var newRow = '';
-    newRow += '<tr></tr>';
-    newRow += '<tr><td>' + label + '</td><td>Last took: </td><td>' + Number(data['lastMs']).toFixed(3) + ' ms</td></tr>';
-    newRow += '<tr><td>(n=' + data['count'] + ')</td><td>Average time </td><td>' + Number(data['averageTime']).toFixed(3) + ' ms </td></tr>';
-    newRow += '<tr><td></td><td>After ' + warmupCount + ' warmups: </td><td>' + Number(data['averageAfterWarmupTime']).toFixed(3) + ' ms</td></tr>';
+    newRow += '<tr class="stat-pad"></tr>';
+    newRow += '<tr class="stat-group"><td>' + label + '</td><td>Last took: </td><td>' + Number(data['lastMs']).toFixed(3) + ' ms</td></tr>';
+    newRow += '<tr class="stat-group"><td>(n=' + data['count'] + ')</td><td>Average time </td><td>' + Number(data['averageTime']).toFixed(3) + ' ms </td></tr>';
+    newRow += '<tr class="stat-group"><td></td><td>After ' + warmupCount + ' warmups: </td><td>' + Number(data['averageAfterWarmupTime']).toFixed(3) + ' ms</td></tr>';
     newRow += '<tr></tr>';
 
     return newRow;
@@ -337,17 +337,17 @@
             <table class="table noBorders">
               <tbody>`;
 
-    s += '<tr><td>Service started</td> <td>' + data.startTimeUTC + '</td></tr>';
-    s += '<tr><td>Uptime</td><td>' + duration(upDays) + '</td></tr>';
+    s += '<tr class="stat-group"><td>Service started</td> <td>' + data.startTimeUTC + '</td></tr>';
+    s += '<tr class="stat-group"><td>Uptime</td><td>' + duration(upDays) + '</td></tr>';
 
 
     // s = 'Service started ' + data['startTimeUTC'] + '. Uptime ' + duration(upDays) + "."; //upDays.toFixed(3) + ' days. ';
     var n = Number(data.prediction.count);
     var warmupCount = data.warmUpCount;
     if (n > 0) {
-      s += '<tr><td> Last prediction</td><td>' + data.lastTimeUTC + '</td></tr>';
-      s += '<tr><td> </td><td>' + duration(lastTimeAgoDays) + ' ago</td></tr>';
-      s += '<tr><td> </td></tr>'
+      s += '<tr class="stat-group"><td> Last prediction</td><td>' + data.lastTimeUTC + '</td></tr>';
+      s += '<tr class="stat-group"><td> </td><td>' + duration(lastTimeAgoDays) + ' ago</td></tr>';
+      s += '<tr class="stat-pad"><td> </td></tr>'
       //     s +=  '<br>'
       //     + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'
       //     +  '<p>'
