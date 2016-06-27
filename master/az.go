@@ -47,3 +47,6 @@ func (a *DefaultAz) Identify(r *http.Request) (az.Principal, error) {
 
 	return pz, nil
 }
+
+func serveNoop(w http.ResponseWriter, r *http.Request) {}
+func authNoop(user, realm string) string               { return "" }

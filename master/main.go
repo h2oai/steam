@@ -30,6 +30,7 @@ type Opts struct {
 	WebAddress                string
 	WebTLSCertPath            string
 	WebTLSKeyPath             string
+	AuthProvider              string
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
@@ -49,6 +50,7 @@ var DefaultOpts = &Opts{
 	defaultWebAddress,
 	"",
 	"",
+	"basic",
 	path.Join(".", fs.VarDir, "master"),
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
@@ -143,9 +145,13 @@ func Run(version, buildDate string, opts *Opts) {
 
 	// --- create basic auth service ---
 	defaultAz := newDefaultAz(ds)
-	// TODO add CLI args for other other providers
-	// TODO conditionally instantiate auth provider based on CLI arg
-	authProvider := newBasicAuthProvider(defaultAz, webAddress)
+	var authProvider AuthProvider
+	switch opts.AuthProvider {
+	case "digest":
+		authProvider = newDigestAuthProvider(defaultAz, webAddress)
+	default: // "basic"
+		authProvider = newBasicAuthProvider(defaultAz, webAddress)
+	}
 
 	// --- create web services ---
 

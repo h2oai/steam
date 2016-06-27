@@ -18,6 +18,7 @@ func serveMaster(c *context) *cobra.Command {
 		webAddress                string
 		webTLSCertPath            string
 		webTLSKeyPath             string
+		authProvider              string
 		workingDirectory          string
 		clusterProxyAddress       string
 		compilationServiceAddress string
@@ -40,6 +41,7 @@ func serveMaster(c *context) *cobra.Command {
 			webAddress,
 			webTLSCertPath,
 			webTLSKeyPath,
+			authProvider,
 			workingDirectory,
 			clusterProxyAddress,
 			compilationServiceAddress,
@@ -59,6 +61,7 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
 	cmd.Flags().StringVar(&webTLSCertPath, "web-tls-cert-path", opts.WebTLSCertPath, "Web server TLS certificate file path (optional).")
 	cmd.Flags().StringVar(&webTLSKeyPath, "web-tls-key-path", opts.WebTLSKeyPath, "Web server TLS key file path (optional).")
+	cmd.Flags().StringVar(&authProvider, "authentication-provider", opts.AuthProvider, "Authentication mechanismfor client logins (one of \"basic\" or \"digest\")")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
