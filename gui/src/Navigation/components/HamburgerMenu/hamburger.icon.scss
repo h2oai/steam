@@ -1,0 +1,63 @@
+@import '../../../variables.scss';
+
+.hamburger-icon {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 48px;
+  height: 48px;
+  font-size: 0;
+  text-indent: -9999px;
+  appearance: none;
+  box-shadow: none;
+  border-radius: none;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+
+  &__span {
+    display: block;
+    position: absolute;
+    top: 20px;
+    left: 9px;
+    right: 9px;
+    height: 4px;
+    background: $brand-dark;
+    transition: background 0s 0.3s;
+    &::before {
+      top: -10px;
+      transition-property: top, transform;
+    }
+    &::after {
+      bottom: -10px;
+      transition-property: bottom, transform;
+    }
+    &::before, &::after {
+      position: absolute;
+      display: block;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: $brand-dark;
+      content: "";
+      transition-duration: 0.3s, 0.3s;
+      transition-delay: 0.3s, 0s;
+    }
+  }
+
+  &.active &__span {
+    background: none;
+    &::before {
+      top: 0;
+      transform: rotate(45deg);
+      transition-delay: 0s, 0.3s;
+    }
+    &::after {
+      bottom: 0;
+      transform: rotate(-45deg);
+      transition-delay: 0s, 0.3s;
+    }
+  }
+}
