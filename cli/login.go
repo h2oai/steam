@@ -14,12 +14,11 @@ import (
 
 var loginHelp = `
 login [address]
-Access a Steam server.
+Sign in to a Steam server.
 Examples:
 
-	$ steam login http://192.168.42.42:9000
-	$ steam login http://192.168.42.42:9000 \
-	    --username=arthur
+	$ steam login 192.168.42.42:9000 \
+			--username=arthur
 			--password=beeblebrox
 `
 
