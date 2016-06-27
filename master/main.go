@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 
 	"github.com/gorilla/context"
@@ -27,6 +28,8 @@ const (
 
 type Opts struct {
 	WebAddress                string
+	WebTLSCertPath            string
+	WebTLSKeyPath             string
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
@@ -44,6 +47,8 @@ type Opts struct {
 
 var DefaultOpts = &Opts{
 	defaultWebAddress,
+	"",
+	"",
 	path.Join(".", fs.VarDir, "master"),
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
@@ -181,9 +186,18 @@ func Run(version, buildDate string, opts *Opts) {
 		if len(webAddress) > 1 && webAddress[:1] == ":" {
 			prefix = "localhost"
 		}
-		log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
-		if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
-			serverFailChan <- err
+		certFile := strings.TrimSpace(opts.WebTLSCertPath)
+		keyFile := strings.TrimSpace(opts.WebTLSKeyPath)
+		if len(certFile) == 0 && len(keyFile) == 0 {
+			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+				serverFailChan <- err
+			}
+		} else {
+			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+				serverFailChan <- err
+			}
 		}
 	}()
 
