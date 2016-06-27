@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/master"
 	"github.com/spf13/cobra"
 )
@@ -232,36 +231,4 @@ func serveMaster(c *context) *cobra.Command {
 
 	return cmd
 
-}
-
-// FIXME - get rid of this: should never be started directly from CLI
-
-var startServiceHelp = `
-service
-Start a new scoring service
-Examples:
-
-Start a new scoring service instance using foo.war listening on port 8888
-    $ steam start service --warfile=foo.war --port=8888
-`
-
-func startService(c *context) *cobra.Command {
-	var (
-		warfile string
-		jetty   string
-		address string
-		port    int
-	)
-	cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
-		pid, err := svc.Start(warfile, jetty, address, port)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		log.Println("Started process:", pid)
-	})
-	cmd.Flags().StringVar(&warfile, "warfile", "", "The WAR file to launch.")
-	cmd.Flags().StringVar(&jetty, "jetty-runner", "", "The jetty runner jar.")
-	cmd.Flags().StringVar(&address, "address", "0.0.0.0", "The ip of the host to launch the scoring service.")
-	cmd.Flags().IntVar(&port, "port", 8000, "The port to listen on.")
-	return cmd
 }
