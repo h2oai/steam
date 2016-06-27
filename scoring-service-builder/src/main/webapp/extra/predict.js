@@ -182,14 +182,14 @@
   function showUrl(pardiv, params) {
     // remove empty parameters returned by serialize.
     params = params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
-    url = "http://" + window.location.host + "/predict?" + params;
+    var url = "http://" + window.location.host + "/predict?" + params;
     pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
   }
 
   function showCurl(pardiv, params) {
     // remove empty parameters returned by serialize.
     params = params.replace(/'/g, "\\'") // quote quotes
-    url = "http://" + window.location.host + "/pypredict";
+    var url = "http://" + window.location.host + "/pypredict";
     pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
   }
 
@@ -226,7 +226,7 @@
       predResults($('#allparams').serialize());
     }
     showStatistics();
-  }
+  };
 
   function runpred(form) {
     predResults(form.p.value);
@@ -255,10 +255,10 @@
 
   }
 
-  function runpredpost(form) {
+  window.runpredpost = function(form) {
     predResultsPost(form.p.value);
     showStatistics();
-  }
+  };
 
 
   function duration(days) {
