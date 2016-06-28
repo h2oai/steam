@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"log"
+	"os"
 	"sort"
 	"strconv"
 	// "sync"
@@ -623,30 +624,27 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 	// 2. attempt to compile and start the service
 	// 3. update the Service record state to "started" if successful, or "failed" if not.
 
-	// if err := c.Ping(); err != nil {
-	// 	return "", fmt.Errorf("Cannot reach compilation service at %s, is it still running?", s.compilationServiceAddress)
-	// }
-
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return nil, err
 	}
 
-	// if err := compilationService.Ping(); err != nil {
-	// 	return nil, fmt.Errorf("Failed connecting to compilation service at %s", s.compilationServiceAddress)
-	// }
-
-	// FIXME: do not recompile if war file is already available
-
-	warFilePath, err := compilationService.CompilePojo(
-		fs.GetJavaModelPath(s.workingDir, model.Name, model.LogicalName),
-		fs.GetGenModelPath(s.workingDir, model.Name),
-		"makewar",
-	)
 	compilationService := compiler.NewServer(s.compilationServiceAddress)
+	if err := compilationService.Ping(); err != nil {
+		return nil, fmt.Errorf("Failed connecting to compilation service at %s", s.compilationServiceAddress)
+	}
 
-	if err != nil {
-		return nil, err
+	// do not recompile if war file is already available
+	warFilePath := fs.GetWarFilePath(s.workingDir, model.Name, model.LogicalName)
+	if _, err := os.Stat(warFilePath); os.IsNotExist(err) {
+		warFilePath, err = compilationService.CompilePojo(
+			fs.GetJavaModelPath(s.workingDir, model.Name, model.LogicalName),
+			fs.GetGenModelPath(s.workingDir, model.Name),
+			"makewar",
+		)
+		if err != nil {
+			return nil, err //FIXME format error
+		}
 	}
 
 	pid, err := svc.Start(
