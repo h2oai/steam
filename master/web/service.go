@@ -16,7 +16,7 @@ import (
 	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/master/data"
-	"github.com/h2oai/steamY/srv/comp" // FIXME rename comp to compiler
+	"github.com/h2oai/steamY/srv/compiler" // FIXME rename comp to compiler
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
 )
@@ -632,7 +632,6 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 		return nil, err
 	}
 
-	compilationService := comp.NewServer(s.compilationServiceAddress)
 	// if err := compilationService.Ping(); err != nil {
 	// 	return nil, fmt.Errorf("Failed connecting to compilation service at %s", s.compilationServiceAddress)
 	// }
@@ -644,6 +643,7 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 		fs.GetGenModelPath(s.workingDir, model.Name),
 		"makewar",
 	)
+	compilationService := compiler.NewServer(s.compilationServiceAddress)
 
 	if err != nil {
 		return nil, err

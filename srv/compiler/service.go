@@ -1,4 +1,4 @@
-package comp
+package compiler
 
 import (
 	"bytes"
