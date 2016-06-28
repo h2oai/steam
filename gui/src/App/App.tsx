@@ -80,7 +80,7 @@ export class App extends React.Component<Props & DispatchProps, any> {
       <div className="app-container">
         <div className="stage">
           <div className={classNames('navigation-container', {open: this.props.navigation.isOpen})}>
-            {sidebar2}
+            {sidebar1}
           </div>
           <div className={classNames('pusher', {open: this.props.navigation.isOpen})}>
             <Body>
