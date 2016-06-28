@@ -48,12 +48,12 @@
       var n = names[i];
       var i1 = Number(i) + 1;
       form += '<div class="form-group row">';
-      form += '<label class="col-sm-6 form-control-label">' + i1 + '. ' + n + '</label> ';
+      form += '<label class="col-sm-3 col-md-3 form-control-label">' + i1 + '. ' + n + '</label> ';
       var domain = domains[i];
       domain = sortValues(domain);
       var card = domain == null ? 0 : domain.length;
 
-      form += '<div class="col-sm-6">'
+      form += '<div class="col-sm-9 col-md-9">'
 
       if (card < 2) {
         form += '<input class="form-control" type="text" name="' + n + '" oninput="updateUrl(event);">';
