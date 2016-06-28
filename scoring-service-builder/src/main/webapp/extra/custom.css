@@ -200,6 +200,39 @@ select:-moz-focusring {
 .glyphicon.glyphicon-new-window {
     color: rgba(36, 67, 90, 0.8);
 }
+.python-input {
+    padding-left: 48px;
+}
+
+.python-input legend {
+    width: 10%;
+    display: inline-block;
+    margin-bottom: 14px;
+}
+
+.python-input .form-group {
+    width: 60%;
+    display: inline-block;
+    margin-left: 25px;
+}
+
+.command-line {
+    margin-left: 48px;
+    margin-top: 2em;
+}
+
+.curl {
+    margin-left: 48px;
+    margin-top: 2em;
+}
+
+tr.stat-group td {
+    padding: 0 8px !important;
+}
+
+tr.stat-pad {
+    height: 8px;
+}
 
 @-moz-document url-prefix() {
     ::-moz-focus-inner {

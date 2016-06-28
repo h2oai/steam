@@ -40,25 +40,26 @@
     <section class="col-md-12 col-sm-12"></section>
     <section id="inputParams" class="col-md-6 col-sm-12">
         <header>
+            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
             POST Input
         </header>
-        <form name="params" action="" method="post">
-            <fieldset>
+        <form name="params" action="" method="post" onsubmit="event.preventDefault(); runpredpost(this)">
+            <fieldset class="python-input">
                 <legend>Python input</legend>
                 <div class="form-group">
                     <label class="sr-only"></label>
                     <div class="input-group">
-                        <input type="text" class="form-control" name="p" size="140"><br>
+                        <input type="text" class="form-control" name="p" size="140" placeholder="Enter sample text to predict spam or ham"><br>
                     </div>
                 </div>
             </fieldset>
 
             <div class="btnContainer">
-                <input id="predict-btn" class="btn btn-primary" type="button" name="okbutton" value="PREDICT" onClick="runpredpost(this.form)">
+                <input id="predict-btn" class="btn btn-primary" type="submit" name="okbutton" value="PREDICT">
                 <input id="reset-btn" class="btn btn-default" type="reset" value="CLEAR">
             </div>
         </form>
-        <h3>Command line</h3>
+        <header class="command-line">Command line</header>
         <div class="curl"></div>
     </section>
 
@@ -72,8 +73,7 @@
         <fieldset class="results">
         </fieldset>
 
-        <h2>URL</h2>
-        <fieldset class="params">
+        <fieldset id="modelStats">
         </fieldset>
 
     </section>
