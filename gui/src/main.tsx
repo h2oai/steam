@@ -12,10 +12,12 @@ import thunk from 'redux-thunk';
 import App from './App/App';
 import Clusters from './Clusters/Clusters';
 import Projects from './Projects/Projects';
+import ProjectDetails from './ProjectDetails/ProjectDetails';
 import { rootReducer } from './App/reducers/rootReducer';
 
 import './variables.scss';
 import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome/css/font-awesome.css';
 
 const initialState = {};
 
@@ -25,7 +27,7 @@ const store: Store = createStore(
   applyMiddleware(thunk)
 );
 
-let history = syncHistoryWithStore(hashHistory, store);
+let history: ReactRouterRedux.ReactRouterReduxHistory = syncHistoryWithStore(hashHistory, store);
 
 ReactDOM.render(
   <Provider store={store}>
@@ -36,6 +38,8 @@ ReactDOM.render(
           <IndexRoute component={Clusters}/>
         </Route>
         <Route path="projects" component={Projects}>
+        </Route>
+        <Route path="/projects/:id" component={ProjectDetails}>
         </Route>
       </Route>
     </Router>

@@ -1,26 +1,21 @@
 @import '../../../variables.scss';
 
-.navigation {
-  background: $brand-dark;
-  min-height: 100%;
-  height: 100%;
-  &__div {
-    padding: 10%;
-    &__ul {
-      color: $brand-yellow;
-      list-style: none;
-      padding: 0;
-      font-size: 1.4em;
-      letter-spacing: 0.2em;
-      font-weight: 800;
-      text-align: center;
-      li {
-        padding: 2% 0;
-        a {
-          text-decoration: none;
-          &:visited {
-            color: $brand-yellow;
-          }
+.navigation__div {
+  padding: 10%;
+  &__ul {
+    color: $brand-yellow;
+    list-style: none;
+    padding: 0;
+    font-size: 1.4em;
+    letter-spacing: 0.2em;
+    font-weight: 800;
+    text-align: center;
+    li {
+      padding: 2% 0;
+      a {
+        text-decoration: none;
+        &:visited {
+          color: $brand-yellow;
         }
       }
     }

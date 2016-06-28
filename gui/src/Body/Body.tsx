@@ -25,14 +25,14 @@ export class Body extends React.Component<Props & DispatchProps, any> {
     };
     this.clickHandler = this.clickHandler.bind(this);
   }
-  clickHandler(): void {
+  clickHandler(event: React.MouseEvent): void {
     this.props.toggleMenu(!this.state.isActive);
     this.setState({
       isActive: !this.state.isActive
     });
   }
   
-  render() {
+  render(): React.ReactElement<HTMLElement> {
     return (
       <section className="body-container">
         <div className="menu-container">
@@ -46,13 +46,13 @@ export class Body extends React.Component<Props & DispatchProps, any> {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch): DispatchProps {
   return {
     toggleMenu: bindActionCreators(toggleMenu, dispatch)
   };
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state: Props): Props {
   return {};
 }
 

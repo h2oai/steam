@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import * as classNames from 'classnames';
+import { Link } from 'react-router';
 import '../styles/leaderboard.scss';
 
 interface Props {
@@ -17,7 +18,7 @@ export class Leaderboard extends React.Component<Props, any> {
     return (suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]);
   }
 
-  render() {
+  render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="leaderboard">
         <header>
@@ -31,13 +32,24 @@ export class Leaderboard extends React.Component<Props, any> {
                   {item.rank + Leaderboard.getOrdinal(item.rank)}
                 </div>
                 <div className="col-sm-2 col-xs-12 metadata">
-                  {item.name}
+                  {item.metadata.name}
                 </div>
                 <div className="col-sm-7 col-xs-12 graphs">
                   GRAPH
                 </div>
                 <div className="col-sm-2 col-xs-12 actions">
-                  ACTIONS
+                  <div>
+                    <Link to={'/projects/' + item.id}>View Details</Link>
+                  </div>
+                  <div>
+                    Promote
+                  </div>
+                  <div>
+                    Deploy
+                  </div>
+                  <div>
+                    &hellip; More Actions
+                  </div>
                 </div>
               </li>
             );

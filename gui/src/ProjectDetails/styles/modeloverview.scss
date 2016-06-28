@@ -1,0 +1,23 @@
+@import '../../variables';
+
+.model-overview {
+  height: 100%;
+  .details {
+    width: 300px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    &--label {
+      white-space: nowrap;
+    }
+    &--line {
+      width: 100%;
+      background: $brand-dark;
+      height: 1px;
+      margin: 0 10px;
+    }
+    &--value {
+      white-space: nowrap;
+    }
+  }
+}

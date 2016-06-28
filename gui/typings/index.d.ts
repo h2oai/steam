@@ -1,6 +1,7 @@
 /// <reference path="globals/classnames/index.d.ts" />
 /// <reference path="globals/es6-promise/index.d.ts" />
 /// <reference path="globals/jquery/index.d.ts" />
+/// <reference path="globals/react-addons-update/index.d.ts" />
 /// <reference path="globals/react-dom/index.d.ts" />
 /// <reference path="globals/react-redux/index.d.ts" />
 /// <reference path="globals/react-router-redux/index.d.ts" />

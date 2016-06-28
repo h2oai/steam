@@ -4,7 +4,7 @@
 import * as React from 'react';
 
 export default class Clusters extends React.Component<any, any> {
-  render() {
+  render(): React.ReactElement<HTMLDivElement> {
     return <div>Clusters</div>
   }
 }

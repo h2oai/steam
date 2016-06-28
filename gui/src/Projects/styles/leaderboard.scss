@@ -24,6 +24,15 @@
       .metadata {
 
       }
+      .actions {
+        border-left: 1px solid $brand-dark;
+        height: 100%;
+        font-size: 1.5em;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+      }
       &:first-child {
         border-top: 1px dashed $brand-dark;
       }
