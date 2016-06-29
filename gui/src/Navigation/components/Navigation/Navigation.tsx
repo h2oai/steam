@@ -3,9 +3,7 @@
  */
 
 import * as React from 'react';
-import { Sidebar } from '../Sidebar/Sidebar';
-import * as classNames from 'classnames';
-
+import { Link } from 'react-router';
 import './navigation.scss';
 
 interface Props {
@@ -21,13 +19,11 @@ interface State {
 export class Navigation extends React.Component<Props & DispatchProps, State> {
   render(): React.ReactElement<HTMLElement> {
     return (
-      <Sidebar>
-        <nav className="navigation__div">
-          <ul className="navigation__div__ul">
-            {this.props.children}
-          </ul>
-        </nav>
-      </Sidebar>
+      <nav className="navigation--primary">
+        <div className="navigation">
+          {this.props.children}    
+        </div>
+      </nav>
     );
   }
 }

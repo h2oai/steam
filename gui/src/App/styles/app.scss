@@ -8,6 +8,14 @@ html, body, .app-container, #app {
   -webkit-font-smoothing: antialiased;
 }
 
+.app-container {
+  display: flex;
+}
+
+.logo {
+
+}
+
 .stage {
   position: absolute;
   width: 100%;

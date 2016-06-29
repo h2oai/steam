@@ -1,19 +1,49 @@
 @import '../../../variables.scss';
 
-.navigation__div {
-  padding: 10%;
-  &__ul {
+.navigation {
+  display: flex;
+  flex-direction: column;
+  header {
+    height: 45px;
+    width: 100%;
+    .logo-container {
+      height: $navigation-icon-size;
+      width: $navigation-icon-size;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .logo {
+        height: $navigation-icon-size * .5;
+        width: $navigation-icon-size * .5;
+        border-radius: 50%;
+        background: $brand-yellow;
+        margin-right: 5px;
+      }
+    }
+  }
+  .nav-list {
+    padding: 0;
     color: $brand-yellow;
     list-style: none;
-    padding: 0;
     font-size: 1.4em;
     letter-spacing: 0.2em;
     font-weight: 800;
-    text-align: center;
     li {
-      padding: 2% 0;
+      padding: 5px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 45px;
+      i {
+        height: $navigation-icon-size;
+        flex-basis: $navigation-icon-size;
+        line-height: $navigation-icon-size;
+        text-align: center;
+      }
       a {
+        flex-basis: 90%;
         text-decoration: none;
+        color: $brand-yellow;
         &:visited {
           color: $brand-yellow;
         }

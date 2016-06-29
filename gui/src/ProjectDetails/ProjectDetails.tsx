@@ -4,9 +4,9 @@
 
 import * as React from 'react';
 import * as classNames from 'classnames';
-import * as _ from 'lodash';
 import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
+import GoodnessOfFit from './components/GoodnessOfFit';
 import './styles/projectdetails.scss';
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -52,6 +52,9 @@ export default class ProjectDetails extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="project-details">
+        <div className="model-header">
+          Model: GBT-1069085
+        </div>
         <header>
           <span onClick={this.toggleOpen.bind(this, 'model')}><i
             className={classNames('fa', {'fa-minus-square-o': this.state.isModelOpen, 'fa-plus-square-o': !this.state.isModelOpen})}></i
@@ -59,6 +62,14 @@ export default class ProjectDetails extends React.Component<Props, any> {
         </header>
         <Collapsible open={this.state.isModelOpen}>
           <ModelOverview></ModelOverview>
+        </Collapsible>
+        <header>
+          <span onClick={this.toggleOpen.bind(this, 'goodness')}><i
+            className={classNames('fa', {'fa-minus-square-o': this.state.isGoodnessOpen, 'fa-plus-square-o': !this.state.isGoodnessOpen})}></i
+          >Goodness of Fit</span>
+        </header>
+        <Collapsible open={this.state.isGoodnessOpen}>
+          <GoodnessOfFit></GoodnessOfFit>
         </Collapsible>
         <header>
           <span onClick={this.toggleOpen.bind(this, 'residual')}><i
@@ -78,16 +89,6 @@ export default class ProjectDetails extends React.Component<Props, any> {
         <Collapsible open={this.state.isVariableOpen}>
           <div>
             Variable body
-          </div>
-        </Collapsible>
-        <header>
-          <span onClick={this.toggleOpen.bind(this, 'goodness')}><i
-            className={classNames('fa', {'fa-minus-square-o': this.state.isGoodnessOpen, 'fa-plus-square-o': !this.state.isGoodnessOpen})}></i
-          >Goodness of Fit</span>
-        </header>
-        <Collapsible open={this.state.isGoodnessOpen}>
-          <div>
-            Goodness body
           </div>
         </Collapsible>
       </div>

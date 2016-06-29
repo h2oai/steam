@@ -1,12 +1,10 @@
 {
   "dependencies": {
-    "history": "registry:npm/history#2.0.0+20160607172317",
     "lodash": "registry:npm/lodash#4.0.0+20160416211519"
   },
   "globalDependencies": {
     "classnames": "registry:dt/classnames#0.0.0+20160316155526",
     "es6-promise": "registry:dt/es6-promise#0.0.0+20160614011821",
-    "history": "registry:dt/history#1.8.0+20160316155526",
     "jquery": "registry:dt/jquery#1.10.0+20160417213236",
     "react": "registry:dt/react#0.14.0+20160602151522",
     "react-addons-update": "registry:dt/react-addons-update#0.14.0+20160316155526",

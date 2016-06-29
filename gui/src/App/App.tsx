@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import * as classNames from 'classnames';
 import { Navigation } from '../Navigation/components/Navigation/Navigation';
+import { Sidebar } from '../Navigation/components/Sidebar/Sidebar';
 import Body from '../Body/Body';
 
 import './styles/app.scss';
@@ -76,17 +77,76 @@ export class App extends React.Component<Props & DispatchProps, any> {
         </div>
       </div>
     );
+
+    let sidebar3 = (
+      <Navigation>
+        <header>
+          <div className="logo"></div>
+            Header goes here
+        </header>
+        <ul className="nav-list">
+
+        </ul>
+      </Navigation>
+    );
     return (
       <div className="app-container">
-        <div className="stage">
-          <div className={classNames('navigation-container', {open: this.props.navigation.isOpen})}>
-            {sidebar1}
-          </div>
-          <div className={classNames('pusher', {open: this.props.navigation.isOpen})}>
-            <Body>
-              {this.props.children}
-            </Body>
-          </div>
+        <Sidebar>
+          <Navigation>
+            <header>
+              <div className="logo-container">
+                <div className="logo"></div>
+              </div>
+            </header>
+            <ul className="nav-list">
+              <li className="nav-list--item">
+                <i className="fa fa-cloud"></i><Link to="clusters">Clusters</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-cube"></i><Link to="clusters">Models</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-cubes"></i><Link to="">Services</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-clone"></i><Link to="clusters">Assets</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-folder-open"></i><Link to="projects">Projects</Link>
+              </li>
+            </ul>
+          </Navigation>
+        </Sidebar>
+        <Sidebar>
+          <Navigation>
+            <header>
+              <div className="logo-container">
+                <div className="logo"></div>
+              </div>
+            </header>
+            <ul className="nav-list">
+              <li className="nav-list--item">
+                <Link to="clusters">Sub 1</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-cube"></i><Link to="clusters">Models</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-cubes"></i><Link to="">Services</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-clone"></i><Link to="clusters">Assets</Link>
+              </li>
+              <li className="nav-list--item">
+                <i className="fa fa-folder-open"></i><Link to="projects">Projects</Link>
+              </li>
+            </ul>
+          </Navigation>
+        </Sidebar>
+        <div className={classNames('pusher', {open: this.props.navigation.isOpen})}>
+          <Body>
+            {this.props.children}
+          </Body>
         </div>
       </div>
     );
