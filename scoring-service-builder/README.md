@@ -61,14 +61,15 @@ Note that when the Builder Service is running, you can also make a war file usin
 The POJO and Jar files are included in the **steamY/scoring-service-builder/examples/example-pojo** folder. 
 
 
-
 ## Starting the H2O Prediction Service
+
+You can start the H2O Prediction Service using the CLI, or you can run the example scripts included with this package. Running the scripts will automatically start the H2O Prediction Service. 
 
 ### Using the CLI
 
 Open a terminal window and run the following command to run the scoring service:
 
-		java -jar jetty-runner-9.3.9.M1.jar --port 55001 exmaple.war
+		java -jar jetty-runner-9.3.9.M1.jar --port 55001 example.war
 
 This starts the H2O Prediction Service at localhost:55001. You can use this web service at http://localhost:55001.
 
@@ -80,11 +81,20 @@ This distribution includes scripts that can be used to quickly get your predicti
 
 Open a terminal window and run the following commands from the **steamY/steam-scoring-service** folder. 
 
-	example.sh
-	run-example.sh
+	# Run an example using the airline dataset
+	sh example.sh
+	sh run-example.sh
+
+or
+
+	# Run an example using the spam-detection dataset
+	sh example-python.sh
+	sh run-example-python.sh
 
 These example scripts generate a War file and then start the prediction service at http://localhost:55001
-using a subset of the airline dataset.
+using a subset of either the airline or spam-detection dataset.
+
+**Note**: If you run the example-python.sh and run-example-python.sh files, be sure to install textblob (`pip install textblob`) so that the python example runs properly.
 
 
 ## Making Predictions
