@@ -5,6 +5,7 @@ This document is meant for H2O developers and describes how to install, start, a
 
 ## Requirements
 - Web browser and an Internet connection
+- steamY repository
 - Go (available from <a href="https://golang.org">golang.org</a>) 
 - Access to this steamY repository
 - SSH access to a Jetty server running YARN
@@ -46,7 +47,7 @@ The following screenshot shows how to make a War file using a POJO file and a Ja
 
 Note that when the Builder Service is running, you can also make a war file using command line arguments. For example:
 
-		curl curl -X POST --form pojo=@examples/example-pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@examples/example-pojo/h2o-genmodel.jar localhost:55000/makewar > example.war
+		curl -X POST --form pojo=@examples/example-pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@examples/example-pojo/h2o-genmodel.jar localhost:55000/makewar > example.war
 
  where:
  
@@ -81,7 +82,7 @@ Perform the following steps to install Steam.
 
 	`mkdir -p $GOPATH/src/github.com/h2oai`
 	
-	>**Note**: The path MUST include `/src/github.com/h2o.ai`. 
+	>**Note**: The path MUST include `/src/github.com/h2oai`. 
 
 4. Change directories to the new **h2oai** folder, and clone the repository in this folder. Enter your git username and password when prompted. 
 
