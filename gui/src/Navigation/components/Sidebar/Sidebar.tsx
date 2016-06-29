@@ -8,6 +8,7 @@ import * as classNames from 'classnames';
 import './styles/sidebar.scss';
 
 interface Props {
+  className
 }
 
 interface DispatchProps {
@@ -20,7 +21,7 @@ interface State {
 export class Sidebar extends React.Component<Props & DispatchProps, State> {
   render(): React.ReactElement<HTMLElement> {
     return (
-      <aside className={classNames('sidebar')}>
+      <aside className={classNames('sidebar', this.props.className)}>
         {this.props.children}
       </aside>
     );

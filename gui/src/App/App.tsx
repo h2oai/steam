@@ -91,63 +91,60 @@ export class App extends React.Component<Props & DispatchProps, any> {
     );
     return (
       <div className="app-container">
-        <Sidebar>
-          <Navigation>
-            <header>
-              <div className="logo-container">
-                <div className="logo"></div>
-              </div>
-            </header>
-            <ul className="nav-list">
-              <li className="nav-list--item">
-                <i className="fa fa-cloud"></i><Link to="clusters">Clusters</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-cube"></i><Link to="clusters">Models</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-cubes"></i><Link to="">Services</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-clone"></i><Link to="clusters">Assets</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-folder-open"></i><Link to="projects">Projects</Link>
-              </li>
-            </ul>
-          </Navigation>
-        </Sidebar>
-        <Sidebar>
-          <Navigation>
-            <header>
-              <div className="logo-container">
-                <div className="logo"></div>
-              </div>
-            </header>
-            <ul className="nav-list">
-              <li className="nav-list--item">
-                <Link to="clusters">Sub 1</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-cube"></i><Link to="clusters">Models</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-cubes"></i><Link to="">Services</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-clone"></i><Link to="clusters">Assets</Link>
-              </li>
-              <li className="nav-list--item">
-                <i className="fa fa-folder-open"></i><Link to="projects">Projects</Link>
-              </li>
-            </ul>
-          </Navigation>
-        </Sidebar>
-        <div className={classNames('pusher', {open: this.props.navigation.isOpen})}>
-          <Body>
-            {this.props.children}
-          </Body>
+        <div>
+          <Sidebar>
+            <Navigation>
+              <header>
+                <div className="logo-container">
+                  <div className="logo"></div>
+                </div>
+              </header>
+              <ul className="nav-list">
+                <li className="nav-list--item">
+                  <i className="fa fa-cloud"></i><Link to="clusters">Clusters</Link>
+                </li>
+                <li className="nav-list--item">
+                  <i className="fa fa-cube"></i><Link to="clusters">Models</Link>
+                </li>
+                <li className="nav-list--item">
+                  <i className="fa fa-cubes"></i><Link to="">Services</Link>
+                </li>
+                <li className="nav-list--item">
+                  <i className="fa fa-clone"></i><Link to="clusters">Assets</Link>
+                </li>
+                <li className="nav-list--item">
+                  <i className="fa fa-folder-open"></i><Link to="projects">Projects</Link>
+                </li>
+              </ul>
+            </Navigation>
+          </Sidebar>
+          <Sidebar className="sub-navigation">
+            <Navigation>
+              <header>
+              </header>
+              <ul className="nav-list">
+                <li className="nav-list--item">
+                  <Link to="clusters">Sub 1</Link>
+                </li>
+                <li className="nav-list--item">
+                  <Link to="clusters">Sub 2</Link>
+                </li>
+                <li className="nav-list--item">
+                  <Link to="">Sub 3</Link>
+                </li>
+                <li className="nav-list--item">
+                  <Link to="clusters">Sub 4</Link>
+                </li>
+                <li className="nav-list--item">
+                  <Link to="projects">Sub 5</Link>
+                </li>
+              </ul>
+            </Navigation>
+          </Sidebar>
         </div>
+        <Body>
+          {this.props.children}
+        </Body>
       </div>
     );
   }

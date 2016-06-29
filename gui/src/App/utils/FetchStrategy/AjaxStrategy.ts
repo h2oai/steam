@@ -5,8 +5,8 @@
 import { IFetchStrategy } from './IFetchStrategy';
 import { IFetchStrategyConfig } from './IFetchStrategyConfig';
 
-export class AJAXFetch implements IFetchStrategy {
-  request(dispatch: Redux.Dispatch, config: IFetchStrategyConfig): void {
+export class AjaxStrategy implements IFetchStrategy {
+  request(dispatch: Redux.Dispatch, config: IFetchStrategyConfig): Promise<any> {
     return fetch(config.url)
       .then(response => response.json())
       .then(json => {
