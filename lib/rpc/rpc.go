@@ -52,7 +52,7 @@ func (proc *Proc) Call(method string, in, out interface{}) error {
 		return fmt.Errorf("Error creating request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Custom %s %s", proc.username, proc.password))
+	req.SetBasicAuth(proc.username, proc.password)
 
 	res, err := proc.client.Do(req)
 	if err != nil {

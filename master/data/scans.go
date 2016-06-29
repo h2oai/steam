@@ -36,6 +36,40 @@ func ScanMetas(rs *sql.Rows) ([]Meta, error) {
 	return structs, nil
 }
 
+func ScanEntityHistory(r *sql.Row) (EntityHistory, error) {
+	var s EntityHistory
+	if err := r.Scan(
+		&s.IdentityId,
+		&s.Action,
+		&s.Description,
+		&s.Created,
+	); err != nil {
+		return EntityHistory{}, err
+	}
+	return s, nil
+}
+
+func ScanEntityHistorys(rs *sql.Rows) ([]EntityHistory, error) {
+	structs := make([]EntityHistory, 0, 16)
+	var err error
+	for rs.Next() {
+		var s EntityHistory
+		if err = rs.Scan(
+			&s.IdentityId,
+			&s.Action,
+			&s.Description,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanPrivilege(r *sql.Row) (Privilege, error) {
 	var s Privilege
 	if err := r.Scan(
@@ -59,6 +93,40 @@ func ScanPrivileges(rs *sql.Rows) ([]Privilege, error) {
 			&s.WorkgroupId,
 			&s.EntityType,
 			&s.EntityId,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanEntityPrivilege(r *sql.Row) (EntityPrivilege, error) {
+	var s EntityPrivilege
+	if err := r.Scan(
+		&s.Type,
+		&s.WorkgroupId,
+		&s.WorkgroupName,
+		&s.WorkgroupDescription,
+	); err != nil {
+		return EntityPrivilege{}, err
+	}
+	return s, nil
+}
+
+func ScanEntityPrivileges(rs *sql.Rows) ([]EntityPrivilege, error) {
+	structs := make([]EntityPrivilege, 0, 16)
+	var err error
+	for rs.Next() {
+		var s EntityPrivilege
+		if err = rs.Scan(
+			&s.Type,
+			&s.WorkgroupId,
+			&s.WorkgroupName,
+			&s.WorkgroupDescription,
 		); err != nil {
 			return nil, err
 		}
@@ -541,3 +609,4 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 	}
 	return structs, nil
 }
+

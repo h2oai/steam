@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/h2oai/steamY/master/az"
-	"github.com/lib/pq"
 	"log"
 	"strconv"
+
+	"github.com/h2oai/steamY/master/az"
+	"github.com/lib/pq"
 )
 
 //
@@ -39,6 +40,7 @@ import (
 //
 // Cluster
 //   Read               x    x    x
+//   Start/Stop         x
 //
 // Project
 //   Read               x    x    x
@@ -63,6 +65,8 @@ const (
 
 const (
 	Version = "1"
+
+	SuperuserRoleName = "Superuser"
 
 	CanView = "view"
 	CanEdit = "edit"
@@ -98,23 +102,23 @@ const (
 	CompletedState    = "completed"
 )
 
-const ( // FIXME change to int64 in postgres
-	ManageRole int64 = 1 + iota
-	ViewRole
-	ManageWorkgroup
-	ViewWorkgroup
-	ManageIdentity
-	ViewIdentity
-	ManageEngine
-	ViewEngine
-	ManageCluster
-	ViewCluster
-	ManageProject
-	ViewProject
-	ManageModel
-	ViewModel
-	ManageService
-	ViewService
+const (
+	ManageRole      = "ManageRole"
+	ViewRole        = "ViewRole"
+	ManageWorkgroup = "ManageWorkgroup"
+	ViewWorkgroup   = "ViewWorkgroup"
+	ManageIdentity  = "ManageIdentity"
+	ViewIdentity    = "ViewIdentity"
+	ManageEngine    = "ManageEngine"
+	ViewEngine      = "ViewEngine"
+	ManageCluster   = "ManageCluster"
+	ViewCluster     = "ViewCluster"
+	ManageProject   = "ManageProject"
+	ViewProject     = "ViewProject"
+	ManageModel     = "ManageModel"
+	ViewModel       = "ViewModel"
+	ManageService   = "ManageService"
+	ViewService     = "ViewService"
 )
 
 var (
@@ -169,6 +173,25 @@ func init() {
 
 type metadata map[string]string
 
+type PermissionKeys struct {
+	ManageRole      int64
+	ViewRole        int64
+	ManageWorkgroup int64
+	ViewWorkgroup   int64
+	ManageIdentity  int64
+	ViewIdentity    int64
+	ManageEngine    int64
+	ViewEngine      int64
+	ManageCluster   int64
+	ViewCluster     int64
+	ManageProject   int64
+	ViewProject     int64
+	ManageModel     int64
+	ViewModel       int64
+	ManageService   int64
+	ViewService     int64
+}
+
 type EntityTypeKeys struct {
 	Role      int64
 	Workgroup int64
@@ -183,6 +206,32 @@ type EntityTypeKeys struct {
 type ClusterTypeKeys struct {
 	External int64
 	Yarn     int64
+}
+
+func toPermissionKeys(permissions []Permission) *PermissionKeys {
+	m := make(map[string]int64)
+	for _, p := range permissions {
+		m[p.Code] = p.Id
+	}
+
+	return &PermissionKeys{
+		m[ManageRole],
+		m[ViewRole],
+		m[ManageWorkgroup],
+		m[ViewWorkgroup],
+		m[ManageIdentity],
+		m[ViewIdentity],
+		m[ManageEngine],
+		m[ViewEngine],
+		m[ManageCluster],
+		m[ViewCluster],
+		m[ManageProject],
+		m[ViewProject],
+		m[ManageModel],
+		m[ViewModel],
+		m[ManageService],
+		m[ViewService],
+	}
 }
 
 func toEntityTypeKeys(entityTypes []EntityType) *EntityTypeKeys {
@@ -215,14 +264,19 @@ func toClusterTypeKeys(clusterTypes []ClusterType) *ClusterTypeKeys {
 }
 
 type Datastore struct {
-	db             *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
-	metadata       metadata
-	permissions    []Permission
-	permissionMap  map[int64]Permission
-	entityTypeMap  map[int64]EntityType
-	EntityTypes    *EntityTypeKeys
-	clusterTypeMap map[int64]ClusterType
-	ClusterTypes   *ClusterTypeKeys
+	db                *sql.DB // Singleton; doesn't actually connect until used, and is pooled internally.
+	metadata          metadata
+	permissions       []Permission
+	permissionMap     map[int64]Permission
+	Permissions       *PermissionKeys
+	entityTypes       []EntityType
+	entityTypeMap     map[int64]EntityType
+	EntityTypes       *EntityTypeKeys
+	clusterTypes      []ClusterType
+	clusterTypeMap    map[int64]ClusterType
+	ClusterTypes      *ClusterTypeKeys
+	ViewPermissions   map[int64]int64
+	ManagePermissions map[int64]int64
 }
 
 func Connect(username, dbname, sslmode string) (*sql.DB, error) {
@@ -283,6 +337,8 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		permissionMap[permission.Id] = permission
 	}
 
+	permissionKeys := toPermissionKeys(permissions)
+
 	entityTypes, err := readEntityTypes(db)
 	if err != nil {
 		return nil, err
@@ -292,6 +348,8 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 	for _, et := range entityTypes {
 		entityTypeMap[et.Id] = et
 	}
+
+	entityTypeKeys := toEntityTypeKeys(entityTypes)
 
 	clusterTypes, err := readClusterTypes(db)
 	if err != nil {
@@ -303,15 +361,42 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 		clusterTypeMap[ct.Id] = ct
 	}
 
+	viewPermissions := map[int64]int64{
+		entityTypeKeys.Cluster:   permissionKeys.ViewCluster,
+		entityTypeKeys.Engine:    permissionKeys.ViewEngine,
+		entityTypeKeys.Identity:  permissionKeys.ViewIdentity,
+		entityTypeKeys.Model:     permissionKeys.ViewModel,
+		entityTypeKeys.Project:   permissionKeys.ViewProject,
+		entityTypeKeys.Role:      permissionKeys.ViewRole,
+		entityTypeKeys.Service:   permissionKeys.ViewService,
+		entityTypeKeys.Workgroup: permissionKeys.ViewWorkgroup,
+	}
+
+	managePermissions := map[int64]int64{
+		entityTypeKeys.Cluster:   permissionKeys.ManageCluster,
+		entityTypeKeys.Engine:    permissionKeys.ManageEngine,
+		entityTypeKeys.Identity:  permissionKeys.ManageIdentity,
+		entityTypeKeys.Model:     permissionKeys.ManageModel,
+		entityTypeKeys.Project:   permissionKeys.ManageProject,
+		entityTypeKeys.Role:      permissionKeys.ManageRole,
+		entityTypeKeys.Service:   permissionKeys.ManageService,
+		entityTypeKeys.Workgroup: permissionKeys.ManageWorkgroup,
+	}
+
 	return &Datastore{
 		db,
 		metadata,
 		permissions,
 		permissionMap,
+		permissionKeys,
+		entityTypes,
 		entityTypeMap,
-		toEntityTypeKeys(entityTypes),
+		entityTypeKeys,
+		clusterTypes,
 		clusterTypeMap,
 		toClusterTypeKeys(clusterTypes),
+		viewPermissions,
+		managePermissions,
 	}, nil
 }
 
@@ -488,37 +573,36 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 			return err
 		}
 
-		return createPrivilege(tx, Privilege{
+		if err := createPrivilege(tx, Privilege{
 			Owns,
 			workgroupId,
 			ds.EntityTypes.Identity,
 			id,
-		})
+		}); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			workgroupId,
+			ds.EntityTypes.Workgroup,
+			workgroupId,
+		}); err != nil {
+			return err
+		}
+
+		roleId, err := createRole(tx, SuperuserRoleName, SuperuserRoleName)
+		if err != nil {
+			return err
+		}
+
+		if err := linkIdentityAndRole(tx, id, roleId); err != nil {
+			return nil
+		}
+
+		return nil
 	})
 	return id, workgroupId, err
-}
-
-func (ds *Datastore) CreateSuperuserRole(pz az.Principal) error {
-
-	roleId, err := ds.CreateRole(pz, "Superuser", "Superuser")
-	if err != nil {
-		return err
-	}
-
-	allPerms := make([]int64, len(ds.permissions))
-	for i, permission := range ds.permissions {
-		allPerms[i] = permission.Id
-	}
-
-	if err := ds.SetRolePermissions(pz, roleId, allPerms); err != nil {
-		return err
-	}
-
-	if err := ds.LinkIdentityAndRole(pz, pz.Id(), roleId); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // --- Lookup tables (static) ---
@@ -713,6 +797,37 @@ func (ds *Datastore) audit(pz az.Principal, tx *sql.Tx, action string, entityTyp
 	return nil
 }
 
+func (ds *Datastore) ReadEntityTypes(pz az.Principal) []EntityType {
+	return ds.entityTypes
+}
+
+func (ds *Datastore) ReadHistoryForEntity(pz az.Principal, entityTypeId, entityId, offset, limit int64) ([]EntityHistory, error) {
+	if err := pz.CheckView(entityTypeId, entityId); err != nil {
+		return nil, err
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			identity_id, action, description, created
+		FROM
+			history
+		WHERE
+			entity_id = $2 AND
+			entity_type_id = $1
+		ORDER BY
+			created DESC
+		OFFSET $3
+		LIMIT $4
+	`, entityTypeId, entityId, offset, limit)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanEntityHistorys(rows)
+}
+
 // --- Permissions ---
 
 func readAllPermissions(db *sql.DB) ([]Permission, error) {
@@ -783,20 +898,35 @@ func (ds *Datastore) readPermissionsForIdentity(identityId int64) ([]int64, erro
 	return scanInts(rows)
 }
 
-func (ds *Datastore) ReadPermissionsForIdentity(pz az.Principal, identityId int64) ([]int64, error) {
+func (ds *Datastore) ReadPermissionsForIdentity(pz az.Principal, identityId int64) ([]Permission, error) {
 	if err := pz.CheckView(ds.EntityTypes.Identity, identityId); err != nil {
 		return nil, err
 	}
 
-	return ds.readPermissionsForIdentity(identityId)
+	rows, err := ds.db.Query(`
+		SELECT DISTINCT
+			p.id, p.code, p.description
+		FROM
+		  identity_role ir,
+			role_permission rp,
+			permission p
+		WHERE
+			ir.identity_id = $1 AND
+			ir.role_id = rp.role_id AND
+			rp.permission_id = p.id
+	`, identityId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanPermissions(rows)
 }
 
 // --- Roles ---
 
-func (ds *Datastore) CreateRole(pz az.Principal, name, description string) (int64, error) {
+func createRole(tx *sql.Tx, name, description string) (int64, error) {
 	var id int64
-	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+	row := tx.QueryRow(`
 			INSERT INTO
 				role
 				(name, description, created)
@@ -804,7 +934,19 @@ func (ds *Datastore) CreateRole(pz az.Principal, name, description string) (int6
 				($1,   $2,          now())
 			RETURNING id
 			`, name, description)
-		if err := row.Scan(&id); err != nil {
+	if err := row.Scan(&id); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (ds *Datastore) CreateRole(pz az.Principal, name, description string) (int64, error) {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		var err error
+
+		id, err = createRole(tx, name, description)
+		if err != nil {
 			return err
 		}
 
@@ -836,20 +978,42 @@ func (ds *Datastore) ReadRoles(pz az.Principal, offset, limit int64) ([]Role, er
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND
-					entity_type_id = $4
+				  $5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND entity_type_id = $4)
 			)
 		ORDER BY 
 			name
 		OFFSET $1
 		LIMIT $2
-		`, offset, limit, pz.Id(), ds.EntityTypes.Role)
+		`, offset, limit, pz.Id(), ds.EntityTypes.Role, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	return ScanRoles(rows)
+}
+
+func (ds *Datastore) readRoleNamesForIdentity(identityId int64) ([]string, error) {
+	rows, err := ds.db.Query(`
+		SELECT DISTINCT
+			r.name
+		FROM
+			role r,
+			identity_role ir
+		WHERE
+		  ir.identity_id = $1 AND
+			ir.role_id = r.id
+		ORDER BY
+			r.name
+		`, identityId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanStrings(rows)
 }
 
 func (ds *Datastore) ReadRolesForIdentity(pz az.Principal, identityId int64) ([]Role, error) {
@@ -869,12 +1033,12 @@ func (ds *Datastore) ReadRolesForIdentity(pz az.Principal, identityId int64) ([]
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND
-					entity_type_id = $3
+				  $4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
 			)
 		ORDER BY
 			r.name
-		`, identityId, pz.Id(), ds.EntityTypes.Role)
+		`, identityId, pz.Id(), ds.EntityTypes.Role, pz.IsSuperuser())
 
 	if err != nil {
 		return nil, err
@@ -900,7 +1064,29 @@ func (ds *Datastore) ReadRole(pz az.Principal, roleId int64) (Role, error) {
 	return ScanRole(row)
 }
 
-func (ds *Datastore) UpdateRole(pz az.Principal, roleId int64, name string) error {
+func (ds *Datastore) ReadRoleByName(pz az.Principal, name string) (Role, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, description, created
+		FROM
+			role
+		WHERE
+			name = $1
+		`, name)
+
+	role, err := ScanRole(row)
+	if err != nil {
+		return Role{}, err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Role, role.Id); err != nil {
+		return Role{}, err
+	}
+
+	return role, nil
+}
+
+func (ds *Datastore) UpdateRole(pz az.Principal, roleId int64, name, description string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
 		return err
 	}
@@ -910,17 +1096,21 @@ func (ds *Datastore) UpdateRole(pz az.Principal, roleId int64, name string) erro
 			UPDATE
 				role
 			SET
-				name = $1
+				name = $1,
+				description = $2
 			WHERE
-				id = $2
-			`, name, roleId); err != nil {
+				id = $3
+			`, name, description, roleId); err != nil {
 			return err
 		}
-		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Role, roleId, metadata{"name": name})
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Role, roleId, metadata{
+			"name":        name,
+			"description": description,
+		})
 	})
 }
 
-func (ds *Datastore) SetRolePermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
+func (ds *Datastore) LinkRoleAndPermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
 		return err
 	}
@@ -1027,13 +1217,13 @@ func (ds *Datastore) ReadWorkgroups(pz az.Principal, offset, limit int64) ([]Wor
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND
-					entity_type_id = $4
+				  $5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND entity_type_id = $4)
 			)
 		ORDER BY name
 		OFFSET $1
 		LIMIT $2
-		`, offset, limit, pz.Id(), ds.EntityTypes.Workgroup)
+		`, offset, limit, pz.Id(), ds.EntityTypes.Workgroup, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -1064,12 +1254,12 @@ func (ds *Datastore) ReadWorkgroupsForIdentity(pz az.Principal, identityId int64
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND
-					entity_type_id = $3
+				  $4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
 			)
 		ORDER BY
 			w.name
-		`, identityId, pz.Id(), ds.EntityTypes.Workgroup)
+		`, identityId, pz.Id(), ds.EntityTypes.Workgroup, pz.IsSuperuser())
 
 	if err != nil {
 		return nil, err
@@ -1099,7 +1289,29 @@ func (ds *Datastore) ReadWorkgroup(pz az.Principal, workgroupId int64) (Workgrou
 	return ScanWorkgroup(row)
 }
 
-func (ds *Datastore) UpdateWorkgroup(pz az.Principal, workgroupId int64, name string) error {
+func (ds *Datastore) ReadWorkgroupByName(pz az.Principal, name string) (Workgroup, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, type, name, description, created
+		FROM
+			workgroup
+		WHERE
+			name = $1
+		`, name)
+
+	workgroup, err := ScanWorkgroup(row)
+	if err != nil {
+		return Workgroup{}, err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Workgroup, workgroup.Id); err != nil {
+		return Workgroup{}, err
+	}
+
+	return workgroup, nil
+}
+
+func (ds *Datastore) UpdateWorkgroup(pz az.Principal, workgroupId int64, name, description string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Workgroup, workgroupId); err != nil {
 		return err
 	}
@@ -1108,10 +1320,11 @@ func (ds *Datastore) UpdateWorkgroup(pz az.Principal, workgroupId int64, name st
 			UPDATE
 				workgroup
 			SET
-				name = $1
+				name = $1,
+				description = $2
 			WHERE
-				id = $2
-			`, name, workgroupId); err != nil {
+				id = $3
+			`, name, description, workgroupId); err != nil {
 			return err
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Workgroup, workgroupId, metadata{"name": name})
@@ -1220,6 +1433,15 @@ func (ds *Datastore) CreateIdentity(pz az.Principal, name, password string) (int
 			return err
 		}
 
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			workgroupId,
+			ds.EntityTypes.Workgroup,
+			workgroupId,
+		}); err != nil {
+			return err
+		}
+
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Identity, id, metadata{"name": name})
 	})
 	return id, workgroupId, err
@@ -1239,13 +1461,13 @@ func (ds *Datastore) ReadIdentities(pz az.Principal, offset, limit int64) ([]Ide
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND
-					entity_type_id = $4
+				  $5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND entity_type_id = $4)
 			)
 		ORDER BY name
 		OFFSET $1
 		LIMIT $2
-		`, offset, limit, pz.Id(), ds.EntityTypes.Identity)
+		`, offset, limit, pz.Id(), ds.EntityTypes.Identity, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -1269,6 +1491,28 @@ func (ds *Datastore) ReadIdentity(pz az.Principal, identityId int64) (Identity, 
 		`, identityId)
 
 	return ScanIdentity(row)
+}
+
+func (ds *Datastore) ReadIdentityByName(pz az.Principal, name string) (Identity, error) {
+	row := ds.db.QueryRow(`
+		SELECT
+			id, name, is_active, last_login, created
+		FROM
+			identity
+		WHERE
+			name = $1
+		`, name)
+
+	identity, err := ScanIdentity(row)
+	if err != nil {
+		return Identity{}, err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Identity, identity.Id); err != nil {
+		return Identity{}, err
+	}
+
+	return identity, nil
 }
 
 func (ds *Datastore) readIdentityAndPassword(name string) (*IdentityAndPassword, error) {
@@ -1318,12 +1562,12 @@ func (ds *Datastore) ReadIdentitiesForWorkgroup(pz az.Principal, workgroupId int
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND
-					entity_type_id = $3
+					$4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
 			)
 		ORDER BY
 			i.name
-		`, workgroupId, pz.Id(), ds.EntityTypes.Identity)
+		`, workgroupId, pz.Id(), ds.EntityTypes.Identity, pz.IsSuperuser())
 
 	if err != nil {
 		return nil, err
@@ -1353,12 +1597,12 @@ func (ds *Datastore) ReadIdentitiesForRole(pz az.Principal, roleId int64) ([]Ide
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND
-					entity_type_id = $3
+				  $4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
 			)
 		ORDER BY
 			i.name
-		`, roleId, pz.Id(), ds.EntityTypes.Identity)
+		`, roleId, pz.Id(), ds.EntityTypes.Identity, pz.IsSuperuser())
 
 	if err != nil {
 		return nil, err
@@ -1418,6 +1662,16 @@ func (ds *Datastore) UnlinkIdentityAndWorkgroup(pz az.Principal, identityId, wor
 	})
 }
 
+func linkIdentityAndRole(tx *sql.Tx, identityId, roleId int64) error {
+	_, err := tx.Exec(`
+		INSERT INTO
+			identity_role
+		VALUES
+			($1, $2)
+		`, identityId, roleId)
+	return err
+}
+
 func (ds *Datastore) LinkIdentityAndRole(pz az.Principal, identityId, roleId int64) error {
 	if err := pz.CheckView(ds.EntityTypes.Role, roleId); err != nil {
 		return err
@@ -1431,12 +1685,7 @@ func (ds *Datastore) LinkIdentityAndRole(pz az.Principal, identityId, roleId int
 		return err
 	}
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
-			INSERT INTO
-				identity_role
-			VALUES
-				($1, $2)
-			`, identityId, roleId); err != nil {
+		if err := linkIdentityAndRole(tx, identityId, roleId); err != nil {
 			return err
 		}
 		return ds.audit(pz, tx, LinkOp, ds.EntityTypes.Identity, identityId, metadata{
@@ -1537,31 +1786,28 @@ func (ds *Datastore) CreatePrivilege(pz az.Principal, privilege Privilege) error
 	})
 }
 
-func (ds *Datastore) ReadPrivileges(pz az.Principal, identityId, entityTypeId, entityId int64) ([]string, error) {
-	if err := pz.CheckView(ds.EntityTypes.Identity, identityId); err != nil {
-		return nil, err
-	}
-
+func (ds *Datastore) ReadEntityPrivileges(pz az.Principal, entityTypeId, entityId int64) ([]EntityPrivilege, error) {
 	if err := pz.CheckView(entityTypeId, entityId); err != nil {
 		return nil, err
 	}
 
 	rows, err := ds.db.Query(`
-		SELECT DISTINCT
-			privilege_type
+		SELECT
+		  p.privilege_type, w.id, w.name, w.description
 		FROM
-			privilege
+			privilege p,
+			workgroup w
 		WHERE
-			entity_id = $1 AND
-			entity_type_id = $2 AND
-			workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3)
-		`, entityId, entityTypeId, identityId)
+			p.entity_id = $1 AND
+			p.entity_type_id = $2 AND
+			w.workgroup_id = p.workgroup_id
+		`, entityId, entityTypeId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	return scanStrings(rows)
+	return ScanEntityPrivileges(rows)
 }
 
 func (ds *Datastore) readPrivileges(identityId, entityTypeId, entityId int64) ([]string, error) {
@@ -1706,12 +1952,12 @@ func (ds *Datastore) ReadEngines(pz az.Principal) ([]Engine, error) {
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
-					entity_type_id = $2
+				  $3 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
 			)
 		ORDER BY
 			name
-		`, pz.Id(), ds.EntityTypes.Engine)
+		`, pz.Id(), ds.EntityTypes.Engine, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -1853,6 +2099,10 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 	return clusterId, err
 }
 
+func (ds *Datastore) ReadClusterTypes(pz az.Principal) []ClusterType {
+	return ds.clusterTypes
+}
+
 func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Cluster, error) {
 	rows, err := ds.db.Query(`
 		SELECT
@@ -1867,14 +2117,14 @@ func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Clust
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
-					entity_type_id = $2
+				  $5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
 			)
 		ORDER BY
 			name
 		OFFSET $3
 		LIMIT $4
-		`, pz.Id(), ds.EntityTypes.Cluster, offset, limit)
+		`, pz.Id(), ds.EntityTypes.Cluster, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -2126,14 +2376,14 @@ func (ds *Datastore) ReadProjects(pz az.Principal, offset, limit int64) ([]Proje
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
-					entity_type_id = $2
+				  $5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
 			)
 		ORDER BY
 			name
 		OFFSET $3
 		LIMIT $4
-		`, pz.Id(), ds.EntityTypes.Project, offset, limit)
+		`, pz.Id(), ds.EntityTypes.Project, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -2242,14 +2492,14 @@ func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, 
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
-					entity_type_id = $2
+					$5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
 			)
 		ORDER BY
 			name
 		OFFSET $3
 		LIMIT $4
-		`, pz.Id(), ds.EntityTypes.Model, offset, limit)
+		`, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -2279,14 +2529,14 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND
-					entity_type_id = $3
+				  $6 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
 			)
 		ORDER BY
 			m.name
 		OFFSET $4
 		LIMIT $5
-		`, projectId, pz.Id(), ds.EntityTypes.Model, offset, limit)
+		`, projectId, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -2389,14 +2639,14 @@ func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Servi
 				FROM 
 					privilege
 				WHERE
-					workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND
-					entity_type_id = $2
+					$5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
 			)
 		ORDER BY
 			address, port
 		OFFSET $3
 		LIMIT $4
-		`, pz.Id(), ds.EntityTypes.Service, offset, limit)
+		`, pz.Id(), ds.EntityTypes.Service, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
@@ -2482,242 +2732,4 @@ func (ds *Datastore) DeleteService(pz az.Principal, serviceId int64) error {
 		}
 		return ds.audit(pz, tx, DeleteOp, ds.EntityTypes.Service, serviceId, metadata{})
 	})
-}
-
-// --- Datastore-backed Principal Impl ---
-
-func (ds *Datastore) NewPrincipal(name string) (az.Principal, error) {
-	identity, err := ds.readIdentityAndPassword(name)
-	if err != nil {
-		return nil, err
-	}
-
-	if identity == nil {
-		return nil, nil
-	}
-
-	permissionIds, err := ds.readPermissionsForIdentity(identity.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	permissionMap := ds.permissionMap
-	permissions := make(map[int64]bool)
-	for _, permissionId := range permissionIds {
-		permissions[permissionMap[permissionId].Code] = true
-	}
-
-	return &Principal{ds, identity, permissions}, nil
-}
-
-type Principal struct {
-	ds          *Datastore
-	identity    *IdentityAndPassword
-	permissions map[int64]bool
-}
-
-func (pz *Principal) Id() int64 {
-	return pz.identity.Id
-}
-
-func (pz *Principal) WorkgroupId() int64 {
-	return pz.identity.WorkgroupId
-}
-
-func (pz *Principal) Name() string {
-	return pz.identity.Name
-}
-
-func (pz *Principal) Password() string {
-	return pz.identity.Password
-}
-
-func (pz *Principal) IsActive() bool {
-	return pz.identity.IsActive
-}
-
-func (pz *Principal) HasPermission(code int64) bool {
-	_, ok := pz.permissions[code]
-	return ok
-}
-
-func (pz *Principal) CheckPermission(code int64) error {
-	if pz.HasPermission(code) {
-		return nil
-	}
-	// FIXME return string representation of permission code
-	return fmt.Errorf("Identity %s does not have permission %d to perform this operation", pz.Name(), code)
-}
-
-// TODO use bitwise ops to simplify this
-func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivilege string) (bool, error) {
-
-	owns := false
-	canEdit := false
-	canView := false
-
-	privileges, err := pz.ds.readPrivileges(pz.identity.Id, entityTypeId, entityId)
-	if err != nil {
-		return false, err
-	}
-
-	if len(privileges) == 0 {
-		return false, nil
-	}
-
-	for _, p := range privileges {
-		switch p {
-		case Owns:
-			owns = true
-			canEdit = true
-			canView = true
-		case CanEdit:
-			canEdit = true
-			canView = true
-		case CanView:
-			canView = true
-		}
-
-		switch expectedPrivilege {
-		case Owns:
-			if owns {
-				return true, nil
-			}
-		case CanEdit:
-			if owns || canEdit {
-				return true, nil
-			}
-		case CanView:
-			if owns || canEdit || canView {
-				return true, nil
-			}
-		}
-	}
-	return false, nil
-}
-
-func (pz *Principal) checkPrivilege(entityTypeId, entityId int64, expectedPrivilege string) error {
-	ok, err := pz.hasPrivilege(entityTypeId, entityId, expectedPrivilege)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return fmt.Errorf("Identity %s does not have privilege '%s' on the entity", pz.Name(), expectedPrivilege)
-	}
-	return nil
-}
-
-func (pz *Principal) Owns(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityId, entityId, Owns)
-}
-
-func (pz *Principal) CanEdit(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityId, entityId, CanEdit)
-}
-
-func (pz *Principal) CanView(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityId, entityId, CanView)
-}
-
-func (pz *Principal) CheckOwns(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityId, entityId, Owns)
-}
-
-func (pz *Principal) CheckEdit(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityId, entityId, CanEdit)
-}
-
-func (pz *Principal) CheckView(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityId, entityId, CanView)
-}
-
-const SystemIdentityName = "system"
-
-func CreateSystemIdentity(db *sql.DB) (int64, int64, error) {
-	var id, workgroupId int64
-	err := executeTransaction(db, func(tx *sql.Tx) error {
-		var err error
-
-		workgroupId, err = createDefaultWorkgroup(tx, SystemIdentityName)
-		if err != nil {
-			return err
-		}
-
-		id, err = createIdentity(tx, SystemIdentityName, "", workgroupId)
-		if err != nil {
-			return err
-		}
-
-		return linkIdentityAndWorkgroup(tx, id, workgroupId)
-	})
-	return id, workgroupId, err
-}
-
-type SystemPrincipal struct {
-	identity *IdentityAndPassword
-}
-
-func (ds *Datastore) NewSystemPrincipal() (az.Principal, error) {
-	identity, err := ds.readIdentityAndPassword(SystemIdentityName)
-	if err != nil {
-		return nil, err
-	}
-
-	if identity == nil {
-		return nil, nil
-	}
-
-	return &SystemPrincipal{identity}, nil
-}
-
-func (pz *SystemPrincipal) Id() int64 {
-	return pz.identity.Id
-}
-
-func (pz *SystemPrincipal) WorkgroupId() int64 {
-	return pz.identity.WorkgroupId
-}
-
-func (pz *SystemPrincipal) Name() string {
-	return pz.identity.Name
-}
-
-func (pz *SystemPrincipal) Password() string {
-	return pz.identity.Password
-}
-
-func (pz *SystemPrincipal) IsActive() bool {
-	return true
-}
-
-func (pz *SystemPrincipal) HasPermission(code int64) bool {
-	return true
-}
-
-func (pz *SystemPrincipal) CheckPermission(code int64) error {
-	return nil
-}
-
-func (pz *SystemPrincipal) Owns(entityTypeId, entityId int64) (bool, error) {
-	return true, nil
-}
-
-func (pz *SystemPrincipal) CanEdit(entityTypeId, entityId int64) (bool, error) {
-	return true, nil
-}
-
-func (pz *SystemPrincipal) CanView(entityTypeId, entityId int64) (bool, error) {
-	return true, nil
-}
-
-func (pz *SystemPrincipal) CheckOwns(entityTypeId, entityId int64) error {
-	return nil
-}
-
-func (pz *SystemPrincipal) CheckEdit(entityTypeId, entityId int64) error {
-	return nil
-}
-
-func (pz *SystemPrincipal) CheckView(entityTypeId, entityId int64) error {
-	return nil
 }

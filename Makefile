@@ -25,6 +25,7 @@ DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 SSB=./scoring-service-builder
 WWW=./var/master/www
 ASSETS = ./var/master/assets
+SCRIPTS = ./scripts
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
 
 all: build gui ssb
@@ -47,6 +48,7 @@ ssb:
 generate:
 	cd ./srv/web && go generate && go fmt service.go
 	cd ./master/db && go generate && go fmt encoding.go
+	cd ./master/data && go generate && go fmt scans.go
 
 lint:
 	@ go get -v github.com/golang/lint/golint
@@ -82,7 +84,8 @@ linux:
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	mkdir -p ./dist/$(DIST_LINUX)/var/master && mv ./steamY ./dist/$(DIST_LINUX)/steam
 	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
-	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/	
+	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/
+	cp -r $(SCRIPTS) ./dist/$(DIST_LINUX)/var/master/
 	tar czfC ./dist/$(DIST_LINUX).tar.gz dist $(DIST_LINUX)
 
 darwin:
@@ -91,9 +94,10 @@ darwin:
 	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steamY ./dist/$(DIST_DARWIN)/steam
 	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
+	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: gui ssb ssb linux darwin
+release: gui ssb linux darwin
 	rm -rf ./dist/$(DIST_LINUX)
 	rm -rf ./dist/$(DIST_DARWIN)
 

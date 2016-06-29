@@ -7,29 +7,34 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/rpc"
+	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/data"
+	"github.com/h2oai/steamY/master/proxy"
 	"github.com/h2oai/steamY/master/web"
 )
 
 const (
-	defaultWebAddress          = "0.0.0.0:9000"
-	defaultClusterProxyAddress = "0.0.0.0:9001"
-	defaultCompilationAddress  = "0.0.0.0:8080"
-	defaultScoringService      = "0.0.0.0"
+	defaultWebAddress          = ":9000"
+	defaultClusterProxyAddress = ":9001"
+	defaultCompilationAddress  = ":8080"
+	defaultScoringServiceHost  = ""
 )
 
 type Opts struct {
 	WebAddress                string
+	WebTLSCertPath            string
+	WebTLSKeyPath             string
+	AuthProvider              string
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
-	ScoringServiceAddress     string
+	ScoringServiceHost        string
 	EnableProfiler            bool
 	YarnKerberosEnabled       bool
 	YarnUserName              string
@@ -43,10 +48,13 @@ type Opts struct {
 
 var DefaultOpts = &Opts{
 	defaultWebAddress,
+	"",
+	"",
+	"basic",
 	path.Join(".", fs.VarDir, "master"),
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
-	defaultScoringService,
+	defaultScoringServiceHost,
 	false,
 	false,
 	"",
@@ -68,11 +76,7 @@ func Run(version, buildDate string, opts *Opts) {
 
 	// --- external ip for base and proxy ---
 	webAddress := opts.WebAddress
-	proxAddress := opts.ClusterProxyAddress
-	if webAddress == defaultWebAddress {
-		webAddress = fs.GetExternalIP(webAddress)
-		proxAddress = fs.GetExternalIP(proxAddress)
-	}
+	proxyAddress := opts.ClusterProxyAddress
 
 	// --- set up wd ---
 	wd, err := fs.MkWorkingDirectory(opts.WorkingDirectory)
@@ -105,21 +109,16 @@ func Run(version, buildDate string, opts *Opts) {
 			log.Fatalln("Starting Steam for the first time requires both --superuser-name and --superuser-password arguments to \"steam serve master\".")
 		}
 
-		if err := validateUsername(opts.SuperuserName); err != nil {
+		if err := auth.ValidateUsername(opts.SuperuserName); err != nil {
 			log.Fatalln("Invalid superuser username:", err)
 		}
 
-		if err := validatePassword(opts.SuperuserPassword); err != nil {
+		if err := auth.ValidatePassword(opts.SuperuserPassword); err != nil {
 			log.Fatalln("Invalid superuser password:", err)
 		}
 
 		if err := data.Prime(db); err != nil {
 			log.Fatalln("Failed priming database:", err)
-		}
-
-		_, _, err := data.CreateSystemIdentity(db)
-		if err != nil {
-			log.Fatalln("Failed system identity setup:", err)
 		}
 	}
 
@@ -128,13 +127,8 @@ func Run(version, buildDate string, opts *Opts) {
 		log.Fatalln("Failed initializing from database:", err)
 	}
 
-	systemIdentity, err := ds.NewSystemPrincipal()
-	if err != nil {
-		log.Fatalln("Failed reading system identity:", err)
-	}
-
 	if !isPrimed {
-		passwordHash, err := hashPassword(opts.SuperuserPassword)
+		passwordHash, err := auth.HashPassword(opts.SuperuserPassword)
 		if err != nil {
 			log.Fatalln("Failed hashing superuser password:", err)
 		}
@@ -143,43 +137,23 @@ func Run(version, buildDate string, opts *Opts) {
 			log.Fatalln("Failed superuser identity setup:", err)
 		}
 
-		su, err := ds.NewPrincipal(opts.SuperuserName)
+		_, err = ds.NewPrincipal(opts.SuperuserName)
 		if err != nil {
 			log.Fatalln("Failed reading superuser principal:", err)
 		}
-
-		if err := ds.CreateSuperuserRole(su); err != nil {
-			log.Fatalln("Failed superuser role setup:", err)
-		}
 	}
 
-	// --- create proxy services ---
-	// rp := proxy.NewRProxy()
-	// rpFailch := make(chan error)
-
-	// go func() {
-	// 	log.Println()
-	// 	if err := http.ListenAndServe(proxAddress, rp); err != nil {
-	// 		rpFailch <- err
-	// 	}
-	// }()
-
 	// --- create basic auth service ---
+	defaultAz := newDefaultAz(ds)
+	var authProvider AuthProvider
+	switch opts.AuthProvider {
+	case "digest":
+		authProvider = newDigestAuthProvider(defaultAz, webAddress)
+	default: // "basic"
+		authProvider = newBasicAuthProvider(defaultAz, webAddress)
+	}
 
-	defaultAz := newDefaultAz(ds, systemIdentity)
-
-	// --- create proxy services ---
-	rp := proxy.NewRProxy()
-	rpFailch := make(chan error)
-
-	go func() {
-		log.Println()
-		if err := http.ListenAndServe(proxAddress, rp); err != nil {
-			rpFailch <- err
-		}
-	}()
-
-	// --- create front end api services ---
+	// --- create web services ---
 
 	webServeMux := http.NewServeMux()
 	webServiceImpl := web.NewService(
@@ -187,15 +161,11 @@ func Run(version, buildDate string, opts *Opts) {
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
-		opts.ScoringServiceAddress,
+		opts.ScoringServiceHost,
 		opts.YarnKerberosEnabled,
 		opts.YarnUserName,
 		opts.YarnKeytab,
 	)
-
-	// TODO add CLI args for other other providers
-	// TODO conditionally instantiate auth provider based on CLI arg
-	authProvider := newBasicAuthProvider(defaultAz, webAddress)
 
 	webServeMux.Handle("/logout", authProvider.Logout())
 	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))
@@ -210,30 +180,71 @@ func Run(version, buildDate string, opts *Opts) {
 		webServeMux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
 	}
 
-	// --- start http servers ---
+	// --- start web server ---
 
-	failch := make(chan error)
-	sigch := make(chan os.Signal)
-	signal.Notify(sigch, syscall.SIGINT, syscall.SIGTERM)
+	serverFailChan := make(chan error)
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	certFile := strings.TrimSpace(opts.WebTLSCertPath)
+	keyFile := strings.TrimSpace(opts.WebTLSKeyPath)
+	enableTLS := !(len(certFile) == 0 && len(keyFile) == 0)
 
 	go func() {
 		log.Println("Web server listening at", webAddress)
-		log.Printf("Point your web browser to http://%s/\n", webAddress)
-		if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
-			failch <- err
+		prefix := ""
+		if len(webAddress) > 1 && webAddress[:1] == ":" {
+			prefix = "localhost"
+		}
+		if enableTLS {
+			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+				serverFailChan <- err
+			}
+		} else {
+			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+				serverFailChan <- err
+			}
 		}
 	}()
 
+	// --- start reverse proxy ---
+
+	proxyHandler := authProvider.Secure(proxy.NewProxyHandler(defaultAz, ds))
+	proxyFailChan := make(chan error)
+	go func() {
+		log.Println("Cluster reverse proxy listening at", proxyAddress)
+		prefix := ""
+		if len(proxyAddress) > 1 && proxyAddress[:1] == ":" {
+			prefix = "localhost"
+		}
+		if enableTLS {
+			log.Printf("Point H2O client libraries to https://%s%s/\n", prefix, proxyAddress)
+			if err := http.ListenAndServeTLS(proxyAddress, certFile, keyFile, proxyHandler); err != nil {
+				proxyFailChan <- err
+			}
+
+		} else {
+			log.Printf("Point H2O client libraries to http://%s%s/\n", prefix, proxyAddress)
+			if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
+				proxyFailChan <- err
+			}
+		}
+	}()
+
+	// --- wait for termination ---
+
 	for {
 		select {
-		case err := <-rpFailch:
-			log.Fatalln("HTTP proxy server startup failed:", err)
-			return
-		case err := <-failch:
+		case err := <-serverFailChan:
 			log.Fatalln("HTTP server startup failed:", err)
 			return
-		case sig := <-sigch:
-			log.Println(sig)
+		case err := <-proxyFailChan:
+			log.Fatalln("Cluster reverse proxy startup failed:", err)
+			return
+		case sig := <-sigChan:
+			log.Println("Caught signal", sig)
 			log.Println("Shut down gracefully.")
 			return
 		}

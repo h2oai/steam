@@ -31,6 +31,7 @@ _testmain.go
 coverage.out
 
 # ignore list
+/steamY
 /dist/
 /var/master/www/
 /var/master/db/steam.db
@@ -39,4 +40,5 @@ coverage.out
 /var/master/assets/*.war
 /var/master/assets/*.jar
 /var/master/model
+/var/master/scripts
 

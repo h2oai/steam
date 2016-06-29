@@ -13,6 +13,13 @@ type Meta struct {
 	Value string
 }
 
+type EntityHistory struct {
+	IdentityId  int64
+	Action      string
+	Description string
+	Created     time.Time
+}
+
 type Privilege struct {
 	Type        string
 	WorkgroupId int64
@@ -20,9 +27,16 @@ type Privilege struct {
 	EntityId    int64
 }
 
+type EntityPrivilege struct {
+	Type                 string
+	WorkgroupId          int64
+	WorkgroupName        string
+	WorkgroupDescription string
+}
+
 type Permission struct {
 	Id          int64
-	Code        int64
+	Code        string
 	Description string
 }
 

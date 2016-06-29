@@ -7,7 +7,7 @@ This demo describes how to use Steam without the need for a local running instan
 - Building a simple model in Python (Optional for users who don't have an existing demo)
 - Deploying the model using Steam
 
-During this demo, three terminal windows will remain open for the Steam, Scoring, and H2O services. A fourth terminal window will be used to run H2O commands in a Python example. 
+During this demo, three terminal windows will remain open for the Steam, Scoring, and H2O services. A fourth terminal window will be used to run H2O commands in the Python or R example. 
 
 Finally, these steps were created using H2O version 3.8.2.8, and that version resides in a Downloads folder. Wherever used, this version number and path should be adjusted to match your version and path.
 
@@ -32,10 +32,17 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 
 ###Optional
 
-The following are required if you use the Python demo included in this document. 
+The following are required if you use a Python or R demo.
+
+**Python**
 
 - A dataset that will be used to generate a model. This demo uses the well-known iris.csv dataset with headers (available online), and the dataset is saved onto the desktop. 
 - Python 2.7
+
+**R**
+
+- A dataset that will be used to generate a model. 
+- Comprehensive R Archive Network (R). Available from <a href="https://cran.r-project.org/mirrors.html", target="_blank">https://cran.r-project.org/mirrors.html</a>. 
 
 ## Installing and Starting Steam, the Compilation Service, and H2O
 
@@ -78,7 +85,13 @@ You are now ready to build a model on this cluster in Python.
 
 ## Building a Model in Python (Optional)
 
->**Note**: This section can be skipped if you already have demo steps that you use in R, Python, or Flow. If you use another demo, be sure that you initialize H2O on your local cluster so that the data will be available in Steam.
+>**Notes**: This section can be skipped if you already have demo steps that you use in R, Python, or Flow. If you use another demo, be sure that you initialize H2O on your local cluster so that the data will be available in Steam. 
+ 
+ >	Additional demos for Python are available <a href="https://github.com/h2oai/h2o-3/tree/master/h2o-py/demos">here</a>.
+ 
+ > Demos for R are available <a href="https://github.com/h2oai/h2o-3/tree/master/h2o-r/demos">here</a>. 
+ 
+ > A demo of Flow can be viewed <a href="https://www.youtube.com/watch?feature=player_embedded&v=wzeuFfbW7WE">here</a>. 
 
 The steps below show how to build model using the Iris dataset and the GBM algorithm. The steps will be run using H2O in Python. Once created, the model can be deployed in Steam. 
 
