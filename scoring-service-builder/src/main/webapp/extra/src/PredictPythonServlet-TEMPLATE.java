@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
+import com.google.gson.GsonBuilder;
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.*;
 import hex.genmodel.*;
@@ -23,7 +24,7 @@ public class PredictPythonServlet extends HttpServlet {
   private static OutputStream stdin;
   private static BufferedReader reader, err_reader;
 
-  static Gson gson = new Gson();
+  private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   private static File servletPath = null;
   String[] colNames;
@@ -78,12 +79,6 @@ public class PredictPythonServlet extends HttpServlet {
       System.out.println("Python destroyed");
     }
     super.destroy();
-  }
-
-  static private String jsonModel() {
-    Gson gson = new Gson();
-    String modelJson = gson.toJson(model);
-    return modelJson;
   }
 
   private static final byte[] NewlineByteArray = "\n".getBytes();
@@ -142,7 +137,6 @@ public class PredictPythonServlet extends HttpServlet {
       if (VERBOSE) System.out.println("pr: " + pr);
 
       // assemble json result
-      Gson gson = new Gson();
       String prJson = gson.toJson(pr);
 
       response.getWriter().write(prJson);
