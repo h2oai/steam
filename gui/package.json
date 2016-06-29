@@ -37,6 +37,7 @@
     "webpack": "^1.13.1"
   },
   "scripts": {
+    "postinstall": "typings install",
     "start": "webpack --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
