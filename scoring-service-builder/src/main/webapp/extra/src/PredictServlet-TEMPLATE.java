@@ -220,9 +220,13 @@ public class PredictServlet extends HttpServlet {
     }
   }
 
+
+
   static {
     GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
     model = new EasyPredictModelWrapper(rawModel);
+
+    GenMunger munger = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
   }
 
   private File servletPath = null;
@@ -237,6 +241,8 @@ public class PredictServlet extends HttpServlet {
       e.printStackTrace();
     }
   }
+
+  public static final mungingStep = REPLACE_THIS_WITH_MUNGING_STEP_BOOLEAN;
 
   public static EasyPredictModelWrapper model;
   public static long startTime = System.currentTimeMillis();

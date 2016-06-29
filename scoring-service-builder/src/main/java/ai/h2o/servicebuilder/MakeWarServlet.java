@@ -35,6 +35,22 @@ import static ai.h2o.servicebuilder.Util.*;
 public class MakeWarServlet extends HttpServlet {
   private static boolean VERBOSE = false;
 
+
+  public interface Transform {
+    /**
+     *
+     * @param input is the original data to be transformed
+     * @return an array of
+     */
+    Object[] fit(byte[] input);
+  }
+
+  public class X implements Transform {
+    public Object[] fit(byte[] input) {
+      return null;
+    }
+  }
+
   private File servletPath = null;
 
   public void init(ServletConfig servletConfig) throws ServletException {
@@ -71,6 +87,7 @@ public class MakeWarServlet extends HttpServlet {
       List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
       String pojofile = null;
       String jarfile = null;
+      String prejarfile = null;
       String predictorClassName = null;
       for (FileItem i : items) {
         String field = i.getFieldName();
@@ -83,6 +100,10 @@ public class MakeWarServlet extends HttpServlet {
           }
           if (field.equals("jar")) {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
+          }
+          if (field.equals("prejar")) {
+            prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
         }
@@ -114,10 +135,12 @@ public class MakeWarServlet extends HttpServlet {
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
 
       // compile extra
-      runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+      List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java"),
-          "Compilation of extra failed");
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java");
+      if (!prejarfile.isEmpty())
+        cmd.add("prejarfile");
+      runCmd(tmpDir, cmd, "Compilation of extra failed");
 
       // create the war jar file
       Collection<File> filesc = FileUtils.listFilesAndDirs(webInfDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
