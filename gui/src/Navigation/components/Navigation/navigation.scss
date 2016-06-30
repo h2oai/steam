@@ -11,14 +11,14 @@
 
 .primary-navigation {
   z-index: $body-index - 2;
-}
-
-.active {
-  background: $brand-yellow;
-  a {
-    color: $brand-dark !important;
+  .active {
+    background: $brand-yellow;
+    a {
+      color: $brand-dark !important;
+    }
   }
 }
+
 
 .secondary-navigation {
   position: absolute;
@@ -26,6 +26,12 @@
   z-index: $body-index - 1;
   background: lighten($brand-dark, 20%);
   transform: translate3d(-201px, 0, 0);
+  .active {
+    background: $brand-yellow;
+    a {
+      color: $brand-dark !important;
+    }
+  }
   &.open {
     transform: translate3d(0px, 0, 0);
   }
