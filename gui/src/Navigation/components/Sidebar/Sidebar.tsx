@@ -8,7 +8,7 @@ import * as classNames from 'classnames';
 import './styles/sidebar.scss';
 
 interface Props {
-  className
+  className: any
 }
 
 interface DispatchProps {

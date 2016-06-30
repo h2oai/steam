@@ -5,6 +5,8 @@
   min-height: 100%;
   background-color: $brand-white;
   overflow: auto;
+  width: 100%;
+  z-index: $body-index;
   .content {
     padding: 45px;
     height: 100%;

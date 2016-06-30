@@ -12,13 +12,6 @@ html, body, .app-container, #app {
   display: flex;
 }
 
-.sub-navigation {
-  transition: transform .3s ease-in-out;
-  &.open {
-    transform: translate3d(-155px, 0, 0);
-  }
-}
-
 .stage {
   position: absolute;
   width: 100%;
@@ -39,71 +32,5 @@ html, body, .app-container, #app {
   &.open {
     width: calc(100% - #{$navigation-width});
     transform: translate3d($navigation-width, 0, 0);
-  }
-}
-
-.navigation-container {
-  height: 100%;
-  min-height: 100%;
-  width: $navigation-width;
-  position: absolute;
-  left: 0;
-  perspective: 10000px;
-  transition: transform .3s;
-  transform: translate3d(100%, 0, 0);
-  &.open {
-    transform: translate3d(0, 0, 0);
-  }
-
-  .project-sidebar {
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    background: $brand-dark;
-    color: $brand-yellow;
-    .item {
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid $brand-yellow;
-      height: 70px;
-      padding: 0 20px;
-      cursor: pointer;
-      &--label {
-        font-size: 2em;
-      }
-      &:hover {
-        background: $brand-yellow;
-        color: $brand-dark;
-        .avatar-container .avatar {
-          background: $brand-dark;
-        }
-      }
-    }
-    .project-sidebar-header {
-      justify-content: center;
-      flex-direction: column;
-      padding: 10px;
-      height: auto;
-      .avatar-container {
-        display: flex;
-        .avatar {
-          background: $brand-yellow;
-          height: 45px;
-          width: 45px;
-          border-radius: 50%;
-          margin: 0 5px;
-        }
-      }
-    }
-    .models {
-      border-top: 1px solid $brand-yellow;
-      height: 70px;
-      .badge {
-        margin-left: auto;
-      }
-    }
-    .transformations {
-      height: 70px;
-    }
   }
 }
