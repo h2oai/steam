@@ -102,10 +102,10 @@ function showResult(div, status, data) {
     }
     else if ("value" in data) {
         // regression result
-       result = "Value <b>" + data["value"] + "</b>";
+        result = "Value <b>" + data["value"] + "</b>";
     }
     else
-        result = "Can't parse result";
+        result = "";
 
     result += "<p><code>" + JSON.stringify(data) + "</code>";
     div.innerHTML = result;
@@ -120,7 +120,7 @@ function showUrl(pardiv, params) {
 
 function showCurl(pardiv, params) {
   // remove empty parameters returned by serialize.
-  params = params.replace(/'/g, "\\'") // quote quotes
+  params = params.replace(/'/g, "'\\''") // quote quotes -> '\''
   url = "http://" + window.location.host + "/pypredict";
   pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
 }
@@ -158,19 +158,17 @@ function runpred2(form) {
 function predResultsPost(params) {
   pardiv = document.querySelector(".curl");
   showCurl(pardiv, params);
-
   div = document.querySelector(".results");
   cmd = '/pypredict';
-    $.post(cmd, params, function(data, status) {
-      showResult(div, status, data);
-    },'json')
-      .fail(function(data, status, error) {
-        down = "<b>POST to /pypredict Failed</b>";
-        div.innerHTML = down + "<br>status " + data.status + "<br>statusText " + data.statusText;
-        stats = document.querySelector(".stats");
-        stats.innerHTML = down;
+  $.post(cmd, params, function(data, status) {
+        showResult(div, status, data);
+      },'json')
+        .fail(function(data, status, error) {
+          down = "<b>POST to /pypredict Failed</b>";
+          div.innerHTML = down + "<br>status " + status + "<br>error " + error;
+          stats = document.querySelector(".stats");
+          stats.innerHTML = down;
       });
-
 }
 
 function runpredpost(form) {

@@ -43,6 +43,8 @@ public class PredictServlet extends HttpServlet {
     }
 
     public synchronized void add(double timeMs, int n) {
+      if (n < 1)
+        return;
       count += n;
       totalTimeMs += timeMs; // n * timeMs/n
       double tt = timeMs * timeMs / n; // n * (timeMs/n)^2
