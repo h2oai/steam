@@ -381,6 +381,12 @@
 
 // main
 
+  window.clearParameters = function() {
+    var form = $('#allparams');
+    form.find('input[type="text"]').not('#queryParams').val('');
+    form.find('input[type="radio"]').prop('checked', false);
+    form.find('select').prop('selectedIndex', 0);
+  };
 
   $(document).ready(function() {
 
