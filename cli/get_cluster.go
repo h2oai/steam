@@ -14,7 +14,7 @@ cluster [clusterId]
 View detailed cluster information.
 Examples:
 
-	$ steam get cluster
+	$ steam get cluster 42
 `
 
 func getCluster(c *context) *cobra.Command {

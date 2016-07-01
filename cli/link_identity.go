@@ -9,7 +9,7 @@ import (
 
 var linkIdentityHelp = `
 identity [identityName] [role | workgroup] [entityName]
-Add an permissions entity group to an identity.
+Add a permissions entity group to an identity.
 Example:
 
 	$ steam link identity minksy role engineer

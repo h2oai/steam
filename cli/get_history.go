@@ -16,7 +16,7 @@ View history for a specified entity. Only enity types identity, role, and workgr
 Examples:
 
 	$ steam get history identity minsky
-	$ steam get histroy cluster 9
+	$ steam get history cluster 9
 `
 
 func getHistory(c *context) *cobra.Command {

@@ -10,7 +10,7 @@ import (
 var createRoleHelp = `
 role [roleName] 
 Creates a user permissions role.
-Exampes:
+Examples:
 
 	$ steam create role engineer --desc="a default engineer role"
 `

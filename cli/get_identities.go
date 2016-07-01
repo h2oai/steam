@@ -10,7 +10,7 @@ import (
 
 var getIdentitiesHelp = `
 identities
-List all identies.
+List all identities.
 Examples:
 
 	$ steam get identities --workgroup=production
