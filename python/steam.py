@@ -316,6 +316,18 @@ class RPCClient:
 		response = self.connection.call("GetScoringServices", request)
 		return [View(o) for o in response['services']]
 
+	def get_scoring_services_for_model(self, model_id, offset, limit):
+		"""
+		Returns services ([]*ScoringService)
+		"""
+		request = {
+			'model_id': model_id,
+			'offset': offset,
+			'limit': limit
+		}
+		response = self.connection.call("GetScoringServicesForModel", request)
+		return [View(o) for o in response['services']]
+
 	def delete_scoring_service(self, service_id):
 		"""
 		Returns None

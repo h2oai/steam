@@ -164,6 +164,7 @@ type Service interface {
 	StopScoringService(pz az.Principal, serviceId int64) error
 	GetScoringService(pz az.Principal, serviceId int64) (*ScoringService, error)
 	GetScoringServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
+	GetScoringServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
 	DeleteScoringService(pz az.Principal, serviceId int64) error
 	AddEngine(pz az.Principal, engineName string, enginePath string) (int64, error)
 	GetEngine(pz az.Principal, engineId int64) (*Engine, error)
@@ -389,6 +390,16 @@ type GetScoringServicesIn struct {
 }
 
 type GetScoringServicesOut struct {
+	Services []*ScoringService `json:"services"`
+}
+
+type GetScoringServicesForModelIn struct {
+	ModelId int64 `json:"model_id"`
+	Offset  int64 `json:"offset"`
+	Limit   int64 `json:"limit"`
+}
+
+type GetScoringServicesForModelOut struct {
 	Services []*ScoringService `json:"services"`
 }
 
@@ -944,6 +955,16 @@ func (this *Remote) GetScoringServices(offset int64, limit int64) ([]*ScoringSer
 	in := GetScoringServicesIn{offset, limit}
 	var out GetScoringServicesOut
 	err := this.Proc.Call("GetScoringServices", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Services, nil
+}
+
+func (this *Remote) GetScoringServicesForModel(modelId int64, offset int64, limit int64) ([]*ScoringService, error) {
+	in := GetScoringServicesForModelIn{modelId, offset, limit}
+	var out GetScoringServicesForModelOut
+	err := this.Proc.Call("GetScoringServicesForModel", &in, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -1653,6 +1674,20 @@ func (this *Impl) GetScoringServices(r *http.Request, in *GetScoringServicesIn, 
 		return azerr
 	}
 	it, err := this.Service.GetScoringServices(pz, in.Offset, in.Limit)
+	if err != nil {
+		return err
+	}
+	out.Services = it
+	return nil
+}
+
+func (this *Impl) GetScoringServicesForModel(r *http.Request, in *GetScoringServicesForModelIn, out *GetScoringServicesForModelOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	it, err := this.Service.GetScoringServicesForModel(pz, in.ModelId, in.Offset, in.Limit)
 	if err != nil {
 		return err
 	}

@@ -540,11 +540,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
+
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
 		return nil, err
 	}
 
+	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
 	r, err := h2o.GetModel(modelName)
@@ -736,6 +738,24 @@ func (s *Service) GetScoringServices(pz az.Principal, offset, limit int64) ([]*w
 	if err != nil {
 		return nil, err
 	}
+	ss := make([]*web.ScoringService, len(services))
+	for i, service := range services {
+		ss[i] = toScoringService(service)
+	}
+
+	return ss, nil
+}
+
+func (s *Service) GetScoringServicesForModel(pz az.Principal, modelId, offset, limit int64) ([]*web.ScoringService, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
+		return nil, err //FIXME format error
+	}
+
+	services, err := s.ds.ReadServicesForModelId(pz, modelId)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
 	ss := make([]*web.ScoringService, len(services))
 	for i, service := range services {
 		ss[i] = toScoringService(service)

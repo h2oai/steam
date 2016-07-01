@@ -137,6 +137,7 @@ StartScoringService(modelId int64, port int) service *ScoringService
 StopScoringService(serviceId int64)
 GetScoringService(serviceId int64) service *ScoringService
 GetScoringServices(offset int64, limit int64) services []*ScoringService
+GetScoringServicesForModel(modelId int64, offset int64, limit int64) services []*ScoringService
 DeleteScoringService(serviceId int64)
 
 AddEngine(engineName string, enginePath string) engineId int64

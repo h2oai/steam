@@ -156,6 +156,7 @@ module Proxy {
 		stopScoringService: (serviceId: number, go: (error: Error) => void) => void
 		getScoringService: (serviceId: number, go: (error: Error, service: ScoringService) => void) => void
 		getScoringServices: (offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
+		getScoringServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
 		deleteScoringService: (serviceId: number, go: (error: Error) => void) => void
 		addEngine: (engineName: string, enginePath: string, go: (error: Error, engineId: number) => void) => void
 		getEngine: (engineId: number, go: (error: Error, engine: Engine) => void) => void
@@ -381,6 +382,16 @@ module Proxy {
 	}
 
 	interface GetScoringServicesOut {
+		services: ScoringService[]
+	}
+
+	interface GetScoringServicesForModelIn {
+		model_id: number
+		offset: number
+		limit: number
+	}
+
+	interface GetScoringServicesForModelOut {
 		services: ScoringService[]
 	}
 
@@ -922,6 +933,17 @@ module Proxy {
 		}
 		Proxy.Call("GetScoringServices", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetScoringServicesOut>data).services)
+		})
+
+	}
+	export function getScoringServicesForModel(modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
+		var req: GetScoringServicesForModelIn = {
+			model_id: modelId,
+			offset: offset,
+			limit: limit
+		}
+		Proxy.Call("GetScoringServicesForModel", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetScoringServicesForModelOut>data).services)
 		})
 
 	}
