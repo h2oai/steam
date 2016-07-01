@@ -10,7 +10,7 @@ import (
 
 var deleteServiceHelp = `
 service [serviceId]
-Deletes a specified scoring service deployed on the specified port from the database.
+Deletes a specified scoring service from the database.
 Examples:
 
 	$ steam delete service 76
