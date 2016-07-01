@@ -280,7 +280,7 @@ type Datastore struct {
 	ManagePermissions map[int64]int64
 }
 
-func Init(name, username, sslmode, suname, supass string) (*Datastore, error) {
+func Create(name, username, sslmode, suname, supass string) (*Datastore, error) {
 	db, err := connect(username, name, sslmode)
 	if err != nil {
 		return nil, fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
@@ -331,6 +331,14 @@ func Init(name, username, sslmode, suname, supass string) (*Datastore, error) {
 	}
 
 	return ds, nil
+}
+
+func Destroy(name, username, sslmode string) error {
+	db, err := connect(username, name, sslmode)
+	if err != nil {
+		return fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
+	}
+	return truncate(db)
 }
 
 func connect(username, dbname, sslmode string) (*sql.DB, error) {

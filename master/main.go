@@ -96,7 +96,7 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- init storage ---
 
-	ds, err := data.Init(
+	ds, err := data.Create(
 		opts.DB.Name,
 		opts.DB.Username,
 		opts.DB.SSLMode,

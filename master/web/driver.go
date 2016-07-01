@@ -8,16 +8,16 @@ import (
 	"log"
 )
 
-type testOpts struct {
+type driverOpts struct {
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
 	ScoringServiceHost        string
-	Yarn                      testYarnOpts
-	DB                        testDBOpts
+	Yarn                      driverYarnOpts
+	DB                        driverDBOpts
 }
 
-type testDBOpts struct {
+type driverDBOpts struct {
 	Name              string
 	Username          string
 	SSLMode           string
@@ -25,19 +25,19 @@ type testDBOpts struct {
 	SuperuserPassword string
 }
 
-type testYarnOpts struct {
+type driverYarnOpts struct {
 	KerberosEnabled bool
 	Username        string
 	Keytab          string
 }
 
-func newService(opts testOpts) (web.Service, az.Directory, error) {
+func newService(opts driverOpts) (web.Service, az.Directory, error) {
 	wd, err := fs.MkWorkingDirectory(opts.WorkingDirectory)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	ds, err := data.Init(
+	ds, err := data.Create(
 		opts.DB.Name,
 		opts.DB.Username,
 		opts.DB.SSLMode,
