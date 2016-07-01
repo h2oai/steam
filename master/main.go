@@ -13,10 +13,10 @@ import (
 	"github.com/gorilla/context"
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/lib/rpc"
-	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/data"
 	"github.com/h2oai/steamY/master/proxy"
 	"github.com/h2oai/steamY/master/web"
+	srvweb "github.com/h2oai/steamY/srv/web"
 )
 
 const (
@@ -25,6 +25,20 @@ const (
 	defaultCompilationAddress  = ":8080"
 	defaultScoringServiceHost  = ""
 )
+
+type DBOpts struct {
+	Name              string
+	Username          string
+	SSLMode           string
+	SuperuserName     string
+	SuperuserPassword string
+}
+
+type YarnOpts struct {
+	KerberosEnabled bool
+	Username        string
+	Keytab          string
+}
 
 type Opts struct {
 	WebAddress                string
@@ -36,14 +50,8 @@ type Opts struct {
 	CompilationServiceAddress string
 	ScoringServiceHost        string
 	EnableProfiler            bool
-	YarnKerberosEnabled       bool
-	YarnUserName              string
-	YarnKeytab                string
-	DBName                    string
-	DBUserName                string
-	DBSSLMode                 string
-	SuperuserName             string
-	SuperuserPassword         string
+	Yarn                      YarnOpts
+	DB                        DBOpts
 }
 
 var DefaultOpts = &Opts{
@@ -56,14 +64,8 @@ var DefaultOpts = &Opts{
 	defaultCompilationAddress,
 	defaultScoringServiceHost,
 	false,
-	false,
-	"",
-	"",
-	"steam",
-	"steam",
-	"disable",
-	"",
-	"",
+	YarnOpts{false, "", ""},
+	DBOpts{"steam", "steam", "disable", "", ""},
 }
 
 type AuthProvider interface {
@@ -71,7 +73,7 @@ type AuthProvider interface {
 	Logout() http.Handler
 }
 
-func Run(version, buildDate string, opts *Opts) {
+func Run(version, buildDate string, opts Opts) {
 	log.Printf("steam v%s build %s\n", version, buildDate)
 
 	// --- external ip for base and proxy ---
@@ -94,57 +96,20 @@ func Run(version, buildDate string, opts *Opts) {
 
 	// --- init storage ---
 
-	db, err := data.Connect(opts.DBUserName, opts.DBName, opts.DBSSLMode)
+	ds, err := data.Init(
+		opts.DB.Name,
+		opts.DB.Username,
+		opts.DB.SSLMode,
+		opts.DB.SuperuserName,
+		opts.DB.SuperuserPassword,
+	)
+
 	if err != nil {
-		log.Fatalf("Failed connecting to database %s as user %s (SSL=%s): %s\n", opts.DBName, opts.DBUserName, opts.DBSSLMode, err)
-	}
-
-	isPrimed, err := data.IsPrimed(db)
-	if err != nil {
-		log.Fatalln("Failed database version check:", err)
-	}
-
-	if !isPrimed {
-		if opts.SuperuserName == "" || opts.SuperuserPassword == "" {
-			log.Fatalln("Starting Steam for the first time requires both --superuser-name and --superuser-password arguments to \"steam serve master\".")
-		}
-
-		if err := auth.ValidateUsername(opts.SuperuserName); err != nil {
-			log.Fatalln("Invalid superuser username:", err)
-		}
-
-		if err := auth.ValidatePassword(opts.SuperuserPassword); err != nil {
-			log.Fatalln("Invalid superuser password:", err)
-		}
-
-		if err := data.Prime(db); err != nil {
-			log.Fatalln("Failed priming database:", err)
-		}
-	}
-
-	ds, err := data.NewDatastore(db)
-	if err != nil {
-		log.Fatalln("Failed initializing from database:", err)
-	}
-
-	if !isPrimed {
-		passwordHash, err := auth.HashPassword(opts.SuperuserPassword)
-		if err != nil {
-			log.Fatalln("Failed hashing superuser password:", err)
-		}
-
-		if _, _, err := ds.CreateSuperuser(opts.SuperuserName, passwordHash); err != nil {
-			log.Fatalln("Failed superuser identity setup:", err)
-		}
-
-		_, err = ds.NewPrincipal(opts.SuperuserName)
-		if err != nil {
-			log.Fatalln("Failed reading superuser principal:", err)
-		}
+		log.Fatalln(err)
 	}
 
 	// --- create basic auth service ---
-	defaultAz := newDefaultAz(ds)
+	defaultAz := NewDefaultAz(ds)
 	var authProvider AuthProvider
 	switch opts.AuthProvider {
 	case "digest":
@@ -156,16 +121,16 @@ func Run(version, buildDate string, opts *Opts) {
 	// --- create web services ---
 
 	webServeMux := http.NewServeMux()
-	webServiceImpl := web.NewService(
-		defaultAz,
+	webService := web.NewService(
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
 		opts.ScoringServiceHost,
-		opts.YarnKerberosEnabled,
-		opts.YarnUserName,
-		opts.YarnKeytab,
+		opts.Yarn.KerberosEnabled,
+		opts.Yarn.Username,
+		opts.Yarn.Keytab,
 	)
+	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 
 	webServeMux.Handle("/logout", authProvider.Logout())
 	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))

@@ -2,16 +2,8 @@ package web
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"sort"
-	"strconv"
-	// "sync"
-	"time"
-
 	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
-	// "github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/auth"
@@ -20,6 +12,11 @@ import (
 	"github.com/h2oai/steamY/srv/compiler" // FIXME rename comp to compiler
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
+	"log"
+	"os"
+	"sort"
+	"strconv"
+	"time"
 )
 
 type Service struct {
@@ -32,27 +29,24 @@ type Service struct {
 	keytab                    string
 }
 
+func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *Service {
+	return &Service{
+		workingDir,
+		ds,
+		compilationServiceAddress,
+		scoringServiceAddress,
+		kerberos,
+		username,
+		keytab,
+	}
+}
+
 func toTimestamp(t time.Time) int64 {
 	return t.UTC().Unix()
 }
 
 func now() int64 {
 	return toTimestamp(time.Now())
-}
-
-func NewService(az az.Az, workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
-	return &web.Impl{
-		&Service{
-			workingDir,
-			ds,
-			compilationServiceAddress,
-			scoringServiceAddress,
-			kerberos,
-			username,
-			keytab,
-		},
-		az,
-	}
 }
 
 func (s *Service) Ping(pz az.Principal, status bool) (bool, error) {

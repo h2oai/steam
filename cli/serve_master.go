@@ -37,7 +37,7 @@ func serveMaster(c *context) *cobra.Command {
 	opts := master.DefaultOpts
 
 	cmd := newCmd(c, serveMasterHelp, func(c *context, args []string) {
-		master.Run(c.version, c.buildDate, &master.Opts{
+		master.Run(c.version, c.buildDate, master.Opts{
 			webAddress,
 			webTLSCertPath,
 			webTLSKeyPath,
@@ -47,14 +47,18 @@ func serveMaster(c *context) *cobra.Command {
 			compilationServiceAddress,
 			scoringServiceHost,
 			enableProfiler,
-			yarnEnableKerberos,
-			yarnUserName,
-			yarnKeytab,
-			dbName,
-			dbUserName,
-			dbSSLMode,
-			superuserName,
-			superuserPassword,
+			master.YarnOpts{
+				yarnEnableKerberos,
+				yarnUserName,
+				yarnKeytab,
+			},
+			master.DBOpts{
+				dbName,
+				dbUserName,
+				dbSSLMode,
+				superuserName,
+				superuserPassword,
+			},
 		})
 	})
 
@@ -67,14 +71,14 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
 	cmd.Flags().StringVar(&scoringServiceHost, "scoring-service-address", opts.ScoringServiceHost, "Address to start scoring services on (\"<ip>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
-	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.YarnKerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
-	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.YarnUserName, "Username to enable Kerberos")
-	cmd.Flags().StringVar(&yarnKeytab, "yarn-keytab", opts.YarnKeytab, "Keytab file to be used with Kerberos authentication")
-	cmd.Flags().StringVar(&dbName, "db-name", opts.DBName, "Database name to use for application data storage")
-	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DBUserName, "Database username to connect as")
-	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DBSSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
-	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.SuperuserName, "Set superuser username (required for first-time-use only)")
-	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.SuperuserPassword, "Set superuser password (required for first-time-use only)")
+	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
+	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.Yarn.Username, "Username to enable Kerberos")
+	cmd.Flags().StringVar(&yarnKeytab, "yarn-keytab", opts.Yarn.Keytab, "Keytab file to be used with Kerberos authentication")
+	cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Name, "Database name to use for application data storage")
+	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Username, "Database username to connect as")
+	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DB.SuperuserName, "Set superuser username (required for first-time-use only)")
+	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DB.SuperuserPassword, "Set superuser password (required for first-time-use only)")
 
 	return cmd
 

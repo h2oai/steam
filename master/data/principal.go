@@ -2,46 +2,9 @@ package data
 
 import (
 	"fmt"
-	"github.com/h2oai/steamY/master/az"
 )
 
 // --- Datastore-backed Principal Impl ---
-
-func (ds *Datastore) NewPrincipal(name string) (az.Principal, error) {
-	identity, err := ds.readIdentityAndPassword(name)
-	if err != nil {
-		return nil, err
-	}
-
-	if identity == nil {
-		return nil, nil
-	}
-
-	roleNames, err := ds.readRoleNamesForIdentity(identity.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	isSuperuser := false
-	for _, roleName := range roleNames {
-		if roleName == SuperuserRoleName {
-			isSuperuser = true
-			break
-		}
-	}
-
-	permissionIds, err := ds.readPermissionsForIdentity(identity.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	permissions := make(map[int64]bool)
-	for _, permissionId := range permissionIds {
-		permissions[permissionId] = true
-	}
-
-	return &Principal{ds, identity, permissions, isSuperuser}, nil
-}
 
 type Principal struct {
 	ds          *Datastore
