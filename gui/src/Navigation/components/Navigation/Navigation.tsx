@@ -7,6 +7,7 @@ import * as classNames from 'classnames';
 import { Link, withRouter } from 'react-router';
 import { Sidebar } from '../Sidebar/Sidebar';
 import './navigation.scss';
+import * as logo from '../../../../assets/h2o-home.png';
 
 interface Props {
   router: any
@@ -98,10 +99,10 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
             <div className="navigation">
               <header>
                 <div className="logo-container">
-                  <div className="logo"></div>
+                  <div className="logo"><img src={logo}></img></div>
                 </div>
               </header>
-              <ul className="nav-list">
+              <ul className={classNames('nav-list', {open: this.state.isOpen})}>
                 {Object.keys(this.sitemap).map((route: string, i: number) => {
                     return (
                       <li key={i} className={classNames('nav-list--item', {active: this.getPath() === route && !this.sitemap[route].childRoutes})} onMouseOver={this.openSubmenu}>
@@ -119,13 +120,13 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
               <header>
               </header>
               <ul className="nav-list">
-                {this.sitemap[this.getPath()].childRoutes.map((route, i: number) => {
+                {this.sitemap[this.getPath()] ? this.sitemap[this.getPath()].childRoutes.map((route, i: number) => {
                   return (
                     <li key={i} className={classNames('nav-list--item', {active: this.getPath() === route.path})}>
                       <Link to={route.path}>{route.label}</Link>
                     </li>
                   );
-                })}
+                }) : null}
               </ul>
             </div>
           </nav>

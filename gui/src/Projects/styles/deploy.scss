@@ -1,0 +1,38 @@
+@import '../../variables.scss';
+
+.deploy-modal {
+  height: 50%;
+  width: 50%;
+  background: $brand-white;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  .close-button {
+    float: right;
+    background: transparent;
+    color: $brand-blue;
+    font-size: 1.5em;
+    border: none;
+    &:focus {
+      outline: none;
+    }
+    &:hover {
+      color: $brand-dark;
+    }
+  }
+  header {
+    font-size: 2em;
+    text-align: center;
+    padding: 10px;
+  }
+  section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+  }
+}

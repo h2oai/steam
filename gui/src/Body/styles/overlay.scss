@@ -1,0 +1,16 @@
+@import '../../variables.scss';
+
+.overlay-container.open {
+  height: 100%;
+  width: 100%;
+  background: rgba($brand-dark, .5);
+  position: absolute;
+  z-index: $body-index + 1;
+  .overlay {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

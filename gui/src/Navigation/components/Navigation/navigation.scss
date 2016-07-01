@@ -120,11 +120,15 @@
       justify-content: center;
       align-items: center;
       .logo {
-        height: $navigation-icon-size * .5;
-        width: $navigation-icon-size * .5;
+        height: 26.5px;
+        width: 26.5px;
         border-radius: 50%;
         background: $brand-yellow;
         margin-right: 5px;
+        img {
+          margin-left: 2px;
+          width: 36.5px;
+        }
       }
     }
   }
@@ -135,6 +139,12 @@
     font-size: 1.4em;
     letter-spacing: 0.2em;
     font-weight: 800;
+    height: 100%;
+    margin-bottom: 0;
+    transition: background 0.3s linear;
+    &.open {
+      background: lighten($brand-dark, 20%);
+    }
     li {
       padding: 5px 0;
       display: flex;
@@ -151,9 +161,6 @@
         flex-basis: 90%;
         text-decoration: none;
         color: $brand-yellow;
-        //&:visited {
-        //  color: $brand-yellow;
-        //}
       }
     }
   }

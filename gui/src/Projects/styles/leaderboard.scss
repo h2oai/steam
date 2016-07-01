@@ -32,6 +32,30 @@
         display: flex;
         flex-direction: column;
         justify-content: space-around;
+        a {
+          color: $brand-white;
+          &:visited {
+            color: $brand-white;
+          }
+          &:hover {
+            text-decoration: none;
+          }
+        }
+        .action {
+          border-radius: 10px;
+          background: $brand-blue;
+          color: $brand-white;
+          padding: 0 15px;
+          text-align: center;
+          cursor: pointer;
+          display: flex;
+          &:hover {
+            background: darken($brand-blue, 10%);
+          }
+          .action-label {
+            flex-basis: 90%;
+          }
+        }
       }
       &:first-child {
         border-top: 1px dashed $brand-dark;
