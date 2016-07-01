@@ -201,9 +201,9 @@ func Parse(idl string) (*Interface, error) {
 	}
 	collect()
 
-	// if we have funcs, import net/http for server stubs
+	// if we have funcs, import log and net/http for server stubs
 	if len(funcs) > 0 {
-		imports = append(imports, "net/http")
+		imports = append(imports, "log", "net/http")
 	}
 
 	return &Interface{pkg, imports, svc, aliases, consts, structs, funcs}, nil

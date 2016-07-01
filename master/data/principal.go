@@ -136,3 +136,7 @@ func (pz *Principal) CheckEdit(entityTypeId, entityId int64) error {
 func (pz *Principal) CheckView(entityTypeId, entityId int64) error {
 	return pz.checkPrivilege(entityTypeId, entityId, CanView)
 }
+
+func (pz *Principal) String() string {
+	return pz.Name()
+}

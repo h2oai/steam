@@ -7,6 +7,7 @@ package web
 
 import (
 	"github.com/h2oai/steamY/master/az"
+	"log"
 	"net/http"
 )
 
@@ -1386,6 +1387,7 @@ func (this *Impl) Ping(r *http.Request, in *PingIn, out *PingOut) error {
 	}
 	it, err := this.Service.Ping(pz, in.Status)
 	if err != nil {
+		log.Printf("%s Failed to Ping: %v", pz, err)
 		return err
 	}
 	out.Status = it
@@ -1400,6 +1402,7 @@ func (this *Impl) RegisterCluster(r *http.Request, in *RegisterClusterIn, out *R
 	}
 	it, err := this.Service.RegisterCluster(pz, in.Address)
 	if err != nil {
+		log.Printf("%s Failed to RegisterCluster: %v", pz, err)
 		return err
 	}
 	out.ClusterId = it
@@ -1414,6 +1417,7 @@ func (this *Impl) UnregisterCluster(r *http.Request, in *UnregisterClusterIn, ou
 	}
 	err := this.Service.UnregisterCluster(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to UnregisterCluster: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1427,6 +1431,7 @@ func (this *Impl) StartYarnCluster(r *http.Request, in *StartYarnClusterIn, out 
 	}
 	it, err := this.Service.StartYarnCluster(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Username)
 	if err != nil {
+		log.Printf("%s Failed to StartYarnCluster: %v", pz, err)
 		return err
 	}
 	out.ClusterId = it
@@ -1441,6 +1446,7 @@ func (this *Impl) StopYarnCluster(r *http.Request, in *StopYarnClusterIn, out *S
 	}
 	err := this.Service.StopYarnCluster(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to StopYarnCluster: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1454,6 +1460,7 @@ func (this *Impl) GetCluster(r *http.Request, in *GetClusterIn, out *GetClusterO
 	}
 	it, err := this.Service.GetCluster(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to GetCluster: %v", pz, err)
 		return err
 	}
 	out.Cluster = it
@@ -1468,6 +1475,7 @@ func (this *Impl) GetYarnCluster(r *http.Request, in *GetYarnClusterIn, out *Get
 	}
 	it, err := this.Service.GetYarnCluster(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to GetYarnCluster: %v", pz, err)
 		return err
 	}
 	out.Cluster = it
@@ -1482,6 +1490,7 @@ func (this *Impl) GetClusters(r *http.Request, in *GetClustersIn, out *GetCluste
 	}
 	it, err := this.Service.GetClusters(pz, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetClusters: %v", pz, err)
 		return err
 	}
 	out.Clusters = it
@@ -1496,6 +1505,7 @@ func (this *Impl) GetClusterStatus(r *http.Request, in *GetClusterStatusIn, out 
 	}
 	it, err := this.Service.GetClusterStatus(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to GetClusterStatus: %v", pz, err)
 		return err
 	}
 	out.ClusterStatus = it
@@ -1510,6 +1520,7 @@ func (this *Impl) DeleteCluster(r *http.Request, in *DeleteClusterIn, out *Delet
 	}
 	err := this.Service.DeleteCluster(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to DeleteCluster: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1523,6 +1534,7 @@ func (this *Impl) GetJob(r *http.Request, in *GetJobIn, out *GetJobOut) error {
 	}
 	it, err := this.Service.GetJob(pz, in.ClusterId, in.JobName)
 	if err != nil {
+		log.Printf("%s Failed to GetJob: %v", pz, err)
 		return err
 	}
 	out.Job = it
@@ -1537,6 +1549,7 @@ func (this *Impl) GetJobs(r *http.Request, in *GetJobsIn, out *GetJobsOut) error
 	}
 	it, err := this.Service.GetJobs(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to GetJobs: %v", pz, err)
 		return err
 	}
 	out.Jobs = it
@@ -1551,6 +1564,7 @@ func (this *Impl) BuildModel(r *http.Request, in *BuildModelIn, out *BuildModelO
 	}
 	it, err := this.Service.BuildModel(pz, in.ClusterId, in.Dataset, in.TargetName, in.MaxRunTime)
 	if err != nil {
+		log.Printf("%s Failed to BuildModel: %v", pz, err)
 		return err
 	}
 	out.Model = it
@@ -1565,6 +1579,7 @@ func (this *Impl) GetModel(r *http.Request, in *GetModelIn, out *GetModelOut) er
 	}
 	it, err := this.Service.GetModel(pz, in.ModelId)
 	if err != nil {
+		log.Printf("%s Failed to GetModel: %v", pz, err)
 		return err
 	}
 	out.Model = it
@@ -1579,6 +1594,7 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
 	}
 	it, err := this.Service.GetModels(pz, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetModels: %v", pz, err)
 		return err
 	}
 	out.Models = it
@@ -1593,6 +1609,7 @@ func (this *Impl) GetClusterModels(r *http.Request, in *GetClusterModelsIn, out 
 	}
 	it, err := this.Service.GetClusterModels(pz, in.ClusterId)
 	if err != nil {
+		log.Printf("%s Failed to GetClusterModels: %v", pz, err)
 		return err
 	}
 	out.Models = it
@@ -1607,6 +1624,7 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 	}
 	it, err := this.Service.ImportModelFromCluster(pz, in.ClusterId, in.ModelName)
 	if err != nil {
+		log.Printf("%s Failed to ImportModelFromCluster: %v", pz, err)
 		return err
 	}
 	out.Model = it
@@ -1621,6 +1639,7 @@ func (this *Impl) DeleteModel(r *http.Request, in *DeleteModelIn, out *DeleteMod
 	}
 	err := this.Service.DeleteModel(pz, in.ModelId)
 	if err != nil {
+		log.Printf("%s Failed to DeleteModel: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1634,6 +1653,7 @@ func (this *Impl) StartScoringService(r *http.Request, in *StartScoringServiceIn
 	}
 	it, err := this.Service.StartScoringService(pz, in.ModelId, in.Port)
 	if err != nil {
+		log.Printf("%s Failed to StartScoringService: %v", pz, err)
 		return err
 	}
 	out.Service = it
@@ -1648,6 +1668,7 @@ func (this *Impl) StopScoringService(r *http.Request, in *StopScoringServiceIn, 
 	}
 	err := this.Service.StopScoringService(pz, in.ServiceId)
 	if err != nil {
+		log.Printf("%s Failed to StopScoringService: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1661,6 +1682,7 @@ func (this *Impl) GetScoringService(r *http.Request, in *GetScoringServiceIn, ou
 	}
 	it, err := this.Service.GetScoringService(pz, in.ServiceId)
 	if err != nil {
+		log.Printf("%s Failed to GetScoringService: %v", pz, err)
 		return err
 	}
 	out.Service = it
@@ -1675,6 +1697,7 @@ func (this *Impl) GetScoringServices(r *http.Request, in *GetScoringServicesIn, 
 	}
 	it, err := this.Service.GetScoringServices(pz, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetScoringServices: %v", pz, err)
 		return err
 	}
 	out.Services = it
@@ -1689,6 +1712,7 @@ func (this *Impl) GetScoringServicesForModel(r *http.Request, in *GetScoringServ
 	}
 	it, err := this.Service.GetScoringServicesForModel(pz, in.ModelId, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetScoringServicesForModel: %v", pz, err)
 		return err
 	}
 	out.Services = it
@@ -1703,6 +1727,7 @@ func (this *Impl) DeleteScoringService(r *http.Request, in *DeleteScoringService
 	}
 	err := this.Service.DeleteScoringService(pz, in.ServiceId)
 	if err != nil {
+		log.Printf("%s Failed to DeleteScoringService: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1716,6 +1741,7 @@ func (this *Impl) AddEngine(r *http.Request, in *AddEngineIn, out *AddEngineOut)
 	}
 	it, err := this.Service.AddEngine(pz, in.EngineName, in.EnginePath)
 	if err != nil {
+		log.Printf("%s Failed to AddEngine: %v", pz, err)
 		return err
 	}
 	out.EngineId = it
@@ -1730,6 +1756,7 @@ func (this *Impl) GetEngine(r *http.Request, in *GetEngineIn, out *GetEngineOut)
 	}
 	it, err := this.Service.GetEngine(pz, in.EngineId)
 	if err != nil {
+		log.Printf("%s Failed to GetEngine: %v", pz, err)
 		return err
 	}
 	out.Engine = it
@@ -1744,6 +1771,7 @@ func (this *Impl) GetEngines(r *http.Request, in *GetEnginesIn, out *GetEnginesO
 	}
 	it, err := this.Service.GetEngines(pz)
 	if err != nil {
+		log.Printf("%s Failed to GetEngines: %v", pz, err)
 		return err
 	}
 	out.Engines = it
@@ -1758,6 +1786,7 @@ func (this *Impl) DeleteEngine(r *http.Request, in *DeleteEngineIn, out *DeleteE
 	}
 	err := this.Service.DeleteEngine(pz, in.EngineId)
 	if err != nil {
+		log.Printf("%s Failed to DeleteEngine: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1771,6 +1800,7 @@ func (this *Impl) GetSupportedEntityTypes(r *http.Request, in *GetSupportedEntit
 	}
 	it, err := this.Service.GetSupportedEntityTypes(pz)
 	if err != nil {
+		log.Printf("%s Failed to GetSupportedEntityTypes: %v", pz, err)
 		return err
 	}
 	out.EntityTypes = it
@@ -1785,6 +1815,7 @@ func (this *Impl) GetSupportedPermissions(r *http.Request, in *GetSupportedPermi
 	}
 	it, err := this.Service.GetSupportedPermissions(pz)
 	if err != nil {
+		log.Printf("%s Failed to GetSupportedPermissions: %v", pz, err)
 		return err
 	}
 	out.Permissions = it
@@ -1799,6 +1830,7 @@ func (this *Impl) GetSupportedClusterTypes(r *http.Request, in *GetSupportedClus
 	}
 	it, err := this.Service.GetSupportedClusterTypes(pz)
 	if err != nil {
+		log.Printf("%s Failed to GetSupportedClusterTypes: %v", pz, err)
 		return err
 	}
 	out.ClusterTypes = it
@@ -1813,6 +1845,7 @@ func (this *Impl) GetPermissionsForRole(r *http.Request, in *GetPermissionsForRo
 	}
 	it, err := this.Service.GetPermissionsForRole(pz, in.RoleId)
 	if err != nil {
+		log.Printf("%s Failed to GetPermissionsForRole: %v", pz, err)
 		return err
 	}
 	out.Permissions = it
@@ -1827,6 +1860,7 @@ func (this *Impl) GetPermissionsForIdentity(r *http.Request, in *GetPermissionsF
 	}
 	it, err := this.Service.GetPermissionsForIdentity(pz, in.IdentityId)
 	if err != nil {
+		log.Printf("%s Failed to GetPermissionsForIdentity: %v", pz, err)
 		return err
 	}
 	out.Permissions = it
@@ -1841,6 +1875,7 @@ func (this *Impl) CreateRole(r *http.Request, in *CreateRoleIn, out *CreateRoleO
 	}
 	it, err := this.Service.CreateRole(pz, in.Name, in.Description)
 	if err != nil {
+		log.Printf("%s Failed to CreateRole: %v", pz, err)
 		return err
 	}
 	out.RoleId = it
@@ -1855,6 +1890,7 @@ func (this *Impl) GetRoles(r *http.Request, in *GetRolesIn, out *GetRolesOut) er
 	}
 	it, err := this.Service.GetRoles(pz, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetRoles: %v", pz, err)
 		return err
 	}
 	out.Roles = it
@@ -1869,6 +1905,7 @@ func (this *Impl) GetRolesForIdentity(r *http.Request, in *GetRolesForIdentityIn
 	}
 	it, err := this.Service.GetRolesForIdentity(pz, in.IdentityId)
 	if err != nil {
+		log.Printf("%s Failed to GetRolesForIdentity: %v", pz, err)
 		return err
 	}
 	out.Roles = it
@@ -1883,6 +1920,7 @@ func (this *Impl) GetRole(r *http.Request, in *GetRoleIn, out *GetRoleOut) error
 	}
 	it, err := this.Service.GetRole(pz, in.RoleId)
 	if err != nil {
+		log.Printf("%s Failed to GetRole: %v", pz, err)
 		return err
 	}
 	out.Role = it
@@ -1897,6 +1935,7 @@ func (this *Impl) GetRoleByName(r *http.Request, in *GetRoleByNameIn, out *GetRo
 	}
 	it, err := this.Service.GetRoleByName(pz, in.Name)
 	if err != nil {
+		log.Printf("%s Failed to GetRoleByName: %v", pz, err)
 		return err
 	}
 	out.Role = it
@@ -1911,6 +1950,7 @@ func (this *Impl) UpdateRole(r *http.Request, in *UpdateRoleIn, out *UpdateRoleO
 	}
 	err := this.Service.UpdateRole(pz, in.RoleId, in.Name, in.Description)
 	if err != nil {
+		log.Printf("%s Failed to UpdateRole: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1924,6 +1964,7 @@ func (this *Impl) LinkRoleAndPermissions(r *http.Request, in *LinkRoleAndPermiss
 	}
 	err := this.Service.LinkRoleAndPermissions(pz, in.RoleId, in.PermissionIds)
 	if err != nil {
+		log.Printf("%s Failed to LinkRoleAndPermissions: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1937,6 +1978,7 @@ func (this *Impl) DeleteRole(r *http.Request, in *DeleteRoleIn, out *DeleteRoleO
 	}
 	err := this.Service.DeleteRole(pz, in.RoleId)
 	if err != nil {
+		log.Printf("%s Failed to DeleteRole: %v", pz, err)
 		return err
 	}
 	return nil
@@ -1950,6 +1992,7 @@ func (this *Impl) CreateWorkgroup(r *http.Request, in *CreateWorkgroupIn, out *C
 	}
 	it, err := this.Service.CreateWorkgroup(pz, in.Name, in.Description)
 	if err != nil {
+		log.Printf("%s Failed to CreateWorkgroup: %v", pz, err)
 		return err
 	}
 	out.WorkgroupId = it
@@ -1964,6 +2007,7 @@ func (this *Impl) GetWorkgroups(r *http.Request, in *GetWorkgroupsIn, out *GetWo
 	}
 	it, err := this.Service.GetWorkgroups(pz, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetWorkgroups: %v", pz, err)
 		return err
 	}
 	out.Workgroups = it
@@ -1978,6 +2022,7 @@ func (this *Impl) GetWorkgroupsForIdentity(r *http.Request, in *GetWorkgroupsFor
 	}
 	it, err := this.Service.GetWorkgroupsForIdentity(pz, in.IdentityId)
 	if err != nil {
+		log.Printf("%s Failed to GetWorkgroupsForIdentity: %v", pz, err)
 		return err
 	}
 	out.Workgroups = it
@@ -1992,6 +2037,7 @@ func (this *Impl) GetWorkgroup(r *http.Request, in *GetWorkgroupIn, out *GetWork
 	}
 	it, err := this.Service.GetWorkgroup(pz, in.WorkgroupId)
 	if err != nil {
+		log.Printf("%s Failed to GetWorkgroup: %v", pz, err)
 		return err
 	}
 	out.Workgroup = it
@@ -2006,6 +2052,7 @@ func (this *Impl) GetWorkgroupByName(r *http.Request, in *GetWorkgroupByNameIn, 
 	}
 	it, err := this.Service.GetWorkgroupByName(pz, in.Name)
 	if err != nil {
+		log.Printf("%s Failed to GetWorkgroupByName: %v", pz, err)
 		return err
 	}
 	out.Workgroup = it
@@ -2020,6 +2067,7 @@ func (this *Impl) UpdateWorkgroup(r *http.Request, in *UpdateWorkgroupIn, out *U
 	}
 	err := this.Service.UpdateWorkgroup(pz, in.WorkgroupId, in.Name, in.Description)
 	if err != nil {
+		log.Printf("%s Failed to UpdateWorkgroup: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2033,6 +2081,7 @@ func (this *Impl) DeleteWorkgroup(r *http.Request, in *DeleteWorkgroupIn, out *D
 	}
 	err := this.Service.DeleteWorkgroup(pz, in.WorkgroupId)
 	if err != nil {
+		log.Printf("%s Failed to DeleteWorkgroup: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2046,6 +2095,7 @@ func (this *Impl) CreateIdentity(r *http.Request, in *CreateIdentityIn, out *Cre
 	}
 	it, err := this.Service.CreateIdentity(pz, in.Name, in.Password)
 	if err != nil {
+		log.Printf("%s Failed to CreateIdentity: %v", pz, err)
 		return err
 	}
 	out.IdentityId = it
@@ -2060,6 +2110,7 @@ func (this *Impl) GetIdentities(r *http.Request, in *GetIdentitiesIn, out *GetId
 	}
 	it, err := this.Service.GetIdentities(pz, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetIdentities: %v", pz, err)
 		return err
 	}
 	out.Identities = it
@@ -2074,6 +2125,7 @@ func (this *Impl) GetIdentitiesForWorkgroup(r *http.Request, in *GetIdentitiesFo
 	}
 	it, err := this.Service.GetIdentitiesForWorkgroup(pz, in.WorkgroupId)
 	if err != nil {
+		log.Printf("%s Failed to GetIdentitiesForWorkgroup: %v", pz, err)
 		return err
 	}
 	out.Identities = it
@@ -2088,6 +2140,7 @@ func (this *Impl) GetIdentititesForRole(r *http.Request, in *GetIdentititesForRo
 	}
 	it, err := this.Service.GetIdentititesForRole(pz, in.RoleId)
 	if err != nil {
+		log.Printf("%s Failed to GetIdentititesForRole: %v", pz, err)
 		return err
 	}
 	out.Identities = it
@@ -2102,6 +2155,7 @@ func (this *Impl) GetIdentity(r *http.Request, in *GetIdentityIn, out *GetIdenti
 	}
 	it, err := this.Service.GetIdentity(pz, in.IdentityId)
 	if err != nil {
+		log.Printf("%s Failed to GetIdentity: %v", pz, err)
 		return err
 	}
 	out.Identity = it
@@ -2116,6 +2170,7 @@ func (this *Impl) GetIdentityByName(r *http.Request, in *GetIdentityByNameIn, ou
 	}
 	it, err := this.Service.GetIdentityByName(pz, in.Name)
 	if err != nil {
+		log.Printf("%s Failed to GetIdentityByName: %v", pz, err)
 		return err
 	}
 	out.Identity = it
@@ -2130,6 +2185,7 @@ func (this *Impl) LinkIdentityAndWorkgroup(r *http.Request, in *LinkIdentityAndW
 	}
 	err := this.Service.LinkIdentityAndWorkgroup(pz, in.IdentityId, in.WorkgroupId)
 	if err != nil {
+		log.Printf("%s Failed to LinkIdentityAndWorkgroup: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2143,6 +2199,7 @@ func (this *Impl) UnlinkIdentityAndWorkgroup(r *http.Request, in *UnlinkIdentity
 	}
 	err := this.Service.UnlinkIdentityAndWorkgroup(pz, in.IdentityId, in.WorkgroupId)
 	if err != nil {
+		log.Printf("%s Failed to UnlinkIdentityAndWorkgroup: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2156,6 +2213,7 @@ func (this *Impl) LinkIdentityAndRole(r *http.Request, in *LinkIdentityAndRoleIn
 	}
 	err := this.Service.LinkIdentityAndRole(pz, in.IdentityId, in.RoleId)
 	if err != nil {
+		log.Printf("%s Failed to LinkIdentityAndRole: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2169,6 +2227,7 @@ func (this *Impl) UnlinkIdentityAndRole(r *http.Request, in *UnlinkIdentityAndRo
 	}
 	err := this.Service.UnlinkIdentityAndRole(pz, in.IdentityId, in.RoleId)
 	if err != nil {
+		log.Printf("%s Failed to UnlinkIdentityAndRole: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2182,6 +2241,7 @@ func (this *Impl) DeactivateIdentity(r *http.Request, in *DeactivateIdentityIn, 
 	}
 	err := this.Service.DeactivateIdentity(pz, in.IdentityId)
 	if err != nil {
+		log.Printf("%s Failed to DeactivateIdentity: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2195,6 +2255,7 @@ func (this *Impl) ShareEntity(r *http.Request, in *ShareEntityIn, out *ShareEnti
 	}
 	err := this.Service.ShareEntity(pz, in.Kind, in.WorkgroupId, in.EntityTypeId, in.EntityId)
 	if err != nil {
+		log.Printf("%s Failed to ShareEntity: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2208,6 +2269,7 @@ func (this *Impl) GetEntityPrivileges(r *http.Request, in *GetEntityPrivilegesIn
 	}
 	it, err := this.Service.GetEntityPrivileges(pz, in.EntityTypeId, in.EntityId)
 	if err != nil {
+		log.Printf("%s Failed to GetEntityPrivileges: %v", pz, err)
 		return err
 	}
 	out.Privileges = it
@@ -2222,6 +2284,7 @@ func (this *Impl) UnshareEntity(r *http.Request, in *UnshareEntityIn, out *Unsha
 	}
 	err := this.Service.UnshareEntity(pz, in.Kind, in.WorkgroupId, in.EntityTypeId, in.EntityId)
 	if err != nil {
+		log.Printf("%s Failed to UnshareEntity: %v", pz, err)
 		return err
 	}
 	return nil
@@ -2235,6 +2298,7 @@ func (this *Impl) GetEntityHistory(r *http.Request, in *GetEntityHistoryIn, out 
 	}
 	it, err := this.Service.GetEntityHistory(pz, in.EntityTypeId, in.EntityId, in.Offset, in.Limit)
 	if err != nil {
+		log.Printf("%s Failed to GetEntityHistory: %v", pz, err)
 		return err
 	}
 	out.History = it
