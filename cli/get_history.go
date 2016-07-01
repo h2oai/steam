@@ -12,7 +12,7 @@ import (
 
 var getHistoryHelp = `
 history [entityType] [entityName | entityId]
-View history for a specified entity. Only enity types identity, role, and workgroup can make call entities by name.
+View history for a specified entity. Only enity types identity, role, and workgroup can be called by name.
 Examples:
 
 	$ steam get history identity minsky

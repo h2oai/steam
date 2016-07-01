@@ -27,9 +27,9 @@ func getModels(c *context) *cobra.Command {
 
 		lines := make([]string, len(ms))
 		for i, m := range ms {
-			lines[i] = fmt.Sprintf("%s\t%d\t%s\t%s\t%s\t%s\t", m.Name, m.Id, m.Algorithm, m.DatasetName, m.ResponseColumnName, fmtAgo(m.CreatedAt))
+			lines[i] = fmt.Sprintf("%s\t%d\t%s\t%s\t%s\t%s ", m.Name, m.Id, m.Algorithm, m.DatasetName, m.ResponseColumnName, fmtAgo(m.CreatedAt))
 		}
-		c.printt("NAME\tALGO\tDATASET\tTARGET\tAGE\t", lines)
+		c.printt("NAME\tALGO\tDATASET\tTARGET\tAGE", lines)
 	})
 
 	return cmd
