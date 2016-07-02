@@ -616,14 +616,14 @@ class RPCClient:
 		response = self.connection.call("GetIdentitiesForWorkgroup", request)
 		return [View(o) for o in response['identities']]
 
-	def get_identitites_for_role(self, role_id):
+	def get_identities_for_role(self, role_id):
 		"""
 		Returns identities ([]*Identity)
 		"""
 		request = {
 			'role_id': role_id
 		}
-		response = self.connection.call("GetIdentititesForRole", request)
+		response = self.connection.call("GetIdentitiesForRole", request)
 		return [View(o) for o in response['identities']]
 
 	def get_identity(self, identity_id):

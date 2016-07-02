@@ -1216,13 +1216,15 @@ func (ds *Datastore) DeleteRole(pz az.Principal, roleId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				role
 			WHERE
 				id = $1
-			`, roleId,
-		); err != nil {
+			RETURNING id
+			`, roleId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Role, roleId); err != nil {
@@ -1398,12 +1400,15 @@ func (ds *Datastore) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
 		return err
 	}
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				workgroup
 			WHERE
 				id = $1
-			`, workgroupId); err != nil {
+			RETURNING id
+			`, workgroupId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Workgroup, workgroupId); err != nil {
@@ -1771,13 +1776,16 @@ func (ds *Datastore) UnlinkIdentityAndRole(pz az.Principal, identityId, roleId i
 		return err
 	}
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				identity_role
 			WHERE
 				identity_id = $1 AND
 				role_id = $2
-			`, identityId, roleId); err != nil {
+			RETURNING identity_id
+			`, identityId, roleId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Identity, identityId, metadata{
@@ -2049,13 +2057,15 @@ func (ds *Datastore) DeleteEngine(pz az.Principal, engineId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				engine
 			WHERE
 				id = $1
-			`, engineId,
-		); err != nil {
+			RETURNING id
+			`, engineId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Engine, engineId); err != nil {
@@ -2315,24 +2325,28 @@ func (ds *Datastore) DeleteCluster(pz az.Principal, clusterId int64) error {
 
 	return ds.exec(func(tx *sql.Tx) error {
 		if cluster.TypeId == ds.ClusterTypes.Yarn {
-			if _, err := tx.Exec(`
+			var id int64
+			row := tx.QueryRow(`
 				DELETE FROM
 					cluster_yarn
 				WHERE
 					id = $1
-				`, cluster.DetailId,
-			); err != nil {
+				RETURNING id
+				`, cluster.DetailId)
+			if err := row.Scan(&id); err != nil {
 				return err
 			}
 		}
 
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				cluster
 			WHERE
 				id = $1
-			`, clusterId,
-		); err != nil {
+			RETURNING id
+			`, clusterId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 
@@ -2409,13 +2423,16 @@ func (ds *Datastore) UnlinkProjectAndModel(pz az.Principal, projectId, modelId i
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				project_model
 			WHERE
 				project_id = $1 AND
 				model_id = $2
-			`, projectId, modelId); err != nil {
+			RETURNING model_id
+			`, projectId, modelId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Project, projectId, metadata{
@@ -2475,13 +2492,15 @@ func (ds *Datastore) DeleteProject(pz az.Principal, projectId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				project
 			WHERE
 				id = $1
-			`, projectId,
-		); err != nil {
+			RETURNING id
+			`, projectId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Project, projectId); err != nil {
@@ -2628,13 +2647,15 @@ func (ds *Datastore) DeleteModel(pz az.Principal, modelId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				model
 			WHERE
 				id = $1
-			`, modelId,
-		); err != nil {
+			RETURNING id
+			`, modelId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Model, modelId); err != nil {
@@ -2780,15 +2801,18 @@ func (ds *Datastore) DeleteService(pz az.Principal, serviceId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				service
 			WHERE
 				id = $1
-			`, serviceId,
-		); err != nil {
+			RETURNING id
+			`, serviceId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
+
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Service, serviceId); err != nil {
 			return err
 		}

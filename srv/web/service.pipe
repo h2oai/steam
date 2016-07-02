@@ -171,7 +171,7 @@ DeleteWorkgroup(workgroupId int64)
 CreateIdentity(name string, password string) identityId int64
 GetIdentities(offset int64, limit int64) identities []*Identity
 GetIdentitiesForWorkgroup(workgroupId int64) identities []*Identity
-GetIdentititesForRole(roleId int64) identities []*Identity
+GetIdentitiesForRole(roleId int64) identities []*Identity
 GetIdentity(identityId int64) identity *Identity
 GetIdentityByName(name string) identity *Identity
 LinkIdentityAndWorkgroup(identityId int64, workgroupId int64)

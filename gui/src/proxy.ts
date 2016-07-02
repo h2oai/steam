@@ -185,7 +185,7 @@ module Proxy {
 		createIdentity: (name: string, password: string, go: (error: Error, identityId: number) => void) => void
 		getIdentities: (offset: number, limit: number, go: (error: Error, identities: Identity[]) => void) => void
 		getIdentitiesForWorkgroup: (workgroupId: number, go: (error: Error, identities: Identity[]) => void) => void
-		getIdentititesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
+		getIdentitiesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
 		getIdentity: (identityId: number, go: (error: Error, identity: Identity) => void) => void
 		getIdentityByName: (name: string, go: (error: Error, identity: Identity) => void) => void
 		linkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
@@ -620,11 +620,11 @@ module Proxy {
 		identities: Identity[]
 	}
 
-	interface GetIdentititesForRoleIn {
+	interface GetIdentitiesForRoleIn {
 		role_id: number
 	}
 
-	interface GetIdentititesForRoleOut {
+	interface GetIdentitiesForRoleOut {
 		identities: Identity[]
 	}
 
@@ -1207,12 +1207,12 @@ module Proxy {
 		})
 
 	}
-	export function getIdentititesForRole(roleId: number, go: (error: Error, identities: Identity[]) => void): void {
-		var req: GetIdentititesForRoleIn = {
+	export function getIdentitiesForRole(roleId: number, go: (error: Error, identities: Identity[]) => void): void {
+		var req: GetIdentitiesForRoleIn = {
 			role_id: roleId
 		}
-		Proxy.Call("GetIdentititesForRole", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<GetIdentititesForRoleOut>data).identities)
+		Proxy.Call("GetIdentitiesForRole", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetIdentitiesForRoleOut>data).identities)
 		})
 
 	}

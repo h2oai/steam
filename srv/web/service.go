@@ -194,7 +194,7 @@ type Service interface {
 	CreateIdentity(pz az.Principal, name string, password string) (int64, error)
 	GetIdentities(pz az.Principal, offset int64, limit int64) ([]*Identity, error)
 	GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*Identity, error)
-	GetIdentititesForRole(pz az.Principal, roleId int64) ([]*Identity, error)
+	GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*Identity, error)
 	GetIdentity(pz az.Principal, identityId int64) (*Identity, error)
 	GetIdentityByName(pz az.Principal, name string) (*Identity, error)
 	LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error
@@ -629,11 +629,11 @@ type GetIdentitiesForWorkgroupOut struct {
 	Identities []*Identity `json:"identities"`
 }
 
-type GetIdentititesForRoleIn struct {
+type GetIdentitiesForRoleIn struct {
 	RoleId int64 `json:"role_id"`
 }
 
-type GetIdentititesForRoleOut struct {
+type GetIdentitiesForRoleOut struct {
 	Identities []*Identity `json:"identities"`
 }
 
@@ -1252,10 +1252,10 @@ func (this *Remote) GetIdentitiesForWorkgroup(workgroupId int64) ([]*Identity, e
 	return out.Identities, nil
 }
 
-func (this *Remote) GetIdentititesForRole(roleId int64) ([]*Identity, error) {
-	in := GetIdentititesForRoleIn{roleId}
-	var out GetIdentititesForRoleOut
-	err := this.Proc.Call("GetIdentititesForRole", &in, &out)
+func (this *Remote) GetIdentitiesForRole(roleId int64) ([]*Identity, error) {
+	in := GetIdentitiesForRoleIn{roleId}
+	var out GetIdentitiesForRoleOut
+	err := this.Proc.Call("GetIdentitiesForRole", &in, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -2234,17 +2234,17 @@ func (this *Impl) GetIdentitiesForWorkgroup(r *http.Request, in *GetIdentitiesFo
 	return nil
 }
 
-func (this *Impl) GetIdentititesForRole(r *http.Request, in *GetIdentititesForRoleIn, out *GetIdentititesForRoleOut) error {
+func (this *Impl) GetIdentitiesForRole(r *http.Request, in *GetIdentitiesForRoleIn, out *GetIdentitiesForRoleOut) error {
 
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "called GetIdentititesForRole")
+	log.Println(pz, "called GetIdentitiesForRole")
 
-	it, err := this.Service.GetIdentititesForRole(pz, in.RoleId)
+	it, err := this.Service.GetIdentitiesForRole(pz, in.RoleId)
 	if err != nil {
-		log.Printf("%s Failed to GetIdentititesForRole: %v", pz, err)
+		log.Printf("%s Failed to GetIdentitiesForRole: %v", pz, err)
 		return err
 	}
 	out.Identities = it

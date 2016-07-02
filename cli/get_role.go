@@ -37,7 +37,7 @@ func getRole(c *context) *cobra.Command {
 			log.Fatalln(err) //FIXME format error
 		}
 
-		idents, err := c.remote.GetIdentititesForRole(role.Id)
+		idents, err := c.remote.GetIdentitiesForRole(role.Id)
 		if err != nil {
 			log.Fatalln(err) //FIXME format error
 		}

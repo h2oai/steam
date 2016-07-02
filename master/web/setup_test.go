@@ -1,11 +1,10 @@
 package web
 
 import (
-	"fmt"
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/master/data"
-	web "github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steamY/srv/web"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,7 +13,14 @@ import (
 
 const superuser = "superuser"
 
-func setup() (web.Service, az.Directory, error) {
+type test struct {
+	t   *testing.T
+	svc web.Service
+	dir az.Directory
+	su  az.Principal
+}
+
+func newTest(t *testing.T) *test {
 	dbOpts := driverDBOpts{
 		"steam",
 		"steam",
@@ -26,31 +32,63 @@ func setup() (web.Service, az.Directory, error) {
 	// Truncate database tables
 
 	if err := data.Destroy(dbOpts.Name, dbOpts.Username, dbOpts.SSLMode); err != nil {
-		return nil, nil, fmt.Errorf("Failed truncating database: %s", err)
+		t.Fatalf("Failed truncating database: %s", err)
 	}
 
 	// Determine current directory
 
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	wd, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		return nil, nil, fmt.Errorf("Failed determining current directory: %s", err)
+		t.Fatalf("Failed determining current directory: %s", err)
 	}
 
-	//
+	// Create service instance
 
 	opts := driverOpts{
-		path.Join(dir, fs.VarDir, "master"),
+		path.Join(wd, fs.VarDir, "master"),
 		":9001",
 		":8080",
 		"",
 		driverYarnOpts{false, "", ""},
 		dbOpts,
 	}
-	return newService(opts)
-}
-
-func check(t *testing.T, err error) {
+	svc, dir, err := newService(opts)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	// Lookup superuser
+
+	su, err := dir.Lookup(superuser)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return &test{t, svc, dir, su}
+}
+
+func (t *test) log(args ...interface{}) {
+	t.t.Log(args...)
+}
+
+func (t *test) fail(format string, args ...interface{}) {
+	t.t.Fatalf(format, args...)
+}
+
+func (t *test) nil(arg interface{}) {
+	if arg != nil {
+		t.fail("unexpected: %s", arg)
+	}
+}
+
+func (t *test) notnil(arg interface{}) {
+	if arg == nil {
+		t.fail("unexpected nil: %s", arg)
+	}
+}
+
+func (t *test) ok(condition bool, format string, args ...interface{}) {
+	if !condition {
+		t.fail(format, args...)
 	}
 }

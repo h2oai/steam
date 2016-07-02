@@ -130,7 +130,7 @@ func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId
 
 	applicationId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
-		log.Println(err)
+		log.Println(pz, err)
 		return 0, err
 	}
 
@@ -1081,7 +1081,7 @@ func (s *Service) GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) 
 	return toIdentities(identities), nil
 }
 
-func (s *Service) GetIdentititesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
+func (s *Service) GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
