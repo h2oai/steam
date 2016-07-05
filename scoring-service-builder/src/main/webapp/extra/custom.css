@@ -44,6 +44,7 @@ body {
     font-family: 'DINPro';
     font-weight: 600;
     color: rgba(23, 23, 23, 0.6);
+    font-size: 16px;
 }
 
 .grad {
@@ -228,8 +229,8 @@ select:-moz-focusring {
 }
 
 .curl code {
-    background-color: #5bc0de;
-    color: #d9edf7;
+    background-color: rgba(0,0,0, 0.1);
+    color: rgba(36, 67, 90, 0.8);
 }
 
 tr.stat-group td {

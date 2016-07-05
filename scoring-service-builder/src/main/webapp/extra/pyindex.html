@@ -55,19 +55,12 @@
                 </div>
             </fieldset>
 
-            <fieldset>
-                <legend>Query String</legend>
-                <div class="form-group">The raw input data above gets automatically built into a REST API query string. You can also input your own string if that's easier for you.
-                </div>
-                <div class="form-group">
-                    <label class="sr-only"></label>
-                    <div class="input-group">
-                        <div id="url-prefix" class="input-group-addon"></div>
-                        <input type="text" class="form-control" id="queryParams" name="p" onkeydown="clearParameters();">
-                        <div class="input-group-addon"><a id="query-link" href="" target="_blank"><i class="glyphicon glyphicon-new-window"></i></a></div>
-                    </div>
-                </div>
-        </fieldset>
+
+            <div class="btnContainer">
+                <input id="predict-btn" class="btn btn-primary" type="submit" name="okbutton" value="PREDICT">
+                <input id="reset-btn" class="btn btn-default" type="reset" value="CLEAR">
+            </div>
+
 
         <fieldset>
                 <legend>Command Line</legend>
@@ -79,11 +72,8 @@
                 </div>
         </fieldset>
 
-            <div class="btnContainer">
-                <input id="predict-btn" class="btn btn-primary" type="submit" name="okbutton" value="PREDICT">
-                <input id="reset-btn" class="btn btn-default" type="reset" value="CLEAR">
-            </div>
         </form>
+
     </section>
 
     <section class="col-md-1">
