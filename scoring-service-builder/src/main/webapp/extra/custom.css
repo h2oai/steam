@@ -200,12 +200,13 @@ select:-moz-focusring {
 .glyphicon.glyphicon-new-window {
     color: rgba(36, 67, 90, 0.8);
 }
+
 .python-input {
     padding-left: 48px;
 }
 
 .python-input legend {
-    width: 10%;
+    width: 30%;
     display: inline-block;
     margin-bottom: 14px;
 }
@@ -224,6 +225,11 @@ select:-moz-focusring {
 .curl {
     margin-left: 48px;
     margin-top: 2em;
+}
+
+.curl code {
+    background-color: #5bc0de;
+    color: #d9edf7;
 }
 
 tr.stat-group td {
