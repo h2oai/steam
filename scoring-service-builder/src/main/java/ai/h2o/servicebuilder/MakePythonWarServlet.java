@@ -120,15 +120,17 @@ public class MakePythonWarServlet extends HttpServlet {
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
 
       // change the class name in the predictor template file to the predictor we have
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictPythonServlet-TEMPLATE.java", "PredictPythonServlet.java");
+//      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
+      InstantiateJavaTemplateFile(tmpDir, predictorClassName, "null", srcPath + "PredictPythonServlet-TEMPLATE.java", "PredictPythonServlet.java");
+      InstantiateJavaTemplateFile(tmpDir, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java"),
+          "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java", "ServletUtil.java"),
           "Compilation of servlet failed");
 
       // create the war jar file
@@ -183,22 +185,26 @@ public class MakePythonWarServlet extends HttpServlet {
 
   }
 
-  private static final String JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-
-  /**
-   * The Java template file has a placeholder for the model name -- we replace that here
-   *
-   * @param tmpDir            run in this directory
-   * @param javaClassName     model name
-   * @param templateFileName  template file
-   * @param resultFileName    restult file
-   * @throws IOException
-   */
-  private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String templateFileName, String resultFileName) throws IOException {
-    byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
-    String java = new String(templateJava).replace(JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME, javaClassName);
-    FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
-  }
+//  private static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
+//  private static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
+//
+//  /**
+//   * The Java template file has a placeholder for the model name -- we replace that here
+//   *
+//   * @param tmpDir            run in this directory
+//   * @param javaClassName     model name
+//   * @param templateFileName  template file
+//   * @param resultFileName    restult file
+//   * @throws IOException
+//   */
+//  private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String replaceTransform, String templateFileName, String resultFileName) throws IOException {
+//    byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
+//    String java = new String(templateJava)
+//        .replace(JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME, javaClassName);
+//    if (replaceTransform != null)
+//      java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT, replaceTransform);
+//    FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
+//  }
 
 }
 

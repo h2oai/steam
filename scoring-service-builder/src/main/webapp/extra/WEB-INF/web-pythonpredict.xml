@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
-    <servlet>
-        <servlet-name>Predict</servlet-name>
-        <servlet-class>PredictServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    <!--<servlet>-->
+        <!--<servlet-name>Predict</servlet-name>-->
+        <!--<servlet-class>PredictServlet</servlet-class>-->
+        <!--<load-on-startup>1</load-on-startup>-->
+    <!--</servlet>-->
     <servlet>
         <servlet-name>PredictPython</servlet-name>
         <servlet-class>PredictPythonServlet</servlet-class>
@@ -22,10 +22,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         <servlet-class>StatsServlet</servlet-class>
     </servlet>
 
-    <servlet-mapping>
-        <servlet-name>Predict</servlet-name>
-        <url-pattern>/predict</url-pattern>
-    </servlet-mapping>
+    <!--<servlet-mapping>-->
+        <!--<servlet-name>Predict</servlet-name>-->
+        <!--<url-pattern>/predict</url-pattern>-->
+    <!--</servlet-mapping>-->
     <servlet-mapping>
         <servlet-name>PredictPython</servlet-name>
         <url-pattern>/pypredict</url-pattern>

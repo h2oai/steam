@@ -40,7 +40,7 @@ public class MakeWarServlet extends HttpServlet {
     /**
      *
      * @param input is the original data to be transformed
-     * @return an array of
+     * @return an array of0
      */
     Object[] fit(byte[] input);
   }
@@ -88,7 +88,9 @@ public class MakeWarServlet extends HttpServlet {
       String pojofile = null;
       String jarfile = null;
       String prejarfile = null;
+      String preclass = null;
       String predictorClassName = null;
+      String transformerClassName = null;
       for (FileItem i : items) {
         String field = i.getFieldName();
         String filename = i.getName();
@@ -106,11 +108,18 @@ public class MakeWarServlet extends HttpServlet {
             prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
+          if (field.equals("preclass")) {
+            transformerClassName = filename;
+            preclass = "WEB-INF" + File.separator + "lib" + File.separator + filename;
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
+          }
         }
       }
       System.out.printf("jar %s  pojo %s\n", jarfile, pojofile);
       if (pojofile == null || jarfile == null)
         throw new Exception("need pojo and jar");
+      if (prejarfile != null && preclass == null || prejarfile == null && preclass != null)
+        throw new Exception("need both prejar and preclass");
 
       // Compile the pojo
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
@@ -130,15 +139,22 @@ public class MakeWarServlet extends HttpServlet {
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
 
       // change the class name in the predictor template file to the predictor we have
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
+      String replaceTransform = null;
+      if (transformerClassName == null)
+        replaceTransform = "null";
+      else
+        replaceTransform = "new " + transformerClassName + "()";
+      InstantiateJavaTemplateFile(tmpDir, predictorClassName, replaceTransform, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
+      InstantiateJavaTemplateFile(tmpDir, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
+//      copyExtraFile(servletPath, srcPath, tmpDir, "ServletUtil-TEMPLATE.java", "ServletUtil-TEMPLATE.java");
 
       // compile extra
       List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java");
-      if (!prejarfile.isEmpty())
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java");
+      if (prejarfile != null)
         cmd.add("prejarfile");
       runCmd(tmpDir, cmd, "Compilation of extra failed");
 
@@ -194,22 +210,26 @@ public class MakeWarServlet extends HttpServlet {
 
   }
 
-  private static final String JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-
-  /**
-   * The Java template file has a placeholder for the model name -- we replace that here
-   *
-   * @param tmpDir            run in this directory
-   * @param javaClassName     model name
-   * @param templateFileName  template file
-   * @param resultFileName    restult file
-   * @throws IOException
-   */
-  private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String templateFileName, String resultFileName) throws IOException {
-    byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
-    String java = new String(templateJava).replace(JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME, javaClassName);
-    FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
-  }
+//  private static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
+//  private static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
+//
+//  /**
+//   * The Java template file has a placeholder for the model name -- we replace that here
+//   *
+//   * @param tmpDir            run in this directory
+//   * @param javaClassName     model name
+//   * @param templateFileName  template file
+//   * @param resultFileName    restult file
+//   * @throws IOException
+//   */
+//  private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String replaceTransform, String templateFileName, String resultFileName) throws IOException {
+//    byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
+//    String java = new String(templateJava)
+//        .replace(JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME, javaClassName);
+//    if (replaceTransform != null)
+//      java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT, replaceTransform);
+//    FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
+//  }
 
 }
 

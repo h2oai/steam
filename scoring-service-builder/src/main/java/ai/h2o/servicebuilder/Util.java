@@ -18,6 +18,96 @@ class Util {
   protected static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
   protected static final String JAVA_TARGET_VERSION = "1.6";
 
+//  public static class Times {
+//    private long count = 0;
+//    private double totalTimeMs = 0;
+//    private double totalTimeSquaredMs = 0;
+//    private double warmupTimeMs = 0;
+//    private double warmupTimeSquaredMs = 0;
+//    private double lastMs = 0;
+//
+//    private Gson gson = new Gson();
+//
+//    public static final int warmUpCount = 5;
+//    public static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
+////    public static final Type rowDataType = new TypeToken<RowData>(){}.getType();
+//
+//
+//    public void add(long startNs, long endNs, int n) {
+//      double elapsed = (endNs - startNs) / 1.0e6;
+//      add(elapsed, n);
+//    }
+//
+//    public void add(long startNs, long endNs) {
+//      add(startNs, endNs, 1);
+//    }
+//
+//    public synchronized void add(double timeMs, int n) {
+//      count += n;
+//      totalTimeMs += timeMs; // n * timeMs/n
+//      double tt = timeMs * timeMs / n; // n * (timeMs/n)^2
+//      totalTimeSquaredMs += tt;
+//      if (count <= warmUpCount) {
+//        warmupTimeMs += timeMs;
+//        warmupTimeSquaredMs += tt;
+//      }
+//      lastMs = timeMs / n;
+//    }
+//
+//    public double avg() {
+//      return count > 0 ? totalTimeMs / count : 0.0;
+//    }
+//
+////    public double sdev() {
+////
+////    }
+//
+//    public double avgAfterWarmup() {
+//      return count > warmUpCount ? (totalTimeMs - warmupTimeMs) / (count - warmUpCount) : 0.0;
+//    }
+//
+//    public String toJson() {
+//      return gson.toJson(toMap());
+//    }
+//
+//    public Map<String, Object> toMap() {
+//      Map<String, Object> map = classToMap();
+//      map.put("averageTime", avg());
+//      map.put("averageAfterWarmupTime", avgAfterWarmup());
+//      return map;
+//    }
+//
+//    private Map<String, Object> classToMap() {
+//      return gson.fromJson(gson.toJson(this), mapType);
+//    }
+//
+//    public String toString() {
+//      return String.format("n %d  last %.3f  avg %.3f after warmup %.3f [ms]", count, lastMs, avg(), avgAfterWarmup());
+//    }
+//  }
+//
+//  public static long startTime = System.currentTimeMillis();
+//  public static long lastTime = 0;
+//  public static Times predictionTimes = new Times();
+//  public static Times getTimes = new Times();
+//  public static Times postTimes = new Times();
+//  public static Times getPythonTimes = new Times();
+//  public static Times postPythonTimes = new Times();
+//
+
+//  public static synchronized AbstractPrediction predict(EasyPredictModelWrapper model, RowData row)
+//      throws PredictException {
+//    long start = System.nanoTime();
+//    AbstractPrediction p = model.predict(row);
+//    long done = System.nanoTime();
+//    lastTime = System.currentTimeMillis();
+//    predictionTimes.add(start, done);
+//
+////    if (VERBOSE) System.out.println("Prediction time " + predictionTimes);
+//    return p;
+//  }
+
+
   /**
    * Run command cmd in separate process in directory
    *
@@ -28,6 +118,7 @@ class Util {
    * @throws Exception
    */
   static String runCmd(File directory, List<String> cmd, String errorMessage) throws Exception {
+//    System.out.println("run " + cmd + " in " + directory);
     ProcessBuilder pb = new ProcessBuilder(cmd);
     pb.directory(directory);
     pb.redirectErrorStream(true); // error sent to output stream
@@ -71,9 +162,9 @@ class Util {
       }
       // Create jar entry
       String filename = t.getPath().replace(relativeToDir, "").replace("\\", "/");
-      if (filename.endsWith("MANIFEST.MF")) { // skip to avoid duplicates
-        continue;
-      }
+//      if (filename.endsWith("MANIFEST.MF")) { // skip to avoid duplicates
+//        continue;
+//      }
       JarEntry jarAdd = new JarEntry(filename);
       jarAdd.setTime(t.lastModified());
       out.putNextEntry(jarAdd);
@@ -107,6 +198,27 @@ class Util {
 
   static void copyExtraFile(File servletPath, String extraPath, File toDir, String fromFileName, String toFileName) throws IOException {
     FileUtils.copyFile(new File(servletPath, extraPath + fromFileName), new File(toDir, toFileName));
+  }
+
+  public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
+  public static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
+
+  /**
+   * The Java template file has a placeholder for the model name -- we replace that here
+   *
+   * @param tmpDir            run in this directory
+   * @param javaClassName     model name
+   * @param templateFileName  template file
+   * @param resultFileName    restult file
+   * @throws IOException
+   */
+  public static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String replaceTransform, String templateFileName, String resultFileName) throws IOException {
+    byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
+    String java = new String(templateJava)
+        .replace(JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME, javaClassName);
+    if (replaceTransform != null)
+      java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT, replaceTransform);
+    FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
   }
 
 }

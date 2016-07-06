@@ -5,6 +5,7 @@ import javax.servlet.http.*;
 import javax.servlet.*;
 
 import com.google.gson.GsonBuilder;
+import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.*;
 import hex.genmodel.*;
@@ -16,8 +17,9 @@ public class PredictPythonServlet extends HttpServlet {
   // Set to false to get better throughput.
   private static boolean VERBOSE = false;
 
-  public static GenModel rawModel;
-  public static EasyPredictModelWrapper model;
+  private static GenModel rawModel= new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+  private static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
+  // Unused here but needs to exists for template   transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
 
   private static Process p = null;
   private static ProcessBuilder pb = null;
@@ -81,6 +83,23 @@ public class PredictPythonServlet extends HttpServlet {
     super.destroy();
   }
 
+  public static synchronized AbstractPrediction predict(RowData row) throws PredictException {
+    long start = System.nanoTime();
+    AbstractPrediction p = model.predict(row);
+    long done = System.nanoTime();
+    ServletUtil.lastTime = System.currentTimeMillis();
+    ServletUtil.predictionTimes.add(start, done);
+
+    if (VERBOSE) System.out.println("Prediction time " + ServletUtil.predictionTimes);
+    return p;
+  }
+
+  static private String jsonModel() {
+    Gson gson = new Gson();
+    String modelJson = gson.toJson(model);
+    return modelJson;
+  }
+
   private static final byte[] NewlineByteArray = "\n".getBytes();
 
   private synchronized String sendPython(String queryString) {
@@ -135,7 +154,7 @@ public class PredictPythonServlet extends HttpServlet {
       RowData row = sparseToRowData(colNames, result);
       if (VERBOSE) System.out.println("row: " + row);
 
-      AbstractPrediction pr = PredictServlet.predict(row);
+      AbstractPrediction pr = predict(row);
       if (VERBOSE) System.out.println("pr: " + pr);
 
       // assemble json result
@@ -151,8 +170,8 @@ public class PredictPythonServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
     long done = System.nanoTime();
-    PredictServlet.getPythonTimes.add(start, done);
-    if (VERBOSE) System.out.println("Python Get time " + PredictServlet.getPythonTimes);
+    ServletUtil.getPythonTimes.add(start, done);
+    if (VERBOSE) System.out.println("Python Get time " + ServletUtil.getPythonTimes);
   }
 
   private void showStderr() {
@@ -238,7 +257,7 @@ public class PredictPythonServlet extends HttpServlet {
         if (VERBOSE) System.out.println("row: " + row);
 
         // do the prediction
-        pr = PredictServlet.predict(row);
+        pr = predict(row);
 
         // assemble json result
         prJson = gson.toJson(pr);
@@ -263,8 +282,8 @@ public class PredictPythonServlet extends HttpServlet {
     }
     if (count > 0) {
       long done = System.nanoTime();
-      PredictServlet.postPythonTimes.add(start, done, count);
-      if (VERBOSE) System.out.println("Python Post time " + PredictServlet.postPythonTimes);
+      ServletUtil.postPythonTimes.add(start, done, count);
+      if (VERBOSE) System.out.println("Python Post time " + ServletUtil.postPythonTimes);
     }
   }
 

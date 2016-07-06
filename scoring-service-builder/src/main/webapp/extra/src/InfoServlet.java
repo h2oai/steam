@@ -13,7 +13,7 @@ import com.google.gson.Gson;
 
 public class InfoServlet extends HttpServlet {
 
-  static EasyPredictModelWrapper model = PredictServlet.model;
+  static EasyPredictModelWrapper model = ServletUtil.model;
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
