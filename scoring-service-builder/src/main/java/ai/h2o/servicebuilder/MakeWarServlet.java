@@ -88,7 +88,7 @@ public class MakeWarServlet extends HttpServlet {
       String pojofile = null;
       String jarfile = null;
       String prejarfile = null;
-      String preclass = null;
+//      String preclass = null;
       String predictorClassName = null;
       String transformerClassName = null;
       for (FileItem i : items) {
@@ -109,16 +109,15 @@ public class MakeWarServlet extends HttpServlet {
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
           if (field.equals("preclass")) {
-            transformerClassName = filename;
-            preclass = "WEB-INF" + File.separator + "lib" + File.separator + filename;
-            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
+            transformerClassName = i.
           }
         }
       }
       System.out.printf("jar %s  pojo %s\n", jarfile, pojofile);
       if (pojofile == null || jarfile == null)
         throw new Exception("need pojo and jar");
-      if (prejarfile != null && preclass == null || prejarfile == null && preclass != null)
+      System.out.printf("prejar %s  preclass %s\n", prejarfile, transformerClassName);
+      if (prejarfile != null && transformerClassName == null || prejarfile == null && transformerClassName != null)
         throw new Exception("need both prejar and preclass");
 
       // Compile the pojo
