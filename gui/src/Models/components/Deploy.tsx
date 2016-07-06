@@ -3,7 +3,7 @@
  */
 import * as React from 'react';
 import '../styles/deploy.scss';
-import Overlay from '../../Body/components/Overlay';
+import Overlay from '../../UIKit/Overlay/Overlay';
   
 interface Props {
   open: boolean
