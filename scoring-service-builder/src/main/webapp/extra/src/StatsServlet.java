@@ -1,9 +1,6 @@
 import com.google.gson.Gson;
-<<<<<<< Updated upstream
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-=======
->>>>>>> Stashed changes
 
 import java.io.*;
 import java.lang.reflect.Type;
