@@ -44,6 +44,7 @@ func newService(opts driverOpts) (web.Service, az.Directory, error) {
 		opts.DB.SuperuserName,
 		opts.DB.SuperuserPassword,
 	)
+
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -92,3 +92,26 @@ func (t *test) ok(condition bool, format string, args ...interface{}) {
 		t.fail(format, args...)
 	}
 }
+
+func buildPermissionMap(t *test) map[string]int64 {
+	permissions, err := t.svc.GetSupportedPermissions(t.su)
+	t.nil(err)
+
+	permissionMap := make(map[string]int64)
+	for _, permission := range permissions {
+		permissionMap[permission.Code] = permission.Id
+	}
+
+	return permissionMap
+}
+
+func buildEntityTypeMap(t *test) map[string]int64 {
+	entityTypes, err := t.svc.GetSupportedEntityTypes(t.su)
+	t.nil(err)
+
+	entityTypeMap := make(map[string]int64)
+	for _, entityType := range entityTypes {
+		entityTypeMap[entityType.Name] = entityType.Id
+	}
+	return entityTypeMap
+}
