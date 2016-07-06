@@ -178,6 +178,7 @@ LinkIdentityAndWorkgroup(identityId int64, workgroupId int64)
 UnlinkIdentityAndWorkgroup(identityId int64, workgroupId int64)
 LinkIdentityAndRole(identityId int64, roleId int64)
 UnlinkIdentityAndRole(identityId int64, roleId int64)
+UpdateIdentity(identityId int64, password string)
 DeactivateIdentity(identityId int64)
 
 ShareEntity(kind string, workgroupId int64, entityTypeId int64, entityId int64)

@@ -690,6 +690,17 @@ class RPCClient:
 		self.connection.call("UnlinkIdentityAndRole", request)
 
 
+	def update_identity(self, identity_id, password):
+		"""
+		Returns None
+		"""
+		request = {
+			'identity_id': identity_id,
+			'password': password
+		}
+		self.connection.call("UpdateIdentity", request)
+
+
 	def deactivate_identity(self, identity_id):
 		"""
 		Returns None

@@ -192,6 +192,7 @@ module Proxy {
 		unlinkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
 		linkIdentityAndRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
 		unlinkIdentityAndRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
+		updateIdentity: (identityId: number, password: string, go: (error: Error) => void) => void
 		deactivateIdentity: (identityId: number, go: (error: Error) => void) => void
 		shareEntity: (kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void) => void
 		getEntityPrivileges: (entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void) => void
@@ -674,6 +675,14 @@ module Proxy {
 	}
 
 	interface UnlinkIdentityAndRoleOut {
+	}
+
+	interface UpdateIdentityIn {
+		identity_id: number
+		password: string
+	}
+
+	interface UpdateIdentityOut {
 	}
 
 	interface DeactivateIdentityIn {
@@ -1270,6 +1279,16 @@ module Proxy {
 			role_id: roleId
 		}
 		Proxy.Call("UnlinkIdentityAndRole", req, function(error, data) {
+			return error ? go(error) : go(null)
+		})
+
+	}
+	export function updateIdentity(identityId: number, password: string, go: (error: Error) => void): void {
+		var req: UpdateIdentityIn = {
+			identity_id: identityId,
+			password: password
+		}
+		Proxy.Call("UpdateIdentity", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 
