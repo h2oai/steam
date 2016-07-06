@@ -7,12 +7,13 @@ This document is meant for H2O developers and describes how to install, start, a
 - Web browser and an Internet connection
 - steamY repository
 - Go (available from <a href="https://golang.org">golang.org</a>) 
-- Access to this steamY repository
+- Access to the steamY repository
 - SSH access to a Jetty server running YARN
 - Typescript
 - Node.js
 - JDK 1.7 or greater
 - H2O AutoML for Apache HDP2.2 or CDH 5.5.3 (internal only)
+- postgresql for using the CLI
 
 ## Building the H2O Scoring Service
 
@@ -249,32 +250,33 @@ When you are finished, use the following process to safely shut down Steam:
 
 ## User Management
 
-This section describes the user management features available in H2O Steam. 
+This section describes the user management features available in H2O Steam when Steam is connected to a database. The Steam database is useful for creating a new bash script and for automatic model deployment. The Steam database supports setup via Python functions and CLI commands. 
 
-### User Management Workflow
+This section includes the following subsections:
 
-1. Define roles based on operational needs.
-2. Define workgroups based on data / access control needs.
-3. Then add a new user:
+- [Terms](#terms)
+- [Privileges/Access Control](#privileges)
+- [Authorization](#authorization)
+- [User Management Setup](#user management setup)
+- [User Management Workflow](#user management workflow)
+- [CLI Command Reference](#CLI Command Reference)
 
- -	Create the user's identity.
- - Associate the user with one or more roles.
- - Optionally, associate the user with one or more workgroups. 
-
-Specific information about Steam User Management is described in the sections that follow. 
-
-
+<a name="terms"></a>
 ### Terms
 
-**Entities** represent *objects* in Steam. Examples of entities include Roles, Workgroups, Identities, Clusters, Projects, Models, and Services (engines). 
+The following lists common terms used when describing Steam User Management.  
 
-**Identities** represent *users* in Steam. Users sign in using an Identity, and then perform operations in Steam.
+- **Entities** represent *objects* in Steam. Examples of entities include Roles, Workgroups, Identities, Clusters, Projects, Models, and Services (engines). 
 
-**Permissions** determine what operations you can perform. Examples of permissions include *Manage Clusters*, *View Clusters*, *Manage Models*, *View Models*, and so on.
+- **Identities** represent *users* in Steam. Users sign in using an Identity, and then perform operations in Steam.
 
-**Privileges** determine the entities that you can perform operations on (i.e., data / access control).
+- **Permissions** determine what operations you can perform. Examples of permissions include *Manage Clusters*, *View Clusters*, *Manage Models*, *View Models*, and so on.
 
-### Privileges / Access Control
+- **Privileges** determine the entities that you can perform operations on (i.e., data / access control).
+
+
+<a name="privileges"></a>
+### Privileges/Access Control
 
 Privileges are uniquely identified by the entity in question and the kind of privilege you have on the entity.
 
@@ -286,9 +288,7 @@ The following privileges are available on an entity:
 
 - **View** privileges allow you to view entities, but not share, edit, or delete them.
 
-When you create an entity, you immediately *Own* it. You can then share this entity with others and award them either *Edit* or *View* privileges.
-
-Entities are allowed to have more than one owner, so you can also add additional owners to entities. 
+When you create an entity, you immediately *Own* it. You can then share this entity with others and award them either *Edit* or *View* privileges. Entities are allowed to have more than one owner, so you can also add additional owners to entities. 
 
 The following table lists the kind of privileges you need in order to perform specific operations on entities:
 
@@ -335,6 +335,7 @@ The following table lists the kind of privileges you need in order to perform sp
 
         
 
+<a name="authorization"></a>
 ### Authorization
 
 Permissions and privileges are set up using Roles and Workgroups, respectively.
@@ -354,12 +355,124 @@ For example:
 #### Workgroups
 A **Workgroup** is a named set of identities. Workgroups allow you to form collections of identities for access control purposes. For example, a *Demand Forecasting* workgroup can be composed of all the users working on demand forecasting, regardless of their role. This workgroup can be then used to control access to all the clusters, projects, models and services that are used for demand forecasting. 
 
--------
 
+<a name="user management setup"></a>
+### User Management Setup
+
+This section describes how to set up and start the Steam  CLI for user management. Five terminal windows will be open the first time you run this setup; four terminal windows will be open for subsequent logins.
+
+1. Open a terminal window and start postgresql. This should be started from the folder where posgresql was installed.
+
+		postgres -D /usr/local/var/postgres
+
+2. Open a second terminal window to create a new user for the Steam database and then create the database. The commands below only need to be performed once. The example below creates a steam **superuser** with a password ``st3amUser`` before creating the Steam database. Be sure to provide a secure password, and be sure to remember the password that you enter. This will be required each time you log in to Steam. 
+
+		createuser -P steam 
+		Enter password for new role: st3amUser
+		Enter it again: st3amUser
+		# Change directories to the Steam /var/master/scripts folder.
+		cd steam-master-darwin-amd64/var/master/scripts
+		./create-database.sh
+
+3. Open a third terminal window. Navigate to the Steam folder and run the following command from within the Steam folder to start the Steam compilation service. 
+
+		cd ../../../
+		java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+
+4. Open a fourth terminal window. From within the Steam folder, start Steam using the password that you provided in Step 2. This starts Steam on localhost:9000.
+
+		./steam serve master --superuser-name=superuser --superuser-password=superuser
+		
+5. <a name="step5"></a>Open a fifth terminal window. From within the Steam folder, log in to the maching running Steam (localhost:9000). Use the password that you provided in Step 2.
+
+		./steam login localhost:9000 --username=superuser --password=superuser
+
+6. Run the following to verify that the CLI is working correctly.
+
+		./steam help
+		
+	You should see the following output.
+	
+		steam vmaster build 2016-07-01T16:26:15+0000: Command Line Interface to Steam
+		
+		Usage:
+		  steam [command]
+		
+		Available Commands:
+		  login       Sign in to a Steam server.
+		  reset       Reset Steam client configuration.
+		  serve       Launch a new service.
+		  start       Start a new resource.
+		  stop        Stop the specified resource.
+		  register    Register an external resource.
+		  unregister  Unregister an external resource.
+		  deploy      Deploy a resource of the specified type.
+		  get         List or view resources of the specified type.
+		  delete      Deletes the specified resource from the database.
+		  import      Import a resource of the specified type into steam.
+		  create      Creates an instance of the specified resource.
+		  deactivate  Deactivate and entity type.
+		  update      Updates an entity in the database.
+		  link        Add authentication permissions.
+		  unlink      Remove authentication permissions.
+
+		Flags:
+		  -v, --verbose[=false]: verbose output
+
+		Use "steam [command] --help" for more information about a command. 
+
+
+<a name="user management workflow"></a>
+### User Management Workflow
+
+The steps below provide a common workflow to follow when creating users. This workflow is followed in the example that follows.
+
+1. Define roles based on operational needs.
+2. Define workgroups based on data / access control needs.
+3. Then add a new user:
+
+ -	Create the user's identity.
+ - Associate the user with one or more roles.
+ - Optionally, associate the user with one or more workgroups. 
+
+#### Example
+
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference](#CLI Command Reference) section for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 5](#step5) above).
+
+		# Create engineer role and link that role to permissions
+		./steam create role engineer --desc="a default engineer role"
+		./steam link role engineer ViewClusters ViewModels ViewWorkgroups
+		
+		# Create data scientist role and link that role to permissions
+		./steam create role datascience --desc="a default data scientist role"
+		./steam link role datascience ViewClusters CreateModels ViewWorkgroups
+		
+		# Create preparation and production workgroups
+		./steam create workgroup preparation --desc="data prep group"
+		./steam create workgroup production --desc="production group"
+		
+		# Create two users - Bob and Jim
+		./steam create identity bob bobSpassword
+		./steam create identity jim j1mSpassword
+		
+		# Link Bob to engineer role; link Jim to datascience role
+		./steam link identity bob role engineer
+		./steam link identity jim role datascience
+		
+		# Link Bob to preparation workgroup; link Jim to production workgroup
+		./steam link identity bob workgroup preparation
+		./steam link identity jim workgroup production
+
+
+### Stopping the Steam Database
+
+Use Ctrl+C in each of the Steam, Compilation Service, and postgres terminal windows to stop the services end your session. 
+
+<a name="CLI Command Reference"></a>
 # CLI Command Reference
 
 - [`create identity`](#create identity)
-- [`deactivate`](#deactivate)
+- [`deactivate identity`](#deactivate identity)
 - [`delete cluster`](#delete cluster)
 - [`delete engine`](#delete engine)
 - [`delete model`](#delete model)
