@@ -1391,7 +1391,10 @@ func (ds *Datastore) UpdateWorkgroup(pz az.Principal, workgroupId int64, name, d
 			`, name, description, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Workgroup, workgroupId, metadata{"name": name})
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Workgroup, workgroupId, metadata{
+			"name":        name,
+			"description": description,
+		})
 	})
 }
 
@@ -1793,6 +1796,27 @@ func (ds *Datastore) UnlinkIdentityAndRole(pz az.Principal, identityId, roleId i
 			"id":   strconv.FormatInt(roleId, 10),
 			"name": role.Name,
 		})
+	})
+}
+
+func (ds *Datastore) UpdateIdentity(pz az.Principal, identityId int64, password string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Identity, identityId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				identity
+			SET
+				password = $1
+			WHERE
+				id = $2
+			`, password, identityId); err != nil {
+			return err
+		}
+
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Identity, identityId, metadata{"password": "(changed)"})
 	})
 }
 

@@ -201,6 +201,7 @@ type Service interface {
 	UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error
 	LinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error
 	UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error
+	UpdateIdentity(pz az.Principal, identityId int64, password string) error
 	DeactivateIdentity(pz az.Principal, identityId int64) error
 	ShareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) error
 	GetEntityPrivileges(pz az.Principal, entityTypeId int64, entityId int64) ([]*EntityPrivilege, error)
@@ -683,6 +684,14 @@ type UnlinkIdentityAndRoleIn struct {
 }
 
 type UnlinkIdentityAndRoleOut struct {
+}
+
+type UpdateIdentityIn struct {
+	IdentityId int64  `json:"identity_id"`
+	Password   string `json:"password"`
+}
+
+type UpdateIdentityOut struct {
 }
 
 type DeactivateIdentityIn struct {
@@ -1316,6 +1325,16 @@ func (this *Remote) UnlinkIdentityAndRole(identityId int64, roleId int64) error 
 	in := UnlinkIdentityAndRoleIn{identityId, roleId}
 	var out UnlinkIdentityAndRoleOut
 	err := this.Proc.Call("UnlinkIdentityAndRole", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) UpdateIdentity(identityId int64, password string) error {
+	in := UpdateIdentityIn{identityId, password}
+	var out UpdateIdentityOut
+	err := this.Proc.Call("UpdateIdentity", &in, &out)
 	if err != nil {
 		return err
 	}
@@ -2344,6 +2363,22 @@ func (this *Impl) UnlinkIdentityAndRole(r *http.Request, in *UnlinkIdentityAndRo
 	err := this.Service.UnlinkIdentityAndRole(pz, in.IdentityId, in.RoleId)
 	if err != nil {
 		log.Printf("%s Failed to UnlinkIdentityAndRole: %v", pz, err)
+		return err
+	}
+	return nil
+}
+
+func (this *Impl) UpdateIdentity(r *http.Request, in *UpdateIdentityIn, out *UpdateIdentityOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called UpdateIdentity")
+
+	err := this.Service.UpdateIdentity(pz, in.IdentityId, in.Password)
+	if err != nil {
+		log.Printf("%s Failed to UpdateIdentity: %v", pz, err)
 		return err
 	}
 	return nil

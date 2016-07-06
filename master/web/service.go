@@ -1164,6 +1164,19 @@ func (s *Service) UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleI
 	return s.ds.UnlinkIdentityAndRole(pz, identityId, roleId)
 }
 
+func (s *Service) UpdateIdentity(pz az.Principal, identityId int64, password string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
+		return err
+	}
+
+	hash, err := auth.HashPassword(password)
+	if err != nil {
+		return fmt.Errorf("Failed hashing password: %s", err)
+	}
+
+	return s.ds.UpdateIdentity(pz, identityId, hash)
+}
+
 func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
