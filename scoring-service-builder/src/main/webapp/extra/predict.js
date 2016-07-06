@@ -169,35 +169,37 @@
       // dimensionality reduction result
       result = "Dimensions <b>" + data["dimensions"] + "</b>";
     }
-    else
+    else {
       result = "Can't parse result: " + data;
+    }
 
     // result += "<p><code>" + JSON.stringify(data) + "</code>";
 
     div.innerHTML = result;
 }
 
-function showUrl(pardiv, params) {
-  // remove empty parameters returned by serialize.
-  params = params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
-  url = "http://" + window.location.host + "/predict?" + params;
-  pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
-}
+  function showUrl(pardiv, params) {
+    // remove empty parameters returned by serialize.
+    params = params.replace(/[\w]+=&/g, "").replace(/&?[\w]+=$/g, "");
+    var url = "http://" + window.location.host + "/predict?" + params;
+    pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
+  }
 
-function showCurl(pardiv, params) {
-  // remove empty parameters returned by serialize.
-  params = params.replace(/'/g, "'\\''") // quote quotes -> '\''
-  url = "http://" + window.location.host + "/pypredict";
-  pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
-}
+  function showCurl(pardiv, params) {
+    // remove empty parameters returned by serialize.
+    params = params.replace(/'/g, "\\'") // quote quotes
+    var url = "http://" + window.location.host + "/pypredict";
+    pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
+  }
 
-function predResults(params) {
-  pardiv = document.querySelector(".params");
-  // add link that opens in new window
-  showUrl(pardiv, params);
+  function predResults(params) {
+    // var pardiv = document.querySelector(".params");
+    // add link that opens in new window
+    //showUrl(pardiv, params);
 
-  div = document.querySelector(".results");
-  cmd = '/predict?' + params;
+    var div = document.querySelector("#modelPredictions");
+
+    var cmd = '/predict?' + params;
     $.get(cmd, function(data, status) {
       showResult(div, status, data);
     }, 'json')
@@ -234,21 +236,23 @@ function predResults(params) {
 //  predResults($('#allparams').serialize());
 //}
 
-function predResultsPost(params) {
-  pardiv = document.querySelector(".curl");
-  showCurl(pardiv, params);
-  div = document.querySelector(".results");
-  cmd = '/pypredict';
-  $.post(cmd, params, function(data, status) {
-        showResult(div, status, data);
-      },'json')
-        .fail(function(data, status, error) {
-          down = "<b>POST to /pypredict Failed</b>";
-          div.innerHTML = down + "<br>status " + status + "<br>error " + error;
-          stats = document.querySelector(".stats");
-          stats.innerHTML = down;
+  function predResultsPost(params) {
+    var pardiv = document.querySelector(".curl");
+    showCurl(pardiv, params);
+
+    var div = document.querySelector(".results");
+    var cmd = '/pypredict';
+    $.post(cmd, params, function(data, status) {
+      showResult(div, status, data);
+    }, 'json')
+      .fail(function(data, status, error) {
+        var down = "<b>POST to /pypredict Failed</b>";
+        div.innerHTML = down + "<br>status " + data.status + "<br>statusText " + data.statusText;
+        var stats = document.querySelector(".stats");
+        stats.innerHTML = down;
       });
-}
+
+  }
 
   window.runpredpost = function(form) {
     predResultsPost(form.p.value);
