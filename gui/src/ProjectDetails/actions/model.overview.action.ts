@@ -5,6 +5,16 @@ import { MockFetchStrategy } from '../../App/utils/FetchStrategy/MockFetchStrate
 export const FETCH_MODEL_OVERVIEW = 'FETCH_MODEL_OVERVIEW';
 export const RECEIVE_MODEL_OVERVIEW = 'RECEIVE_MODEL_OVERVIEW';
 
+interface Basics {
+  label: string,
+  value: string | number
+}
+
+interface Parameters {
+  label: string,
+  value: number
+}
+
 export const requestModelOverview = () => {
   return {
     type: FETCH_MODEL_OVERVIEW
@@ -21,7 +31,7 @@ export function receiveModelOverview(modelOverview) {
 export function fetchModelOverview() {
   return (dispatch) => {
     dispatch(requestModelOverview());
-    let basics = [
+    let basics: Basics[] = [
       {
         label: 'Author',
         value: 'Mark Landry'
@@ -47,7 +57,7 @@ export function fetchModelOverview() {
         value: 'GBM'
       }
     ];
-    let parameters = [
+    let parameters: Parameters[] = [
       {
         label: 'ntrees',
         value: 50,

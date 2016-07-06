@@ -1,7 +1,16 @@
-$brand-dark: #131313;
+$brand-dark-1: rgb(74, 74, 74);
+$brand-dark-2: rgb(109, 109, 109);
+$brand-dark-3: rgb(155, 155, 155);
 $brand-yellow: #fbe91f;
 $brand-blue: #1485CC;
-$brand-white: lighten($brand-dark, 92%);
-$navigation-width: 240px;
-$navigation-icon-size: 45px;
+$brand-green: green;
+$brand-white: rgb(255, 255, 255);
+$brand-orange: rgb(245, 166, 35);
+
+$base-grid-unit: 60px;
 $body-index: 3;
+$xlarge: $base-grid-unit;
+$large: $base-grid-unit * (2/3);
+$medium: $base-grid-unit / 2;
+$small: $base-grid-unit / 3;
+$xsmall: $base-grid-unit / 4;

@@ -8,7 +8,6 @@ import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
 import GoodnessOfFit from './components/GoodnessOfFit';
 import './styles/projectdetails.scss';
-import 'bootstrap/dist/css/bootstrap.css';
 
 interface Props {
   params: any

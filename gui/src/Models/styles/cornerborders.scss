@@ -1,0 +1,17 @@
+@import '../../variables.scss';
+
+.corner-borders {
+  position: relative;
+  border: 1px solid $brand-dark-1;
+  width: 100%;
+  &:before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    border: 1px solid #fff;
+    height: calc(100% + 2px);
+    width: calc(100% + 2px);
+    border-radius: $small;
+  }
+}

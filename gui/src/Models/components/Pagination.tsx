@@ -3,7 +3,6 @@
  */
 import * as React from 'react';  
 import '../styles/pagination.scss';
-import 'bootstrap/dist/css/bootstrap.css';
 
 interface Props {
   
@@ -14,9 +13,9 @@ export class Pagination extends React.Component<Props, any> {
     return (
       <div className="pagination-container">
         <div>
-          <span><i className="glyphicon glyphicon-chevron-left"></i></span>
+          <span><i className="fa fa-chevron-left"></i></span>
           Page 1 of 14
-          <span><i className="glyphicon glyphicon-chevron-right"></i></span>
+          <span><i className="fa fa-chevron-right"></i></span>
         </div>
       </div>
     );

@@ -3,7 +3,6 @@
  */
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import * as classNames from 'classnames';
 import '../styles/overlay.scss';
 
 interface Props {

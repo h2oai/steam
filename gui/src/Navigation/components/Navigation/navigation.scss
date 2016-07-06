@@ -1,5 +1,6 @@
 @import '../../../variables.scss';
 
+$navigation-width: $base-grid-unit * 5;
 .navigation-wrapper {
   display: flex;
   height: 100%;
@@ -14,26 +15,44 @@
   .active {
     background: $brand-yellow;
     a {
-      color: $brand-dark !important;
+      color: $brand-dark-1 !important;
     }
   }
 }
-
 
 .secondary-navigation {
   position: absolute;
   transition: transform .3s ease-in-out;
   z-index: $body-index - 1;
-  background: lighten($brand-dark, 20%);
-  transform: translate3d(-201px, 0, 0);
-  .active {
-    background: $brand-yellow;
-    a {
-      color: $brand-dark !important;
+  background: $brand-dark-2;
+  transform: translate3d(-($navigation-width - $xlarge), 0, 0);
+  .nav-list--item {
+    position: relative;
+    border: 4px solid $brand-dark-2;
+    padding: 0 $small;
+    &.active {
+      &::before {
+        right: 100%;
+        top: 50%;
+        border: solid transparent;
+        content: '';
+        height: 0;
+        width: 0;
+        position: absolute;
+      }
+      &::before {
+        border-color: transparent;
+        border-width: $xsmall;
+        margin-top: -($xsmall);
+        border-right-color: $brand-dark-2;
+      }
+      a {
+        color: $brand-white !important;
+      }
     }
   }
   &.open {
-    transform: translate3d(0px, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -54,37 +73,37 @@
     height: 100%;
     width: 100%;
     position: absolute;
-    background: $brand-dark;
+    background: $brand-dark-1;
     color: $brand-yellow;
     .item {
       display: flex;
       align-items: center;
       border-bottom: 1px solid $brand-yellow;
-      height: 70px;
-      padding: 0 20px;
+      height: $xlarge;
+      padding: 0 $small;
       cursor: pointer;
       &--label {
         font-size: 2em;
       }
       &:hover {
         background: $brand-yellow;
-        color: $brand-dark;
+        color: $brand-dark-1;
         .avatar-container .avatar {
-          background: $brand-dark;
+          background: $brand-dark-1;
         }
       }
     }
     .project-sidebar-header {
       justify-content: center;
       flex-direction: column;
-      padding: 10px;
+      padding: $small;
       height: auto;
       .avatar-container {
         display: flex;
         .avatar {
           background: $brand-yellow;
-          height: 45px;
-          width: 45px;
+          height: $xlarge;
+          width: $xlarge;
           border-radius: 50%;
           margin: 0 5px;
         }
@@ -92,17 +111,23 @@
     }
     .models {
       border-top: 1px solid $brand-yellow;
-      height: 70px;
+      height: $xlarge;
       .badge {
         margin-left: auto;
       }
     }
     .transformations {
-      height: 70px;
+      height: $xlarge;
     }
   }
 }
 
+.header-content {
+  font-size: 48px;
+  flex-basis: 3.5em;
+  color: $brand-dark-3;
+  padding: 0 $small;
+}
 .navigation {
   height: 100%;
   &--primary {
@@ -111,11 +136,24 @@
   display: flex;
   flex-direction: column;
   header {
-    height: 45px;
+    height: $xlarge;
     width: 100%;
+    .header-navigation {
+      height: $xlarge;
+      font-size: 1.5em;
+      color: $brand-dark-3;
+      font-family: "Open Sans", sans-serif;
+      justify-content: flex-start;
+      align-items: center;
+      display: flex;
+      padding: 0 $small;
+      i {
+        margin-right: 5px;
+      }
+    }
     .logo-container {
-      height: $navigation-icon-size;
-      width: $navigation-icon-size;
+      height: $xlarge;
+      width: $xlarge;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -123,7 +161,7 @@
         height: 26.5px;
         width: 26.5px;
         border-radius: 50%;
-        background: $brand-yellow;
+        background: $brand-dark-1;
         margin-right: 5px;
         img {
           margin-left: 2px;
@@ -134,33 +172,39 @@
   }
   .nav-list {
     padding: 0;
-    color: $brand-yellow;
+    color: $brand-white;
     list-style: none;
-    font-size: 1.4em;
-    letter-spacing: 0.2em;
-    font-weight: 800;
+    font-size: 1.5em;
     height: 100%;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 500;
     margin-bottom: 0;
-    transition: background 0.3s linear;
-    &.open {
-      background: lighten($brand-dark, 20%);
+    &--label {
+      flex: 1;
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+      display: flex;
     }
     li {
-      padding: 5px 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 45px;
+      height: $xlarge;
       i {
-        height: $navigation-icon-size;
-        flex-basis: $navigation-icon-size;
-        line-height: $navigation-icon-size;
+        height: $xlarge;
+        width: $xlarge;
+        flex-basis: $xlarge;
+        line-height: $xlarge;
         text-align: center;
       }
       a {
-        flex-basis: 90%;
+        justify-content: flex-start;
+        align-items: center;
+        flex: 1;
+        display: flex;
         text-decoration: none;
-        color: $brand-yellow;
+        color: $brand-white;
       }
     }
   }

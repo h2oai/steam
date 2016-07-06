@@ -1,8 +1,8 @@
 @import '../../variables.scss';
 
 .deploy-modal {
-  height: 50%;
   width: 50%;
+  height: 50%;
   background: $brand-white;
   border-radius: 5px;
   justify-content: center;
@@ -17,7 +17,7 @@
       outline: none;
     }
     &:hover {
-      color: $brand-dark;
+      color: $brand-dark-1;
     }
   }
   header {

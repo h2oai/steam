@@ -1,0 +1,58 @@
+@import '../../variables.scss';
+
+.new-project {
+  form {
+    margin: $small 0;
+    label {
+      font-size: 1.5em;
+      display: block;
+      margin: ($xsmall / 2) 0;
+    }
+    span {
+      font-size: 1em;
+      font-family: "Open Sans", sans-serif;
+      display: block;
+    }
+    input {
+      width: $base-grid-unit * 3;
+    }
+  }
+  .save-dictionary, .train-models {
+    margin: $medium 0;
+  }
+  .build-model {
+    .row {
+      padding: $xsmall 0;
+      .cell:first-child {
+        flex-basis: $xlarge * 2;
+        flex-grow: 0;
+      }
+    }
+    .mode-checkboxes {
+      width: 50%;
+      display: flex;
+      justify-content: space-between;
+    }
+    .dataframe-range {
+      display: flex;
+      flex-direction: column;
+      width: $xlarge * 4;
+      input[type="range"] {
+        width: $xlarge * 4;
+      }
+      &-labels {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+  }
+  button {
+    padding: 5px $small;
+    border-radius: 3px;
+    color: $brand-white;
+    background-color: $brand-orange;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}

@@ -8,9 +8,9 @@
   width: 100%;
   z-index: $body-index;
   .content {
-    padding: 45px;
     height: 100%;
     min-height: 100%;
+    padding: 0 $base-grid-unit;
   }
   .menu-container {
     position: absolute;

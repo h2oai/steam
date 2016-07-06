@@ -3,32 +3,22 @@
  */
 
 import * as React from 'react';
-import * as classNames from 'classnames';
-import { Leaderboard }from './components/Leaderboard';
-import { Pagination } from './components/Pagination';
+import * as _ from 'lodash';
+import NewProject from './components/NewProject';
 
-export default class Projects extends React.Component<any, any> {
-  render() {
-    let items = [
-      {
-        id: 1,
-        rank: 1,
-        metadata: {
-          name: 'DRF-1069085'
-        }
-      },
-      {
-        id: 2,
-        rank: 2,
-        metadata: {
-          name: 'DRF-1069099'
-        }
-      }
-    ];
+interface Props {
+  leaderboard
+}
+
+interface DispatchProps {
+  fetchLeaderboard: Function
+}
+
+export default class Projects extends React.Component<Props & DispatchProps, any> {
+  render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="projects">
-        <Leaderboard items={items}></Leaderboard>
-        <Pagination></Pagination>
+        <NewProject></NewProject>
       </div>
     );
   }

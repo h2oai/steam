@@ -1,0 +1,8 @@
+@import '../../variables.scss';
+
+.page-header {
+  font-family: "Oswald", sans-serif;
+  font-size: 48px;
+  color: $brand-orange;
+  margin-bottom: $base-grid-unit / 2;
+}

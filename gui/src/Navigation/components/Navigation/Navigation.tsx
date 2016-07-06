@@ -28,28 +28,40 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
       icon: 'fa fa-folder',
       childRoutes: [
         {
-          path: 'projects',
-          label: 'Leaderboard'
+          path: 'models',
+          label: 'Models'
         },
         {
-          path: 'assets',
-          label: 'Assets'
+          path: 'projects/dataframes',
+          label: 'Dataframes'
         },
         {
-          path: 'services',
-          label: 'Services'
+          path: 'projects/repository',
+          label: 'Repository'
+        },
+        {
+          path: 'projects/configurations',
+          label: 'Configurations'
+        },
+        {
+          path: 'projects/deployments',
+          label: 'Deployments'
+        },
+        {
+          path: 'projects/collaborators',
+          label: 'Collaborators'
         }
       ]
+    },
+    services: {
+      path: 'services',
+      label: 'Services',
+      icon: 'fa fa-cloud',
+      childRoutes: []
     },
     clusters: {
       path: 'clusters',
       label: 'Clusters',
-      icon: 'fa fa-cloud',
-      childRoutes: []
-    },
-    models: {
-      path: 'models',
-      label: 'Models',
       icon: 'fa fa-cube',
       childRoutes: [
         {
@@ -57,6 +69,12 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
           label: 'Sub 1'
         }
       ]
+    },
+    team: {
+      path: 'team',
+      label: 'Team',
+      icon: 'fa fa-users',
+      childRoute: []
     }
   };
 
@@ -102,11 +120,13 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
                   <div className="logo"><img src={logo}></img></div>
                 </div>
               </header>
+              <div className="header-content">
+              </div>
               <ul className={classNames('nav-list', {open: this.state.isOpen})}>
                 {Object.keys(this.sitemap).map((route: string, i: number) => {
                     return (
                       <li key={i} className={classNames('nav-list--item', {active: this.getPath() === route && !this.sitemap[route].childRoutes})} onMouseOver={this.openSubmenu}>
-                        <Link to={this.sitemap[route].path}><i className={this.sitemap[route].icon}></i> {this.sitemap[route].label}</Link>
+                        <Link to={this.sitemap[route].path}><i className={this.sitemap[route].icon}></i><div className="nav-list--label">{this.sitemap[route].label}</div></Link>
                       </li>
                     );
                   })}
@@ -118,7 +138,11 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
           <nav className="navigation--primary">
             <div className="navigation">
               <header>
+                <div className="header-navigation">
+                  <i className="fa fa-angle-left"></i><span>Projects</span>
+                </div>
               </header>
+              <div className="header-content">UNTITLED</div>
               <ul className="nav-list">
                 {this.sitemap[this.getPath()] ? this.sitemap[this.getPath()].childRoutes.map((route, i: number) => {
                   return (

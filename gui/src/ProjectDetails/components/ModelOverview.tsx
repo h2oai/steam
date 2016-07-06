@@ -22,7 +22,6 @@ export class ModelOverview extends React.Component<Props & DispatchProps, any> {
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    console.log(this.props);
     if (!this.props.modelOverview) {
       return <div></div>;
     }
