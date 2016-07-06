@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/lib/pq"
 )
@@ -279,7 +280,68 @@ type Datastore struct {
 	ManagePermissions map[int64]int64
 }
 
-func Connect(username, dbname, sslmode string) (*sql.DB, error) {
+func Create(name, username, sslmode, suname, supass string) (*Datastore, error) {
+	db, err := connect(username, name, sslmode)
+	if err != nil {
+		return nil, fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
+	}
+
+	primed, err := isPrimed(db)
+	if err != nil {
+		return nil, fmt.Errorf("Failed database version check:", err)
+	}
+
+	if !primed {
+		if suname == "" || supass == "" {
+			return nil, fmt.Errorf("Starting Steam for the first time requires both --superuser-name and --superuser-password arguments to \"steam serve master\".")
+		}
+
+		if err := auth.ValidateUsername(suname); err != nil {
+			return nil, fmt.Errorf("Invalid superuser username: %s", err)
+		}
+
+		if err := auth.ValidatePassword(supass); err != nil {
+			return nil, fmt.Errorf("Invalid superuser password: %s", err)
+		}
+
+		if err := prime(db); err != nil {
+			return nil, fmt.Errorf("Failed priming database: %s", err)
+		}
+	}
+
+	ds, err := newDatastore(db)
+	if err != nil {
+		return nil, fmt.Errorf("Failed initializing from database: %s", err)
+	}
+
+	if !primed {
+		passwordHash, err := auth.HashPassword(supass)
+		if err != nil {
+			return nil, fmt.Errorf("Failed hashing superuser password: %s", err)
+		}
+
+		if _, _, err := ds.CreateSuperuser(suname, passwordHash); err != nil {
+			return nil, fmt.Errorf("Failed superuser identity setup: %s", err)
+		}
+
+		_, err = ds.Lookup(suname)
+		if err != nil {
+			return nil, fmt.Errorf("Failed reading superuser principal: %s", err)
+		}
+	}
+
+	return ds, nil
+}
+
+func Destroy(name, username, sslmode string) error {
+	db, err := connect(username, name, sslmode)
+	if err != nil {
+		return fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
+	}
+	return truncate(db)
+}
+
+func connect(username, dbname, sslmode string) (*sql.DB, error) {
 
 	log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
 
@@ -299,7 +361,7 @@ func Connect(username, dbname, sslmode string) (*sql.DB, error) {
 	return db, nil
 }
 
-// NewDB creates a new instance of a data access object.
+// newDatastore creates a new instance of a data access object.
 //
 // Valid values for sslmode are:
 //   disable - No SSL
@@ -307,7 +369,7 @@ func Connect(username, dbname, sslmode string) (*sql.DB, error) {
 //   verify-ca - Always SSL (verify that the certificate presented by the server was signed by a trusted CA)
 //   verify-full - Always SSL (verify that the certification presented by the server was signed by a
 //     trusted CA and the server host name matches the one in the certificate)
-func NewDatastore(db *sql.DB) (*Datastore, error) {
+func newDatastore(db *sql.DB) (*Datastore, error) {
 
 	// Read meta information
 
@@ -400,7 +462,7 @@ func NewDatastore(db *sql.DB) (*Datastore, error) {
 	}, nil
 }
 
-func IsPrimed(db *sql.DB) (bool, error) {
+func isPrimed(db *sql.DB) (bool, error) {
 	row := db.QueryRow(`
 		SELECT 
 			count(1)
@@ -414,7 +476,7 @@ func IsPrimed(db *sql.DB) (bool, error) {
 	return count > 0, err
 }
 
-func Prime(db *sql.DB) error {
+func prime(db *sql.DB) error {
 	log.Println("Priming database for first time use...")
 	if err := createMetadata(db, "version", "1"); err != nil {
 		return err
@@ -1154,13 +1216,15 @@ func (ds *Datastore) DeleteRole(pz az.Principal, roleId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				role
 			WHERE
 				id = $1
-			`, roleId,
-		); err != nil {
+			RETURNING id
+			`, roleId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Role, roleId); err != nil {
@@ -1327,7 +1391,10 @@ func (ds *Datastore) UpdateWorkgroup(pz az.Principal, workgroupId int64, name, d
 			`, name, description, workgroupId); err != nil {
 			return err
 		}
-		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Workgroup, workgroupId, metadata{"name": name})
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Workgroup, workgroupId, metadata{
+			"name":        name,
+			"description": description,
+		})
 	})
 }
 
@@ -1336,12 +1403,15 @@ func (ds *Datastore) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
 		return err
 	}
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				workgroup
 			WHERE
 				id = $1
-			`, workgroupId); err != nil {
+			RETURNING id
+			`, workgroupId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Workgroup, workgroupId); err != nil {
@@ -1709,13 +1779,16 @@ func (ds *Datastore) UnlinkIdentityAndRole(pz az.Principal, identityId, roleId i
 		return err
 	}
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				identity_role
 			WHERE
 				identity_id = $1 AND
 				role_id = $2
-			`, identityId, roleId); err != nil {
+			RETURNING identity_id
+			`, identityId, roleId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Identity, identityId, metadata{
@@ -1723,6 +1796,27 @@ func (ds *Datastore) UnlinkIdentityAndRole(pz az.Principal, identityId, roleId i
 			"id":   strconv.FormatInt(roleId, 10),
 			"name": role.Name,
 		})
+	})
+}
+
+func (ds *Datastore) UpdateIdentity(pz az.Principal, identityId int64, password string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Identity, identityId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				identity
+			SET
+				password = $1
+			WHERE
+				id = $2
+			`, password, identityId); err != nil {
+			return err
+		}
+
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Identity, identityId, metadata{"password": "(changed)"})
 	})
 }
 
@@ -1987,13 +2081,15 @@ func (ds *Datastore) DeleteEngine(pz az.Principal, engineId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				engine
 			WHERE
 				id = $1
-			`, engineId,
-		); err != nil {
+			RETURNING id
+			`, engineId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Engine, engineId); err != nil {
@@ -2253,24 +2349,28 @@ func (ds *Datastore) DeleteCluster(pz az.Principal, clusterId int64) error {
 
 	return ds.exec(func(tx *sql.Tx) error {
 		if cluster.TypeId == ds.ClusterTypes.Yarn {
-			if _, err := tx.Exec(`
+			var id int64
+			row := tx.QueryRow(`
 				DELETE FROM
 					cluster_yarn
 				WHERE
 					id = $1
-				`, cluster.DetailId,
-			); err != nil {
+				RETURNING id
+				`, cluster.DetailId)
+			if err := row.Scan(&id); err != nil {
 				return err
 			}
 		}
 
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				cluster
 			WHERE
 				id = $1
-			`, clusterId,
-		); err != nil {
+			RETURNING id
+			`, clusterId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 
@@ -2347,13 +2447,16 @@ func (ds *Datastore) UnlinkProjectAndModel(pz az.Principal, projectId, modelId i
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				project_model
 			WHERE
 				project_id = $1 AND
 				model_id = $2
-			`, projectId, modelId); err != nil {
+			RETURNING model_id
+			`, projectId, modelId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Project, projectId, metadata{
@@ -2413,13 +2516,15 @@ func (ds *Datastore) DeleteProject(pz az.Principal, projectId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				project
 			WHERE
 				id = $1
-			`, projectId,
-		); err != nil {
+			RETURNING id
+			`, projectId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Project, projectId); err != nil {
@@ -2566,13 +2671,15 @@ func (ds *Datastore) DeleteModel(pz az.Principal, modelId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				model
 			WHERE
 				id = $1
-			`, modelId,
-		); err != nil {
+			RETURNING id
+			`, modelId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Model, modelId); err != nil {
@@ -2718,15 +2825,18 @@ func (ds *Datastore) DeleteService(pz az.Principal, serviceId int64) error {
 	}
 
 	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
+		var id int64
+		row := tx.QueryRow(`
 			DELETE FROM
 				service
 			WHERE
 				id = $1
-			`, serviceId,
-		); err != nil {
+			RETURNING id
+			`, serviceId)
+		if err := row.Scan(&id); err != nil {
 			return err
 		}
+
 		if err := deletePrivilegesOn(tx, ds.EntityTypes.Service, serviceId); err != nil {
 			return err
 		}

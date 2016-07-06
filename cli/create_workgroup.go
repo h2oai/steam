@@ -10,7 +10,7 @@ import (
 var createWorkgroupHelp = `
 workgroup [workgroupName] 
 Creates a user permissions workgroup.
-Exampes:
+Examples:
 
 	$ steam create workgroup production --desc="The production group"
 `

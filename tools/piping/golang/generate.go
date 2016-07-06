@@ -1,9 +1,10 @@
 package golang
 
 import (
+	"strings"
+
 	"github.com/h2oai/steamY/tools/piping/parser"
 	"github.com/serenize/snaker"
-	"strings"
 )
 
 func genParam(p *parser.Param) string {
@@ -128,6 +129,7 @@ func genServerStub(f *parser.Func) string {
 		return azerr
 	}
 	`
+	c += "log.Println(pz, \"called " + f.Name + "\")\n\n"
 
 	if f.Return != nil {
 		c += "it, "
@@ -140,7 +142,9 @@ func genServerStub(f *parser.Func) string {
 		}
 		c += strings.Join(params, ", ")
 	}
-	c += ")\n\tif err != nil {\n\t\treturn err\n\t}\n"
+	c += ")\n\tif err != nil {\n"
+	c += "\t\tlog.Printf(\"%s Failed to " + f.Name + ": %v\", pz, err)\n"
+	c += "\t\treturn err\n\t}\n"
 	if f.Return != nil {
 		c += "\tout." + capitalize(f.Return.Name) + " = it\n"
 	}

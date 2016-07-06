@@ -2,16 +2,8 @@ package web
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"sort"
-	"strconv"
-	// "sync"
-	"time"
-
 	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
-	// "github.com/h2oai/steamY/lib/proxy"
 	"github.com/h2oai/steamY/lib/svc"
 	"github.com/h2oai/steamY/lib/yarn"
 	"github.com/h2oai/steamY/master/auth"
@@ -20,6 +12,11 @@ import (
 	"github.com/h2oai/steamY/srv/compiler" // FIXME rename comp to compiler
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
+	"log"
+	"os"
+	"sort"
+	"strconv"
+	"time"
 )
 
 type Service struct {
@@ -32,27 +29,24 @@ type Service struct {
 	keytab                    string
 }
 
+func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *Service {
+	return &Service{
+		workingDir,
+		ds,
+		compilationServiceAddress,
+		scoringServiceAddress,
+		kerberos,
+		username,
+		keytab,
+	}
+}
+
 func toTimestamp(t time.Time) int64 {
 	return t.UTC().Unix()
 }
 
 func now() int64 {
 	return toTimestamp(time.Now())
-}
-
-func NewService(az az.Az, workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *web.Impl {
-	return &web.Impl{
-		&Service{
-			workingDir,
-			ds,
-			compilationServiceAddress,
-			scoringServiceAddress,
-			kerberos,
-			username,
-			keytab,
-		},
-		az,
-	}
 }
 
 func (s *Service) Ping(pz az.Principal, status bool) (bool, error) {
@@ -136,7 +130,7 @@ func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId
 
 	applicationId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
-		log.Println(err)
+		log.Println(pz, err)
 		return 0, err
 	}
 
@@ -540,11 +534,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
+
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
 		return nil, err
 	}
 
+	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
 	r, err := h2o.GetModel(modelName)
@@ -736,6 +732,24 @@ func (s *Service) GetScoringServices(pz az.Principal, offset, limit int64) ([]*w
 	if err != nil {
 		return nil, err
 	}
+	ss := make([]*web.ScoringService, len(services))
+	for i, service := range services {
+		ss[i] = toScoringService(service)
+	}
+
+	return ss, nil
+}
+
+func (s *Service) GetScoringServicesForModel(pz az.Principal, modelId, offset, limit int64) ([]*web.ScoringService, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
+		return nil, err //FIXME format error
+	}
+
+	services, err := s.ds.ReadServicesForModelId(pz, modelId)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
 	ss := make([]*web.ScoringService, len(services))
 	for i, service := range services {
 		ss[i] = toScoringService(service)
@@ -1067,7 +1081,7 @@ func (s *Service) GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) 
 	return toIdentities(identities), nil
 }
 
-func (s *Service) GetIdentititesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
+func (s *Service) GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
 	}
@@ -1148,6 +1162,19 @@ func (s *Service) UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleI
 	}
 
 	return s.ds.UnlinkIdentityAndRole(pz, identityId, roleId)
+}
+
+func (s *Service) UpdateIdentity(pz az.Principal, identityId int64, password string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
+		return err
+	}
+
+	hash, err := auth.HashPassword(password)
+	if err != nil {
+		return fmt.Errorf("Failed hashing password: %s", err)
+	}
+
+	return s.ds.UpdateIdentity(pz, identityId, hash)
 }
 
 func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {

@@ -137,6 +137,7 @@ StartScoringService(modelId int64, port int) service *ScoringService
 StopScoringService(serviceId int64)
 GetScoringService(serviceId int64) service *ScoringService
 GetScoringServices(offset int64, limit int64) services []*ScoringService
+GetScoringServicesForModel(modelId int64, offset int64, limit int64) services []*ScoringService
 DeleteScoringService(serviceId int64)
 
 AddEngine(engineName string, enginePath string) engineId int64
@@ -170,13 +171,14 @@ DeleteWorkgroup(workgroupId int64)
 CreateIdentity(name string, password string) identityId int64
 GetIdentities(offset int64, limit int64) identities []*Identity
 GetIdentitiesForWorkgroup(workgroupId int64) identities []*Identity
-GetIdentititesForRole(roleId int64) identities []*Identity
+GetIdentitiesForRole(roleId int64) identities []*Identity
 GetIdentity(identityId int64) identity *Identity
 GetIdentityByName(name string) identity *Identity
 LinkIdentityAndWorkgroup(identityId int64, workgroupId int64)
 UnlinkIdentityAndWorkgroup(identityId int64, workgroupId int64)
 LinkIdentityAndRole(identityId int64, roleId int64)
 UnlinkIdentityAndRole(identityId int64, roleId int64)
+UpdateIdentity(identityId int64, password string)
 DeactivateIdentity(identityId int64)
 
 ShareEntity(kind string, workgroupId int64, entityTypeId int64, entityId int64)

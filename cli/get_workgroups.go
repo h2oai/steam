@@ -13,7 +13,7 @@ import (
 var getWorkgroupsHelp = `
 workgroups
 List permission workgroups.
-Exampes:
+Examples:
 
 	$ steam get workgroups --identity=2
 `

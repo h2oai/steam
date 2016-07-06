@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
+import com.google.gson.GsonBuilder;
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.*;
 import hex.genmodel.*;
@@ -23,7 +24,7 @@ public class PredictPythonServlet extends HttpServlet {
   private static OutputStream stdin;
   private static BufferedReader reader, err_reader;
 
-  static Gson gson = new Gson();
+  private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   private static File servletPath = null;
   String[] colNames;
@@ -80,12 +81,6 @@ public class PredictPythonServlet extends HttpServlet {
     super.destroy();
   }
 
-  static private String jsonModel() {
-    Gson gson = new Gson();
-    String modelJson = gson.toJson(model);
-    return modelJson;
-  }
-
   private static final byte[] NewlineByteArray = "\n".getBytes();
 
   private synchronized String sendPython(String queryString) {
@@ -102,7 +97,9 @@ public class PredictPythonServlet extends HttpServlet {
         result = reader.readLine();
       }
       catch (IOException e) {
-        System.out.println("IOException in sendPython restarting python");
+        String msg = "ERROR IOException in sendPython restarting python";
+        result = msg;
+        System.out.println(msg);
         e.printStackTrace();
         showStderr();
         // it failed so we restart it and retry
@@ -142,7 +139,6 @@ public class PredictPythonServlet extends HttpServlet {
       if (VERBOSE) System.out.println("pr: " + pr);
 
       // assemble json result
-      Gson gson = new Gson();
       String prJson = gson.toJson(pr);
 
       response.getWriter().write(prJson);
@@ -225,22 +221,15 @@ public class PredictPythonServlet extends HttpServlet {
       AbstractPrediction pr;
       String prJson;
       String result;
+      boolean outputResult = false;
       while (r.ready()) {
         line = r.readLine();
         if (VERBOSE) System.out.println("line " + line);
 
-        result = "";
-        if (line == null) {
-          System.out.println("null input to python, not sent");
-        }
-        else {
-          result = sendPython(line);
-          if (VERBOSE) System.out.println("from python: " + result);
-          if (result == null) {
-            result = "";
-            System.out.println("null result from python");
-          }
-        }
+        result = sendPython(line);
+        if (VERBOSE) System.out.println("from python: " + result);
+        if (result == null)
+          result = "ERROR null result from python";
         if (result.startsWith("ERROR"))
           throw new Exception(result);
 
@@ -259,8 +248,12 @@ public class PredictPythonServlet extends HttpServlet {
         writer.write(prJson);
         writer.write('\n');
         count += 1;
+        outputResult = true;
       }
-      response.setStatus(HttpServletResponse.SC_OK);
+      if (outputResult)
+        response.setStatus(HttpServletResponse.SC_OK);
+      else
+        response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "Empty input to POST");
     }
     catch (Exception e) {
       // Prediction failed.
@@ -268,10 +261,11 @@ public class PredictPythonServlet extends HttpServlet {
       e.printStackTrace();
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
-    long done = System.nanoTime();
-    PredictServlet.postPythonTimes.add(start, done, count);
-    if (VERBOSE) System.out.println("Python Post time " + PredictServlet.postPythonTimes);
-
+    if (count > 0) {
+      long done = System.nanoTime();
+      PredictServlet.postPythonTimes.add(start, done, count);
+      if (VERBOSE) System.out.println("Python Post time " + PredictServlet.postPythonTimes);
+    }
   }
 
 }

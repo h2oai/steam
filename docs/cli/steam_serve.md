@@ -1,11 +1,11 @@
 ## steam serve
 
-Lauch a new service.
+Launch a new service.
 
 ### Synopsis
 
 
-Lauch a new service.
+Launch a new service.
 
 Examples:
 

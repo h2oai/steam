@@ -156,6 +156,7 @@ module Proxy {
 		stopScoringService: (serviceId: number, go: (error: Error) => void) => void
 		getScoringService: (serviceId: number, go: (error: Error, service: ScoringService) => void) => void
 		getScoringServices: (offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
+		getScoringServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
 		deleteScoringService: (serviceId: number, go: (error: Error) => void) => void
 		addEngine: (engineName: string, enginePath: string, go: (error: Error, engineId: number) => void) => void
 		getEngine: (engineId: number, go: (error: Error, engine: Engine) => void) => void
@@ -184,13 +185,14 @@ module Proxy {
 		createIdentity: (name: string, password: string, go: (error: Error, identityId: number) => void) => void
 		getIdentities: (offset: number, limit: number, go: (error: Error, identities: Identity[]) => void) => void
 		getIdentitiesForWorkgroup: (workgroupId: number, go: (error: Error, identities: Identity[]) => void) => void
-		getIdentititesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
+		getIdentitiesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
 		getIdentity: (identityId: number, go: (error: Error, identity: Identity) => void) => void
 		getIdentityByName: (name: string, go: (error: Error, identity: Identity) => void) => void
 		linkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
 		unlinkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
 		linkIdentityAndRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
 		unlinkIdentityAndRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
+		updateIdentity: (identityId: number, password: string, go: (error: Error) => void) => void
 		deactivateIdentity: (identityId: number, go: (error: Error) => void) => void
 		shareEntity: (kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void) => void
 		getEntityPrivileges: (entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void) => void
@@ -381,6 +383,16 @@ module Proxy {
 	}
 
 	interface GetScoringServicesOut {
+		services: ScoringService[]
+	}
+
+	interface GetScoringServicesForModelIn {
+		model_id: number
+		offset: number
+		limit: number
+	}
+
+	interface GetScoringServicesForModelOut {
 		services: ScoringService[]
 	}
 
@@ -609,11 +621,11 @@ module Proxy {
 		identities: Identity[]
 	}
 
-	interface GetIdentititesForRoleIn {
+	interface GetIdentitiesForRoleIn {
 		role_id: number
 	}
 
-	interface GetIdentititesForRoleOut {
+	interface GetIdentitiesForRoleOut {
 		identities: Identity[]
 	}
 
@@ -663,6 +675,14 @@ module Proxy {
 	}
 
 	interface UnlinkIdentityAndRoleOut {
+	}
+
+	interface UpdateIdentityIn {
+		identity_id: number
+		password: string
+	}
+
+	interface UpdateIdentityOut {
 	}
 
 	interface DeactivateIdentityIn {
@@ -922,6 +942,17 @@ module Proxy {
 		}
 		Proxy.Call("GetScoringServices", req, function(error, data) {
 			return error ? go(error, null) : go(null, (<GetScoringServicesOut>data).services)
+		})
+
+	}
+	export function getScoringServicesForModel(modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
+		var req: GetScoringServicesForModelIn = {
+			model_id: modelId,
+			offset: offset,
+			limit: limit
+		}
+		Proxy.Call("GetScoringServicesForModel", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetScoringServicesForModelOut>data).services)
 		})
 
 	}
@@ -1185,12 +1216,12 @@ module Proxy {
 		})
 
 	}
-	export function getIdentititesForRole(roleId: number, go: (error: Error, identities: Identity[]) => void): void {
-		var req: GetIdentititesForRoleIn = {
+	export function getIdentitiesForRole(roleId: number, go: (error: Error, identities: Identity[]) => void): void {
+		var req: GetIdentitiesForRoleIn = {
 			role_id: roleId
 		}
-		Proxy.Call("GetIdentititesForRole", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<GetIdentititesForRoleOut>data).identities)
+		Proxy.Call("GetIdentitiesForRole", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetIdentitiesForRoleOut>data).identities)
 		})
 
 	}
@@ -1248,6 +1279,16 @@ module Proxy {
 			role_id: roleId
 		}
 		Proxy.Call("UnlinkIdentityAndRole", req, function(error, data) {
+			return error ? go(error) : go(null)
+		})
+
+	}
+	export function updateIdentity(identityId: number, password: string, go: (error: Error) => void): void {
+		var req: UpdateIdentityIn = {
+			identity_id: identityId,
+			password: password
+		}
+		Proxy.Call("UpdateIdentity", req, function(error, data) {
 			return error ? go(error) : go(null)
 		})
 

@@ -44,5 +44,5 @@ steam serve master
 ```
 
 ### SEE ALSO
-* [steam serve](steam_serve.md)	 - Lauch a new service.
+* [steam serve](steam_serve.md)	 - Launch a new service.
 

@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 var serveHelp = `
 serve [agent-type]
-Lauch a new service.
+Launch a new service.
 Examples:
 
     $ steam serve master

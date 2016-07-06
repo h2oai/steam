@@ -99,6 +99,8 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		serve(c),
 		start(c),
 		stop(c),
+		register(c),
+		unregister(c),
 		deploy(c),
 		get(c),
 		delete_(c),
