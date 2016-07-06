@@ -1,0 +1,252 @@
+@font-face {
+    font-family: 'Borda';
+    src: url('fonts/Borda.ttf');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Borda';
+    src: url('fonts/Borda Light.ttf');
+    font-weight: lighter;
+}
+
+@font-face {
+    font-family: 'Borda';
+    src: url('fonts/Borda Bold.ttf');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'DINPro';
+    src: url('fonts/DINPro-Regular.ttf');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'DINPro';
+    src: url('fonts/DINPro-Light.ttf');
+    font-weight: 200;
+}
+
+@font-face {
+    font-family: 'DINPro';
+    src: url('fonts/DINPro-Bold.ttf');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'DINPro';
+    src: url('fonts/DINPro-Medium.ttf');
+    font-weight: 600;
+}
+
+body {
+    font-family: 'DINPro';
+    font-weight: 600;
+    color: rgba(23, 23, 23, 0.6);
+    font-size: 16px;
+}
+
+.grad {
+    background-color: rgba(36, 67, 90, 0.8); /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(rgba(36, 67, 90, 0.8), rgba(23, 23, 23, 0.8)); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(rgba(36, 67, 90, 0.8), rgba(23, 23, 23, 0.8)); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(rgba(36, 67, 90, 0.8), rgba(23, 23, 23, 0.8)); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(rgba(36, 67, 90, 0.8), rgba(23, 23, 23, 0.8)); /* Standard syntax */
+}
+
+.title {
+    width: 100%;
+    height: 4em;
+    background-color: rgba(36, 67, 90, 0.8);
+    font-family: 'Borda';
+    font-weight: lighter;
+
+}
+
+.title h1 {
+    float: right;
+    margin: 0;
+    color: rgba(89, 195, 200, 0.8);
+    padding-right: 1em;
+    padding-top: 0.25em;
+}
+
+.title h2 {
+    float: left;
+    padding-left: 1.5em;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.5em;
+}
+
+header {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    color: rgba(23, 23, 23, 0.8);
+
+}
+
+header .glyphicon {
+    color: rgba(89, 195, 200, 0.8);
+    padding-right: 2em;
+}
+
+section {
+    margin-top: 1em;
+    margin-bottom: 2em;
+}
+
+fieldset {
+    margin-top: 2em;
+    padding-left: 3em;
+    padding-right: 3em;
+    font-weight: 600;
+}
+
+fieldset:last-of-type {
+    margin-bottom: 2em;
+}
+
+fieldset legend {
+    font-size: 1em;
+    padding-bottom: 0.5em;
+    color: rgba(23, 23, 23, 0.8);
+}
+
+*:focus {
+    outline: none !important;
+    box-shadow: none;
+}
+
+input[type="radio"] {
+    margin-left: 1em;
+    margin-right: 0.5em;
+
+}
+
+.form-group {
+    vertical-align: bottom;
+}
+
+.form-control-label {
+    font-weight: 600;
+}
+
+.btn {
+    border-radius: 50px;
+    min-width: 200px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8em;
+    margin: 0.5em;
+}
+
+.btn-primary {
+    background: rgba(36, 67, 90, 0.8);
+    color: rgba(251, 252, 248, 0.8);
+    border: none;
+    text-shadow: none;
+}
+
+.btn-primary:hover {
+    background-color: rgba(36, 67, 90, 1);
+    color: rgba(89, 195, 200, 0.8);
+    border: none;
+    text-shadow: none;
+}
+
+.btn-default {
+    background: white;
+    color: rgba(36, 67, 90, 0.8);
+    text-shadow: none;
+    border-color: rgba(36, 67, 90, 0.8);
+}
+
+.btnContainer {
+    padding-left: 2em;
+}
+
+.form-control {
+    font-weight: normal;
+    border-style: none none solid none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: rgba(89, 195, 200, 1);
+    color: rgba(89, 195, 200, 1);
+}
+
+.input-group-addon {
+    border-style: none;
+    background-color: transparent;
+}
+
+table.noBorders > tbody > tr > td {
+    border: none;
+}
+
+.hcell {
+    font-weight: bold;
+}
+
+select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #000;
+}
+
+.glyphicon.glyphicon-new-window {
+    color: rgba(36, 67, 90, 0.8);
+}
+
+.python-input {
+    padding-left: 48px;
+}
+
+.python-input legend {
+    width: 30%;
+    display: inline-block;
+    margin-bottom: 14px;
+}
+
+.python-input .form-group {
+    width: 60%;
+    display: inline-block;
+    margin-left: 25px;
+}
+
+.command-line {
+    margin-left: 48px;
+    margin-top: 2em;
+}
+
+.curl {
+    margin-left: 48px;
+    margin-top: 2em;
+}
+
+.curl code {
+    background-color: rgba(0,0,0, 0.1);
+    color: rgba(36, 67, 90, 0.8);
+}
+
+tr.stat-group td {
+    padding: 0 8px !important;
+}
+
+tr.stat-pad {
+    height: 8px;
+}
+
+@-moz-document url-prefix() {
+    ::-moz-focus-inner {
+        border: none
+    }
+    select:-moz-focusring {
+        color: transparent;
+        text-shadow: 0px 0px 0px #000;
+    }
+}
