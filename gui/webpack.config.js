@@ -13,6 +13,8 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     publicPath: '/',
+    library: 'UIKit',
+    libraryTarget: 'umd',
     filename: 'bundle.js'
   },
   resolve: {
