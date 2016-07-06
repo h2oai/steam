@@ -13,7 +13,7 @@ import (
 )
 
 var loginHelp = `
-login [address]
+login [address:port] --username=[username] --password=[password]
 Sign in to a Steam server.
 Examples:
 

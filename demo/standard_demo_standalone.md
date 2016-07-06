@@ -28,7 +28,7 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 	- `s3cmd get s3://steam-release/steamY-master-linux-amd64.tar.gz`
 	- `s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz`
 - H2O jar file
-	- available from the <a href="http://h2o-release.s3.amazonaws.com/h2o/rel-turchin/8/index.html" target="_blank">H2O Download</a> page
+	- available from the <a href="http://www.h2o.ai/download/h2o/choose" target="_blank">H2O Download</a> page
 
 ###Optional
 

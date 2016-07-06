@@ -1,4 +1,9 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
@@ -8,6 +13,9 @@ import javax.servlet.http.*;
 import javax.servlet.*;
 
 public class StatsServlet extends HttpServlet {
+
+  private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+  private static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
@@ -22,11 +30,13 @@ public class StatsServlet extends HttpServlet {
       final String startUTC = sdf.format(new Date(PredictServlet.startTime));
       final String lastPredictionUTC = PredictServlet.lastTime > 0 ? sdf.format(new Date(PredictServlet.lastTime)) : "";
       final long warmUpCount = PredictServlet.warmUpCount;
+      final long startTime = PredictServlet.startTime;
+      final long lastTime = PredictServlet.lastTime;
 
       Map<String, Object> js = new HashMap<String, Object>() {
         {
-          put("startTime", PredictServlet.startTime);
-          put("lastTime", PredictServlet.lastTime);
+          put("startTime", startTime);
+          put("lastTime", lastTime);
           put("lastTimeUTC", lastPredictionUTC);
           put("startTimeUTC", startUTC);
           put("upTimeMs", upTimeMs);
@@ -41,7 +51,7 @@ public class StatsServlet extends HttpServlet {
           put("pythonpost", PredictServlet.postPythonTimes.toMap());
         }
       };
-      String json = PredictServlet.gson.toJson(js, PredictServlet.mapType);
+      String json = gson.toJson(js, mapType);
 
       response.getWriter().write(json);
       response.setStatus(HttpServletResponse.SC_OK);

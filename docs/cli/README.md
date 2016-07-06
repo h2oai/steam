@@ -23,7 +23,7 @@ steam v build : Command Line Interface to Steam
 * [steam link](steam_link.md)	 - Add authentication permissions.
 * [steam login](steam_login.md)	 - Sign in to a Steam server.
 * [steam reset](steam_reset.md)	 - Reset Steam client configuration.
-* [steam serve](steam_serve.md)	 - Lauch a new service.
+* [steam serve](steam_serve.md)	 - Launch a new service.
 * [steam start](steam_start.md)	 - Start a new resource.
 * [steam stop](steam_stop.md)	 - Stop the specified resource.
 * [steam unlink](steam_unlink.md)	 - Remove authentication permissions.

@@ -12,7 +12,7 @@ workgroup [workgroupName]
 Change or update a workgroup in the database.
 Examples:
 
-	$ steam update workgroup engineer --desc="A better engineer" --name=
+	$ steam update workgroup production --desc="A deploy workgroup" --name="deploy"
 `
 
 func updateWorkgroup(c *context) *cobra.Command {

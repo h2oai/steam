@@ -316,6 +316,18 @@ class RPCClient:
 		response = self.connection.call("GetScoringServices", request)
 		return [View(o) for o in response['services']]
 
+	def get_scoring_services_for_model(self, model_id, offset, limit):
+		"""
+		Returns services ([]*ScoringService)
+		"""
+		request = {
+			'model_id': model_id,
+			'offset': offset,
+			'limit': limit
+		}
+		response = self.connection.call("GetScoringServicesForModel", request)
+		return [View(o) for o in response['services']]
+
 	def delete_scoring_service(self, service_id):
 		"""
 		Returns None
@@ -604,14 +616,14 @@ class RPCClient:
 		response = self.connection.call("GetIdentitiesForWorkgroup", request)
 		return [View(o) for o in response['identities']]
 
-	def get_identitites_for_role(self, role_id):
+	def get_identities_for_role(self, role_id):
 		"""
 		Returns identities ([]*Identity)
 		"""
 		request = {
 			'role_id': role_id
 		}
-		response = self.connection.call("GetIdentititesForRole", request)
+		response = self.connection.call("GetIdentitiesForRole", request)
 		return [View(o) for o in response['identities']]
 
 	def get_identity(self, identity_id):

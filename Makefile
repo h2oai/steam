@@ -47,7 +47,6 @@ ssb:
 
 generate:
 	cd ./srv/web && go generate && go fmt service.go
-	cd ./master/db && go generate && go fmt encoding.go
 	cd ./master/data && go generate && go fmt scans.go
 
 lint:

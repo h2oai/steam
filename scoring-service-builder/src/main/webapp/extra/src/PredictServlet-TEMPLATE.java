@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.exception.PredictException;
@@ -20,9 +21,9 @@ public class PredictServlet extends HttpServlet {
   public static final int warmUpCount = 5;
   private static final Class ROW_DATA_TYPE = new RowData().getClass();
 
-  public static final Gson gson = new Gson();
-  public static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
-  public static final Type rowDataType = new TypeToken<RowData>(){}.getType();
+  private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+  private static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
+  private static final Type rowDataType = new TypeToken<RowData>(){}.getType();
 
   public static class Times {
     private long count = 0;
@@ -42,6 +43,8 @@ public class PredictServlet extends HttpServlet {
     }
 
     public synchronized void add(double timeMs, int n) {
+      if (n < 1)
+        return;
       count += n;
       totalTimeMs += timeMs; // n * timeMs/n
       double tt = timeMs * timeMs / n; // n * (timeMs/n)^2
@@ -77,7 +80,7 @@ public class PredictServlet extends HttpServlet {
     }
 
     private Map<String, Object> classToMap() {
-      return PredictServlet.gson.fromJson(gson.toJson(this), mapType);
+      return gson.fromJson(gson.toJson(this), mapType);
     }
 
     public String toString() {
@@ -212,7 +215,7 @@ public class PredictServlet extends HttpServlet {
     }
 
     private Map<String, Object> classToMap() {
-      return PredictServlet.gson.fromJson(gson.toJson(this), mapType);
+      return gson.fromJson(gson.toJson(this), mapType);
     }
 
     public String toString() {
@@ -253,12 +256,6 @@ public class PredictServlet extends HttpServlet {
   public static Times getPythonTimes = new PredictServlet.Times();
   public static Times postPythonTimes = new PredictServlet.Times();
 
-  static private String jsonModel() {
-
-    String modelJson = gson.toJson(model);
-    return modelJson;
-  }
-
   @SuppressWarnings("unchecked")
   private void fillRowDataFromHttpRequest(HttpServletRequest request, RowData row) {
     Map<String, String[]> parameterMap;
@@ -288,7 +285,6 @@ public class PredictServlet extends HttpServlet {
       AbstractPrediction pr = predict(row);
 
       // assemble json result
-      Gson gson = new Gson();
       String prJson = gson.toJson(pr);
 
       response.getWriter().write(prJson);
