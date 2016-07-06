@@ -47,6 +47,36 @@ export function fetchLeaderboard() {
           creationDate: '2016-06-14',
           timing: '213 ± 12ms'
         }
+      },
+      {
+        id: 2,
+        rank: 3,
+        metadata: {
+          modelName: 'GBT-1071707',
+          createdBy: 'marklandry',
+          creationDate: '2016-06-14',
+          timing: '213 ± 12ms'
+        }
+      },
+      {
+        id: 3,
+        rank: 4,
+        metadata: {
+          modelName: 'GBT-1071707',
+          createdBy: 'marklandry',
+          creationDate: '2016-06-14',
+          timing: '213 ± 12ms'
+        }
+      },
+      {
+        id: 4,
+        rank: 5,
+        metadata: {
+          modelName: 'GBT-1071707',
+          createdBy: 'marklandry',
+          creationDate: '2016-06-14',
+          timing: '213 ± 12ms'
+        }
       }
     ];
     new MockFetchStrategy().request(dispatch, {

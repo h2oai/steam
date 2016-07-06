@@ -35,7 +35,7 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
     return (
       <div className="metrics">
         <div className="metrics-summary">
-          <span className="metrics-summary--title">Metrics</span>
+          <div className="metrics-summary--title">Metrics</div>
           {metrics.map((item, i) => {
             return <DetailLine key={i} icon={item.label} label={item.label} value={item.value}/>;
           })}

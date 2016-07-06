@@ -5,18 +5,16 @@ import * as React from 'react';
 import '../styles/pagination.scss';
 
 interface Props {
-  
+  items: any
 }
 
-export class Pagination extends React.Component<Props, any> {
+export default class Pagination extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="pagination-container">
-        <div>
-          <span><i className="fa fa-chevron-left"></i></span>
-          Page 1 of 14
-          <span><i className="fa fa-chevron-right"></i></span>
-        </div>
+        <span><i className="fa fa-caret-left"></i></span>
+        <span className="page-info">1 - 5 of {this.props.items.length} models</span>
+        <span><i className="fa fa-caret-right"></i></span>
       </div>
     );
   }

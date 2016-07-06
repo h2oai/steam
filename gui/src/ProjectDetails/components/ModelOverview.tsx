@@ -37,13 +37,13 @@ export class ModelOverview extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="metrics">
         <div className="metrics-summary">
-          <span className="metrics-summary--title">Basics</span>
+          <div className="metrics-summary--title">Basics</div>
           {this.props.modelOverview.basics.map((item, i) => {
             return <DetailLine key={i} icon={iconMap[item.label]} label={item.label} value={item.value}/>;
           })}
         </div>
         <div className="metrics-summary">
-          <span className="metrics-summary--title">Parameters</span>
+          <div className="metrics-summary--title">Model Parameters</div>
           {this.props.modelOverview.parameters.map((item, i) => {
             return <DetailLine key={i} label={item.label} value={item.value}/>
           })}

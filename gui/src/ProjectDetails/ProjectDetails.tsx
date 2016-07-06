@@ -7,6 +7,7 @@ import * as classNames from 'classnames';
 import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
 import GoodnessOfFit from './components/GoodnessOfFit';
+import PageHeader from '../Projects/components/PageHeader';
 import './styles/projectdetails.scss';
 
 interface Props {
@@ -51,10 +52,10 @@ export default class ProjectDetails extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="project-details">
-        <div className="model-header">
-          Model: GBT-1069085
-        </div>
-        <header>
+        <PageHeader>
+          DRF-1069085
+        </PageHeader>
+        <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'model')}><i
             className={classNames('fa', {'fa-minus-square-o': this.state.isModelOpen, 'fa-plus-square-o': !this.state.isModelOpen})}></i
           >Model Overview</span>
@@ -62,7 +63,7 @@ export default class ProjectDetails extends React.Component<Props, any> {
         <Collapsible open={this.state.isModelOpen}>
           <ModelOverview></ModelOverview>
         </Collapsible>
-        <header>
+        <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'goodness')}><i
             className={classNames('fa', {'fa-minus-square-o': this.state.isGoodnessOpen, 'fa-plus-square-o': !this.state.isGoodnessOpen})}></i
           >Goodness of Fit</span>
@@ -70,7 +71,7 @@ export default class ProjectDetails extends React.Component<Props, any> {
         <Collapsible open={this.state.isGoodnessOpen}>
           <GoodnessOfFit></GoodnessOfFit>
         </Collapsible>
-        <header>
+        <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'residual')}><i
             className={classNames('fa', {'fa-minus-square-o': this.state.isResidualOpen, 'fa-plus-square-o': !this.state.isResidualOpen})}></i
           >Residual Analysis</span>
@@ -80,7 +81,7 @@ export default class ProjectDetails extends React.Component<Props, any> {
             Residual body
           </div>
         </Collapsible>
-        <header>
+        <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'variable')}><i
             className={classNames('fa', {'fa-minus-square-o': this.state.isVariableOpen, 'fa-plus-square-o': !this.state.isVariableOpen})}></i
           >Variable Analysis</span>

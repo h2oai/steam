@@ -3,10 +3,10 @@
 .metrics {
   height: 100%;
   .metrics-summary {
-    padding: 10px;
     &--title {
-      text-decoration: underline;
-      font-size: 2em;
+      padding: $small 0;
+      font-size: 1.2em;
+      font-weight: 700;
     }
   }
 }

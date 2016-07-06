@@ -7,7 +7,6 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
-import { Pagination } from './components/Pagination';
 import { fetchLeaderboard } from './actions/leaderboard.actions';
 
 interface Props {
@@ -33,7 +32,6 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="projects">
         <Leaderboard items={this.props.leaderboard}></Leaderboard>
-        <Pagination></Pagination>
       </div>
     );
   }

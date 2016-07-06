@@ -1,23 +1,23 @@
 @import '../../variables.scss';
 
 .details {
-  font-size: 2em;
+  font-size: 1.2em;
   width: 500px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: $brand-dark-3;
   &--label {
     white-space: nowrap;
     flex: 0 0;
     i {
-      font-size: .5em;
       margin-right: 5px;
       vertical-align: middle;
     }
   }
   &--line {
     width: 100%;
-    background: $brand-dark-1;
+    border-top: 1px dotted $brand-dark-3;
     height: 1px;
     margin: 0 10px;
     flex-grow: 1;

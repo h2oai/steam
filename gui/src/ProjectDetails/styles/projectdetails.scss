@@ -3,21 +3,13 @@
 .project-details {
   height: 100%;
   width: 100%;
-  header {
-    font-size: 1.5em;
-    padding: $small;
-    border-bottom: 1px solid $brand-dark-1;
-  }
-  .model-header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: $large;
-    background: $brand-white;
-    border-bottom: 1px solid $brand-dark-1;
-    display: flex;
-    align-items: center;
-    font-size: 2em;
-    color: $brand-blue;
+  .overview-header {
+    font-size: $medium;
+    border-bottom: 2px solid $brand-dark-3;
+    i {
+      font-size: $small;
+      font-weight: 100;
+      margin-right: $xsmall;
+    }
   }
 }

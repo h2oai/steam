@@ -7,8 +7,8 @@ import * as classNames from 'classnames';
 import { Link } from 'react-router';
 import Deploy from '../components/Deploy';
 import RocGraph from '../components/RocGraph';
-import CornerBorders from '../components/CornerBorders';
 import PageHeader from '../../Projects/components/PageHeader';
+import Pagination from '../components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
@@ -52,8 +52,11 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="leaderboard">
-        <PageHeader>Models</PageHeader>
         <Deploy open={this.state.isDeployOpen} closeHandler={this.closeHandler}></Deploy>
+        <PageHeader>Models</PageHeader>
+        <div className="filter">
+          <input type="text" placeholder="filter models"/>
+        </div>
         <Table>
           <Row header={true}>
             <Cell>
@@ -118,6 +121,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
             );
           })}
         </Table>
+        <Pagination items={this.props.items}></Pagination>
       </div>
     );
   }

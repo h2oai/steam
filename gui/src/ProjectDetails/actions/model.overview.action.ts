@@ -59,24 +59,20 @@ export function fetchModelOverview() {
     ];
     let parameters: Parameters[] = [
       {
-        label: 'ntrees',
+        label: 'ntree',
         value: 50,
       },
       {
-        label: 'max-depth',
+        label: 'max_depth',
         value: 5,
       },
       {
-        label: 'min-rows',
+        label: 'min_rows',
         value: 10,
       },
       {
-        label: 'learn rate',
+        label: 'learn_rate',
         value: 0.1,
-      },
-      {
-        label: 'nfold',
-        value: 6.0,
       }
     ];
     new MockFetchStrategy().request(dispatch, {
