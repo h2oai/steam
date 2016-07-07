@@ -196,26 +196,5 @@ public class MakePythonWarServlet extends HttpServlet {
 
   }
 
-//  private static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-//  private static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
-//
-//  /**
-//   * The Java template file has a placeholder for the model name -- we replace that here
-//   *
-//   * @param tmpDir            run in this directory
-//   * @param javaClassName     model name
-//   * @param templateFileName  template file
-//   * @param resultFileName    restult file
-//   * @throws IOException
-//   */
-//  private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String replaceTransform, String templateFileName, String resultFileName) throws IOException {
-//    byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
-//    String java = new String(templateJava)
-//        .replace(JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME, javaClassName);
-//    if (replaceTransform != null)
-//      java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT, replaceTransform);
-//    FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
-//  }
-
 }
 
