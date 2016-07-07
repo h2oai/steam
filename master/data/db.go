@@ -2542,9 +2542,9 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		row := tx.QueryRow(`
 			INSERT INTO
 				model
-				(name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, created)
+				(name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, raw_metrics, raw_metrics_version, created)
 			VALUES
-				($1,   $2,           $3,        $4,           $5,                   $6,           $7,       $8,           now())
+				($1,   $2,           $3,        $4,           $5,                   $6,           $7,       $8,           $9,          $10,                 now())
 			RETURNING id
 			`,
 			model.Name,
@@ -2555,6 +2555,8 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 			model.LogicalName,
 			model.Location,
 			model.MaxRunTime,
+			model.RawMetrics,
+			model.RawMetricsVersion,
 		)
 		if err := row.Scan(&id); err != nil {
 			return err

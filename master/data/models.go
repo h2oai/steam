@@ -127,6 +127,8 @@ type Model struct {
 	LogicalName        string
 	Location           string
 	MaxRunTime         int64
+	RawMetrics         string
+	RawMetricsVersion  string
 	Created            time.Time
 }
 
