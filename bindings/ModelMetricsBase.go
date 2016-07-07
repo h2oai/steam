@@ -31,7 +31,7 @@ func NewModelMetricsBase() *ModelMetricsBase {
 		Frame:         nil,
 		FrameChecksum: 0,
 		Description:   "",
-		ModelCategory: 0,
+		ModelCategory: ModelCategory_NONE_,
 		ScoringTime:   0,
 		Predictions:   nil,
 		Mse:           0.0,

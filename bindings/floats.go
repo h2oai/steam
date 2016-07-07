@@ -2,12 +2,10 @@ package bindings
 
 import (
 	"fmt"
-	"log"
 	"math"
 )
 
 func jsonToFloat(j interface{}) float32 {
-	log.Println("To Floats", j)
 	switch j.(type) {
 	case string:
 		if j == "NaN" {
@@ -28,7 +26,6 @@ func jsonToFloat(j interface{}) float32 {
 }
 
 func jsonToDoubl(j interface{}) float64 {
-	log.Println("To Doubl", j)
 	switch j.(type) {
 	case string:
 		if j == "NaN" {
@@ -51,7 +48,6 @@ func jsonToDoubl(j interface{}) float64 {
 func jsonToFloats(j []interface{}) []float32 {
 	ret := make([]float32, len(j))
 	for i, inter := range j {
-		log.Println(i, "To Float", inter)
 		switch inter.(type) {
 		case string:
 			if inter == "NaN" {
@@ -74,7 +70,6 @@ func jsonToFloats(j []interface{}) []float32 {
 func jsonToDoubls(j []interface{}) []float64 {
 	ret := make([]float64, len(j))
 	for i, inter := range j {
-		log.Println(i, "To Doubl", inter)
 		switch inter.(type) {
 		case string:
 			if inter == "NaN" {
