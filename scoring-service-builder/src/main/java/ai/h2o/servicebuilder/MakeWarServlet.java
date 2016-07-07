@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -88,13 +89,12 @@ public class MakeWarServlet extends HttpServlet {
       String pojofile = null;
       String jarfile = null;
       String prejarfile = null;
-//      String preclass = null;
       String predictorClassName = null;
       String transformerClassName = null;
       for (FileItem i : items) {
         String field = i.getFieldName();
         String filename = i.getName();
-        if (filename != null && filename.length() > 0) {
+        if (filename != null && filename.length() > 0) { // file fields
           if (field.equals("pojo")) {
             pojofile = filename;
             predictorClassName = filename.replace(".java", "");
@@ -108,8 +108,10 @@ public class MakeWarServlet extends HttpServlet {
             prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
+        }
+        else { // form text field
           if (field.equals("preclass")) {
-            transformerClassName = i.
+            transformerClassName = i.getString();
           }
         }
       }
@@ -147,14 +149,12 @@ public class MakeWarServlet extends HttpServlet {
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
-//      copyExtraFile(servletPath, srcPath, tmpDir, "ServletUtil-TEMPLATE.java", "ServletUtil-TEMPLATE.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "Transform.java", "Transform.java");
 
       // compile extra
       List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java");
-      if (prejarfile != null)
-        cmd.add("prejarfile");
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "Transform.java");
       runCmd(tmpDir, cmd, "Compilation of extra failed");
 
       // create the war jar file

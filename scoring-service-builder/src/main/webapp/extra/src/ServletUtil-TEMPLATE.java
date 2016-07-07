@@ -10,14 +10,14 @@ import hex.genmodel.*;
 
 class ServletUtil {
 
-  public interface Transform {
-    /**
-     *
-     * @param input is the original data to be transformed
-     * @return an array of
-     */
-    Object[] fit(byte[] input);
-  }
+//  public interface Transform {
+//    /**
+//     *
+//     * @param input is the original data to be transformed
+//     * @return an array of
+//     */
+//    Object[] fit(byte[] input);
+//  }
 
   // load model
   static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();

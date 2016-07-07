@@ -24,7 +24,7 @@ public class PredictServlet extends HttpServlet {
 
   private static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
   private static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
-  private static ServletUtil.Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
+  private static Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
 
   private File servletPath = null;
 
@@ -66,7 +66,18 @@ public class PredictServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     long start = System.nanoTime();
     RowData row = new RowData();
-    fillRowDataFromHttpRequest(request, row);
+    if (transform == null) { // no jar transformation
+      fillRowDataFromHttpRequest(request, row);
+    }
+    else {
+      // transform with the jar
+      byte[] bytes = request.getQueryString().getBytes();
+      Map<String, Object> tr = transform.fit(bytes);
+      for (String k : tr.keySet()) {
+        System.out.println(k + " = " + tr.get(k));
+        row.put(k, tr.get(k));
+      }
+    }
     try {
       if (model == null)
         throw new Exception("No predictor model");
