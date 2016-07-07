@@ -42,9 +42,14 @@ The following screenshot shows how to make a War file using a POJO file and a Ja
 
 Click **Upload** to upload the files to the Prediction Service Builder and create a War file.
 
->***Note***: You can also build a War file using a model with an additional pre-processing step. To do this, specify a Python file and additional pre-processing python files. When these files are specified, the prediction file will perform additional pre-processing on the specified model before completing the War file. 
+>***Note***: You can also build a War file using a model with an additional pre-processing step. There are two options for this: Python or Java/Scala.
 
->For testing, an example python file is available in the **/scoring-service/builder/examples/example-spam-detection** folder. The additional python files are available in the **/scoring-service/builder/examples/example-spam-detection/lib** folder.  
+> Python. Specify a Python file and additional pre-processing python files and use `makewarpython`. When these files are specified, the prediction file will perform additional pre-processing on the specified model before predicting with the model POJO.
+
+> Java/Scala/Jar. Specify a Jar file that contains everyting you need, then the name of the Class that performs the preprocessing. Use the regular `makewar`. When these files are specified, the prediction file will perform additional pre-processing on the specified model before predicting with the model POJO..
+
+
+>For testing, an example python file is available in the **/scoring-service/builder/examples/spam-detection-python** folder. The additional python files are available in the **/scoring-service/builder/examples/spam-detection-python/lib** folder.
 
 
 ### Using the CLI
