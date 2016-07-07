@@ -40,11 +40,11 @@ public class PredictServlet extends HttpServlet {
     }
   }
 
-  static private String jsonModel() {
-
-    String modelJson = gson.toJson(model);
-    return modelJson;
-  }
+//  static private String jsonModel() {
+//
+//    String modelJson = gson.toJson(model);
+//    return modelJson;
+//  }
 
   @SuppressWarnings("unchecked")
   private void fillRowDataFromHttpRequest(HttpServletRequest request, RowData row) {
@@ -130,7 +130,7 @@ public class PredictServlet extends HttpServlet {
         line = r.readLine();
         if (VERBOSE) System.out.println("line " + line);
 
-        row = gson.fromJson(line, ServletUtil.rowDataType);
+        row = gson.fromJson(line, ServletUtil.ROW_DATA_TYPE);
         if (VERBOSE) System.out.println("row " + row);
         if (row != null) {
           // do the prediction

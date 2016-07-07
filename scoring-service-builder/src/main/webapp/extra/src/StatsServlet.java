@@ -13,7 +13,6 @@ import javax.servlet.http.*;
 import javax.servlet.*;
 
 public class StatsServlet extends HttpServlet {
-
   public static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -48,7 +47,7 @@ public class StatsServlet extends HttpServlet {
           put("pythonpost", ServletUtil.postPythonTimes.toMap());
         }
       };
-      String json = gson.toJson(js, ServletUtil.mapType);
+      String json = gson.toJson(js, ServletUtil.MAP_TYPE);
 
       response.getWriter().write(json);
       response.setStatus(HttpServletResponse.SC_OK);

@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -10,28 +11,17 @@ import hex.genmodel.*;
 
 class ServletUtil {
 
-//  public interface Transform {
-//    /**
-//     *
-//     * @param input is the original data to be transformed
-//     * @return an array of
-//     */
-//    Object[] fit(byte[] input);
-//  }
-
   // load model
   static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
   public static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
-
     // load preprocessing
   public static Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
 
-
-  public static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
-  public static final Type rowDataType = new TypeToken<RowData>(){}.getType();
-
+  public static final Type MAP_TYPE = new TypeToken<HashMap<String, Object>>(){}.getType();
+  public static final Type ROW_DATA_TYPE = new TypeToken<RowData>(){}.getType();
   public static final int warmUpCount = 5;
 
+  private static Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
   public static class Times {
     private long count = 0;
     private double totalTimeMs = 0;
@@ -39,14 +29,6 @@ class ServletUtil {
     private double warmupTimeMs = 0;
     private double warmupTimeSquaredMs = 0;
     private double lastMs = 0;
-
-    private Gson gson = new Gson();
-
-
-//    public static final Type mapType = new TypeToken<HashMap<String, Object>>() {
-//    }.getType();
-//    public static final Type rowDataType = new TypeToken<RowData>(){}.getType();
-
 
     public void add(long startNs, long endNs, int n) {
       double elapsed = (endNs - startNs) / 1.0e6;
@@ -73,9 +55,7 @@ class ServletUtil {
       return count > 0 ? totalTimeMs / count : 0.0;
     }
 
-//    public double sdev() {
-//
-//    }
+//    public double sdev() { }
 
     public double avgAfterWarmup() {
       return count > warmUpCount ? (totalTimeMs - warmupTimeMs) / (count - warmUpCount) : 0.0;
@@ -93,7 +73,7 @@ class ServletUtil {
     }
 
     private Map<String, Object> classToMap() {
-      return gson.fromJson(gson.toJson(this), mapType);
+      return gson.fromJson(gson.toJson(this), MAP_TYPE);
     }
 
     public String toString() {

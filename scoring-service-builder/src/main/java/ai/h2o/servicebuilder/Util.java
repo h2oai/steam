@@ -14,6 +14,8 @@ import java.util.jar.Manifest;
  * Created by magnus on 5/10/16.
  */
 class Util {
+  public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
+  public static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
 
   protected static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
   protected static final String JAVA_TARGET_VERSION = "1.6";
@@ -29,8 +31,8 @@ class Util {
 //    private Gson gson = new Gson();
 //
 //    public static final int warmUpCount = 5;
-//    public static final Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
-////    public static final Type rowDataType = new TypeToken<RowData>(){}.getType();
+//    public static final Type MapType = new TypeToken<HashMap<String, Object>>(){}.getType();
+////    public static final Type ROW_DATA_TYPE = new TypeToken<RowData>(){}.getType();
 //
 //
 //    public void add(long startNs, long endNs, int n) {
@@ -78,7 +80,7 @@ class Util {
 //    }
 //
 //    private Map<String, Object> classToMap() {
-//      return gson.fromJson(gson.toJson(this), mapType);
+//      return gson.fromJson(gson.toJson(this), MapType);
 //    }
 //
 //    public String toString() {
@@ -199,9 +201,6 @@ class Util {
   static void copyExtraFile(File servletPath, String extraPath, File toDir, String fromFileName, String toFileName) throws IOException {
     FileUtils.copyFile(new File(servletPath, extraPath + fromFileName), new File(toDir, toFileName));
   }
-
-  public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-  public static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
 
   /**
    * The Java template file has a placeholder for the model name -- we replace that here
