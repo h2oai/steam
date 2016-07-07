@@ -2,6 +2,12 @@ package web
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/lib/svc"
@@ -12,11 +18,6 @@ import (
 	"github.com/h2oai/steamY/srv/compiler" // FIXME rename comp to compiler
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
-	"log"
-	"os"
-	"sort"
-	"strconv"
-	"time"
 )
 
 type Service struct {
@@ -60,7 +61,7 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 	}
 
 	h := h2ov3.NewClient(address)
-	cloud, err := h.GetCloud()
+	cloud, err := h.GetCloudStatus()
 	if err != nil {
 		return 0, fmt.Errorf("Could not communicate with cloud %s.", address)
 	}
@@ -276,7 +277,7 @@ func (s *Service) GetClusterStatus(pz az.Principal, cloudId int64) (*web.Cluster
 
 	h2o := h2ov3.NewClient(cluster.Address)
 
-	cloud, err := h2o.GetCloud()
+	cloud, err := h2o.GetCloudStatus()
 
 	var (
 		tot, all int32
@@ -358,7 +359,7 @@ func (s *Service) GetJob(pz az.Principal, clusterId int64, jobName string) (*web
 
 	h := h2ov3.NewClient(cluster.Address)
 
-	j, err := h.GetJob(jobName)
+	j, err := h.GetJobsFetch(jobName)
 	if err != nil {
 		return nil, err //FIXME format error
 	}
@@ -379,7 +380,7 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 
 	h := h2ov3.NewClient(cluster.Address)
 
-	j, err := h.GetJobs()
+	j, err := h.GetJobsList()
 	if err != nil {
 		return nil, err //FIXME format error
 	}
@@ -508,7 +509,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	}
 
 	h := h2ov3.NewClient(cluster.Address)
-	ms, err := h.GetModels()
+	ms, err := h.GetModelsList()
 	if err != nil {
 		return nil, fmt.Errorf("Failed fetching models from cluster: %s", err)
 	}
@@ -545,7 +546,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
-	r, err := h2o.GetModel(modelName)
+	r, err := h2o.GetModelsFetch(modelName)
 	if err != nil {
 		return nil, err
 	}
@@ -582,6 +583,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 
 	mod := toModel(model)
 	mod.Algorithm = m.AlgoFullName
+
+	// TODO: json, modelMetrics, err
+	// This needs to hooked up to api
+	_, _, err := h2o.GetModelMetricsListSchemaFetchByModel(modelName)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
 
 	return mod, nil
 }
