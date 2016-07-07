@@ -558,6 +558,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 
 	m := r.Models[0]
 
+	// TODO: json, modelMetrics, err
+	// This needs to hooked up to api
+	rawMetrics, _, err := h2o.GetModelMetricsListSchemaFetchByModel(modelName)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
 		modelName,
@@ -567,8 +574,8 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 		m.ResponseColumnName,
 		logicalName,
 		location,
-		0,   // FIXME
-		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
+		0,
+		string(rawMetrics),
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
@@ -583,13 +590,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 
 	mod := toModel(model)
 	mod.Algorithm = m.AlgoFullName
-
-	// TODO: json, modelMetrics, err
-	// This needs to hooked up to api
-	_, _, err := h2o.GetModelMetricsListSchemaFetchByModel(modelName)
-	if err != nil {
-		return nil, err //FIXME format error
-	}
 
 	return mod, nil
 }
