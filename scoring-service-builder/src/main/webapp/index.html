@@ -1,84 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <!-- Latest compiled and minified CSS -->
+    <title>Steam :: Prediction Service Builder </title>
 
-    <title>Make War</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
 
-    <style type="text/css">
-        body {
-            background-color: #fbe91f;
-            font-family: 'futura_ltlight', sans-serif;
-        }
-    </style>
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css" >
 
-  </head>
+    <script src="https://fb.me/react-with-addons-15.1.0.js"></script>
+    <script src="https://fb.me/react-dom-15.1.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+
+    <link rel="stylesheet" href="custom.css">
+
+    <script src="jquery.js" ></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+
+
+
+    </head>
 
   <body>
 
-    <div class="site-wrapper">
-
-      <div class="site-wrapper-inner">
-
-        <div class="cover-container">
-
-          <div class="inner cover">
-            <h1 class="cover-heading text-shadow text-center">Make H2O Web Archives (war files) from POJOs</h1>
-
-            <h2>Make an H2O Prediction Service</h2>
-
-            <form class="form-inline" role="form" method="POST" action="makewar" enctype="multipart/form-data">
-              <p>
-                Pojo <input type="file" name="pojo"><br>
-
-                Jar <input type="file" name="jar"><br>
-                <p>
-                <input type="submit" value="OK">
-                <input type="reset">
-              </p>
-            </form>
-
-            <h2>Make an H2O Prediction Service with Python pre-processing</h2>
-
-            <form class="form-inline" role="form" method="POST" action="makepythonwar" enctype="multipart/form-data">
-              <p>
-                Pojo file <input type="file" name="pojo"><br>
-
-                h2o-genmodel.jar file <input type="file" name="jar"><br>
-
-                Python file <input type="file" name="python"><br>
-
-                Extra Python files (select one or more files) <input type="file" name="pythonextra" multiple><br>
-
-              <p>
-                <input type="submit" value="OK">
-                <input type="reset">
-              </p>
-            </form>
-
-
-            <!--<p class="text-center" style="font-size:36px">-->
-              <!--<strong id="responseField"></strong>-->
-            <!--</p>-->
-          </div>
-          <p>&nbsp;</p>
-          <div class="mastfoot">
-            <div class="inner text-center">
-              <p class="text-shadow">Build your own predictive apps using <a href="http://h2o.ai/">H2O</a>!</p>
-            </div>
-          </div>
-
-        </div>
-
+      <div class="title grad container-fluid">
+        <h1>Steam</h1>
+        <h2>Prediction Service Builder</h2>
       </div>
 
-    </div>
+      <main class="container-fluid">
+<!--         <section class="col-md-12 col-sm-12">
+          <p>Start building your prediction service!</p>
+        </section>
+ -->
+        <section id="python" class="col-md-4 col-sm-12">
+          <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Python preprocessing<span class="subtitle">*optional</span></header>
 
+          <form autocomplete="off" method="POST" action="makepythonwar" enctype="multipart/form-data">
+              <div class="input-inline-row">
+                    <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
+                    <div class="file-input-div">
+                        <input class="form-control file-input" type="text" id="python1" placeholder="Select a Python pre-processing file "/>
+                        <input type="file" name="python"/>
+                    </div>
+              </div>
+
+              <div class="input-inline-row">
+                    <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
+                    <div class="file-input-div">
+                        <input class="form-control file-input" type="text" id="python1" placeholder="Select extra Python library file(s)"/>
+                        <input type="file" name="pythonextra" multiple />
+                    </div>
+              </div>
+
+              <input type="file" name="pojo"/>
+              <input type="file" name="jar"/>
+          </form>
+
+        </section>
+
+        <section class="col-md-1">
+
+
+        </section>
+        <section id="java" class="col-md-4 col-sm-12" >
+          <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Java Prediction Files<span class="subtitle">*required</span></header>
+
+          <form autocomplete="off" role="form" method="POST" action="makewar" enctype="multipart/form-data">
+              <div class="input-inline-row">
+                    <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
+                    <div class="file-input-div">
+                        <input class="form-control file-input" type="text" id="python1" placeholder="Select a POJO"/>
+                        <input type="file" name="pojo" />
+                    </div>
+              </div>
+
+              <div class="input-inline-row">
+                    <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
+                    <div class="file-input-div">
+                        <input class="form-control file-input" type="text" id="python1" placeholder="Select a H2O Jar file" />
+                        <input type="file" name="jar" />
+                    </div>
+              </div>
+          </form>
+        </section>
+
+        <div class="btnContainer col-md-12">
+          <input id="upload" class="btn btn-primary" type="submit" value="Upload"></input>
+          <input id="reset" class="btn btn-default" type="reset"></input>
+        </div>
+
+      </main>
+
+      <script>
+        $('.file-icon').click(function(){
+            $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
+        });
+
+        $('.file-input').click(function(){
+            $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
+        });
+
+        $('input[type="file"]').change(function(){
+
+            var names = [];
+            for (var i = 0; i < $(this).get(0).files.length; ++i) {
+                names.push( $(this).get(0).files[i].name );
+            }
+
+            $(this).closest('.input-inline-row').find("input[type='text']").val(names);
+        });
+
+        $('#upload').click(function(){
+
+            // IF POJO/JAR, gives error
+            if ( !$('#java form input[name="pojo"]').val() || !$('#java form input[name="jar"]').val()){
+               alert('You must select at least a POJO file, and a JAR to make a WAR service. Python files are optional though.');
+            }
+            // ELSE IF there are some python files, do a python make war
+            else if ( $('input[name="python"]').val() || $('input[name="pythonextra"]').val() ){
+                console.log($('#java form input[name="pojo"]').get(0).files);
+                console.log($('#java form input[name="jar"]').get(0).files);
+                $('#python form input[name="pojo"]').get(0).files = $('#java form input[name="pojo"]').get(0).files;
+                $('#python form input[name="jar"]').get(0).files = $('#java form input[name="jar"]').get(0).files;
+
+                $('#python form').submit();
+            }
+            // ELSE must be only POJO/JAR
+            else {
+
+              $('#java form').submit();
+            }
+
+
+        });
+
+        $('#reset').click(function(){
+          $('input[type="text"]').val('');
+          $('input[type="file"]').val('');
+        });
+
+      </script>
   </body>
 </html>
