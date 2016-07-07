@@ -143,23 +143,23 @@ func (h *H2O) GetModelsList() (*bindings.ModelsV3, error) {
 //////////////////////////
 
 // GetModelMetricsListSchemaFetchByModel Return the saved scoring metrics for the specified Model. */
-func (h *H2O) GetModelMetricsListSchemaFetchByModel(model string) (*bindings.ModelMetricsListSchemaV3, error) {
+func (h *H2O) GetModelMetricsListSchemaFetchByModel(model string) ([]byte, *bindings.ModelMetricsListSchemaV3, error) {
 	//@GET
 	u := h.url("/3/ModelMetrics/models/?{model}", model)
 
 	res, err := http.Get(u)
 	if err != nil {
-		return nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
+		return nil, nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
 	}
 
 	data, err := h.handleResponse(res, u)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var out bindings.ModelMetricsListSchemaV3
 	if err := json.Unmarshal(data, &out); err != nil {
-		return nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
+		return nil, nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
 	}
-	return &out, nil
+	return data, &out, nil
 }

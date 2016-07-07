@@ -584,6 +584,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 	mod := toModel(model)
 	mod.Algorithm = m.AlgoFullName
 
+	// TODO: json, modelMetrics, err
+	// This needs to hooked up to api
+	_, _, err := h2o.GetModelMetricsListSchemaFetchByModel(modelName)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
 	return mod, nil
 }
 
