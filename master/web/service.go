@@ -448,6 +448,8 @@ func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetNa
 		logicalName,
 		location,
 		int64(maxRunTime),
+		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
+		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
 	if err != nil {
@@ -564,7 +566,9 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 		m.ResponseColumnName,
 		logicalName,
 		location,
-		0,
+		0,   // FIXME
+		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
+		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
 	if err != nil {

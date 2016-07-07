@@ -450,6 +450,8 @@ CREATE TABLE model (
     logical_name text NOT NULL,
     location text NOT NULL,
     max_run_time integer,
+    raw_metrics text NOT NULL,
+    raw_metrics_version text NOT NULL,
     created timestamp with time zone NOT NULL
 );
 
@@ -482,6 +484,20 @@ COMMENT ON COLUMN model.logical_name IS 'The logical name of the model (typicall
 --
 
 COMMENT ON COLUMN model.location IS 'The location of this model''s saved assets (e.g. /var/master/model).';
+
+
+--
+-- Name: COLUMN model.raw_metrics; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.raw_metrics IS 'Raw model metrics JSON obtained from H2O.';
+
+
+--
+-- Name: COLUMN model.raw_metrics_version; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.raw_metrics_version IS 'Version of the deserializer to use for unpacking raw_metrics';
 
 
 --

@@ -536,6 +536,8 @@ func ScanModel(r *sql.Row) (Model, error) {
 		&s.LogicalName,
 		&s.Location,
 		&s.MaxRunTime,
+		&s.RawMetrics,
+		&s.RawMetricsVersion,
 		&s.Created,
 	); err != nil {
 		return Model{}, err
@@ -558,6 +560,8 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.LogicalName,
 			&s.Location,
 			&s.MaxRunTime,
+			&s.RawMetrics,
+			&s.RawMetricsVersion,
 			&s.Created,
 		); err != nil {
 			return nil, err
@@ -609,3 +613,4 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 	}
 	return structs, nil
 }
+
