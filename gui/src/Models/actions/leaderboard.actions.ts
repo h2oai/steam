@@ -2,6 +2,8 @@
  * Created by justin on 6/28/16.
  */
 import { MockFetchStrategy } from '../../App/utils/FetchStrategy/MockFetchStrategy';
+import { AjaxStrategy } from '../../App/utils/FetchStrategy/AjaxStrategy';
+import * as Remote from '../../Proxy/Proxy';
 export const FETCH_LEADERBOARD = 'FETCH_LEADERBOARD';
 export const RECEIVE_LEADERBOARD = 'RECEIVE_LEADERBOARD';
 
@@ -79,6 +81,9 @@ export function fetchLeaderboard() {
         }
       }
     ];
+    // Remote.Proxy.getModels(0, 5, (error, res) => {
+    //   console.log(error, res);
+    // });
     new MockFetchStrategy().request(dispatch, {
       callback: receiveLeaderboard,
       data: leaderboard
