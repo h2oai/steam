@@ -14,7 +14,7 @@ role [roleName] [permissionIds]
 Add permissions to a role. 
 Examples:
 
-	$ steam link role engineer ViewClusters ViewModels ViewWorkgroups
+	$ steam link role engineer ViewCluster ViewModel ViewWorkgroup
 `
 
 func linkRole(c *context) *cobra.Command {
