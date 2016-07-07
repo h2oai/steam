@@ -35,22 +35,6 @@ import static ai.h2o.servicebuilder.Util.*;
 public class MakeWarServlet extends HttpServlet {
   private static boolean VERBOSE = false;
 
-
-  public interface Transform {
-    /**
-     *
-     * @param input is the original data to be transformed
-     * @return an array of0
-     */
-    Object[] fit(byte[] input);
-  }
-
-  public class X implements Transform {
-    public Object[] fit(byte[] input) {
-      return null;
-    }
-  }
-
   private File servletPath = null;
 
   public void init(ServletConfig servletConfig) throws ServletException {
@@ -151,12 +135,13 @@ public class MakeWarServlet extends HttpServlet {
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "Transform.java", "Transform.java");
 
       // compile extra
       List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "Transform.java");
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java");
       runCmd(tmpDir, cmd, "Compilation of extra failed");
 
       // create the war jar file

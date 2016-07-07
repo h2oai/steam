@@ -1,15 +1,17 @@
 import java.util.Map;
-
 import hex.genmodel.easy.*;
 
 public interface Transform {
     /**
      *
-     * @param input is the original data to be transformed
-     * @return an array of
+     * RowData is a Map<String, Object> where
+     * String is the column name
+     * Object is the data value in that column Integer/Double/String
+     * defined in h2o-genmodel.jar
+     *
+     * @param input is one incoming row of data to be transformed
+     * @return the resulting one row of data
      */
-    //    Object[] fit(byte[] input);
-    //Map<String, Object> fit(byte[] input);
     RowData fit(byte[] input);
 }
 

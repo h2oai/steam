@@ -129,12 +129,13 @@ public class MakePythonWarServlet extends HttpServlet {
 
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "Transform.java", "Transform.java");
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java", "ServletUtil.java", "Transform.java"),
+          "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java"),
           "Compilation of servlet failed");
 
       // create the war jar file
