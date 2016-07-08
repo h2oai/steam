@@ -45,7 +45,7 @@ export class ModelOverview extends React.Component<Props & DispatchProps, any> {
         <div className="metrics-summary">
           <div className="metrics-summary--title">Model Parameters</div>
           {this.props.modelOverview.parameters.map((item, i) => {
-            return <DetailLine key={i} label={item.label} value={item.value}/>
+            return <DetailLine key={i} label={item.label} value={item.value}/>;
           })}
         </div>
       </div>
@@ -62,7 +62,7 @@ function mapStateToProps(state: Props): Props {
 function mapDispatchToProps(dispatch) {
   return {
     fetchModelOverview: bindActionCreators(fetchModelOverview, dispatch)
-  }
+  };
 }
 
 export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ModelOverview);

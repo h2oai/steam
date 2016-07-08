@@ -25,7 +25,7 @@ export function receiveModelOverview(modelOverview) {
   return {
     type: RECEIVE_MODEL_OVERVIEW,
     modelOverview
-  }
+  };
 }
 
 export function fetchModelOverview() {

@@ -23,7 +23,7 @@ export function receiveLeaderboard(leaderboard) {
   return {
     type: RECEIVE_LEADERBOARD,
     leaderboard
-  }
+  };
 }
 
 export function fetchLeaderboard() {
