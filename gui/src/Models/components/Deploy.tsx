@@ -3,8 +3,8 @@
  */
 import * as React from 'react';
 import '../styles/deploy.scss';
-import Overlay from '../../UIKit/Overlay/Overlay';
-  
+import { Overlay } from 'h2oUIKit';
+
 interface Props {
   open: boolean
   closeHandler: Function
@@ -16,7 +16,8 @@ export default class Deploy extends React.Component<Props, any> {
     this.onClick = this.onClick.bind(this);
     this.state = {
       isOpen: false
-    }
+    };
+    console.log(Overlay);
   }
 
   onClick() {
