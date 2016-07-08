@@ -84,6 +84,7 @@ export function fetchLeaderboard() {
     // Remote.Proxy.getModels(0, 5, (error, res) => {
     //   console.log(error, res);
     // });
+    console.log('hit');
     new MockFetchStrategy().request(dispatch, {
       callback: receiveLeaderboard,
       data: leaderboard

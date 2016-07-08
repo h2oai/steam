@@ -38,6 +38,7 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
 }
 
 function mapStateToProps(state: Props): Props {
+  console.log(state);
   return {
     leaderboard: state.leaderboard.items
   };

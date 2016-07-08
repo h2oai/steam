@@ -8146,13 +8146,13 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={data}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={data}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={data}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
@@ -8166,7 +8166,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
             );
           })}
         </Table>
-        <div ref="rocChart"/>
         <Pagination items={this.props.items}></Pagination>
       </div>
     );
