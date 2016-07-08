@@ -47,7 +47,7 @@ function mapStateToProps(state: Props): Props {
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch)
-  }
+  };
 }
 
 export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Projects);

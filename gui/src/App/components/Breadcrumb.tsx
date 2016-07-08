@@ -17,6 +17,6 @@ export default class Breadcrumb extends React.Component<Props, any> {
           return <li key={i}>{crumb}</li>;
         })}
       </ol>
-    )
+    );
   }
 }
