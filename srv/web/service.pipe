@@ -36,8 +36,34 @@ type Job
  StartedAt int64
  CompletedAt int64
 
+type Project
+ Id int64
+ Name string
+ Description string
+ CreatedAt int64
+
+type Datasource
+ Id int64
+ ProjectId int64
+ Name string
+ Description string
+ Kind string
+ Configuration string
+ CreatedAt int64
+
+type Dataset
+ Id int64
+ DatasourceId int64
+ Name string
+ Description string
+ FrameName string
+ ResponseColumnName string
+ Properties string
+ CreatedAt int64
+
 type Model
  Id int64
+ DatasetId int64
  Name string
  ClusterName string
  Algorithm string
@@ -46,6 +72,7 @@ type Model
  LogicalName string
  Location string
  MaxRuntime int
+ Metrics string
  CreatedAt int64
 
 type ScoringService
@@ -126,11 +153,30 @@ DeleteCluster(clusterId int64)
 GetJob(clusterId int64, jobName string) job *Job
 GetJobs(clusterId int64) jobs []*Job
 
-BuildModel(clusterId int64, dataset string, targetName string, maxRunTime int) model *Model
+CreateProject(name string, description string) projectId int64
+GetProjects(offset int64, limit int64) projects []*Project
+GetProject(projectId int64) project *Project
+DeleteProject(projectId int64)
+
+CreateDatasource(projectId int64, name string, description string, path string) datasourceId int64
+GetDatasources(projectId int64, offset int64, limit int64) datasources []*Datasource
+GetDatasource(datasourceId int64) project *Project
+UpdateDatasource(name string, description string, path string)
+DeleteDatasource(datasourceId int64)
+
+CreateDataset(clusterId int64, datasourceId int64, name string, description string, responseColumnName string) datasetId int64
+GetDatasets(datasourceId int64, offset int64, limit int64) datasets []*Dataset
+GetDataset(datasetId int64) dataset *Dataset
+UpdateDataset(datasetId int64, name string, description string, responseColumnName string)
+SplitDataset(datasetId int64, ratio1 int, ratio2 int) datasetIds []int64
+DeleteDataset(datasetId int64)
+
+BuildModel(clusterId int64, datasetId int64, algorithm string) modelId int64
+BuildAutoModel(clusterId int64, dataset string, targetName string, maxRunTime int) model *Model
 GetModel(modelId int64) model *Model
-GetModels(offset int64, limit int64) models []*Model
+GetModels(projectId int64, offset int64, limit int64) models []*Model
 GetClusterModels(clusterId int64) models []*Model
-ImportModelFromCluster(clusterId int64, modelName string) model *Model
+ImportModelFromCluster(clusterId int64, projectId int64, modelName string) model *Model
 DeleteModel(modelId int64)
 
 StartScoringService(modelId int64, port int) service *ScoringService

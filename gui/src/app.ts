@@ -931,7 +931,7 @@ module Main {
 
         function buildModel(): void {
             ctx.setBusy('Building model...')
-            ctx.remote.buildModel(cloudId, frame(), responseColumn(), maxRunTimeNum(), (err) => {
+            ctx.remote.buildAutoModel(cloudId, frame(), responseColumn(), maxRunTimeNum(), (err) => {
                 if (err) {
                     error(err.message)
                 } else {
@@ -1367,7 +1367,7 @@ module Main {
     function newCloudModelPane(ctx: Context, clusterId: int, model: Proxy.Model): CloudModelPane {
         const getModel: Act = () => {
             ctx.setBusy('Getting model from h2o...')
-            ctx.remote.importModelFromCluster(clusterId, model.name, (err, model) => {
+            ctx.remote.importModelFromCluster(clusterId, 0, model.name, (err, model) => {
                 ctx.setFree()
                 if (err) {
                     alert(err.message)
@@ -1398,7 +1398,7 @@ module Main {
         const error = sig<string>('')
         const items = sigs<Folder>([])
         const hasItems = lifts(items, (items) => items.length > 0)
-        ctx.remote.getModels(0, 10000, (err, models) => {
+        ctx.remote.getModels(0, 0, 10000, (err, models) => {
             if (err) {
                 error(err.message)
                 return

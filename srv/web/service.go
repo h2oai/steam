@@ -49,8 +49,37 @@ type Job struct {
 	CompletedAt int64  `json:"completed_at"`
 }
 
+type Project struct {
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+}
+
+type Datasource struct {
+	Id            int64  `json:"id"`
+	ProjectId     int64  `json:"project_id"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Kind          string `json:"kind"`
+	Configuration string `json:"configuration"`
+	CreatedAt     int64  `json:"created_at"`
+}
+
+type Dataset struct {
+	Id                 int64  `json:"id"`
+	DatasourceId       int64  `json:"datasource_id"`
+	Name               string `json:"name"`
+	Description        string `json:"description"`
+	FrameName          string `json:"frame_name"`
+	ResponseColumnName string `json:"response_column_name"`
+	Properties         string `json:"properties"`
+	CreatedAt          int64  `json:"created_at"`
+}
+
 type Model struct {
 	Id                 int64  `json:"id"`
+	DatasetId          int64  `json:"dataset_id"`
 	Name               string `json:"name"`
 	ClusterName        string `json:"cluster_name"`
 	Algorithm          string `json:"algorithm"`
@@ -59,6 +88,7 @@ type Model struct {
 	LogicalName        string `json:"logical_name"`
 	Location           string `json:"location"`
 	MaxRuntime         int    `json:"max_runtime"`
+	Metrics            string `json:"metrics"`
 	CreatedAt          int64  `json:"created_at"`
 }
 
@@ -155,11 +185,27 @@ type Service interface {
 	DeleteCluster(pz az.Principal, clusterId int64) error
 	GetJob(pz az.Principal, clusterId int64, jobName string) (*Job, error)
 	GetJobs(pz az.Principal, clusterId int64) ([]*Job, error)
-	BuildModel(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
+	CreateProject(pz az.Principal, name string, description string) (int64, error)
+	GetProjects(pz az.Principal, offset int64, limit int64) ([]*Project, error)
+	GetProject(pz az.Principal, projectId int64) (*Project, error)
+	DeleteProject(pz az.Principal, projectId int64) error
+	CreateDatasource(pz az.Principal, projectId int64, name string, description string, path string) (int64, error)
+	GetDatasources(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Datasource, error)
+	GetDatasource(pz az.Principal, datasourceId int64) (*Project, error)
+	UpdateDatasource(pz az.Principal, name string, description string, path string) error
+	DeleteDatasource(pz az.Principal, datasourceId int64) error
+	CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error)
+	GetDatasets(pz az.Principal, datasourceId int64, offset int64, limit int64) ([]*Dataset, error)
+	GetDataset(pz az.Principal, datasetId int64) (*Dataset, error)
+	UpdateDataset(pz az.Principal, datasetId int64, name string, description string, responseColumnName string) error
+	SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error)
+	DeleteDataset(pz az.Principal, datasetId int64) error
+	BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error)
+	BuildAutoModel(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
 	GetModel(pz az.Principal, modelId int64) (*Model, error)
-	GetModels(pz az.Principal, offset int64, limit int64) ([]*Model, error)
+	GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
 	GetClusterModels(pz az.Principal, clusterId int64) ([]*Model, error)
-	ImportModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*Model, error)
+	ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelName string) (*Model, error)
 	DeleteModel(pz az.Principal, modelId int64) error
 	StartScoringService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
 	StopScoringService(pz az.Principal, serviceId int64) error
@@ -310,14 +356,159 @@ type GetJobsOut struct {
 	Jobs []*Job `json:"jobs"`
 }
 
+type CreateProjectIn struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type CreateProjectOut struct {
+	ProjectId int64 `json:"project_id"`
+}
+
+type GetProjectsIn struct {
+	Offset int64 `json:"offset"`
+	Limit  int64 `json:"limit"`
+}
+
+type GetProjectsOut struct {
+	Projects []*Project `json:"projects"`
+}
+
+type GetProjectIn struct {
+	ProjectId int64 `json:"project_id"`
+}
+
+type GetProjectOut struct {
+	Project *Project `json:"project"`
+}
+
+type DeleteProjectIn struct {
+	ProjectId int64 `json:"project_id"`
+}
+
+type DeleteProjectOut struct {
+}
+
+type CreateDatasourceIn struct {
+	ProjectId   int64  `json:"project_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Path        string `json:"path"`
+}
+
+type CreateDatasourceOut struct {
+	DatasourceId int64 `json:"datasource_id"`
+}
+
+type GetDatasourcesIn struct {
+	ProjectId int64 `json:"project_id"`
+	Offset    int64 `json:"offset"`
+	Limit     int64 `json:"limit"`
+}
+
+type GetDatasourcesOut struct {
+	Datasources []*Datasource `json:"datasources"`
+}
+
+type GetDatasourceIn struct {
+	DatasourceId int64 `json:"datasource_id"`
+}
+
+type GetDatasourceOut struct {
+	Project *Project `json:"project"`
+}
+
+type UpdateDatasourceIn struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Path        string `json:"path"`
+}
+
+type UpdateDatasourceOut struct {
+}
+
+type DeleteDatasourceIn struct {
+	DatasourceId int64 `json:"datasource_id"`
+}
+
+type DeleteDatasourceOut struct {
+}
+
+type CreateDatasetIn struct {
+	ClusterId          int64  `json:"cluster_id"`
+	DatasourceId       int64  `json:"datasource_id"`
+	Name               string `json:"name"`
+	Description        string `json:"description"`
+	ResponseColumnName string `json:"response_column_name"`
+}
+
+type CreateDatasetOut struct {
+	DatasetId int64 `json:"dataset_id"`
+}
+
+type GetDatasetsIn struct {
+	DatasourceId int64 `json:"datasource_id"`
+	Offset       int64 `json:"offset"`
+	Limit        int64 `json:"limit"`
+}
+
+type GetDatasetsOut struct {
+	Datasets []*Dataset `json:"datasets"`
+}
+
+type GetDatasetIn struct {
+	DatasetId int64 `json:"dataset_id"`
+}
+
+type GetDatasetOut struct {
+	Dataset *Dataset `json:"dataset"`
+}
+
+type UpdateDatasetIn struct {
+	DatasetId          int64  `json:"dataset_id"`
+	Name               string `json:"name"`
+	Description        string `json:"description"`
+	ResponseColumnName string `json:"response_column_name"`
+}
+
+type UpdateDatasetOut struct {
+}
+
+type SplitDatasetIn struct {
+	DatasetId int64 `json:"dataset_id"`
+	Ratio1    int   `json:"ratio1"`
+	Ratio2    int   `json:"ratio2"`
+}
+
+type SplitDatasetOut struct {
+	DatasetIds []int64 `json:"dataset_ids"`
+}
+
+type DeleteDatasetIn struct {
+	DatasetId int64 `json:"dataset_id"`
+}
+
+type DeleteDatasetOut struct {
+}
+
 type BuildModelIn struct {
+	ClusterId int64  `json:"cluster_id"`
+	DatasetId int64  `json:"dataset_id"`
+	Algorithm string `json:"algorithm"`
+}
+
+type BuildModelOut struct {
+	ModelId int64 `json:"model_id"`
+}
+
+type BuildAutoModelIn struct {
 	ClusterId  int64  `json:"cluster_id"`
 	Dataset    string `json:"dataset"`
 	TargetName string `json:"target_name"`
 	MaxRunTime int    `json:"max_run_time"`
 }
 
-type BuildModelOut struct {
+type BuildAutoModelOut struct {
 	Model *Model `json:"model"`
 }
 
@@ -330,8 +521,9 @@ type GetModelOut struct {
 }
 
 type GetModelsIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	ProjectId int64 `json:"project_id"`
+	Offset    int64 `json:"offset"`
+	Limit     int64 `json:"limit"`
 }
 
 type GetModelsOut struct {
@@ -348,6 +540,7 @@ type GetClusterModelsOut struct {
 
 type ImportModelFromClusterIn struct {
 	ClusterId int64  `json:"cluster_id"`
+	ProjectId int64  `json:"project_id"`
 	ModelName string `json:"model_name"`
 }
 
@@ -871,10 +1064,170 @@ func (this *Remote) GetJobs(clusterId int64) ([]*Job, error) {
 	return out.Jobs, nil
 }
 
-func (this *Remote) BuildModel(clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error) {
-	in := BuildModelIn{clusterId, dataset, targetName, maxRunTime}
+func (this *Remote) CreateProject(name string, description string) (int64, error) {
+	in := CreateProjectIn{name, description}
+	var out CreateProjectOut
+	err := this.Proc.Call("CreateProject", &in, &out)
+	if err != nil {
+		return 0, err
+	}
+	return out.ProjectId, nil
+}
+
+func (this *Remote) GetProjects(offset int64, limit int64) ([]*Project, error) {
+	in := GetProjectsIn{offset, limit}
+	var out GetProjectsOut
+	err := this.Proc.Call("GetProjects", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Projects, nil
+}
+
+func (this *Remote) GetProject(projectId int64) (*Project, error) {
+	in := GetProjectIn{projectId}
+	var out GetProjectOut
+	err := this.Proc.Call("GetProject", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Project, nil
+}
+
+func (this *Remote) DeleteProject(projectId int64) error {
+	in := DeleteProjectIn{projectId}
+	var out DeleteProjectOut
+	err := this.Proc.Call("DeleteProject", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) CreateDatasource(projectId int64, name string, description string, path string) (int64, error) {
+	in := CreateDatasourceIn{projectId, name, description, path}
+	var out CreateDatasourceOut
+	err := this.Proc.Call("CreateDatasource", &in, &out)
+	if err != nil {
+		return 0, err
+	}
+	return out.DatasourceId, nil
+}
+
+func (this *Remote) GetDatasources(projectId int64, offset int64, limit int64) ([]*Datasource, error) {
+	in := GetDatasourcesIn{projectId, offset, limit}
+	var out GetDatasourcesOut
+	err := this.Proc.Call("GetDatasources", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Datasources, nil
+}
+
+func (this *Remote) GetDatasource(datasourceId int64) (*Project, error) {
+	in := GetDatasourceIn{datasourceId}
+	var out GetDatasourceOut
+	err := this.Proc.Call("GetDatasource", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Project, nil
+}
+
+func (this *Remote) UpdateDatasource(name string, description string, path string) error {
+	in := UpdateDatasourceIn{name, description, path}
+	var out UpdateDatasourceOut
+	err := this.Proc.Call("UpdateDatasource", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) DeleteDatasource(datasourceId int64) error {
+	in := DeleteDatasourceIn{datasourceId}
+	var out DeleteDatasourceOut
+	err := this.Proc.Call("DeleteDatasource", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) CreateDataset(clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error) {
+	in := CreateDatasetIn{clusterId, datasourceId, name, description, responseColumnName}
+	var out CreateDatasetOut
+	err := this.Proc.Call("CreateDataset", &in, &out)
+	if err != nil {
+		return 0, err
+	}
+	return out.DatasetId, nil
+}
+
+func (this *Remote) GetDatasets(datasourceId int64, offset int64, limit int64) ([]*Dataset, error) {
+	in := GetDatasetsIn{datasourceId, offset, limit}
+	var out GetDatasetsOut
+	err := this.Proc.Call("GetDatasets", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Datasets, nil
+}
+
+func (this *Remote) GetDataset(datasetId int64) (*Dataset, error) {
+	in := GetDatasetIn{datasetId}
+	var out GetDatasetOut
+	err := this.Proc.Call("GetDataset", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Dataset, nil
+}
+
+func (this *Remote) UpdateDataset(datasetId int64, name string, description string, responseColumnName string) error {
+	in := UpdateDatasetIn{datasetId, name, description, responseColumnName}
+	var out UpdateDatasetOut
+	err := this.Proc.Call("UpdateDataset", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) SplitDataset(datasetId int64, ratio1 int, ratio2 int) ([]int64, error) {
+	in := SplitDatasetIn{datasetId, ratio1, ratio2}
+	var out SplitDatasetOut
+	err := this.Proc.Call("SplitDataset", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.DatasetIds, nil
+}
+
+func (this *Remote) DeleteDataset(datasetId int64) error {
+	in := DeleteDatasetIn{datasetId}
+	var out DeleteDatasetOut
+	err := this.Proc.Call("DeleteDataset", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) BuildModel(clusterId int64, datasetId int64, algorithm string) (int64, error) {
+	in := BuildModelIn{clusterId, datasetId, algorithm}
 	var out BuildModelOut
 	err := this.Proc.Call("BuildModel", &in, &out)
+	if err != nil {
+		return 0, err
+	}
+	return out.ModelId, nil
+}
+
+func (this *Remote) BuildAutoModel(clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error) {
+	in := BuildAutoModelIn{clusterId, dataset, targetName, maxRunTime}
+	var out BuildAutoModelOut
+	err := this.Proc.Call("BuildAutoModel", &in, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -891,8 +1244,8 @@ func (this *Remote) GetModel(modelId int64) (*Model, error) {
 	return out.Model, nil
 }
 
-func (this *Remote) GetModels(offset int64, limit int64) ([]*Model, error) {
-	in := GetModelsIn{offset, limit}
+func (this *Remote) GetModels(projectId int64, offset int64, limit int64) ([]*Model, error) {
+	in := GetModelsIn{projectId, offset, limit}
 	var out GetModelsOut
 	err := this.Proc.Call("GetModels", &in, &out)
 	if err != nil {
@@ -911,8 +1264,8 @@ func (this *Remote) GetClusterModels(clusterId int64) ([]*Model, error) {
 	return out.Models, nil
 }
 
-func (this *Remote) ImportModelFromCluster(clusterId int64, modelName string) (*Model, error) {
-	in := ImportModelFromClusterIn{clusterId, modelName}
+func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, modelName string) (*Model, error) {
+	in := ImportModelFromClusterIn{clusterId, projectId, modelName}
 	var out ImportModelFromClusterOut
 	err := this.Proc.Call("ImportModelFromCluster", &in, &out)
 	if err != nil {
@@ -1599,6 +1952,256 @@ func (this *Impl) GetJobs(r *http.Request, in *GetJobsIn, out *GetJobsOut) error
 	return nil
 }
 
+func (this *Impl) CreateProject(r *http.Request, in *CreateProjectIn, out *CreateProjectOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called CreateProject")
+
+	it, err := this.Service.CreateProject(pz, in.Name, in.Description)
+	if err != nil {
+		log.Printf("%s Failed to CreateProject: %v", pz, err)
+		return err
+	}
+	out.ProjectId = it
+	return nil
+}
+
+func (this *Impl) GetProjects(r *http.Request, in *GetProjectsIn, out *GetProjectsOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called GetProjects")
+
+	it, err := this.Service.GetProjects(pz, in.Offset, in.Limit)
+	if err != nil {
+		log.Printf("%s Failed to GetProjects: %v", pz, err)
+		return err
+	}
+	out.Projects = it
+	return nil
+}
+
+func (this *Impl) GetProject(r *http.Request, in *GetProjectIn, out *GetProjectOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called GetProject")
+
+	it, err := this.Service.GetProject(pz, in.ProjectId)
+	if err != nil {
+		log.Printf("%s Failed to GetProject: %v", pz, err)
+		return err
+	}
+	out.Project = it
+	return nil
+}
+
+func (this *Impl) DeleteProject(r *http.Request, in *DeleteProjectIn, out *DeleteProjectOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called DeleteProject")
+
+	err := this.Service.DeleteProject(pz, in.ProjectId)
+	if err != nil {
+		log.Printf("%s Failed to DeleteProject: %v", pz, err)
+		return err
+	}
+	return nil
+}
+
+func (this *Impl) CreateDatasource(r *http.Request, in *CreateDatasourceIn, out *CreateDatasourceOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called CreateDatasource")
+
+	it, err := this.Service.CreateDatasource(pz, in.ProjectId, in.Name, in.Description, in.Path)
+	if err != nil {
+		log.Printf("%s Failed to CreateDatasource: %v", pz, err)
+		return err
+	}
+	out.DatasourceId = it
+	return nil
+}
+
+func (this *Impl) GetDatasources(r *http.Request, in *GetDatasourcesIn, out *GetDatasourcesOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called GetDatasources")
+
+	it, err := this.Service.GetDatasources(pz, in.ProjectId, in.Offset, in.Limit)
+	if err != nil {
+		log.Printf("%s Failed to GetDatasources: %v", pz, err)
+		return err
+	}
+	out.Datasources = it
+	return nil
+}
+
+func (this *Impl) GetDatasource(r *http.Request, in *GetDatasourceIn, out *GetDatasourceOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called GetDatasource")
+
+	it, err := this.Service.GetDatasource(pz, in.DatasourceId)
+	if err != nil {
+		log.Printf("%s Failed to GetDatasource: %v", pz, err)
+		return err
+	}
+	out.Project = it
+	return nil
+}
+
+func (this *Impl) UpdateDatasource(r *http.Request, in *UpdateDatasourceIn, out *UpdateDatasourceOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called UpdateDatasource")
+
+	err := this.Service.UpdateDatasource(pz, in.Name, in.Description, in.Path)
+	if err != nil {
+		log.Printf("%s Failed to UpdateDatasource: %v", pz, err)
+		return err
+	}
+	return nil
+}
+
+func (this *Impl) DeleteDatasource(r *http.Request, in *DeleteDatasourceIn, out *DeleteDatasourceOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called DeleteDatasource")
+
+	err := this.Service.DeleteDatasource(pz, in.DatasourceId)
+	if err != nil {
+		log.Printf("%s Failed to DeleteDatasource: %v", pz, err)
+		return err
+	}
+	return nil
+}
+
+func (this *Impl) CreateDataset(r *http.Request, in *CreateDatasetIn, out *CreateDatasetOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called CreateDataset")
+
+	it, err := this.Service.CreateDataset(pz, in.ClusterId, in.DatasourceId, in.Name, in.Description, in.ResponseColumnName)
+	if err != nil {
+		log.Printf("%s Failed to CreateDataset: %v", pz, err)
+		return err
+	}
+	out.DatasetId = it
+	return nil
+}
+
+func (this *Impl) GetDatasets(r *http.Request, in *GetDatasetsIn, out *GetDatasetsOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called GetDatasets")
+
+	it, err := this.Service.GetDatasets(pz, in.DatasourceId, in.Offset, in.Limit)
+	if err != nil {
+		log.Printf("%s Failed to GetDatasets: %v", pz, err)
+		return err
+	}
+	out.Datasets = it
+	return nil
+}
+
+func (this *Impl) GetDataset(r *http.Request, in *GetDatasetIn, out *GetDatasetOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called GetDataset")
+
+	it, err := this.Service.GetDataset(pz, in.DatasetId)
+	if err != nil {
+		log.Printf("%s Failed to GetDataset: %v", pz, err)
+		return err
+	}
+	out.Dataset = it
+	return nil
+}
+
+func (this *Impl) UpdateDataset(r *http.Request, in *UpdateDatasetIn, out *UpdateDatasetOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called UpdateDataset")
+
+	err := this.Service.UpdateDataset(pz, in.DatasetId, in.Name, in.Description, in.ResponseColumnName)
+	if err != nil {
+		log.Printf("%s Failed to UpdateDataset: %v", pz, err)
+		return err
+	}
+	return nil
+}
+
+func (this *Impl) SplitDataset(r *http.Request, in *SplitDatasetIn, out *SplitDatasetOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called SplitDataset")
+
+	it, err := this.Service.SplitDataset(pz, in.DatasetId, in.Ratio1, in.Ratio2)
+	if err != nil {
+		log.Printf("%s Failed to SplitDataset: %v", pz, err)
+		return err
+	}
+	out.DatasetIds = it
+	return nil
+}
+
+func (this *Impl) DeleteDataset(r *http.Request, in *DeleteDatasetIn, out *DeleteDatasetOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called DeleteDataset")
+
+	err := this.Service.DeleteDataset(pz, in.DatasetId)
+	if err != nil {
+		log.Printf("%s Failed to DeleteDataset: %v", pz, err)
+		return err
+	}
+	return nil
+}
+
 func (this *Impl) BuildModel(r *http.Request, in *BuildModelIn, out *BuildModelOut) error {
 
 	pz, azerr := this.Az.Identify(r)
@@ -1607,9 +2210,26 @@ func (this *Impl) BuildModel(r *http.Request, in *BuildModelIn, out *BuildModelO
 	}
 	log.Println(pz, "called BuildModel")
 
-	it, err := this.Service.BuildModel(pz, in.ClusterId, in.Dataset, in.TargetName, in.MaxRunTime)
+	it, err := this.Service.BuildModel(pz, in.ClusterId, in.DatasetId, in.Algorithm)
 	if err != nil {
 		log.Printf("%s Failed to BuildModel: %v", pz, err)
+		return err
+	}
+	out.ModelId = it
+	return nil
+}
+
+func (this *Impl) BuildAutoModel(r *http.Request, in *BuildAutoModelIn, out *BuildAutoModelOut) error {
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+	log.Println(pz, "called BuildAutoModel")
+
+	it, err := this.Service.BuildAutoModel(pz, in.ClusterId, in.Dataset, in.TargetName, in.MaxRunTime)
+	if err != nil {
+		log.Printf("%s Failed to BuildAutoModel: %v", pz, err)
 		return err
 	}
 	out.Model = it
@@ -1641,7 +2261,7 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
 	}
 	log.Println(pz, "called GetModels")
 
-	it, err := this.Service.GetModels(pz, in.Offset, in.Limit)
+	it, err := this.Service.GetModels(pz, in.ProjectId, in.Offset, in.Limit)
 	if err != nil {
 		log.Printf("%s Failed to GetModels: %v", pz, err)
 		return err
@@ -1675,7 +2295,7 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 	}
 	log.Println(pz, "called ImportModelFromCluster")
 
-	it, err := this.Service.ImportModelFromCluster(pz, in.ClusterId, in.ModelName)
+	it, err := this.Service.ImportModelFromCluster(pz, in.ClusterId, in.ProjectId, in.ModelName)
 	if err != nil {
 		log.Printf("%s Failed to ImportModelFromCluster: %v", pz, err)
 		return err

@@ -395,6 +395,74 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 	return jobs, nil
 }
 
+// --- Project ---
+
+func (s *Service) CreateProject(pz az.Principal, name, description string) (int64, error) {
+	return 0, nil // XXX return project id
+}
+
+func (s *Service) GetProjects(pz az.Principal, offset, limit int64) ([]*web.Project, error) {
+	return nil, nil // XXX
+}
+
+func (s *Service) GetProject(pz az.Principal, projectId int64) (*web.Project, error) {
+	return nil, nil // XXX
+}
+
+func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
+	return nil // XXX
+}
+
+// --- Datasource ---
+
+func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, path string) (int64, error) {
+	return 0, nil // XXX return datasource id
+}
+
+func (s *Service) GetDatasources(pz az.Principal, projectId, offset, limit int64) ([]*web.Datasource, error) {
+	return nil, nil // XXX
+}
+
+func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Project, error) {
+	return nil, nil // XXX
+}
+
+func (s *Service) UpdateDatasource(pz az.Principal, name, description, path string) error {
+	return nil // XXX
+}
+
+func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
+	return nil // XXX
+}
+
+// --- Dataset ---
+
+func (s *Service) CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name, description string, responseColumnName string) (int64, error) {
+	return 0, nil // XXX return dataset id
+}
+
+func (s *Service) GetDatasets(pz az.Principal, datasourceId int64, offset, limit int64) ([]*web.Dataset, error) {
+	return nil, nil // XXX
+}
+
+func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, error) {
+	return nil, nil // XXX
+}
+
+func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
+	return nil // XXX
+}
+
+func (s *Service) SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error) {
+	return nil, nil // XXX
+}
+
+func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
+	return nil // XXX
+}
+
+// --- Model ---
+
 func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string) (string, string, error) {
 
 	// FIXME: allow overwriting of existing java-model/genmodel/metrics, if any.
@@ -415,7 +483,14 @@ func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string) (string, string,
 	return location, logicalName, err
 }
 
-func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
+func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
+	return 0, nil // XXX Build default model, save to DB, return model id
+}
+
+func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
+
+	return nil, fmt.Errorf("AutoML is currently not supported")
+
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return nil, err
 	}
@@ -441,6 +516,7 @@ func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetNa
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
 		modelName,
 		cluster.Name,
 		"AutoML",
@@ -476,7 +552,7 @@ func (s *Service) GetModel(pz az.Principal, modelId int64) (*web.Model, error) {
 	return toModel(model), nil
 }
 
-func (s *Service) GetModels(pz az.Principal, offset, limit int64) ([]*web.Model, error) {
+func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int64) ([]*web.Model, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
@@ -518,6 +594,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	for i, m := range ms.Models {
 		models[i] = &web.Model{
 			0,
+			0,
 			m.ModelId.Name,
 			cluster.Name,
 			m.AlgoFullName,
@@ -526,6 +603,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 			"",
 			"",
 			0,
+			"", // XXX Fill in raw metrics
 			m.Timestamp,
 		}
 	}
@@ -533,8 +611,8 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	return models, nil
 }
 
-func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*web.Model, error) {
-	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
+func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelName string) (*web.Model, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return nil, err
 	}
 
@@ -544,6 +622,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 	}
 
 	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
+
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
 	r, err := h2o.GetModelsFetch(modelName)
@@ -565,8 +644,33 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 		return nil, err //FIXME format error
 	}
 
+	// XXX Sebastian: fetch raw frame json from H2O
+
+	datasourceId, err := s.ds.CreateDatasource(pz, data.Datasource{
+		0,
+		projectId,
+		modelName + " Datasource",
+		"Datasource for model " + modelName,
+		"Implicit",
+		"",
+		time.Now(),
+	})
+
+	datasetId, err := s.ds.CreateDataset(pz, data.Dataset{
+		0,
+		datasourceId,
+		modelName + " Dataset",
+		"Dataset for model " + modelName,
+		m.DataFrame.Name,
+		m.ResponseColumnName,
+		"",  // XXX Sebastian: put raw frame json here
+		"1", // MUST be "1"; will change when H2O's API version is bumped.
+		time.Now(),
+	})
+
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		datasetId,
 		modelName,
 		cluster.Name,
 		m.AlgoFullName,
@@ -1315,6 +1419,7 @@ func toYarnCluster(c data.YarnCluster) *web.YarnCluster {
 func toModel(m data.Model) *web.Model {
 	return &web.Model{
 		m.Id,
+		m.DatasetId,
 		m.Name,
 		m.ClusterName,
 		m.Algorithm,
@@ -1323,6 +1428,7 @@ func toModel(m data.Model) *web.Model {
 		m.LogicalName,
 		m.Location,
 		int(m.MaxRunTime), // FIXME change db field to int
+		m.Metrics,
 		toTimestamp(m.Created),
 	}
 }

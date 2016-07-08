@@ -209,7 +209,189 @@ class RPCClient:
 		response = self.connection.call("GetJobs", request)
 		return [View(o) for o in response['jobs']]
 
-	def build_model(self, cluster_id, dataset, target_name, max_run_time):
+	def create_project(self, name, description):
+		"""
+		Returns projectId (int64)
+		"""
+		request = {
+			'name': name,
+			'description': description
+		}
+		response = self.connection.call("CreateProject", request)
+		return response['project_id']
+
+	def get_projects(self, offset, limit):
+		"""
+		Returns projects ([]*Project)
+		"""
+		request = {
+			'offset': offset,
+			'limit': limit
+		}
+		response = self.connection.call("GetProjects", request)
+		return [View(o) for o in response['projects']]
+
+	def get_project(self, project_id):
+		"""
+		Returns project (*Project)
+		"""
+		request = {
+			'project_id': project_id
+		}
+		response = self.connection.call("GetProject", request)
+		return View(response['project'])
+
+	def delete_project(self, project_id):
+		"""
+		Returns None
+		"""
+		request = {
+			'project_id': project_id
+		}
+		self.connection.call("DeleteProject", request)
+
+
+	def create_datasource(self, project_id, name, description, path):
+		"""
+		Returns datasourceId (int64)
+		"""
+		request = {
+			'project_id': project_id,
+			'name': name,
+			'description': description,
+			'path': path
+		}
+		response = self.connection.call("CreateDatasource", request)
+		return response['datasource_id']
+
+	def get_datasources(self, project_id, offset, limit):
+		"""
+		Returns datasources ([]*Datasource)
+		"""
+		request = {
+			'project_id': project_id,
+			'offset': offset,
+			'limit': limit
+		}
+		response = self.connection.call("GetDatasources", request)
+		return [View(o) for o in response['datasources']]
+
+	def get_datasource(self, datasource_id):
+		"""
+		Returns project (*Project)
+		"""
+		request = {
+			'datasource_id': datasource_id
+		}
+		response = self.connection.call("GetDatasource", request)
+		return View(response['project'])
+
+	def update_datasource(self, name, description, path):
+		"""
+		Returns None
+		"""
+		request = {
+			'name': name,
+			'description': description,
+			'path': path
+		}
+		self.connection.call("UpdateDatasource", request)
+
+
+	def delete_datasource(self, datasource_id):
+		"""
+		Returns None
+		"""
+		request = {
+			'datasource_id': datasource_id
+		}
+		self.connection.call("DeleteDatasource", request)
+
+
+	def create_dataset(self, cluster_id, datasource_id, name, description, response_column_name):
+		"""
+		Returns datasetId (int64)
+		"""
+		request = {
+			'cluster_id': cluster_id,
+			'datasource_id': datasource_id,
+			'name': name,
+			'description': description,
+			'response_column_name': response_column_name
+		}
+		response = self.connection.call("CreateDataset", request)
+		return response['dataset_id']
+
+	def get_datasets(self, datasource_id, offset, limit):
+		"""
+		Returns datasets ([]*Dataset)
+		"""
+		request = {
+			'datasource_id': datasource_id,
+			'offset': offset,
+			'limit': limit
+		}
+		response = self.connection.call("GetDatasets", request)
+		return [View(o) for o in response['datasets']]
+
+	def get_dataset(self, dataset_id):
+		"""
+		Returns dataset (*Dataset)
+		"""
+		request = {
+			'dataset_id': dataset_id
+		}
+		response = self.connection.call("GetDataset", request)
+		return View(response['dataset'])
+
+	def update_dataset(self, dataset_id, name, description, response_column_name):
+		"""
+		Returns None
+		"""
+		request = {
+			'dataset_id': dataset_id,
+			'name': name,
+			'description': description,
+			'response_column_name': response_column_name
+		}
+		self.connection.call("UpdateDataset", request)
+
+
+	def split_dataset(self, dataset_id, ratio1, ratio2):
+		"""
+		Returns datasetIds ([]int64)
+		"""
+		request = {
+			'dataset_id': dataset_id,
+			'ratio1': ratio1,
+			'ratio2': ratio2
+		}
+		response = self.connection.call("SplitDataset", request)
+		return response['dataset_ids']
+
+	def delete_dataset(self, dataset_id):
+		"""
+		Returns None
+		"""
+		request = {
+			'dataset_id': dataset_id
+		}
+		self.connection.call("DeleteDataset", request)
+
+
+	def build_model(self, cluster_id, dataset_id, algorithm):
+		"""
+		Returns modelId (int64)
+		"""
+		request = {
+			'cluster_id': cluster_id,
+			'dataset_id': dataset_id,
+			'algorithm': algorithm
+		}
+		response = self.connection.call("BuildModel", request)
+		return response['model_id']
+
+	def build_auto_model(self, cluster_id, dataset, target_name, max_run_time):
 		"""
 		Returns model (*Model)
 		"""
@@ -219,7 +401,7 @@ class RPCClient:
 			'target_name': target_name,
 			'max_run_time': max_run_time
 		}
-		response = self.connection.call("BuildModel", request)
+		response = self.connection.call("BuildAutoModel", request)
 		return View(response['model'])
 
 	def get_model(self, model_id):
@@ -232,11 +414,12 @@ class RPCClient:
 		response = self.connection.call("GetModel", request)
 		return View(response['model'])
 
-	def get_models(self, offset, limit):
+	def get_models(self, project_id, offset, limit):
 		"""
 		Returns models ([]*Model)
 		"""
 		request = {
+			'project_id': project_id,
 			'offset': offset,
 			'limit': limit
 		}
@@ -253,12 +436,13 @@ class RPCClient:
 		response = self.connection.call("GetClusterModels", request)
 		return [View(o) for o in response['models']]
 
-	def import_model_from_cluster(self, cluster_id, model_name):
+	def import_model_from_cluster(self, cluster_id, project_id, model_name):
 		"""
 		Returns model (*Model)
 		"""
 		request = {
 			'cluster_id': cluster_id,
+			'project_id': project_id,
 			'model_name': model_name
 		}
 		response = self.connection.call("ImportModelFromCluster", request)

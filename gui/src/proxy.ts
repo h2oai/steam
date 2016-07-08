@@ -44,8 +44,37 @@ module Proxy {
 		completed_at: number
 	}
 
+	export interface Project {
+		id: number
+		name: string
+		description: string
+		created_at: number
+	}
+
+	export interface Datasource {
+		id: number
+		project_id: number
+		name: string
+		description: string
+		kind: string
+		configuration: string
+		created_at: number
+	}
+
+	export interface Dataset {
+		id: number
+		datasource_id: number
+		name: string
+		description: string
+		frame_name: string
+		response_column_name: string
+		properties: string
+		created_at: number
+	}
+
 	export interface Model {
 		id: number
+		dataset_id: number
 		name: string
 		cluster_name: string
 		algorithm: string
@@ -54,6 +83,7 @@ module Proxy {
 		logical_name: string
 		location: string
 		max_runtime: number
+		metrics: string
 		created_at: number
 	}
 
@@ -146,11 +176,27 @@ module Proxy {
 		deleteCluster: (clusterId: number, go: (error: Error) => void) => void
 		getJob: (clusterId: number, jobName: string, go: (error: Error, job: Job) => void) => void
 		getJobs: (clusterId: number, go: (error: Error, jobs: Job[]) => void) => void
-		buildModel: (clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
+		createProject: (name: string, description: string, go: (error: Error, projectId: number) => void) => void
+		getProjects: (offset: number, limit: number, go: (error: Error, projects: Project[]) => void) => void
+		getProject: (projectId: number, go: (error: Error, project: Project) => void) => void
+		deleteProject: (projectId: number, go: (error: Error) => void) => void
+		createDatasource: (projectId: number, name: string, description: string, path: string, go: (error: Error, datasourceId: number) => void) => void
+		getDatasources: (projectId: number, offset: number, limit: number, go: (error: Error, datasources: Datasource[]) => void) => void
+		getDatasource: (datasourceId: number, go: (error: Error, project: Project) => void) => void
+		updateDatasource: (name: string, description: string, path: string, go: (error: Error) => void) => void
+		deleteDatasource: (datasourceId: number, go: (error: Error) => void) => void
+		createDataset: (clusterId: number, datasourceId: number, name: string, description: string, responseColumnName: string, go: (error: Error, datasetId: number) => void) => void
+		getDatasets: (datasourceId: number, offset: number, limit: number, go: (error: Error, datasets: Dataset[]) => void) => void
+		getDataset: (datasetId: number, go: (error: Error, dataset: Dataset) => void) => void
+		updateDataset: (datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void) => void
+		splitDataset: (datasetId: number, ratio1: number, ratio2: number, go: (error: Error, datasetIds: number[]) => void) => void
+		deleteDataset: (datasetId: number, go: (error: Error) => void) => void
+		buildModel: (clusterId: number, datasetId: number, algorithm: string, go: (error: Error, modelId: number) => void) => void
+		buildAutoModel: (clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
 		getModel: (modelId: number, go: (error: Error, model: Model) => void) => void
-		getModels: (offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
+		getModels: (projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
 		getClusterModels: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
-		importModelFromCluster: (clusterId: number, modelName: string, go: (error: Error, model: Model) => void) => void
+		importModelFromCluster: (clusterId: number, projectId: number, modelName: string, go: (error: Error, model: Model) => void) => void
 		deleteModel: (modelId: number, go: (error: Error) => void) => void
 		startScoringService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
 		stopScoringService: (serviceId: number, go: (error: Error) => void) => void
@@ -301,14 +347,159 @@ module Proxy {
 		jobs: Job[]
 	}
 
+	interface CreateProjectIn {
+		name: string
+		description: string
+	}
+
+	interface CreateProjectOut {
+		project_id: number
+	}
+
+	interface GetProjectsIn {
+		offset: number
+		limit: number
+	}
+
+	interface GetProjectsOut {
+		projects: Project[]
+	}
+
+	interface GetProjectIn {
+		project_id: number
+	}
+
+	interface GetProjectOut {
+		project: Project
+	}
+
+	interface DeleteProjectIn {
+		project_id: number
+	}
+
+	interface DeleteProjectOut {
+	}
+
+	interface CreateDatasourceIn {
+		project_id: number
+		name: string
+		description: string
+		path: string
+	}
+
+	interface CreateDatasourceOut {
+		datasource_id: number
+	}
+
+	interface GetDatasourcesIn {
+		project_id: number
+		offset: number
+		limit: number
+	}
+
+	interface GetDatasourcesOut {
+		datasources: Datasource[]
+	}
+
+	interface GetDatasourceIn {
+		datasource_id: number
+	}
+
+	interface GetDatasourceOut {
+		project: Project
+	}
+
+	interface UpdateDatasourceIn {
+		name: string
+		description: string
+		path: string
+	}
+
+	interface UpdateDatasourceOut {
+	}
+
+	interface DeleteDatasourceIn {
+		datasource_id: number
+	}
+
+	interface DeleteDatasourceOut {
+	}
+
+	interface CreateDatasetIn {
+		cluster_id: number
+		datasource_id: number
+		name: string
+		description: string
+		response_column_name: string
+	}
+
+	interface CreateDatasetOut {
+		dataset_id: number
+	}
+
+	interface GetDatasetsIn {
+		datasource_id: number
+		offset: number
+		limit: number
+	}
+
+	interface GetDatasetsOut {
+		datasets: Dataset[]
+	}
+
+	interface GetDatasetIn {
+		dataset_id: number
+	}
+
+	interface GetDatasetOut {
+		dataset: Dataset
+	}
+
+	interface UpdateDatasetIn {
+		dataset_id: number
+		name: string
+		description: string
+		response_column_name: string
+	}
+
+	interface UpdateDatasetOut {
+	}
+
+	interface SplitDatasetIn {
+		dataset_id: number
+		ratio1: number
+		ratio2: number
+	}
+
+	interface SplitDatasetOut {
+		dataset_ids: number[]
+	}
+
+	interface DeleteDatasetIn {
+		dataset_id: number
+	}
+
+	interface DeleteDatasetOut {
+	}
+
 	interface BuildModelIn {
+		cluster_id: number
+		dataset_id: number
+		algorithm: string
+	}
+
+	interface BuildModelOut {
+		model_id: number
+	}
+
+	interface BuildAutoModelIn {
 		cluster_id: number
 		dataset: string
 		target_name: string
 		max_run_time: number
 	}
 
-	interface BuildModelOut {
+	interface BuildAutoModelOut {
 		model: Model
 	}
 
@@ -321,6 +512,7 @@ module Proxy {
 	}
 
 	interface GetModelsIn {
+		project_id: number
 		offset: number
 		limit: number
 	}
@@ -339,6 +531,7 @@ module Proxy {
 
 	interface ImportModelFromClusterIn {
 		cluster_id: number
+		project_id: number
 		model_name: string
 	}
 
@@ -848,15 +1041,181 @@ module Proxy {
 		})
 
 	}
-	export function buildModel(clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void): void {
+	export function createProject(name: string, description: string, go: (error: Error, projectId: number) => void): void {
+		var req: CreateProjectIn = {
+			name: name,
+			description: description
+		}
+		Proxy.Call("CreateProject", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<CreateProjectOut>data).project_id)
+		})
+
+	}
+	export function getProjects(offset: number, limit: number, go: (error: Error, projects: Project[]) => void): void {
+		var req: GetProjectsIn = {
+			offset: offset,
+			limit: limit
+		}
+		Proxy.Call("GetProjects", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetProjectsOut>data).projects)
+		})
+
+	}
+	export function getProject(projectId: number, go: (error: Error, project: Project) => void): void {
+		var req: GetProjectIn = {
+			project_id: projectId
+		}
+		Proxy.Call("GetProject", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetProjectOut>data).project)
+		})
+
+	}
+	export function deleteProject(projectId: number, go: (error: Error) => void): void {
+		var req: DeleteProjectIn = {
+			project_id: projectId
+		}
+		Proxy.Call("DeleteProject", req, function(error, data) {
+			return error ? go(error) : go(null)
+		})
+
+	}
+	export function createDatasource(projectId: number, name: string, description: string, path: string, go: (error: Error, datasourceId: number) => void): void {
+		var req: CreateDatasourceIn = {
+			project_id: projectId,
+			name: name,
+			description: description,
+			path: path
+		}
+		Proxy.Call("CreateDatasource", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<CreateDatasourceOut>data).datasource_id)
+		})
+
+	}
+	export function getDatasources(projectId: number, offset: number, limit: number, go: (error: Error, datasources: Datasource[]) => void): void {
+		var req: GetDatasourcesIn = {
+			project_id: projectId,
+			offset: offset,
+			limit: limit
+		}
+		Proxy.Call("GetDatasources", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetDatasourcesOut>data).datasources)
+		})
+
+	}
+	export function getDatasource(datasourceId: number, go: (error: Error, project: Project) => void): void {
+		var req: GetDatasourceIn = {
+			datasource_id: datasourceId
+		}
+		Proxy.Call("GetDatasource", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetDatasourceOut>data).project)
+		})
+
+	}
+	export function updateDatasource(name: string, description: string, path: string, go: (error: Error) => void): void {
+		var req: UpdateDatasourceIn = {
+			name: name,
+			description: description,
+			path: path
+		}
+		Proxy.Call("UpdateDatasource", req, function(error, data) {
+			return error ? go(error) : go(null)
+		})
+
+	}
+	export function deleteDatasource(datasourceId: number, go: (error: Error) => void): void {
+		var req: DeleteDatasourceIn = {
+			datasource_id: datasourceId
+		}
+		Proxy.Call("DeleteDatasource", req, function(error, data) {
+			return error ? go(error) : go(null)
+		})
+
+	}
+	export function createDataset(clusterId: number, datasourceId: number, name: string, description: string, responseColumnName: string, go: (error: Error, datasetId: number) => void): void {
+		var req: CreateDatasetIn = {
+			cluster_id: clusterId,
+			datasource_id: datasourceId,
+			name: name,
+			description: description,
+			response_column_name: responseColumnName
+		}
+		Proxy.Call("CreateDataset", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<CreateDatasetOut>data).dataset_id)
+		})
+
+	}
+	export function getDatasets(datasourceId: number, offset: number, limit: number, go: (error: Error, datasets: Dataset[]) => void): void {
+		var req: GetDatasetsIn = {
+			datasource_id: datasourceId,
+			offset: offset,
+			limit: limit
+		}
+		Proxy.Call("GetDatasets", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetDatasetsOut>data).datasets)
+		})
+
+	}
+	export function getDataset(datasetId: number, go: (error: Error, dataset: Dataset) => void): void {
+		var req: GetDatasetIn = {
+			dataset_id: datasetId
+		}
+		Proxy.Call("GetDataset", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<GetDatasetOut>data).dataset)
+		})
+
+	}
+	export function updateDataset(datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void): void {
+		var req: UpdateDatasetIn = {
+			dataset_id: datasetId,
+			name: name,
+			description: description,
+			response_column_name: responseColumnName
+		}
+		Proxy.Call("UpdateDataset", req, function(error, data) {
+			return error ? go(error) : go(null)
+		})
+
+	}
+	export function splitDataset(datasetId: number, ratio1: number, ratio2: number, go: (error: Error, datasetIds: number[]) => void): void {
+		var req: SplitDatasetIn = {
+			dataset_id: datasetId,
+			ratio1: ratio1,
+			ratio2: ratio2
+		}
+		Proxy.Call("SplitDataset", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<SplitDatasetOut>data).dataset_ids)
+		})
+
+	}
+	export function deleteDataset(datasetId: number, go: (error: Error) => void): void {
+		var req: DeleteDatasetIn = {
+			dataset_id: datasetId
+		}
+		Proxy.Call("DeleteDataset", req, function(error, data) {
+			return error ? go(error) : go(null)
+		})
+
+	}
+	export function buildModel(clusterId: number, datasetId: number, algorithm: string, go: (error: Error, modelId: number) => void): void {
 		var req: BuildModelIn = {
+			cluster_id: clusterId,
+			dataset_id: datasetId,
+			algorithm: algorithm
+		}
+		Proxy.Call("BuildModel", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<BuildModelOut>data).model_id)
+		})
+
+	}
+	export function buildAutoModel(clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void): void {
+		var req: BuildAutoModelIn = {
 			cluster_id: clusterId,
 			dataset: dataset,
 			target_name: targetName,
 			max_run_time: maxRunTime
 		}
-		Proxy.Call("BuildModel", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<BuildModelOut>data).model)
+		Proxy.Call("BuildAutoModel", req, function(error, data) {
+			return error ? go(error, null) : go(null, (<BuildAutoModelOut>data).model)
 		})
 
 	}
@@ -869,8 +1228,9 @@ module Proxy {
 		})
 
 	}
-	export function getModels(offset: number, limit: number, go: (error: Error, models: Model[]) => void): void {
+	export function getModels(projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void): void {
 		var req: GetModelsIn = {
+			project_id: projectId,
 			offset: offset,
 			limit: limit
 		}
@@ -888,9 +1248,10 @@ module Proxy {
 		})
 
 	}
-	export function importModelFromCluster(clusterId: number, modelName: string, go: (error: Error, model: Model) => void): void {
+	export function importModelFromCluster(clusterId: number, projectId: number, modelName: string, go: (error: Error, model: Model) => void): void {
 		var req: ImportModelFromClusterIn = {
 			cluster_id: clusterId,
+			project_id: projectId,
 			model_name: modelName
 		}
 		Proxy.Call("ImportModelFromCluster", req, function(error, data) {
