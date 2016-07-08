@@ -65,6 +65,7 @@ module.exports = {
   // more options in the optional tslint object
   tslint: {
     configuration: {
+      // for a complete list of rules, see: http://palantir.github.io/tslint/rules/
       rules: {
         'triple-equals': [true, 'allow-null-check', 'allow-undefined-check'],
         'class-name': true,
