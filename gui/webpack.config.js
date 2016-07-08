@@ -66,7 +66,13 @@ module.exports = {
   tslint: {
     configuration: {
       rules: {
-
+        'triple-equals': [true, 'allow-null-check', 'allow-undefined-check'],
+        'class-name': true,
+        'semi-colon': [true, 'always', 'ignore-interfaces'],
+        'radix': true,
+        'align': [true, 'parameters', 'statements'],
+        'variable-name': [true, 'ban-keywords', 'check-format', 'allow-leading-underscore'],
+        'whitespace': [true, 'check-branch', 'check-decl', 'check-operator', 'check-module', 'check-separator', 'check-type', 'check-typecast']
         }
     },
 
