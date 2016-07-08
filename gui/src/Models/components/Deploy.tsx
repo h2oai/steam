@@ -4,7 +4,6 @@
 import * as React from 'react';
 import '../styles/deploy.scss';
 import { Overlay } from 'h2oUIKit';
-import * as visComponents from 'vis-components';
 
 interface Props {
   open: boolean
@@ -18,7 +17,6 @@ export default class Deploy extends React.Component<Props, any> {
     this.state = {
       isOpen: false
     };
-    console.log(visComponents);
   }
 
   onClick() {
