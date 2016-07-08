@@ -1,8 +1,9 @@
 import java.io.*;
 import java.net.MalformedURLException;
-
 import javax.servlet.http.*;
 import javax.servlet.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.GsonBuilder;
 import hex.genmodel.easy.exception.PredictException;
@@ -13,13 +14,10 @@ import hex.genmodel.*;
 import com.google.gson.Gson;
 
 public class PredictPythonServlet extends HttpServlet {
-  // Set to true for demo mode (to print the predictions to stdout).
-  // Set to false to get better throughput.
-  private static boolean VERBOSE = false;
+  private static final Logger logger = LoggerFactory.getLogger("PredictPythonServlet");
 
-  private static GenModel rawModel= new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-  private static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
-  // Unused here but needs to exists for template   transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
+  private static GenModel rawModel = ServletUtil.rawModel;
+  private static EasyPredictModelWrapper model = ServletUtil.model;
 
   private static Process p = null;
   private static ProcessBuilder pb = null;
@@ -35,10 +33,10 @@ public class PredictPythonServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      if (VERBOSE) System.out.println("servletPath " + servletPath);
+      logger.debug("servletPath {}",servletPath);
 
-      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-      model = new EasyPredictModelWrapper(rawModel);
+//      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+//      model = new EasyPredictModelWrapper(rawModel);
 
       if (rawModel == null || model == null)
         throw new ServletException("can't load model");
@@ -54,7 +52,7 @@ public class PredictPythonServlet extends HttpServlet {
 
   private void startPython() throws Exception {
     String program = servletPath.getAbsolutePath() + "/WEB-INF/python.py";
-    if (VERBOSE) System.out.println(program);
+    logger.debug(program);
     // start the python process
     try {
       // score.py
@@ -67,10 +65,9 @@ public class PredictPythonServlet extends HttpServlet {
       InputStream stderr = p.getErrorStream();
       reader = new BufferedReader(new InputStreamReader(stdout));
       err_reader = new BufferedReader(new InputStreamReader(stderr));
-      System.out.println("Python started");
+      logger.info("Python started");
     } catch (Exception ex) {
-      System.out.println("Python failed");
-      ex.printStackTrace();
+      logger.error("Python failed", ex);
       throw new Exception("Python failed");
     }
   }
@@ -78,7 +75,7 @@ public class PredictPythonServlet extends HttpServlet {
   public void destroy() {
     if (p != null) {
       p.destroy();
-      System.out.println("Python destroyed");
+      logger.info("Python destroyed");
     }
     super.destroy();
   }
@@ -90,7 +87,7 @@ public class PredictPythonServlet extends HttpServlet {
     ServletUtil.lastTime = System.currentTimeMillis();
     ServletUtil.predictionTimes.add(start, done);
 
-    if (VERBOSE) System.out.println("Prediction time " + ServletUtil.predictionTimes);
+    logger.debug("Prediction time {}", ServletUtil.predictionTimes);
     return p;
   }
 
@@ -118,8 +115,7 @@ public class PredictPythonServlet extends HttpServlet {
       catch (IOException e) {
         String msg = "ERROR IOException in sendPython restarting python";
         result = msg;
-        System.out.println(msg);
-        e.printStackTrace();
+        logger.error(msg, e);
         showStderr();
         // it failed so we restart it and retry
 //        if (p != null) p.destroy();
@@ -132,7 +128,7 @@ public class PredictPythonServlet extends HttpServlet {
 //        showStderr();
     }
     catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error("sendPython failed", ex);
       showStderr();
     }
     return result;
@@ -145,17 +141,17 @@ public class PredictPythonServlet extends HttpServlet {
         throw new Exception("No predictor model");
 
       String queryString = request.getQueryString();
-      if (VERBOSE) System.out.println("queryString " + queryString);
+      logger.debug("queryString {}", queryString);
 
       String result = sendPython(queryString.replaceAll("%20", " "));
-      if (VERBOSE) System.out.println("result " + result);
+      logger.debug("result {}", result);
 
       // should now be in sparse format from python
       RowData row = sparseToRowData(colNames, result);
-      if (VERBOSE) System.out.println("row: " + row);
+      logger.debug("row: {}", row);
 
       AbstractPrediction pr = predict(row);
-      if (VERBOSE) System.out.println("pr: " + pr);
+      logger.debug("pr: {}", pr);
 
       // assemble json result
       String prJson = gson.toJson(pr);
@@ -166,22 +162,22 @@ public class PredictPythonServlet extends HttpServlet {
     }
     catch (Exception e) {
       // Prediction failed.
-      System.out.println(e.getMessage());
+      logger.error("doGet failed", e);
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
     long done = System.nanoTime();
     ServletUtil.getPythonTimes.add(start, done);
-    if (VERBOSE) System.out.println("Python Get time " + ServletUtil.getPythonTimes);
+    logger.debug("Python Get time {}", ServletUtil.getPythonTimes);
   }
 
   private void showStderr() {
     String line;
     try {
       while ((line=err_reader.readLine())!=null) {
-        System.err.println(line);
+        logger.info(line);
       }
     } catch (Exception ex2) {
-      ex2.printStackTrace();
+      logger.error("showStderr failed", ex2);
     }
   }
 
@@ -200,7 +196,7 @@ public class PredictPythonServlet extends HttpServlet {
     }
     catch (NumberFormatException e) {
 //      throw new Exception("Failed to parse " + result);
-      System.out.println("Failed to parse " + result);
+      logger.error("Failed to parse {}", result);
     }
     return row;
   }
@@ -243,10 +239,10 @@ public class PredictPythonServlet extends HttpServlet {
       boolean outputResult = false;
       while (r.ready()) {
         line = r.readLine();
-        if (VERBOSE) System.out.println("line " + line);
+        logger.debug("line {}", line);
 
         result = sendPython(line);
-        if (VERBOSE) System.out.println("from python: " + result);
+        logger.debug("from python: {}", result);
         if (result == null)
           result = "ERROR null result from python";
         if (result.startsWith("ERROR"))
@@ -254,14 +250,14 @@ public class PredictPythonServlet extends HttpServlet {
 
         // should now be in sparse format from python
         row = sparseToRowData(colNames, result);
-        if (VERBOSE) System.out.println("row: " + row);
+        logger.debug("row: {}", row);
 
         // do the prediction
         pr = predict(row);
 
         // assemble json result
         prJson = gson.toJson(pr);
-        if (VERBOSE) System.out.println("prJson: " + prJson);
+        logger.debug("prJson: {}", prJson);
 
         // Emit the prediction to the servlet response.
         writer.write(prJson);
@@ -276,14 +272,13 @@ public class PredictPythonServlet extends HttpServlet {
     }
     catch (Exception e) {
       // Prediction failed.
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      logger.error("doPost failed", e);
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
     if (count > 0) {
       long done = System.nanoTime();
       ServletUtil.postPythonTimes.add(start, done, count);
-      if (VERBOSE) System.out.println("Python Post time " + ServletUtil.postPythonTimes);
+      logger.debug("Python Post time {}", ServletUtil.postPythonTimes);
     }
   }
 

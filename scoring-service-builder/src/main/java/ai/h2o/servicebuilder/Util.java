@@ -1,6 +1,8 @@
 package ai.h2o.servicebuilder;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.jar.Manifest;
  * Created by magnus on 5/10/16.
  */
 class Util {
+  private static final Logger logger = LoggerFactory.getLogger("Util");
+
   public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
   public static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
 
@@ -120,7 +124,6 @@ class Util {
    * @throws Exception
    */
   static String runCmd(File directory, List<String> cmd, String errorMessage) throws Exception {
-//    System.out.println("run " + cmd + " in " + directory);
     ProcessBuilder pb = new ProcessBuilder(cmd);
     pb.directory(directory);
     pb.redirectErrorStream(true); // error sent to output stream
@@ -131,7 +134,7 @@ class Util {
     StringBuilder sb = new StringBuilder();
     BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
     while ((s = stdout.readLine()) != null) {
-      System.out.println(s);
+      logger.info(s);
       sb.append(s);
       sb.append('\n');
     }
@@ -159,7 +162,7 @@ class Util {
     for (File t : tobeJared) {
       if (t == null || !t.exists() || t.isDirectory()) {
         if (t != null && !t.isDirectory())
-          System.out.println("Can't add to jar " + t);
+          logger.error("Can't add to jar {}", t);
         continue;
       }
       // Create jar entry

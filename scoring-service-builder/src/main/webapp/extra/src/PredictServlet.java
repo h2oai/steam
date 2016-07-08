@@ -3,7 +3,8 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.HashMap;
 import java.lang.reflect.Type;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
@@ -17,14 +18,15 @@ import hex.genmodel.*;
 import com.google.gson.Gson;
 
 public class PredictServlet extends HttpServlet {
-  private static final boolean VERBOSE = false;
+  private static final Logger logger = LoggerFactory.getLogger("PredictServlet");
+
   private static final Class ROW_DATA_TYPE = new RowData().getClass();
 
   private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
-  private static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-  private static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
-  private static Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
+  private static GenModel rawModel = ServletUtil.rawModel;
+  private static EasyPredictModelWrapper model = ServletUtil.model;
+  private static Transform transform = ServletUtil.transform;
 
   private File servletPath = null;
 
@@ -32,30 +34,23 @@ public class PredictServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      if (VERBOSE) System.out.println("servletPath " + servletPath);
+      logger.debug("servletPath {}", servletPath);
 
      }
     catch (MalformedURLException e) {
-      e.printStackTrace();
+      logger.error("init failed", e);
     }
   }
-
-//  static private String jsonModel() {
-//
-//    String modelJson = gson.toJson(model);
-//    return modelJson;
-//  }
 
   @SuppressWarnings("unchecked")
   private void fillRowDataFromHttpRequest(HttpServletRequest request, RowData row) {
     Map<String, String[]> parameterMap;
     parameterMap = request.getParameterMap();
-    if (VERBOSE) System.out.println();
     for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
       String key = entry.getKey();
       String[] values = entry.getValue();
       for (String value : values) {
-        if (VERBOSE) System.out.println("Key: " + key + " Value: " + value);
+        logger.debug("Key: {}  Value: {}", key, value);
         if (value.length() > 0) {
           row.put(key, value);
         }
@@ -74,7 +69,7 @@ public class PredictServlet extends HttpServlet {
       byte[] bytes = request.getQueryString().getBytes();
       Map<String, Object> tr = transform.fit(bytes);
       for (String k : tr.keySet()) {
-        System.out.println(k + " = " + tr.get(k));
+        logger.info("{} = {}", k, tr.get(k));
         row.put(k, tr.get(k));
       }
     }
@@ -94,12 +89,12 @@ public class PredictServlet extends HttpServlet {
     }
     catch (Exception e) {
       // Prediction failed.
-      System.out.println(e.getMessage());
+      logger.error("get failed", e);
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
     long done = System.nanoTime();
     ServletUtil.getTimes.add(start, done);
-    if (VERBOSE) System.out.println("Get time " + ServletUtil.getTimes);
+    logger.debug("Get time {}", ServletUtil.getTimes);
   }
 
   public static synchronized AbstractPrediction predict(RowData row) throws PredictException {
@@ -109,7 +104,7 @@ public class PredictServlet extends HttpServlet {
     ServletUtil.lastTime = System.currentTimeMillis();
     ServletUtil.predictionTimes.add(start, done);
 
-    if (VERBOSE) System.out.println("Prediction time " + ServletUtil.predictionTimes);
+    logger.debug("Prediction time {}", ServletUtil.predictionTimes);
     return p;
   }
 
@@ -128,17 +123,17 @@ public class PredictServlet extends HttpServlet {
       String prJson;
       while (r.ready()) {
         line = r.readLine();
-        if (VERBOSE) System.out.println("line " + line);
+        logger.debug("line {}", line);
 
         row = gson.fromJson(line, ServletUtil.ROW_DATA_TYPE);
-        if (VERBOSE) System.out.println("row " + row);
+        logger.debug("row {}", row);
         if (row != null) {
           // do the prediction
           pr = predict(row);
 
           // assemble json result
           prJson = gson.toJson(pr);
-          if (VERBOSE) System.out.println(prJson);
+          logger.debug(prJson);
 
           // Emit the prediction to the servlet response.
           writer.write(prJson);
@@ -150,13 +145,12 @@ public class PredictServlet extends HttpServlet {
     }
     catch (Exception e) {
       // Prediction failed.
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      logger.error("post failed", e);
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
     long done = System.nanoTime();
     ServletUtil.postTimes.add(start, done, count);
-    if (VERBOSE) System.out.println("Post time " + ServletUtil.postTimes);
+    logger.debug("Post time {}", ServletUtil.postTimes);
   }
 
 }

@@ -5,6 +5,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -36,13 +38,15 @@ import static ai.h2o.servicebuilder.Util.*;
 public class MakePythonWarServlet extends HttpServlet {
   private static boolean VERBOSE = false;
 
+  private static final Logger logger = LoggerFactory.getLogger("MakePythonWarServlet");
+
   private File servletPath = null;
 
   public void init(ServletConfig servletConfig) throws ServletException {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      if (VERBOSE) System.out.println("servletPath = " + servletPath);
+      if (VERBOSE) logger.info("servletPath = " + servletPath);
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -55,7 +59,7 @@ public class MakePythonWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      if (VERBOSE) System.out.println("tmpDir " + tmpDir);
+      if (VERBOSE) logger.info("tmpDir " + tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -123,10 +127,8 @@ public class MakePythonWarServlet extends HttpServlet {
       FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "fonts"), tmpDir);
 
       // change the class name in the predictor template file to the predictor we have
-//      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, "null", srcPath + "PredictPythonServlet-TEMPLATE.java", "PredictPythonServlet.java");
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
-
+      copyExtraFile(servletPath, srcPath, tmpDir, "PredictPythonServlet.java", "PredictPythonServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
@@ -157,7 +159,7 @@ public class MakePythonWarServlet extends HttpServlet {
       byte[] resjar = createJarArchiveByteArray(files, tmpDir.getPath() + File.separator);
       if (resjar == null)
         throw new Exception("Can't create war of compiler output");
-      System.out.println("war created from " + files.length + " files, size " + resjar.length);
+      logger.info("war created from {} files, size {}", files.length, resjar.length);
 
       // send jar back
       ServletOutputStream sout = response.getOutputStream();
@@ -170,14 +172,14 @@ public class MakePythonWarServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
 
       Long elapsedMs = System.currentTimeMillis() - startTime;
-      System.out.println("Done python war creation in " + elapsedMs + " ms");
+      logger.info("Done python war creation in {}", elapsedMs);
     }
     catch (Exception e) {
-      e.printStackTrace();
+      logger.error("doPost failed", e);
       // send the error message back
       String message = e.getMessage();
       if (message == null) message = "no message";
-      System.out.println(message);
+      logger.error(message);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       response.getWriter().write(message);
       response.getWriter().write(Arrays.toString(e.getStackTrace()));
@@ -190,7 +192,7 @@ public class MakePythonWarServlet extends HttpServlet {
           FileUtils.deleteDirectory(tmpDir);
         }
         catch (IOException e) {
-          System.err.println("Can't delete tmp directory");
+          logger.error("Can't delete tmp directory");
         }
       }
     }
