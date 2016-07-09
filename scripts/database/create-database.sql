@@ -520,7 +520,8 @@ ALTER SEQUENCE meta_id_seq OWNED BY meta.id;
 
 CREATE TABLE model (
     id integer NOT NULL,
-    dataset_id integer NOT NULL,
+    training_dataset_id integer NOT NULL,
+    validation_dataset_id integer NOT NULL,
     name text NOT NULL,
     cluster_name text NOT NULL,
     algorithm text NOT NULL,
@@ -1209,17 +1210,24 @@ CREATE INDEX fki_identity_workgroup__workgroup_id ON identity_workgroup USING bt
 
 
 --
--- Name: fki_model__dataset_id; Type: INDEX; Schema: public; Owner: steam
---
-
-CREATE INDEX fki_model__dataset_id ON model USING btree (dataset_id);
-
-
---
 -- Name: fki_model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
 CREATE INDEX fki_model_id ON service USING btree (model_id);
+
+
+--
+-- Name: fki_model_training__dataset_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_model_training__dataset_id ON model USING btree (training_dataset_id);
+
+
+--
+-- Name: fki_model_validation__dataset_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_model_validation__dataset_id ON model USING btree (validation_dataset_id);
 
 
 --
@@ -1329,11 +1337,19 @@ ALTER TABLE ONLY identity_workgroup
 
 
 --
--- Name: fk_model__dataset_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+-- Name: fk_model_training__dataset_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
 ALTER TABLE ONLY model
-    ADD CONSTRAINT fk_model__dataset_id FOREIGN KEY (dataset_id) REFERENCES dataset(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_model_training__dataset_id FOREIGN KEY (training_dataset_id) REFERENCES dataset(id);
+
+
+--
+-- Name: fk_model_validation__dataset_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY model
+    ADD CONSTRAINT fk_model_validation__dataset_id FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id);
 
 
 --

@@ -78,18 +78,19 @@ type Dataset struct {
 }
 
 type Model struct {
-	Id                 int64  `json:"id"`
-	DatasetId          int64  `json:"dataset_id"`
-	Name               string `json:"name"`
-	ClusterName        string `json:"cluster_name"`
-	Algorithm          string `json:"algorithm"`
-	DatasetName        string `json:"dataset_name"`
-	ResponseColumnName string `json:"response_column_name"`
-	LogicalName        string `json:"logical_name"`
-	Location           string `json:"location"`
-	MaxRuntime         int    `json:"max_runtime"`
-	Metrics            string `json:"metrics"`
-	CreatedAt          int64  `json:"created_at"`
+	Id                  int64  `json:"id"`
+	TrainingDatasetId   int64  `json:"training_dataset_id"`
+	ValidationDatasetId int64  `json:"validation_dataset_id"`
+	Name                string `json:"name"`
+	ClusterName         string `json:"cluster_name"`
+	Algorithm           string `json:"algorithm"`
+	DatasetName         string `json:"dataset_name"`
+	ResponseColumnName  string `json:"response_column_name"`
+	LogicalName         string `json:"logical_name"`
+	Location            string `json:"location"`
+	MaxRuntime          int    `json:"max_runtime"`
+	Metrics             string `json:"metrics"`
+	CreatedAt           int64  `json:"created_at"`
 }
 
 type ScoringService struct {

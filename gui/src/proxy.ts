@@ -74,7 +74,8 @@ module Proxy {
 
 	export interface Model {
 		id: number
-		dataset_id: number
+		training_dataset_id: number
+		validation_dataset_id: number
 		name: string
 		cluster_name: string
 		algorithm: string

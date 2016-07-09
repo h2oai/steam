@@ -2656,12 +2656,13 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		row := tx.QueryRow(`
 			INSERT INTO
 				model
-				(name, dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,   $2,           $3,        $4,           $5,                   $6,           $7,       $8,           $9,          $10,                 now())
+				($1,   $2,                  $3,                    $4,           $5,        $6,           $7,                   $8,           $9,          $10,       $11,     $12,             now())
 			RETURNING id
 			`,
-			model.DatasetId,
+			model.TrainingDatasetId,
+			model.ValidationDatasetId,
 			model.Name,
 			model.ClusterName,
 			model.Algorithm,
@@ -2704,7 +2705,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, created
+			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -2738,7 +2739,7 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 
 	rows, err := ds.db.Query(`
 		SELECT
-			m.id, m.name, m.cluster_name, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.created
+			m.id, m.name, m.training_dataset_id, m.validation_dataset_id, m.cluster_name, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
 		FROM
 			model m,
 			project_model pm
@@ -2774,7 +2775,7 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, created
+			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE

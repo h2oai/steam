@@ -517,6 +517,7 @@ func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targ
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
 		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
 		modelName,
 		cluster.Name,
 		"AutoML",
@@ -595,6 +596,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 		models[i] = &web.Model{
 			0,
 			0,
+			0,
 			m.ModelId.Name,
 			cluster.Name,
 			m.AlgoFullName,
@@ -656,7 +658,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		time.Now(),
 	})
 
-	datasetId, err := s.ds.CreateDataset(pz, data.Dataset{
+	trainingDatasetId, err := s.ds.CreateDataset(pz, data.Dataset{
 		0,
 		datasourceId,
 		modelName + " Dataset",
@@ -670,7 +672,8 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
-		datasetId,
+		trainingDatasetId,
+		trainingDatasetId,
 		modelName,
 		cluster.Name,
 		m.AlgoFullName,
@@ -1419,7 +1422,8 @@ func toYarnCluster(c data.YarnCluster) *web.YarnCluster {
 func toModel(m data.Model) *web.Model {
 	return &web.Model{
 		m.Id,
-		m.DatasetId,
+		m.TrainingDatasetId,
+		m.ValidationDatasetId,
 		m.Name,
 		m.ClusterName,
 		m.Algorithm,

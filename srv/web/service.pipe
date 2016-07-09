@@ -63,7 +63,8 @@ type Dataset
 
 type Model
  Id int64
- DatasetId int64
+ TrainingDatasetId int64
+ ValidationDatasetId int64
  Name string
  ClusterName string
  Algorithm string

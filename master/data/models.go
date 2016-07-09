@@ -140,19 +140,20 @@ type Dataset struct {
 }
 
 type Model struct {
-	Id                 int64
-	DatasetId          int64
-	Name               string
-	ClusterName        string
-	Algorithm          string
-	DatasetName        string
-	ResponseColumnName string
-	LogicalName        string
-	Location           string
-	MaxRunTime         int64
-	Metrics            string
-	MetricsVersion     string
-	Created            time.Time
+	Id                  int64
+	TrainingDatasetId   int64
+	ValidationDatasetId int64
+	Name                string
+	ClusterName         string
+	Algorithm           string
+	DatasetName         string
+	ResponseColumnName  string
+	LogicalName         string
+	Location            string
+	MaxRunTime          int64
+	Metrics             string
+	MetricsVersion      string
+	Created             time.Time
 }
 
 type Service struct {
