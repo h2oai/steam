@@ -1,0 +1,27 @@
+@import '../../variables.scss';
+
+.dropdown {
+  button {
+    border-radius: 3px;
+    border: 1px solid $brand-dark-2;
+    background-color: $brand-dark-3;
+  }
+  .dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    opacity: 0;
+    height: 0;
+    ul {
+      margin: 0;
+      padding: 0 5px;
+      border: 1px solid black;
+      list-style-type: none;
+    }
+  }
+  &.open {
+    .dropdown-menu {
+      opacity: 1;
+    }
+  }
+}
