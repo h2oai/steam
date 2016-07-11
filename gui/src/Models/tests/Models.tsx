@@ -1,9 +1,6 @@
 /**
  * Created by justin on 7/8/16.
  */
-
-import 'jest';
-
 jest.unmock('../Models');
 
 import * as React from 'react';
