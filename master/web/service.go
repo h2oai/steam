@@ -451,15 +451,52 @@ func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 // --- Datasource ---
 
 func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, path string) (int64, error) {
-	return 0, nil // XXX return datasource id
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
+		return 0, err
+	}
+
+	datasource := data.Datasource{
+		0,
+		projectId,
+		name,
+		description,
+		"", // XXX kind what to do here?
+		"", // XXX configuration what to do here?
+		time.Now(),
+	}
+
+	datasrcId, err := s.ds.CreateDatasource(pz, datasource)
+	if err != nil {
+		return 0, err
+	}
+
+	return datasrcId, nil
 }
 
-func (s *Service) GetDatasources(pz az.Principal, projectId, offset, limit int64) ([]*web.Datasource, error) {
-	return nil, nil // XXX
+func (s *Service) GetDatasourcesForProject(pz az.Principal, projectId, offset, limit int64) ([]*web.Datasource, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDatasource); err != nil {
+		return nil, err
+	}
+
+	datasources, err := s.ds.ReadDatasourcesByProject(pz, projectId, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasources(datasources), nil
 }
 
-func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Project, error) {
-	return nil, nil // XXX
+func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datasource, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDatasource); err != nil {
+		return nil, err
+	}
+
+	datasource, err := s.ds.ReadDatasource(pz, datasourceId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasource(datasource), nil
 }
 
 func (s *Service) UpdateDatasource(pz az.Principal, name, description, path string) error {
@@ -467,7 +504,15 @@ func (s *Service) UpdateDatasource(pz az.Principal, name, description, path stri
 }
 
 func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
-	return nil // XXX
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
+		return err
+	}
+
+	if err := s.ds.DeleteDatasource(pz, datasourceId); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // --- Dataset ---
@@ -1622,6 +1667,27 @@ func toProjects(projects []data.Project) []*web.Project {
 	array := make([]*web.Project, len(projects))
 	for i, project := range projects {
 		array[i] = toProject(project)
+	}
+
+	return array
+}
+
+func toDatasource(datasource data.Datasource) *web.Datasource {
+	return &web.Datasource{
+		datasource.Id,
+		datasource.ProjectId,
+		datasource.Name,
+		datasource.Description,
+		datasource.Kind,
+		datasource.Configuration,
+		toTimestamp(datasource.Created),
+	}
+}
+
+func toDatasources(datasources []data.Datasource) []*web.Datasource {
+	array := make([]*web.Datasource, len(datasources))
+	for i, datasource := range datasources {
+		array[i] = toDatasource(datasource)
 	}
 
 	return array
