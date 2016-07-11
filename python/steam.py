@@ -278,13 +278,13 @@ class RPCClient:
 
 	def get_datasource(self, datasource_id):
 		"""
-		Returns project (*Project)
+		Returns datasource (*Datasources)
 		"""
 		request = {
 			'datasource_id': datasource_id
 		}
 		response = self.connection.call("GetDatasource", request)
-		return View(response['project'])
+		return View(response['datasource'])
 
 	def update_datasource(self, name, description, path):
 		"""

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -433,9 +434,10 @@ func (s *Service) GetProject(pz az.Principal, projectId int64) (*web.Project, er
 		return nil, err
 	}
 
-	return toProject(project), nil // XXX
+	return toProject(project), nil
 }
 
+// TODO needs to check for dependent entitites
 func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
 		return err
@@ -455,13 +457,19 @@ func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, descr
 		return 0, err
 	}
 
+	mapPath := map[string]string{"path": path}
+	jsonPath, err := json.Marshal(mapPath)
+	if err != nil {
+		return 0, err
+	}
+
 	datasource := data.Datasource{
 		0,
 		projectId,
 		name,
 		description,
-		"", // XXX kind what to do here?
-		"", // XXX configuration what to do here?
+		"CSV", // FIXME: this is hardcoded
+		string(jsonPath),
 		time.Now(),
 	}
 
@@ -473,12 +481,12 @@ func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, descr
 	return datasrcId, nil
 }
 
-func (s *Service) GetDatasourcesForProject(pz az.Principal, projectId, offset, limit int64) ([]*web.Datasource, error) {
+func (s *Service) GetDatasources(pz az.Principal, projectId, offset, limit int64) ([]*web.Datasource, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewDatasource); err != nil {
 		return nil, err
 	}
 
-	datasources, err := s.ds.ReadDatasourcesByProject(pz, projectId, offset, limit)
+	datasources, err := s.ds.ReadDatasources(pz, projectId, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -499,10 +507,35 @@ func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datas
 	return toDatasource(datasource), nil
 }
 
-func (s *Service) UpdateDatasource(pz az.Principal, name, description, path string) error {
-	return nil // XXX
+func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, path string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
+		return err
+	}
+
+	mapPath := map[string]string{"path": path}
+	jsonPath, err := json.Marshal(mapPath)
+	if err != nil {
+		return 0, err
+	}
+
+	datasource := data.Datasource{
+		0,
+		0,
+		name,
+		description,
+		"CSV", // FIXME this is hardcoded
+		string(jsonPath),
+		time.Now(),
+	}
+
+	if err := s.ds.UpdateDatasource(pz, datasourceId, datasource); err != nil {
+		return err
+	}
+
+	return nil
 }
 
+// TODO this needs to check dependent datasets
 func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return err
@@ -518,27 +551,99 @@ func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
 // --- Dataset ---
 
 func (s *Service) CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name, description string, responseColumnName string) (int64, error) {
-	return 0, nil // XXX return dataset id
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
+		return 0, err
+	}
+
+	// XXX import dataset here
+
+	dataset := data.Dataset{
+		0,
+		datasourceId,
+		name,
+		description,
+		"", // XXX FrameName key from h2o
+		responseColumnName,
+		"", // XXX Properties rawJson from h2o
+		"1",
+		time.Now(),
+	}
+
+	datasetId, err := s.ds.CreateDataset(pz, dataset)
+	if err != nil {
+		return 0, err
+	}
+
+	return datasetId, nil
 }
 
 func (s *Service) GetDatasets(pz az.Principal, datasourceId int64, offset, limit int64) ([]*web.Dataset, error) {
-	return nil, nil // XXX
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDataset); err != nil {
+		return nil, err
+	}
+
+	datasets, err := s.ds.ReadDatasets(pz, datasourceId, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasets(datasets), nil
 }
 
 func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, error) {
-	return nil, nil // XXX
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDataset); err != nil {
+		return nil, err
+	}
+
+	dataset, err := s.ds.ReadDataset(pz, datasetId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDataset(dataset), nil
 }
 
 func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
-	return nil // XXX
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
+		return err
+	}
+
+	// XXX import dataset here
+
+	dataset := data.Dataset{
+		0,
+		0,
+		name,
+		description,
+		"", // XXX FrameName key from h2o
+		responseColumnName,
+		"", // XXX Properties rawJson from h2o
+		"1",
+		time.Now(),
+	}
+
+	if err := s.ds.UpdateDataset(pz, datasetId, dataset); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error) {
 	return nil, nil // XXX
 }
 
+// TODO needs to check for dependent models
 func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
-	return nil // XXX
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
+		return err
+	}
+
+	if err := s.ds.ReadDataset(pz, datasetId); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // --- Model ---

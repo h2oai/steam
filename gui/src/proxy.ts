@@ -183,7 +183,7 @@ module Proxy {
 		deleteProject: (projectId: number, go: (error: Error) => void) => void
 		createDatasource: (projectId: number, name: string, description: string, path: string, go: (error: Error, datasourceId: number) => void) => void
 		getDatasources: (projectId: number, offset: number, limit: number, go: (error: Error, datasources: Datasource[]) => void) => void
-		getDatasource: (datasourceId: number, go: (error: Error, project: Project) => void) => void
+		getDatasource: (datasourceId: number, go: (error: Error, datasource: Datasources) => void) => void
 		updateDatasource: (name: string, description: string, path: string, go: (error: Error) => void) => void
 		deleteDatasource: (datasourceId: number, go: (error: Error) => void) => void
 		createDataset: (clusterId: number, datasourceId: number, name: string, description: string, responseColumnName: string, go: (error: Error, datasetId: number) => void) => void
@@ -407,7 +407,7 @@ module Proxy {
 	}
 
 	interface GetDatasourceOut {
-		project: Project
+		datasource: Datasources
 	}
 
 	interface UpdateDatasourceIn {
@@ -1103,12 +1103,12 @@ module Proxy {
 		})
 
 	}
-	export function getDatasource(datasourceId: number, go: (error: Error, project: Project) => void): void {
+	export function getDatasource(datasourceId: number, go: (error: Error, datasource: Datasources) => void): void {
 		var req: GetDatasourceIn = {
 			datasource_id: datasourceId
 		}
 		Proxy.Call("GetDatasource", req, function(error, data) {
-			return error ? go(error, null) : go(null, (<GetDatasourceOut>data).project)
+			return error ? go(error, null) : go(null, (<GetDatasourceOut>data).datasource)
 		})
 
 	}

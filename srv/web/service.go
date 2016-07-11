@@ -192,7 +192,7 @@ type Service interface {
 	DeleteProject(pz az.Principal, projectId int64) error
 	CreateDatasource(pz az.Principal, projectId int64, name string, description string, path string) (int64, error)
 	GetDatasources(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Datasource, error)
-	GetDatasource(pz az.Principal, datasourceId int64) (*Project, error)
+	GetDatasource(pz az.Principal, datasourceId int64) (*Datasources, error)
 	UpdateDatasource(pz az.Principal, name string, description string, path string) error
 	DeleteDatasource(pz az.Principal, datasourceId int64) error
 	CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error)
@@ -416,7 +416,7 @@ type GetDatasourceIn struct {
 }
 
 type GetDatasourceOut struct {
-	Project *Project `json:"project"`
+	Datasource *Datasources `json:"datasource"`
 }
 
 type UpdateDatasourceIn struct {
@@ -1125,14 +1125,14 @@ func (this *Remote) GetDatasources(projectId int64, offset int64, limit int64) (
 	return out.Datasources, nil
 }
 
-func (this *Remote) GetDatasource(datasourceId int64) (*Project, error) {
+func (this *Remote) GetDatasource(datasourceId int64) (*Datasources, error) {
 	in := GetDatasourceIn{datasourceId}
 	var out GetDatasourceOut
 	err := this.Proc.Call("GetDatasource", &in, &out)
 	if err != nil {
 		return nil, err
 	}
-	return out.Project, nil
+	return out.Datasource, nil
 }
 
 func (this *Remote) UpdateDatasource(name string, description string, path string) error {
@@ -2067,7 +2067,7 @@ func (this *Impl) GetDatasource(r *http.Request, in *GetDatasourceIn, out *GetDa
 		log.Printf("%s Failed to GetDatasource: %v", pz, err)
 		return err
 	}
-	out.Project = it
+	out.Datasource = it
 	return nil
 }
 
