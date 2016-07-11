@@ -2,6 +2,18 @@
 
 .leaderboard {
   width: 100%;
+  header {
+    display: flex;
+    justify-content: space-between;
+    div:last-child {
+      display: flex;
+      align-items: flex-end;
+      margin: 11.5px 0;
+      button:first-child {
+        margin-right: $xsmall;
+      }
+    }
+  }
   .row {
     svg {
       border: 1px solid $brand-dark-3;

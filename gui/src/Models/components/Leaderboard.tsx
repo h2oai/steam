@@ -53,7 +53,13 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     return (
       <div className="leaderboard">
         <Deploy open={this.state.isDeployOpen} closeHandler={this.closeHandler}></Deploy>
-        <PageHeader>Models</PageHeader>
+        <PageHeader>
+          <span>Models</span>
+          <div>
+            <button className="default invert">Build Model in Flow</button>
+            <button className="default">Import Model</button>
+          </div>
+        </PageHeader>
         <div className="filter">
           <input type="text" placeholder="filter models"/>
         </div>
@@ -90,7 +96,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                       {item.metadata.modelName}
                     </div>
                     <div>
-                      {item.metadata.createdBy} 
+                      {item.metadata.createdBy}
                     </div>
                     <div>
                       {item.metadata.creationDate}
