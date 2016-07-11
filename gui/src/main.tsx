@@ -34,11 +34,11 @@ let history: ReactRouterRedux.ReactRouterReduxHistory = syncHistoryWithStore(has
 ReactDOM.render(
   <Provider store={store}>
     <Router history={history}>
-      <Route path="/" component={App}>
+      <Route path="/" component={App} isExcludedFromBreadcrumb={true}>
         <IndexRoute component={WelcomeSplashScreen}/>
-        <Route path="projects" component={Projects}>
+        <Route path="projects" component={Projects} name="Projects" isExcludedFromBreadcrumb={true}>
           <IndexRoute component={WelcomeSplashScreen}/>
-          <Route path="new" component={NewProject}/>
+          <Route path="new" component={NewProject} name="Create New Project"/>
         </Route>
         <Route path="clusters" component={Clusters}/>
         <Route path="models" component={Models}/>
