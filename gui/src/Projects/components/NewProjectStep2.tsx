@@ -60,7 +60,7 @@ export default class NewProjectStep2 extends React.Component<any, any> {
             </Cell>
           </Row>
         </Table>
-        <button type="button" className="train-models">Train Models</button>
+        <button type="button" className="default">Train Models</button>
       </div>
     );
   }

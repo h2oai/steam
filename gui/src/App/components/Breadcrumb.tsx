@@ -3,16 +3,21 @@
  */
 
 import * as React from 'react';
+import * as _ from 'lodash';
 import '../styles/breadcrumb.scss';
 
 interface Props {
-  crumbs: string[]
+  routes: ReactRouter.PlainRoute & {
+    isHiddenBreadcrumb: boolean,
+    isExcludedFromBreadcrumb: boolean,
+    name: string
+  }[] 
 }
 
 export default class Breadcrumb extends React.Component<Props, any> {
   isHiddenBreadcrumb() {
     return _.some(this.props.routes, route => {
-      return route.isHiddenBreadcrumb === true
+      return route.isHiddenBreadcrumb === true;
     });
   }
 
