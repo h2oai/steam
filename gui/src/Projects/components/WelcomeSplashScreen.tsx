@@ -13,7 +13,7 @@ export default class WelcomeSplashScreen extends React.Component<any, any> {
           <div>WELCOME TO</div>
           <div className="welcome-splash-screen--content--product-name">H<sub>2</sub>O STEAM</div>
           <div>Fast, distributed taglines for teams</div>
-          <button type="button"><Link to="/projects/new">Start A New Project</Link></button>
+          <Link to="/projects/new">Start A New Project</Link>
         </div>
       </div>
     )
