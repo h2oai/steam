@@ -35,12 +35,12 @@ ReactDOM.render(
   <Provider store={store}>
     <Router history={history}>
       <Route path="/" component={App}>
-        <IndexRoute component={Clusters}/>
-        <Route path="clusters" component={Clusters}/>
+        <IndexRoute component={WelcomeSplashScreen}/>
         <Route path="projects" component={Projects}>
           <IndexRoute component={WelcomeSplashScreen}/>
           <Route path="new" component={NewProject}/>
         </Route>
+        <Route path="clusters" component={Clusters}/>
         <Route path="models" component={Models}/>
         <Route path="models/:id" component={ProjectDetails}/>
       </Route>
