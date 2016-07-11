@@ -8,6 +8,7 @@ import PageHeader from '../components/PageHeader';
 import Table from '../components/Table';
 import Row from '../components/Row';
 import Cell from '../components/Cell';
+import Dropdown from '../components/Dropdown';
 import '../styles/newproject.scss';
 
 interface Props {
@@ -27,7 +28,7 @@ export default class NewProject extends React.Component<Props, any> {
           <label>Upload a CSV file</label>
           <span>We will automatically infer a data dictionary based on the data</span>
           <input type="file"/>
-          <button type="button">Upload</button>
+          <button type="button" className="default">Upload</button>
         </form>
         <form>
           <label>Verify Data Shape</label>
@@ -91,9 +92,10 @@ export default class NewProject extends React.Component<Props, any> {
             <select>
               <option>Test</option>
             </select>
+            <Dropdown></Dropdown>
           </form>
         </div>
-        <Link to="/projects/new/2">Next: Train Initial Models</Link>
+        <Link to="/projects/new/2" className="default">Next: Train Initial Models</Link>
       </div>
     );
   }

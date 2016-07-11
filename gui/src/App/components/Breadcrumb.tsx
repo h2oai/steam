@@ -11,11 +11,9 @@ interface Props {
 
 export default class Breadcrumb extends React.Component<Props, any> {
   isHiddenBreadcrumb() {
-    let result = _.some(this.props.routes, route => {
+    return _.some(this.props.routes, route => {
       return route.isHiddenBreadcrumb === true
     });
-    console.log(result);
-    return result;
   }
 
   render(): React.ReactElement<HTMLElement> {
@@ -25,7 +23,6 @@ export default class Breadcrumb extends React.Component<Props, any> {
     return (
       <ol className="breadcrumb">
         {this.props.routes.map((route, i) => {
-          console.log(route);
           if (route.isExcludedFromBreadcrumb === true) {
             return null;
           }
