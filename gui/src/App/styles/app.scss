@@ -15,6 +15,12 @@ html, body, .app-container, #app {
   outline: none;
 }
 
+select {
+  background: lighten($brand-dark-3, 25%);
+  height: $medium;
+  width: $xlarge * 5;
+}
+
 button, a {
   &.default {
     display: inline-block;

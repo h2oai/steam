@@ -16,16 +16,15 @@
     input {
       width: $base-grid-unit * 3;
     }
-    select {
-      background: lighten($brand-dark-3, 25%);
-      height: $medium;
-      width: $xlarge * 5;
-    }
   }
   .save-dictionary, .train-models {
     margin: $medium 0;
   }
   .build-model {
+    margin-bottom: $medium;
+    .row.header {
+      padding: 0;
+    }
     .row {
       padding: $xsmall 0;
       .cell:first-child {
@@ -41,9 +40,9 @@
     .dataframe-range {
       display: flex;
       flex-direction: column;
-      width: $xlarge * 4;
+      width: $xlarge * 5;
       input[type="range"] {
-        width: $xlarge * 4;
+        width: $xlarge * 5;
       }
       &-labels {
         display: flex;
