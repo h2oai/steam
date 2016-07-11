@@ -92,7 +92,6 @@ export default class NewProject extends React.Component<Props, any> {
             <select>
               <option>Test</option>
             </select>
-            <Dropdown></Dropdown>
           </form>
         </div>
         <Link to="/projects/new/2" className="default">Next: Train Initial Models</Link>

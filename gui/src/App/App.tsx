@@ -16,7 +16,12 @@ type NavigationState = {
 }
 
 interface Props {
-  navigation: NavigationState
+  navigation: NavigationState,
+  routes: ReactRouter.PlainRoute & {
+    isHiddenBreadcrumb: boolean,
+    isExcludedFromBreadcrumb: boolean,
+    name: string
+  }[]
 }
 
 interface DispatchProps {

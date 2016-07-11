@@ -16,6 +16,6 @@ export default class WelcomeSplashScreen extends React.Component<any, any> {
           <button type="button"><Link to="/projects/new">Start A New Project</Link></button>
         </div>
       </div>
-    )
+    );
   }
 }

@@ -16,6 +16,11 @@
     input {
       width: $base-grid-unit * 3;
     }
+    select {
+      background: lighten($brand-dark-3, 25%);
+      height: $medium;
+      width: $xlarge * 5;
+    }
   }
   .save-dictionary, .train-models {
     margin: $medium 0;
