@@ -29,5 +29,10 @@
     font-weight: 600;
     margin-top: $xlarge;
     border-radius: 5px;
+    cursor: pointer;
+    a, a:visited {
+      text-decoration: none;
+      color: $brand-white;
+    }
   }
 }

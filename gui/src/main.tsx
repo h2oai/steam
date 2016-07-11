@@ -13,7 +13,9 @@ import App from './App/App';
 import Clusters from './Clusters/Clusters';
 import Models from './Models/Models';
 import Projects from './Projects/Projects';
+import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ProjectDetails from './ProjectDetails/ProjectDetails';
+import NewProject from './Projects/components/NewProject';
 import { rootReducer } from './App/reducers/rootReducer';
 
 import './variables.scss';
@@ -35,7 +37,10 @@ ReactDOM.render(
       <Route path="/" component={App}>
         <IndexRoute component={Clusters}/>
         <Route path="clusters" component={Clusters}/>
-        <Route path="projects" component={Projects}/>
+        <Route path="projects" component={Projects}>
+          <IndexRoute component={WelcomeSplashScreen}/>
+          <Route path="new" component={NewProject}/>
+        </Route>
         <Route path="models" component={Models}/>
         <Route path="models/:id" component={ProjectDetails}/>
       </Route>

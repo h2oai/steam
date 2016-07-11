@@ -18,7 +18,7 @@ export default class Projects extends React.Component<Props & DispatchProps, any
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="projects">
-        <WelcomeSplashScreen/>
+        {this.props.children}
       </div>
     );
   }

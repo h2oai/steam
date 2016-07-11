@@ -11,6 +11,10 @@ html, body, .app-container, #app {
   margin: 0;
 }
 
+*:focus {
+  outline: none;
+}
+
 .app-container {
   display: flex;
   .body-container {
