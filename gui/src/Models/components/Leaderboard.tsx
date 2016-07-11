@@ -8050,38 +8050,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     return (suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]);
   }
 
-  componentDidMount() {
-    let config = {
-      'margin': 20,
-      'width': 150,
-      'height': 150,
-      'interpolationMode': 'basis',
-      'fpr': 'X',
-      'tprVariables': [
-        {
-          'name': 'BPC',
-          'label': 'Break Points'
-        },
-        {
-          'name': 'WNR',
-          'label': 'Winners'
-        },
-        {
-          'name': 'FSP',
-          'label': 'First Serve %',
-        },
-        {
-          'name': 'NPW',
-          'label': 'Net Points Won'
-        }
-      ],
-      'animate': true,
-      'smooth': true
-    };
-    console.log(visComponents);
-    visComponents.rocChart.plot(this.refs.rocChart, data, config);
-  }
-
   openDeploy(): void {
     this.setState({
       isDeployOpen: true
@@ -8146,13 +8114,13 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={data}/>
+                  <RocGraph key={'trainRoc' + i} data={data}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={data}/>
+                  <RocGraph key={'testRoc' + i} data={data}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={data}/>
+                  <RocGraph key={'residualsRoc' + i} data={data}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
