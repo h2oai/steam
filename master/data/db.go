@@ -2605,6 +2605,125 @@ func (ds *Datastore) CreateDatasource(pz az.Principal, datasource Datasource) (i
 	return id, err
 }
 
+func (ds *Datastore) ReadDatasources(pz az.Principal, projectId, offset, limit int64) ([]Datasource, error) {
+	rows, err := ds.db.Query(`
+			SELECT
+				id, project_id, name, description, kind, configuration, created
+			FROM
+				datasource
+			WHERE
+				id IN
+				(
+					SELECT DISTINCT
+						entity_id
+					FROM
+						privilege
+					WHERE
+						$6
+						OR
+						(
+							workgroup_id IN
+							(
+								SELECT 
+									workgroup_id 
+								FROM
+									identity_workgroup
+								WHERE
+									identity_id = $1
+							)
+							AND
+							entity_type_id = $2
+				)
+				AND
+				project_id = $3
+			ORDER BY
+				name
+			OFFSET $4
+			LIMIT $5
+
+
+			`, pz.Id(), ds.EntityTypes.Datasource, projectId, offset, limit, pz.IsSuperuser())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanDatasources(rows)
+}
+
+func (ds *Datastore) ReadDatasource(pz az.Principal, datasourceId int64) (Datasource, error) {
+	if err := pz.CheckView(ds.EntityTypes.Datasource, datasourceId); err != nil {
+		return Datasource{}, err
+	}
+
+	row := ds.db.QueryRow(`
+		SELECT
+			id, project_id, name, description, kind, configuration, created
+		FROM
+			datasource
+		WHERE
+			id = $1
+		`, datasourceId)
+	return ScanDatasource(row)
+}
+
+func (ds *Datastore) UpdateDatasource(pz az.Principal, datasourceId int64, datasource Datasource) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Datasource, datasourceId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				datasource
+			SET
+				name = $1
+				description = $2
+				kind = $3
+				configuration = $4
+			WHERE
+				id = $5
+			`,
+			datasource.Name,
+			datasource.Description,
+			datasource.Kind,
+			datasource.Configuration,
+			datasourceId,
+		); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Datasource, datasourceId, metadata{
+			"name":          datasource.Name,
+			"description":   datasource.Description,
+			"kind":          datasource.Kind,
+			"configuration": datasource.Configuration,
+		})
+	})
+}
+
+func (ds *Datastore) DeleteDatasource(pz az.Principal, datasourceId int64) error {
+	if err := pz.CheckOwns(ds.EntityTypes.Datasource, datasourceId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		var id int64
+		row := tx.QueryRow(`
+			DELETE FROM
+				datasource
+			WHERE
+				id = $1
+			RETURNING id
+			`, datasourceId)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Datasource, datasourceId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, DeleteOp, ds.EntityTypes.Datasource, datasourceId, metadata{})
+	})
+}
+
 // --- Dataset ---
 
 func (ds *Datastore) CreateDataset(pz az.Principal, dataset Dataset) (int64, error) {
@@ -2646,6 +2765,121 @@ func (ds *Datastore) CreateDataset(pz az.Principal, dataset Dataset) (int64, err
 		})
 	})
 	return id, err
+}
+
+func (ds *Datastore) ReadDatasets(pz az.Principal, datasetId, offset, limit int64) ([]Dataset, error) {
+	rows, err := ds.db.Query(`
+			SELECT
+				id, datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created
+			FROM
+				dataset
+			WHERE
+				id IN
+				(
+					SELECT DISTINCT
+						entity_id
+					FROM
+						privilege
+					WHERE
+						$6
+						OR
+						(
+							workgroup_id IN
+							(
+								SELECT 
+									workgroup_id 
+								FROM
+									identity_workgroup
+								WHERE
+									identity_id = $1
+							)
+							AND
+							entity_type_id = $2
+				)
+				AND
+				project_id = $3
+			ORDER BY
+				name
+			OFFSET $4
+			LIMIT $5
+
+
+			`, pz.Id(), ds.EntityTypes.Dataset, datasetId, offset, limit, pz.IsSuperuser())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanDatasets(rows)
+}
+
+func (ds *Datastore) ReadDataset(pz az.Principal, datasetId int64) (Dataset, error) {
+	if err := pz.CheckView(ds.EntityTypes.Dataset, datasetId); err != nil {
+		return Dataset{}, err
+	}
+
+	row := ds.db.QueryRow(`
+		SELECT
+			id, datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created
+		FROM
+			dataset
+		WHERE
+			id = $1
+		`, datasetId)
+	return ScanDataset(row)
+}
+
+func (ds *Datastore) UpdateDataset(pz az.Principal, datasetId int64, dataset Dataset) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Dataset, datasetId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				dataset
+			SET
+				name = $1
+				description = $2
+				responseColumnName = $3
+			WHERE
+				id = $4
+			`,
+			dataset.Name,
+			dataset.Description,
+			dataset.ResponseColumnName,
+			datasetId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Dataset, datasetId, metadata{
+			"name":               dataset.Name,
+			"description":        dataset.Description,
+			"responseColumnName": dataset.ResponseColumnName,
+		})
+	})
+}
+
+func (ds *Datastore) DeleteDataset(pz az.Principal, datasetId int64) error {
+	if err := pz.CheckOwns(ds.EntityTypes.Dataset, datasetId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		var id int64
+		row := tx.QueryRow(`
+			DELETE FROM
+				dataset
+			WHERE
+				id = $1
+			RETURNING id
+			`, datasetId)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Dataset, datasetId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, DeleteOp, ds.EntityTypes.Dataset, datasetId, metadata{})
+	})
 }
 
 // --- Model ---
