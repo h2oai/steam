@@ -46,13 +46,19 @@
       }
     }
   }
-  button {
-    padding: 5px $small;
+  button, a {
+    display: inline-block;
+    padding: ($xsmall / 2) $medium;
     border-radius: 3px;
     color: $brand-white;
     background-color: $brand-orange;
     border: none;
     font-weight: 600;
     cursor: pointer;
+    text-decoration: none;
+    &:visited {
+      text-decoration: none;
+      color: $brand-white;
+    }
   }
 }

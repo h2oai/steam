@@ -15,6 +15,32 @@ html, body, .app-container, #app {
   outline: none;
 }
 
+button, a {
+  &.default {
+    display: inline-block;
+    padding: ($xsmall / 2) $medium;
+    border-radius: 3px;
+    color: $brand-white;
+    background-color: $brand-orange;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid $brand-orange;
+    &:visited {
+      text-decoration: none;
+      color: $brand-white;
+    }
+    &.invert {
+      color: $brand-orange;
+      background-color: $brand-white;
+      border: 1px solid $brand-orange;
+      &:visited {
+        color: $brand-orange;
+      }
+    }
+  }
+}
+
 .app-container {
   display: flex;
   .body-container {

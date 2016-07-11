@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import { withRouter } from 'react-router';
 import Navigation from '../Navigation/components/Navigation/Navigation';
 import Breadcrumb from './components/Breadcrumb';
 import Body from '../Body/Body';
@@ -21,20 +22,23 @@ interface Props {
 interface DispatchProps {
 }
 
-export default class App extends React.Component<Props & DispatchProps, any> {
+export class App extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="app-container">
         <Navigation></Navigation>
         <div className="body-container">
           <header>
-            <Breadcrumb crumbs={['Churn Prediction', 'Models']}></Breadcrumb>
+            <Breadcrumb routes={this.props.routes}></Breadcrumb>
           </header>
           <Body>
-            {this.props.children}
+          {this.props.children}
           </Body>
         </div>
       </div>
     );
   }
 }
+
+export default withRouter(App);
+
