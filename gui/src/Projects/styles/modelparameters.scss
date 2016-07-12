@@ -1,0 +1,28 @@
+@import '../../variables.scss';
+
+.model-parameters {
+  .table {
+    .row {
+      padding:5px 0;
+      border-bottom:none;
+      align-items:center;
+      .cell {
+        &:nth-child(1) {
+          flex-grow:6;
+          &:before {
+            display:inline;
+            content: leader('.');
+          }
+        }
+        &:nth-child(2) {
+          flex-grow:1;
+          width:50px;
+        }
+        &:nth-child(3) {
+          flex-grow:4;
+          font-size:85%;
+        }
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@
  import Table from './Table';
  import Row from './Row';
  import Cell from './Cell';
+ import ModelParameters from './ModelParameters';
  import { Link } from 'react-router';
  import '../styles/createnew.scss';
 
@@ -93,7 +94,7 @@
                     <p><Link to="/grid-search">switch to grid search</Link></p>
                   </Cell>
                   <Cell className="value">
-                    TK
+                    <ModelParameters/>
                   </Cell>
                 </Row>
 
