@@ -41,7 +41,7 @@ ReactDOM.render(
         <IndexRoute component={WelcomeSplashScreen}/>
         <Route path="projects" component={Projects} name="Projects" isExcludedFromBreadcrumb={true}>
           <IndexRoute component={WelcomeSplashScreen}/>
-          <Route path="deployments" component={Deployments}/>
+          <Route path="deployments" component={Deployments} name="Deployments"/>
           <Route path="new" isExcludedFromBreadcrumb={true}>
             <Route path="1" component={NewProjectStep1} name="Create New Project"/>
             <Route path="2" component={NewProjectStep2} isExcludedFromBreadcrumb={true}/>

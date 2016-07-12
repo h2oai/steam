@@ -3,48 +3,24 @@
 .deployed-services {
   header {
     margin: $medium 0;
+    font-family: $font-text;
   }
 }
 
-.panel {
-  border: $rule-solid-thin;
-  border-radius: 3px;
-  box-shadow: 0 3px 3px $brand-dark-3;
-  margin-bottom: $medium;
-  display: flex;
-  font-family: $font-text;
-  .panel-title {
-    font-size: 1.5em;
-    border-right: $rule-solid-thin;
-    padding: $small;
-    a {
-      text-decoration: none;
+.services-panel.panel {
+  width: 70%;
+  .panel-info-row {
+    display: flex;
+    justify-content: space-around;
+    width: 30%;
+    span:first-child {
+      flex-basis: $medium;
     }
-  }
-  .panel-body {
-    display: flex;
-    flex-direction: column;
-    flex-basis: 80%;
-  }
-  .panel-info {
-    padding-left: $small;
-    padding-bottom: $small;
-    flex-basis: 80%;
-    border-right: $rule-solid-thin;
-  }
-  .panel-actions {
-    display: flex;
-    flex-direction: column;
-    margin: $small;
-    .panel-action {
-      margin-bottom: $xsmall;
-      div {
-        display: inline-block;
-      }
-      div:first-of-type {
-        width: $small;
-        text-align: center;
-      }
+    span:nth-child(2) {
+      flex-basis: $medium;
+    }
+    span:last-child {
+      margin: auto;
     }
   }
 }
