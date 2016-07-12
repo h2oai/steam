@@ -1,38 +1,93 @@
 @import '../../variables.scss';
 
-.deploy-modal {
-  width: 50%;
-  height: 50%;
-  background: $brand-white;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
+.close-button-container {
+  position: relative;
   .close-button {
-    float: right;
+    position: absolute;
+    font-size: 2em;
+    top: 0;
     background: transparent;
-    color: $brand-blue;
-    font-size: 1.5em;
+    color: $brand-dark-1;
     border: none;
-    &:focus {
-      outline: none;
-    }
+    cursor: pointer;
     &:hover {
-      color: $brand-dark-1;
+      color: darken($brand-dark-1, 25%);
     }
   }
+}
+
+.deploy-modal-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  max-height: 70%;
+  height: 70%;
+}
+
+.deploy-modal {
+  width: 50%;
+  background: $brand-white;
+  border-radius: 2px;
+  border: 1px solid $brand-dark-1;
+  box-shadow: 0px 3px 5px 0 $brand-dark-3;
+  padding: $medium;
+  overflow: auto;
   header {
-    font-size: 2em;
-    text-align: center;
-    padding: 10px;
+    font-size: 2.5em;
+    border-bottom: 2px solid $brand-dark-3;
+    padding: $small 0;
+    margin-bottom: $xsmall;
+  }
+  .deployment-table .row {
+    &:first-of-type {
+      padding-top: 0;
+    }
+    padding: $small 0;
+    select {
+      width: $xlarge * 7;
+    }
+    .caption {
+      margin-bottom: $xsmall;
+    }
+    .cell:first-child {
+      flex-basis: $xlarge * 3;
+    }
+    .cell:last-child {
+      flex-basis: 100%;
+      font-family: "Open Sans", sans-serif;
+    }
+    &:last-of-type {
+      padding: 0;
+    }
+    &:last-of-type, &:nth-last-child(2) {
+      border-bottom: none;
+    }
   }
   section {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    ul {
-      list-style: none;
-      padding: 0;
+    overflow-y: auto;
+  }
+  .deploy-button {
+    margin-right: $small;
+  }
+  .radio-container {
+    display: flex;
+    justify-content: space-between;
+    .radio-group {
+      margin: 0 5px;
+      border: 1px solid $brand-dark-1;
+      border-radius: 5px;
+      padding: 10px 10px $large 10px;
+      flex: 1 1;
+      &.selected {
+        border: 1px solid $brand-blue;
+      }
     }
   }
+}
+
+.overlay-container {
+  transition: opacity 300ms ease-in-out;
+  background: rgba($brand-white, .7) !important;
 }

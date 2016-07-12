@@ -124,7 +124,7 @@ $navigation-width: $base-grid-unit * 5;
 
 .header-content {
   font-size: $text-large;
-  flex-basis: 3.5em;
+  min-height: 3.5em;
   color: $brand-dark-3;
   padding: 0 $small;
 }
