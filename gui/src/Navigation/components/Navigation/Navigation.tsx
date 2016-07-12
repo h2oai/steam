@@ -10,7 +10,6 @@ import './navigation.scss';
 import * as logo from '../../../../assets/h2o-home.png';
 
 interface Props {
-  routes: ReactRouter.PlainRoute[],
   router: any
 }
 
@@ -22,39 +21,37 @@ interface State {
 }
 
 export class Navigation extends React.Component<Props & DispatchProps, State> {
-  projectsSubmenu = [
-    {
-      path: 'models',
-      label: 'Models'
-    },
-    {
-      path: 'projects/dataframes',
-      label: 'Dataframes'
-    },
-    {
-      path: 'projects/repository',
-      label: 'Repository'
-    },
-    {
-      path: 'projects/configurations',
-      label: 'Configurations'
-    },
-    {
-      path: 'projects/deployments',
-      label: 'Deployments'
-    },
-    {
-      path: 'projects/collaborators',
-      label: 'Collaborators'
-    }
-  ];
-
   sitemap = {
     projects: {
       path: 'projects',
       label: 'Projects',
       icon: 'fa fa-folder',
-      childRoutes: this.projectsSubmenu
+      childRoutes: [
+        {
+          path: 'models',
+          label: 'Models'
+        },
+        {
+          path: 'projects/dataframes',
+          label: 'Dataframes'
+        },
+        {
+          path: 'projects/repository',
+          label: 'Repository'
+        },
+        {
+          path: 'projects/configurations',
+          label: 'Configurations'
+        },
+        {
+          path: 'projects/deployments',
+          label: 'Deployments'
+        },
+        {
+          path: 'projects/collaborators',
+          label: 'Collaborators'
+        }
+      ]
     },
     services: {
       path: 'services',
@@ -113,7 +110,6 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
   }
 
   render(): React.ReactElement<HTMLElement> {
-    console.log(this.props.routes);
     return (
       <div className="nav-container" onMouseLeave={this.closeSubmenu}>
         <Sidebar className="primary-navigation">

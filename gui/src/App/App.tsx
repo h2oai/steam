@@ -31,7 +31,7 @@ export class App extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="app-container">
-        <Navigation routes={this.props.routes}></Navigation>
+        <Navigation></Navigation>
         <div className="body-container">
           <header>
             <Breadcrumb routes={this.props.routes}></Breadcrumb>
