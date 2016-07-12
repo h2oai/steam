@@ -1,41 +1,5 @@
 @import '../../variables.scss';
 
-.tabs {
-  position: relative;
-  z-index: 1;
-  white-space: nowrap;
-  .tab {
-    position: relative;
-    display: inline-block;
-    padding: 1em 1.5em 0.7em;
-    color: inherit;
-    text-decoration: none;
-    margin: 0 -0.1em;
-    &:not(.selected):before {
-      background: $brand-dark-4;
-    }
-    &.selected:before {
-      border-bottom: none;
-    }
-    &:before {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: -1;
-      border-bottom: none;
-      background: $brand-white;
-      transform: perspective(5px) rotateX(1deg);
-      transform-origin: bottom;
-    }
-    &:before {
-      border: 2px solid $brand-dark-3;
-    }
-  }
-}
-
 main {
   margin-top: -2px;
   background-color: $brand-white;
