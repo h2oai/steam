@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { rocChart } from 'vis-components';
+import * as rocChart from 'roc-chart';
 import '../styles/rocgraph.scss';
 
 interface Props {
@@ -9,6 +9,11 @@ interface Props {
 
 export default class RocGraph extends React.Component<Props, any> {
   _mountNode: Element;
+
+  constructor() {
+    super();
+    console.log(rocChart);
+  }
 
   componentWillMount() {
     let config = {
@@ -38,7 +43,7 @@ export default class RocGraph extends React.Component<Props, any> {
       'animate': true,
       'smooth': true
     };
-    rocChart.plot(this._mountNode, this.props.data, config);
+    rocChart.plot(ReactDOM.findDOMNode(this.refs.something), this.props.data, config);
   }
 
   componentDidMount() {
@@ -63,6 +68,6 @@ export default class RocGraph extends React.Component<Props, any> {
   }
 
   render() {
-    return null;
+    return <div ref="something"></div>;
   }
 }
