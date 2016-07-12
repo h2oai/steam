@@ -123,8 +123,8 @@ $navigation-width: $base-grid-unit * 5;
 }
 
 .header-content {
-  font-size: 48px;
-  flex-basis: 3.5em;
+  font-size: $text-large;
+  min-height: 3.5em;
   color: $brand-dark-3;
   padding: 0 $small;
 }

@@ -2,7 +2,27 @@
 
 .page-header {
   font-family: "Oswald", sans-serif;
-  font-size: 48px;
+  font-size: $text-large;
   color: $brand-orange;
   margin-bottom: $base-grid-unit / 2;
+  text-transform: uppercase;
+  display: flex;
+  flex-wrap:wrap;
+  justify-content: space-between;
+  div.buttons {
+    display: flex;
+    align-items: flex-end;
+    margin: 11.5px 0;
+    button:first-child {
+      margin-right: $xsmall;
+    }
+  }
+}
+
+.subtitle {
+  color: $brand-dark-3;
+  font-size:40%;
+  text-transform:none;
+  font-family:Arial, sans-serif;
+  flex-basis:100%;
 }

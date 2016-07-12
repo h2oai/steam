@@ -101,6 +101,7 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
         isOpen: false
       });
     }
+
   }
 
   getPath(): string {

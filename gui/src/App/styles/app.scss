@@ -3,12 +3,61 @@
 html, body, .app-container, #app {
   height: 100%;
   min-height: 100%;
-  font-family: "Oswald", "Open Sans", sans-serif;
+  font-family: $font-body;
   font-size: 12px;
   color: $brand-dark-1;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
   margin: 0;
+}
+
+*:focus {
+  outline: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color:$link-color;
+}
+
+select {
+  background: #f0f0f0; /* Old browsers */
+  background: -moz-linear-gradient(top,  #ffffff 0%, #f0f0f0 10%, #d4d4d4 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #ffffff 0%,#f0f0f0 10%,#d4d4d4 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #ffffff 0%,#f0f0f0 10%,#d4d4d4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#d4d4d4',GradientType=0 ); /* IE6-9 */
+  box-shadow:1px 1px 3px rgba(0,0,0,0.25);
+  height: $medium;
+  width: $xlarge * 5;
+}
+
+button, a {
+  &.default {
+    display: inline-block;
+    padding: ($xsmall / 2) $medium;
+    border-radius: 3px;
+    color: $brand-white;
+    background-color: $brand-orange;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid $brand-orange;
+    &:visited {
+      text-decoration: none;
+      color: $brand-white;
+    }
+    &.invert {
+      color: $brand-orange;
+      background-color: $brand-white;
+      border: 1px solid $brand-orange;
+      &:visited {
+        color: $brand-orange;
+      }
+    }
+  }
 }
 
 .app-container {

@@ -4,10 +4,8 @@
 jest.unmock('../Models');
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import * as TestUtils from 'react-addons-test-utils';
 
-const Models = require('../Models');
+import Models from '../Models';
 
 describe('Models', () => {
   it('exists', () => {

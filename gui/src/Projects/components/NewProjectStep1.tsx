@@ -3,10 +3,12 @@
  */
 
 import * as React from 'react';
+import { Link } from 'react-router';
 import PageHeader from '../components/PageHeader';
 import Table from '../components/Table';
 import Row from '../components/Row';
 import Cell from '../components/Cell';
+import Dropdown from '../components/Dropdown';
 import '../styles/newproject.scss';
 
 interface Props {
@@ -26,11 +28,11 @@ export default class NewProject extends React.Component<Props, any> {
           <label>Upload a CSV file</label>
           <span>We will automatically infer a data dictionary based on the data</span>
           <input type="file"/>
-          <button type="button">Upload</button>
+          <button type="button" className="default">Upload</button>
         </form>
         <form>
-          <label>Verify Data Dictionary</label>
-          <span>Start building models by verifying the import and selecting a response column</span>
+          <label>Verify Data Shape</label>
+          <span>Your models will be more accurate if H2O has an accurate understanding of the column types in your data.</span>
         </form>
         <div>
           <Table>
@@ -82,53 +84,17 @@ export default class NewProject extends React.Component<Props, any> {
               <Cell/>
             </Row>
           </Table>
-          <button type="button" className="save-dictionary">
-            Save Dictionary
-          </button>
         </div>
         <div>
           <form>
-            <label>
-              Build Initial Model
-            </label>
-            <span>
-              Create a training frame, test frame, and start building models.
-            </span>
+            <label>Select Response Column</label>
+            <span>Identify the column with the value you want to predict.</span>
+            <select>
+              <option>Test</option>
+            </select>
           </form>
-          <Table className="build-model">
-            <Row header={true}/>
-            <Row>
-              <Cell>SPLIT DATAFRAME</Cell>
-              <Cell>
-                <div className="dataframe-range">
-                  <div>
-                    <input type="range"/>
-                  </div>
-                  <div className="dataframe-range-labels">
-                    <div>
-                      Train: 75%
-                    </div>
-                    <div>
-                      Test: 25%
-                    </div>
-                  </div>
-                </div>
-              </Cell>
-            </Row>
-            <Row>
-              <Cell>DEFAULT MODELS</Cell>
-              <Cell>
-                <div className="mode-checkboxes">
-                  <span><input type="checkbox"/>&nbsp;Generalized Linear Model</span>
-                  <span><input type="checkbox"/>&nbsp;Gradient Boosting Machine</span>
-                  <span><input type="checkbox"/>&nbsp;Random Forest</span>
-                  <span><input type="checkbox"/>&nbsp;Deep Learning</span>
-                </div>
-              </Cell>
-            </Row>
-          </Table>
-          <button type="button" className="train-models">Train Models</button>
         </div>
+        <Link to="/projects/new/2" className="default">Next: Train Initial Models</Link>
       </div>
     );
   }
