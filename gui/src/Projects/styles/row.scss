@@ -2,14 +2,14 @@
 
 .table .row {
   width: 100%;
-  border-bottom: 1px dotted $brand-dark-3;
-  padding: 5px;
+  border-bottom: $rule-dotted-thin;
+  padding: 15px 0;
   @media (min-width: 500px) {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
   }
   &.header {
-    border-bottom: 2px solid $brand-dark-3;
+    border-bottom: $rule-solid-thick;
   }
 }

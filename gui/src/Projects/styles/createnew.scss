@@ -1,0 +1,42 @@
+@import '../../variables.scss';
+
+.create-new-model {
+  section {
+    border-top:$rule-solid-thick;
+    padding-top:10px;
+    .table .row .cell.label, .table .row .cell.value {
+      flex-basis: auto;
+    }
+    .label {
+      width:25%;
+      text-transform:uppercase;
+      font-size:120%;
+      p {
+        margin:0 0 10px 0;
+        font-family:$font-text;
+        text-transform:none;
+        font-size:80%;
+      }
+    }
+    .value {
+      width:75%;
+      padding-left:15px;
+      font-family:$font-text;
+    }
+  }
+  section.actions {
+    border-top:none;
+    margin-top:50px;
+    .optional {
+      display: flex;
+      padding-top:15px;
+      .optional-label {
+        font-family:$font-text;
+        padding-left:5px;
+        p {
+          margin:0;
+        }
+      }
+    }
+  }
+}
