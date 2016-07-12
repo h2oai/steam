@@ -8,6 +8,7 @@ import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
 import GoodnessOfFit from './components/GoodnessOfFit';
 import PageHeader from '../Projects/components/PageHeader';
+import { hashHistory } from 'react-router';
 import './styles/projectdetails.scss';
 
 interface Props {
@@ -49,11 +50,23 @@ export default class ProjectDetails extends React.Component<Props, any> {
     }
   }
 
+  forkModel() {
+    hashHistory.push('/forkmodel');
+  }
+
+  deployModel() {
+    return null;
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="project-details">
         <PageHeader>
-          DRF-1069085
+          <span>DRF-1069085</span>
+          <div className="buttons">
+            <button className="default invert" onClick={this.forkModel}>Fork Model</button>
+            <button className="default" onClick={this.deployModel}>Deploy Model</button>
+          </div>
         </PageHeader>
         <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'model')}><i

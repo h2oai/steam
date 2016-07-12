@@ -55,7 +55,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
         <Deploy open={this.state.isDeployOpen} closeHandler={this.closeHandler}></Deploy>
         <PageHeader>
           <span>Models</span>
-          <div>
+          <div className="buttons">
             <button className="default invert">Build Model in Flow</button>
             <button className="default">Import Model</button>
           </div>
