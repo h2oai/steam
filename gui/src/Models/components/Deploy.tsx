@@ -21,7 +21,6 @@ export default class Deploy extends React.Component<Props, any> {
     this.state = {
       isOpen: false
     };
-    console.log(Overlay);
   }
 
   onClick() {
