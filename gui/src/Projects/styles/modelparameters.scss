@@ -1,0 +1,50 @@
+@import '../../variables.scss';
+
+.model-parameters {
+  .table {
+    .row {
+      padding:7px 0;
+      border-bottom:none;
+      align-items:center;
+      .cell {
+        &:nth-child(1) {
+          flex-basis:50%;
+          overflow:hidden;
+          span {
+            background:#fff;
+            padding-right:7px;
+            color:$brand-dark-2;
+            &:before {
+              float: left;
+              width: 0;
+              white-space: nowrap;
+              content:
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+              "· · · · · · · · · · · · · · · · · · · · "
+            }
+          }
+        }
+        &:nth-child(2) {
+          flex-basis:50px;
+          margin:0 7px;
+          flex-grow:0;
+        }
+        &:nth-child(3) {
+          font-size:10px;
+          flex-basis:240px;
+          flex-grow:0;
+        }
+      }
+    }
+  }
+  .link {
+    font-size:10px;
+  }
+}

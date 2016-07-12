@@ -58,6 +58,17 @@ button, a {
       }
     }
   }
+  &.link {
+    display:inline;
+    border:none;
+    padding:0;
+    margin:0;
+    background:none;
+    color:$link-color;
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:inherit;
+  }
 }
 
 .app-container {

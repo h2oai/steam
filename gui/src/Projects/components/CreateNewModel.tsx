@@ -7,6 +7,7 @@
  import Table from './Table';
  import Row from './Row';
  import Cell from './Cell';
+ import ModelParameters from './ModelParameters';
  import { Link } from 'react-router';
  import '../styles/createnew.scss';
 
@@ -58,7 +59,7 @@
                     Transformation Pipeline
                   </Cell>
                   <Cell className="value">
-                    transformers/transformation-pipeline.py <Link to="/change">change</Link>
+                    transformers/transformation-pipeline.py <button className="link">change</button>
                   </Cell>
                 </Row>
 
@@ -90,10 +91,10 @@
                     <p className="hint">
                       Not sure what parameters to use? Try grid search to test a range of parameters at once.
                     </p>
-                    <p><Link to="/grid-search">switch to grid search</Link></p>
+                    <p><button className="link">switch to grid search</button></p>
                   </Cell>
                   <Cell className="value">
-                    TK
+                    <ModelParameters/>
                   </Cell>
                 </Row>
 
