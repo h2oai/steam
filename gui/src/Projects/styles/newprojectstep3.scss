@@ -1,0 +1,12 @@
+@import '../../variables.scss';
+
+.new-project-step-3 {
+  .panel {
+    width: 70%;
+    .progress-bar-container {
+      border-radius: $medium;
+      background-color: transparent;
+      border: $rule-solid-thick;
+    }
+  }
+}
