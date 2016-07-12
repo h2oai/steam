@@ -1,0 +1,26 @@
+@import '../../variables.scss';
+
+.deployed-services {
+  header {
+    margin: $medium 0;
+    font-family: $font-text;
+  }
+}
+
+.services-panel.panel {
+  width: 70%;
+  .panel-info-row {
+    display: flex;
+    justify-content: space-around;
+    width: 30%;
+    span:first-child {
+      flex-basis: $medium;
+    }
+    span:nth-child(2) {
+      flex-basis: $medium;
+    }
+    span:last-child {
+      margin: auto;
+    }
+  }
+}

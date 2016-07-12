@@ -1,0 +1,44 @@
+@import '../../variables.scss';
+
+.panel {
+  border: $rule-solid-thin;
+  border-radius: 3px;
+  box-shadow: 0 3px 3px $brand-dark-3;
+  margin-bottom: $medium;
+  display: flex;
+  font-family: $font-text;
+  .panel-title {
+    font-size: 1.5em;
+    border-right: $rule-solid-thin;
+    padding: $small;
+    a {
+      text-decoration: none;
+    }
+  }
+  .panel-body {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 80%;
+  }
+  .panel-info {
+    padding-left: $small;
+    padding-bottom: $small;
+    flex-basis: 80%;
+    border-right: $rule-solid-thin;
+  }
+  .panel-actions {
+    display: flex;
+    flex-direction: column;
+    margin: $small;
+    .panel-action {
+      margin-bottom: $xsmall / 2;
+      div {
+        display: inline-block;
+      }
+      div:first-of-type {
+        width: $small;
+        text-align: center;
+      }
+    }
+  }
+}
