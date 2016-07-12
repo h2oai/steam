@@ -59,7 +59,7 @@
                     Transformation Pipeline
                   </Cell>
                   <Cell className="value">
-                    transformers/transformation-pipeline.py <Link to="/change">change</Link>
+                    transformers/transformation-pipeline.py <button className="link">change</button>
                   </Cell>
                 </Row>
 
@@ -91,7 +91,7 @@
                     <p className="hint">
                       Not sure what parameters to use? Try grid search to test a range of parameters at once.
                     </p>
-                    <p><Link to="/grid-search">switch to grid search</Link></p>
+                    <p><button className="link">switch to grid search</button></p>
                   </Cell>
                   <Cell className="value">
                     <ModelParameters/>

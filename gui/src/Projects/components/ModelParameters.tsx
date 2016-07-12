@@ -20,27 +20,27 @@ export default class ModelParameters extends React.Component<Props, any> {
       <div className="model-parameters">
         <Table>
           <Row>
-            <Cell>Number of Trees</Cell>
+            <Cell><span>Number of Trees</span></Cell>
             <Cell>SPINNER</Cell>
             <Cell>Number of trees to train</Cell>
           </Row>
           <Row>
-            <Cell>Max Depth</Cell>
+            <Cell><span>Max Depth</span></Cell>
             <Cell>SPINNER</Cell>
             <Cell>Maximum depth for any number in a tree</Cell>
           </Row>
           <Row>
-            <Cell>Minimum Number of Rows</Cell>
+            <Cell><span>Minimum Number of Rows</span></Cell>
             <Cell>SPINNER</Cell>
             <Cell>Minimum number of rows in each leaf node</Cell>
           </Row>
           <Row>
-            <Cell>Learning Rate</Cell>
+            <Cell><span>Learning Rate</span></Cell>
             <Cell>SPINNER</Cell>
             <Cell>Learning rate</Cell>
           </Row>
         </Table>
-        <Link to="">see full parameters list</Link>
+        <button className="link">see full parameters list</button>
       </div>
     );
   }
