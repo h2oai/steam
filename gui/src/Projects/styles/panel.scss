@@ -15,14 +15,16 @@
       text-decoration: none;
     }
   }
+  .panel-sub-title {
+    font-size: 0.8em;
+  }
   .panel-body {
     display: flex;
     flex-direction: column;
     flex-basis: 80%;
   }
   .panel-info {
-    padding-left: $small;
-    padding-bottom: $small;
+    padding: $small;
     flex-basis: 80%;
     border-right: $rule-solid-thin;
   }
