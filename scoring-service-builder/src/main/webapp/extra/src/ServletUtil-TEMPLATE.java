@@ -22,6 +22,7 @@ class ServletUtil {
   public static final int warmUpCount = 5;
 
   private static Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+
   public static class Times {
     private long count = 0;
     private double totalTimeMs = 0;
