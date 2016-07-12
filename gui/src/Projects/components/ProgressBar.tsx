@@ -9,10 +9,12 @@ interface Props {
   progress: number,
   showPercentage: boolean,
   className?: any,
-  onComplete?: Function
+  onComplete?: Function,
+  onClick?: Function
 }
 export default class ProgressBar extends React.Component<Props, any> {
   interval: number;
+
   constructor() {
     super();
     this.state = {
@@ -55,10 +57,12 @@ export default class ProgressBar extends React.Component<Props, any> {
 
   render(): React.ReactElement<HTMLDivElement> {
     return (
-      <div className={classNames('progress-bar-container', this.props.className)}>
+      <div ref="progressBar"
+           className={classNames('progress-bar-container', {complete: this.state.progress === 100}, this.props.className)} onClick={this.props.onClick}>
         <div className="progress-bar" style={{width: this.state.progress + '%'}}>
         </div>
-        <div className="progress-counter">{this.props.showPercentage === true ? Math.ceil(this.state.progress) + '%' : null}</div>
+        <div
+          className="progress-counter">{this.props.showPercentage === true && _.isEmpty(this.props.children) ? Math.ceil(this.state.progress) + '%' : null}</div>
       </div>
     );
   }

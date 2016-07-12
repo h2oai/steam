@@ -2,7 +2,10 @@
  * Created by justin on 7/12/16.
  */
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { Link } from 'react-router';
 import * as $ from 'jquery';
+import { hashHistory } from 'react-router';
 import * as classNames from 'classnames';
 import Panel from './Panel';
 import PageHeader from './PageHeader';
@@ -10,7 +13,6 @@ import ProgressBar from './ProgressBar';
 import '../styles/newprojectstep3.scss';
 
 export default class NewProjectStep3 extends React.Component<any, any> {
-  progressBars: Array = [];
   constructor() {
     super();
     let jobs = [
@@ -43,17 +45,23 @@ export default class NewProjectStep3 extends React.Component<any, any> {
       jobs: jobs
     }
   }
-  onComplete() {
-    console.log(this.progressBars);
-    $(this).addClass('complete');
+
+  onComplete(progressBar) {
+    let node = ReactDOM.findDOMNode(progressBar);
+    $(node).addClass('progress-button');
+    $(node).find('.progress-counter').text('Completed');
+  }
+
+  onClick() {
+    hashHistory.push('/models/0');
   }
 
   render() {
     return (
       <div className="new-project-step-3">
         <PageHeader>GOOD WORK!</PageHeader>
-        <div>
-          5 training jobs have been added to the Prithvi - 8 node cluster.
+        <div className="sub-title">
+          5 training jobs have been added to the <span>Prithvi - 8 node</span> cluster.
         </div>
         <section>
           {this.state.jobs.map((job, i) => {
@@ -67,7 +75,9 @@ export default class NewProjectStep3 extends React.Component<any, any> {
                     </div>
                   </div>
                   <div className="panel-info">
-                    <ProgressBar ref={() => this.progressBars.push(this)} className={classNames({complete: this.state.jobs[i].isComplete})} showPercentage={true} onComplete={this.onComplete.bind(this)}/>
+                    <ProgressBar showPercentage={true} onComplete={this.onComplete.bind(this)}
+                                 onClick={this.onClick.bind(this)}>
+                    </ProgressBar>
                   </div>
                 </div>
                 <div className="panel-actions">
@@ -83,6 +93,7 @@ export default class NewProjectStep3 extends React.Component<any, any> {
               </Panel>
             );
           })}
+          <Link to="/models" className="default link-leaderboard">Return to Model Leaderboard</Link><Link to="/projects/deployments">See all jobs on Prithbi - 8 node</Link>
         </section>
       </div>
     );

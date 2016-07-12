@@ -1,12 +1,37 @@
 @import '../../variables.scss';
 
 .new-project-step-3 {
+  .link-leaderboard {
+    margin-right: $medium;
+  }
+  .sub-title {
+    font-family: $font-text;
+    margin-bottom: $small;
+    span {
+      font-weight: 800;
+    }
+  }
   .panel {
     width: 70%;
     .progress-bar-container {
       border-radius: $medium;
       background-color: transparent;
       border: $rule-solid-thick;
+      transition: width 0.3s ease-in 0.3s;
+      .progress-bar {
+        transition: background 0.3s ease-in;
+      }
+      &.progress-button {
+        width: $xlarge * 3;
+        cursor: pointer;
+        .progress-bar {
+          background-color: $brand-green-2;
+        }
+        .progress-counter {
+          justify-content: center;
+          width: 100%;
+        }
+      }
     }
   }
 }
