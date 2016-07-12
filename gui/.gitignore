@@ -3,3 +3,4 @@ node_modules/
 typings/
 coverage/
 .npmrc
+npm-debug.log

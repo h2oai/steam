@@ -17,6 +17,7 @@ import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ProjectDetails from './ProjectDetails/ProjectDetails';
 import NewProjectStep1 from './Projects/components/NewProjectStep1';
 import NewProjectStep2 from './Projects/components/NewProjectStep2';
+import CreateNewModel from './Projects/components/CreateNewModel';
 import { rootReducer } from './App/reducers/rootReducer';
 
 import './variables.scss';
@@ -47,6 +48,7 @@ ReactDOM.render(
         </Route>
         <Route path="clusters" component={Clusters}/>
         <Route path="models" component={Models}/>
+        <Route path="forkmodel" component={CreateNewModel} name="Create New Model"/>
         <Route path="models/:id" component={ProjectDetails}/>
       </Route>
     </Router>
