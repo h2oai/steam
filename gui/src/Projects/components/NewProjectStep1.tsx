@@ -3,12 +3,12 @@
  */
 
 import * as React from 'react';
+import * as classNames from 'classnames';
 import { Link } from 'react-router';
 import PageHeader from '../components/PageHeader';
 import Table from '../components/Table';
 import Row from '../components/Row';
 import Cell from '../components/Cell';
-import Dropdown from '../components/Dropdown';
 import '../styles/newproject.scss';
 
 interface Props {
@@ -16,6 +16,12 @@ interface Props {
 }
 
 export default class NewProject extends React.Component<Props, any> {
+  constructor() {
+    super();
+    this.state = {
+      shapeIsDisabled: true
+    }
+  }
   render() {
     return (
       <div className="new-project">
@@ -24,7 +30,7 @@ export default class NewProject extends React.Component<Props, any> {
           <label>Give your project a name</label>
           <input type="text" placeholder="Name"/>
         </form>
-        <form>
+        <form className={classNames({disabled: this.state.shapeIsDisabled})}>
           <label>Upload a CSV file</label>
           <span>We will automatically infer a data dictionary based on the data</span>
           <input type="file"/>
