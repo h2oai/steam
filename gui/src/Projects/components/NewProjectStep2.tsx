@@ -2,6 +2,7 @@
  * Created by justin on 7/10/16.
  */
 import * as React from 'react';
+import { Link } from 'react-router';
 import Table from '../components/Table';
 import Row from '../components/Row';
 import Cell from '../components/Cell';
@@ -60,7 +61,7 @@ export default class NewProjectStep2 extends React.Component<any, any> {
             </Cell>
           </Row>
         </Table>
-        <button type="button" className="default">Train Models</button>
+        <Link to="/projects/new/3" className="default">Train Models</Link>
       </div>
     );
   }

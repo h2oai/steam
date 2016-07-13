@@ -17,6 +17,7 @@ import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ProjectDetails from './ProjectDetails/ProjectDetails';
 import NewProjectStep1 from './Projects/components/NewProjectStep1';
 import NewProjectStep2 from './Projects/components/NewProjectStep2';
+import NewProjectStep3 from './Projects/components/NewProjectStep3';
 import Deployments from './Projects/components/Deployments';
 import CreateNewModel from './Projects/components/CreateNewModel';
 import { rootReducer } from './App/reducers/rootReducer';
@@ -45,6 +46,7 @@ ReactDOM.render(
           <Route path="new" isExcludedFromBreadcrumb={true}>
             <Route path="1" component={NewProjectStep1} name="Create New Project"/>
             <Route path="2" component={NewProjectStep2} isExcludedFromBreadcrumb={true}/>
+            <Route path="3" component={NewProjectStep3} isExcludedFromBreadcrumb={true}/>
             <IndexRedirect to="1"/>
           </Route>
         </Route>
