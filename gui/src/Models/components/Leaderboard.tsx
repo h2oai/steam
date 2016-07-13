@@ -14,6 +14,9 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import '../styles/leaderboard.scss';
 
+// fake data
+import { DRFTrain } from '../tests/data/DRFTrain';
+
 interface Props {
   items: any[]
 }
@@ -107,13 +110,13 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={DRFTrain}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={DRFTrain}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={DRFTrain}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
