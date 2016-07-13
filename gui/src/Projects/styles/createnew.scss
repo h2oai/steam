@@ -10,12 +10,12 @@
     .label {
       width:25%;
       text-transform:uppercase;
-      font-size:120%;
+      font-size:14.4px;
       p {
         margin:0 0 10px 0;
         font-family:$font-text;
         text-transform:none;
-        font-size:80%;
+        font-size:10px;
       }
     }
     .value {
@@ -33,6 +33,7 @@
       .optional-label {
         font-family:$font-text;
         padding-left:5px;
+        font-size:10px;
         p {
           margin:0;
         }

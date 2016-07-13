@@ -3,10 +3,10 @@
  */
 import * as React from 'react';
 import * as classNames from 'classnames';
+import * as _ from 'lodash';
 import '../styles/progressbar.scss';
 
 interface Props {
-  progress: number,
   showPercentage: boolean,
   className?: any,
   onComplete?: Function,

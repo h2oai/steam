@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import * as ReactRouter from 'react-router';
 import * as _ from 'lodash';
 import '../styles/breadcrumb.scss';
 
