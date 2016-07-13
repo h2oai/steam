@@ -639,7 +639,7 @@ func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
 		return err
 	}
 
-	if err := s.ds.ReadDataset(pz, datasetId); err != nil {
+	if err := s.ds.DeleteDataset(pz, datasetId); err != nil {
 		return err
 	}
 
