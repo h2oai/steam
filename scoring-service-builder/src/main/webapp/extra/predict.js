@@ -128,8 +128,9 @@
 
     var result = '<legend>Model Predictions</legend>'
 
-
     if ("classProbabilities" in data) {
+
+      result += `<p>The following predictions are based on threshold F1 </p>`
       // binomial and multinomial
       var label = data["label"];
       var index = data["labelIndex"];
@@ -205,9 +206,10 @@
     }, 'json')
       .fail(function(data, status, error) {
         var down = "<b>Service is down</b>";
-        div.innerHTML = down + "<br>status " + data.status + " statusText " + data.statusText;
+        // div.innerHTML = down + "<br>status " + data.status + " statusText " + data.statusText;
+        div.innerHTML = 'Error: ' + data.statusText;
         var stats = document.querySelector("#modelStats");
-        stats.innerHTML = down;
+        // stats.innerHTML = down;
         // pardiv.innerHTML = "";
       });
 
