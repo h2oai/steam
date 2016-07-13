@@ -515,7 +515,7 @@ func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, de
 	mapPath := map[string]string{"path": path}
 	jsonPath, err := json.Marshal(mapPath)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	datasource := data.Datasource{
@@ -1773,7 +1773,6 @@ func toProjects(projects []data.Project) []*web.Project {
 	for i, project := range projects {
 		array[i] = toProject(project)
 	}
-
 	return array
 }
 
@@ -1794,7 +1793,27 @@ func toDatasources(datasources []data.Datasource) []*web.Datasource {
 	for i, datasource := range datasources {
 		array[i] = toDatasource(datasource)
 	}
+	return array
+}
 
+func toDataset(dataset data.Dataset) *web.Dataset {
+	return &web.Dataset{
+		dataset.Id,
+		dataset.DatasourceId,
+		dataset.Name,
+		dataset.Description,
+		dataset.FrameName,
+		dataset.ResponseColumnName,
+		dataset.Properties,
+		toTimestamp(dataset.Created),
+	}
+}
+
+func toDatasets(datasets []data.Dataset) []*web.Dataset {
+	array := make([]*web.Dataset, len(datasets))
+	for i, dataset := range datasets {
+		array[i] = toDataset(dataset)
+	}
 	return array
 }
 

@@ -183,8 +183,8 @@ module Proxy {
 		deleteProject: (projectId: number, go: (error: Error) => void) => void
 		createDatasource: (projectId: number, name: string, description: string, path: string, go: (error: Error, datasourceId: number) => void) => void
 		getDatasources: (projectId: number, offset: number, limit: number, go: (error: Error, datasources: Datasource[]) => void) => void
-		getDatasource: (datasourceId: number, go: (error: Error, datasource: Datasources) => void) => void
-		updateDatasource: (name: string, description: string, path: string, go: (error: Error) => void) => void
+		getDatasource: (datasourceId: number, go: (error: Error, datasource: Datasource) => void) => void
+		updateDatasource: (datasourceId: number, name: string, description: string, path: string, go: (error: Error) => void) => void
 		deleteDatasource: (datasourceId: number, go: (error: Error) => void) => void
 		createDataset: (clusterId: number, datasourceId: number, name: string, description: string, responseColumnName: string, go: (error: Error, datasetId: number) => void) => void
 		getDatasets: (datasourceId: number, offset: number, limit: number, go: (error: Error, datasets: Dataset[]) => void) => void
@@ -407,10 +407,11 @@ module Proxy {
 	}
 
 	interface GetDatasourceOut {
-		datasource: Datasources
+		datasource: Datasource
 	}
 
 	interface UpdateDatasourceIn {
+		datasource_id: number
 		name: string
 		description: string
 		path: string
@@ -1103,7 +1104,7 @@ module Proxy {
 		})
 
 	}
-	export function getDatasource(datasourceId: number, go: (error: Error, datasource: Datasources) => void): void {
+	export function getDatasource(datasourceId: number, go: (error: Error, datasource: Datasource) => void): void {
 		var req: GetDatasourceIn = {
 			datasource_id: datasourceId
 		}
@@ -1112,8 +1113,9 @@ module Proxy {
 		})
 
 	}
-	export function updateDatasource(name: string, description: string, path: string, go: (error: Error) => void): void {
+	export function updateDatasource(datasourceId: number, name: string, description: string, path: string, go: (error: Error) => void): void {
 		var req: UpdateDatasourceIn = {
+			datasource_id: datasourceId,
 			name: name,
 			description: description,
 			path: path

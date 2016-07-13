@@ -161,8 +161,8 @@ DeleteProject(projectId int64)
 
 CreateDatasource(projectId int64, name string, description string, path string) datasourceId int64
 GetDatasources(projectId int64, offset int64, limit int64) datasources []*Datasource
-GetDatasource(datasourceId int64) datasource *Datasources
-UpdateDatasource(name string, description string, path string)
+GetDatasource(datasourceId int64) datasource *Datasource
+UpdateDatasource(datasourceId int64, name string, description string, path string)
 DeleteDatasource(datasourceId int64)
 
 CreateDataset(clusterId int64, datasourceId int64, name string, description string, responseColumnName string) datasetId int64

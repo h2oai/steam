@@ -192,8 +192,8 @@ type Service interface {
 	DeleteProject(pz az.Principal, projectId int64) error
 	CreateDatasource(pz az.Principal, projectId int64, name string, description string, path string) (int64, error)
 	GetDatasources(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Datasource, error)
-	GetDatasource(pz az.Principal, datasourceId int64) (*Datasources, error)
-	UpdateDatasource(pz az.Principal, name string, description string, path string) error
+	GetDatasource(pz az.Principal, datasourceId int64) (*Datasource, error)
+	UpdateDatasource(pz az.Principal, datasourceId int64, name string, description string, path string) error
 	DeleteDatasource(pz az.Principal, datasourceId int64) error
 	CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error)
 	GetDatasets(pz az.Principal, datasourceId int64, offset int64, limit int64) ([]*Dataset, error)
@@ -416,13 +416,14 @@ type GetDatasourceIn struct {
 }
 
 type GetDatasourceOut struct {
-	Datasource *Datasources `json:"datasource"`
+	Datasource *Datasource `json:"datasource"`
 }
 
 type UpdateDatasourceIn struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Path        string `json:"path"`
+	DatasourceId int64  `json:"datasource_id"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	Path         string `json:"path"`
 }
 
 type UpdateDatasourceOut struct {
@@ -1125,7 +1126,7 @@ func (this *Remote) GetDatasources(projectId int64, offset int64, limit int64) (
 	return out.Datasources, nil
 }
 
-func (this *Remote) GetDatasource(datasourceId int64) (*Datasources, error) {
+func (this *Remote) GetDatasource(datasourceId int64) (*Datasource, error) {
 	in := GetDatasourceIn{datasourceId}
 	var out GetDatasourceOut
 	err := this.Proc.Call("GetDatasource", &in, &out)
@@ -1135,8 +1136,8 @@ func (this *Remote) GetDatasource(datasourceId int64) (*Datasources, error) {
 	return out.Datasource, nil
 }
 
-func (this *Remote) UpdateDatasource(name string, description string, path string) error {
-	in := UpdateDatasourceIn{name, description, path}
+func (this *Remote) UpdateDatasource(datasourceId int64, name string, description string, path string) error {
+	in := UpdateDatasourceIn{datasourceId, name, description, path}
 	var out UpdateDatasourceOut
 	err := this.Proc.Call("UpdateDatasource", &in, &out)
 	if err != nil {
@@ -2079,7 +2080,7 @@ func (this *Impl) UpdateDatasource(r *http.Request, in *UpdateDatasourceIn, out 
 	}
 	log.Println(pz, "called UpdateDatasource")
 
-	err := this.Service.UpdateDatasource(pz, in.Name, in.Description, in.Path)
+	err := this.Service.UpdateDatasource(pz, in.DatasourceId, in.Name, in.Description, in.Path)
 	if err != nil {
 		log.Printf("%s Failed to UpdateDatasource: %v", pz, err)
 		return err
