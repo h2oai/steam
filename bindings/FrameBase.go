@@ -12,7 +12,7 @@ type FrameBase struct {
 	IsText bool `json:"is_text"`
 }
 
-func newFrameBase() *FrameBase {
+func NewFrameBase() *FrameBase {
 	return &FrameBase{
 		FrameId:  nil,
 		ByteSize: 0,

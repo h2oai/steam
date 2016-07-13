@@ -54,7 +54,7 @@ type FrameV3 struct {
 	*/
 }
 
-func newFrameV3() *FrameV3 {
+func NewFrameV3() *FrameV3 {
 	return &FrameV3{
 		RowOffset:           0,
 		RowCount:            0,

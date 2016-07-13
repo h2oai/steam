@@ -43,7 +43,7 @@ type JobV3 struct {
 	*/
 }
 
-func newJobV3() *JobV3 {
+func NewJobV3() *JobV3 {
 	return &JobV3{
 		Key:          nil,
 		Description:  "",

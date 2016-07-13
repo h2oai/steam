@@ -1,10 +1,5 @@
 package bindings
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 type ModelsV3 struct {
 	*ModelsBase
 	/* INHERITED: Name of Model of interest
@@ -40,13 +35,4 @@ func NewModelsV3() *ModelsV3 {
 			},
 		},
 	}
-}
-
-// ToString returns the contents of this object as a JSON String.
-func (o *ModelsV3) ToString() string {
-	j, err := json.MarshalIndent(o, "", "    ")
-	if err != nil {
-		return fmt.Sprint(err)
-	}
-	return string(j)
 }

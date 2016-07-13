@@ -60,7 +60,7 @@ type ColV3 struct {
 	Percentiles []float64 `json:"percentiles"`
 }
 
-func newColV3() *ColV3 {
+func NewColV3() *ColV3 {
 	return &ColV3{
 		Label:                 "",
 		MissingCount:          0,

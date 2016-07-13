@@ -108,33 +108,24 @@ type AutoMLV3 struct {
 	Leader bindings.ModelKeyV3 `json:"leader"`
 }
 
-func (h *H2O) jobPoll(jobID string) (*bindings.JobV3, error) {
-	// var (
-	// 	j bindings.JobsV3
-	// 	k bindings.JobV3
-	// )
+func (h *H2O) JobPoll(jobId string) (*bindings.JobV3, error) {
+	for {
+		jobBase, err := h.GetJobsFetch(jobId)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(jobBase)
 
-	// for { // Polling for job
-	// 	b, err := h.get("/3/Jobs/"+jobID, nil)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	if err := unmarshal(b, &j); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	k = *j.Jobs[0]
-	// 	if k.Status == "CREATED" || k.Status == "RUNNING" {
-	// 		continue
-	// 	} else {
-	// 		if k.Exception != "" {
-	// 			return nil, fmt.Errorf("Error running AutoML: %s", k.Exception)
-	// 		}
-	// 	}
-	// 	break
-	// }
-
-	// return &k, nil
-	return nil, nil
+		job := jobBase.Jobs[0]
+		if job.Status == "CREATED" || job.Status == "RUNNING" {
+			continue
+		} else {
+			if job.Exception != "" {
+				return nil, fmt.Errorf("H2O Job Error: %v", job.Exception)
+			}
+		}
+		return job, nil
+	}
 }
 
 // AutoML will use the built in AutoML tool to create a model with minimal

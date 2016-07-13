@@ -3,6 +3,6 @@ package bindings
 type Schema struct {
 }
 
-func newSchema() *Schema {
+func NewSchema() *Schema {
 	return &Schema{}
 }

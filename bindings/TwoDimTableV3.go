@@ -23,7 +23,7 @@ type TwoDimTableV3 struct {
 	*/
 }
 
-func newTwoDimTableV3() *TwoDimTableV3 {
+func NewTwoDimTableV3() *TwoDimTableV3 {
 	return &TwoDimTableV3{
 		TwoDimTableBase: &TwoDimTableBase{
 			Name:        "",
