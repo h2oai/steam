@@ -43,7 +43,7 @@ export default class NewProjectStep3 extends React.Component<any, any> {
     ];
     this.state = {
       jobs: jobs
-    }
+    };
   }
 
   onComplete(progressBar) {

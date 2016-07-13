@@ -7,7 +7,7 @@ import * as classNames from 'classnames';
 import { Link, withRouter } from 'react-router';
 import { Sidebar } from '../Sidebar/Sidebar';
 import './navigation.scss';
-import * as logo from '../../../../assets/h2o-home.png';
+const logo = require('../../../../assets/h2o-home.png');
 
 interface Props {
   router: any

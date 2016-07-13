@@ -27,13 +27,13 @@ import 'font-awesome/css/font-awesome.css';
 
 const initialState = {};
 
-const store: Store = createStore(
+const store: any = createStore(
   rootReducer,
   initialState,
   applyMiddleware(thunk)
 );
 
-let history: ReactRouterRedux.ReactRouterReduxHistory = syncHistoryWithStore(hashHistory, store);
+let history: any = syncHistoryWithStore(hashHistory, store);
 
 ReactDOM.render(
   <Provider store={store}>

@@ -4,7 +4,6 @@
 jest.unmock('../Models');
 
 import * as React from 'react';
-
 import Models from '../Models';
 
 describe('Models', () => {
