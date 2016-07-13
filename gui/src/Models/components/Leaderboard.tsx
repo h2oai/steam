@@ -15,7 +15,16 @@ import Cell from '../../Projects/components/Cell';
 import '../styles/leaderboard.scss';
 
 // fake data
-import { DRFTrain } from '../tests/data/DRFTrain';
+import { deeplearning_train } from '../tests/data/deeplearning_train';
+import { deeplearning_validation } from '../tests/data/deeplearning_validation';
+import { drf_train } from '../tests/data/drf_train';
+import { drf_validation } from '../tests/data/drf_validation';
+import { gbm_train } from '../tests/data/gbm_train';
+import { gbm_validation } from '../tests/data/gbm_validation';
+import { glm_train } from '../tests/data/glm_train';
+import { glm_validation } from '../tests/data/glm_validation';
+import { naivebayes_train } from '../tests/data/naivebayes_train';
+import { naivebayes_validation } from '../tests/data/naivebayes_validation';
 
 interface Props {
   items: any[]
@@ -25,6 +34,9 @@ interface DispatchProps {
 }
 
 export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
+
+  fakeData = {}
+
   constructor() {
     super();
     this.state = {
@@ -32,6 +44,18 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
+    this.fakeData = {
+      deeplearning_train,
+      deeplearning_validation,
+      drf_train,
+      drf_validation,
+      gbm_train,
+      gbm_validation,
+      glm_train,
+      glm_validation,
+      naivebayes_train,
+      naivebayes_validation
+    }
   }
 
   static getOrdinal(rank: number): string {
@@ -80,9 +104,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
             <Cell className="graph">
               TEST ROC
             </Cell>
-            <Cell className="graph">
-              RESIDUALS
-            </Cell>
             <Cell>
               <div className="actions">
                 ACTIONS
@@ -110,13 +131,10 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={DRFTrain}/>
+                  <RocGraph data={this.fakeData[item.metadata.modelType + '_train']}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={DRFTrain}/>
-                </Cell>
-                <Cell className="graph">
-                  <RocGraph data={DRFTrain}/>
+                  <RocGraph data={this.fakeData[item.metadata.modelType + '_validation']}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">

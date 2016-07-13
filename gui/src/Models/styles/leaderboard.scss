@@ -3,9 +3,6 @@
 .leaderboard {
   width: 100%;
   .row {
-    svg {
-      border: 1px solid $brand-dark-3;
-    }
     .cell {
       flex-grow: 1;
       font-family: "Open Sans", sans-serif;
