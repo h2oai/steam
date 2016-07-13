@@ -17,19 +17,21 @@
 
     <script src="predict.js"></script>
 
+    
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800|Oswald:400,300,700' rel='stylesheet' type='text/css'>
+
+
 </head>
 
 <body>
 
-<div class="title grad container-fluid">
-    <h1>Steam</h1>
-    <h2>Prediction Service</h2>
+<div class="title container-fluid">
+    <h1>Prediction Service</h1>
+    <h2>POJO: grid_2_model_9.java</h2>
+    <br/>
+    <p>Select input parameters, OR enter your own custom query string to predict.</p>
 </div>
 <main class="container-fluid">
-    <section class="col-md-12 col-sm-12">
-        <p>Select input parameters, OR enter your own custom query string to predict</p>
-    </section>
-
     <section id="inputParams" class="col-md-6 col-sm-12">
         <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Model input parameters</header>
 
@@ -54,9 +56,9 @@
             </fieldset>
 
             <div class="btnContainer">
-                <input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="PREDICT">
+                <input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="Predict">
 
-                <input id="reset-btn" type="reset" class="btn btn-default" value="CLEAR">
+                <input id="reset-btn" type="reset" class="btn btn-default" value="Clear">
             </div>
 
         </form>
@@ -118,7 +120,7 @@
     <section class="col-md-1">
 
     </section>
-    <section id="results" class="col-md-4 col-sm-12">
+    <section id="results" class="col-md-5 col-sm-12">
         <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
         <fieldset id="modelPredictions">
             <!--             <legend>Model Predictions</legend>
@@ -169,7 +171,7 @@
                        </table> -->
         </fieldset>
         <div class="btnContainer">
-            <button id="stats-btn" class="btn btn-primary" type="submit">More stats</button>
+            <button id="stats-btn" class="btn btn-primary" type="submit">More Stats</button>
         </div>
     </section>
 
