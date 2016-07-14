@@ -1,4 +1,4 @@
-export const drf_train = [
+export const drfTrain = [
   {
     "fpr": 0.0017852588625350675,
     "tpr": 0.02410518626734843

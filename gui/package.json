@@ -17,7 +17,6 @@
     "redux": "^3.5.2",
     "redux-thunk": "^2.1.0",
     "h2oUIKit": "^0.2.0",
-    "h2oUIKit": "^0.2.1",
     "vis-components": "^0.1.0"
   },
   "devDependencies": {

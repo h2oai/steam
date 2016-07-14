@@ -1,4 +1,4 @@
-export const deeplearning_validation = [
+export const deeplearningValidation = [
   {
     "fpr": 0,
     "tpr": 0.002

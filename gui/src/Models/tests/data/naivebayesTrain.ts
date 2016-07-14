@@ -1,4 +1,4 @@
-export const naivebayes_train = [
+export const naivebayesTrain = [
   {
     "fpr": 0.006375924509053813,
     "tpr": 0.05697589481373265

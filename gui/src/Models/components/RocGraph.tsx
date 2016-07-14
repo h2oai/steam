@@ -22,6 +22,14 @@ export default class RocGraph extends React.Component<Props, any> {
     }
   }
 
+  componentWillUnmount() {
+    if (this._mountNode) {
+      ReactDOM.unmountComponentAtNode(this._mountNode);
+      this._mountNode.remove();
+      this._mountNode = null;
+    }
+  }
+
   renderGraph() {
     let cfg = {
         margin: { top: 2, right: 2, bottom: 2, left: 2 },

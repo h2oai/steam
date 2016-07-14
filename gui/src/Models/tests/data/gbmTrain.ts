@@ -1,4 +1,4 @@
-export const gbm_train = [
+export const gbmTrain = [
   {
     "fpr": 0,
     "tpr": 0.0007304601899196494

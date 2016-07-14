@@ -1,4 +1,4 @@
-export const glm_validation = [
+export const glmValidation = [
   {
     "fpr": 0,
     "tpr": 0.002
@@ -1599,4 +1599,4 @@ export const glm_validation = [
     "fpr": 1,
     "tpr": 1
   }
-]
+];

@@ -15,16 +15,16 @@ import Cell from '../../Projects/components/Cell';
 import '../styles/leaderboard.scss';
 
 // fake data
-import { deeplearning_train } from '../tests/data/deeplearning_train';
-import { deeplearning_validation } from '../tests/data/deeplearning_validation';
-import { drf_train } from '../tests/data/drf_train';
-import { drf_validation } from '../tests/data/drf_validation';
-import { gbm_train } from '../tests/data/gbm_train';
-import { gbm_validation } from '../tests/data/gbm_validation';
-import { glm_train } from '../tests/data/glm_train';
-import { glm_validation } from '../tests/data/glm_validation';
-import { naivebayes_train } from '../tests/data/naivebayes_train';
-import { naivebayes_validation } from '../tests/data/naivebayes_validation';
+import { deeplearningTrain } from '../tests/data/deeplearningTrain';
+import { deeplearningValidation } from '../tests/data/deeplearningValidation';
+import { drfTrain } from '../tests/data/drfTrain';
+import { drfValidation } from '../tests/data/drfValidation';
+import { gbmTrain } from '../tests/data/gbmTrain';
+import { gbmValidation } from '../tests/data/gbmValidation';
+import { glmTrain } from '../tests/data/glmTrain';
+import { glmValidation } from '../tests/data/glmValidation';
+import { naivebayesTrain } from '../tests/data/naivebayesTrain';
+import { naivebayesValidation } from '../tests/data/naivebayesValidation';
 
 interface Props {
   items: any[]
@@ -35,7 +35,7 @@ interface DispatchProps {
 
 export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
 
-  fakeData = {}
+  fakeData = {};
 
   constructor() {
     super();
@@ -45,17 +45,17 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
     this.fakeData = {
-      deeplearning_train,
-      deeplearning_validation,
-      drf_train,
-      drf_validation,
-      gbm_train,
-      gbm_validation,
-      glm_train,
-      glm_validation,
-      naivebayes_train,
-      naivebayes_validation
-    }
+      deeplearningTrain,
+      deeplearningValidation,
+      drfTrain,
+      drfValidation,
+      gbmTrain,
+      gbmValidation,
+      glmTrain,
+      glmValidation,
+      naivebayesTrain,
+      naivebayesValidation
+    };
   }
 
   static getOrdinal(rank: number): string {
@@ -131,10 +131,10 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.fakeData[item.metadata.modelType + '_train']}/>
+                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Train']}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.fakeData[item.metadata.modelType + '_validation']}/>
+                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Validation']}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">

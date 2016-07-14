@@ -1,4 +1,4 @@
-export const gbm_validation = [
+export const gbmValidation = [
   {
     "fpr": 0,
     "tpr": 0.002

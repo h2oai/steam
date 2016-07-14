@@ -1,4 +1,4 @@
-export const drf_validation = [
+export const drfValidation = [
   {
     "fpr": 0.0007980845969672786,
     "tpr": 0.002

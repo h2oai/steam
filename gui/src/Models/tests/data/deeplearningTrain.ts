@@ -1,4 +1,4 @@
-export const deeplearning_train = [
+export const deeplearningTrain = [
   {
     "fpr": 0,
     "tpr": 0.0007304601899196494

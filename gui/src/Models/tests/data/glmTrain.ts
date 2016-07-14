@@ -1,4 +1,4 @@
-export const glm_train = [
+export const glmTrain = [
   {
     "fpr": 0,
     "tpr": 0.0007304601899196494

@@ -1,4 +1,4 @@
-export const naivebayes_validation = [
+export const naivebayesValidation = [
   {
     "fpr": 0.007980845969672785,
     "tpr": 0.068
