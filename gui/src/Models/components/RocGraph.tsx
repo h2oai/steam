@@ -1,12 +1,57 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import '../styles/rocgraph.scss';
+import { rocChart } from 'vis-components';
 
 interface Props {
-
+  data: any[]
 }
 
 export default class RocGraph extends React.Component<Props, any> {
+
+  _mountNode: Element;
+
+  componentDidMount() {
+    this._mountNode = ReactDOM.findDOMNode(this);
+    this.renderGraph();
+  }
+
+  componentDidUpdate() {
+    if (this._mountNode) {
+      this.renderGraph();
+    }
+  }
+
+  componentWillUnmount() {
+    if (this._mountNode) {
+      ReactDOM.unmountComponentAtNode(this._mountNode);
+      this._mountNode.remove();
+      this._mountNode = null;
+    }
+  }
+
+  renderGraph() {
+    let cfg = {
+        margin: { top: 2, right: 2, bottom: 2, left: 2 },
+        width: 60,
+        height: 60,
+        interpolationMode: 'basis',
+        ticks: undefined,
+        tickValues: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1],
+        fpr: 'fpr',
+        tprVariables: [{
+          name: 'tpr',
+        }],
+        animate: false,
+        hideTicks: true,
+        hideAxes: true,
+        hideBoundaries: false
+    };
+
+    rocChart.plot(this._mountNode, this.props.data, cfg);
+  }
+
   render() {
-    return <svg width="60px" height="60px" className="train-roc-graph" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>;
+    return <div className="roc-container"></div>;
   }
 }
