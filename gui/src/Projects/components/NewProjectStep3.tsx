@@ -6,7 +6,6 @@ import * as ReactDOM from 'react-dom';
 import { Link } from 'react-router';
 import * as $ from 'jquery';
 import { hashHistory } from 'react-router';
-import * as classNames from 'classnames';
 import Panel from './Panel';
 import PageHeader from './PageHeader';
 import ProgressBar from './ProgressBar';

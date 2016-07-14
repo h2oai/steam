@@ -9,6 +9,8 @@ import '../styles/progressbar.scss';
 interface Props {
   showPercentage: boolean,
   className?: any,
+  start?: boolean,
+  end?: boolean,
   onComplete?: Function,
   onClick?: Function
 }
@@ -23,7 +25,18 @@ export default class ProgressBar extends React.Component<Props, any> {
   }
 
   componentDidMount() {
-    this.start();
+    if (this.props.start === true || _.isUndefined(this.props.start)) {
+      this.start();
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (_.isUndefined(nextProps.start) && this.state.progress === 0) {
+      this.start();
+    }
+    if (nextProps.end === true && this.state.progress !== 100) {
+      this.end();
+    }
   }
 
   componentWillUnmount() {
@@ -31,17 +44,11 @@ export default class ProgressBar extends React.Component<Props, any> {
   }
 
   start() {
-    let maxIncrements = Math.floor(Math.random() * (100 - 40 + 1)) + 40;
-    let i = 0;
     this.interval = setInterval(() => {
-      i++;
       let remaining = 100 - this.state.progress;
       this.setState({
         progress: this.state.progress += (0.05 * Math.pow(1 - Math.sqrt(remaining), 2))
       });
-      if (i >= maxIncrements) {
-        this.end();
-      }
     }, 50);
   }
 
@@ -51,6 +58,7 @@ export default class ProgressBar extends React.Component<Props, any> {
     });
     clearInterval(this.interval);
     if (this.props.onComplete) {
+      debugger;
       this.props.onComplete(this);
     }
   }

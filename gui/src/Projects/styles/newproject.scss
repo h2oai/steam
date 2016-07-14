@@ -1,7 +1,18 @@
 @import '../../variables.scss';
 
 .new-project {
+  .progress-bar-container {
+    border-radius: $medium;
+    background-color: transparent;
+    border: $rule-solid-thick;
+    transition: width 0.3s ease-in 0.3s;
+    height: $medium;
+    width: 40%;
+  }
   .disabled {
+    * {
+      pointer-events: none;
+    }
     &:after {
       display: block;
       position: absolute;
@@ -11,10 +22,13 @@
       width: 100%;
       z-index: 2;
       opacity: 0.7;
+      top: 0;
+      left: 0;
     }
   }
   form {
     margin: $small 0;
+    position: relative;
     label {
       font-size: 1.5em;
       display: block;
@@ -26,11 +40,48 @@
       display: block;
     }
     input {
-      width: $base-grid-unit * 3;
+      width: $base-grid-unit * 5;
+      height: $medium;
     }
   }
-  .save-dictionary, .train-models {
+  input[type="file"] {
+    display: none;
+  }
+  .upload-file {
+    margin-right: $small;
+    height: $medium;
+    margin-top: $xsmall;
+  }
+  .table {
+    position: relative;
+    &.disabled .cell {
+      span {
+        background: $brand-dark-3;
+        color: $brand-dark-3;
+      }
+      .values {
+        display: none;
+      }
+    }
+  }
+  a.next {
+    margin-top: $medium;
+    position: relative;
+    &.disabled {
+      border: 1px solid $brand-dark-1;
+      background: $brand-dark-1;
+      pointer-events: none;
+      &:after {
+        top: -1px;
+        left: -1px;
+        width: calc(100% + 2px);
+        height: calc(100% + 2px);
+      }
+    }
+  }
+  .train-models {
     margin: $medium 0;
+    position: relative;
   }
   .build-model {
     margin-bottom: $medium;
