@@ -10,6 +10,43 @@ import (
 	"github.com/h2oai/steamY/bindings"
 )
 
+/////////////////
+/////////////////
+////// GBM //////
+/////////////////
+/////////////////
+
+// PostGBMTrain Train a GBM model. */
+func (h *H2O) PostGBMTrain(in *bindings.GBMParametersV3) (*bindings.GBMV3, error) {
+	//@POST
+	u := h.url("/3/ModelBuilders/gbm")
+
+	v := url.Values{
+		"training_frame":  {in.TrainingFrame.Name},
+		"response_column": {in.ResponseColumn.ColumnName},
+	}
+
+	if in.ValidationFrame != nil {
+		v["validation_frame"] = []string{in.ValidationFrame.Name}
+	}
+
+	res, err := http.PostForm(u, v)
+	if err != nil {
+		return nil, fmt.Errorf("H2O post request failed: %s: %s", u, err)
+	}
+
+	data, err := h.handleResponse(res, u)
+	if err != nil {
+		return nil, err
+	}
+
+	var out bindings.GBMV3
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
+	}
+	return &out, nil
+}
+
 /////////////////////////
 /////////////////////////
 ////// ImportFiles //////

@@ -114,7 +114,6 @@ func (h *H2O) JobPoll(jobId string) (*bindings.JobV3, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(jobBase)
 
 		job := jobBase.Jobs[0]
 		if job.Status == "CREATED" || job.Status == "RUNNING" {
