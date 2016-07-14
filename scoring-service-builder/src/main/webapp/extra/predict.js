@@ -260,7 +260,7 @@
       .fail(function(data, status, error) {
         // var down = "<b>POST to /pypredict Failed</b>";
         // div.innerHTML = down + "<br>status " + data.status + "<br>statusText " + data.statusText;
-        div innerHTML = 'Error: ' + data.statusText;
+        div.innerHTML = 'Error: ' + data.statusText;
         var stats = document.querySelector(".stats");
         stats.innerHTML = down;
       });
