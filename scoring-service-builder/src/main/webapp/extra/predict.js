@@ -48,16 +48,16 @@
       var n = names[i];
       var i1 = Number(i) + 1;
       form += '<div class="form-group row">';
-      form += '<label class="col-sm-5 col-md-4 col-lg-4 form-control-label">' + i1 + '. ' + n + '</label> ';
+      form += '<label class="col-sm-5 col-md-5 col-lg-4 form-control-label">' + i1 + '. ' + n + '</label> ';
       var domain = domains[i];
       domain = sortValues(domain);
       var card = domain == null ? 0 : domain.length;
 
-      form += '<div class="col-sm-7 col-md-8 col-lg-8">'
+      form += '<div class="col-sm-7 col-md-7 col-lg-8">'
 
       if (card < 2) {
         form += '<input class="form-control" type="text" name="' + n + '" oninput="updateUrl(event);">';
-      } else if (card <= 3) {
+      } else if (card <= 2) {
         for (var i = 0; i < card; i += 1) {
           form += '<input type="radio" name="' + n + '" value="' + domain[i] + '" onclick="updateUrl(event);"> ' + domain[i] + '</input>\n';
         }
@@ -137,7 +137,9 @@
       var probs = data["classProbabilities"];
       var prob = probs[index];
 
-      result += `<p>Predicting <span class="labelHighlight">` + label + `</span> based on max F1 threshold </p>`
+      if (probs.length == 2){
+          result += `<p>Predicting <span class="labelHighlight">` + label + `</span> based on max F1 threshold </p>`
+      }
 
       result += `<table class="table" id="modelPredictions">
                   <thead> 
@@ -256,8 +258,9 @@
       showResult(div, status, data);
     }, 'json')
       .fail(function(data, status, error) {
-        var down = "<b>POST to /pypredict Failed</b>";
-        div.innerHTML = down + "<br>status " + data.status + "<br>statusText " + data.statusText;
+        // var down = "<b>POST to /pypredict Failed</b>";
+        // div.innerHTML = down + "<br>status " + data.status + "<br>statusText " + data.statusText;
+        div innerHTML = 'Error: ' + data.statusText;
         var stats = document.querySelector(".stats");
         stats.innerHTML = down;
       });
