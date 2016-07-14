@@ -38,7 +38,10 @@ func getCluster(c *context) *cobra.Command {
 		// -- Execution --
 
 		// create lines
-		var lines, info, yarn []string
+		var (
+			lines, info, yarn, models []string
+			modelCt                   int
+		)
 
 		// base cluster info
 		cluster, err := c.remote.GetCluster(clusterId)
@@ -70,6 +73,21 @@ func getCluster(c *context) *cobra.Command {
 				fmt.Sprintf("MEMORY:\t%s", clusterInfo.MaxMemory),
 				fmt.Sprintf("TOTAL CPUS:\t%d", clusterInfo.TotalCpuCount),
 			}
+
+			clusterModels, err := c.remote.GetClusterModels(clusterId)
+			if err != nil {
+				log.Fatalln(err) //FIXME format error
+			}
+
+			modelCt = len(clusterModels)
+			models = make([]string, modelCt)
+			for i, clusterModel := range clusterModels {
+				models[i] = fmt.Sprintf("%s\t%s\t%s",
+					clusterModel.Name,
+					clusterModel.Algorithm,
+					fmtAgo(clusterModel.CreatedAt),
+				)
+			}
 		} else {
 			info = []string{fmt.Sprintf("STATE:\t%s", cluster.State)}
 		}
@@ -84,9 +102,13 @@ func getCluster(c *context) *cobra.Command {
 			fmt.Sprintf("AGE:\t%s", fmtAgo(cluster.CreatedAt)),
 		)
 
-		// FIXME: formmating
+		// -- Formatting --
 
 		c.printt("\t"+cluster.Name, lines)
+		fmt.Println("Models in cluster:", modelCt)
+		if modelCt > 0 {
+			c.printt("NAME\tALGO\tAGE", models)
+		}
 	})
 
 	return cmd

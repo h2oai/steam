@@ -1,3 +1,5 @@
+-- MODIFIED BY HAND TO WORK ON ubuntu precise with postgres 9.1
+
 --
 -- PostgreSQL database dump
 --
@@ -8,12 +10,10 @@
 -- Dumped by pg_dump version 9.5.1
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 DROP DATABASE IF EXISTS steam;
 
@@ -29,18 +29,17 @@ ALTER DATABASE steam OWNER TO steam;
 \connect steam
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: steam
 --
 
-CREATE SCHEMA IF NOT EXISTS public;
+DROP SCHEMA IF EXISTS public;
+CREATE SCHEMA public;
 
 
 ALTER SCHEMA public OWNER TO steam;
@@ -56,7 +55,8 @@ COMMENT ON SCHEMA public IS 'standard public schema';
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+DROP EXTENSION IF EXISTS plpgsql;
+CREATE EXTENSION plpgsql WITH SCHEMA pg_catalog;
 
 
 --
