@@ -130,16 +130,19 @@
 
     if ("classProbabilities" in data) {
 
-      result += `<p>The following predictions are based on threshold F1 </p>`
+
       // binomial and multinomial
       var label = data["label"];
       var index = data["labelIndex"];
       var probs = data["classProbabilities"];
       var prob = probs[index];
 
+      result += `<p>Predicting <span class="labelHighlight">` + label + `</span> based on max F1 threshold </p>`
+
       result += `<table class="table" id="modelPredictions">
                   <thead> 
                     <tr>
+                      <th>Index</th>
                       <th>Labels</th>
                       <th>Probability</th>
                     </tr>
@@ -148,7 +151,12 @@
                   `
 
       for (var label_i in outputDomain) {
-        result += '<tr><td>' + outputDomain[label_i] + '</td> <td>' + probs[label_i].toFixed(4) + '</td></tr>';
+        if (parseInt(label_i) === index ){
+          result += '<tr class="rowHighlight">'
+        } else {
+          result += '<tr>'
+        }
+        result += '<td>' + label_i + '</td><td>' + outputDomain[label_i] + '</td> <td>' + probs[label_i].toFixed(4) + '</td></tr>';
       }
 
       result += '</tbody></table>';

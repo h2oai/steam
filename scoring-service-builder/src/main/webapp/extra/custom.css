@@ -233,6 +233,17 @@ select:-moz-focusring {
     color: rgba(36, 67, 90, 0.8);
 }
 
+.indexHighlight, .labelHighlight {
+    font-family: 'Borda';
+    background: aliceblue;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.rowHighlight{
+    background: aliceblue;
+}
+
 tr.stat-group td {
     padding: 0 8px !important;
 }
