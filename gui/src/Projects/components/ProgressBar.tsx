@@ -12,7 +12,8 @@ interface Props {
   start?: boolean,
   end?: boolean,
   onComplete?: Function,
-  onClick?: Function
+  onClick?: Function,
+  style?: any
 }
 export default class ProgressBar extends React.Component<Props, any> {
   interval: number;

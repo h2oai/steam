@@ -26,6 +26,32 @@
       left: 0;
     }
   }
+  .added-file {
+    position: relative;
+    .added-file-icon {
+      height: 7em;
+      display: inline-block;
+      position: relative;
+      width: 8em;
+      i.fa.fa-file-o {
+        position: absolute;
+        font-size: 7em;
+      }
+      .file-type {
+        position: absolute;
+        bottom: 0.7em;
+        left: 0.7em;
+        font-size: 1.5em;
+      }
+    }
+    .added-file-info-wrapper {
+      position: absolute;
+      display: inline-block;
+      .added-file-info {
+
+      }
+    }
+  }
   form {
     margin: $small 0;
     position: relative;
@@ -42,6 +68,7 @@
     input {
       width: $base-grid-unit * 5;
       height: $medium;
+      cursor: pointer;
     }
   }
   input[type="file"] {

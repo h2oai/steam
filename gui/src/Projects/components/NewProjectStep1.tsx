@@ -28,7 +28,8 @@ export default class NewProject extends React.Component<Props, any> {
     this.state = {
       shapeIsDisabled: true,
       uploadFilename: '',
-      isUploading: false
+      isUploading: false,
+      isUploaded: false
     };
   }
 
@@ -61,7 +62,7 @@ export default class NewProject extends React.Component<Props, any> {
       this.setState({
         stopUploading: true
       });
-    }, 2000)
+    }, 2000);
   }
 
   getAddDataSource() {
@@ -70,7 +71,7 @@ export default class NewProject extends React.Component<Props, any> {
         <label>Add a Data Source</label>
         <span>We will automatically infer a data dictionary based on the data</span>
         <input ref="uploadText" type="text" className="upload-file" onClick={this.onClickFileText.bind(this)}
-               value={this.state.uploadFilename}/>
+               value={this.state.uploadFilename} readOnly/>
         <input ref="uploadFile" type="file"/>
         <button type="button" className="default" onClick={this.upload.bind(this)}>Upload</button>
       </form>
@@ -78,10 +79,29 @@ export default class NewProject extends React.Component<Props, any> {
   }
 
   onCompleteUploading() {
-    console.log('show');
     this.setState({
-      isUploading: false
+      isUploading: false,
+      isUploaded: true
     });
+  }
+
+  static extractFileExtension(filename) {
+    var extensionPattern = /\.[0-9a-z]+$/i;
+    return filename.match(extensionPattern)[0];
+  }
+
+  getAddedFile() {
+    return (
+      <div className="added-file">
+        <div className="added-file-icon">
+          <i className="fa fa-file-o"/>
+          <span className="file-type">{NewProject.extractFileExtension(this.state.uploadFilename).toUpperCase()}</span>
+        </div>
+        <div className="added-file-info">
+          <span>{this.state.uploadFilename}</span><span><a href="javascript:void(0);">Remove</a></span>
+        </div>
+      </div>
+    );
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -92,8 +112,12 @@ export default class NewProject extends React.Component<Props, any> {
           <label>Give your project a name</label>
           <input type="text" placeholder="Name"/>
         </form>
-        {this.state.isUploading === false ? this.getAddDataSource() : null}
-        {this.state.isUploading === true ? <ProgressBar showPercentage={true} onComplete={this.onCompleteUploading.bind(this)} end={this.state.stopUploading} style={{display: this.state.stopUploading ? 'block' : 'none'}}/>: null}
+        {this.state.isUploading === false && !this.state.isUploaded ? this.getAddDataSource() : null}
+        {this.state.isUploading === true ?
+          <ProgressBar showPercentage={true} onComplete={this.onCompleteUploading.bind(this)}
+                       end={this.state.stopUploading}
+                       style={{display: this.state.stopUploading ? 'block' : 'none'}}/> : null}
+        {this.state.isUploaded ? this.getAddedFile() : null}
         <form className={classNames({disabled: !this.state.uploadFilename})}>
           <label>Verify Data Shape</label>
           <span>Your models will be more accurate if H2O has an accurate understanding of the column types in your data.</span>
@@ -151,7 +175,8 @@ export default class NewProject extends React.Component<Props, any> {
             <label>Select Response Column</label>
             <span>Identify the column with the value you want to predict.</span>
             <select>
-              <option>Test</option>
+              <option>Select Column</option>
+              <option>churn</option>
             </select>
           </form>
         </div>
