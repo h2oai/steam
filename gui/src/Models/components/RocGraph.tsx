@@ -15,10 +15,12 @@ export default class RocGraph extends React.Component<Props, any> {
     this._mountNode = ReactDOM.findDOMNode(this);
     this.renderGraph();
   }
-
-  componentDidUpdate() {
+  
+  componentWillUnmount() {
     if (this._mountNode) {
-      this.renderGraph();
+      ReactDOM.unmountComponentAtNode(this._mountNode);
+      this._mountNode.remove();
+      this._mountNode = null;
     }
   }
 
