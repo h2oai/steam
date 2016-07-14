@@ -30,7 +30,7 @@
         <p>Select input parameters, OR enter your own custom query string to predict</p>
     </section>
 
-    <section id="inputParams" class="col-md-6 col-sm-12">
+    <section id="inputParams" class="col-md-6 col-sm-12 col-lg-5">
         <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Model input parameters</header>
 
         <form autocomplete="off" onsubmit="event.preventDefault();runpred2(this.form)" id="allparams" onreset="setEmptyUrl();">
@@ -54,9 +54,9 @@
             </fieldset>
 
             <div class="btnContainer">
-                <input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="PREDICT">
+                <input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="predict">
 
-                <input id="reset-btn" type="reset" class="btn btn-default" value="CLEAR">
+                <input id="reset-btn" type="reset" class="btn btn-default" value="clear">
             </div>
 
         </form>
@@ -115,10 +115,10 @@
 
     </section>
 
-    <section class="col-md-1">
+    <section class="col-md-0 col-lg-2">
 
     </section>
-    <section id="results" class="col-md-4 col-sm-12">
+    <section id="results" class="col-lg-5 col-md-6 col-sm-12">
         <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
         <fieldset id="modelPredictions">
             <!--             <legend>Model Predictions</legend>
