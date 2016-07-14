@@ -16,7 +16,8 @@
     "react-router-redux": "^4.0.5",
     "redux": "^3.5.2",
     "redux-thunk": "^2.1.0",
-    "h2oUIKit": "^0.2.0"
+    "h2oUIKit": "^0.2.0",
+    "vis-components": "^0.1.0"
   },
   "devDependencies": {
     "browser-sync": "^2.13.0",

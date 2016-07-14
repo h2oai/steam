@@ -35,6 +35,7 @@ export function fetchLeaderboard() {
         rank: 1,
         metadata: {
           modelName: 'DRF-1069085',
+          modelType: 'drf',
           createdBy: 'tonychu',
           creationDate: '2016-06-14',
           timing: '213 ± 12ms'
@@ -45,6 +46,7 @@ export function fetchLeaderboard() {
         rank: 2,
         metadata: {
           modelName: 'GBT-1071707',
+          modelType: 'deeplearning',
           createdBy: 'ivywang',
           creationDate: '2016-06-14',
           timing: '213 ± 12ms'
@@ -55,6 +57,7 @@ export function fetchLeaderboard() {
         rank: 3,
         metadata: {
           modelName: 'GBT-1071707',
+          modelType: 'gbm',
           createdBy: 'marklandry',
           creationDate: '2016-06-14',
           timing: '213 ± 12ms'
@@ -65,6 +68,7 @@ export function fetchLeaderboard() {
         rank: 4,
         metadata: {
           modelName: 'GBT-1071707',
+          modelType: 'glm',
           createdBy: 'marklandry',
           creationDate: '2016-06-14',
           timing: '213 ± 12ms'
@@ -75,6 +79,7 @@ export function fetchLeaderboard() {
         rank: 5,
         metadata: {
           modelName: 'GBT-1071707',
+          modelType: 'naivebayes',
           createdBy: 'marklandry',
           creationDate: '2016-06-14',
           timing: '213 ± 12ms'

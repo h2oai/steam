@@ -14,6 +14,18 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import '../styles/leaderboard.scss';
 
+// fake data
+import { deeplearningTrain } from '../tests/data/deeplearningTrain';
+import { deeplearningValidation } from '../tests/data/deeplearningValidation';
+import { drfTrain } from '../tests/data/drfTrain';
+import { drfValidation } from '../tests/data/drfValidation';
+import { gbmTrain } from '../tests/data/gbmTrain';
+import { gbmValidation } from '../tests/data/gbmValidation';
+import { glmTrain } from '../tests/data/glmTrain';
+import { glmValidation } from '../tests/data/glmValidation';
+import { naivebayesTrain } from '../tests/data/naivebayesTrain';
+import { naivebayesValidation } from '../tests/data/naivebayesValidation';
+
 interface Props {
   items: any[]
 }
@@ -22,6 +34,9 @@ interface DispatchProps {
 }
 
 export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
+
+  fakeData = {};
+
   constructor() {
     super();
     this.state = {
@@ -29,6 +44,18 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
+    this.fakeData = {
+      deeplearningTrain,
+      deeplearningValidation,
+      drfTrain,
+      drfValidation,
+      gbmTrain,
+      gbmValidation,
+      glmTrain,
+      glmValidation,
+      naivebayesTrain,
+      naivebayesValidation
+    };
   }
 
   static getOrdinal(rank: number): string {
@@ -77,9 +104,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
             <Cell className="graph">
               TEST ROC
             </Cell>
-            <Cell className="graph">
-              RESIDUALS
-            </Cell>
             <Cell>
               <div className="actions">
                 ACTIONS
@@ -107,13 +131,10 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Train']}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph/>
-                </Cell>
-                <Cell className="graph">
-                  <RocGraph/>
+                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Validation']}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
