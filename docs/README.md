@@ -1,6 +1,6 @@
 # Installing, Starting, and H2O Using Steam on a YARN Cluster
 
-This document is provided for external users and describes how to install, start, and use Steam on a YARN cluster. For instructions on using Steam on your local machine, refer to the [standard\_demo\_standalone](../demo/standard_demo_standalone.md) document.
+This document is provided for external users and describes how to install, start, and use Steam on a YARN cluster. For instructions on using Steam on your local machine, refer to the [README.md](../demo/README.md) document in the demo folder.
 
 
 ## Requirements
