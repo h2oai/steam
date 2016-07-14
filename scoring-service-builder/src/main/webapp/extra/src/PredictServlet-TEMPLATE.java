@@ -71,12 +71,15 @@ public class PredictServlet extends HttpServlet {
     }
     else {
       // transform with the jar
-      byte[] bytes = request.getQueryString().getBytes();
-      Map<String, Object> tr = transform.fit(bytes);
+      String req = request.getQueryString().replaceAll("%20", " ");
+      //System.out.println(req);
+      byte[] bytes = req.getBytes();
+      Map<String, Object> tr = transform.fit(new String(bytes));
       for (String k : tr.keySet()) {
-        System.out.println(k + " = " + tr.get(k));
+        logger.debug("{} = {}", k, tr.get(k));
         row.put(k, tr.get(k));
       }
+      System.out.println(row);
     }
     try {
       if (model == null)
@@ -128,10 +131,20 @@ public class PredictServlet extends HttpServlet {
       String prJson;
       while (r.ready()) {
         line = r.readLine();
-        if (VERBOSE) System.out.println("line " + line);
-
-        row = gson.fromJson(line, ServletUtil.ROW_DATA_TYPE);
-        if (VERBOSE) System.out.println("row " + row);
+        logger.debug("line {}", line);
+        if (transform == null) { // no jar transformation
+          row = gson.fromJson(line, ServletUtil.ROW_DATA_TYPE);
+        }
+        else {
+          row = new RowData();
+          Map<String, Object> tr = transform.fit(line);
+          for (String k : tr.keySet()) {
+            logger.debug("{} = {}", k, tr.get(k));
+            row.put(k, tr.get(k));
+          }
+          System.out.println(row);
+        }
+        logger.debug("row {}", row);
         if (row != null) {
           // do the prediction
           pr = predict(row);

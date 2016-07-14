@@ -12,6 +12,7 @@ import hex.genmodel.*;
 class ServletUtil {
 
   // load model
+  static String modelName = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
   static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
   public static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
     // load preprocessing
@@ -22,6 +23,7 @@ class ServletUtil {
   public static final int warmUpCount = 5;
 
   private static Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+
   public static class Times {
     private long count = 0;
     private double totalTimeMs = 0;
