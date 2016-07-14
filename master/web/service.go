@@ -2,6 +2,12 @@ package web
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/h2oai/steamY/bindings"
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/lib/svc"
@@ -12,11 +18,6 @@ import (
 	"github.com/h2oai/steamY/srv/compiler" // FIXME rename comp to compiler
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
-	"log"
-	"os"
-	"sort"
-	"strconv"
-	"time"
 )
 
 type Service struct {
@@ -60,9 +61,9 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 	}
 
 	h := h2ov3.NewClient(address)
-	cloud, err := h.GetCloud()
+	cloud, err := h.GetCloudStatus()
 	if err != nil {
-		return 0, fmt.Errorf("Could not communicate with cloud %s.", address)
+		return 0, fmt.Errorf("Could not communicate with an h2o cluster at %s", address)
 	}
 
 	_, ok, err := s.ds.ReadClusterByAddress(pz, address)
@@ -76,12 +77,8 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 
 	clusterId, err := s.ds.CreateExternalCluster(pz, cloud.CloudName, address, data.StartedState)
 	if err != nil {
-		return 0, fmt.Errorf("Failed storing cluster:", err)
+		return 0, err
 	}
-	// s.clusterProxy.NewProxy(c.ID, c.Address)
-	// if err := s.pollCloud(toCloud(c)); err != nil {
-	// 	return nil, err
-	// }
 
 	return clusterId, nil
 }
@@ -120,17 +117,16 @@ func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId
 		return 0, err
 	}
 	if ok {
-		return 0, fmt.Errorf("Failed starting cluster: a cluster with the name %s already exists.", clusterName)
+		return 0, fmt.Errorf("A cluster with the name %s already exists.", clusterName)
 	}
 
 	engine, err := s.ds.ReadEngine(pz, engineId)
 	if err != nil {
-		return 0, fmt.Errorf("Failed starting cluster: cannot locate the specified engine %d: %s", engineId, err)
+		return 0, err
 	}
 
 	applicationId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
 	if err != nil {
-		log.Println(pz, err)
 		return 0, err
 	}
 
@@ -145,19 +141,9 @@ func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId
 	}
 
 	clusterId, err := s.ds.CreateYarnCluster(pz, clusterName, address, data.StartedState, yarnCluster)
-
 	if err != nil {
 		return 0, err
 	}
-
-	// // Create an instance of this cloud in cloudActivity map
-	// if err := s.pollCloud(toCluster(c)); err != nil {
-	// 	return nil, err
-	// }
-
-	// Create a reverse proxy for cluster.
-	// FIXME
-	// s.clusterProxy.NewProxy(c.ID, c.Address)
 
 	return clusterId, nil
 }
@@ -194,18 +180,6 @@ func (s *Service) StopYarnCluster(pz az.Principal, clusterId int64) error {
 
 	return s.ds.UpdateClusterState(pz, clusterId, data.StoppedState)
 }
-
-// FIXME - why is this required?
-
-// func (s *Service) Shutdown(address string) error {
-// 	h := h2ov3.NewClient(address)
-
-// 	if err := h.Shutdown(); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
 
 func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
@@ -276,7 +250,7 @@ func (s *Service) GetClusterStatus(pz az.Principal, cloudId int64) (*web.Cluster
 
 	h2o := h2ov3.NewClient(cluster.Address)
 
-	cloud, err := h2o.GetCloud()
+	cloud, err := h2o.GetCloudStatus()
 
 	var (
 		tot, all int32
@@ -358,9 +332,9 @@ func (s *Service) GetJob(pz az.Principal, clusterId int64, jobName string) (*web
 
 	h := h2ov3.NewClient(cluster.Address)
 
-	j, err := h.GetJob(jobName)
+	j, err := h.GetJobsFetch(jobName)
 	if err != nil {
-		return nil, err //FIXME format error
+		return nil, err
 	}
 	job := j.Jobs[0]
 
@@ -379,9 +353,9 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 
 	h := h2ov3.NewClient(cluster.Address)
 
-	j, err := h.GetJobs()
+	j, err := h.GetJobsList()
 	if err != nil {
-		return nil, err //FIXME format error
+		return nil, err
 	}
 
 	jobs := make([]*web.Job, len(j.Jobs))
@@ -423,7 +397,7 @@ func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetNa
 		return nil, err
 	}
 	if cluster.State == data.StoppedState {
-		return nil, fmt.Errorf("Failed building model: cluster is not running")
+		return nil, fmt.Errorf("Cluster is not running")
 	}
 
 	h2o := h2ov3.NewClient(cluster.Address)
@@ -508,9 +482,9 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	}
 
 	h := h2ov3.NewClient(cluster.Address)
-	ms, err := h.GetModels()
+	ms, err := h.GetModelsList()
 	if err != nil {
-		return nil, fmt.Errorf("Failed fetching models from cluster: %s", err)
+		return nil, err
 	}
 
 	models := make([]*web.Model, len(ms.Models))
@@ -545,7 +519,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
-	r, err := h2o.GetModel(modelName)
+	r, err := h2o.GetModelsFetch(modelName)
 	if err != nil {
 		return nil, err
 	}
@@ -557,6 +531,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 
 	m := r.Models[0]
 
+	// TODO: json, modelMetrics, err
+	// This needs to hooked up to api
+	rawMetrics, _, err := h2o.GetModelMetricsListSchemaFetchByModel(modelName)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
 		modelName,
@@ -566,8 +547,8 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 		m.ResponseColumnName,
 		logicalName,
 		location,
-		0,   // FIXME
-		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
+		0,
+		string(rawMetrics),
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
@@ -606,7 +587,7 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	if len(services) > 0 {
 		for _, service := range services {
 			if service.State != data.StoppedState {
-				return fmt.Errorf("Failed deleting model: a scoring service for this model is deployed and running at %s:%d", service.Address, service.Port)
+				return fmt.Errorf("A scoring service for this model is deployed and running at %s:%d", service.Address, service.Port)
 			}
 		}
 	}
@@ -631,7 +612,7 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 
 	compilationService := compiler.NewServer(s.compilationServiceAddress)
 	if err := compilationService.Ping(); err != nil {
-		return nil, fmt.Errorf("Failed connecting to compilation service at %s", s.compilationServiceAddress)
+		return nil, err
 	}
 
 	// do not recompile if war file is already available
@@ -643,7 +624,7 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 			"makewar",
 		)
 		if err != nil {
-			return nil, err //FIXME format error
+			return nil, err
 		}
 	}
 
@@ -701,7 +682,7 @@ func (s *Service) StopScoringService(pz az.Principal, serviceId int64) error {
 	}
 
 	if service.State == data.StoppedState {
-		return fmt.Errorf("Scoring service is already stopped")
+		return fmt.Errorf("Scoring service on model %s at port %d is already stopped", service.ModelId, service.Port)
 	}
 
 	if err := svc.Stop(int(service.ProcessId)); err != nil {
@@ -746,12 +727,12 @@ func (s *Service) GetScoringServices(pz az.Principal, offset, limit int64) ([]*w
 
 func (s *Service) GetScoringServicesForModel(pz az.Principal, modelId, offset, limit int64) ([]*web.ScoringService, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
-		return nil, err //FIXME format error
+		return nil, err
 	}
 
 	services, err := s.ds.ReadServicesForModelId(pz, modelId)
 	if err != nil {
-		return nil, err //FIXME format error
+		return nil, err
 	}
 
 	ss := make([]*web.ScoringService, len(services))
@@ -1049,7 +1030,7 @@ func (s *Service) CreateIdentity(pz az.Principal, name string, password string) 
 
 	hash, err := auth.HashPassword(password)
 	if err != nil {
-		return 0, fmt.Errorf("Failed hashing password: %s", err)
+		return 0, err
 	}
 	id, _, err := s.ds.CreateIdentity(pz, name, hash)
 	if err != nil {

@@ -3,11 +3,6 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
-    <!--<servlet>-->
-        <!--<servlet-name>Predict</servlet-name>-->
-        <!--<servlet-class>PredictServlet</servlet-class>-->
-        <!--<load-on-startup>1</load-on-startup>-->
-    <!--</servlet>-->
     <servlet>
         <servlet-name>PredictPython</servlet-name>
         <servlet-class>PredictPythonServlet</servlet-class>
@@ -21,11 +16,11 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         <servlet-name>Stats</servlet-name>
         <servlet-class>StatsServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Ping</servlet-name>
+        <servlet-class>PingServlet</servlet-class>
+    </servlet>
 
-    <!--<servlet-mapping>-->
-        <!--<servlet-name>Predict</servlet-name>-->
-        <!--<url-pattern>/predict</url-pattern>-->
-    <!--</servlet-mapping>-->
     <servlet-mapping>
         <servlet-name>PredictPython</servlet-name>
         <url-pattern>/pypredict</url-pattern>
@@ -37,6 +32,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     <servlet-mapping>
         <servlet-name>Stats</servlet-name>
         <url-pattern>/stats</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Ping</servlet-name>
+        <url-pattern>/ping</url-pattern>
     </servlet-mapping>
 
 </web-app>

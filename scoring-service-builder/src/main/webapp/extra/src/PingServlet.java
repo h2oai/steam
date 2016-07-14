@@ -1,4 +1,3 @@
-package ai.h2o.servicebuilder;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;

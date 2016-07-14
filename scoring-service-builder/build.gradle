@@ -15,8 +15,6 @@ ext {
     junitVersion  = '4.12'
 }
 
-//org.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-
 dependencies {
     compile "javax.servlet:servlet-api:2.5"
     compile "commons-io:commons-io:2.4"

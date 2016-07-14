@@ -9,7 +9,7 @@ The H2O Scoring Service Builder is an application that allows you to perform the
 
 ## Notes
 
-All code is currently compiled to Java 1.6 to make it useable with rJava.
+All code is compiled to Java 1.6 to make it useable with rJava.
 
 If you use an older version of Java, you will need to use an older jetty-runner. Jetty 9.3 requires Java 1.8. Jetty 9.0-9.2 requires Java 1.7. Jetty 8 requires Java 1.6.
 
@@ -42,23 +42,28 @@ The following screenshot shows how to make a War file using a POJO file and a Ja
 
 Click **Upload** to upload the files to the Prediction Service Builder and create a War file.
 
->***Note***: You can also build a War file using a model with an additional pre-processing step. To do this, specify a Python file and additional pre-processing python files. When these files are specified, the prediction file will perform additional pre-processing on the specified model before completing the War file. 
+>***Note***: You can also build a War file using a model with an additional pre-processing step. There are two options for this: Python or Java/Scala.
 
->For testing, an example python file is available in the **/scoring-service/builder/examples/example-spam-detection** folder. The additional python files are available in the **/scoring-service/builder/examples/example-spam-detection/lib** folder.  
+> Python. Specify a Python file and additional pre-processing python files and use `makewarpython`. When these files are specified, the prediction file will perform additional pre-processing on the specified model before predicting with the model POJO.
+
+> Java/Scala/Jar. Specify a Jar file that contains everyting you need, then the name of the Class that performs the preprocessing. Use the regular `makewar`. When these files are specified, the prediction file will perform additional pre-processing on the specified model before predicting with the model POJO..
+
+
+>For testing, an example python file is available in the **/scoring-service/builder/examples/spam-detection-python** folder. The additional python files are available in the **/scoring-service/builder/examples/spam-detection-python/lib** folder.
 
 
 ### Using the CLI
 
 Note that when the Builder Service is running, you can also make a war file using command line arguments. For example:
 
-	curl -X POST --form pojo=@examples/example-pojo/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@examples/example-pojo/h2o-genmodel.jar localhost:55000/makewar > example.war
+	curl -X POST --form pojo=@examples/pojo-server/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java --form jar=@examples/pojo-server/h2o-genmodel.jar localhost:55000/makewar > example.war
 
  where:
  
  - `gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java` is the POJO file from H2O
  - `h2o-genmodel.jar` is the corresponding Jar file from your version of H2O
 
-The POJO and Jar files are included in the **steamY/scoring-service-builder/examples/example-pojo** folder. 
+The POJO and Jar files are included in the **steamY/scoring-service-builder/examples/pojo-server** folder.
 
 
 ## Starting the H2O Prediction Service
@@ -82,12 +87,14 @@ This distribution includes scripts that can be used to quickly get your predicti
 Open a terminal window and run the following commands from the **steamY/steam-scoring-service** folder. 
 
 	# Run an example using the airline dataset
+	cd examples/pojo-server
 	sh example.sh
 	sh run-example.sh
 
 or
 
 	# Run an example using the spam-detection dataset
+	cd examples/spam-detection-python
 	sh example-python.sh
 	sh run-example-python.sh
 

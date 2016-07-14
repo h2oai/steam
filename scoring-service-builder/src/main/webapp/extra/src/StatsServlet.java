@@ -11,8 +11,12 @@ import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.*;
 import javax.servlet.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatsServlet extends HttpServlet {
+  private static final Logger logger = LoggerFactory.getLogger("StatsServlet");
+
   public static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -54,7 +58,7 @@ public class StatsServlet extends HttpServlet {
     }
     catch (Exception e) {
       // Prediction failed.
-      System.out.println(e.getMessage());
+      logger.error("get failed", e);
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
   }

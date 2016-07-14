@@ -5,6 +5,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -35,21 +37,7 @@ import static ai.h2o.servicebuilder.Util.*;
 public class MakeWarServlet extends HttpServlet {
   private static boolean VERBOSE = false;
 
-
-  public interface Transform {
-    /**
-     *
-     * @param input is the original data to be transformed
-     * @return an array of0
-     */
-    Object[] fit(byte[] input);
-  }
-
-  public class X implements Transform {
-    public Object[] fit(byte[] input) {
-      return null;
-    }
-  }
+  private static final Logger logger = LoggerFactory.getLogger("MakeWarServlet");
 
   private File servletPath = null;
 
@@ -57,10 +45,10 @@ public class MakeWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      if (VERBOSE) System.out.println("servletPath = " + servletPath);
+      if (VERBOSE) logger.info("servletPath = {}", servletPath);
     }
     catch (MalformedURLException e) {
-      e.printStackTrace();
+      logger.error("Can't init servlet", e);
     }
   }
 
@@ -70,7 +58,7 @@ public class MakeWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      if (VERBOSE) System.out.println("tmpDir " + tmpDir);
+      if (VERBOSE) logger.info("tmpDir {}", tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -114,10 +102,10 @@ public class MakeWarServlet extends HttpServlet {
           }
         }
       }
-      System.out.printf("jar %s  pojo %s\n", jarfile, pojofile);
+      logger.info("jar {}  pojo {}", jarfile, pojofile);
       if (pojofile == null || jarfile == null)
         throw new Exception("need pojo and jar");
-      System.out.printf("prejar %s  preclass %s\n", prejarfile, transformerClassName);
+      logger.info("prejar {}  preclass {}", prejarfile, transformerClassName);
       if (prejarfile != null && transformerClassName == null || prejarfile == null && transformerClassName != null)
         throw new Exception("need both prejar and preclass");
 
@@ -142,21 +130,22 @@ public class MakeWarServlet extends HttpServlet {
       FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "fonts"), tmpDir);
 
       // change the class name in the predictor template file to the predictor we have
-      String replaceTransform = null;
+      String replaceTransform;
       if (transformerClassName == null)
         replaceTransform = "null";
       else
         replaceTransform = "new " + transformerClassName + "()";
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, replaceTransform, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
       InstantiateJavaTemplateFile(tmpDir, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "PredictServlet.java", "PredictServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "Transform.java", "Transform.java");
 
       // compile extra
       List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "Transform.java");
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java");
       runCmd(tmpDir, cmd, "Compilation of extra failed");
 
       // create the war jar file
@@ -177,7 +166,7 @@ public class MakeWarServlet extends HttpServlet {
       byte[] resjar = createJarArchiveByteArray(files, tmpDir.getPath() + File.separator);
       if (resjar == null)
         throw new Exception("Can't create war of compiler output");
-      System.out.println("war created from " + files.length + " files, size " + resjar.length);
+      logger.info("war created from {} files, size {}", files.length, resjar.length);
 
       // send jar back
       ServletOutputStream sout = response.getOutputStream();
@@ -190,14 +179,14 @@ public class MakeWarServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
 
       Long elapsedMs = System.currentTimeMillis() - startTime;
-      System.out.println("Done war creation in " + elapsedMs + " ms");
+      logger.info("Done war creation in {} ms", elapsedMs);
     }
     catch (Exception e) {
-      e.printStackTrace();
+      logger.error("doPost failed ", e);
       // send the error message back
       String message = e.getMessage();
       if (message == null) message = "no message";
-      System.out.println(message);
+      logger.error(message);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       response.getWriter().write(message);
       response.getWriter().write(Arrays.toString(e.getStackTrace()));
@@ -210,7 +199,7 @@ public class MakeWarServlet extends HttpServlet {
           FileUtils.deleteDirectory(tmpDir);
         }
         catch (IOException e) {
-          System.err.println("Can't delete tmp directory");
+          logger.error("Can't delete tmp directory");
         }
       }
     }

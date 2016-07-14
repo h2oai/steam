@@ -129,7 +129,7 @@ func genServerStub(f *parser.Func) string {
 		return azerr
 	}
 	`
-	c += "log.Println(pz, \"called " + f.Name + "\")\n\n"
+	c += "log.Println(pz, \"Called " + f.Name + "\")\n\n"
 
 	if f.Return != nil {
 		c += "it, "
