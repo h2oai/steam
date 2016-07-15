@@ -68,13 +68,13 @@
     input {
       width: $base-grid-unit * 5;
       height: $medium;
-      cursor: pointer;
     }
   }
   input[type="file"] {
     display: none;
   }
   .upload-file {
+    cursor: pointer;
     margin-right: $small;
     height: $medium;
     margin-top: $xsmall;

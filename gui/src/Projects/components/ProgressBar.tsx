@@ -58,10 +58,11 @@ export default class ProgressBar extends React.Component<Props, any> {
       progress: 100
     });
     clearInterval(this.interval);
-    if (this.props.onComplete) {
-      debugger;
-      this.props.onComplete(this);
-    }
+    setTimeout(() => {
+      if (this.props.onComplete) {
+        this.props.onComplete(this);
+      }
+    }, 100);
   }
 
   render(): React.ReactElement<HTMLDivElement> {

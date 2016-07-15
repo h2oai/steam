@@ -3,21 +3,29 @@
  */
 
 import * as React from 'react';
+import { connect } from 'react-redux';
+import { Link } from 'react-router';
+import { bindActionCreators } from 'redux';
 import * as classNames from 'classnames';
 import * as $ from 'jquery';
-import { Link } from 'react-router';
 import PageHeader from '../components/PageHeader';
 import Table from '../components/Table';
 import Row from '../components/Row';
 import Cell from '../components/Cell';
 import ProgressBar from '../components/ProgressBar';
+import { fetchProjects } from '../actions/projects.actions';
 import '../styles/newproject.scss';
 
 interface Props {
-  children?: React.ReactChildren
+  children?: React.ReactChildren,
+  projects: any
 }
 
-export default class NewProject extends React.Component<Props, any> {
+interface DispatchProps {
+  fetchProjects: Function
+}
+
+export class NewProject extends React.Component<Props & DispatchProps, any> {
   refs: {
     [key: string]: (Element);
     uploadFile: HTMLInputElement;
@@ -40,6 +48,7 @@ export default class NewProject extends React.Component<Props, any> {
         uploadFilename: uploadFile[0].files[0].name
       });
     });
+    this.props.fetchProjects();
   }
 
   componentWillUnmount(): void {
@@ -185,3 +194,17 @@ export default class NewProject extends React.Component<Props, any> {
     );
   }
 }
+
+function mapStateToProps(state: Props): Props {
+  return {
+    projects: state.projects
+  }
+}
+
+function mapDispatchToProps(dispatch): DispatchProps {
+  return {
+    fetchProjects: bindActionCreators(fetchProjects, dispatch)
+  };
+}
+
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(NewProject)
