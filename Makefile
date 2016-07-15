@@ -46,7 +46,7 @@ ssb:
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
 
 generate:
-	cd ./srv/web && go generate && go fmt service.go
+	piping
 	cd ./master/data && go generate && go fmt scans.go
 
 lint:
