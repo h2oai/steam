@@ -1,6 +1,6 @@
 # H2O Scoring Service Builder
 
-The H2O Scoring Service Builder is an application that allows you to perform the following through either a web UI or command line:
+The H2O Scoring Service Builder is a stand-alone application that allows you to perform the following through either a web UI or command line:
 
 1. Compile a POJO, and then build a Jar file from a POJO and a gen-model file
 2. Compile the POJO, and then build a War file that is a service from a POJO, gen-model. You can then run the war file in Jetty, Tomcat, etc.

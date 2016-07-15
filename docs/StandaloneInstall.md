@@ -41,7 +41,7 @@ The following are required if you use a Python or R demo.
 
 This section describes how to set up and start Steam and start the Steam CLI for user management. Five terminal windows will be open the first time you run this setup; four terminal windows will be open for subsequent logins.
 
-1. Go to <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a> and download the Steam version for your platform (Linux or Mac). 
+1. Go to <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a> and download the Steam version for your platform (Linux or Mac). Be sure to accept the EULA.
 
 2. Open a terminal window and untar the steamY binary. Note that the command below untars the OS X binary. Replace `darwin` with `linux` in the steps that follow to build on Linux.
 
@@ -220,6 +220,8 @@ Once created, the model will be visible in the Steam UI.
      
  You can view additional statistics about the scoring service by clicking the **More Stats** button.
  
+Refer to the [H2O Scoring Service Builder](ScoringServiceBuilder.md) document for more information.
+
 ## Stopping the Steam Database
 
 When you are finished using Steam, press Ctrl+C in each of the Steam, Compilation Service, and postgres terminal windows to stop the services end your session. 

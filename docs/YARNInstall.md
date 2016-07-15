@@ -18,7 +18,7 @@ Perform the following steps to install Steam.
 
 ***Note***: This installation should only be performed on a YARN edge node.
 
-1. Go to <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a> and download the Steam version for your platform (Linux or Mac). 
+1. Go to <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a> and download the Steam version for your platform (Linux or Mac). Be sure to accept the EULA.
 
 2. Open a terminal window and SSH into your YARN edge node. 
 
@@ -164,6 +164,8 @@ Successfully deployed models can be viewed on the **Services** page. On this pag
 Use the **Clear** button to clear all entries and begin a new prediction.
      
 You can view additional statistics about the scoring service by clicking the **More Stats** button.
+
+Refer to the [H2O Scoring Service Builder](ScoringServiceBuilder.md) document for more information.
 
 ## Using Steam with H2O Flow
 
