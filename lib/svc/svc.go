@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -40,7 +39,7 @@ func Start(warfile, jetty, host string, port int) (int, error) {
 	// 	return 0, err
 	// }
 
-	defer stdErr.Close() // Wait may not necessarily close, so pipe should close
+	defer stdErr.Close()
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
@@ -66,8 +65,12 @@ func Start(warfile, jetty, host string, port int) (int, error) {
 	go func() { // This is the fail condition
 		if err := cmd.Wait(); err != nil {
 			if !success {
-				log.Printf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, host, port, errText)
-				e <- fmt.Errorf("Failed starting scoring service for %s at  %s:%d:\n%v", warfile, host, port, errText)
+				e <- fmt.Errorf("Scoring service launch failed: warfile %s at address %s:%d:\n%v",
+					warfile,
+					host,
+					port,
+					errText,
+				)
 			}
 		}
 	}()

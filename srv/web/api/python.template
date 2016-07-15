@@ -1,0 +1,104 @@
+// ------------------------------
+// --- This is generated code ---
+// ---      DO NOT EDIT       ---
+// ------------------------------
+
+
+import httplib
+import base64
+import string
+import json
+import sys
+import logging
+from collections import namedtuple
+
+class RPCError(Exception):
+	def __init__(self, value):
+		self.value = value
+	def __str__(self):
+		return repr(self.value)
+
+class HTTPConnection:
+	def __init__(self, host, port, username, password):
+		self.host = host
+		self.port = port
+		self.username = username
+		self.password = password
+		self.uid = 0
+
+	def call(self, method, params):
+		self.uid = self.uid + 1
+		request = {
+			'id': self.uid,
+			'method': 'web.' + method,
+			'params': [params]
+		}
+		payload = json.dumps(request)
+
+		ws = httplib.HTTP(self.host, self.port)
+		ws.putrequest("POST", '/web')
+
+		ws.putheader("Host", self.host)
+		ws.putheader("User-Agent", "Steam Python Client")
+		ws.putheader("Content-type", "application/json; charset=\"UTF-8\"")
+		ws.putheader("Content-length", "%d" % len(payload))
+		auth = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
+		ws.putheader("Authorization", "Basic %s" % auth)
+		ws.endheaders()
+
+		ws.send(payload)
+
+		logging.info('%s@%s:%d %s(%s)', self.username, self.host, self.port, method, json.dumps(params))
+
+		code, status, header = ws.getreply()
+		reply = ws.getfile().read()
+
+		# print 'code:', code
+		# print 'status:', status
+		# print 'reply:', reply
+
+		if code != 200:
+			logging.exception('%s %s %s', code, status, reply)
+			raise RPCError(reply)
+
+		response = json.loads(reply)
+		error = response['error']
+
+		if error is None:
+			result = response['result']
+			logging.info('%s %s %s', code, status, json.dumps(result))
+			return result
+		else:
+			logging.exception('%s %s %s', code, status, error)
+			raise RPCError(error)
+
+class View(object):
+	def __init__(self, d):
+		self.__dict__ = d
+	def __str__(self):
+		return json.dumps(self.__dict__)
+
+class RPCClient:
+	def __init__(self, connection):
+		self.connection = connection
+	
+	{{with .Facade}}
+	{{range .Methods}}
+	def {{snake .Name}}(self{{range .Inputs}}, {{snake .Name}}{{end}}):
+		"""
+		Parameters:
+		{{range .Inputs}}{{snake .Name}}: {{.Type}}
+		{{end}}
+		Returns:
+		{{range .Outputs}}{{snake .Name}}: {{.Type}}
+    {{else}}None{{end}}
+		"""
+		request = {
+			{{range .Inputs}}'{{snake .Name}}': {{snake .Name}}
+			{{end}}
+		}
+		response = self.connection.call("{{.Name}}", request)
+		return {{range $i, $e := .Outputs}}{{if $i}}, {{end}}response['{{snake .Name}}']{{end}}
+	{{end}}
+	{{end}}
+

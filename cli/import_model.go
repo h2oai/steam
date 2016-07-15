@@ -17,6 +17,9 @@ Examples:
 `
 
 func importModel(c *context) *cobra.Command {
+	var (
+		projectId int64
+	)
 	cmd := newCmd(c, importModelHelp, func(c *context, args []string) {
 		if len(args) != 2 {
 			log.Fatalln("Incorrect number of arguments. See 'steam help import model'.")
@@ -28,12 +31,13 @@ func importModel(c *context) *cobra.Command {
 		}
 		modelName := args[1]
 
-		if _, err := c.remote.ImportModelFromCluster(clusterId, modelName); err != nil {
+		if _, err := c.remote.ImportModelFromCluster(clusterId, projectId, modelName); err != nil {
 			log.Fatalln(err)
 		}
 
 		fmt.Println("Retireved model:", modelName)
 	})
+	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "ID of project to import this model into")
 
 	return cmd
 }

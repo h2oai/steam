@@ -62,6 +62,9 @@ func (c *context) configure(verbose, requiresAuth bool) {
 		log.Fatalln("You are not authenticated to a Steam server. See 'steam help login' for more details.")
 	}
 	httpScheme := "http"
+	if host.EnableTLS {
+		httpScheme = "https"
+	}
 	c.remote = &web.Remote{rpc.NewProc(httpScheme, "/web", "web", addr, host.Username, host.Password)}
 	c.uploadURL = (&url.URL{Scheme: httpScheme, Host: addr, Path: "/upload"}).String()
 

@@ -10,7 +10,7 @@ import (
 
 var getIdentitiesHelp = `
 identities
-List all identies.
+List all identities.
 Examples:
 
 	$ steam get identities --workgroup=production
@@ -47,7 +47,7 @@ func getIdentities(c *context) *cobra.Command {
 				log.Fatalln(err)
 			}
 
-			ids, err = c.remote.GetIdentititesForRole(rl.Id)
+			ids, err = c.remote.GetIdentitiesForRole(rl.Id)
 			if err != nil {
 				log.Fatalln(err)
 			}

@@ -10,7 +10,7 @@ import (
 var createIdentityHelp = `
 identity [username] [password]
 Creates a user.
-Exampes:
+Examples:
 
 	$ steam create minsky m1n5kypassword
 `

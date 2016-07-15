@@ -6,19 +6,19 @@ import (
 	"time"
 )
 
-func connect(t *testing.T) (*Datastore, az.Principal) {
-	db, err := Connect("steam", "steam", "disable")
+func setup(t *testing.T) (*Datastore, az.Principal) {
+	db, err := connect("steam", "steam", "disable")
 	if err != nil {
 		t.Error(err)
 	}
 	if err := truncate(db); err != nil {
 		t.Error(err)
 	}
-	if err := Prime(db); err != nil {
+	if err := prime(db); err != nil {
 		t.Error(err)
 	}
 
-	ds, err := NewDatastore(db)
+	ds, err := newDatastore(db)
 	if err != nil {
 		t.Error(err)
 	}
@@ -30,13 +30,13 @@ func connect(t *testing.T) (*Datastore, az.Principal) {
 		t.Fatal(err)
 	}
 
-	p, err := ds.NewPrincipal(suName)
+	p, err := ds.Lookup(suName)
 
 	return ds, p
 }
 
 func TestInvalidIdentity(t *testing.T) {
-	ds, _ := connect(t)
+	ds, _ := setup(t)
 
 	userpwd, err := ds.readIdentityAndPassword("user1")
 	if err != nil {
@@ -48,7 +48,7 @@ func TestInvalidIdentity(t *testing.T) {
 }
 
 func TestPrivilegesForIdentity(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	t.Log("superuser=", p.IsSuperuser())
 
@@ -111,7 +111,7 @@ func TestPrivilegesForIdentity(t *testing.T) {
 }
 
 func TestPrivilegesForWorkgroup(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	// Create user
 	uid, _, err := ds.CreateIdentity(p, "user", "password1")
@@ -183,7 +183,7 @@ func TestPrivilegesForWorkgroup(t *testing.T) {
 }
 
 func TestPrivilegeCollationForIdentity(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	// Create user
 	uid, uwgid, err := ds.CreateIdentity(p, "user", "password1")
@@ -285,7 +285,7 @@ func TestPrivilegeCollationForIdentity(t *testing.T) {
 }
 
 func TestSecurity(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	// read permissions
 	permissions, err := ds.ReadAllPermissions(p)
@@ -642,7 +642,7 @@ func TestSecurity(t *testing.T) {
 }
 
 func TestEngines(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	id1, err := ds.CreateEngine(p, "engine1", "location1")
 	if err != nil {
@@ -711,7 +711,7 @@ func TestEngines(t *testing.T) {
 }
 
 func TestExternalClusters(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	id1, err := ds.CreateExternalCluster(p, "cluster1", "address1", "started")
 	if err != nil {
@@ -780,7 +780,7 @@ func TestExternalClusters(t *testing.T) {
 }
 
 func TestYarnClusters(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	eid, err := ds.CreateEngine(p, "engine", "location")
 	if err != nil {
@@ -888,7 +888,7 @@ func TestYarnClusters(t *testing.T) {
 }
 
 func TestProjects(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	id1, err := ds.CreateProject(p, "project1", "description1")
 	if err != nil {
@@ -957,7 +957,7 @@ func TestProjects(t *testing.T) {
 }
 
 func TestModels(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	id1, err := ds.CreateModel(p, Model{
 		0,
@@ -1048,7 +1048,7 @@ func TestModels(t *testing.T) {
 }
 
 func TestProjectModels(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	pid, err := ds.CreateProject(p, "project1", "description1")
 	if err != nil {
@@ -1136,7 +1136,7 @@ func TestProjectModels(t *testing.T) {
 }
 
 func TestServices(t *testing.T) {
-	ds, p := connect(t)
+	ds, p := setup(t)
 
 	mid1, err := ds.CreateModel(p, Model{
 		0,

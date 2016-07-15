@@ -29,6 +29,3 @@ func (p *DigestAuthProvider) Logout() http.Handler {
 func newDigestAuthProvider(az az.Az, realm string) AuthProvider {
 	return &DigestAuthProvider{az, realm}
 }
-
-func serveNoop(w http.ResponseWriter, r *http.Request) {}
-func authNoop(user, realm string) string               { return "" }
