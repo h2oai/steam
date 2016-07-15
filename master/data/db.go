@@ -3018,6 +3018,30 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 	return ScanModel(row)
 }
 
+func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, location, logicalName string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				model
+			SET
+				location = $1
+				logical_name = $2
+			WHERE
+				id = $3
+			`, location, logicalName, modelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{
+			"location":     location,
+			"logical_name": logicalName,
+		})
+	})
+}
+
 func (ds *Datastore) DeleteModel(pz az.Principal, modelId int64) error {
 	if err := pz.CheckOwns(ds.EntityTypes.Model, modelId); err != nil {
 		return err

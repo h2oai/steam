@@ -621,10 +621,11 @@ func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
 
 // --- Model ---
 
-func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string) (string, string, error) {
+func (s *Service) exportModel(h2o *h2ov3.H2O, modelId int64) (string, string, error) {
 
-	// FIXME: allow overwriting of existing java-model/genmodel/metrics, if any.
-	// FIXME: purge war file if overwriting, so that a fresh war file can be built the next time around.
+	// Use modelId because it'll provide a unique directory name every time with
+	// a persistend db; no need to purge/overwrite any files on disk
+	modelName := strconv.FormatInt(modelId, 10)
 
 	var location, logicalName string
 	location = fs.GetModelPath(s.workingDir, modelName)
@@ -667,11 +668,6 @@ func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targ
 		return nil, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelName)
-	if err != nil {
-		return nil, err
-	}
-
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
 		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
@@ -681,14 +677,23 @@ func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targ
 		"AutoML",
 		dataset,
 		targetName,
-		logicalName,
-		location,
+		"",
+		"",
 		int64(maxRunTime),
 		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	location, logicalName, err := s.exportModel(h2o, modelId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
 		return nil, err
 	}
 
@@ -790,11 +795,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return nil, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelName)
-	if err != nil {
-		return nil, err
-	}
-
 	m := r.Models[0]
 
 	// TODO: json, modelMetrics, err
@@ -837,14 +837,23 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		m.AlgoFullName,
 		dataFrameName(m),
 		m.ResponseColumnName,
-		logicalName,
-		location,
+		"",
+		"",
 		0,
 		string(rawMetrics),
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	location, logicalName, err := s.exportModel(h2o, modelId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
 		return nil, err
 	}
 
@@ -866,7 +875,7 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 
 	// FIXME delete assets from disk
 
-	_, err := s.ds.ReadModel(pz, modelId)
+	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return err
 	}
