@@ -1,6 +1,6 @@
 # Installing, Starting, and H2O Using Steam on a YARN Cluster
 
-This document is provided for external users and describes how to install, start, and use Steam on a YARN cluster. For instructions on using Steam on your local machine, refer to the [standard\_demo\_standalone](../demo/standard_demo_standalone.md) document.
+This document is provided for external users and describes how to install, start, and use Steam on a YARN cluster. For instructions on using Steam on your local machine, refer to the [README.md](../demo/README.md) document in the demo folder.
 
 
 ## Requirements
@@ -8,6 +8,8 @@ This document is provided for external users and describes how to install, start
 - Web browser with an Internet connection
 - Steam tar for OS X or Linux
 - JDK 1.7 or greater
+- PostgreSQL 9.1 or greater
+	- available from <a href="https://www.postgresql.org/" target="_blank">PostgreSQL.org</a>
 - H2O AutoML package (for example, **automl-hdp2.2.jar**)
 
 ## Installation
@@ -41,8 +43,27 @@ Perform the following steps to install Steam.
 	
 		tar -xvf steamY-master-darwin-amd64.tar.gz
 
-## Starting Steam
-Now that Steam is installed, perform the following steps to start and use Steam. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
+## Start the PostgreSQL Database
+
+The command starts PostgreSQL. This should be started from the folder where PostgreSQL was installed.
+
+		postgres -D /usr/local/var/postgres
+
+## Create a User
+
+This step create a new user for the Steam database and then create the database. The commands below only need to be performed once. The example below creates a steam **superuser** with a password ``superuser`` before creating the Steam database. Be sure to provide a secure password, and be sure to remember the password that you enter. This will be required each time you log in to Steam. 
+
+		createuser -P steam 
+		Enter password for new role: superuser
+		Enter it again: superuser
+		# Change directories to the Steam /var/master/scripts folder.
+		cd steam-master-darwin-amd64/var/master/scripts
+		./create-database.sh
+
+
+## Starting Steam and the Steam Scoring Service
+
+Perform the following steps to start Steam and teh Steam Scoring Service. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
 
 1. Change directories to your Steam directory, then set up the Jetty server using one of the following methods:
 
@@ -62,9 +83,9 @@ Now that Steam is installed, perform the following steps to start and use Steam.
 
 		ssh <user>@<yarn_edge_node>
 
-3. Change directories to the Steam directory (either **steam-master-linux-amd64** or **steam-master-darwin-amd64**), then start the Steam master node. For example, the following commands will start Steam on localhost. Note that the port value must match the port running the Jetty server, which defaults to 8080. 
+3. Change directories to the Steam directory (either **steam-master-linux-amd64** or **steam-master-darwin-amd64**), then start the Steam master node. For example, the following commands will start Steam on 192.168.2.182. Note that the port value must match the port running the Jetty server, which defaults to 8080. 
 
-		./steam serve master --compilation-service-address="localhost:8080"
+		./steam serve master --compilation-service-address="192.168.2.182:8080"
 		
 	**Note**: You can view all available options for starting Steam using `./steam help serve master`
 
@@ -91,15 +112,15 @@ An empty Steam UI will display. Before performing any tasks, you must first add 
 
 2. Browse to the **automl-hdp2.2.jar** file on your local machine, then click **Upload**. 
 
-### Starting a Cloud
+### Starting a Cluster
 
-Clouds can be configured after the engine asset was successfully added. 
+Cluster can be configured after the engine asset was successfully added. 
 
-1.  Click the **Clouds** icon (<img src="images/icon_clouds.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel, then select **Start a Cloud**. 
+1.  Click the **Clusters** icon (<img src="images/icon_clouds.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel, then select **Start a Cluster**. 
 
 2. Enter/specify the following information to set up your cloud:
 
-	a. A name for the cloud
+	a. A name for the cluster.
 
 	b. The version of H2O that will run on the cloud.
 
@@ -107,38 +128,23 @@ Clouds can be configured after the engine asset was successfully added.
 	
 	d. The amount of memory available on each node. Be sure to include the unit ("m" or "g").
 	
-	![Adding a cloud](images/add_cloud.png)
+	![Adding a cluster](images/add_cloud.png)
 	
-3. Click **Start Cloud** when you are finished.
+3. Click **Start Cluster** when you are finished.
 
-The Cloud Details page opens upon successful completion. This page shows the cloud configuration information and includes a link to the H2O Flow URL. From this page, you can begin building your model. 
+The Cluster Details page opens upon successful completion. This page shows the cluster configuration information and includes a link to the H2O Flow URL. From this page, you can begin building your model. 
 
-  ![Cloud details](images/cloud_details.png)
+  ![Cluster details](images/cloud_details.png)
 
-***Note***: You can view a stream of the cloud creation log in the terminal window that is running Steam. In the UI, Steam will respond with an error if the cloud configuration is incorrect (for example, if you specify more nodes than available on the cluster). 
+***Note***: You can view a stream of the cluster creation log in the terminal window that is running Steam. In the UI, Steam will respond with an error if the cloud configuration is incorrect (for example, if you specify more nodes than available on the cluster). 
 
 ### Adding a Model
-Models are created from the Cloud Details page. When building a model, you will need to provide the location of the dataset that you will use as well as the response column. 
 
-1. Click the **Build a Model** button on the bottom of the Cloud Details page.
-
-2. Enter a path for the dataset that you want to use to build the model. 
-
-	***Note***: If you choose to use a local dataset, then that dataset must reside in the same folder/path on each node in the cluster.
-
-3. Specify the column that will be used as the response column in the model. 
-
-4. Specify the maximum run time in seconds. H2O will return an error if the model build stalls after this threshold is reached.
-
-5. Click **Start Building** when you are finished. 
-
-	![Building a model](images/build_model.png)
+Models can be created using Flow, R, or Python when H2O is initialized using this cluster. Once created, the model will automatically be visible in Steam. 
 
 ### Viewing Models	
 
 Click the **Models** icon (<img src="images/icon_models.png" alt="Thumbnail" style="width: 25px;" />) on the left navigation panel to view models that were successfully created. 
-
-These models are processed using H2O's AutoML algorithm, which determines the best method to use to build the model. The model name includes this method. So, for example, if Steam returns a model named "DRF_model...", then this indicates that DRF was the algorithm that provided the best result.
 
 ### Deploying Models
 

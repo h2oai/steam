@@ -15,7 +15,7 @@ import java.util.jar.Manifest;
  *
  * Created by magnus on 5/10/16.
  */
-class Util {
+public class Util {
   private static final Logger logger = LoggerFactory.getLogger("Util");
 
   public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
@@ -123,7 +123,7 @@ class Util {
    * @return stdout combined with stderr
    * @throws Exception
    */
-  static String runCmd(File directory, List<String> cmd, String errorMessage) throws Exception {
+ public static String runCmd(File directory, List<String> cmd, String errorMessage) throws Exception {
     ProcessBuilder pb = new ProcessBuilder(cmd);
     pb.directory(directory);
     pb.redirectErrorStream(true); // error sent to output stream
