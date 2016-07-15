@@ -1,50 +1,51 @@
 # <a name="CLI Command Reference"></a>CLI Command Reference Appendix
 
-- [`create identity`](#create identity)
-- [`create role`](#create role)
-- [`create workgroup`](#create workgroup)
-- [`deactivate identity`](#deactivate identity)
-- [`delete cluster`](#delete cluster)
-- [`delete engine`](#delete engine)
-- [`delete model`](#delete model)
-- [`delete role`](#delete role)
-- [`delete service`](#delete service)
-- [`delete workgroup`](#delete workgroup)
-- [`deploy engine`](#deploy engine)
-- [`get cluster`](#get cluster)
-- [`get clusters`](#get clusters)
-- [`get engine`](#get engine)
-- [`get engines`](#get engines)
-- [`get entities`](#get entities)
-- [`get history`](#get history)
-- [`get identities`](#get identities)
-- [`get identity`](#get identity)
-- [`get model`](#get model)
-- [`get models`](#get models)
-- [`get permissions`](#get permissions)
-- [`get role`](#get role)
-- [`get roles`](#get roles)
-- [`get service`](#get service)
-- [`get services`](#get services)
-- [`get workgroup`](#get workgroup)
-- [`get workgroups`](#get workgroups)
-- [`import model`](#import model)
-- [`link identity`](#link identity)
-- [`link role`](#link role)
+- [`create identity`](#createidentity)
+- [`create role`](#createrole)
+- [`create workgroup`](#createworkgroup)
+- [`deactivate identity`](#deactivateidentity)
+- [`delete cluster`](#deletecluster)
+- [`delete engine`](#deleteengine)
+- [`delete model`](#deletemodel)
+- [`delete role`](#deleterole)
+- [`delete service`](#deleteservice)
+- [`delete workgroup`](#deleteworkgroup)
+- [`deploy engine`](#deployengine)
+- [`get cluster`](#getcluster)
+- [`get clusters`](#getclusters)
+- [`get engine`](#getengine)
+- [`get engines`](#getengines)
+- [`get entities`](#getentities)
+- [`get history`](#gethistory)
+- [`get identities`](#getidentities)
+- [`get identity`](#getidentity)
+- [`get model`](#getmodel)
+- [`get models`](#getmodels)
+- [`get permissions`](#getpermissions)
+- [`get role`](#getrole)
+- [`get roles`](#getroles)
+- [`get service`](#getservice)
+- [`get services`](#getservices)
+- [`get workgroup`](#getworkgroup)
+- [`get workgroups`](#getworkgroups)
+- [`import model`](#importmodel)
+- [`link identity`](#linkidentity)
+- [`link role`](#linkrole)
 - [`login`](#login)
-- [`register cluster`](#register cluster)
+- [`register cluster`](#registercluster)
 - [`reset`](#reset)
-- [`start cluster`](#start cluster)
-- [`stop cluster`](#stop cluster)
-- [`stop service`](#stop service)
-- [`unlink identity`](#unlink identity)
-- [`unregister cluster`](#unregister cluster)
-- [`update role`](#update role)
-- [`update workgroup`](#update workgroup)
+- [`start cluster`](#startcluster)
+- [`stop cluster`](#stopcluster)
+- [`stop service`](#stopservice)
+- [`unlink identity`](#unlinkidentity)
+- [`unregister cluster`](#unregistercluster)
+- [`update role`](#updaterole)
+- [`update workgroup`](#updateworkgroup)
 
 ------
 
-### <a name="create identity"></a>`create identity`
+<a name="createidentity"></a>
+### `create identity`
 
 **Description**
 
@@ -69,7 +70,7 @@ The following example creates a new user with a username of "minky" and a passwo
 	
 ------
 
-### <a name="create role"></a>`create role`
+### <a name="createrole"></a>`create role`
 
 **Description**
 
@@ -94,7 +95,7 @@ The following example creates an engineer role.
 		
 ------
 
-### <a name="create workgroup"></a>`create workgroup`
+### <a name="createworkgroup"></a>`create workgroup`
 
 **Description**
 
@@ -117,7 +118,7 @@ The following example creates a data preparation workgroup.
 		
 ------
 
-### <a name="deactivate identity"></a>`deactivate identity`
+### <a name="deactivateidentity"></a>`deactivate identity`
 
 **Description**
 
@@ -139,7 +140,7 @@ The following example deactivates user "minsky".
 
 -----
 
-### <a name="delete cluster"></a>`delete cluster`
+### <a name="deletecluster"></a>`delete cluster`
 
 **Description**
 
@@ -166,7 +167,7 @@ The following example deletes cluster 2.
 
 ------
 
-### <a name="delete engine"></a>`delete engine`
+### <a name="deleteengine"></a>`delete engine`
 
 **Description**
 
@@ -193,7 +194,7 @@ The following example retrieves a list of engines currently added to the databas
 
 ------
 
-### <a name="delete model"></a>`delete model`
+### <a name="deletemodel"></a>`delete model`
 
 **Description**
 
@@ -215,7 +216,7 @@ The following example deletes model 3 from the database. Note that you can use [
 
 -----
 
-### <a name="delete role"></a>`delete role`
+### <a name="deleterole"></a>`delete role`
 
 **Description**
 
@@ -237,7 +238,7 @@ The following example deletes role 3 from the database. Note that you can use [`
 
 -----
 
-### <a name="delete service"></a>`delete service`
+### <a name="deleteservice"></a>`delete service`
 
 **Description**
 
@@ -261,7 +262,7 @@ The following example stops and then deletes service 2. This service will no lon
 
 -----
 
-### <a name="delete workgroup"></a>`delete workgroup`
+### <a name="deleteworkgroup"></a>`delete workgroup`
 
 **Description**
 
@@ -283,7 +284,7 @@ The following example deletes workgroup 3 from the database. Note that you can u
 
 -----
 
-### <a name="deploy engine"></a>`deploy engine` 
+### <a name="deployengine"></a>`deploy engine` 
 
 **Description**
 
@@ -305,7 +306,7 @@ The following specifies to deploy the H2O AutoML engine.
 
 -----
 
-### <a name="get cluster"></a>`get cluster`
+### <a name="getcluster"></a>`get cluster`
 
 **Description** 
 
@@ -335,7 +336,7 @@ The following example retrieves information for cluster ID 1.
 
 -----
 
-### <a name="get clusters"></a>`get clusters`
+### <a name="getclusters"></a>`get clusters`
 
 **Description** 
 
@@ -359,7 +360,7 @@ The following example retrieves a list of clusters that are running H2O and are 
 
 -----
 
-### <a name="get engine"></a>`get engine`
+### <a name="getengine"></a>`get engine`
 
 **Description** 
 
@@ -384,7 +385,7 @@ The following example retrieves information about engine 1.
 
 -----
 
-### <a name="get engines"></a>`get engines`
+### <a name="getengines"></a>`get engines`
 
 **Description** 
 
@@ -409,7 +410,7 @@ The following example retrieves a list of engines that have been deployed. (Refe
 
 -----
 
-### <a name="get entities"></a>`get entities`
+### <a name="getentities"></a>`get entities`
 
 **Description** 
 
@@ -440,7 +441,7 @@ The following example retrieves a list of the supported Steam entity types.
 
 -----
 
-### <a name="get history"></a>`get history`
+### <a name="gethistory"></a>`get history`
 
 **Description** 
 
@@ -467,7 +468,7 @@ The following example retrieves information for user "bob".
 
 -----
 
-### <a name="get identities"></a>`get identities`
+### <a name="getidentities"></a>`get identities`
 
 **Description** 
 
@@ -493,7 +494,7 @@ The following example retrieves a list of users that are available on the databa
 
 -----
 
-### <a name="get identity"></a>`get identity`
+### <a name="getidentity"></a>`get identity`
 
 **Description** 
 
@@ -531,7 +532,7 @@ The following example retrieves information about user Jim.
 
 -----
 
-### <a name="get model"></a>`get model`
+### <a name="getmodel"></a>`get model`
 
 **Description** 
 
@@ -553,7 +554,7 @@ The following example retrieves information for model 2.
 	
 -----
 
-### <a name="get models"></a>`get models`
+### <a name="getmodels"></a>`get models`
 
 **Description** 
 
@@ -575,7 +576,7 @@ The following example retrieves a list of models that are available on the datab
 	
 -----
 
-### <a name="get permissions"></a>`get permissions`
+### <a name="getpermissions"></a>`get permissions`
 
 **Description** 
 
@@ -614,7 +615,7 @@ The following example retrieves a list of Steam permissions.
 
 -----
 
-### <a name="get role"></a>`get role`
+### <a name="getrole"></a>`get role`
 
 **Description** 
 
@@ -649,7 +650,7 @@ The following example retrieves information about the datascience role.
 
 -----
 
-### <a name="get roles"></a>`get roles`
+### <a name="getroles"></a>`get roles`
 
 **Description** 
 
@@ -675,7 +676,7 @@ The following example retrieves a list of roles that are available on the databa
 
 -----
 
-### <a name="get service"></a>`get service`
+### <a name="getservice"></a>`get service`
 
 **Description** 
 
@@ -697,7 +698,7 @@ The following example retrieve information about service 2.
 
 -----
 
-### <a name="get services"></a>`get services`
+### <a name="getservices"></a>`get services`
 
 **Description** 
 
@@ -719,7 +720,7 @@ The following example retrieves a list of services that are available on the dat
 
 -----
 
-### <a name="get workgroup"></a>`get workgroup`
+### <a name="getworkgroup"></a>`get workgroup`
 
 **Description** 
 
@@ -749,7 +750,7 @@ The following example retrieves information about the production workgroup
 	
 -----
 
-### <a name="get workgroups"></a>`get workgroups`
+### <a name="getworkgroups"></a>`get workgroups`
 
 **Description** 
 
@@ -774,7 +775,7 @@ The following example retrieves a list of workgroups that are available on the d
 
 -----
 
-### <a name="import model"></a>`import model`
+### <a name="importmodel"></a>`import model`
 
 **Description** 
 
@@ -797,7 +798,7 @@ The following example specifies to import the GBM_model_python_1468599779202_1 m
 
 -----
 
-### <a name="link identity"></a>`link identity`
+### <a name="linkidentity"></a>`link identity`
 
 **Description** 
 
@@ -822,7 +823,7 @@ The following example links user Jim to datascience role and then to the product
 
 -----
 
-### <a name="link role"></a>`link role`
+### <a name="linkrole"></a>`link role`
 
 **Description** 
 
@@ -870,7 +871,7 @@ The following example logs user Bob into a Steam instance running on localhost:9
 
 -----
 
-### <a name="register cluster"></a>`register cluster`
+### <a name="registercluster"></a>`register cluster`
 
 **Description**
 
@@ -895,7 +896,7 @@ The following example registers Steam on localhost:54323. Note that this will on
 
 -----
 
-### <a name="reset></a>`reset`
+### <a name="reset"></a>`reset`
 
 **Description**
 
@@ -918,7 +919,7 @@ The following example resets the current Steam instance.
 
 -----
 
-### <a name="start cluster"></a>`start cluster`
+### <a name="startcluster"></a>`start cluster`
 
 **Description**
 
@@ -947,7 +948,7 @@ The following example retrieves a list of engines, then starts a cluster through
 	
 -----
 
-### <a name="stop cluster"></a>`stop cluster`
+### <a name="stopcluster"></a>`stop cluster`
 
 **Description**
 
@@ -969,7 +970,7 @@ The following example stops a cluster that has an ID of 9.
 
 -----
 
-### <a name="stop service"></a>`stop service`
+### <a name="stopservice"></a>`stop service`
 
 **Description**
 
@@ -991,7 +992,7 @@ The following example stops a service that has an ID of 2.
 
 -----
 
-### <a name="unlink identity"></a>`unlink identity`
+### <a name="unlinkidentity"></a>`unlink identity`
 
 **Description** 
 
@@ -1016,7 +1017,7 @@ The following example removes user Jim from the datascience role and then from t
 
 -----
 
-### <a name="unregister cluster"></a>`unregister cluster`
+### <a name="unregistercluster"></a>`unregister cluster`
 
 **Description**
 
@@ -1039,7 +1040,7 @@ The following example stops a cluster that has an ID of 9.
 
 -----
 
-### <a name="updated role"></a>`update role`
+### <a name="updatedrole"></a>`update role`
 
 **Description**
 
@@ -1064,7 +1065,7 @@ The following example changes the name of the engineer role to be "science engin
 		
 ------
 
-### <a name="create workgroup"></a>`create workgroup`
+### <a name="createworkgroup"></a>`create workgroup`
 
 **Description**
 

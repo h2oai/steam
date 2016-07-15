@@ -51,17 +51,15 @@ The following are required if you use a Python or R demo.
 
 This section describes how to set up and start Steam and start the Steam CLI for user management. Five terminal windows will be open the first time you run this setup; four terminal windows will be open for subsequent logins.
 
-1. Open a terminal window and start PostgreSQL. This should be started from the folder where PostgreSQL was installed.
+1. Go to <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a> and download the Steam version for your platform (Linux or Mac). 
 
-		postgres -D /usr/local/var/postgres
-
-2. Open a second terminal window and download the steamY binary. Note that the command below downloads the OS X binary. Replace `darwin` with `linux` in the steps that follow to build on Linux.
-
-	`user$ s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz`
-
-3. Untar the steamY binary.
+2. Open a terminal window and untar the steamY binary. Note that the command below untars the OS X binary. Replace `darwin` with `linux` in the steps that follow to build on Linux.
 
 	`user$ tar xvf steamY-master-darwin-amd64.tar.gz`
+
+3. Open a second terminal window and start PostgreSQL. This should be started from the folder where PostgreSQL was installed.
+
+		postgres -D /usr/local/var/postgres
 
 4. Open a third terminal window to create a new user for the Steam database and then create the database. The commands below only need to be performed once. The example below creates a steam **superuser** with a password ``superuser`` before creating the Steam database. Be sure to provide a secure password, and be sure to remember the password that you enter. This will be required each time you log in to Steam. 
 

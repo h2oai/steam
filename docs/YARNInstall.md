@@ -17,21 +17,11 @@ Perform the following steps to install Steam.
 
 ***Note***: This installation should only be performed on a YARN edge node.
 
-1. Open a terminal window and SSH into your YARN edge node. 
+1. Go to <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a> and download the Steam version for your platform (Linux or Mac). 
+
+2. Open a terminal window and SSH into your YARN edge node. 
 
 		ssh <user>@<yarn_edge_node>
-
-2. Retrieve the Steam release for your OS.
-
-	**Linux**
-	
-		s3cmd get s3://steam-release/steamY-master-linux-amd64.tar.gz 
-		
-	**OS X**
-
-		s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz		
-
-	***Note***: This saves the Steam package (tar file) into your current folder.
 
 3. Untar the Steam package. 
 
