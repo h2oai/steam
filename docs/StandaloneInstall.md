@@ -73,16 +73,15 @@ This section describes how to set up and start Steam and start the Steam CLI for
 
 	>***Note***: This starts the Steam web service on `localhost:9000`, the compilation service on `localhost:8080` (same as the Jetty server), and the scoring service on `localhost`. You can change these using `--compilation-service-address=<ip_address:port>` and `--scoring-service-address=<ip_address>`. Use `./steam help serve master` or `./steam serve master -h` to view additional options.
 
-7. <a name="step7"></a>Open a fifth terminal window. From within the Steam folder, log in to the maching running Steam (localhost:9000). Use the password that you provided in Step 2.
+7. <a name="step7"></a>Open a fifth terminal window. From within the Steam folder, log in to the machine running Steam (localhost:9000). Use the password that you provided in Step 2.
 
 		./steam login localhost:9000 --username=superuser --password=superuser
-
 
 8. Run the following to verify that the CLI is working correctly.
 
 		./steam help
 		
-At this point, you can open a browser and navigate to localhost:9000. Login credentials will automatically be supplied. 
+At this point, you can open a browser and navigate to localhost:9000. Note that you may be prompted to once more provide the login credentials supplied in Step 7. 
 
 The next section describes how to add additional users to the Steam database. 
 
@@ -114,11 +113,6 @@ The following example creates sample roles, workgroups, and users using the CLI.
 		# Link Bob to preparation workgroup; link Jim to production workgroup
 		./steam link identity bob workgroup preparation
 		./steam link identity jim workgroup production
-
-
-### Stopping the Steam Database
-
-Use Ctrl+C in each of the Steam, Compilation Service, and postgres terminal windows to stop the services end your session. 
 
 
 ## Using H2O with Steam
@@ -226,6 +220,10 @@ Once created, the model will be visible in the Steam UI.
      
  You can view additional statistics about the scoring service by clicking the **More Stats** button.
  
+## Stopping the Steam Database
+
+When you are finished using Steam, press Ctrl+C in each of the Steam, Compilation Service, and postgres terminal windows to stop the services end your session. 
+
 ## What's Next?
  
 Now that you have completed your first demo, you are ready to begin creating models using your own data. Additional users can then be give access to this data based on the user's role and workgroup.  
