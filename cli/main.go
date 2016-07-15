@@ -8,8 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/h2oai/steamY/lib/svc"
-	"github.com/h2oai/steamY/master"
 	"github.com/spf13/cobra"
 )
 
@@ -101,6 +99,8 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		serve(c),
 		start(c),
 		stop(c),
+		register(c),
+		unregister(c),
 		deploy(c),
 		get(c),
 		delete_(c),
@@ -148,120 +148,4 @@ func parseHelp(text string) (*Doc, error) {
 		d[1],
 		d[1] + "\n\n" + d[2],
 	}, nil
-}
-
-//
-// Commands
-//
-
-var serveHelp = `
-serve [agent-type]
-Lauch a new service.
-Examples:
-
-    $ steam serve master
-`
-
-func serve(c *context) *cobra.Command {
-	cmd := newCmd(c, serveHelp, nil)
-	cmd.AddCommand(serveMaster(c))
-	return cmd
-}
-
-var serveMasterHelp = `
-master
-Launch the Steam master.
-Examples:
-
-    $ steam serve master
-`
-
-func serveMaster(c *context) *cobra.Command {
-	var (
-		webAddress                string
-		workingDirectory          string
-		clusterProxyAddress       string
-		compilationServiceAddress string
-		scoringServiceHost        string
-		enableProfiler            bool
-		yarnEnableKerberos        bool
-		yarnUserName              string
-		yarnKeytab                string
-		dbName                    string
-		dbUserName                string
-		dbSSLMode                 string
-		superuserName             string
-		superuserPassword         string
-	)
-
-	opts := master.DefaultOpts
-
-	cmd := newCmd(c, serveMasterHelp, func(c *context, args []string) {
-		master.Run(c.version, c.buildDate, &master.Opts{
-			webAddress,
-			workingDirectory,
-			clusterProxyAddress,
-			compilationServiceAddress,
-			scoringServiceHost,
-			enableProfiler,
-			yarnEnableKerberos,
-			yarnUserName,
-			yarnKeytab,
-			dbName,
-			dbUserName,
-			dbSSLMode,
-			superuserName,
-			superuserPassword,
-		})
-	})
-
-	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
-	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
-	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
-	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
-	cmd.Flags().StringVar(&scoringServiceHost, "scoring-service-address", opts.ScoringServiceHost, "Address to start scoring services on (\"<ip>\")")
-	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
-	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.YarnKerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
-	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.YarnUserName, "Username to enable Kerberos")
-	cmd.Flags().StringVar(&yarnKeytab, "yarn-keytab", opts.YarnKeytab, "Keytab file to be used with Kerberos authentication")
-	cmd.Flags().StringVar(&dbName, "db-name", opts.DBName, "Database name to use for application data storage")
-	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DBUserName, "Database username to connect as")
-	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DBSSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
-	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.SuperuserName, "Set superuser username (required for first-time-use only)")
-	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.SuperuserPassword, "Set superuser password (required for first-time-use only)")
-
-	return cmd
-
-}
-
-// FIXME - get rid of this: should never be started directly from CLI
-
-var startServiceHelp = `
-service
-Start a new scoring service
-Examples:
-
-Start a new scoring service instance using foo.war listening on port 8888
-    $ steam start service --warfile=foo.war --port=8888
-`
-
-func startService(c *context) *cobra.Command {
-	var (
-		warfile string
-		jetty   string
-		address string
-		port    int
-	)
-	cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
-		pid, err := svc.Start(warfile, jetty, address, port)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		log.Println("Started process:", pid)
-	})
-	cmd.Flags().StringVar(&warfile, "warfile", "", "The WAR file to launch.")
-	cmd.Flags().StringVar(&jetty, "jetty-runner", "", "The jetty runner jar.")
-	cmd.Flags().StringVar(&address, "address", "0.0.0.0", "The ip of the host to launch the scoring service.")
-	cmd.Flags().IntVar(&port, "port", 8000, "The port to listen on.")
-	return cmd
 }

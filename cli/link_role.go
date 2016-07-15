@@ -5,42 +5,44 @@ package cli
 import (
 	"fmt"
 	"log"
-	"strconv"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 var linkRoleHelp = `
-role [roleId] [permissionIds]
+role [roleName] [permissionIds]
 Add permissions to a role. 
 Examples:
 
-	$ steam link role 2 2,4,6
+	$ steam link role engineer ViewCluster ViewModel ViewWorkgroup
 `
 
 func linkRole(c *context) *cobra.Command {
 	cmd := newCmd(c, linkRoleHelp, func(c *context, args []string) {
-		if len(args) != 2 {
+		if len(args) < 2 {
 			log.Fatalln("Invalid usage. See 'steam help link role'.")
 		}
 
-		roleId, err := strconv.ParseInt(args[0], 10, 64)
+		// -- Args --
+
+		roleName := args[0]
+		permissions := args[1:len(args)]
+		fmt.Println(roleName, permissions)
+
+		// -- Execution --
+
+		role, err := c.remote.GetRoleByName(roleName)
 		if err != nil {
-			log.Fatalln("Invalid usage for roleId %s: expecting int: %v", args[0], err)
+			log.Fatalln(err) //FIXME format error
 		}
 
-		rawIds := strings.Split(args[1], ",")
-		permissionIds := make([]int64, len(rawIds))
-		for i, id := range rawIds {
-			permissionIds[i], err = strconv.ParseInt(id, 10, 64)
-			if err != nil {
-				log.Fatalln("Invalid usage for permissionIds %s: expecting int: %v", id, err)
-			}
+		permissionIds, err := getPermissionIds(c, permissions...)
+		if err != nil {
+			log.Fatalln(err) //FIXME format error
 		}
 
-		c.remote.LinkRoleAndPermissions(roleId, permissionIds)
-		fmt.Println("Role", roleId, "linked to permissions:", permissionIds)
+		c.remote.LinkRoleAndPermissions(role.Id, permissionIds)
+		fmt.Println("Role", roleName, "linked to permissions:", permissions)
 	})
 
 	return cmd

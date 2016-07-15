@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>H2O Scoring Service</title>
+
+    <script src="jquery.js"></script>
+    <script src="predict.js"></script>
+
+    <style type="text/css">
+        body {
+            background-color: #fbe91f;
+            font-family: 'futura_ltlight', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+<H1>H2O Prediction Service</H1>
+
+<h2>Input</h2>
+<div class="input">
+</div>
+
+<h2>Input with Query String</h2>
+<form name="params" action="" method="get">
+    <p>
+        <b>Query String</b> <input type="text" name="p" size="80"><br>
+    </p>
+
+    <input type="button" name="okbutton" value="PREDICT" onClick="runpred(this.form)">
+    <input type="reset" value="CLEAR">
+</form>
+
+<h2>Prediction result</h2>
+<div class="results">
+</div>
+
+<h2>URL</h2>
+<div class="params">
+</div>
+
+<h2>Statistics</h2>
+<div class="stats">
+</div>
+
+</body>
+</html>

@@ -7,15 +7,16 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/lib/rpc"
-	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/data"
 	"github.com/h2oai/steamY/master/proxy"
 	"github.com/h2oai/steamY/master/web"
+	srvweb "github.com/h2oai/steamY/srv/web"
 )
 
 const (
@@ -25,38 +26,46 @@ const (
 	defaultScoringServiceHost  = ""
 )
 
+type DBOpts struct {
+	Name              string
+	Username          string
+	SSLMode           string
+	SuperuserName     string
+	SuperuserPassword string
+}
+
+type YarnOpts struct {
+	KerberosEnabled bool
+	Username        string
+	Keytab          string
+}
+
 type Opts struct {
 	WebAddress                string
+	WebTLSCertPath            string
+	WebTLSKeyPath             string
+	AuthProvider              string
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
 	ScoringServiceHost        string
 	EnableProfiler            bool
-	YarnKerberosEnabled       bool
-	YarnUserName              string
-	YarnKeytab                string
-	DBName                    string
-	DBUserName                string
-	DBSSLMode                 string
-	SuperuserName             string
-	SuperuserPassword         string
+	Yarn                      YarnOpts
+	DB                        DBOpts
 }
 
 var DefaultOpts = &Opts{
 	defaultWebAddress,
+	"",
+	"",
+	"basic",
 	path.Join(".", fs.VarDir, "master"),
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
 	defaultScoringServiceHost,
 	false,
-	false,
-	"",
-	"",
-	"steam",
-	"steam",
-	"disable",
-	"",
-	"",
+	YarnOpts{false, "", ""},
+	DBOpts{"steam", "steam", "disable", "", ""},
 }
 
 type AuthProvider interface {
@@ -64,7 +73,7 @@ type AuthProvider interface {
 	Logout() http.Handler
 }
 
-func Run(version, buildDate string, opts *Opts) {
+func Run(version, buildDate string, opts Opts) {
 	log.Printf("steam v%s build %s\n", version, buildDate)
 
 	// --- external ip for base and proxy ---
@@ -87,74 +96,41 @@ func Run(version, buildDate string, opts *Opts) {
 
 	// --- init storage ---
 
-	db, err := data.Connect(opts.DBUserName, opts.DBName, opts.DBSSLMode)
+	ds, err := data.Create(
+		opts.DB.Name,
+		opts.DB.Username,
+		opts.DB.SSLMode,
+		opts.DB.SuperuserName,
+		opts.DB.SuperuserPassword,
+	)
+
 	if err != nil {
-		log.Fatalf("Failed connecting to database %s as user %s (SSL=%s): %s\n", opts.DBName, opts.DBUserName, opts.DBSSLMode, err)
-	}
-
-	isPrimed, err := data.IsPrimed(db)
-	if err != nil {
-		log.Fatalln("Failed database version check:", err)
-	}
-
-	if !isPrimed {
-		if opts.SuperuserName == "" || opts.SuperuserPassword == "" {
-			log.Fatalln("Starting Steam for the first time requires both --superuser-name and --superuser-password arguments to \"steam serve master\".")
-		}
-
-		if err := auth.ValidateUsername(opts.SuperuserName); err != nil {
-			log.Fatalln("Invalid superuser username:", err)
-		}
-
-		if err := auth.ValidatePassword(opts.SuperuserPassword); err != nil {
-			log.Fatalln("Invalid superuser password:", err)
-		}
-
-		if err := data.Prime(db); err != nil {
-			log.Fatalln("Failed priming database:", err)
-		}
-	}
-
-	ds, err := data.NewDatastore(db)
-	if err != nil {
-		log.Fatalln("Failed initializing from database:", err)
-	}
-
-	if !isPrimed {
-		passwordHash, err := auth.HashPassword(opts.SuperuserPassword)
-		if err != nil {
-			log.Fatalln("Failed hashing superuser password:", err)
-		}
-
-		if _, _, err := ds.CreateSuperuser(opts.SuperuserName, passwordHash); err != nil {
-			log.Fatalln("Failed superuser identity setup:", err)
-		}
-
-		_, err = ds.NewPrincipal(opts.SuperuserName)
-		if err != nil {
-			log.Fatalln("Failed reading superuser principal:", err)
-		}
+		log.Fatalln(err)
 	}
 
 	// --- create basic auth service ---
-	defaultAz := newDefaultAz(ds)
-	// TODO add CLI args for other other providers
-	// TODO conditionally instantiate auth provider based on CLI arg
-	authProvider := newBasicAuthProvider(defaultAz, webAddress)
+	defaultAz := NewDefaultAz(ds)
+	var authProvider AuthProvider
+	switch opts.AuthProvider {
+	case "digest":
+		authProvider = newDigestAuthProvider(defaultAz, webAddress)
+	default: // "basic"
+		authProvider = newBasicAuthProvider(defaultAz, webAddress)
+	}
 
 	// --- create web services ---
 
 	webServeMux := http.NewServeMux()
-	webServiceImpl := web.NewService(
-		defaultAz,
+	webService := web.NewService(
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
 		opts.ScoringServiceHost,
-		opts.YarnKerberosEnabled,
-		opts.YarnUserName,
-		opts.YarnKeytab,
+		opts.Yarn.KerberosEnabled,
+		opts.Yarn.Username,
+		opts.Yarn.Keytab,
 	)
+	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 
 	webServeMux.Handle("/logout", authProvider.Logout())
 	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))
@@ -175,15 +151,26 @@ func Run(version, buildDate string, opts *Opts) {
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
+	certFile := strings.TrimSpace(opts.WebTLSCertPath)
+	keyFile := strings.TrimSpace(opts.WebTLSKeyPath)
+	enableTLS := !(len(certFile) == 0 && len(keyFile) == 0)
+
 	go func() {
 		log.Println("Web server listening at", webAddress)
 		prefix := ""
 		if len(webAddress) > 1 && webAddress[:1] == ":" {
 			prefix = "localhost"
 		}
-		log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
-		if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
-			serverFailChan <- err
+		if enableTLS {
+			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+				serverFailChan <- err
+			}
+		} else {
+			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
+			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+				serverFailChan <- err
+			}
 		}
 	}()
 
@@ -193,8 +180,21 @@ func Run(version, buildDate string, opts *Opts) {
 	proxyFailChan := make(chan error)
 	go func() {
 		log.Println("Cluster reverse proxy listening at", proxyAddress)
-		if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
-			proxyFailChan <- err
+		prefix := ""
+		if len(proxyAddress) > 1 && proxyAddress[:1] == ":" {
+			prefix = "localhost"
+		}
+		if enableTLS {
+			log.Printf("Point H2O client libraries to https://%s%s/\n", prefix, proxyAddress)
+			if err := http.ListenAndServeTLS(proxyAddress, certFile, keyFile, proxyHandler); err != nil {
+				proxyFailChan <- err
+			}
+
+		} else {
+			log.Printf("Point H2O client libraries to http://%s%s/\n", prefix, proxyAddress)
+			if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
+				proxyFailChan <- err
+			}
 		}
 	}()
 
