@@ -7,6 +7,7 @@ This document is provided for external users and describes how to install, start
 
 - Web browser with an Internet connection
 - Steam tar for OS X or Linux
+	- available from <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a>
 - JDK 1.7 or greater
 - PostgreSQL 9.1 or greater
 	- available from <a href="https://www.postgresql.org/" target="_blank">PostgreSQL.org</a>
