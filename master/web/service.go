@@ -875,7 +875,7 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 
 	// FIXME delete assets from disk
 
-	model, err := s.ds.ReadModel(pz, modelId)
+	_, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return err
 	}
