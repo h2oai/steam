@@ -5,11 +5,14 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as _ from 'lodash';
 import * as $ from 'jquery';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import { Link, hashHistory } from 'react-router';
 import Panel from './Panel';
 import PageHeader from './PageHeader';
 import ProgressBar from './ProgressBar';
 import '../styles/newprojectstep3.scss';
+import { createProject, getCurrentProject } from '../actions/projects.actions';
 
 interface Job {
   name: string,
@@ -20,7 +23,18 @@ interface Job {
   interval: number,
 }
 
-export default class NewProjectStep3 extends React.Component<any, any> {
+interface Props {
+  projects: {
+    project: any
+  }
+}
+
+interface DispatchProps {
+  getCurrentProject: Function,
+  createProject: Function
+}
+
+export class NewProjectStep3 extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     let jobs: Job[] = [
@@ -61,6 +75,12 @@ export default class NewProjectStep3 extends React.Component<any, any> {
     this.state = {
       jobs: jobs
     };
+
+  }
+
+  componentDidMount() {
+    this.props.getCurrentProject();
+    this.props.createProject(this.props.projects.project);
   }
 
   componentWillUnmount() {
@@ -77,7 +97,6 @@ export default class NewProjectStep3 extends React.Component<any, any> {
         newState[index] = {
           isComplete: true
         };
-        console.log('set state');
         this.setState({jobs: newState});
       }, Math.floor(Math.random() * 4000) + 2000);
     });
@@ -137,3 +156,18 @@ export default class NewProjectStep3 extends React.Component<any, any> {
     );
   }
 }
+
+function mapStateToProps(state: Props): Props {
+  return {
+    projects: state.projects
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    createProject: bindActionCreators(createProject, dispatch),
+    getCurrentProject: bindActionCreators(getCurrentProject, dispatch)
+  };
+}
+
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(NewProjectStep3);

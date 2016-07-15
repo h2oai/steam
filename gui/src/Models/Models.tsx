@@ -20,7 +20,7 @@ interface DispatchProps {
 export class Projects extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.leaderboard)) {
-      this.props.fetchLeaderboard();
+      this.props.fetchLeaderboard(0);
     }
   }
 

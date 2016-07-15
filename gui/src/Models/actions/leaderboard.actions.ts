@@ -26,7 +26,7 @@ export function receiveLeaderboard(leaderboard) {
   };
 }
 
-export function fetchLeaderboard() {
+export function fetchLeaderboard(projectId) {
   return (dispatch) => {
     dispatch(requestLeaderboard());
     let leaderboard: Leaderboard[] = [
@@ -86,12 +86,9 @@ export function fetchLeaderboard() {
         }
       }
     ];
-    // Remote.Proxy.getModels(0, 5, (error, res) => {
-    //   console.log(error, res);
-    // });
-    new MockFetchStrategy().request(dispatch, {
-      callback: receiveLeaderboard,
-      data: leaderboard
+    Remote.getModels(projectId, 5, 0, (error, res) => {
+      console.log(error, res);
+      dispatch(receiveLeaderboard(res));
     });
   };
 }

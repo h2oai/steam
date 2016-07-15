@@ -6,7 +6,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Router, Route, IndexRoute, IndexRedirect, hashHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
-import { Store, createStore, applyMiddleware } from 'redux';
+import { Store, createStore, applyMiddleware, compose } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import App from './App/App';
@@ -30,7 +30,10 @@ const initialState = {};
 const store: any = createStore(
   rootReducer,
   initialState,
-  applyMiddleware(thunk)
+  compose(
+    applyMiddleware(thunk),
+    window.devToolsExtension && window.devToolsExtension()
+  )
 );
 
 let history: any = syncHistoryWithStore(hashHistory, store);

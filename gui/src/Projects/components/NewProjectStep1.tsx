@@ -3,17 +3,17 @@
  */
 
 import * as React from 'react';
+import * as classNames from 'classnames';
+import * as $ from 'jquery';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import { bindActionCreators } from 'redux';
-import * as classNames from 'classnames';
-import * as $ from 'jquery';
 import PageHeader from '../components/PageHeader';
 import Table from '../components/Table';
 import Row from '../components/Row';
 import Cell from '../components/Cell';
 import ProgressBar from '../components/ProgressBar';
-import { fetchProjects } from '../actions/projects.actions';
+import { fetchProjects, createProject, setCurrentProject } from '../actions/projects.actions';
 import '../styles/newproject.scss';
 
 interface Props {
@@ -22,7 +22,9 @@ interface Props {
 }
 
 interface DispatchProps {
-  fetchProjects: Function
+  fetchProjects: Function,
+  setCurrentProject: Function,
+  createProject: Function
 }
 
 export class NewProject extends React.Component<Props & DispatchProps, any> {
@@ -37,7 +39,10 @@ export class NewProject extends React.Component<Props & DispatchProps, any> {
       shapeIsDisabled: true,
       uploadFilename: '',
       isUploading: false,
-      isUploaded: false
+      isUploaded: false,
+      project: {
+        name: ''
+      }
     };
   }
 
@@ -113,13 +118,22 @@ export class NewProject extends React.Component<Props & DispatchProps, any> {
     );
   }
 
+  handleNameChange(event) {
+    this.setState({
+      project: {
+        name: event.target.value
+      }
+    });
+    this.props.setCurrentProject(this.state.project);
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="new-project">
         <PageHeader>New Project</PageHeader>
         <form>
           <label>Give your project a name</label>
-          <input type="text" placeholder="Name"/>
+          <input type="text" placeholder="Name" onChange={this.handleNameChange.bind(this)}/>
         </form>
         {this.state.isUploading === false && !this.state.isUploaded ? this.getAddDataSource() : null}
         {this.state.isUploading === true ?
@@ -203,7 +217,9 @@ function mapStateToProps(state: Props): Props {
 
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
-    fetchProjects: bindActionCreators(fetchProjects, dispatch)
+    fetchProjects: bindActionCreators(fetchProjects, dispatch),
+    createProject: bindActionCreators(createProject, dispatch),
+    setCurrentProject: bindActionCreators(setCurrentProject, dispatch)
   };
 }
 
