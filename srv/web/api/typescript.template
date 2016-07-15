@@ -48,7 +48,7 @@ module Proxy {
   export function {{lower .Name}}{{template "signature" .}}: void {
     const req: {{.Name}}In = { {{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{snake .Name}}: {{lower .Name}}{{end}} }
     Proxy.Call("{{.Name}}", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error{{range .Outputs}}, null{{end}})
       } else {
         const d: {{.Name}}Out = <{{.Name}}Out>data

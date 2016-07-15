@@ -1486,7 +1486,7 @@ module Proxy {
   export function ping(input: boolean, go: (error: Error, output: boolean) => void): void {
     const req: PingIn = { input: input }
     Proxy.Call("Ping", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: PingOut = <PingOut>data
@@ -1498,7 +1498,7 @@ module Proxy {
   export function registerCluster(address: string, go: (error: Error, clusterId: number) => void): void {
     const req: RegisterClusterIn = { address: address }
     Proxy.Call("RegisterCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: RegisterClusterOut = <RegisterClusterOut>data
@@ -1510,7 +1510,7 @@ module Proxy {
   export function unregisterCluster(clusterId: number, go: (error: Error) => void): void {
     const req: UnregisterClusterIn = { cluster_id: clusterId }
     Proxy.Call("UnregisterCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UnregisterClusterOut = <UnregisterClusterOut>data
@@ -1522,7 +1522,7 @@ module Proxy {
   export function startYarnCluster(clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void): void {
     const req: StartYarnClusterIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, username: username }
     Proxy.Call("StartYarnCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: StartYarnClusterOut = <StartYarnClusterOut>data
@@ -1534,7 +1534,7 @@ module Proxy {
   export function stopYarnCluster(clusterId: number, go: (error: Error) => void): void {
     const req: StopYarnClusterIn = { cluster_id: clusterId }
     Proxy.Call("StopYarnCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: StopYarnClusterOut = <StopYarnClusterOut>data
@@ -1546,7 +1546,7 @@ module Proxy {
   export function getCluster(clusterId: number, go: (error: Error, cluster: Cluster) => void): void {
     const req: GetClusterIn = { cluster_id: clusterId }
     Proxy.Call("GetCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetClusterOut = <GetClusterOut>data
@@ -1558,7 +1558,7 @@ module Proxy {
   export function getYarnCluster(clusterId: number, go: (error: Error, cluster: YarnCluster) => void): void {
     const req: GetYarnClusterIn = { cluster_id: clusterId }
     Proxy.Call("GetYarnCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetYarnClusterOut = <GetYarnClusterOut>data
@@ -1570,7 +1570,7 @@ module Proxy {
   export function getClusters(offset: number, limit: number, go: (error: Error, clusters: Cluster[]) => void): void {
     const req: GetClustersIn = { offset: offset, limit: limit }
     Proxy.Call("GetClusters", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetClustersOut = <GetClustersOut>data
@@ -1582,7 +1582,7 @@ module Proxy {
   export function getClusterStatus(clusterId: number, go: (error: Error, clusterStatus: ClusterStatus) => void): void {
     const req: GetClusterStatusIn = { cluster_id: clusterId }
     Proxy.Call("GetClusterStatus", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetClusterStatusOut = <GetClusterStatusOut>data
@@ -1594,7 +1594,7 @@ module Proxy {
   export function deleteCluster(clusterId: number, go: (error: Error) => void): void {
     const req: DeleteClusterIn = { cluster_id: clusterId }
     Proxy.Call("DeleteCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteClusterOut = <DeleteClusterOut>data
@@ -1606,7 +1606,7 @@ module Proxy {
   export function getJob(clusterId: number, jobName: string, go: (error: Error, job: Job) => void): void {
     const req: GetJobIn = { cluster_id: clusterId, job_name: jobName }
     Proxy.Call("GetJob", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetJobOut = <GetJobOut>data
@@ -1618,7 +1618,7 @@ module Proxy {
   export function getJobs(clusterId: number, go: (error: Error, jobs: Job[]) => void): void {
     const req: GetJobsIn = { cluster_id: clusterId }
     Proxy.Call("GetJobs", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetJobsOut = <GetJobsOut>data
@@ -1630,7 +1630,7 @@ module Proxy {
   export function createProject(name: string, description: string, go: (error: Error, projectId: number) => void): void {
     const req: CreateProjectIn = { name: name, description: description }
     Proxy.Call("CreateProject", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: CreateProjectOut = <CreateProjectOut>data
@@ -1642,7 +1642,7 @@ module Proxy {
   export function getProjects(offset: number, limit: number, go: (error: Error, projects: Project[]) => void): void {
     const req: GetProjectsIn = { offset: offset, limit: limit }
     Proxy.Call("GetProjects", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetProjectsOut = <GetProjectsOut>data
@@ -1654,7 +1654,7 @@ module Proxy {
   export function getProject(projectId: number, go: (error: Error, project: Project) => void): void {
     const req: GetProjectIn = { project_id: projectId }
     Proxy.Call("GetProject", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetProjectOut = <GetProjectOut>data
@@ -1666,7 +1666,7 @@ module Proxy {
   export function deleteProject(projectId: number, go: (error: Error) => void): void {
     const req: DeleteProjectIn = { project_id: projectId }
     Proxy.Call("DeleteProject", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteProjectOut = <DeleteProjectOut>data
@@ -1678,7 +1678,7 @@ module Proxy {
   export function createDatasource(projectId: number, name: string, description: string, path: string, go: (error: Error, datasourceId: number) => void): void {
     const req: CreateDatasourceIn = { project_id: projectId, name: name, description: description, path: path }
     Proxy.Call("CreateDatasource", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: CreateDatasourceOut = <CreateDatasourceOut>data
@@ -1690,7 +1690,7 @@ module Proxy {
   export function getDatasources(projectId: number, offset: number, limit: number, go: (error: Error, datasources: Datasource[]) => void): void {
     const req: GetDatasourcesIn = { project_id: projectId, offset: offset, limit: limit }
     Proxy.Call("GetDatasources", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetDatasourcesOut = <GetDatasourcesOut>data
@@ -1702,7 +1702,7 @@ module Proxy {
   export function getDatasource(datasourceId: number, go: (error: Error, datasource: Datasource) => void): void {
     const req: GetDatasourceIn = { datasource_id: datasourceId }
     Proxy.Call("GetDatasource", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetDatasourceOut = <GetDatasourceOut>data
@@ -1714,7 +1714,7 @@ module Proxy {
   export function updateDatasource(datasourceId: number, name: string, description: string, path: string, go: (error: Error) => void): void {
     const req: UpdateDatasourceIn = { datasource_id: datasourceId, name: name, description: description, path: path }
     Proxy.Call("UpdateDatasource", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UpdateDatasourceOut = <UpdateDatasourceOut>data
@@ -1726,7 +1726,7 @@ module Proxy {
   export function deleteDatasource(datasourceId: number, go: (error: Error) => void): void {
     const req: DeleteDatasourceIn = { datasource_id: datasourceId }
     Proxy.Call("DeleteDatasource", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteDatasourceOut = <DeleteDatasourceOut>data
@@ -1738,7 +1738,7 @@ module Proxy {
   export function createDataset(clusterId: number, datasourceId: number, name: string, description: string, responseColumnName: string, go: (error: Error, datasetId: number) => void): void {
     const req: CreateDatasetIn = { cluster_id: clusterId, datasource_id: datasourceId, name: name, description: description, response_column_name: responseColumnName }
     Proxy.Call("CreateDataset", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: CreateDatasetOut = <CreateDatasetOut>data
@@ -1750,7 +1750,7 @@ module Proxy {
   export function getDatasets(datasourceId: number, offset: number, limit: number, go: (error: Error, datasets: Dataset[]) => void): void {
     const req: GetDatasetsIn = { datasource_id: datasourceId, offset: offset, limit: limit }
     Proxy.Call("GetDatasets", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetDatasetsOut = <GetDatasetsOut>data
@@ -1762,7 +1762,7 @@ module Proxy {
   export function getDataset(datasetId: number, go: (error: Error, dataset: Dataset) => void): void {
     const req: GetDatasetIn = { dataset_id: datasetId }
     Proxy.Call("GetDataset", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetDatasetOut = <GetDatasetOut>data
@@ -1774,7 +1774,7 @@ module Proxy {
   export function updateDataset(datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void): void {
     const req: UpdateDatasetIn = { dataset_id: datasetId, name: name, description: description, response_column_name: responseColumnName }
     Proxy.Call("UpdateDataset", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UpdateDatasetOut = <UpdateDatasetOut>data
@@ -1786,7 +1786,7 @@ module Proxy {
   export function splitDataset(datasetId: number, ratio1: number, ratio2: number, go: (error: Error, datasetIds: number[]) => void): void {
     const req: SplitDatasetIn = { dataset_id: datasetId, ratio1: ratio1, ratio2: ratio2 }
     Proxy.Call("SplitDataset", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: SplitDatasetOut = <SplitDatasetOut>data
@@ -1798,7 +1798,7 @@ module Proxy {
   export function deleteDataset(datasetId: number, go: (error: Error) => void): void {
     const req: DeleteDatasetIn = { dataset_id: datasetId }
     Proxy.Call("DeleteDataset", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteDatasetOut = <DeleteDatasetOut>data
@@ -1810,7 +1810,7 @@ module Proxy {
   export function buildModel(clusterId: number, datasetId: number, algorithm: string, go: (error: Error, modelId: number) => void): void {
     const req: BuildModelIn = { cluster_id: clusterId, dataset_id: datasetId, algorithm: algorithm }
     Proxy.Call("BuildModel", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: BuildModelOut = <BuildModelOut>data
@@ -1822,7 +1822,7 @@ module Proxy {
   export function buildAutoModel(clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void): void {
     const req: BuildAutoModelIn = { cluster_id: clusterId, dataset: dataset, target_name: targetName, max_run_time: maxRunTime }
     Proxy.Call("BuildAutoModel", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: BuildAutoModelOut = <BuildAutoModelOut>data
@@ -1834,7 +1834,7 @@ module Proxy {
   export function getModel(modelId: number, go: (error: Error, model: Model) => void): void {
     const req: GetModelIn = { model_id: modelId }
     Proxy.Call("GetModel", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetModelOut = <GetModelOut>data
@@ -1846,7 +1846,7 @@ module Proxy {
   export function getModels(projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void): void {
     const req: GetModelsIn = { project_id: projectId, offset: offset, limit: limit }
     Proxy.Call("GetModels", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetModelsOut = <GetModelsOut>data
@@ -1858,7 +1858,7 @@ module Proxy {
   export function getClusterModels(clusterId: number, go: (error: Error, models: Model[]) => void): void {
     const req: GetClusterModelsIn = { cluster_id: clusterId }
     Proxy.Call("GetClusterModels", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetClusterModelsOut = <GetClusterModelsOut>data
@@ -1870,7 +1870,7 @@ module Proxy {
   export function importModelFromCluster(clusterId: number, projectId: number, modelName: string, go: (error: Error, model: Model) => void): void {
     const req: ImportModelFromClusterIn = { cluster_id: clusterId, project_id: projectId, model_name: modelName }
     Proxy.Call("ImportModelFromCluster", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: ImportModelFromClusterOut = <ImportModelFromClusterOut>data
@@ -1882,7 +1882,7 @@ module Proxy {
   export function deleteModel(modelId: number, go: (error: Error) => void): void {
     const req: DeleteModelIn = { model_id: modelId }
     Proxy.Call("DeleteModel", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteModelOut = <DeleteModelOut>data
@@ -1894,7 +1894,7 @@ module Proxy {
   export function startScoringService(modelId: number, port: number, go: (error: Error, service: ScoringService) => void): void {
     const req: StartScoringServiceIn = { model_id: modelId, port: port }
     Proxy.Call("StartScoringService", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: StartScoringServiceOut = <StartScoringServiceOut>data
@@ -1906,7 +1906,7 @@ module Proxy {
   export function stopScoringService(serviceId: number, go: (error: Error) => void): void {
     const req: StopScoringServiceIn = { service_id: serviceId }
     Proxy.Call("StopScoringService", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: StopScoringServiceOut = <StopScoringServiceOut>data
@@ -1918,7 +1918,7 @@ module Proxy {
   export function getScoringService(serviceId: number, go: (error: Error, service: ScoringService) => void): void {
     const req: GetScoringServiceIn = { service_id: serviceId }
     Proxy.Call("GetScoringService", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetScoringServiceOut = <GetScoringServiceOut>data
@@ -1930,7 +1930,7 @@ module Proxy {
   export function getScoringServices(offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
     const req: GetScoringServicesIn = { offset: offset, limit: limit }
     Proxy.Call("GetScoringServices", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetScoringServicesOut = <GetScoringServicesOut>data
@@ -1942,7 +1942,7 @@ module Proxy {
   export function getScoringServicesForModel(modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
     const req: GetScoringServicesForModelIn = { model_id: modelId, offset: offset, limit: limit }
     Proxy.Call("GetScoringServicesForModel", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetScoringServicesForModelOut = <GetScoringServicesForModelOut>data
@@ -1954,7 +1954,7 @@ module Proxy {
   export function deleteScoringService(serviceId: number, go: (error: Error) => void): void {
     const req: DeleteScoringServiceIn = { service_id: serviceId }
     Proxy.Call("DeleteScoringService", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteScoringServiceOut = <DeleteScoringServiceOut>data
@@ -1966,7 +1966,7 @@ module Proxy {
   export function addEngine(engineName: string, enginePath: string, go: (error: Error, engineId: number) => void): void {
     const req: AddEngineIn = { engine_name: engineName, engine_path: enginePath }
     Proxy.Call("AddEngine", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: AddEngineOut = <AddEngineOut>data
@@ -1978,7 +1978,7 @@ module Proxy {
   export function getEngine(engineId: number, go: (error: Error, engine: Engine) => void): void {
     const req: GetEngineIn = { engine_id: engineId }
     Proxy.Call("GetEngine", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetEngineOut = <GetEngineOut>data
@@ -1990,7 +1990,7 @@ module Proxy {
   export function getEngines(go: (error: Error, engines: Engine[]) => void): void {
     const req: GetEnginesIn = {  }
     Proxy.Call("GetEngines", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetEnginesOut = <GetEnginesOut>data
@@ -2002,7 +2002,7 @@ module Proxy {
   export function deleteEngine(engineId: number, go: (error: Error) => void): void {
     const req: DeleteEngineIn = { engine_id: engineId }
     Proxy.Call("DeleteEngine", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteEngineOut = <DeleteEngineOut>data
@@ -2014,7 +2014,7 @@ module Proxy {
   export function getSupportedEntityTypes(go: (error: Error, entityTypes: EntityType[]) => void): void {
     const req: GetSupportedEntityTypesIn = {  }
     Proxy.Call("GetSupportedEntityTypes", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetSupportedEntityTypesOut = <GetSupportedEntityTypesOut>data
@@ -2026,7 +2026,7 @@ module Proxy {
   export function getSupportedPermissions(go: (error: Error, permissions: Permission[]) => void): void {
     const req: GetSupportedPermissionsIn = {  }
     Proxy.Call("GetSupportedPermissions", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetSupportedPermissionsOut = <GetSupportedPermissionsOut>data
@@ -2038,7 +2038,7 @@ module Proxy {
   export function getSupportedClusterTypes(go: (error: Error, clusterTypes: ClusterType[]) => void): void {
     const req: GetSupportedClusterTypesIn = {  }
     Proxy.Call("GetSupportedClusterTypes", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetSupportedClusterTypesOut = <GetSupportedClusterTypesOut>data
@@ -2050,7 +2050,7 @@ module Proxy {
   export function getPermissionsForRole(roleId: number, go: (error: Error, permissions: Permission[]) => void): void {
     const req: GetPermissionsForRoleIn = { role_id: roleId }
     Proxy.Call("GetPermissionsForRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetPermissionsForRoleOut = <GetPermissionsForRoleOut>data
@@ -2062,7 +2062,7 @@ module Proxy {
   export function getPermissionsForIdentity(identityId: number, go: (error: Error, permissions: Permission[]) => void): void {
     const req: GetPermissionsForIdentityIn = { identity_id: identityId }
     Proxy.Call("GetPermissionsForIdentity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetPermissionsForIdentityOut = <GetPermissionsForIdentityOut>data
@@ -2074,7 +2074,7 @@ module Proxy {
   export function createRole(name: string, description: string, go: (error: Error, roleId: number) => void): void {
     const req: CreateRoleIn = { name: name, description: description }
     Proxy.Call("CreateRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: CreateRoleOut = <CreateRoleOut>data
@@ -2086,7 +2086,7 @@ module Proxy {
   export function getRoles(offset: number, limit: number, go: (error: Error, roles: Role[]) => void): void {
     const req: GetRolesIn = { offset: offset, limit: limit }
     Proxy.Call("GetRoles", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetRolesOut = <GetRolesOut>data
@@ -2098,7 +2098,7 @@ module Proxy {
   export function getRolesForIdentity(identityId: number, go: (error: Error, roles: Role[]) => void): void {
     const req: GetRolesForIdentityIn = { identity_id: identityId }
     Proxy.Call("GetRolesForIdentity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetRolesForIdentityOut = <GetRolesForIdentityOut>data
@@ -2110,7 +2110,7 @@ module Proxy {
   export function getRole(roleId: number, go: (error: Error, role: Role) => void): void {
     const req: GetRoleIn = { role_id: roleId }
     Proxy.Call("GetRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetRoleOut = <GetRoleOut>data
@@ -2122,7 +2122,7 @@ module Proxy {
   export function getRoleByName(name: string, go: (error: Error, role: Role) => void): void {
     const req: GetRoleByNameIn = { name: name }
     Proxy.Call("GetRoleByName", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetRoleByNameOut = <GetRoleByNameOut>data
@@ -2134,7 +2134,7 @@ module Proxy {
   export function updateRole(roleId: number, name: string, description: string, go: (error: Error) => void): void {
     const req: UpdateRoleIn = { role_id: roleId, name: name, description: description }
     Proxy.Call("UpdateRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UpdateRoleOut = <UpdateRoleOut>data
@@ -2146,7 +2146,7 @@ module Proxy {
   export function linkRoleAndPermissions(roleId: number, permissionIds: number[], go: (error: Error) => void): void {
     const req: LinkRoleAndPermissionsIn = { role_id: roleId, permission_ids: permissionIds }
     Proxy.Call("LinkRoleAndPermissions", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: LinkRoleAndPermissionsOut = <LinkRoleAndPermissionsOut>data
@@ -2158,7 +2158,7 @@ module Proxy {
   export function deleteRole(roleId: number, go: (error: Error) => void): void {
     const req: DeleteRoleIn = { role_id: roleId }
     Proxy.Call("DeleteRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteRoleOut = <DeleteRoleOut>data
@@ -2170,7 +2170,7 @@ module Proxy {
   export function createWorkgroup(name: string, description: string, go: (error: Error, workgroupId: number) => void): void {
     const req: CreateWorkgroupIn = { name: name, description: description }
     Proxy.Call("CreateWorkgroup", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: CreateWorkgroupOut = <CreateWorkgroupOut>data
@@ -2182,7 +2182,7 @@ module Proxy {
   export function getWorkgroups(offset: number, limit: number, go: (error: Error, workgroups: Workgroup[]) => void): void {
     const req: GetWorkgroupsIn = { offset: offset, limit: limit }
     Proxy.Call("GetWorkgroups", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetWorkgroupsOut = <GetWorkgroupsOut>data
@@ -2194,7 +2194,7 @@ module Proxy {
   export function getWorkgroupsForIdentity(identityId: number, go: (error: Error, workgroups: Workgroup[]) => void): void {
     const req: GetWorkgroupsForIdentityIn = { identity_id: identityId }
     Proxy.Call("GetWorkgroupsForIdentity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetWorkgroupsForIdentityOut = <GetWorkgroupsForIdentityOut>data
@@ -2206,7 +2206,7 @@ module Proxy {
   export function getWorkgroup(workgroupId: number, go: (error: Error, workgroup: Workgroup) => void): void {
     const req: GetWorkgroupIn = { workgroup_id: workgroupId }
     Proxy.Call("GetWorkgroup", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetWorkgroupOut = <GetWorkgroupOut>data
@@ -2218,7 +2218,7 @@ module Proxy {
   export function getWorkgroupByName(name: string, go: (error: Error, workgroup: Workgroup) => void): void {
     const req: GetWorkgroupByNameIn = { name: name }
     Proxy.Call("GetWorkgroupByName", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetWorkgroupByNameOut = <GetWorkgroupByNameOut>data
@@ -2230,7 +2230,7 @@ module Proxy {
   export function updateWorkgroup(workgroupId: number, name: string, description: string, go: (error: Error) => void): void {
     const req: UpdateWorkgroupIn = { workgroup_id: workgroupId, name: name, description: description }
     Proxy.Call("UpdateWorkgroup", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UpdateWorkgroupOut = <UpdateWorkgroupOut>data
@@ -2242,7 +2242,7 @@ module Proxy {
   export function deleteWorkgroup(workgroupId: number, go: (error: Error) => void): void {
     const req: DeleteWorkgroupIn = { workgroup_id: workgroupId }
     Proxy.Call("DeleteWorkgroup", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeleteWorkgroupOut = <DeleteWorkgroupOut>data
@@ -2254,7 +2254,7 @@ module Proxy {
   export function createIdentity(name: string, password: string, go: (error: Error, identityId: number) => void): void {
     const req: CreateIdentityIn = { name: name, password: password }
     Proxy.Call("CreateIdentity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: CreateIdentityOut = <CreateIdentityOut>data
@@ -2266,7 +2266,7 @@ module Proxy {
   export function getIdentities(offset: number, limit: number, go: (error: Error, identities: Identity[]) => void): void {
     const req: GetIdentitiesIn = { offset: offset, limit: limit }
     Proxy.Call("GetIdentities", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetIdentitiesOut = <GetIdentitiesOut>data
@@ -2278,7 +2278,7 @@ module Proxy {
   export function getIdentitiesForWorkgroup(workgroupId: number, go: (error: Error, identities: Identity[]) => void): void {
     const req: GetIdentitiesForWorkgroupIn = { workgroup_id: workgroupId }
     Proxy.Call("GetIdentitiesForWorkgroup", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetIdentitiesForWorkgroupOut = <GetIdentitiesForWorkgroupOut>data
@@ -2290,7 +2290,7 @@ module Proxy {
   export function getIdentitiesForRole(roleId: number, go: (error: Error, identities: Identity[]) => void): void {
     const req: GetIdentitiesForRoleIn = { role_id: roleId }
     Proxy.Call("GetIdentitiesForRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetIdentitiesForRoleOut = <GetIdentitiesForRoleOut>data
@@ -2302,7 +2302,7 @@ module Proxy {
   export function getIdentity(identityId: number, go: (error: Error, identity: Identity) => void): void {
     const req: GetIdentityIn = { identity_id: identityId }
     Proxy.Call("GetIdentity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetIdentityOut = <GetIdentityOut>data
@@ -2314,7 +2314,7 @@ module Proxy {
   export function getIdentityByName(name: string, go: (error: Error, identity: Identity) => void): void {
     const req: GetIdentityByNameIn = { name: name }
     Proxy.Call("GetIdentityByName", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetIdentityByNameOut = <GetIdentityByNameOut>data
@@ -2326,7 +2326,7 @@ module Proxy {
   export function linkIdentityAndWorkgroup(identityId: number, workgroupId: number, go: (error: Error) => void): void {
     const req: LinkIdentityAndWorkgroupIn = { identity_id: identityId, workgroup_id: workgroupId }
     Proxy.Call("LinkIdentityAndWorkgroup", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: LinkIdentityAndWorkgroupOut = <LinkIdentityAndWorkgroupOut>data
@@ -2338,7 +2338,7 @@ module Proxy {
   export function unlinkIdentityAndWorkgroup(identityId: number, workgroupId: number, go: (error: Error) => void): void {
     const req: UnlinkIdentityAndWorkgroupIn = { identity_id: identityId, workgroup_id: workgroupId }
     Proxy.Call("UnlinkIdentityAndWorkgroup", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UnlinkIdentityAndWorkgroupOut = <UnlinkIdentityAndWorkgroupOut>data
@@ -2350,7 +2350,7 @@ module Proxy {
   export function linkIdentityAndRole(identityId: number, roleId: number, go: (error: Error) => void): void {
     const req: LinkIdentityAndRoleIn = { identity_id: identityId, role_id: roleId }
     Proxy.Call("LinkIdentityAndRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: LinkIdentityAndRoleOut = <LinkIdentityAndRoleOut>data
@@ -2362,7 +2362,7 @@ module Proxy {
   export function unlinkIdentityAndRole(identityId: number, roleId: number, go: (error: Error) => void): void {
     const req: UnlinkIdentityAndRoleIn = { identity_id: identityId, role_id: roleId }
     Proxy.Call("UnlinkIdentityAndRole", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UnlinkIdentityAndRoleOut = <UnlinkIdentityAndRoleOut>data
@@ -2374,7 +2374,7 @@ module Proxy {
   export function updateIdentity(identityId: number, password: string, go: (error: Error) => void): void {
     const req: UpdateIdentityIn = { identity_id: identityId, password: password }
     Proxy.Call("UpdateIdentity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UpdateIdentityOut = <UpdateIdentityOut>data
@@ -2386,7 +2386,7 @@ module Proxy {
   export function deactivateIdentity(identityId: number, go: (error: Error) => void): void {
     const req: DeactivateIdentityIn = { identity_id: identityId }
     Proxy.Call("DeactivateIdentity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: DeactivateIdentityOut = <DeactivateIdentityOut>data
@@ -2398,7 +2398,7 @@ module Proxy {
   export function shareEntity(kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void): void {
     const req: ShareEntityIn = { kind: kind, workgroup_id: workgroupId, entity_type_id: entityTypeId, entity_id: entityId }
     Proxy.Call("ShareEntity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: ShareEntityOut = <ShareEntityOut>data
@@ -2410,7 +2410,7 @@ module Proxy {
   export function getEntityPrivileges(entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void): void {
     const req: GetEntityPrivilegesIn = { entity_type_id: entityTypeId, entity_id: entityId }
     Proxy.Call("GetEntityPrivileges", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetEntityPrivilegesOut = <GetEntityPrivilegesOut>data
@@ -2422,7 +2422,7 @@ module Proxy {
   export function unshareEntity(kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void): void {
     const req: UnshareEntityIn = { kind: kind, workgroup_id: workgroupId, entity_type_id: entityTypeId, entity_id: entityId }
     Proxy.Call("UnshareEntity", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error)
       } else {
         const d: UnshareEntityOut = <UnshareEntityOut>data
@@ -2434,7 +2434,7 @@ module Proxy {
   export function getEntityHistory(entityTypeId: number, entityId: number, offset: number, limit: number, go: (error: Error, history: EntityHistory[]) => void): void {
     const req: GetEntityHistoryIn = { entity_type_id: entityTypeId, entity_id: entityId, offset: offset, limit: limit }
     Proxy.Call("GetEntityHistory", req, function(error, data) {
-      if error {
+      if (error) {
         return go(error, null)
       } else {
         const d: GetEntityHistoryOut = <GetEntityHistoryOut>data
