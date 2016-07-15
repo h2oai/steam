@@ -1,0 +1,12 @@
+Description:
+
+    cli-man generates man pages for the Steam CLI.
+
+
+Usage: 
+
+    $ cli-man [path]
+
+    [path] defaults to ./ if not specified.
+
+

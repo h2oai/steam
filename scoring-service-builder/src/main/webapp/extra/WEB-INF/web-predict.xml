@@ -16,6 +16,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         <servlet-name>Stats</servlet-name>
         <servlet-class>StatsServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Ping</servlet-name>
+        <servlet-class>PingServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>Predict</servlet-name>
@@ -28,6 +32,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     <servlet-mapping>
         <servlet-name>Stats</servlet-name>
         <url-pattern>/stats</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Ping</servlet-name>
+        <url-pattern>/ping</url-pattern>
     </servlet-mapping>
 
 </web-app>

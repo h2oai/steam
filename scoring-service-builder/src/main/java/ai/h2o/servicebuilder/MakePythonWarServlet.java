@@ -5,6 +5,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -36,13 +38,15 @@ import static ai.h2o.servicebuilder.Util.*;
 public class MakePythonWarServlet extends HttpServlet {
   private static boolean VERBOSE = false;
 
+  private static final Logger logger = LoggerFactory.getLogger("MakePythonWarServlet");
+
   private File servletPath = null;
 
   public void init(ServletConfig servletConfig) throws ServletException {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      if (VERBOSE) System.out.println("servletPath = " + servletPath);
+      if (VERBOSE) logger.info("servletPath = " + servletPath);
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -55,7 +59,7 @@ public class MakePythonWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      if (VERBOSE) System.out.println("tmpDir " + tmpDir);
+      if (VERBOSE) logger.info("tmpDir " + tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -116,19 +120,24 @@ public class MakePythonWarServlet extends HttpServlet {
       copyExtraFile(servletPath, extraPath, tmpDir, "pyindex.html", "index.html");
       copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
+      copyExtraFile(servletPath, extraPath, tmpDir, "custom.css", "custom.css");
       copyExtraFile(servletPath, webInfPath, webInfDir, "web-pythonpredict.xml", "web.xml");
       FileUtils.copyDirectoryToDirectory(new File(servletPath, webInfPath + "lib"), webInfDir);
+      FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "bootstrap"), tmpDir);
+      FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "fonts"), tmpDir);
 
       // change the class name in the predictor template file to the predictor we have
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictServlet-TEMPLATE.java", "PredictServlet.java");
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, srcPath + "PredictPythonServlet-TEMPLATE.java", "PredictPythonServlet.java");
+      InstantiateJavaTemplateFile(tmpDir, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "PredictPythonServlet.java", "PredictPythonServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "Transform.java", "Transform.java");
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java"),
+          "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java"),
           "Compilation of servlet failed");
 
       // create the war jar file
@@ -136,6 +145,13 @@ public class MakePythonWarServlet extends HttpServlet {
       filesc.add(new File(tmpDir, "index.html"));
       filesc.add(new File(tmpDir, "jquery.js"));
       filesc.add(new File(tmpDir, "predict.js"));
+      filesc.add(new File(tmpDir, "custom.css"));
+
+      Collection<File> dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "bootstrap"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+      filesc.addAll(dirc);
+      dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "fonts"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+      filesc.addAll(dirc);
+
       File[] files = filesc.toArray(new File[]{});
       if (files.length == 0)
         throw new Exception("Can't list compiler output files (out)");
@@ -143,7 +159,7 @@ public class MakePythonWarServlet extends HttpServlet {
       byte[] resjar = createJarArchiveByteArray(files, tmpDir.getPath() + File.separator);
       if (resjar == null)
         throw new Exception("Can't create war of compiler output");
-      System.out.println("war created from " + files.length + " files, size " + resjar.length);
+      logger.info("war created from {} files, size {}", files.length, resjar.length);
 
       // send jar back
       ServletOutputStream sout = response.getOutputStream();
@@ -156,14 +172,14 @@ public class MakePythonWarServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
 
       Long elapsedMs = System.currentTimeMillis() - startTime;
-      System.out.println("Done python war creation in " + elapsedMs + " ms");
+      logger.info("Done python war creation in {}", elapsedMs);
     }
     catch (Exception e) {
-      e.printStackTrace();
+      logger.error("doPost failed", e);
       // send the error message back
       String message = e.getMessage();
       if (message == null) message = "no message";
-      System.out.println(message);
+      logger.error(message);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       response.getWriter().write(message);
       response.getWriter().write(Arrays.toString(e.getStackTrace()));
@@ -176,28 +192,11 @@ public class MakePythonWarServlet extends HttpServlet {
           FileUtils.deleteDirectory(tmpDir);
         }
         catch (IOException e) {
-          System.err.println("Can't delete tmp directory");
+          logger.error("Can't delete tmp directory");
         }
       }
     }
 
-  }
-
-  private static final String JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-
-  /**
-   * The Java template file has a placeholder for the model name -- we replace that here
-   *
-   * @param tmpDir            run in this directory
-   * @param javaClassName     model name
-   * @param templateFileName  template file
-   * @param resultFileName    restult file
-   * @throws IOException
-   */
-  private static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String templateFileName, String resultFileName) throws IOException {
-    byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
-    String java = new String(templateJava).replace(JAVA_TEMPLATE_REPLACE_WITH_CLASS_NAME, javaClassName);
-    FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
   }
 
 }

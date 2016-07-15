@@ -1,4 +1,9 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
@@ -6,27 +11,32 @@ import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.*;
 import javax.servlet.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatsServlet extends HttpServlet {
+  private static final Logger logger = LoggerFactory.getLogger("StatsServlet");
+
+  public static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
-      if (PredictServlet.model == null)
+      if (ServletUtil.model == null)
         throw new Exception("No predictor model");
 
       final long now = System.currentTimeMillis();
-      final long upTimeMs = now - PredictServlet.startTime;
-      final long lastTimeAgoMs = now - PredictServlet.lastTime;
+      final long upTimeMs = now - ServletUtil.startTime;
+      final long lastTimeAgoMs = now - ServletUtil.lastTime;
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
       sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-      final String startUTC = sdf.format(new Date(PredictServlet.startTime));
-      final String lastPredictionUTC = PredictServlet.lastTime > 0 ? sdf.format(new Date(PredictServlet.lastTime)) : "";
-      final long warmUpCount = PredictServlet.warmUpCount;
+      final String startUTC = sdf.format(new Date(ServletUtil.startTime));
+      final String lastPredictionUTC = ServletUtil.lastTime > 0 ? sdf.format(new Date(ServletUtil.lastTime)) : "";
+      final long warmUpCount = ServletUtil.warmUpCount;
 
       Map<String, Object> js = new HashMap<String, Object>() {
         {
-          put("startTime", PredictServlet.startTime);
-          put("lastTime", PredictServlet.lastTime);
+          put("startTime", ServletUtil.startTime);
+          put("lastTime", ServletUtil.lastTime);
           put("lastTimeUTC", lastPredictionUTC);
           put("startTimeUTC", startUTC);
           put("upTimeMs", upTimeMs);
@@ -34,21 +44,21 @@ public class StatsServlet extends HttpServlet {
           put("lastTimeAgoMs", lastTimeAgoMs);
           put("warmUpCount", warmUpCount);
 
-          put("prediction", PredictServlet.predictionTimes.toMap());
-          put("get", PredictServlet.getTimes.toMap());
-          put("post", PredictServlet.postTimes.toMap());
-          put("pythonget", PredictServlet.getPythonTimes.toMap());
-          put("pythonpost", PredictServlet.postPythonTimes.toMap());
+          put("prediction", ServletUtil.predictionTimes.toMap());
+          put("get", ServletUtil.getTimes.toMap());
+          put("post", ServletUtil.postTimes.toMap());
+          put("pythonget", ServletUtil.getPythonTimes.toMap());
+          put("pythonpost", ServletUtil.postPythonTimes.toMap());
         }
       };
-      String json = PredictServlet.gson.toJson(js, PredictServlet.mapType);
+      String json = gson.toJson(js, ServletUtil.MAP_TYPE);
 
       response.getWriter().write(json);
       response.setStatus(HttpServletResponse.SC_OK);
     }
     catch (Exception e) {
       // Prediction failed.
-      System.out.println(e.getMessage());
+      logger.error("get failed", e);
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
   }
