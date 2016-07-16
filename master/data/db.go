@@ -2676,9 +2676,9 @@ func (ds *Datastore) UpdateDatasource(pz az.Principal, datasourceId int64, datas
 			UPDATE
 				datasource
 			SET
-				name = $1
-				description = $2
-				kind = $3
+				name = $1,
+				description = $2,
+				kind = $3,
 				configuration = $4
 			WHERE
 				id = $5
@@ -2838,8 +2838,8 @@ func (ds *Datastore) UpdateDataset(pz az.Principal, datasetId int64, dataset Dat
 			UPDATE
 				dataset
 			SET
-				name = $1
-				description = $2
+				name = $1,
+				description = $2,
 				responseColumnName = $3
 			WHERE
 				id = $4
