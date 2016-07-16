@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -368,10 +369,263 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 	return jobs, nil
 }
 
-func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string) (string, string, error) {
+// --- Project ---
 
-	// FIXME: allow overwriting of existing java-model/genmodel/metrics, if any.
-	// FIXME: purge war file if overwriting, so that a fresh war file can be built the next time around.
+func (s *Service) CreateProject(pz az.Principal, name, description string) (int64, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return 0, err
+	}
+
+	projectId, err := s.ds.CreateProject(pz, name, description)
+	if err != nil {
+		return 0, err
+	}
+
+	return projectId, nil
+}
+
+func (s *Service) GetProjects(pz az.Principal, offset, limit int64) ([]*web.Project, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	projects, err := s.ds.ReadProjects(pz, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toProjects(projects), nil
+}
+
+func (s *Service) GetProject(pz az.Principal, projectId int64) (*web.Project, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	project, err := s.ds.ReadProject(pz, projectId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toProject(project), nil
+}
+
+// TODO needs to check for dependent entitites
+func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	if err := s.ds.DeleteProject(pz, projectId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// --- Datasource ---
+
+func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, path string) (int64, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
+		return 0, err
+	}
+
+	mapPath := map[string]string{"path": path}
+	jsonPath, err := json.Marshal(mapPath)
+	if err != nil {
+		return 0, err
+	}
+
+	datasource := data.Datasource{
+		0,
+		projectId,
+		name,
+		description,
+		"CSV", // FIXME: this is hardcoded
+		string(jsonPath),
+		time.Now(),
+	}
+
+	datasrcId, err := s.ds.CreateDatasource(pz, datasource)
+	if err != nil {
+		return 0, err
+	}
+
+	return datasrcId, nil
+}
+
+func (s *Service) GetDatasources(pz az.Principal, projectId, offset, limit int64) ([]*web.Datasource, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDatasource); err != nil {
+		return nil, err
+	}
+
+	datasources, err := s.ds.ReadDatasources(pz, projectId, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasources(datasources), nil
+}
+
+func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datasource, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDatasource); err != nil {
+		return nil, err
+	}
+
+	datasource, err := s.ds.ReadDatasource(pz, datasourceId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasource(datasource), nil
+}
+
+func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, path string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
+		return err
+	}
+
+	mapPath := map[string]string{"path": path}
+	jsonPath, err := json.Marshal(mapPath)
+	if err != nil {
+		return err
+	}
+
+	datasource := data.Datasource{
+		0,
+		0,
+		name,
+		description,
+		"CSV", // FIXME this is hardcoded
+		string(jsonPath),
+		time.Now(),
+	}
+
+	if err := s.ds.UpdateDatasource(pz, datasourceId, datasource); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// TODO this needs to check dependent datasets
+func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
+		return err
+	}
+
+	if err := s.ds.DeleteDatasource(pz, datasourceId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// --- Dataset ---
+
+func (s *Service) CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name, description string, responseColumnName string) (int64, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
+		return 0, err
+	}
+
+	// XXX import dataset here
+
+	dataset := data.Dataset{
+		0,
+		datasourceId,
+		name,
+		description,
+		"", // XXX FrameName key from h2o
+		responseColumnName,
+		"", // XXX Properties rawJson from h2o
+		"1",
+		time.Now(),
+	}
+
+	datasetId, err := s.ds.CreateDataset(pz, dataset)
+	if err != nil {
+		return 0, err
+	}
+
+	return datasetId, nil
+}
+
+func (s *Service) GetDatasets(pz az.Principal, datasourceId int64, offset, limit int64) ([]*web.Dataset, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDataset); err != nil {
+		return nil, err
+	}
+
+	datasets, err := s.ds.ReadDatasets(pz, datasourceId, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasets(datasets), nil
+}
+
+func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewDataset); err != nil {
+		return nil, err
+	}
+
+	dataset, err := s.ds.ReadDataset(pz, datasetId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDataset(dataset), nil
+}
+
+func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
+		return err
+	}
+
+	// XXX import dataset here
+
+	dataset := data.Dataset{
+		0,
+		0,
+		name,
+		description,
+		"", // XXX FrameName key from h2o
+		responseColumnName,
+		"", // XXX Properties rawJson from h2o
+		"1",
+		time.Now(),
+	}
+
+	if err := s.ds.UpdateDataset(pz, datasetId, dataset); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error) {
+	return nil, nil // XXX
+}
+
+// TODO needs to check for dependent models
+func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
+		return err
+	}
+
+	if err := s.ds.DeleteDataset(pz, datasetId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// --- Model ---
+
+func (s *Service) exportModel(h2o *h2ov3.H2O, modelId int64) (string, string, error) {
+
+	// Use modelId because it'll provide a unique directory name every time with
+	// a persistend db; no need to purge/overwrite any files on disk
+	modelName := strconv.FormatInt(modelId, 10)
 
 	var location, logicalName string
 	location = fs.GetModelPath(s.workingDir, modelName)
@@ -388,7 +642,14 @@ func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string) (string, string,
 	return location, logicalName, err
 }
 
-func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
+func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
+	return 0, nil // XXX Build default model, save to DB, return model id
+}
+
+func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
+
+	return nil, fmt.Errorf("AutoML is currently not supported")
+
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return nil, err
 	}
@@ -407,26 +668,32 @@ func (s *Service) BuildModel(pz az.Principal, clusterId int64, dataset, targetNa
 		return nil, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelName)
-	if err != nil {
-		return nil, err
-	}
-
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
 		modelName,
 		cluster.Name,
 		"AutoML",
 		dataset,
 		targetName,
-		logicalName,
-		location,
+		"",
+		"",
 		int64(maxRunTime),
 		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	location, logicalName, err := s.exportModel(h2o, modelId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
 		return nil, err
 	}
 
@@ -449,7 +716,7 @@ func (s *Service) GetModel(pz az.Principal, modelId int64) (*web.Model, error) {
 	return toModel(model), nil
 }
 
-func (s *Service) GetModels(pz az.Principal, offset, limit int64) ([]*web.Model, error) {
+func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int64) ([]*web.Model, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
@@ -491,6 +758,8 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	for i, m := range ms.Models {
 		models[i] = &web.Model{
 			0,
+			0,
+			0,
 			m.ModelId.Name,
 			cluster.Name,
 			m.AlgoFullName,
@@ -499,6 +768,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 			"",
 			"",
 			0,
+			"", // XXX Fill in raw metrics
 			m.Timestamp,
 		}
 	}
@@ -506,8 +776,8 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	return models, nil
 }
 
-func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, modelName string) (*web.Model, error) {
-	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
+func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelName string) (*web.Model, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return nil, err
 	}
 
@@ -517,14 +787,10 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 	}
 
 	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
+
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
 	r, err := h2o.GetModelsFetch(modelName)
-	if err != nil {
-		return nil, err
-	}
-
-	location, logicalName, err := s.exportModel(h2o, modelName)
 	if err != nil {
 		return nil, err
 	}
@@ -538,21 +804,56 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId int64, model
 		return nil, err //FIXME format error
 	}
 
+	// XXX Sebastian: fetch raw frame json from H2O
+
+	datasourceId, err := s.ds.CreateDatasource(pz, data.Datasource{
+		0,
+		projectId,
+		modelName + " Datasource",
+		"Datasource for model " + modelName,
+		"Implicit",
+		"",
+		time.Now(),
+	})
+
+	trainingDatasetId, err := s.ds.CreateDataset(pz, data.Dataset{
+		0,
+		datasourceId,
+		modelName + " Dataset",
+		"Dataset for model " + modelName,
+		m.DataFrame.Name,
+		m.ResponseColumnName,
+		"",  // XXX Sebastian: put raw frame json here
+		"1", // MUST be "1"; will change when H2O's API version is bumped.
+		time.Now(),
+	})
+
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		trainingDatasetId,
+		trainingDatasetId,
 		modelName,
 		cluster.Name,
 		m.AlgoFullName,
 		dataFrameName(m),
 		m.ResponseColumnName,
-		logicalName,
-		location,
+		"",
+		"",
 		0,
 		string(rawMetrics),
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	location, logicalName, err := s.exportModel(h2o, modelId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
 		return nil, err
 	}
 
@@ -1288,6 +1589,8 @@ func toYarnCluster(c data.YarnCluster) *web.YarnCluster {
 func toModel(m data.Model) *web.Model {
 	return &web.Model{
 		m.Id,
+		m.TrainingDatasetId,
+		m.ValidationDatasetId,
 		m.Name,
 		m.ClusterName,
 		m.Algorithm,
@@ -1296,6 +1599,7 @@ func toModel(m data.Model) *web.Model {
 		m.LogicalName,
 		m.Location,
 		int(m.MaxRunTime), // FIXME change db field to int
+		m.Metrics,
 		toTimestamp(m.Created),
 	}
 }
@@ -1433,6 +1737,64 @@ func toEntityHistory(entityHistory []data.EntityHistory) []*web.EntityHistory {
 			h.Description,
 			toTimestamp(h.Created),
 		}
+	}
+	return array
+}
+
+func toProject(project data.Project) *web.Project {
+	return &web.Project{
+		project.Id,
+		project.Name,
+		project.Description,
+		toTimestamp(project.Created),
+	}
+}
+
+func toProjects(projects []data.Project) []*web.Project {
+	array := make([]*web.Project, len(projects))
+	for i, project := range projects {
+		array[i] = toProject(project)
+	}
+	return array
+}
+
+func toDatasource(datasource data.Datasource) *web.Datasource {
+	return &web.Datasource{
+		datasource.Id,
+		datasource.ProjectId,
+		datasource.Name,
+		datasource.Description,
+		datasource.Kind,
+		datasource.Configuration,
+		toTimestamp(datasource.Created),
+	}
+}
+
+func toDatasources(datasources []data.Datasource) []*web.Datasource {
+	array := make([]*web.Datasource, len(datasources))
+	for i, datasource := range datasources {
+		array[i] = toDatasource(datasource)
+	}
+	return array
+}
+
+func toDataset(dataset data.Dataset) *web.Dataset {
+	return &web.Dataset{
+		dataset.Id,
+		dataset.DatasourceId,
+		dataset.Name,
+		dataset.Description,
+		dataset.FrameName,
+		dataset.ResponseColumnName,
+		dataset.Properties,
+		toTimestamp(dataset.Created),
+	}
+}
+
+func toDatasets(datasets []data.Dataset) []*web.Dataset {
+	array := make([]*web.Dataset, len(datasets))
+	for i, dataset := range datasets {
+		array[i] = toDataset(dataset)
 	}
 	return array
 }

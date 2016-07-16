@@ -1,17 +1,8 @@
-package python
+// ------------------------------
+// --- This is generated code ---
+// ---      DO NOT EDIT       ---
+// ------------------------------
 
-import (
-	"github.com/h2oai/steamY/tools/piping/parser"
-	"github.com/serenize/snaker"
-	"strings"
-)
-
-func genPrelude() string {
-	return `
-# ----------------------------------
-# --- Generated with go:generate ---
-# ---        DO NOT EDIT         ---
-# ----------------------------------
 
 import httplib
 import base64
@@ -90,84 +81,24 @@ class View(object):
 class RPCClient:
 	def __init__(self, connection):
 		self.connection = connection
-	`
-}
-
-func genReturn(param *parser.Param) string {
-	n := "response['" + snaker.CamelToSnake(param.Name) + "']"
-	t := param.Type
-	isArray := false
-
-	if strings.HasPrefix(t, "[]") {
-		t = t[2:]
-		isArray = true
-	}
-	if strings.HasPrefix(t, "*") {
-		t = t[1:]
-	}
-
-	switch t {
-	case "bool", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "int", "uint":
-		return n
-	default:
-		if isArray {
-			return "[View(o) for o in " + n + "]"
+	
+	{{with .Facade}}
+	{{range .Methods}}
+	def {{snake .Name}}(self{{range .Inputs}}, {{snake .Name}}{{end}}):
+		"""
+		Parameters:
+		{{range .Inputs}}{{snake .Name}}: {{.Type}}
+		{{end}}
+		Returns:
+		{{range .Outputs}}{{snake .Name}}: {{.Type}}
+    {{else}}None{{end}}
+		"""
+		request = {
+			{{range .Inputs}}'{{snake .Name}}': {{snake .Name}}
+			{{end}}
 		}
-		return "View(" + n + ")"
-	}
-}
+		response = self.connection.call("{{.Name}}", request)
+		return {{range $i, $e := .Outputs}}{{if $i}}, {{end}}response['{{snake .Name}}']{{end}}
+	{{end}}
+	{{end}}
 
-func genParam(p *parser.Param) string {
-	return snaker.CamelToSnake(p.Name)
-}
-
-func genClientStub(f *parser.Func) string {
-	c := "\n\n\tdef " + snaker.CamelToSnake(f.Name) + "("
-	args := make([]string, len(f.Params)+1)
-	args[0] = "self"
-	for i, p := range f.Params {
-		args[i+1] = genParam(p)
-	}
-	c += strings.Join(args, ", ")
-	c += "):\n"
-
-	c += "\t\t\"\"\"\n"
-	c += "\t\tReturns "
-	if f.Return != nil {
-		c += f.Return.Name + " (" + f.Return.Type + ")\n"
-	} else {
-		c += "None\n"
-	}
-	c += "\t\t\"\"\"\n"
-
-	c += "\t\trequest = {\n"
-	for i, p := range f.Params {
-		c += "\t\t\t'" + snaker.CamelToSnake(p.Name) + "': " + snaker.CamelToSnake(p.Name)
-		if i < len(f.Params)-1 {
-			c += ","
-		}
-		c += "\n"
-	}
-	c += "\t\t}\n"
-
-	call := "self.connection.call(\"" + f.Name + "\", request)\n"
-	if f.Return != nil {
-		c += "\t\tresponse = " + call
-		c += "\t\treturn " + genReturn(f.Return)
-	} else {
-		c += "\t\t" + call
-	}
-
-	return c
-}
-
-func Generate(i *parser.Interface) string {
-	c := genPrelude()
-	if len(i.Funcs) > 0 {
-		for _, f := range i.Funcs {
-			c += genClientStub(f)
-		}
-	}
-
-	return c
-}

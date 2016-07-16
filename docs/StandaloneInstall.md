@@ -88,7 +88,7 @@ The next section describes how to add additional users to the Steam database.
 
 ### <a name="adding roles, workgroups, and users"></a>Adding Roles, Workgroups, and Users
 
-The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference Appendix](../docs/CLIAppendix.md) for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference Appendix](CLIAppendix.md) for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
 
 		# Create engineer role and link that role to permissions
 		./steam create role engineer --desc="a default engineer role"

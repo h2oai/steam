@@ -74,7 +74,7 @@ body {
 
 .title h2 {
     float: left;
-    padding-left: 1.5em;
+    padding-left: inherit;
     color: rgba(255, 255, 255, 0.8);
     font-size: 1.5em;
 }
@@ -167,6 +167,7 @@ input[type="radio"] {
     padding-left: 2em;
 }
 
+
 .form-control {
     font-weight: normal;
     border-style: none none solid none;
@@ -231,6 +232,17 @@ select:-moz-focusring {
 .curl code {
     background-color: rgba(0,0,0, 0.1);
     color: rgba(36, 67, 90, 0.8);
+}
+
+.indexHighlight, .labelHighlight {
+    font-family: 'Borda';
+    background: aliceblue;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.rowHighlight{
+    background: aliceblue;
 }
 
 tr.stat-group td {
