@@ -93,25 +93,25 @@ func (h *H2O) GetJobsFetch(job_id string) (*bindings.JobsV3, error) {
 ////////////////////
 
 // GetModelsFetch Return the specified Model from the H2O distributed K/V store, optionally with the list of compatible Frames. */
-func (h *H2O) GetModelsFetch(model_id string) (*bindings.ModelsV3, error) {
+func (h *H2O) GetModelsFetch(model_id string) ([]byte, *bindings.ModelsV3, error) {
 	//@GET
 	u := h.url("/3/Models/?{model_id}", model_id)
 
 	res, err := http.Get(u)
 	if err != nil {
-		return nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
+		return nil, nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
 	}
 
 	data, err := h.handleResponse(res, u)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var out bindings.ModelsV3
 	if err := json.Unmarshal(data, &out); err != nil {
-		return nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
+		return nil, nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
 	}
-	return &out, nil
+	return data, &out, nil
 }
 
 // GetModelsList Return all Models from the H2O distributed K/V store. */

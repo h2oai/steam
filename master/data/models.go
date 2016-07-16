@@ -3,8 +3,9 @@
 package data
 
 import (
-	"github.com/lib/pq"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type Meta struct {
@@ -141,9 +142,9 @@ type Dataset struct {
 
 type Model struct {
 	Id                  int64
+	Name                string
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
-	Name                string
 	ClusterName         string
 	Algorithm           string
 	DatasetName         string

@@ -621,14 +621,14 @@ func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
 
 // --- Model ---
 
-func (s *Service) exportModel(h2o *h2ov3.H2O, modelId int64) (string, string, error) {
+func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (string, string, error) {
 
 	// Use modelId because it'll provide a unique directory name every time with
 	// a persistend db; no need to purge/overwrite any files on disk
-	modelName := strconv.FormatInt(modelId, 10)
+	modelStringId := strconv.FormatInt(modelId, 10)
 
 	var location, logicalName string
-	location = fs.GetModelPath(s.workingDir, modelName)
+	location = fs.GetModelPath(s.workingDir, modelStringId)
 	javaModelPath, err := h2o.ExportJavaModel(modelName, location)
 	if err != nil {
 		return location, logicalName, err
@@ -670,9 +670,9 @@ func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targ
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
-		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
-		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
 		modelName,
+		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
 		cluster.Name,
 		"AutoML",
 		dataset,
@@ -688,7 +688,7 @@ func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targ
 		return nil, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelId)
+	location, logicalName, err := s.exportModel(h2o, modelName, modelId)
 	if err != nil {
 		return nil, err
 	}
@@ -790,7 +790,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
-	r, err := h2o.GetModelsFetch(modelName)
+	_, r, err := h2o.GetModelsFetch(modelName)
 	if err != nil {
 		return nil, err
 	}
@@ -801,7 +801,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	// This needs to hooked up to api
 	rawMetrics, _, err := h2o.GetModelMetricsListSchemaFetchByModel(modelName)
 	if err != nil {
-		return nil, err //FIXME format error
+		return nil, err
 	}
 
 	// XXX Sebastian: fetch raw frame json from H2O
@@ -815,7 +815,9 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		"",
 		time.Now(),
 	})
-
+	if err != nil {
+		return nil, err
+	}
 	trainingDatasetId, err := s.ds.CreateDataset(pz, data.Dataset{
 		0,
 		datasourceId,
@@ -827,12 +829,15 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
-		trainingDatasetId,
-		trainingDatasetId,
 		modelName,
+		trainingDatasetId,
+		trainingDatasetId,
 		cluster.Name,
 		m.AlgoFullName,
 		dataFrameName(m),
@@ -848,7 +853,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return nil, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelId)
+	location, logicalName, err := s.exportModel(h2o, modelName, modelId)
 	if err != nil {
 		return nil, err
 	}
@@ -857,15 +862,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return nil, err
 	}
 
+	log.Println(modelId)
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return nil, err
 	}
 
-	mod := toModel(model)
-	mod.Algorithm = m.AlgoFullName
-
-	return mod, nil
+	return toModel(model), nil
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {

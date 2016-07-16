@@ -2895,9 +2895,9 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 				($1,   $2,                  $3,                    $4,           $5,        $6,           $7,                   $8,           $9,          $10,       $11,     $12,             now())
 			RETURNING id
 			`,
+			model.Name,
 			model.TrainingDatasetId,
 			model.ValidationDatasetId,
-			model.Name,
 			model.ClusterName,
 			model.Algorithm,
 			model.DatasetName,
@@ -3028,7 +3028,7 @@ func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, locatio
 			UPDATE
 				model
 			SET
-				location = $1
+				location = $1,
 				logical_name = $2
 			WHERE
 				id = $3
@@ -3036,8 +3036,7 @@ func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, locatio
 			return err
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{
-			"location":     location,
-			"logical_name": logicalName,
+			"location": location,
 		})
 	})
 }

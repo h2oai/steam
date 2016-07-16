@@ -612,9 +612,9 @@ func ScanModel(r *sql.Row) (Model, error) {
 	var s Model
 	if err := r.Scan(
 		&s.Id,
+		&s.Name,
 		&s.TrainingDatasetId,
 		&s.ValidationDatasetId,
-		&s.Name,
 		&s.ClusterName,
 		&s.Algorithm,
 		&s.DatasetName,
@@ -638,9 +638,9 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 		var s Model
 		if err = rs.Scan(
 			&s.Id,
+			&s.Name,
 			&s.TrainingDatasetId,
 			&s.ValidationDatasetId,
-			&s.Name,
 			&s.ClusterName,
 			&s.Algorithm,
 			&s.DatasetName,
