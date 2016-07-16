@@ -98,9 +98,10 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
               <div className="header-content">UNTITLED</div>
               <ul className="nav-list">
                 {_.map(this.sitemap[0].childRoutes, (route: any) => {
-                  return (
-                    <li key={route.path} className={classNames('nav-list--item', {active: this.props.router.isActive(route.path, true)})}>
-                      <Link to={route.path}>{route.name}</Link>
+                  let path = this.sitemap[0].path + '/' + route.path;
+                  return (!route.showInNavigation) ? null : (
+                    <li key={route.path} className={classNames('nav-list--item', {active: this.props.router.isActive(path, true)})}>
+                      <Link to={path}>{route.name}</Link>
                     </li>
                   );
                 })}

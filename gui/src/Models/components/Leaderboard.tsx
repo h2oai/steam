@@ -138,7 +138,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                 </Cell>
                 <Cell>
                   <ul className="actions">
-                    <li><Link to={"models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
+                    <li><Link to={"/projects/models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                     <li><span><i className="fa fa-database"></i></span><span>designate as baseline</span></li>
                     <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span><span>deploy model</span></li>
                     <li><span><i className="fa fa-ellipsis-h"></i></span><span>more actions</span></li>

@@ -43,6 +43,21 @@ export const routes = [{
         showInNavigation: false,
       },
       childRoutes: [
+        // /projects/models
+        {
+          path: 'models',
+          component: Models,
+          name: 'Models',
+          showInBreadcrumb: true,
+          showInNavigation: true
+        },
+        // /models/:id
+        {
+          path: 'models/:id',
+          component: ProjectDetails,
+          showInBreadcrumb: true,
+          showInNavigation: false
+        },
         // /projects/deployments
         {
           path: 'deployments',
@@ -96,26 +111,11 @@ export const routes = [{
           showInBreadcrumb: true,
           showInNavigation: true
         },
-        // /projects/models
-        {
-          path: 'models',
-          component: Models,
-          name: 'Models',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
         // /projects/forkmodel
         {
           path: 'forkmodel',
           component: CreateNewModel,
           name: 'Fork Model',
-          showInBreadcrumb: true,
-          showInNavigation: false
-        },
-        // /projects/models/:id
-        {
-          path: 'models/:id',
-          component: ProjectDetails,
           showInBreadcrumb: true,
           showInNavigation: false
         }
