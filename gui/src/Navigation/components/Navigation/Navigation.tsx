@@ -7,6 +7,8 @@ import * as classNames from 'classnames';
 import { Link, withRouter } from 'react-router';
 import { Sidebar } from '../Sidebar/Sidebar';
 import './navigation.scss';
+import { routes } from '../../routes';
+import * as _ from 'lodash';
 const logo = require('../../../../assets/h2o-home.png');
 
 interface Props {
@@ -21,69 +23,15 @@ interface State {
 }
 
 export class Navigation extends React.Component<Props & DispatchProps, State> {
-  sitemap = {
-    projects: {
-      path: 'projects',
-      label: 'Projects',
-      icon: 'fa fa-folder',
-      childRoutes: [
-        {
-          path: 'models',
-          label: 'Models'
-        },
-        {
-          path: 'projects/dataframes',
-          label: 'Dataframes'
-        },
-        {
-          path: 'projects/repository',
-          label: 'Repository'
-        },
-        {
-          path: 'projects/configurations',
-          label: 'Configurations'
-        },
-        {
-          path: 'projects/deployments',
-          label: 'Deployments'
-        },
-        {
-          path: 'projects/collaborators',
-          label: 'Collaborators'
-        }
-      ]
-    },
-    services: {
-      path: 'services',
-      label: 'Services',
-      icon: 'fa fa-cloud',
-      childRoutes: []
-    },
-    clusters: {
-      path: 'clusters',
-      label: 'Clusters',
-      icon: 'fa fa-cube',
-      childRoutes: [
-        {
-          path: 'models',
-          label: 'Sub 1'
-        }
-      ]
-    },
-    team: {
-      path: 'team',
-      label: 'Team',
-      icon: 'fa fa-users',
-      childRoute: []
-    }
-  };
+
+  sitemap = routes[0].childRoutes;
 
   constructor() {
     super();
     this.openSubmenu = this.openSubmenu.bind(this);
     this.closeSubmenu = this.closeSubmenu.bind(this);
     this.state = {
-      isOpen: false
+      isOpen: true
     };
   }
 
@@ -105,9 +53,12 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
   }
 
   getPath(): string {
-    return Object.keys(this.sitemap).filter((key) => {
-      return this.props.router.isActive(key, true);
-    })[0];
+    let foo = _.filter(this.sitemap, (route) => {
+      console.log('route: ', route);
+      return this.props.router.isActive(route.path, true);
+    });
+    console.log("foo", foo);
+    return (foo[0]) ? foo[0].path : '';
   }
 
   render(): React.ReactElement<HTMLElement> {
@@ -124,13 +75,14 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
               <div className="header-content">
               </div>
               <ul className={classNames('nav-list', {open: this.state.isOpen})}>
-                {Object.keys(this.sitemap).map((route: string, i: number) => {
-                    return (
-                      <li key={i} className={classNames('nav-list--item', {active: this.getPath() === route && !this.sitemap[route].childRoutes})} onMouseOver={this.openSubmenu}>
-                        <Link to={this.sitemap[route].path}><i className={this.sitemap[route].icon}></i><div className="nav-list--label">{this.sitemap[route].label}</div></Link>
-                      </li>
-                    );
-                  })}
+              {_.map(this.sitemap, (route: any) => {
+                  return (
+                    <li key={route.path} className={classNames('nav-list--item', {active: this.props.router.isActive(route.path, true)})} onMouseOver={this.openSubmenu}>
+                      <Link to={route.path}><i className={route.icon}></i><div className="nav-list--label">{route.name}</div></Link>
+                    </li>
+                  );
+                })
+              }
               </ul>
             </div>
           </nav>
@@ -145,13 +97,13 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
               </header>
               <div className="header-content">UNTITLED</div>
               <ul className="nav-list">
-                {this.sitemap[this.getPath()] ? this.sitemap[this.getPath()].childRoutes.map((route, i: number) => {
+                {_.map(this.sitemap[0].childRoutes, (route: any) => {
                   return (
-                    <li key={i} className={classNames('nav-list--item', {active: this.getPath() === route.path})}>
-                      <Link to={route.path}>{route.label}</Link>
+                    <li key={route.path} className={classNames('nav-list--item', {active: this.props.router.isActive(route.path, true)})}>
+                      <Link to={route.path}>{route.name}</Link>
                     </li>
                   );
-                }) : null}
+                })}
               </ul>
             </div>
           </nav>
