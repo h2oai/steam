@@ -25,8 +25,6 @@ const store: any = createStore(
 
 let history: any = syncHistoryWithStore(hashHistory, store);
 
-console.log(createRoutes(routes));
-
 ReactDOM.render(
   <Provider store={store}>
     <Router history={hashHistory} routes={routes}></Router>

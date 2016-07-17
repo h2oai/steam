@@ -14,6 +14,7 @@
  import NewProjectStep3 from '../Projects/components/NewProjectStep3';
  import Deployments from '../Projects/components/Deployments';
  import CreateNewModel from '../Projects/components/CreateNewModel';
+ import Dummy from '../Dummy/Dummy';
 
 export const routes = [{
   path: '/',
@@ -43,6 +44,14 @@ export const routes = [{
         showInNavigation: false,
       },
       childRoutes: [
+        // /projects/data
+        {
+          path: 'data',
+          component: Dummy,
+          name: 'Data',
+          showInBreadcrumb: true,
+          showInNavigation: true
+        },
         // /projects/models
         {
           path: 'models',
@@ -58,13 +67,29 @@ export const routes = [{
           showInBreadcrumb: true,
           showInNavigation: false
         },
+        // /projects/data
+        {
+          path: 'assets',
+          component: Dummy,
+          name: 'Assets',
+          showInBreadcrumb: true,
+          showInNavigation: true
+        },
         // /projects/deployments
         {
-          path: 'deployments',
-          component: Deployments,
-          name: 'Deployments',
+          path: 'deployment',
+          component: Dummy,
+          name: 'Deployment',
           showInBreadcrumb: true,
-          showInNavigation: true,
+          showInNavigation: true
+        },
+        // /projects/collaborators
+        {
+          path: 'collaborators',
+          component: Dummy,
+          name: 'Collaborators',
+          showInBreadcrumb: true,
+          showInNavigation: true
         },
         // /projects/new
         {
@@ -102,14 +127,6 @@ export const routes = [{
               showInNavigation: false
             }
           ]
-        },
-        // /projects/clusters
-        {
-          path: 'clusters',
-          component: Clusters,
-          name: 'Clusters',
-          showInBreadcrumb: true,
-          showInNavigation: true
         },
         // /projects/forkmodel
         {
