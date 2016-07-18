@@ -25,6 +25,7 @@
     "browser-sync-webpack-plugin": "^1.0.3",
     "css-loader": "^0.23.1",
     "file-loader": "^0.8.5",
+    "http-proxy-middleware": "^0.17.0",
     "jest-cli": "^13.2.3",
     "node-sass": "^3.8.0",
     "raw-loader": "^0.5.1",

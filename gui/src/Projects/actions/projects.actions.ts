@@ -61,9 +61,9 @@ export function fetchProjects() {
 export function createProject(project: {name: string, description: string}) {
   return (dispatch) => {
     dispatch(creatingProject(project));
-    dispatch(createdProject({"result":{"project_id":1},"error":null,"id":2}));
-    // Remote.createProject(project.name, project.description, (error, res) => {
-    //   dispatch(createdProject(res));
-    // })
+    Remote
+    Remote.createProject(project.name, project.description, (error, res) => {
+      dispatch(createdProject(res));
+    })
   }
 }

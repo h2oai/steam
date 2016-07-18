@@ -20,7 +20,7 @@ interface Job {
   author: string,
   startTime: number,
   isComplete: boolean,
-  interval: number,
+  timeout: number,
 }
 
 interface Props {
@@ -44,7 +44,7 @@ export class NewProjectStep3 extends React.Component<Props & DispatchProps, any>
         author: 'Mark Landry',
         startTime: new Date().getTime(),
         isComplete: false,
-        interval: null
+        timeout: null
       },
       {
         name: 'DRF-1070196',
@@ -52,7 +52,7 @@ export class NewProjectStep3 extends React.Component<Props & DispatchProps, any>
         author: 'Mark Landry',
         startTime: new Date().getTime(),
         isComplete: false,
-        interval: null
+        timeout: null
       },
       {
         name: 'DRF-1070196',
@@ -60,7 +60,7 @@ export class NewProjectStep3 extends React.Component<Props & DispatchProps, any>
         author: 'Mark Landry',
         startTime: new Date().getTime(),
         isComplete: false,
-        interval: null
+        timeout: null
       },
       {
         name: 'DRF-1070196',
@@ -68,7 +68,7 @@ export class NewProjectStep3 extends React.Component<Props & DispatchProps, any>
         author: 'Mark Landry',
         startTime: new Date().getTime(),
         isComplete: false,
-        interval: null
+        timeout: null
       }
     ];
     this.endJobsRandomly(jobs);
@@ -85,19 +85,21 @@ export class NewProjectStep3 extends React.Component<Props & DispatchProps, any>
 
   componentWillUnmount() {
     this.state.jobs.map((job) => {
-      clearInterval(job.interval);
+      clearTimeout(job.timeout);
     });
   }
 
   private endJobsRandomly(jobs: Job[]) {
     jobs.map((job) => {
-      job.interval = setTimeout(() => {
+      job.timeout = setTimeout(() => {
+        console.log(job);
         let newState = _.cloneDeep(this.state.jobs);
         let index = _.findIndex(this.state.jobs, job);
         newState[index] = {
           isComplete: true
         };
         this.setState({jobs: newState});
+        clearTimeout(newState[index].timeout);
       }, Math.floor(Math.random() * 4000) + 2000);
     });
   }

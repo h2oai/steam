@@ -4,6 +4,7 @@
 
 var path = require('path');
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+var proxy = require('http-proxy-middleware');
 
 module.exports = {
   entry: [
@@ -59,7 +60,9 @@ module.exports = {
     new BrowserSyncPlugin({
       host: 'localhost',
       port: 3000,
-      server: { baseDir: ['../var/master/www'] }
+      server: {
+        baseDir: ['../var/master/www']
+      }
     })
   ],
   // more options in the optional tslint object
