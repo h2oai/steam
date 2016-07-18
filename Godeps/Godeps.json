@@ -12,11 +12,6 @@
 			"Rev": "cb4372376e1e00e9f6ab9ec142e029302c9e7140"
 		},
 		{
-			"ImportPath": "github.com/boltdb/bolt",
-			"Comment": "v1.1.0-22-g6e1ca38",
-			"Rev": "6e1ca38c6a73025366cd8705553b404746ee6e63"
-		},
-		{
 			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
 			"Comment": "v1.0.4",
 			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
@@ -27,11 +22,11 @@
 		},
 		{
 			"ImportPath": "github.com/gorilla/rpc",
-			"Rev": "5bc359e9ad5cb47312fe2ef8d0651dafab381f27"
+			"Rev": "64e20900b8aa38bb0771dec71ba3bcc2b07fc8ec"
 		},
 		{
 			"ImportPath": "github.com/gorilla/rpc/json",
-			"Rev": "5bc359e9ad5cb47312fe2ef8d0651dafab381f27"
+			"Rev": "64e20900b8aa38bb0771dec71ba3bcc2b07fc8ec"
 		},
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
@@ -87,10 +82,6 @@
 		{
 			"ImportPath": "golang.org/x/net/context",
 			"Rev": "d7bf3545bb0dacf009c535b3d3fbf53ac0a339ab"
-		},
-		{
-			"ImportPath": "golang.org/x/sys/unix",
-			"Rev": "2bacc619e34d59719d9ed86f0e04e8261aed3409"
 		}
 	]
 }

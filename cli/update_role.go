@@ -12,7 +12,7 @@ role [roleName]
 Change or update a role in the database.
 Examples:
 
-	$ steam update role engineer --desc="A better engineer" --name=
+	$ steam update role engineer --desc="A better engineer" --name="science engineer"
 `
 
 func updateRole(c *context) *cobra.Command {

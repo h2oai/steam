@@ -1,3 +1,5 @@
+-- MODIFIED BY HAND TO WORK ON ubuntu precise with postgres 9.1
+
 --
 -- PostgreSQL database dump
 --
@@ -8,12 +10,10 @@
 -- Dumped by pg_dump version 9.5.1
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 DROP DATABASE IF EXISTS steam;
 
@@ -29,18 +29,17 @@ ALTER DATABASE steam OWNER TO steam;
 \connect steam
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: steam
 --
 
-CREATE SCHEMA IF NOT EXISTS public;
+DROP SCHEMA IF EXISTS public;
+CREATE SCHEMA public;
 
 
 ALTER SCHEMA public OWNER TO steam;
@@ -56,7 +55,8 @@ COMMENT ON SCHEMA public IS 'standard public schema';
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+DROP EXTENSION IF EXISTS plpgsql;
+CREATE EXTENSION plpgsql WITH SCHEMA pg_catalog;
 
 
 --
@@ -232,6 +232,84 @@ ALTER TABLE cluster_yarn_id_seq OWNER TO steam;
 --
 
 ALTER SEQUENCE cluster_yarn_id_seq OWNED BY cluster_yarn.id;
+
+
+--
+-- Name: dataset; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE dataset (
+    id integer NOT NULL,
+    datasource_id integer NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    frame_name text NOT NULL,
+    response_column_name text NOT NULL,
+    properties text NOT NULL,
+    properties_version text NOT NULL,
+    created timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE dataset OWNER TO steam;
+
+--
+-- Name: dataset_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE dataset_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE dataset_id_seq OWNER TO steam;
+
+--
+-- Name: dataset_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE dataset_id_seq OWNED BY dataset.id;
+
+
+--
+-- Name: datasource; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE datasource (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    kind text NOT NULL,
+    configuration text NOT NULL,
+    created timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE datasource OWNER TO steam;
+
+--
+-- Name: datasource_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE datasource_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE datasource_id_seq OWNER TO steam;
+
+--
+-- Name: datasource_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE datasource_id_seq OWNED BY datasource.id;
 
 
 --
@@ -442,6 +520,8 @@ ALTER SEQUENCE meta_id_seq OWNED BY meta.id;
 
 CREATE TABLE model (
     id integer NOT NULL,
+    training_dataset_id integer NOT NULL,
+    validation_dataset_id integer NOT NULL,
     name text NOT NULL,
     cluster_name text NOT NULL,
     algorithm text NOT NULL,
@@ -450,6 +530,8 @@ CREATE TABLE model (
     logical_name text NOT NULL,
     location text NOT NULL,
     max_run_time integer,
+    metrics text NOT NULL,
+    metrics_version text NOT NULL,
     created timestamp with time zone NOT NULL
 );
 
@@ -482,6 +564,20 @@ COMMENT ON COLUMN model.logical_name IS 'The logical name of the model (typicall
 --
 
 COMMENT ON COLUMN model.location IS 'The location of this model''s saved assets (e.g. /var/master/model).';
+
+
+--
+-- Name: COLUMN model.metrics; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.metrics IS 'Raw model metrics JSON obtained from H2O.';
+
+
+--
+-- Name: COLUMN model.metrics_version; Type: COMMENT; Schema: public; Owner: steam
+--
+
+COMMENT ON COLUMN model.metrics_version IS 'Version of the deserializer to use for unpacking metrics';
 
 
 --
@@ -746,6 +842,20 @@ ALTER TABLE ONLY cluster_yarn ALTER COLUMN id SET DEFAULT nextval('cluster_yarn_
 -- Name: id; Type: DEFAULT; Schema: public; Owner: steam
 --
 
+ALTER TABLE ONLY dataset ALTER COLUMN id SET DEFAULT nextval('dataset_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY datasource ALTER COLUMN id SET DEFAULT nextval('datasource_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
 ALTER TABLE ONLY engine ALTER COLUMN id SET DEFAULT nextval('engine_id_seq'::regclass);
 
 
@@ -841,6 +951,22 @@ ALTER TABLE ONLY cluster_type
 
 ALTER TABLE ONLY cluster_yarn
     ADD CONSTRAINT pk_cluster_yarn PRIMARY KEY (id);
+
+
+--
+-- Name: pk_dataset; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY dataset
+    ADD CONSTRAINT pk_dataset PRIMARY KEY (id);
+
+
+--
+-- Name: pk_datasource; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY datasource
+    ADD CONSTRAINT pk_datasource PRIMARY KEY (id);
 
 
 --
@@ -1042,6 +1168,20 @@ CREATE INDEX fki_cluster_yarn__engine_id ON cluster_yarn USING btree (engine_id)
 
 
 --
+-- Name: fki_dataset__datasource_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_dataset__datasource_id ON dataset USING btree (datasource_id);
+
+
+--
+-- Name: fki_datasource__project_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_datasource__project_id ON datasource USING btree (project_id);
+
+
+--
 -- Name: fki_history__entity_type_id; Type: INDEX; Schema: public; Owner: steam
 --
 
@@ -1074,6 +1214,20 @@ CREATE INDEX fki_identity_workgroup__workgroup_id ON identity_workgroup USING bt
 --
 
 CREATE INDEX fki_model_id ON service USING btree (model_id);
+
+
+--
+-- Name: fki_model_training__dataset_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_model_training__dataset_id ON model USING btree (training_dataset_id);
+
+
+--
+-- Name: fki_model_validation__dataset_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_model_validation__dataset_id ON model USING btree (validation_dataset_id);
 
 
 --
@@ -1135,6 +1289,22 @@ ALTER TABLE ONLY cluster_yarn
 
 
 --
+-- Name: fk_dataset__datasource_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY dataset
+    ADD CONSTRAINT fk_dataset__datasource_id FOREIGN KEY (datasource_id) REFERENCES datasource(id) ON DELETE CASCADE;
+
+
+--
+-- Name: fk_datasource__project_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY datasource
+    ADD CONSTRAINT fk_datasource__project_id FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE;
+
+
+--
 -- Name: fk_history__entity_type_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -1164,6 +1334,22 @@ ALTER TABLE ONLY identity_workgroup
 
 ALTER TABLE ONLY identity_workgroup
     ADD CONSTRAINT fk_identity_workgroup__workgroup_id FOREIGN KEY (workgroup_id) REFERENCES workgroup(id) ON DELETE CASCADE;
+
+
+--
+-- Name: fk_model_training__dataset_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY model
+    ADD CONSTRAINT fk_model_training__dataset_id FOREIGN KEY (training_dataset_id) REFERENCES dataset(id);
+
+
+--
+-- Name: fk_model_validation__dataset_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY model
+    ADD CONSTRAINT fk_model_validation__dataset_id FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id);
 
 
 --

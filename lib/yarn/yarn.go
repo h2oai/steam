@@ -110,10 +110,10 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	if err != nil {
 		return "", "", "", err
 	}
-	stdErr, err := cmd.StderrPipe()
-	if err != nil {
-		return "", "", "", err
-	}
+	// stdErr, err := cmd.StderrPipe()
+	// if err != nil {
+	// 	return "", "", "", err
+	// }
 
 	if err := cmd.Start(); err != nil {
 		return "", "", "", err
@@ -137,12 +137,12 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 			}
 		}
 	}()
-	go func() {
-		in := bufio.NewScanner(stdErr)
-		for in.Scan() {
-			cmdErr += in.Text() + "\n"
-		}
-	}()
+	// go func() {
+	// 	in := bufio.NewScanner(stdErr)
+	// 	for in.Scan() {
+	// 		cmdErr += in.Text() + "\n"
+	// 	}
+	// }()
 
 	// TODO should be a ticket system, not halting
 	if err := cmd.Wait(); err != nil {
