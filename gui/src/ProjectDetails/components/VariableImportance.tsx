@@ -3,6 +3,9 @@
  */
 import * as React from 'react';
 import DetailLine from './DetailLine';
+import Table from '../../Projects/components/Table';
+import Row from '../../Projects/components/Row';
+import Cell from '../../Projects/components/Cell';
 import '../styles/goodnessoffit.scss';
 
 interface Props {
@@ -40,6 +43,28 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
             return <DetailLine key={i} icon={item.label} label={item.label} value={item.value}/>;
           })}
         </div>
+        <Table>
+          <Row header={true}>
+            <Cell>
+              <i className="fa fa-caret-down"/>
+            </Cell>
+            <Cell>
+              COLUMN
+            </Cell>
+            <Cell className="graph">
+              IMPORTANCE
+            </Cell>
+            <Cell className="graph">
+              PARTIAL DEPENDENCY
+            </Cell>
+            <Cell className="graph">
+              RESPONSE DISTRIBUTION
+            </Cell>
+            <Cell className="graph">
+              NOTES
+            </Cell>
+          </Row>
+        </Table>
       </div>
     );
   }

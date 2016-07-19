@@ -7,6 +7,7 @@ import * as classNames from 'classnames';
 import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
 import GoodnessOfFit from './components/GoodnessOfFit';
+import VariableImportance from './components/VariableImportance';
 import PageHeader from '../Projects/components/PageHeader';
 import { hashHistory } from 'react-router';
 import './styles/projectdetails.scss';
@@ -100,9 +101,7 @@ export default class ProjectDetails extends React.Component<Props, any> {
           >Variable Importance</span>
         </header>
         <Collapsible open={this.state.isVariableOpen}>
-          <div>
-            Variable Importance body
-          </div>
+          <VariableImportance></VariableImportance>
         </Collapsible>
       </div>
     );
