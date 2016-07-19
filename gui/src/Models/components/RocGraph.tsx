@@ -16,12 +16,6 @@ export default class RocGraph extends React.Component<Props, any> {
     this.renderGraph();
   }
 
-  componentDidUpdate() {
-    if (this._mountNode) {
-      this.renderGraph();
-    }
-  }
-
   componentWillUnmount() {
     if (this._mountNode) {
       ReactDOM.unmountComponentAtNode(this._mountNode);
@@ -36,16 +30,15 @@ export default class RocGraph extends React.Component<Props, any> {
         width: 60,
         height: 60,
         interpolationMode: 'basis',
-        ticks: undefined,
-        tickValues: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1],
+        smooth: true,
         fpr: 'fpr',
         tprVariables: [{
           name: 'tpr',
+          label: 'tpr'
         }],
         animate: false,
-        hideTicks: true,
         hideAxes: true,
-        hideBoundaries: false
+        hideAUCText: true
     };
 
     rocChart.plot(this._mountNode, this.props.data, cfg);

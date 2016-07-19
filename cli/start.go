@@ -13,6 +13,5 @@ Examples:
 func start(c *context) *cobra.Command {
 	cmd := newCmd(c, startHelp, nil)
 	cmd.AddCommand(startCluster(c))
-	cmd.AddCommand(startService(c))
 	return cmd
 }

@@ -21,11 +21,11 @@ type Principal interface {
 	CheckView(entityTypeId, entityId int64) error
 }
 
+type Directory interface {
+	Lookup(username string) (Principal, error)
+}
+
 type Az interface {
 	Authenticate(username string) string
-	//Authenticate(r *http.Request) (Principal, error)
 	Identify(r *http.Request) (Principal, error)
-	//Authorize(name string) error
-	//Deauthorize(name string) error
-	//IsAuthorized(name string) (bool, error)
 }

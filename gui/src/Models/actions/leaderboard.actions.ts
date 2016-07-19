@@ -34,55 +34,60 @@ export function fetchLeaderboard() {
         id: 0,
         rank: 1,
         metadata: {
-          modelName: 'DRF-1069085',
-          modelType: 'drf',
-          createdBy: 'tonychu',
-          creationDate: '2016-06-14',
-          timing: '213 ± 12ms'
+          modelName: 'glm-aaed8e67-2a86-476f-b1ab-b8232c0c553e',
+          modelType: 'glm',
+          createdBy: 'laurendiperna',
+          creationDate: '2016-07-18',
+          timing: '213 ± 12ms',
+          auc: 0.847345
         }
       },
       {
         id: 1,
         rank: 2,
         metadata: {
-          modelName: 'GBT-1071707',
-          modelType: 'deeplearning',
-          createdBy: 'ivywang',
-          creationDate: '2016-06-14',
-          timing: '213 ± 12ms'
+          modelName: 'gbm-007328bb-1d09-4dcd-b659-7f58acfa4da4',
+          modelType: 'gbm',
+          createdBy: 'navdeep',
+          creationDate: '2016-07-18',
+          timing: '213 ± 12ms',
+          auc: 0.846126
         }
       },
       {
         id: 2,
         rank: 3,
         metadata: {
-          modelName: 'GBT-1071707',
-          modelType: 'gbm',
+          modelName: 'deeplearning-ef0ea82a-acf4-4392-9b91-44d583fb826f',
+          modelType: 'deeplearning',
           createdBy: 'marklandry',
-          creationDate: '2016-06-14',
-          timing: '213 ± 12ms'
+          creationDate: '2016-07-18',
+          timing: '213 ± 12ms',
+          auc: 0.837695
         }
       },
       {
         id: 3,
         rank: 4,
         metadata: {
-          modelName: 'GBT-1071707',
-          modelType: 'glm',
-          createdBy: 'marklandry',
-          creationDate: '2016-06-14',
-          timing: '213 ± 12ms'
+          modelName: 'drf-5c77a28d-04e5-46f6-964a-a3b7f80ba1a6',
+          modelType: 'drf',
+          createdBy: 'laurendiperna',
+          creationDate: '2016-07-18',
+          timing: '213 ± 12ms',
+          auc: 0.835059
         }
       },
       {
         id: 4,
         rank: 5,
         metadata: {
-          modelName: 'GBT-1071707',
+          modelName: 'naivebayes-940f6d45-54e4-41f9-aa34-8562e7f9390f',
           modelType: 'naivebayes',
           createdBy: 'marklandry',
-          creationDate: '2016-06-14',
-          timing: '213 ± 12ms'
+          creationDate: '2016-07-18',
+          timing: '213 ± 12ms',
+          auc: 0.819140
         }
       }
     ];

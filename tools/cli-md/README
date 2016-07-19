@@ -1,0 +1,16 @@
+Description:
+
+    cli-md generates Markdown (*.md) help files for the Steam CLI.
+
+
+Usage: 
+
+    $ cli-md [path]
+
+    [path] defaults to ./ if not specified.
+
+
+More: 
+
+    To build a single HTML file, use pandoc:
+    $ pandoc -s -f markdown -t html *.md > steam.html

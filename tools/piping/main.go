@@ -1,60 +1,83 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"github.com/h2oai/steamY/tools/piping/golang"
-	"github.com/h2oai/steamY/tools/piping/parser"
-	"github.com/h2oai/steamY/tools/piping/python"
-	"github.com/h2oai/steamY/tools/piping/typescript"
+	"github.com/h2oai/steamY/srv/web/api"
+	"github.com/serenize/snaker"
 	"io/ioutil"
+	"strings"
 )
 
 func main() {
-
-	// Usage: piping -idl widget.pipe -go widget.go -ts widget.ts - py widget.py
-
-	file := flag.String("idl", "service.pipe", "Path to IDL file")
-	goDest := flag.String("go", "", "Output file name for Go")
-	tsDest := flag.String("ts", "", "Output file name for Typescript")
-	pyDest := flag.String("py", "", "Output file name for Python")
-
-	flag.Parse()
-
-	idl, err := ioutil.ReadFile(*file)
+	i, err := Define("Service", &api.Service{})
 	if err != nil {
-		panic(fmt.Sprintf("Error opening IDL: %s: %s", *file, err))
+		panic(err)
 	}
+	generate(i, "srv/web/api/go.template", "srv/web/service.go", map[string]interface{}{
+		"lower": lower,
+		"snake": snaker.CamelToSnake,
+	})
+	generate(i, "srv/web/api/typescript.template", "gui/src/proxy.ts", map[string]interface{}{
+		"lower":   lower,
+		"snake":   snaker.CamelToSnake,
+		"js_type": jsTypeOf,
+	})
+	generate(i, "srv/web/api/python.template", "python/steam.py", map[string]interface{}{
+		"lower": lower,
+		"snake": snaker.CamelToSnake,
+	})
 
-	i, err := parser.Parse(string(idl))
+}
+
+func generate(i *Interface, input, output string, funcMap map[string]interface{}) {
+	fmt.Println(input, "-->", output)
+
+	tmpl, err := ioutil.ReadFile(input)
 	if err != nil {
-		panic(fmt.Sprintf("Error parsing IDL: %s", err))
+		panic(err)
 	}
 
-	fmt.Println()
-
-	if *goDest != "" {
-		if err = ioutil.WriteFile(*goDest, []byte(golang.Generate(i)), 0644); err != nil {
-			panic(fmt.Sprintf("Error writing Go output: %s: %s", *goDest, err))
-		}
-
-		fmt.Println("Go service definition created:", *goDest)
+	code, err := Generate(i, string(tmpl), funcMap)
+	if err != nil {
+		panic(err)
 	}
 
-	if *tsDest != "" {
-		if err = ioutil.WriteFile(*tsDest, []byte(typescript.Generate(i)), 0644); err != nil {
-			panic(fmt.Sprintf("Error writing Typescript output: %s: %s", *tsDest, err))
-		}
-
-		fmt.Println("Typescript service definition created:", *tsDest)
+	if err := ioutil.WriteFile(output, code, 0644); err != nil {
+		panic(err)
 	}
+}
 
-	if *pyDest != "" {
-		if err = ioutil.WriteFile(*pyDest, []byte(python.Generate(i)), 0644); err != nil {
-			panic(fmt.Sprintf("Error writing Python output: %s: %s", *pyDest, err))
-		}
-
-		fmt.Println("Python service definition created:", *pyDest)
+func lower(s string) string {
+	switch len(s) {
+	case 0:
+		return ""
+	case 1:
+		return strings.ToLower(s)
+	default:
+		return strings.ToLower(string(s[0])) + s[1:]
 	}
+}
 
+func jsTypeOf(t string) string {
+	switch t {
+	case "bool":
+		return "boolean"
+	case
+		"int",
+		"int8",
+		"int16",
+		"int32",
+		"int64",
+		"uint",
+		"uint8",
+		"uint16",
+		"uint32",
+		"uint64",
+		"uintptr",
+		"float32",
+		"float64":
+		return "number"
+	default:
+		return t
+	}
 }

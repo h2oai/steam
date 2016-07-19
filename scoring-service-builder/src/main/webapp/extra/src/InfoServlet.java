@@ -1,9 +1,10 @@
 import java.io.*;
 import java.util.Map;
 import java.util.Arrays;
-
 import javax.servlet.http.*;
 import javax.servlet.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.*;
@@ -13,7 +14,9 @@ import com.google.gson.Gson;
 
 public class InfoServlet extends HttpServlet {
 
-  static EasyPredictModelWrapper model = PredictServlet.model;
+  private static final Logger logger = LoggerFactory.getLogger("InfoServlet");
+
+  static EasyPredictModelWrapper model = ServletUtil.model;
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
@@ -28,7 +31,7 @@ public class InfoServlet extends HttpServlet {
     }
     catch (Exception e) {
       // Prediction failed.
-      System.out.println(e.getMessage());
+      logger.error("doGet failed", e);
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
   }

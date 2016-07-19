@@ -524,10 +524,96 @@ func ScanProjects(rs *sql.Rows) ([]Project, error) {
 	return structs, nil
 }
 
+func ScanDatasource(r *sql.Row) (Datasource, error) {
+	var s Datasource
+	if err := r.Scan(
+		&s.Id,
+		&s.ProjectId,
+		&s.Name,
+		&s.Description,
+		&s.Kind,
+		&s.Configuration,
+		&s.Created,
+	); err != nil {
+		return Datasource{}, err
+	}
+	return s, nil
+}
+
+func ScanDatasources(rs *sql.Rows) ([]Datasource, error) {
+	structs := make([]Datasource, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Datasource
+		if err = rs.Scan(
+			&s.Id,
+			&s.ProjectId,
+			&s.Name,
+			&s.Description,
+			&s.Kind,
+			&s.Configuration,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanDataset(r *sql.Row) (Dataset, error) {
+	var s Dataset
+	if err := r.Scan(
+		&s.Id,
+		&s.DatasourceId,
+		&s.Name,
+		&s.Description,
+		&s.FrameName,
+		&s.ResponseColumnName,
+		&s.Properties,
+		&s.PropertiesVersion,
+		&s.Created,
+	); err != nil {
+		return Dataset{}, err
+	}
+	return s, nil
+}
+
+func ScanDatasets(rs *sql.Rows) ([]Dataset, error) {
+	structs := make([]Dataset, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Dataset
+		if err = rs.Scan(
+			&s.Id,
+			&s.DatasourceId,
+			&s.Name,
+			&s.Description,
+			&s.FrameName,
+			&s.ResponseColumnName,
+			&s.Properties,
+			&s.PropertiesVersion,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanModel(r *sql.Row) (Model, error) {
 	var s Model
 	if err := r.Scan(
 		&s.Id,
+		&s.TrainingDatasetId,
+		&s.ValidationDatasetId,
 		&s.Name,
 		&s.ClusterName,
 		&s.Algorithm,
@@ -536,6 +622,8 @@ func ScanModel(r *sql.Row) (Model, error) {
 		&s.LogicalName,
 		&s.Location,
 		&s.MaxRunTime,
+		&s.Metrics,
+		&s.MetricsVersion,
 		&s.Created,
 	); err != nil {
 		return Model{}, err
@@ -550,6 +638,8 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 		var s Model
 		if err = rs.Scan(
 			&s.Id,
+			&s.TrainingDatasetId,
+			&s.ValidationDatasetId,
 			&s.Name,
 			&s.ClusterName,
 			&s.Algorithm,
@@ -558,6 +648,8 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.LogicalName,
 			&s.Location,
 			&s.MaxRunTime,
+			&s.Metrics,
+			&s.MetricsVersion,
 			&s.Created,
 		); err != nil {
 			return nil, err
@@ -609,4 +701,3 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 	}
 	return structs, nil
 }
-

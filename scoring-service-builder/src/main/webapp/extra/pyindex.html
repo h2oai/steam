@@ -9,60 +9,84 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>H2O+Python Scoring Service</title>
+    <title>Steam :: Prediction Service </title>
 
     <script src="jquery.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
     <script src="predict.js"></script>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css">
 
-    <style type="text/css">
-        body {
-            background-color: #fbe91f;
-            font-family: 'futura_ltlight', sans-serif;
-        }
-    </style>
+    <link rel="stylesheet" href="custom.css">
 </head>
 
 <body>
 
-<H1>H2O+Python Prediction Service</H1>
-
+<div class="title grad container-fluid">
+    <h1>Steam</h1>
+    <h2>Prediction Service</h2>
+</div>
 <!--<h2>POST Input to Python Pre-processing</h2>-->
 <!--<form name="params" action="" onSubmit="runpredpost(event.target)" method="post">-->
-    <!--<p>-->
-       <!--<b>Python input</b> <input type="text" name="p" size="140"><br>-->
-    <!--</p>-->
+<!--<p>-->
+<!--<b>Python input</b> <input type="text" name="p" size="140"><br>-->
+<!--</p>-->
 
-    <!--&lt;!&ndash;<input type="submit" name="okbutton" value="PREDICT" onClick="runpredpost(this.form)">&ndash;&gt;-->
-    <!--<input type="submit" name="okbutton" value="PREDICT">-->
-    <!--<input type="reset" value="CLEAR">-->
+<!--&lt;!&ndash;<input type="submit" name="okbutton" value="PREDICT" onClick="runpredpost(this.form)">&ndash;&gt;-->
+<!--<input type="submit" name="okbutton" value="PREDICT">-->
+<!--<input type="reset" value="CLEAR">-->
 <!--</form>-->
 
-<h2>POST Input</h2>
-<form name="params" action="" method="post">
-    <p>
-        <b>Python input</b> <input type="text" name="p" size="140"><br>
-    </p>
+<main class="container-fluid">
+    <section class="col-md-12 col-sm-12"></section>
+    <section id="inputParams" class="col-md-6 col-sm-12">
+        <header>
+            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
+            Model input parameters
+        </header>
+        <form name="params" action="" method="post" onsubmit="event.preventDefault(); runpredpost(this)">
+            <fieldset>
+                <legend>Raw Input (before python preprocessing)</legend>
+                <div class="form-group">
+                    <label class="sr-only"></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="p" size="140" placeholder="Enter raw input for prediction"><br>
+                    </div>
+                </div>
+            </fieldset>
 
-    <input type="button" name="okbutton" value="PREDICT" onClick="runpredpost(this.form)">
-    <input type="reset" value="CLEAR">
-</form>
+
+            <div class="btnContainer">
+                <input id="predict-btn" class="btn btn-primary" type="submit" name="okbutton" value="PREDICT">
+                <input id="reset-btn" class="btn btn-default" type="reset" value="CLEAR">
+            </div>
 
 
+        <fieldset>
+                <legend>Command Line</legend>
+                <div class="form-group">Another way to run this prediction is through command line, via POST to the REST API. 
+                </div>
+                <div class="form-group">
+                    <label class="sr-only"></label>
+                    <div class="curl"></div>
+                </div>
+        </fieldset>
 
-<h3>Command line</h3>
-<div class="curl"></div>
+        </form>
 
-<h2>Prediction result</h2>
-<div class="results">
-</div>
+    </section>
 
-<h2>URL</h2>
-<div class="params">
-</div>
+    <section class="col-md-1">
+    </section>
 
-<h2>Statistics</h2>
-<div class="stats">
-</div>
+    <section id="results" class="col-md-4 col-sm-12">
+        <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
+        <fieldset class="results">
+        </fieldset>
+        <fieldset id="modelStats">
+        </fieldset>
 
+    </section>
+</main>
 </body>
 </html>
