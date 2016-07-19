@@ -8,9 +8,13 @@ import { connect } from 'react-redux';
 import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
 import { fetchLeaderboard } from './actions/leaderboard.actions';
+import { Model } from '../Proxy/proxy';
 
 interface Props {
-  leaderboard
+  leaderboard: Model[],
+  params: {
+    id: string
+  }
 }
 
 interface DispatchProps {
@@ -20,7 +24,7 @@ interface DispatchProps {
 export class Projects extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.leaderboard)) {
-      this.props.fetchLeaderboard();
+      this.props.fetchLeaderboard(parseInt(this.props.params.id));
     }
   }
 
@@ -28,7 +32,6 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     if (!this.props.leaderboard) {
       return <div></div>;
     }
-
     return (
       <div className="projects">
         <Leaderboard items={this.props.leaderboard}></Leaderboard>
