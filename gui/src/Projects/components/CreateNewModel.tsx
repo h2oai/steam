@@ -32,7 +32,7 @@
        <div className="create-new-model">
          <PageHeader>
            Create New Model
-           <div className="subtitle">Forked from <Link to={"/models/DRF-1069085"}>DRF-1069085</Link></div>
+           <div className="subtitle">Forked from <Link to={"/projects/models/DRF-1069085"}>DRF-1069085</Link></div>
          </PageHeader>
          <form name="new-model" onSubmit={this.handleSubmit}>
            <section className="data">

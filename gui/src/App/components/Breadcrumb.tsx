@@ -3,37 +3,54 @@
  */
 
 import * as React from 'react';
-import * as ReactRouter from 'react-router';
+import { Link } from 'react-router';
 import * as _ from 'lodash';
 import '../styles/breadcrumb.scss';
-import { routes } from '../../Navigation/routes';
+import { routes } from '../../routes';
 
 interface Props {
-  routes: ReactRouter.PlainRoute & {
-    isHiddenBreadcrumb: boolean,
-    isExcludedFromBreadcrumb: boolean,
-    name: string
-  }[]
+  routes: any,
+  router: any,
+  params: any
 }
 
 export default class Breadcrumb extends React.Component<Props, any> {
-  isHiddenBreadcrumb() {
-    return _.some(this.props.routes, route => {
-      return route.isHiddenBreadcrumb === true;
-    });
-  }
 
   render(): React.ReactElement<HTMLElement> {
-    if (this.isHiddenBreadcrumb() === true) {
-      return null;
-    }
+
+    // create a new array, including only routes that we want to show in the breadcrumb
+    let crumbs = [];
+
+    _.forEach(this.props.routes, (route) => {
+      if (route.showInBreadcrumb) {
+        if (route.path.indexOf('/:') > -1) {
+          // split into two
+          let pair = route.path.split('/:');
+          crumbs.push({
+            name: route.name,
+            path: pair[0]
+          });
+          crumbs.push({
+            name: this.props.params[pair[1]],
+            path: this.props.params[pair[1]]
+          });
+        } else {
+          crumbs.push(_.assign({},route));
+        }
+      }
+    });
+
+    let path = '';
+
     return (
       <ol className="breadcrumb">
-        {this.props.routes.map((route, i) => {
-          if (route.isExcludedFromBreadcrumb === true) {
-            return null;
+        {crumbs.map((route, i) => {
+          if (crumbs.length > 1) {
+            path = (i > 0) ? path += '/' + route.path : path;
+            let crumb = (i === crumbs.length - 1) ? route.name : (<Link to={path}>{route.name}</Link>);
+            return <li key={i}>{crumb}</li>;
           }
-          return <li key={i}>{route.name}</li>;
+          return null;
         })}
       </ol>
     );

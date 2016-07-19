@@ -9,7 +9,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
-import { routes } from './Navigation/routes';
+import { routes } from './routes';
 import { rootReducer } from './App/reducers/rootReducer';
 
 import './variables.scss';
