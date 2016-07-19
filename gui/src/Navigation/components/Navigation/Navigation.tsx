@@ -5,7 +5,6 @@
 import * as React from 'react';
 import * as classNames from 'classnames';
 import { Link, withRouter } from 'react-router';
-import { connect } from 'react-redux';
 import { Sidebar } from '../Sidebar/Sidebar';
 import './navigation.scss';
 import { routes } from '../../../routes';
@@ -28,9 +27,6 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
 
   constructor() {
     super();
-    this.state = {
-      isOpen: true
-    };
   }
 
   sitemap = routes[0].childRoutes;
