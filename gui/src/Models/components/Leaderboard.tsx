@@ -14,7 +14,7 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import '../styles/leaderboard.scss';
 
-// fake data
+// sample data
 import { deeplearningTrain } from '../tests/data/deeplearningTrain';
 import { deeplearningValidation } from '../tests/data/deeplearningValidation';
 import { drfTrain } from '../tests/data/drfTrain';
@@ -35,7 +35,7 @@ interface DispatchProps {
 
 export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
 
-  fakeData = {};
+  sampleData = {};
 
   constructor() {
     super();
@@ -44,7 +44,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
-    this.fakeData = {
+    this.sampleData = {
       deeplearningTrain,
       deeplearningValidation,
       drfTrain,
@@ -131,10 +131,10 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Train']}/>
+                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Train']}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Validation']}/>
+                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Validation']}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
