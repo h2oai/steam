@@ -16,7 +16,7 @@ import (
 	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/master/data"
-	"github.com/h2oai/steamY/srv/compiler" // FIXME rename comp to compiler
+	"github.com/h2oai/steamY/srv/compiler"
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
 )
@@ -410,10 +410,18 @@ func (s *Service) GetProject(pz az.Principal, projectId int64) (*web.Project, er
 	return toProject(project), nil
 }
 
-// TODO needs to check for dependent entitites
 func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
 		return err
+	}
+
+	_, ok, err := s.ds.ReadDatasourceByProject(pz, projectId)
+	if err != nil {
+		return err
+	}
+
+	if ok {
+		return fmt.Errorf("This project still contains at least one datasource.")
 	}
 
 	if err := s.ds.DeleteProject(pz, projectId); err != nil {
@@ -508,10 +516,18 @@ func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, de
 	return nil
 }
 
-// TODO this needs to check dependent datasets
 func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return err
+	}
+
+	_, ok, err := s.ds.ReadDatasetByDatasource(pz, datasourceId)
+	if err != nil {
+		return err
+	}
+
+	if ok {
+		return fmt.Errorf("A dataset is still using this datasource.")
 	}
 
 	if err := s.ds.DeleteDatasource(pz, datasourceId); err != nil {
@@ -659,10 +675,18 @@ func (s *Service) SplitDataset(pz az.Principal, datasetId int64, ratio1 int, rat
 	return nil, nil // XXX
 }
 
-// TODO needs to check for dependent models
 func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
 		return err
+	}
+
+	_, ok, err := s.ds.ReadModelByDataset(pz, datasetId)
+	if err != nil {
+		return err
+	}
+
+	if ok {
+		return fmt.Errorf("A model is still using this dataset.")
 	}
 
 	if err := s.ds.DeleteDataset(pz, datasetId); err != nil {
