@@ -15,18 +15,30 @@ import '../styles/variableimportance.scss';
 import { responseDistributionSubset } from '../tests/data/responseDistributionSubset';
 
 interface Props {
+  columns?: any[]
+  data?: any
+  rowHeight?: number
+  rowWidth?: number
 }
 
-export default class VariableImportance extends React.Component<Props, any> {
+interface State {
 
-  columns = [];
-  sampleData = {};
+}
 
-  constructor() {
-    super();
-    this.rowHeight = 70;
-    this.rowWidth = 210;
-    this.columns = [
+export default class VariableImportance extends React.Component<Props, State> {
+
+  widthScale: any = () => {};
+
+  componentWillMount() {
+    this.widthScale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([0, this.props.rowWidth]);
+  }
+
+  static defaultProps: Props = {
+    rowHeight: 70,
+    rowWidth: 210,
+    columns: [
       {
         name: 'tenure',
         type: 'numeric',
@@ -52,14 +64,12 @@ export default class VariableImportance extends React.Component<Props, any> {
         type: 'categorical',
         importance: 0.21
       }
-    ];
-    this.widthScale = d3.scaleLinear()
-      .domain([0, 1])
-      .range([0, this.rowWidth]);
-    this.sampleData = {
+    ],
+    data : {
       responseDistributionSubset
     }
-  }
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="variable-importance metrics">
@@ -84,7 +94,7 @@ export default class VariableImportance extends React.Component<Props, any> {
               NOTES
             </Cell>
           </Row>
-          {this.columns.map((item, i) => {
+          {this.props.columns.map((item, i) => {
             return (
               <Row key={i}>
               <Cell>
@@ -102,12 +112,12 @@ export default class VariableImportance extends React.Component<Props, any> {
               </Cell>
               <Cell>
                 <div>
-                  <svg width={this.rowWidth} height={this.rowHeight}>
+                  <svg width={this.props.rowWidth} height={this.props.rowHeight}>
                     <rect
                       x="0"
                       y="0"
                       width={this.widthScale(item.importance)}
-                      height={this.rowHeight}
+                      height={this.props.rowHeight}
                       rx="0"
                       ry="0"
                       className="bar"
@@ -121,7 +131,7 @@ export default class VariableImportance extends React.Component<Props, any> {
               <Cell className="graph">
               </Cell>
               <Cell>
-                <GroupedBarChart data={this.sampleData['responseDistributionSubset'][i]['responseCounts']}/>
+                <GroupedBarChart data={this.props.data['responseDistributionSubset'][i]['responseCounts']}/>
               </Cell>
               <Cell></Cell>
             </Row>

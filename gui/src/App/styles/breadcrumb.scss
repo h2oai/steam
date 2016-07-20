@@ -1,6 +1,7 @@
 @import '../../variables.scss';
 
 .breadcrumb {
+  box-shadow: 0 0 7px rgba(0,0,0,0.35);
   height: $base-grid-unit;
   margin: 0;
   padding: 0 $base-grid-unit;
