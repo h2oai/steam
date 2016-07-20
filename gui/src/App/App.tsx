@@ -37,7 +37,7 @@ export class App extends React.Component<Props & DispatchProps, any> {
         <Navigation router={this.props.router} routes={this.props.routes}></Navigation>
         <div className="body-container">
           <header>
-            <Breadcrumb router={this.props.router} routes={this.props.routes} params={this.props.params}></Breadcrumb>
+            <Breadcrumb routes={this.props.routes} params={this.props.params}></Breadcrumb>
           </header>
           <Body>
           {this.props.children}

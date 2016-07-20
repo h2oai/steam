@@ -17,7 +17,23 @@
  import CreateNewModel from './Projects/components/CreateNewModel';
  import Dummy from './Dummy/Dummy';
 
-export const routes = [{
+interface IIndexRoute {
+  component: any
+  name: string
+}
+
+interface IRoute {
+  path: string
+  component?: any
+  name: string;
+  showInBreadcrumb?: boolean
+  showInNavigation?: boolean
+  icon?: string
+  indexRoute?: IIndexRoute
+  childRoutes?: IRoute[]
+}
+
+export const routes: IRoute[] = [{
   path: '/',
   component: App,
   name: 'Home',
@@ -25,9 +41,7 @@ export const routes = [{
   showInNavigation: false,
   indexRoute: {
     component: WelcomeSplashScreen,
-    name: 'Welcome',
-    showInBreadcrumb: false,
-    showInNavigation: false
+    name: 'Welcome'
   },
   childRoutes: [
     // /projects
@@ -40,9 +54,7 @@ export const routes = [{
       icon: 'fa fa-folder',
       indexRoute: {
         component: WelcomeSplashScreen,
-        name: 'Welcome',
-        showInBreadcrumb: false,
-        showInNavigation: false,
+        name: 'Welcome'
       },
       childRoutes: [
         // /projects/data
@@ -64,8 +76,8 @@ export const routes = [{
         // /models/:id
         {
           path: 'models/:id',
-          name: 'Models',
           component: ProjectDetails,
+          name: 'Models',
           showInBreadcrumb: true,
           showInNavigation: false
         },
@@ -175,8 +187,8 @@ export const routes = [{
     // /clusters
     {
       path: 'clusters',
-      name: 'Clusters',
       component: Dummy,
+      name: 'Clusters',
       icon: 'fa fa-cube',
       showInBreadcrumb: true,
       showInNavigation: true,
@@ -207,11 +219,11 @@ export const routes = [{
     // /team
     {
       path: 'team',
-      name: 'Team',
-      icon: 'fa fa-users',
       component: Dummy,
+      name: 'Team',
       showInBreadcrumb: true,
       showInNavigation: true,
+      icon: 'fa fa-users',
       childRoutes: [
         {
           path: 'submenu1',

@@ -10,7 +10,6 @@ import { routes } from '../../routes';
 
 interface Props {
   routes: any,
-  router: any,
   params: any
 }
 
@@ -35,7 +34,7 @@ export default class Breadcrumb extends React.Component<Props, any> {
             path: this.props.params[pair[1]]
           });
         } else {
-          crumbs.push(_.assign({},route));
+          crumbs.push(_.assign({}, route));
         }
       }
     });

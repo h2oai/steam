@@ -62,7 +62,7 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
           </Sidebar>
         );
       }
-    })
+    });
     return (
       <div className='nav-container'>
         <Sidebar className="primary-navigation">
