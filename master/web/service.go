@@ -523,21 +523,76 @@ func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
 
 // --- Dataset ---
 
+func (s *Service) importDataset(name, configuration, address string) ([]byte, string, error) {
+	h2o := h2ov3.NewClient(address)
+
+	// Translate json to string path
+	rawJson := make(map[string]string)
+	if err := json.Unmarshal([]byte(configuration), &rawJson); err != nil {
+		return nil, "", err
+	}
+	path, ok := rawJson["path"]
+	if !ok {
+		return nil, "", fmt.Errorf("Cannot locate path: Empty datasource configuration")
+	}
+
+	importBody, err := h2o.PostImportFilesImportfiles(path)
+	if err != nil {
+		return nil, "", err
+	}
+
+	parseSetupBody, err := h2o.PostParseSetupGuesssetup(importBody.DestinationFrames)
+	if err != nil {
+		return nil, "", err
+	}
+
+	parseParms := bindings.NewParseV3()
+	parseParms.FromParseSetup(*parseSetupBody)
+	parseParms.Blocking = true
+	parseBody, err := h2o.PostParseParse(parseParms)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	job, err := h2o.JobPoll(parseBody.Job.Key.Name)
+	if err != nil {
+		return nil, "", err
+	}
+	rawFrame, _, err := h2o.GetFramesFetch(job.Dest.Name)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return rawFrame, parseParms.DestinationFrame.Name, err
+}
+
 func (s *Service) CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name, description string, responseColumnName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
 		return 0, err
 	}
 
-	// XXX import dataset here
+	datasource, err := s.ds.ReadDatasource(pz, datasourceId)
+	if err != nil {
+		return 0, err
+	}
+	cluster, err := s.ds.ReadCluster(pz, clusterId)
+	if err != nil {
+		return 0, err
+	}
+
+	properties, frameName, err := s.importDataset(name, datasource.Configuration, cluster.Address)
+	if err != nil {
+		return 0, err
+	}
 
 	dataset := data.Dataset{
 		0,
 		datasourceId,
 		name,
 		description,
-		"", // XXX FrameName key from h2o
+		frameName,
 		responseColumnName,
-		"", // XXX Properties rawJson from h2o
+		string(properties),
 		"1",
 		time.Now(),
 	}
@@ -581,16 +636,14 @@ func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, descript
 		return err
 	}
 
-	// XXX import dataset here
-
 	dataset := data.Dataset{
 		0,
 		0,
 		name,
 		description,
-		"", // XXX FrameName key from h2o
+		"",
 		responseColumnName,
-		"", // XXX Properties rawJson from h2o
+		"",
 		"1",
 		time.Now(),
 	}
@@ -742,6 +795,7 @@ func dataFrameName(m *bindings.ModelSchemaBase) string {
 	return ""
 }
 
+// TODO: add offset/limit to this call for future
 func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Model, error) {
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
@@ -768,7 +822,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 			"",
 			"",
 			0,
-			"", // XXX Fill in raw metrics
+			"", // TODO Fill in raw metrics (Maybe not, this is an H2O call not a db call)
 			m.Timestamp,
 		}
 	}
@@ -790,21 +844,18 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
-	_, r, err := h2o.GetModelsFetch(modelName)
+	rawModel, r, err := h2o.GetModelsFetch(modelName)
 	if err != nil {
 		return nil, err
 	}
 
 	m := r.Models[0]
 
-	// TODO: json, modelMetrics, err
-	// This needs to hooked up to api
-	rawMetrics, _, err := h2o.GetModelMetricsListSchemaFetchByModel(modelName)
+	// fetch raw frame json from H2O
+	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name)
 	if err != nil {
 		return nil, err
 	}
-
-	// XXX Sebastian: fetch raw frame json from H2O
 
 	datasourceId, err := s.ds.CreateDatasource(pz, data.Datasource{
 		0,
@@ -825,7 +876,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		"Dataset for model " + modelName,
 		m.DataFrame.Name,
 		m.ResponseColumnName,
-		"",  // XXX Sebastian: put raw frame json here
+		string(rawFrame),
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})
@@ -845,7 +896,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		"",
 		"",
 		0,
-		string(rawMetrics),
+		string(rawModel),
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 	})

@@ -49,7 +49,7 @@ type CloudV3 struct {
 	*/
 }
 
-func newCloudV3() *CloudV3 {
+func NewCloudV3() *CloudV3 {
 	return &CloudV3{
 		SkipTicks:         false,
 		Version:           "",

@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+// ---- JSON Formatting ----
+
 func jsonToFloat(j interface{}) float32 {
 	switch j.(type) {
 	case string:

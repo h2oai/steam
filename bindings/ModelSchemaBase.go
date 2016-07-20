@@ -1,10 +1,5 @@
 package bindings
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 type ModelSchemaBase struct {
 	*Schema
 	/** Model key */
@@ -31,13 +26,4 @@ func NewModelSchemaBase() *ModelSchemaBase {
 		Timestamp:          0,
 		Schema:             &Schema{},
 	}
-}
-
-// ToString returns the contents of this object as a JSON String.
-func (o *ModelSchemaBase) ToString() string {
-	j, err := json.MarshalIndent(o, "", "    ")
-	if err != nil {
-		return fmt.Sprint(err)
-	}
-	return string(j)
 }

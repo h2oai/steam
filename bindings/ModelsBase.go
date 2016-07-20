@@ -22,7 +22,7 @@ type ModelsBase struct {
 	*/
 }
 
-func newModelsBase() *ModelsBase {
+func NewModelsBase() *ModelsBase {
 	return &ModelsBase{
 		ModelId:              nil,
 		Preview:              false,

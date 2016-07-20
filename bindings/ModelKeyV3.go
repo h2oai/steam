@@ -15,7 +15,7 @@ type ModelKeyV3 struct {
 	*/
 }
 
-func newModelKeyV3() *ModelKeyV3 {
+func NewModelKeyV3() *ModelKeyV3 {
 	return &ModelKeyV3{
 		KeyV3: &KeyV3{
 			Name: "",
