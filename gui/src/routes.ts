@@ -79,19 +79,19 @@ export const routes: IRoute[] = [{
         name: 'Welcome'
       },
       childRoutes: [
-        // /projects/data
-        {
-          path: 'data',
-          component: Dummy,
-          name: 'Data',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
         // /projects/models
         {
           path: 'models',
           component: Models,
           name: 'Models',
+          showInBreadcrumb: true,
+          showInNavigation: true
+        },
+        // /projects/data
+        {
+          path: 'data',
+          component: Dummy,
+          name: 'Data',
           showInBreadcrumb: true,
           showInNavigation: true
         },
