@@ -1,0 +1,22 @@
+@import '../../variables';
+
+.variableImportance {
+  height: 100%;
+  padding: $small 0;
+  font-family: $font-text;
+}
+
+.columnName {
+  font-size: 2em;
+  font-weight: 700;
+}
+
+.detail {
+  font-size: 1.2em;
+  font-weight: 300;
+  color: $brand-lightgray;
+}
+
+.bar {
+  fill: $brand-orange;
+}

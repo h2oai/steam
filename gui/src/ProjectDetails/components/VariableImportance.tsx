@@ -6,43 +6,54 @@ import DetailLine from './DetailLine';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
-import '../styles/goodnessoffit.scss';
+import '../styles/variableimportance.scss';
+import * as d3 from 'd3';
 
 interface Props {
 }
 
-export default class GoodnessOfFit extends React.Component<Props, any> {
-  render(): React.ReactElement<HTMLDivElement> {
-    let metrics = [
+export default class VariableImportance extends React.Component<Props, any> {
+
+  columns = [];
+
+  constructor() {
+    super();
+    this.rowHeight = 70;
+    this.rowWidth = 210; 
+    this.columns = [
       {
-        label: 'F1',
-        value: '',
+        name: 'tenure',
+        type: 'numeric',
+        importance: 0.97
+      }, 
+      {
+        name: 'gender',
+        type: 'enum(2)',
+        importance: 0.88
       },
       {
-        label: 'Log Loss',
-        value: '',
+        name: 'PhoneService',
+        type: 'enum(3)',
+        importance: 0.72
       },
       {
-        label: 'Mean Squared Error',
-        value: '',
+        name: 'OnlineSecurity',
+        type: 'enum(3)',
+        importance: 0.32
       },
       {
-        label: 'Precision',
-        value: '',
-      },
-      {
-        label: 'Recall',
-        value: '',
-      }
+        name: 'Dependents',
+        type: 'numeric',
+        importance: 0.21
+      }            
     ];
+    this.widthScale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([0, this.rowWidth]);
+  }
+  render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="metrics">
-        <div className="metrics-summary">
-          <div className="metrics-summary--title">Metrics</div>
-          {metrics.map((item, i) => {
-            return <DetailLine key={i} icon={item.label} label={item.label} value={item.value}/>;
-          })}
-        </div>
         <Table>
           <Row header={true}>
             <Cell>
@@ -64,6 +75,46 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
               NOTES
             </Cell>
           </Row>
+          {this.columns.map((item, i) => {
+            return (
+              <Row>
+              <Cell></Cell>
+              <Cell>
+                <div className="variableImportance">
+                  <div className="columnName">
+                    {item.name}
+                  </div>
+                  <div className="detail">
+                    {item.type}
+                  </div>
+                </div>
+              </Cell>
+                <div>
+                  <svg width={this.rowWidth} height={this.rowHeight}>
+                    <rect 
+                      x="0"
+                      y="0"
+                      width={this.widthScale(item.importance)}
+                      height={this.rowHeight}
+                      rx="0"
+                      ry="0"
+                      className="bar"
+                    />
+                  </svg>
+                </div>
+                <div className="detail">
+                  {item.importance}
+                </div>
+              <Cell>
+              </Cell>
+              <Cell className="graph">
+              </Cell>
+              <Cell className="graph">
+              </Cell>
+              <Cell></Cell>
+            </Row>
+            );
+          })}
         </Table>
       </div>
     );
