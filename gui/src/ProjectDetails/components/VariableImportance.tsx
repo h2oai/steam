@@ -8,6 +8,7 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import GroupedBarChart from './GroupedBarChart';
 import * as d3 from 'd3';
+import { getOrdinal } from '../../utils/utils';
 import '../styles/variableimportance.scss';
 
 // sample data
@@ -24,13 +25,13 @@ export default class VariableImportance extends React.Component<Props, any> {
   constructor() {
     super();
     this.rowHeight = 70;
-    this.rowWidth = 210; 
+    this.rowWidth = 210;
     this.columns = [
       {
         name: 'tenure',
         type: 'numeric',
         importance: 0.97
-      }, 
+      },
       {
         name: 'gender',
         type: 'enum(2)',
@@ -50,7 +51,7 @@ export default class VariableImportance extends React.Component<Props, any> {
         name: 'Dependents',
         type: 'categorical',
         importance: 0.21
-      }            
+      }
     ];
     this.widthScale = d3.scaleLinear()
       .domain([0, 1])
@@ -61,7 +62,7 @@ export default class VariableImportance extends React.Component<Props, any> {
   }
   render(): React.ReactElement<HTMLDivElement> {
     return (
-      <div className="metrics">
+      <div className="variable-importance metrics">
         <Table>
           <Row header={true}>
             <Cell>
@@ -85,8 +86,10 @@ export default class VariableImportance extends React.Component<Props, any> {
           </Row>
           {this.columns.map((item, i) => {
             return (
-              <Row>
-              <Cell></Cell>
+              <Row key={i}>
+              <Cell>
+                {(i + 1) + getOrdinal(i + 1)}
+              </Cell>
               <Cell>
                 <div className="variableImportance">
                   <div className="columnName">
@@ -100,7 +103,7 @@ export default class VariableImportance extends React.Component<Props, any> {
               <Cell>
                 <div>
                   <svg width={this.rowWidth} height={this.rowHeight}>
-                    <rect 
+                    <rect
                       x="0"
                       y="0"
                       width={this.widthScale(item.importance)}
@@ -116,8 +119,6 @@ export default class VariableImportance extends React.Component<Props, any> {
                 </div>
               </Cell>
               <Cell className="graph">
-              </Cell>
-              <Cell>
               </Cell>
               <Cell>
                 <GroupedBarChart data={this.sampleData['responseDistributionSubset'][i]['responseCounts']}/>

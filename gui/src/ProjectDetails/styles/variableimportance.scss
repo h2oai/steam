@@ -1,14 +1,13 @@
 @import '../../variables';
 
 .variableImportance {
-  height: 100%;
-  padding: $small 0;
-  font-family: $font-text;
+//  font-family: $font-text;
 }
 
 .columnName {
-  font-size: 2em;
-  font-weight: 700;
+  font-size: 1.3em;
+  font-family: $font-text;
+  font-weight: 600;
 }
 
 .detail {
@@ -19,4 +18,32 @@
 
 .bar {
   fill: $brand-orange;
+}
+
+.metrics.variable-importance {
+  .table {
+    .row {
+      &.header {
+
+      }
+      .cell:nth-child(1) {
+        flex-basis:64px;
+      }
+      .cell:nth-child(2) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(3) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(4) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(5) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(6) {
+        flex-basis:20%;
+      }
+    }
+  }
 }
