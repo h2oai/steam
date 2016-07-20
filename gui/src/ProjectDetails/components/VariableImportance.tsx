@@ -6,8 +6,12 @@ import DetailLine from './DetailLine';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
-import '../styles/variableimportance.scss';
+import GroupedBarChart from './GroupedBarChart';
 import * as d3 from 'd3';
+import '../styles/variableimportance.scss';
+
+// sample data
+import { responseDistributionSubset } from '../tests/data/responseDistributionSubset';
 
 interface Props {
 }
@@ -15,6 +19,7 @@ interface Props {
 export default class VariableImportance extends React.Component<Props, any> {
 
   columns = [];
+  sampleData = {};
 
   constructor() {
     super();
@@ -43,13 +48,16 @@ export default class VariableImportance extends React.Component<Props, any> {
       },
       {
         name: 'Dependents',
-        type: 'numeric',
+        type: 'categorical',
         importance: 0.21
       }            
     ];
     this.widthScale = d3.scaleLinear()
       .domain([0, 1])
       .range([0, this.rowWidth]);
+    this.sampleData = {
+      responseDistributionSubset
+    }
   }
   render(): React.ReactElement<HTMLDivElement> {
     return (
@@ -107,11 +115,12 @@ export default class VariableImportance extends React.Component<Props, any> {
                   {item.importance}
                 </div>
               </Cell>
+              <Cell className="graph">
+              </Cell>
               <Cell>
               </Cell>
-              <Cell className="graph">
-              </Cell>
-              <Cell className="graph">
+              <Cell>
+                <GroupedBarChart data={this.sampleData['responseDistributionSubset'][i]['responseCounts']}/>
               </Cell>
               <Cell></Cell>
             </Row>
