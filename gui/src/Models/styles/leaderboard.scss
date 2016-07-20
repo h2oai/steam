@@ -3,6 +3,11 @@
 .leaderboard {
   width: 100%;
   .row {
+    &.header {
+      .cell:first-child {
+        padding-top:0;
+      }
+    }
     .cell {
       flex-grow: 1;
       font-family: "Open Sans", sans-serif;
@@ -11,9 +16,10 @@
       flex-grow: 0;
       flex-basis: $medium;
       color: $brand-dark-3;
+      padding-top:3px;
     }
     .cell:nth-of-type(2) {
-      flex-basis: auto;
+      flex-basis: 50%;
       flex-grow: 2;
       .metadata {
         .model-name {
@@ -30,6 +36,11 @@
       align-self: center;
       flex-grow: 0;
       margin: auto;
+      svg {
+        rect {
+          shape-rendering: crispEdges;
+        }
+      }
     }
     .cell:last-child {
       flex-basis: $xlarge * 3;
