@@ -93,7 +93,7 @@ export default class NewProjectStep3 extends React.Component<any, any> {
               </Panel>
             );
           })}
-          <Link to="/models" className="default link-leaderboard">Return to Model Leaderboard</Link><Link to="/projects/deployments">See all jobs on Prithbi - 8 node</Link>
+          <Link to="/projects/models" className="default link-leaderboard">Return to Model Leaderboard</Link><Link to="/projects/deployments">See all jobs on Prithbi - 8 node</Link>
         </section>
       </div>
     );
