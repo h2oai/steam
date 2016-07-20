@@ -89,6 +89,7 @@ export default class VariableImportance extends React.Component<Props, any> {
                   </div>
                 </div>
               </Cell>
+              <Cell>
                 <div>
                   <svg width={this.rowWidth} height={this.rowHeight}>
                     <rect 
@@ -105,6 +106,7 @@ export default class VariableImportance extends React.Component<Props, any> {
                 <div className="detail">
                   {item.importance}
                 </div>
+              </Cell>
               <Cell>
               </Cell>
               <Cell className="graph">
