@@ -88,7 +88,51 @@ export default class VariableImportance extends React.Component<Props, State> {
               PARTIAL DEPENDENCY
             </Cell>
             <Cell className="graph">
-              RESPONSE DISTRIBUTION
+              <div>
+                RESPONSE DISTRIBUTION
+              </div>
+              <div className="legend">
+                <svg width={this.props.rowWidth} height={0.37 * this.props.rowHeight}>
+                  <g transform="translate(0, 0)">
+                    <rect
+                        x="0"
+                        y="10"
+                        width="20"
+                        height="20"
+                        rx="0"
+                        ry="0"
+                        className="symbol yes"
+                    />
+                    <text 
+                       x="30"
+                       y="10"
+                       dy="12"
+                       className="legendText"
+                    >
+                       Yes
+                     </text>
+                  </g>
+                  <g transform="translate(85, 0)">
+                    <rect
+                      x="0"
+                      y="10"
+                      width="20"
+                      height="20"
+                      rx="0"
+                      ry="0"
+                      className="symbol no"
+                    />
+                    <text 
+                       x="30"
+                       y="10"
+                       dy="12"
+                       className="legendText" 
+                    >
+                       No
+                     </text>
+                  </g>
+                </svg>
+              </div>
             </Cell>
             <Cell className="graph">
               NOTES
