@@ -3,36 +3,36 @@ import * as ReactDOM from 'react-dom';
 import { groupedBarChart } from 'vis-components';
 
 interface Props {
-  data: any[]
+    data: any[]
 }
 
-export default class groupedBarChart extends React.Component<Props, any> {
+export default class GroupedBarChart extends React.Component<Props, any> {
 
-  _mountNode: Element;
+    _mountNode: Element;
 
-  componentDidMount() {
-    this._mountNode = ReactDOM.findDOMNode(this);
-    this.renderGraph();
-  }
-
-  componentWillUnmount() {
-    if (this._mountNode) {
-      ReactDOM.unmountComponentAtNode(this._mountNode);
-      this._mountNode.remove();
-      this._mountNode = null;
+    componentDidMount() {
+        this._mountNode = ReactDOM.findDOMNode(this);
+        this.renderGraph();
     }
-  }
 
-  renderGraph() {
-    let options = {
-      groupByVariable: 'value',
-      barColors: ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f']
-    };
+    componentWillUnmount() {
+        if (this._mountNode) {
+            ReactDOM.unmountComponentAtNode(this._mountNode);
+            this._mountNode.remove();
+            this._mountNode = null;
+        }
+    }
 
-    groupedBarChart.plot(this._mountNode, this.props.data, options);
-  }
+    renderGraph() {
+        let options = {
+            groupByVariable: 'value',
+            barColors: ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f']
+        };
 
-  render() {
-    return <div className="grouped-bar-container"></div>;
-  }
+        groupedBarChart.plot(this._mountNode, this.props.data, options);
+    }
+
+    render() {
+        return <div className="grouped-bar-container"></div>;
+    }
 }

@@ -12,9 +12,10 @@ import Pagination from '../components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
+import { getOrdinal } from '../../utils/utils';
 import '../styles/leaderboard.scss';
 
-// fake data
+// sample data
 import { deeplearningTrain } from '../tests/data/deeplearningTrain';
 import { deeplearningValidation } from '../tests/data/deeplearningValidation';
 import { drfTrain } from '../tests/data/drfTrain';
@@ -35,7 +36,7 @@ interface DispatchProps {
 
 export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
 
-  fakeData = {};
+  sampleData = {};
 
   constructor() {
     super();
@@ -44,7 +45,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
-    this.fakeData = {
+    this.sampleData = {
       deeplearningTrain,
       deeplearningValidation,
       drfTrain,
@@ -56,12 +57,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
       naivebayesTrain,
       naivebayesValidation
     };
-  }
-
-  static getOrdinal(rank: number): string {
-    let suffixes = ['th', 'st', 'nd', 'rd'];
-    let remainder = rank % 100;
-    return (suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]);
   }
 
   openDeploy(): void {
@@ -113,7 +108,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
           {this.props.items.map((item, i) => {
             return (
               <Row key={i}>
-                <Cell>{item.rank + Leaderboard.getOrdinal(item.rank)}</Cell>
+                <Cell>{item.rank + getOrdinal(item.rank)}</Cell>
                 <Cell>
                   <div className="metadata">
                     <div className="model-name">
@@ -131,14 +126,14 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Train']}/>
+                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Train']}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.fakeData[item.metadata.modelType + 'Validation']}/>
+                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Validation']}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
-                    <li><Link to={"models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
+                    <li><Link to={"/projects/models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                     <li><span><i className="fa fa-database"></i></span><span>designate as baseline</span></li>
                     <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span><span>deploy model</span></li>
                     <li><span><i className="fa fa-ellipsis-h"></i></span><span>more actions</span></li>
