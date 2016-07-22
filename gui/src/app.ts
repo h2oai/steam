@@ -859,7 +859,7 @@ module Main {
                 return
             }
             ctx.setBusy('Creating cluster...')
-            ctx.remote.startYarnCluster(cloudId(), engine().id, cloudSizeNum(), cloudMemory(), ctx.principal.username, (err, clusterId) => {
+            ctx.remote.startClusterOnYarn(cloudId(), engine().id, cloudSizeNum(), cloudMemory(), ctx.principal.username, (err, clusterId) => {
                 if (err) {
                     error(err.message)
                 } else {
@@ -931,7 +931,7 @@ module Main {
 
         function buildModel(): void {
             ctx.setBusy('Building model...')
-            ctx.remote.buildAutoModel(cloudId, frame(), responseColumn(), maxRunTimeNum(), (err) => {
+            ctx.remote.buildModelAuto(cloudId, frame(), responseColumn(), maxRunTimeNum(), (err) => {
                 if (err) {
                     error(err.message)
                 } else {
@@ -982,7 +982,7 @@ module Main {
 
         const deployModel: Act = () => {
             ctx.setBusy('Deploying model...')
-            ctx.remote.startScoringService(model.id, portNum(), (err) => {
+            ctx.remote.startService(model.id, portNum(), (err) => {
                 if (err) {
                     error(err.message)
                 } else {
@@ -1138,7 +1138,7 @@ module Main {
             const jobSlug = sig<string>('')
             const isActive = sig<boolean>(true)
 
-            ctx.remote.getClusterModels(cloud.id, (err, models) => {
+            ctx.remote.getModelsFromCluster(cloud.id, (err, models) => {
                 if (err) {
                     alert(err.message)
                     return
@@ -1194,7 +1194,7 @@ module Main {
         const canStop = sig<boolean>(cloud.state !== 'stopped')
         function stopCloud(): void {
             ctx.setBusy('Stopping cluster...')
-            ctx.remote.stopYarnCluster(cloud.id, (err) => {
+            ctx.remote.stopClusterOnYarn(cloud.id, (err) => {
                 ctx.setFree()
                 if (err) {
                     error(err.message)
@@ -1235,7 +1235,7 @@ module Main {
         }
 
         if (!isExternalCluster(cloud)) {
-            ctx.remote.getYarnCluster(cloud.id, (err, yarnCluster) => {
+            ctx.remote.getClusterOnYarn(cloud.id, (err, yarnCluster) => {
                 if (err) {
                     error(err.message)
                     return
@@ -1316,7 +1316,7 @@ module Main {
             })
             ctx.pushDialog(dialog)
         }
-        ctx.remote.getClusterModels(cloud.id, (err, models) => {
+        ctx.remote.getModelsFromCluster(cloud.id, (err, models) => {
             if (err) {
                 error(err.message)
                 return
@@ -1467,7 +1467,7 @@ module Main {
         const error = sig<string>('')
         const items = sigs<FolderI>([])
         const hasItems = lifts(items, (items) => items.length > 0)
-        ctx.remote.getScoringServices(0, 10000, (err, services) => {
+        ctx.remote.getServices(0, 10000, (err, services) => {
             if (err) {
                 error(err.message)
                 return
@@ -1506,7 +1506,7 @@ module Main {
         const canStop = sig<boolean>(service.state !== 'stopped')
         const stopService: Act = () => {
             ctx.setBusy('Stopping service...')
-            ctx.remote.stopScoringService(service.id, (err) => {
+            ctx.remote.stopService(service.id, (err) => {
                 ctx.setFree()
                 if (err) {
                     alert(err.message)
