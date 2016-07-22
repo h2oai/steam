@@ -49,7 +49,7 @@ func Define(name string, instance interface{}) (*Interface, error) {
 	return toInterface(name, dict)
 }
 
-func Generate(i *Interface, tmpl string, funcMap map[string]interface{}) ([]byte, error) {
+func Generate(i interface{}, tmpl string, funcMap map[string]interface{}) ([]byte, error) {
 	t, err := template.New("test").Funcs(funcMap).Parse(tmpl)
 	if err != nil {
 		return nil, err
@@ -127,6 +127,11 @@ func toStruct(s interface{}) (*Struct, error) {
 			isStruct = ft.Kind() == reflect.Struct
 		}
 
+		help := f.Tag.Get("help")
+		if len(help) == 0 {
+			help = "No description available"
+		}
+
 		fields[i] = &Field{
 			ft,
 			f.Name,
@@ -134,7 +139,7 @@ func toStruct(s interface{}) (*Struct, error) {
 			isArray,
 			isStruct,
 			defaultValueOf(ft.Name(), isArray, isStruct),
-			f.Tag.Get("help"),
+			help,
 		}
 	}
 	return &Struct{t.Name(), fields}, nil
