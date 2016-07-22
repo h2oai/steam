@@ -995,11 +995,12 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 	}
 
 	// do not recompile if war file is already available
-	warFilePath := fs.GetWarFilePath(s.workingDir, model.Name, model.LogicalName)
+	modelDir := strconv.FormatInt(modelId, 10)
+	warFilePath := fs.GetWarFilePath(s.workingDir, modelDir, model.LogicalName)
 	if _, err := os.Stat(warFilePath); os.IsNotExist(err) {
 		warFilePath, err = compilationService.CompilePojo(
-			fs.GetJavaModelPath(s.workingDir, model.Name, model.LogicalName),
-			fs.GetGenModelPath(s.workingDir, model.Name),
+			fs.GetJavaModelPath(s.workingDir, modelDir, model.LogicalName),
+			fs.GetGenModelPath(s.workingDir, modelDir),
 			"makewar",
 		)
 		if err != nil {
