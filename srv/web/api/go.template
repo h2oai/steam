@@ -17,9 +17,9 @@ import (
 
 {{range .Structs}}
 type {{.Name}} struct {
-{{range .Fields}}
+{{- range .Fields}}
   {{.Name}} {{template "typeOf" .}} `json:"{{snake .Name}}"`
-{{end}}
+{{- end}}
 }
 {{end}}
 
@@ -31,9 +31,9 @@ type Az interface {
 
 {{with .Facade}}
 type {{.Name}} interface {
-  {{range .Methods}}
+  {{- range .Methods}}
   {{.Name}}(pz az.Principal{{range .Inputs}}, {{lower .Name}} {{template "typeOf" .}}{{end}}) ({{range .Outputs}}{{template "typeOf" .}}, {{end}}error)
-  {{end}}
+  {{- end}}
 }
 {{end}}
 
@@ -43,14 +43,15 @@ type {{.Name}} interface {
 {{with .Facade}}
 {{range .Methods}}
 type {{.Name}}In struct {
-  {{range .Inputs}}
+  {{- range .Inputs}}
   {{.Name}} {{template "typeOf" .}} `json:"{{snake .Name}}"`
-  {{end}}
+  {{- end}}
 }
+
 type {{.Name}}Out struct {
-  {{range .Outputs}}
+  {{- range .Outputs}}
   {{.Name}} {{template "typeOf" .}} `json:"{{snake .Name}}"`
-  {{end}}
+  {{- end}}
 }
 {{end}}
 {{end}}
