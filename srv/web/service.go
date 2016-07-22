@@ -109,6 +109,7 @@ type Model struct {
   ValidationDatasetId int64 `json:"validation_dataset_id"`
   Name string `json:"name"`
   ClusterName string `json:"cluster_name"`
+  ModelKey string `json:"model_key"`
   Algorithm string `json:"algorithm"`
   DatasetName string `json:"dataset_name"`
   ResponseColumnName string `json:"response_column_name"`
@@ -206,7 +207,7 @@ type Service interface {
   GetModel(pz az.Principal, modelId int64) (*Model, error)
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
   GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*Model, error)
-  ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelName string) (*Model, error)
+  ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
   DeleteModel(pz az.Principal, modelId int64) (error)
   StartService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
   StopService(pz az.Principal, serviceId int64) (error)
@@ -547,11 +548,12 @@ type GetModelsFromClusterOut struct {
 type ImportModelFromClusterIn struct {
   ClusterId int64 `json:"cluster_id"`
   ProjectId int64 `json:"project_id"`
+  ModelKey string `json:"model_key"`
   ModelName string `json:"model_name"`
 }
 
 type ImportModelFromClusterOut struct {
-  Model *Model `json:"model"`
+  ModelId int64 `json:"model_id"`
 }
 
 type DeleteModelIn struct {
@@ -1275,14 +1277,14 @@ func (this *Remote) GetModelsFromCluster(clusterId int64) ([]*Model, error) {
   return out.Models, nil
 }
 
-func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, modelName string) (*Model, error) {
-  in := ImportModelFromClusterIn{ clusterId , projectId , modelName  }
+func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, modelKey string, modelName string) (int64, error) {
+  in := ImportModelFromClusterIn{ clusterId , projectId , modelKey , modelName  }
   var out ImportModelFromClusterOut
   err := this.Proc.Call("ImportModelFromCluster", &in, &out)
   if err != nil {
-    return nil, err
+    return 0, err
   }
-  return out.Model, nil
+  return out.ModelId, nil
 }
 
 func (this *Remote) DeleteModel(modelId int64) (error) {
@@ -2334,13 +2336,13 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 	}
 	log.Println(pz, "ImportModelFromCluster")
 
-	val0, err := this.Service.ImportModelFromCluster(pz, in.ClusterId, in.ProjectId, in.ModelName)
+	val0, err := this.Service.ImportModelFromCluster(pz, in.ClusterId, in.ProjectId, in.ModelKey, in.ModelName)
 	if err != nil {
 		log.Printf("%s Failed ImportModelFromCluster: %v", pz, err)
 		return err
 	}
   
-	out.Model = val0 
+	out.ModelId = val0 
   
 	return nil
 }

@@ -103,6 +103,7 @@ module Proxy {
     validation_dataset_id: number // No description available
     name: string // No description available
     cluster_name: string // No description available
+    model_key: string // No description available
     algorithm: string // No description available
     dataset_name: string // No description available
     response_column_name: string // No description available
@@ -229,7 +230,7 @@ module Proxy {
     // List models from a cluster
     getModelsFromCluster: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
     // Import models from a cluster
-    importModelFromCluster: (clusterId: number, projectId: number, modelName: string, go: (error: Error, model: Model) => void) => void
+    importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
     // Delete a model
     deleteModel: (modelId: number, go: (error: Error) => void) => void
     // Start a service
@@ -613,11 +614,12 @@ module Proxy {
   interface ImportModelFromClusterIn {
     cluster_id: number
     project_id: number
+    model_key: string
     model_name: string
   }
 
   interface ImportModelFromClusterOut {
-    model: Model
+    model_id: number
   }
   
   interface DeleteModelIn {
@@ -1395,14 +1397,14 @@ module Proxy {
 		})
   }
   
-  export function importModelFromCluster(clusterId: number, projectId: number, modelName: string, go: (error: Error, model: Model) => void): void {
-    const req: ImportModelFromClusterIn = { cluster_id: clusterId, project_id: projectId, model_name: modelName }
+  export function importModelFromCluster(clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void): void {
+    const req: ImportModelFromClusterIn = { cluster_id: clusterId, project_id: projectId, model_key: modelKey, model_name: modelName }
     Proxy.Call("ImportModelFromCluster", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
         const d: ImportModelFromClusterOut = <ImportModelFromClusterOut>data
-        return go(null, d.model)
+        return go(null, d.model_id)
       }
 		})
   }

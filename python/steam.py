@@ -656,25 +656,27 @@ class RPCClient:
 		response = self.connection.call("GetModelsFromCluster", request)
 		return response['models']
 	
-	def import_model_from_cluster(self, cluster_id, project_id, model_name):
+	def import_model_from_cluster(self, cluster_id, project_id, model_key, model_name):
 		"""
 		Import models from a cluster
 
 		Parameters:
 		cluster_id: No description available (int64)
 		project_id: No description available (int64)
+		model_key: No description available (string)
 		model_name: No description available (string)
 
 		Returns:
-		model: No description available (Model)
+		model_id: No description available (int64)
 		"""
 		request = {
 			'cluster_id': cluster_id
 			'project_id': project_id
+			'model_key': model_key
 			'model_name': model_name
 		}
 		response = self.connection.call("ImportModelFromCluster", request)
-		return response['model']
+		return response['model_id']
 	
 	def delete_model(self, model_id):
 		"""

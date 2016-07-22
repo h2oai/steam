@@ -740,17 +740,18 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 
 	h2o := h2ov3.NewClient(cluster.Address)
 
-	modelName, err := h2o.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
+	modelKey, err := h2o.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
 	if err != nil {
 		return nil, err
 	}
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
-		modelName,
-		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
-		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		modelKey, // TODO this should be a modelName
 		cluster.Name,
+		modelKey,
 		"AutoML",
 		dataset,
 		targetName,
@@ -765,7 +766,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		return nil, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelName, modelId)
+	location, logicalName, err := s.exportModel(h2o, modelKey, modelId)
 	if err != nil {
 		return nil, err
 	}
@@ -840,6 +841,7 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*web
 			0,
 			m.ModelId.Name,
 			cluster.Name,
+			m.ModelId.Name,
 			m.AlgoFullName,
 			dataFrameName(m),
 			m.ResponseColumnName,
@@ -854,23 +856,26 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*web
 	return models, nil
 }
 
-func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelName string) (*web.Model, error) {
+func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelKey, modelName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
+	// Default modelName to modelKey
+	if modelName == "" {
+		modelName = modelKey
+	}
 
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
-	rawModel, r, err := h2o.GetModelsFetch(modelName)
+	rawModel, r, err := h2o.GetModelsFetch(modelKey)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	m := r.Models[0]
@@ -878,7 +883,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	// fetch raw frame json from H2O
 	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	datasourceId, err := s.ds.CreateDatasource(pz, data.Datasource{
@@ -891,7 +896,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		time.Now(),
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	trainingDatasetId, err := s.ds.CreateDataset(pz, data.Dataset{
 		0,
@@ -905,15 +910,16 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		time.Now(),
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		trainingDatasetId,
+		trainingDatasetId,
 		modelName,
-		trainingDatasetId,
-		trainingDatasetId,
 		cluster.Name,
+		modelKey,
 		m.AlgoFullName,
 		dataFrameName(m),
 		m.ResponseColumnName,
@@ -925,25 +931,19 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		time.Now(),
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelName, modelId)
+	location, logicalName, err := s.exportModel(h2o, modelKey, modelId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	log.Println(modelId)
-	model, err := s.ds.ReadModel(pz, modelId)
-	if err != nil {
-		return nil, err
-	}
-
-	return toModel(model), nil
+	return modelId, nil
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
@@ -1672,6 +1672,7 @@ func toModel(m data.Model) *web.Model {
 		m.ValidationDatasetId,
 		m.Name,
 		m.ClusterName,
+		m.ModelKey,
 		m.Algorithm,
 		m.DatasetName,
 		m.ResponseColumnName,

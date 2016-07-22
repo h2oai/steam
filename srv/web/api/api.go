@@ -72,6 +72,7 @@ type Model struct {
 	ValidationDatasetId int64
 	Name                string
 	ClusterName         string
+	ModelKey            string
 	Algorithm           string
 	DatasetName         string
 	ResponseColumnName  string
@@ -427,9 +428,10 @@ type GetModelsFromCluster struct {
 type ImportModelFromCluster struct {
 	ClusterId int64
 	ProjectId int64
+	ModelKey  string
 	ModelName string
 	_         int
-	Model     Model
+	ModelId   int64
 }
 type DeleteModel struct {
 	ModelId int64
