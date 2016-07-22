@@ -11,265 +11,152 @@ module Proxy {
 
   
   export interface Cluster {
-    
-    id: number
-    
-    name: string
-    
-    type_id: number
-    
-    detail_id: number
-    
-    address: string
-    
-    state: string
-    
-    created_at: number
-    
+    id: number // No description available
+    name: string // No description available
+    type_id: number // No description available
+    detail_id: number // No description available
+    address: string // No description available
+    state: string // No description available
+    created_at: number // No description available
   }
   
   export interface ClusterStatus {
-    
-    version: string
-    
-    status: string
-    
-    max_memory: string
-    
-    total_cpu_count: number
-    
-    total_allowed_cpu_count: number
-    
+    version: string // No description available
+    status: string // No description available
+    max_memory: string // No description available
+    total_cpu_count: number // No description available
+    total_allowed_cpu_count: number // No description available
   }
   
   export interface ClusterType {
-    
-    id: number
-    
-    name: string
-    
+    id: number // No description available
+    name: string // No description available
   }
   
   export interface Dataset {
-    
-    id: number
-    
-    datasource_id: number
-    
-    name: string
-    
-    description: string
-    
-    frame_name: string
-    
-    response_column_name: string
-    
-    properties: string
-    
-    created_at: number
-    
+    id: number // No description available
+    datasource_id: number // No description available
+    name: string // No description available
+    description: string // No description available
+    frame_name: string // No description available
+    response_column_name: string // No description available
+    properties: string // No description available
+    created_at: number // No description available
   }
   
   export interface Datasource {
-    
-    id: number
-    
-    project_id: number
-    
-    name: string
-    
-    description: string
-    
-    kind: string
-    
-    configuration: string
-    
-    created_at: number
-    
+    id: number // No description available
+    project_id: number // No description available
+    name: string // No description available
+    description: string // No description available
+    kind: string // No description available
+    configuration: string // No description available
+    created_at: number // No description available
   }
   
   export interface Engine {
-    
-    id: number
-    
-    name: string
-    
-    location: string
-    
-    created_at: number
-    
+    id: number // No description available
+    name: string // No description available
+    location: string // No description available
+    created_at: number // No description available
   }
   
   export interface EntityHistory {
-    
-    identity_id: number
-    
-    action: string
-    
-    description: string
-    
-    created_at: number
-    
+    identity_id: number // No description available
+    action: string // No description available
+    description: string // No description available
+    created_at: number // No description available
   }
   
   export interface EntityPrivilege {
-    
-    kind: string
-    
-    workgroup_id: number
-    
-    workgroup_name: string
-    
-    workgroup_description: string
-    
+    kind: string // No description available
+    workgroup_id: number // No description available
+    workgroup_name: string // No description available
+    workgroup_description: string // No description available
   }
   
   export interface EntityType {
-    
-    id: number
-    
-    name: string
-    
+    id: number // No description available
+    name: string // No description available
   }
   
   export interface Identity {
-    
-    id: number
-    
-    name: string
-    
-    is_active: boolean
-    
-    last_login: number
-    
-    created: number
-    
+    id: number // No description available
+    name: string // No description available
+    is_active: boolean // No description available
+    last_login: number // No description available
+    created: number // No description available
   }
   
   export interface Job {
-    
-    name: string
-    
-    cluster_name: string
-    
-    description: string
-    
-    progress: string
-    
-    started_at: number
-    
-    completed_at: number
-    
+    name: string // No description available
+    cluster_name: string // No description available
+    description: string // No description available
+    progress: string // No description available
+    started_at: number // No description available
+    completed_at: number // No description available
   }
   
   export interface Model {
-    
-    id: number
-    
-    training_dataset_id: number
-    
-    validation_dataset_id: number
-    
-    name: string
-    
-    cluster_name: string
-    
-    algorithm: string
-    
-    dataset_name: string
-    
-    response_column_name: string
-    
-    logical_name: string
-    
-    location: string
-    
-    max_runtime: number
-    
-    metrics: string
-    
-    created_at: number
-    
+    id: number // No description available
+    training_dataset_id: number // No description available
+    validation_dataset_id: number // No description available
+    name: string // No description available
+    cluster_name: string // No description available
+    algorithm: string // No description available
+    dataset_name: string // No description available
+    response_column_name: string // No description available
+    logical_name: string // No description available
+    location: string // No description available
+    max_runtime: number // No description available
+    metrics: string // No description available
+    created_at: number // No description available
   }
   
   export interface Permission {
-    
-    id: number
-    
-    code: string
-    
-    description: string
-    
+    id: number // No description available
+    code: string // No description available
+    description: string // No description available
   }
   
   export interface Project {
-    
-    id: number
-    
-    name: string
-    
-    description: string
-    
-    created_at: number
-    
+    id: number // No description available
+    name: string // No description available
+    description: string // No description available
+    created_at: number // No description available
   }
   
   export interface Role {
-    
-    id: number
-    
-    name: string
-    
-    description: string
-    
-    created: number
-    
+    id: number // No description available
+    name: string // No description available
+    description: string // No description available
+    created: number // No description available
   }
   
   export interface ScoringService {
-    
-    id: number
-    
-    model_id: number
-    
-    address: string
-    
-    port: number
-    
-    process_id: number
-    
-    state: string
-    
-    created_at: number
-    
+    id: number // No description available
+    model_id: number // No description available
+    address: string // No description available
+    port: number // No description available
+    process_id: number // No description available
+    state: string // No description available
+    created_at: number // No description available
   }
   
   export interface Workgroup {
-    
-    id: number
-    
-    name: string
-    
-    description: string
-    
-    created: number
-    
+    id: number // No description available
+    name: string // No description available
+    description: string // No description available
+    created: number // No description available
   }
   
   export interface YarnCluster {
-    
-    id: number
-    
-    engine_id: number
-    
-    size: number
-    
-    application_id: string
-    
-    memory: string
-    
-    username: string
-    
+    id: number // No description available
+    engine_id: number // No description available
+    size: number // No description available
+    application_id: string // No description available
+    memory: string // No description available
+    username: string // No description available
   }
   
 
@@ -277,1205 +164,846 @@ module Proxy {
 
   
   export interface Service {
-    
-    ping: (input: boolean, go: (error: Error, output: boolean) => void) => void
-    
+    // Ping the Steam server
+    pingServer: (input: string, go: (error: Error, output: string) => void) => void
+    // Connect to a cluster
     registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
-    
+    // Disconnect from a cluster
     unregisterCluster: (clusterId: number, go: (error: Error) => void) => void
-    
-    startYarnCluster: (clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void) => void
-    
-    stopYarnCluster: (clusterId: number, go: (error: Error) => void) => void
-    
+    // Start a cluster using Yarn
+    startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void) => void
+    // Stop a cluster using Yarn
+    stopClusterOnYarn: (clusterId: number, go: (error: Error) => void) => void
+    // Get cluster details
     getCluster: (clusterId: number, go: (error: Error, cluster: Cluster) => void) => void
-    
-    getYarnCluster: (clusterId: number, go: (error: Error, cluster: YarnCluster) => void) => void
-    
+    // Get cluster details (Yarn only)
+    getClusterOnYarn: (clusterId: number, go: (error: Error, cluster: YarnCluster) => void) => void
+    // List clusters
     getClusters: (offset: number, limit: number, go: (error: Error, clusters: Cluster[]) => void) => void
-    
+    // Get cluster status
     getClusterStatus: (clusterId: number, go: (error: Error, clusterStatus: ClusterStatus) => void) => void
-    
+    // Delete a cluster
     deleteCluster: (clusterId: number, go: (error: Error) => void) => void
-    
+    // Get job details
     getJob: (clusterId: number, jobName: string, go: (error: Error, job: Job) => void) => void
-    
+    // List jobs
     getJobs: (clusterId: number, go: (error: Error, jobs: Job[]) => void) => void
-    
+    // Create a project
     createProject: (name: string, description: string, go: (error: Error, projectId: number) => void) => void
-    
+    // List projects
     getProjects: (offset: number, limit: number, go: (error: Error, projects: Project[]) => void) => void
-    
+    // Get project details
     getProject: (projectId: number, go: (error: Error, project: Project) => void) => void
-    
+    // Delete a project
     deleteProject: (projectId: number, go: (error: Error) => void) => void
-    
+    // Create a datasource
     createDatasource: (projectId: number, name: string, description: string, path: string, go: (error: Error, datasourceId: number) => void) => void
-    
+    // List datasources
     getDatasources: (projectId: number, offset: number, limit: number, go: (error: Error, datasources: Datasource[]) => void) => void
-    
+    // Get datasource details
     getDatasource: (datasourceId: number, go: (error: Error, datasource: Datasource) => void) => void
-    
+    // Update a datasource
     updateDatasource: (datasourceId: number, name: string, description: string, path: string, go: (error: Error) => void) => void
-    
+    // Delete a datasource
     deleteDatasource: (datasourceId: number, go: (error: Error) => void) => void
-    
+    // Create a dataset
     createDataset: (clusterId: number, datasourceId: number, name: string, description: string, responseColumnName: string, go: (error: Error, datasetId: number) => void) => void
-    
+    // List datasets
     getDatasets: (datasourceId: number, offset: number, limit: number, go: (error: Error, datasets: Dataset[]) => void) => void
-    
+    // Get dataset details
     getDataset: (datasetId: number, go: (error: Error, dataset: Dataset) => void) => void
-    
+    // Update a dataset
     updateDataset: (datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void) => void
-    
+    // Split a dataset
     splitDataset: (datasetId: number, ratio1: number, ratio2: number, go: (error: Error, datasetIds: number[]) => void) => void
-    
+    // Delete a dataset
     deleteDataset: (datasetId: number, go: (error: Error) => void) => void
-    
+    // Build a model
     buildModel: (clusterId: number, datasetId: number, algorithm: string, go: (error: Error, modelId: number) => void) => void
-    
-    buildAutoModel: (clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
-    
+    // Build an AutoML model
+    buildModelAuto: (clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
+    // Get model details
     getModel: (modelId: number, go: (error: Error, model: Model) => void) => void
-    
+    // List models
     getModels: (projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
-    
-    getClusterModels: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
-    
+    // List models from a cluster
+    getModelsFromCluster: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
+    // Import models from a cluster
     importModelFromCluster: (clusterId: number, projectId: number, modelName: string, go: (error: Error, model: Model) => void) => void
-    
+    // Delete a model
     deleteModel: (modelId: number, go: (error: Error) => void) => void
-    
-    startScoringService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
-    
-    stopScoringService: (serviceId: number, go: (error: Error) => void) => void
-    
-    getScoringService: (serviceId: number, go: (error: Error, service: ScoringService) => void) => void
-    
-    getScoringServices: (offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
-    
-    getScoringServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
-    
-    deleteScoringService: (serviceId: number, go: (error: Error) => void) => void
-    
+    // Start a service
+    startService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
+    // Stop a service
+    stopService: (serviceId: number, go: (error: Error) => void) => void
+    // Get service details
+    getService: (serviceId: number, go: (error: Error, service: ScoringService) => void) => void
+    // List services
+    getServices: (offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
+    // List services for a model
+    getServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
+    // Delete a service
+    deleteService: (serviceId: number, go: (error: Error) => void) => void
+    // Add an engine
     addEngine: (engineName: string, enginePath: string, go: (error: Error, engineId: number) => void) => void
-    
+    // Get engine details
     getEngine: (engineId: number, go: (error: Error, engine: Engine) => void) => void
-    
+    // List engines
     getEngines: (go: (error: Error, engines: Engine[]) => void) => void
-    
+    // Delete an engine
     deleteEngine: (engineId: number, go: (error: Error) => void) => void
-    
-    getSupportedEntityTypes: (go: (error: Error, entityTypes: EntityType[]) => void) => void
-    
-    getSupportedPermissions: (go: (error: Error, permissions: Permission[]) => void) => void
-    
-    getSupportedClusterTypes: (go: (error: Error, clusterTypes: ClusterType[]) => void) => void
-    
+    // List all entity types
+    getAllEntityTypes: (go: (error: Error, entityTypes: EntityType[]) => void) => void
+    // List all permissions
+    getAllPermissions: (go: (error: Error, permissions: Permission[]) => void) => void
+    // List all cluster types
+    getAllClusterTypes: (go: (error: Error, clusterTypes: ClusterType[]) => void) => void
+    // List permissions for a role
     getPermissionsForRole: (roleId: number, go: (error: Error, permissions: Permission[]) => void) => void
-    
+    // List permissions for an identity
     getPermissionsForIdentity: (identityId: number, go: (error: Error, permissions: Permission[]) => void) => void
-    
+    // Create a role
     createRole: (name: string, description: string, go: (error: Error, roleId: number) => void) => void
-    
+    // List roles
     getRoles: (offset: number, limit: number, go: (error: Error, roles: Role[]) => void) => void
-    
+    // List roles for an identity
     getRolesForIdentity: (identityId: number, go: (error: Error, roles: Role[]) => void) => void
-    
+    // Get role details
     getRole: (roleId: number, go: (error: Error, role: Role) => void) => void
-    
+    // Get role details by name
     getRoleByName: (name: string, go: (error: Error, role: Role) => void) => void
-    
+    // Update a role
     updateRole: (roleId: number, name: string, description: string, go: (error: Error) => void) => void
-    
-    linkRoleAndPermissions: (roleId: number, permissionIds: number[], go: (error: Error) => void) => void
-    
+    // Link role with permissions
+    linkRoleWithPermissions: (roleId: number, permissionIds: number[], go: (error: Error) => void) => void
+    // Delete a role
     deleteRole: (roleId: number, go: (error: Error) => void) => void
-    
+    // Create a workgroup
     createWorkgroup: (name: string, description: string, go: (error: Error, workgroupId: number) => void) => void
-    
+    // List workgroups
     getWorkgroups: (offset: number, limit: number, go: (error: Error, workgroups: Workgroup[]) => void) => void
-    
+    // List workgroups for an identity
     getWorkgroupsForIdentity: (identityId: number, go: (error: Error, workgroups: Workgroup[]) => void) => void
-    
+    // Get workgroup details
     getWorkgroup: (workgroupId: number, go: (error: Error, workgroup: Workgroup) => void) => void
-    
+    // Get workgroup details by name
     getWorkgroupByName: (name: string, go: (error: Error, workgroup: Workgroup) => void) => void
-    
+    // Update a workgroup
     updateWorkgroup: (workgroupId: number, name: string, description: string, go: (error: Error) => void) => void
-    
+    // Delete a workgroup
     deleteWorkgroup: (workgroupId: number, go: (error: Error) => void) => void
-    
+    // Create an identity
     createIdentity: (name: string, password: string, go: (error: Error, identityId: number) => void) => void
-    
+    // List identities
     getIdentities: (offset: number, limit: number, go: (error: Error, identities: Identity[]) => void) => void
-    
+    // List identities for a workgroup
     getIdentitiesForWorkgroup: (workgroupId: number, go: (error: Error, identities: Identity[]) => void) => void
-    
+    // List identities for a role
     getIdentitiesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
-    
+    // Get identity details
     getIdentity: (identityId: number, go: (error: Error, identity: Identity) => void) => void
-    
+    // Get identity details by name
     getIdentityByName: (name: string, go: (error: Error, identity: Identity) => void) => void
-    
-    linkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
-    
-    unlinkIdentityAndWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
-    
-    linkIdentityAndRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
-    
-    unlinkIdentityAndRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
-    
+    // Link an identity with a workgroup
+    linkIdentityWithWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
+    // Unlink an identity from a workgroup
+    unlinkIdentityFromWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
+    // Link an identity with a role
+    linkIdentityWithRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
+    // Unlink an identity from a role
+    unlinkIdentityFromRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
+    // Update an identity
     updateIdentity: (identityId: number, password: string, go: (error: Error) => void) => void
-    
+    // Deactivate an identity
     deactivateIdentity: (identityId: number, go: (error: Error) => void) => void
-    
+    // Share an entity with a workgroup
     shareEntity: (kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void) => void
-    
-    getEntityPrivileges: (entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void) => void
-    
+    // List privileges for an entity
+    getPrivileges: (entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void) => void
+    // Unshare an entity
     unshareEntity: (kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void) => void
-    
-    getEntityHistory: (entityTypeId: number, entityId: number, offset: number, limit: number, go: (error: Error, history: EntityHistory[]) => void) => void
-    
+    // List audit trail records for an entity
+    getHistory: (entityTypeId: number, entityId: number, offset: number, limit: number, go: (error: Error, history: EntityHistory[]) => void) => void
   }
 
   // --- Messages ---
   
-  interface PingIn {
-    
-    input: boolean
-    
+  interface PingServerIn {
+    input: string
   }
 
-  interface PingOut {
-    
-    output: boolean
-    
+  interface PingServerOut {
+    output: string
   }
   
   interface RegisterClusterIn {
-    
     address: string
-    
   }
 
   interface RegisterClusterOut {
-    
     cluster_id: number
-    
   }
   
   interface UnregisterClusterIn {
-    
     cluster_id: number
-    
   }
 
   interface UnregisterClusterOut {
-    
   }
   
-  interface StartYarnClusterIn {
-    
+  interface StartClusterOnYarnIn {
     cluster_name: string
-    
     engine_id: number
-    
     size: number
-    
     memory: string
-    
     username: string
-    
   }
 
-  interface StartYarnClusterOut {
-    
+  interface StartClusterOnYarnOut {
     cluster_id: number
-    
   }
   
-  interface StopYarnClusterIn {
-    
+  interface StopClusterOnYarnIn {
     cluster_id: number
-    
   }
 
-  interface StopYarnClusterOut {
-    
+  interface StopClusterOnYarnOut {
   }
   
   interface GetClusterIn {
-    
     cluster_id: number
-    
   }
 
   interface GetClusterOut {
-    
     cluster: Cluster
-    
   }
   
-  interface GetYarnClusterIn {
-    
+  interface GetClusterOnYarnIn {
     cluster_id: number
-    
   }
 
-  interface GetYarnClusterOut {
-    
+  interface GetClusterOnYarnOut {
     cluster: YarnCluster
-    
   }
   
   interface GetClustersIn {
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetClustersOut {
-    
     clusters: Cluster[]
-    
   }
   
   interface GetClusterStatusIn {
-    
     cluster_id: number
-    
   }
 
   interface GetClusterStatusOut {
-    
     cluster_status: ClusterStatus
-    
   }
   
   interface DeleteClusterIn {
-    
     cluster_id: number
-    
   }
 
   interface DeleteClusterOut {
-    
   }
   
   interface GetJobIn {
-    
     cluster_id: number
-    
     job_name: string
-    
   }
 
   interface GetJobOut {
-    
     job: Job
-    
   }
   
   interface GetJobsIn {
-    
     cluster_id: number
-    
   }
 
   interface GetJobsOut {
-    
     jobs: Job[]
-    
   }
   
   interface CreateProjectIn {
-    
     name: string
-    
     description: string
-    
   }
 
   interface CreateProjectOut {
-    
     project_id: number
-    
   }
   
   interface GetProjectsIn {
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetProjectsOut {
-    
     projects: Project[]
-    
   }
   
   interface GetProjectIn {
-    
     project_id: number
-    
   }
 
   interface GetProjectOut {
-    
     project: Project
-    
   }
   
   interface DeleteProjectIn {
-    
     project_id: number
-    
   }
 
   interface DeleteProjectOut {
-    
   }
   
   interface CreateDatasourceIn {
-    
     project_id: number
-    
     name: string
-    
     description: string
-    
     path: string
-    
   }
 
   interface CreateDatasourceOut {
-    
     datasource_id: number
-    
   }
   
   interface GetDatasourcesIn {
-    
     project_id: number
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetDatasourcesOut {
-    
     datasources: Datasource[]
-    
   }
   
   interface GetDatasourceIn {
-    
     datasource_id: number
-    
   }
 
   interface GetDatasourceOut {
-    
     datasource: Datasource
-    
   }
   
   interface UpdateDatasourceIn {
-    
     datasource_id: number
-    
     name: string
-    
     description: string
-    
     path: string
-    
   }
 
   interface UpdateDatasourceOut {
-    
   }
   
   interface DeleteDatasourceIn {
-    
     datasource_id: number
-    
   }
 
   interface DeleteDatasourceOut {
-    
   }
   
   interface CreateDatasetIn {
-    
     cluster_id: number
-    
     datasource_id: number
-    
     name: string
-    
     description: string
-    
     response_column_name: string
-    
   }
 
   interface CreateDatasetOut {
-    
     dataset_id: number
-    
   }
   
   interface GetDatasetsIn {
-    
     datasource_id: number
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetDatasetsOut {
-    
     datasets: Dataset[]
-    
   }
   
   interface GetDatasetIn {
-    
     dataset_id: number
-    
   }
 
   interface GetDatasetOut {
-    
     dataset: Dataset
-    
   }
   
   interface UpdateDatasetIn {
-    
     dataset_id: number
-    
     name: string
-    
     description: string
-    
     response_column_name: string
-    
   }
 
   interface UpdateDatasetOut {
-    
   }
   
   interface SplitDatasetIn {
-    
     dataset_id: number
-    
     ratio1: number
-    
     ratio2: number
-    
   }
 
   interface SplitDatasetOut {
-    
     dataset_ids: number[]
-    
   }
   
   interface DeleteDatasetIn {
-    
     dataset_id: number
-    
   }
 
   interface DeleteDatasetOut {
-    
   }
   
   interface BuildModelIn {
-    
     cluster_id: number
-    
     dataset_id: number
-    
     algorithm: string
-    
   }
 
   interface BuildModelOut {
-    
     model_id: number
-    
   }
   
-  interface BuildAutoModelIn {
-    
+  interface BuildModelAutoIn {
     cluster_id: number
-    
     dataset: string
-    
     target_name: string
-    
     max_run_time: number
-    
   }
 
-  interface BuildAutoModelOut {
-    
+  interface BuildModelAutoOut {
     model: Model
-    
   }
   
   interface GetModelIn {
-    
     model_id: number
-    
   }
 
   interface GetModelOut {
-    
     model: Model
-    
   }
   
   interface GetModelsIn {
-    
     project_id: number
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetModelsOut {
-    
     models: Model[]
-    
   }
   
-  interface GetClusterModelsIn {
-    
+  interface GetModelsFromClusterIn {
     cluster_id: number
-    
   }
 
-  interface GetClusterModelsOut {
-    
+  interface GetModelsFromClusterOut {
     models: Model[]
-    
   }
   
   interface ImportModelFromClusterIn {
-    
     cluster_id: number
-    
     project_id: number
-    
     model_name: string
-    
   }
 
   interface ImportModelFromClusterOut {
-    
     model: Model
-    
   }
   
   interface DeleteModelIn {
-    
     model_id: number
-    
   }
 
   interface DeleteModelOut {
-    
   }
   
-  interface StartScoringServiceIn {
-    
+  interface StartServiceIn {
     model_id: number
-    
     port: number
-    
   }
 
-  interface StartScoringServiceOut {
-    
+  interface StartServiceOut {
     service: ScoringService
-    
   }
   
-  interface StopScoringServiceIn {
-    
+  interface StopServiceIn {
     service_id: number
-    
   }
 
-  interface StopScoringServiceOut {
-    
+  interface StopServiceOut {
   }
   
-  interface GetScoringServiceIn {
-    
+  interface GetServiceIn {
     service_id: number
-    
   }
 
-  interface GetScoringServiceOut {
-    
+  interface GetServiceOut {
     service: ScoringService
-    
   }
   
-  interface GetScoringServicesIn {
-    
+  interface GetServicesIn {
     offset: number
-    
     limit: number
-    
   }
 
-  interface GetScoringServicesOut {
-    
+  interface GetServicesOut {
     services: ScoringService[]
-    
   }
   
-  interface GetScoringServicesForModelIn {
-    
+  interface GetServicesForModelIn {
     model_id: number
-    
     offset: number
-    
     limit: number
-    
   }
 
-  interface GetScoringServicesForModelOut {
-    
+  interface GetServicesForModelOut {
     services: ScoringService[]
-    
   }
   
-  interface DeleteScoringServiceIn {
-    
+  interface DeleteServiceIn {
     service_id: number
-    
   }
 
-  interface DeleteScoringServiceOut {
-    
+  interface DeleteServiceOut {
   }
   
   interface AddEngineIn {
-    
     engine_name: string
-    
     engine_path: string
-    
   }
 
   interface AddEngineOut {
-    
     engine_id: number
-    
   }
   
   interface GetEngineIn {
-    
     engine_id: number
-    
   }
 
   interface GetEngineOut {
-    
     engine: Engine
-    
   }
   
   interface GetEnginesIn {
-    
   }
 
   interface GetEnginesOut {
-    
     engines: Engine[]
-    
   }
   
   interface DeleteEngineIn {
-    
     engine_id: number
-    
   }
 
   interface DeleteEngineOut {
-    
   }
   
-  interface GetSupportedEntityTypesIn {
-    
+  interface GetAllEntityTypesIn {
   }
 
-  interface GetSupportedEntityTypesOut {
-    
+  interface GetAllEntityTypesOut {
     entity_types: EntityType[]
-    
   }
   
-  interface GetSupportedPermissionsIn {
-    
+  interface GetAllPermissionsIn {
   }
 
-  interface GetSupportedPermissionsOut {
-    
+  interface GetAllPermissionsOut {
     permissions: Permission[]
-    
   }
   
-  interface GetSupportedClusterTypesIn {
-    
+  interface GetAllClusterTypesIn {
   }
 
-  interface GetSupportedClusterTypesOut {
-    
+  interface GetAllClusterTypesOut {
     cluster_types: ClusterType[]
-    
   }
   
   interface GetPermissionsForRoleIn {
-    
     role_id: number
-    
   }
 
   interface GetPermissionsForRoleOut {
-    
     permissions: Permission[]
-    
   }
   
   interface GetPermissionsForIdentityIn {
-    
     identity_id: number
-    
   }
 
   interface GetPermissionsForIdentityOut {
-    
     permissions: Permission[]
-    
   }
   
   interface CreateRoleIn {
-    
     name: string
-    
     description: string
-    
   }
 
   interface CreateRoleOut {
-    
     role_id: number
-    
   }
   
   interface GetRolesIn {
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetRolesOut {
-    
     roles: Role[]
-    
   }
   
   interface GetRolesForIdentityIn {
-    
     identity_id: number
-    
   }
 
   interface GetRolesForIdentityOut {
-    
     roles: Role[]
-    
   }
   
   interface GetRoleIn {
-    
     role_id: number
-    
   }
 
   interface GetRoleOut {
-    
     role: Role
-    
   }
   
   interface GetRoleByNameIn {
-    
     name: string
-    
   }
 
   interface GetRoleByNameOut {
-    
     role: Role
-    
   }
   
   interface UpdateRoleIn {
-    
     role_id: number
-    
     name: string
-    
     description: string
-    
   }
 
   interface UpdateRoleOut {
-    
   }
   
-  interface LinkRoleAndPermissionsIn {
-    
+  interface LinkRoleWithPermissionsIn {
     role_id: number
-    
     permission_ids: number[]
-    
   }
 
-  interface LinkRoleAndPermissionsOut {
-    
+  interface LinkRoleWithPermissionsOut {
   }
   
   interface DeleteRoleIn {
-    
     role_id: number
-    
   }
 
   interface DeleteRoleOut {
-    
   }
   
   interface CreateWorkgroupIn {
-    
     name: string
-    
     description: string
-    
   }
 
   interface CreateWorkgroupOut {
-    
     workgroup_id: number
-    
   }
   
   interface GetWorkgroupsIn {
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetWorkgroupsOut {
-    
     workgroups: Workgroup[]
-    
   }
   
   interface GetWorkgroupsForIdentityIn {
-    
     identity_id: number
-    
   }
 
   interface GetWorkgroupsForIdentityOut {
-    
     workgroups: Workgroup[]
-    
   }
   
   interface GetWorkgroupIn {
-    
     workgroup_id: number
-    
   }
 
   interface GetWorkgroupOut {
-    
     workgroup: Workgroup
-    
   }
   
   interface GetWorkgroupByNameIn {
-    
     name: string
-    
   }
 
   interface GetWorkgroupByNameOut {
-    
     workgroup: Workgroup
-    
   }
   
   interface UpdateWorkgroupIn {
-    
     workgroup_id: number
-    
     name: string
-    
     description: string
-    
   }
 
   interface UpdateWorkgroupOut {
-    
   }
   
   interface DeleteWorkgroupIn {
-    
     workgroup_id: number
-    
   }
 
   interface DeleteWorkgroupOut {
-    
   }
   
   interface CreateIdentityIn {
-    
     name: string
-    
     password: string
-    
   }
 
   interface CreateIdentityOut {
-    
     identity_id: number
-    
   }
   
   interface GetIdentitiesIn {
-    
     offset: number
-    
     limit: number
-    
   }
 
   interface GetIdentitiesOut {
-    
     identities: Identity[]
-    
   }
   
   interface GetIdentitiesForWorkgroupIn {
-    
     workgroup_id: number
-    
   }
 
   interface GetIdentitiesForWorkgroupOut {
-    
     identities: Identity[]
-    
   }
   
   interface GetIdentitiesForRoleIn {
-    
     role_id: number
-    
   }
 
   interface GetIdentitiesForRoleOut {
-    
     identities: Identity[]
-    
   }
   
   interface GetIdentityIn {
-    
     identity_id: number
-    
   }
 
   interface GetIdentityOut {
-    
     identity: Identity
-    
   }
   
   interface GetIdentityByNameIn {
-    
     name: string
-    
   }
 
   interface GetIdentityByNameOut {
-    
     identity: Identity
-    
   }
   
-  interface LinkIdentityAndWorkgroupIn {
-    
+  interface LinkIdentityWithWorkgroupIn {
     identity_id: number
-    
     workgroup_id: number
-    
   }
 
-  interface LinkIdentityAndWorkgroupOut {
-    
+  interface LinkIdentityWithWorkgroupOut {
   }
   
-  interface UnlinkIdentityAndWorkgroupIn {
-    
+  interface UnlinkIdentityFromWorkgroupIn {
     identity_id: number
-    
     workgroup_id: number
-    
   }
 
-  interface UnlinkIdentityAndWorkgroupOut {
-    
+  interface UnlinkIdentityFromWorkgroupOut {
   }
   
-  interface LinkIdentityAndRoleIn {
-    
+  interface LinkIdentityWithRoleIn {
     identity_id: number
-    
     role_id: number
-    
   }
 
-  interface LinkIdentityAndRoleOut {
-    
+  interface LinkIdentityWithRoleOut {
   }
   
-  interface UnlinkIdentityAndRoleIn {
-    
+  interface UnlinkIdentityFromRoleIn {
     identity_id: number
-    
     role_id: number
-    
   }
 
-  interface UnlinkIdentityAndRoleOut {
-    
+  interface UnlinkIdentityFromRoleOut {
   }
   
   interface UpdateIdentityIn {
-    
     identity_id: number
-    
     password: string
-    
   }
 
   interface UpdateIdentityOut {
-    
   }
   
   interface DeactivateIdentityIn {
-    
     identity_id: number
-    
   }
 
   interface DeactivateIdentityOut {
-    
   }
   
   interface ShareEntityIn {
-    
     kind: string
-    
     workgroup_id: number
-    
     entity_type_id: number
-    
     entity_id: number
-    
   }
 
   interface ShareEntityOut {
-    
   }
   
-  interface GetEntityPrivilegesIn {
-    
+  interface GetPrivilegesIn {
     entity_type_id: number
-    
     entity_id: number
-    
   }
 
-  interface GetEntityPrivilegesOut {
-    
+  interface GetPrivilegesOut {
     privileges: EntityPrivilege[]
-    
   }
   
   interface UnshareEntityIn {
-    
     kind: string
-    
     workgroup_id: number
-    
     entity_type_id: number
-    
     entity_id: number
-    
   }
 
   interface UnshareEntityOut {
-    
   }
   
-  interface GetEntityHistoryIn {
-    
+  interface GetHistoryIn {
     entity_type_id: number
-    
     entity_id: number
-    
     offset: number
-    
     limit: number
-    
   }
 
-  interface GetEntityHistoryOut {
-    
+  interface GetHistoryOut {
     history: EntityHistory[]
-    
   }
   
 
@@ -1483,13 +1011,13 @@ module Proxy {
   // --- Client Stub ---
 
   
-  export function ping(input: boolean, go: (error: Error, output: boolean) => void): void {
-    const req: PingIn = { input: input }
-    Proxy.Call("Ping", req, function(error, data) {
+  export function pingServer(input: string, go: (error: Error, output: string) => void): void {
+    const req: PingServerIn = { input: input }
+    Proxy.Call("PingServer", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: PingOut = <PingOut>data
+        const d: PingServerOut = <PingServerOut>data
         return go(null, d.output)
       }
 		})
@@ -1519,25 +1047,25 @@ module Proxy {
 		})
   }
   
-  export function startYarnCluster(clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void): void {
-    const req: StartYarnClusterIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, username: username }
-    Proxy.Call("StartYarnCluster", req, function(error, data) {
+  export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void): void {
+    const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, username: username }
+    Proxy.Call("StartClusterOnYarn", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: StartYarnClusterOut = <StartYarnClusterOut>data
+        const d: StartClusterOnYarnOut = <StartClusterOnYarnOut>data
         return go(null, d.cluster_id)
       }
 		})
   }
   
-  export function stopYarnCluster(clusterId: number, go: (error: Error) => void): void {
-    const req: StopYarnClusterIn = { cluster_id: clusterId }
-    Proxy.Call("StopYarnCluster", req, function(error, data) {
+  export function stopClusterOnYarn(clusterId: number, go: (error: Error) => void): void {
+    const req: StopClusterOnYarnIn = { cluster_id: clusterId }
+    Proxy.Call("StopClusterOnYarn", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: StopYarnClusterOut = <StopYarnClusterOut>data
+        const d: StopClusterOnYarnOut = <StopClusterOnYarnOut>data
         return go(null)
       }
 		})
@@ -1555,13 +1083,13 @@ module Proxy {
 		})
   }
   
-  export function getYarnCluster(clusterId: number, go: (error: Error, cluster: YarnCluster) => void): void {
-    const req: GetYarnClusterIn = { cluster_id: clusterId }
-    Proxy.Call("GetYarnCluster", req, function(error, data) {
+  export function getClusterOnYarn(clusterId: number, go: (error: Error, cluster: YarnCluster) => void): void {
+    const req: GetClusterOnYarnIn = { cluster_id: clusterId }
+    Proxy.Call("GetClusterOnYarn", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetYarnClusterOut = <GetYarnClusterOut>data
+        const d: GetClusterOnYarnOut = <GetClusterOnYarnOut>data
         return go(null, d.cluster)
       }
 		})
@@ -1819,13 +1347,13 @@ module Proxy {
 		})
   }
   
-  export function buildAutoModel(clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void): void {
-    const req: BuildAutoModelIn = { cluster_id: clusterId, dataset: dataset, target_name: targetName, max_run_time: maxRunTime }
-    Proxy.Call("BuildAutoModel", req, function(error, data) {
+  export function buildModelAuto(clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void): void {
+    const req: BuildModelAutoIn = { cluster_id: clusterId, dataset: dataset, target_name: targetName, max_run_time: maxRunTime }
+    Proxy.Call("BuildModelAuto", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: BuildAutoModelOut = <BuildAutoModelOut>data
+        const d: BuildModelAutoOut = <BuildModelAutoOut>data
         return go(null, d.model)
       }
 		})
@@ -1855,13 +1383,13 @@ module Proxy {
 		})
   }
   
-  export function getClusterModels(clusterId: number, go: (error: Error, models: Model[]) => void): void {
-    const req: GetClusterModelsIn = { cluster_id: clusterId }
-    Proxy.Call("GetClusterModels", req, function(error, data) {
+  export function getModelsFromCluster(clusterId: number, go: (error: Error, models: Model[]) => void): void {
+    const req: GetModelsFromClusterIn = { cluster_id: clusterId }
+    Proxy.Call("GetModelsFromCluster", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetClusterModelsOut = <GetClusterModelsOut>data
+        const d: GetModelsFromClusterOut = <GetModelsFromClusterOut>data
         return go(null, d.models)
       }
 		})
@@ -1891,73 +1419,73 @@ module Proxy {
 		})
   }
   
-  export function startScoringService(modelId: number, port: number, go: (error: Error, service: ScoringService) => void): void {
-    const req: StartScoringServiceIn = { model_id: modelId, port: port }
-    Proxy.Call("StartScoringService", req, function(error, data) {
+  export function startService(modelId: number, port: number, go: (error: Error, service: ScoringService) => void): void {
+    const req: StartServiceIn = { model_id: modelId, port: port }
+    Proxy.Call("StartService", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: StartScoringServiceOut = <StartScoringServiceOut>data
+        const d: StartServiceOut = <StartServiceOut>data
         return go(null, d.service)
       }
 		})
   }
   
-  export function stopScoringService(serviceId: number, go: (error: Error) => void): void {
-    const req: StopScoringServiceIn = { service_id: serviceId }
-    Proxy.Call("StopScoringService", req, function(error, data) {
+  export function stopService(serviceId: number, go: (error: Error) => void): void {
+    const req: StopServiceIn = { service_id: serviceId }
+    Proxy.Call("StopService", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: StopScoringServiceOut = <StopScoringServiceOut>data
+        const d: StopServiceOut = <StopServiceOut>data
         return go(null)
       }
 		})
   }
   
-  export function getScoringService(serviceId: number, go: (error: Error, service: ScoringService) => void): void {
-    const req: GetScoringServiceIn = { service_id: serviceId }
-    Proxy.Call("GetScoringService", req, function(error, data) {
+  export function getService(serviceId: number, go: (error: Error, service: ScoringService) => void): void {
+    const req: GetServiceIn = { service_id: serviceId }
+    Proxy.Call("GetService", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetScoringServiceOut = <GetScoringServiceOut>data
+        const d: GetServiceOut = <GetServiceOut>data
         return go(null, d.service)
       }
 		})
   }
   
-  export function getScoringServices(offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
-    const req: GetScoringServicesIn = { offset: offset, limit: limit }
-    Proxy.Call("GetScoringServices", req, function(error, data) {
+  export function getServices(offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
+    const req: GetServicesIn = { offset: offset, limit: limit }
+    Proxy.Call("GetServices", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetScoringServicesOut = <GetScoringServicesOut>data
+        const d: GetServicesOut = <GetServicesOut>data
         return go(null, d.services)
       }
 		})
   }
   
-  export function getScoringServicesForModel(modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
-    const req: GetScoringServicesForModelIn = { model_id: modelId, offset: offset, limit: limit }
-    Proxy.Call("GetScoringServicesForModel", req, function(error, data) {
+  export function getServicesForModel(modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
+    const req: GetServicesForModelIn = { model_id: modelId, offset: offset, limit: limit }
+    Proxy.Call("GetServicesForModel", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetScoringServicesForModelOut = <GetScoringServicesForModelOut>data
+        const d: GetServicesForModelOut = <GetServicesForModelOut>data
         return go(null, d.services)
       }
 		})
   }
   
-  export function deleteScoringService(serviceId: number, go: (error: Error) => void): void {
-    const req: DeleteScoringServiceIn = { service_id: serviceId }
-    Proxy.Call("DeleteScoringService", req, function(error, data) {
+  export function deleteService(serviceId: number, go: (error: Error) => void): void {
+    const req: DeleteServiceIn = { service_id: serviceId }
+    Proxy.Call("DeleteService", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: DeleteScoringServiceOut = <DeleteScoringServiceOut>data
+        const d: DeleteServiceOut = <DeleteServiceOut>data
         return go(null)
       }
 		})
@@ -2011,37 +1539,37 @@ module Proxy {
 		})
   }
   
-  export function getSupportedEntityTypes(go: (error: Error, entityTypes: EntityType[]) => void): void {
-    const req: GetSupportedEntityTypesIn = {  }
-    Proxy.Call("GetSupportedEntityTypes", req, function(error, data) {
+  export function getAllEntityTypes(go: (error: Error, entityTypes: EntityType[]) => void): void {
+    const req: GetAllEntityTypesIn = {  }
+    Proxy.Call("GetAllEntityTypes", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetSupportedEntityTypesOut = <GetSupportedEntityTypesOut>data
+        const d: GetAllEntityTypesOut = <GetAllEntityTypesOut>data
         return go(null, d.entity_types)
       }
 		})
   }
   
-  export function getSupportedPermissions(go: (error: Error, permissions: Permission[]) => void): void {
-    const req: GetSupportedPermissionsIn = {  }
-    Proxy.Call("GetSupportedPermissions", req, function(error, data) {
+  export function getAllPermissions(go: (error: Error, permissions: Permission[]) => void): void {
+    const req: GetAllPermissionsIn = {  }
+    Proxy.Call("GetAllPermissions", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetSupportedPermissionsOut = <GetSupportedPermissionsOut>data
+        const d: GetAllPermissionsOut = <GetAllPermissionsOut>data
         return go(null, d.permissions)
       }
 		})
   }
   
-  export function getSupportedClusterTypes(go: (error: Error, clusterTypes: ClusterType[]) => void): void {
-    const req: GetSupportedClusterTypesIn = {  }
-    Proxy.Call("GetSupportedClusterTypes", req, function(error, data) {
+  export function getAllClusterTypes(go: (error: Error, clusterTypes: ClusterType[]) => void): void {
+    const req: GetAllClusterTypesIn = {  }
+    Proxy.Call("GetAllClusterTypes", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetSupportedClusterTypesOut = <GetSupportedClusterTypesOut>data
+        const d: GetAllClusterTypesOut = <GetAllClusterTypesOut>data
         return go(null, d.cluster_types)
       }
 		})
@@ -2143,13 +1671,13 @@ module Proxy {
 		})
   }
   
-  export function linkRoleAndPermissions(roleId: number, permissionIds: number[], go: (error: Error) => void): void {
-    const req: LinkRoleAndPermissionsIn = { role_id: roleId, permission_ids: permissionIds }
-    Proxy.Call("LinkRoleAndPermissions", req, function(error, data) {
+  export function linkRoleWithPermissions(roleId: number, permissionIds: number[], go: (error: Error) => void): void {
+    const req: LinkRoleWithPermissionsIn = { role_id: roleId, permission_ids: permissionIds }
+    Proxy.Call("LinkRoleWithPermissions", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: LinkRoleAndPermissionsOut = <LinkRoleAndPermissionsOut>data
+        const d: LinkRoleWithPermissionsOut = <LinkRoleWithPermissionsOut>data
         return go(null)
       }
 		})
@@ -2323,49 +1851,49 @@ module Proxy {
 		})
   }
   
-  export function linkIdentityAndWorkgroup(identityId: number, workgroupId: number, go: (error: Error) => void): void {
-    const req: LinkIdentityAndWorkgroupIn = { identity_id: identityId, workgroup_id: workgroupId }
-    Proxy.Call("LinkIdentityAndWorkgroup", req, function(error, data) {
+  export function linkIdentityWithWorkgroup(identityId: number, workgroupId: number, go: (error: Error) => void): void {
+    const req: LinkIdentityWithWorkgroupIn = { identity_id: identityId, workgroup_id: workgroupId }
+    Proxy.Call("LinkIdentityWithWorkgroup", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: LinkIdentityAndWorkgroupOut = <LinkIdentityAndWorkgroupOut>data
+        const d: LinkIdentityWithWorkgroupOut = <LinkIdentityWithWorkgroupOut>data
         return go(null)
       }
 		})
   }
   
-  export function unlinkIdentityAndWorkgroup(identityId: number, workgroupId: number, go: (error: Error) => void): void {
-    const req: UnlinkIdentityAndWorkgroupIn = { identity_id: identityId, workgroup_id: workgroupId }
-    Proxy.Call("UnlinkIdentityAndWorkgroup", req, function(error, data) {
+  export function unlinkIdentityFromWorkgroup(identityId: number, workgroupId: number, go: (error: Error) => void): void {
+    const req: UnlinkIdentityFromWorkgroupIn = { identity_id: identityId, workgroup_id: workgroupId }
+    Proxy.Call("UnlinkIdentityFromWorkgroup", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: UnlinkIdentityAndWorkgroupOut = <UnlinkIdentityAndWorkgroupOut>data
+        const d: UnlinkIdentityFromWorkgroupOut = <UnlinkIdentityFromWorkgroupOut>data
         return go(null)
       }
 		})
   }
   
-  export function linkIdentityAndRole(identityId: number, roleId: number, go: (error: Error) => void): void {
-    const req: LinkIdentityAndRoleIn = { identity_id: identityId, role_id: roleId }
-    Proxy.Call("LinkIdentityAndRole", req, function(error, data) {
+  export function linkIdentityWithRole(identityId: number, roleId: number, go: (error: Error) => void): void {
+    const req: LinkIdentityWithRoleIn = { identity_id: identityId, role_id: roleId }
+    Proxy.Call("LinkIdentityWithRole", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: LinkIdentityAndRoleOut = <LinkIdentityAndRoleOut>data
+        const d: LinkIdentityWithRoleOut = <LinkIdentityWithRoleOut>data
         return go(null)
       }
 		})
   }
   
-  export function unlinkIdentityAndRole(identityId: number, roleId: number, go: (error: Error) => void): void {
-    const req: UnlinkIdentityAndRoleIn = { identity_id: identityId, role_id: roleId }
-    Proxy.Call("UnlinkIdentityAndRole", req, function(error, data) {
+  export function unlinkIdentityFromRole(identityId: number, roleId: number, go: (error: Error) => void): void {
+    const req: UnlinkIdentityFromRoleIn = { identity_id: identityId, role_id: roleId }
+    Proxy.Call("UnlinkIdentityFromRole", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: UnlinkIdentityAndRoleOut = <UnlinkIdentityAndRoleOut>data
+        const d: UnlinkIdentityFromRoleOut = <UnlinkIdentityFromRoleOut>data
         return go(null)
       }
 		})
@@ -2407,13 +1935,13 @@ module Proxy {
 		})
   }
   
-  export function getEntityPrivileges(entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void): void {
-    const req: GetEntityPrivilegesIn = { entity_type_id: entityTypeId, entity_id: entityId }
-    Proxy.Call("GetEntityPrivileges", req, function(error, data) {
+  export function getPrivileges(entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void): void {
+    const req: GetPrivilegesIn = { entity_type_id: entityTypeId, entity_id: entityId }
+    Proxy.Call("GetPrivileges", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetEntityPrivilegesOut = <GetEntityPrivilegesOut>data
+        const d: GetPrivilegesOut = <GetPrivilegesOut>data
         return go(null, d.privileges)
       }
 		})
@@ -2431,13 +1959,13 @@ module Proxy {
 		})
   }
   
-  export function getEntityHistory(entityTypeId: number, entityId: number, offset: number, limit: number, go: (error: Error, history: EntityHistory[]) => void): void {
-    const req: GetEntityHistoryIn = { entity_type_id: entityTypeId, entity_id: entityId, offset: offset, limit: limit }
-    Proxy.Call("GetEntityHistory", req, function(error, data) {
+  export function getHistory(entityTypeId: number, entityId: number, offset: number, limit: number, go: (error: Error, history: EntityHistory[]) => void): void {
+    const req: GetHistoryIn = { entity_type_id: entityTypeId, entity_id: entityId, offset: offset, limit: limit }
+    Proxy.Call("GetHistory", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
-        const d: GetEntityHistoryOut = <GetEntityHistoryOut>data
+        const d: GetHistoryOut = <GetHistoryOut>data
         return go(null, d.history)
       }
 		})

@@ -17,265 +17,152 @@ import (
 
 
 type Cluster struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
   TypeId int64 `json:"type_id"`
-
   DetailId int64 `json:"detail_id"`
-
   Address string `json:"address"`
-
   State string `json:"state"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type ClusterStatus struct {
-
   Version string `json:"version"`
-
   Status string `json:"status"`
-
   MaxMemory string `json:"max_memory"`
-
   TotalCpuCount int `json:"total_cpu_count"`
-
   TotalAllowedCpuCount int `json:"total_allowed_cpu_count"`
-
 }
 
 type ClusterType struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
 }
 
 type Dataset struct {
-
   Id int64 `json:"id"`
-
   DatasourceId int64 `json:"datasource_id"`
-
   Name string `json:"name"`
-
   Description string `json:"description"`
-
   FrameName string `json:"frame_name"`
-
   ResponseColumnName string `json:"response_column_name"`
-
   Properties string `json:"properties"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type Datasource struct {
-
   Id int64 `json:"id"`
-
   ProjectId int64 `json:"project_id"`
-
   Name string `json:"name"`
-
   Description string `json:"description"`
-
   Kind string `json:"kind"`
-
   Configuration string `json:"configuration"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type Engine struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
   Location string `json:"location"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type EntityHistory struct {
-
   IdentityId int64 `json:"identity_id"`
-
   Action string `json:"action"`
-
   Description string `json:"description"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type EntityPrivilege struct {
-
   Kind string `json:"kind"`
-
   WorkgroupId int64 `json:"workgroup_id"`
-
   WorkgroupName string `json:"workgroup_name"`
-
   WorkgroupDescription string `json:"workgroup_description"`
-
 }
 
 type EntityType struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
 }
 
 type Identity struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
   IsActive bool `json:"is_active"`
-
   LastLogin int64 `json:"last_login"`
-
   Created int64 `json:"created"`
-
 }
 
 type Job struct {
-
   Name string `json:"name"`
-
   ClusterName string `json:"cluster_name"`
-
   Description string `json:"description"`
-
   Progress string `json:"progress"`
-
   StartedAt int64 `json:"started_at"`
-
   CompletedAt int64 `json:"completed_at"`
-
 }
 
 type Model struct {
-
   Id int64 `json:"id"`
-
   TrainingDatasetId int64 `json:"training_dataset_id"`
-
   ValidationDatasetId int64 `json:"validation_dataset_id"`
-
   Name string `json:"name"`
-
   ClusterName string `json:"cluster_name"`
-
   Algorithm string `json:"algorithm"`
-
   DatasetName string `json:"dataset_name"`
-
   ResponseColumnName string `json:"response_column_name"`
-
   LogicalName string `json:"logical_name"`
-
   Location string `json:"location"`
-
   MaxRuntime int `json:"max_runtime"`
-
   Metrics string `json:"metrics"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type Permission struct {
-
   Id int64 `json:"id"`
-
   Code string `json:"code"`
-
   Description string `json:"description"`
-
 }
 
 type Project struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
   Description string `json:"description"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type Role struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
   Description string `json:"description"`
-
   Created int64 `json:"created"`
-
 }
 
 type ScoringService struct {
-
   Id int64 `json:"id"`
-
   ModelId int64 `json:"model_id"`
-
   Address string `json:"address"`
-
   Port int `json:"port"`
-
   ProcessId int `json:"process_id"`
-
   State string `json:"state"`
-
   CreatedAt int64 `json:"created_at"`
-
 }
 
 type Workgroup struct {
-
   Id int64 `json:"id"`
-
   Name string `json:"name"`
-
   Description string `json:"description"`
-
   Created int64 `json:"created"`
-
 }
 
 type YarnCluster struct {
-
   Id int64 `json:"id"`
-
   EngineId int64 `json:"engine_id"`
-
   Size int `json:"size"`
-
   ApplicationId string `json:"application_id"`
-
   Memory string `json:"memory"`
-
   Username string `json:"username"`
-
 }
 
 
@@ -287,167 +174,86 @@ type Az interface {
 
 
 type Service interface {
-  
-  Ping(pz az.Principal, input bool) (bool, error)
-  
+  PingServer(pz az.Principal, input string) (string, error)
   RegisterCluster(pz az.Principal, address string) (int64, error)
-  
   UnregisterCluster(pz az.Principal, clusterId int64) (error)
-  
-  StartYarnCluster(pz az.Principal, clusterName string, engineId int64, size int, memory string, username string) (int64, error)
-  
-  StopYarnCluster(pz az.Principal, clusterId int64) (error)
-  
+  StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, username string) (int64, error)
+  StopClusterOnYarn(pz az.Principal, clusterId int64) (error)
   GetCluster(pz az.Principal, clusterId int64) (*Cluster, error)
-  
-  GetYarnCluster(pz az.Principal, clusterId int64) (*YarnCluster, error)
-  
+  GetClusterOnYarn(pz az.Principal, clusterId int64) (*YarnCluster, error)
   GetClusters(pz az.Principal, offset int64, limit int64) ([]*Cluster, error)
-  
   GetClusterStatus(pz az.Principal, clusterId int64) (*ClusterStatus, error)
-  
   DeleteCluster(pz az.Principal, clusterId int64) (error)
-  
   GetJob(pz az.Principal, clusterId int64, jobName string) (*Job, error)
-  
   GetJobs(pz az.Principal, clusterId int64) ([]*Job, error)
-  
   CreateProject(pz az.Principal, name string, description string) (int64, error)
-  
   GetProjects(pz az.Principal, offset int64, limit int64) ([]*Project, error)
-  
   GetProject(pz az.Principal, projectId int64) (*Project, error)
-  
   DeleteProject(pz az.Principal, projectId int64) (error)
-  
   CreateDatasource(pz az.Principal, projectId int64, name string, description string, path string) (int64, error)
-  
   GetDatasources(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Datasource, error)
-  
   GetDatasource(pz az.Principal, datasourceId int64) (*Datasource, error)
-  
   UpdateDatasource(pz az.Principal, datasourceId int64, name string, description string, path string) (error)
-  
   DeleteDatasource(pz az.Principal, datasourceId int64) (error)
-  
   CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error)
-  
   GetDatasets(pz az.Principal, datasourceId int64, offset int64, limit int64) ([]*Dataset, error)
-  
   GetDataset(pz az.Principal, datasetId int64) (*Dataset, error)
-  
   UpdateDataset(pz az.Principal, datasetId int64, name string, description string, responseColumnName string) (error)
-  
   SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error)
-  
   DeleteDataset(pz az.Principal, datasetId int64) (error)
-  
   BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error)
-  
-  BuildAutoModel(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
-  
+  BuildModelAuto(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
   GetModel(pz az.Principal, modelId int64) (*Model, error)
-  
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
-  
-  GetClusterModels(pz az.Principal, clusterId int64) ([]*Model, error)
-  
+  GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*Model, error)
   ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelName string) (*Model, error)
-  
   DeleteModel(pz az.Principal, modelId int64) (error)
-  
-  StartScoringService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
-  
-  StopScoringService(pz az.Principal, serviceId int64) (error)
-  
-  GetScoringService(pz az.Principal, serviceId int64) (*ScoringService, error)
-  
-  GetScoringServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
-  
-  GetScoringServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
-  
-  DeleteScoringService(pz az.Principal, serviceId int64) (error)
-  
+  StartService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
+  StopService(pz az.Principal, serviceId int64) (error)
+  GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
+  GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
+  GetServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
+  DeleteService(pz az.Principal, serviceId int64) (error)
   AddEngine(pz az.Principal, engineName string, enginePath string) (int64, error)
-  
   GetEngine(pz az.Principal, engineId int64) (*Engine, error)
-  
   GetEngines(pz az.Principal) ([]*Engine, error)
-  
   DeleteEngine(pz az.Principal, engineId int64) (error)
-  
-  GetSupportedEntityTypes(pz az.Principal) ([]*EntityType, error)
-  
-  GetSupportedPermissions(pz az.Principal) ([]*Permission, error)
-  
-  GetSupportedClusterTypes(pz az.Principal) ([]*ClusterType, error)
-  
+  GetAllEntityTypes(pz az.Principal) ([]*EntityType, error)
+  GetAllPermissions(pz az.Principal) ([]*Permission, error)
+  GetAllClusterTypes(pz az.Principal) ([]*ClusterType, error)
   GetPermissionsForRole(pz az.Principal, roleId int64) ([]*Permission, error)
-  
   GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*Permission, error)
-  
   CreateRole(pz az.Principal, name string, description string) (int64, error)
-  
   GetRoles(pz az.Principal, offset int64, limit int64) ([]*Role, error)
-  
   GetRolesForIdentity(pz az.Principal, identityId int64) ([]*Role, error)
-  
   GetRole(pz az.Principal, roleId int64) (*Role, error)
-  
   GetRoleByName(pz az.Principal, name string) (*Role, error)
-  
   UpdateRole(pz az.Principal, roleId int64, name string, description string) (error)
-  
-  LinkRoleAndPermissions(pz az.Principal, roleId int64, permissionIds []int64) (error)
-  
+  LinkRoleWithPermissions(pz az.Principal, roleId int64, permissionIds []int64) (error)
   DeleteRole(pz az.Principal, roleId int64) (error)
-  
   CreateWorkgroup(pz az.Principal, name string, description string) (int64, error)
-  
   GetWorkgroups(pz az.Principal, offset int64, limit int64) ([]*Workgroup, error)
-  
   GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*Workgroup, error)
-  
   GetWorkgroup(pz az.Principal, workgroupId int64) (*Workgroup, error)
-  
   GetWorkgroupByName(pz az.Principal, name string) (*Workgroup, error)
-  
   UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) (error)
-  
   DeleteWorkgroup(pz az.Principal, workgroupId int64) (error)
-  
   CreateIdentity(pz az.Principal, name string, password string) (int64, error)
-  
   GetIdentities(pz az.Principal, offset int64, limit int64) ([]*Identity, error)
-  
   GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*Identity, error)
-  
   GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*Identity, error)
-  
   GetIdentity(pz az.Principal, identityId int64) (*Identity, error)
-  
   GetIdentityByName(pz az.Principal, name string) (*Identity, error)
-  
-  LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) (error)
-  
-  UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) (error)
-  
-  LinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) (error)
-  
-  UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) (error)
-  
+  LinkIdentityWithWorkgroup(pz az.Principal, identityId int64, workgroupId int64) (error)
+  UnlinkIdentityFromWorkgroup(pz az.Principal, identityId int64, workgroupId int64) (error)
+  LinkIdentityWithRole(pz az.Principal, identityId int64, roleId int64) (error)
+  UnlinkIdentityFromRole(pz az.Principal, identityId int64, roleId int64) (error)
   UpdateIdentity(pz az.Principal, identityId int64, password string) (error)
-  
   DeactivateIdentity(pz az.Principal, identityId int64) (error)
-  
   ShareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) (error)
-  
-  GetEntityPrivileges(pz az.Principal, entityTypeId int64, entityId int64) ([]*EntityPrivilege, error)
-  
+  GetPrivileges(pz az.Principal, entityTypeId int64, entityId int64) ([]*EntityPrivilege, error)
   UnshareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) (error)
-  
-  GetEntityHistory(pz az.Principal, entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error)
-  
+  GetHistory(pz az.Principal, entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error)
 }
 
 
@@ -456,960 +262,682 @@ type Service interface {
 
 
 
-type PingIn struct {
-  
-  Input bool `json:"input"`
-  
+type PingServerIn struct {
+  Input string `json:"input"`
 }
-type PingOut struct {
-  
-  Output bool `json:"output"`
-  
+
+type PingServerOut struct {
+  Output string `json:"output"`
 }
 
 type RegisterClusterIn struct {
-  
   Address string `json:"address"`
-  
 }
+
 type RegisterClusterOut struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
 }
 
 type UnregisterClusterIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
 }
+
 type UnregisterClusterOut struct {
-  
 }
 
-type StartYarnClusterIn struct {
-  
+type StartClusterOnYarnIn struct {
   ClusterName string `json:"cluster_name"`
-  
   EngineId int64 `json:"engine_id"`
-  
   Size int `json:"size"`
-  
   Memory string `json:"memory"`
-  
   Username string `json:"username"`
-  
-}
-type StartYarnClusterOut struct {
-  
-  ClusterId int64 `json:"cluster_id"`
-  
 }
 
-type StopYarnClusterIn struct {
-  
+type StartClusterOnYarnOut struct {
   ClusterId int64 `json:"cluster_id"`
-  
 }
-type StopYarnClusterOut struct {
-  
+
+type StopClusterOnYarnIn struct {
+  ClusterId int64 `json:"cluster_id"`
+}
+
+type StopClusterOnYarnOut struct {
 }
 
 type GetClusterIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
-}
-type GetClusterOut struct {
-  
-  Cluster *Cluster `json:"cluster"`
-  
 }
 
-type GetYarnClusterIn struct {
-  
-  ClusterId int64 `json:"cluster_id"`
-  
+type GetClusterOut struct {
+  Cluster *Cluster `json:"cluster"`
 }
-type GetYarnClusterOut struct {
-  
+
+type GetClusterOnYarnIn struct {
+  ClusterId int64 `json:"cluster_id"`
+}
+
+type GetClusterOnYarnOut struct {
   Cluster *YarnCluster `json:"cluster"`
-  
 }
 
 type GetClustersIn struct {
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
 }
+
 type GetClustersOut struct {
-  
   Clusters []*Cluster `json:"clusters"`
-  
 }
 
 type GetClusterStatusIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
 }
+
 type GetClusterStatusOut struct {
-  
   ClusterStatus *ClusterStatus `json:"cluster_status"`
-  
 }
 
 type DeleteClusterIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
 }
+
 type DeleteClusterOut struct {
-  
 }
 
 type GetJobIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
   JobName string `json:"job_name"`
-  
 }
+
 type GetJobOut struct {
-  
   Job *Job `json:"job"`
-  
 }
 
 type GetJobsIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
 }
+
 type GetJobsOut struct {
-  
   Jobs []*Job `json:"jobs"`
-  
 }
 
 type CreateProjectIn struct {
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
 }
+
 type CreateProjectOut struct {
-  
   ProjectId int64 `json:"project_id"`
-  
 }
 
 type GetProjectsIn struct {
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
 }
+
 type GetProjectsOut struct {
-  
   Projects []*Project `json:"projects"`
-  
 }
 
 type GetProjectIn struct {
-  
   ProjectId int64 `json:"project_id"`
-  
 }
+
 type GetProjectOut struct {
-  
   Project *Project `json:"project"`
-  
 }
 
 type DeleteProjectIn struct {
-  
   ProjectId int64 `json:"project_id"`
-  
 }
+
 type DeleteProjectOut struct {
-  
 }
 
 type CreateDatasourceIn struct {
-  
   ProjectId int64 `json:"project_id"`
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
   Path string `json:"path"`
-  
 }
+
 type CreateDatasourceOut struct {
-  
   DatasourceId int64 `json:"datasource_id"`
-  
 }
 
 type GetDatasourcesIn struct {
-  
   ProjectId int64 `json:"project_id"`
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
 }
+
 type GetDatasourcesOut struct {
-  
   Datasources []*Datasource `json:"datasources"`
-  
 }
 
 type GetDatasourceIn struct {
-  
   DatasourceId int64 `json:"datasource_id"`
-  
 }
+
 type GetDatasourceOut struct {
-  
   Datasource *Datasource `json:"datasource"`
-  
 }
 
 type UpdateDatasourceIn struct {
-  
   DatasourceId int64 `json:"datasource_id"`
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
   Path string `json:"path"`
-  
 }
+
 type UpdateDatasourceOut struct {
-  
 }
 
 type DeleteDatasourceIn struct {
-  
   DatasourceId int64 `json:"datasource_id"`
-  
 }
+
 type DeleteDatasourceOut struct {
-  
 }
 
 type CreateDatasetIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
   DatasourceId int64 `json:"datasource_id"`
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
   ResponseColumnName string `json:"response_column_name"`
-  
 }
+
 type CreateDatasetOut struct {
-  
   DatasetId int64 `json:"dataset_id"`
-  
 }
 
 type GetDatasetsIn struct {
-  
   DatasourceId int64 `json:"datasource_id"`
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
 }
+
 type GetDatasetsOut struct {
-  
   Datasets []*Dataset `json:"datasets"`
-  
 }
 
 type GetDatasetIn struct {
-  
   DatasetId int64 `json:"dataset_id"`
-  
 }
+
 type GetDatasetOut struct {
-  
   Dataset *Dataset `json:"dataset"`
-  
 }
 
 type UpdateDatasetIn struct {
-  
   DatasetId int64 `json:"dataset_id"`
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
   ResponseColumnName string `json:"response_column_name"`
-  
 }
+
 type UpdateDatasetOut struct {
-  
 }
 
 type SplitDatasetIn struct {
-  
   DatasetId int64 `json:"dataset_id"`
-  
   Ratio1 int `json:"ratio1"`
-  
   Ratio2 int `json:"ratio2"`
-  
 }
+
 type SplitDatasetOut struct {
-  
   DatasetIds []int64 `json:"dataset_ids"`
-  
 }
 
 type DeleteDatasetIn struct {
-  
   DatasetId int64 `json:"dataset_id"`
-  
 }
+
 type DeleteDatasetOut struct {
-  
 }
 
 type BuildModelIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
   DatasetId int64 `json:"dataset_id"`
-  
   Algorithm string `json:"algorithm"`
-  
-}
-type BuildModelOut struct {
-  
-  ModelId int64 `json:"model_id"`
-  
 }
 
-type BuildAutoModelIn struct {
-  
-  ClusterId int64 `json:"cluster_id"`
-  
-  Dataset string `json:"dataset"`
-  
-  TargetName string `json:"target_name"`
-  
-  MaxRunTime int `json:"max_run_time"`
-  
+type BuildModelOut struct {
+  ModelId int64 `json:"model_id"`
 }
-type BuildAutoModelOut struct {
-  
+
+type BuildModelAutoIn struct {
+  ClusterId int64 `json:"cluster_id"`
+  Dataset string `json:"dataset"`
+  TargetName string `json:"target_name"`
+  MaxRunTime int `json:"max_run_time"`
+}
+
+type BuildModelAutoOut struct {
   Model *Model `json:"model"`
-  
 }
 
 type GetModelIn struct {
-  
   ModelId int64 `json:"model_id"`
-  
 }
+
 type GetModelOut struct {
-  
   Model *Model `json:"model"`
-  
 }
 
 type GetModelsIn struct {
-  
   ProjectId int64 `json:"project_id"`
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
-}
-type GetModelsOut struct {
-  
-  Models []*Model `json:"models"`
-  
 }
 
-type GetClusterModelsIn struct {
-  
-  ClusterId int64 `json:"cluster_id"`
-  
-}
-type GetClusterModelsOut struct {
-  
+type GetModelsOut struct {
   Models []*Model `json:"models"`
-  
+}
+
+type GetModelsFromClusterIn struct {
+  ClusterId int64 `json:"cluster_id"`
+}
+
+type GetModelsFromClusterOut struct {
+  Models []*Model `json:"models"`
 }
 
 type ImportModelFromClusterIn struct {
-  
   ClusterId int64 `json:"cluster_id"`
-  
   ProjectId int64 `json:"project_id"`
-  
   ModelName string `json:"model_name"`
-  
 }
+
 type ImportModelFromClusterOut struct {
-  
   Model *Model `json:"model"`
-  
 }
 
 type DeleteModelIn struct {
-  
   ModelId int64 `json:"model_id"`
-  
 }
+
 type DeleteModelOut struct {
-  
 }
 
-type StartScoringServiceIn struct {
-  
+type StartServiceIn struct {
   ModelId int64 `json:"model_id"`
-  
   Port int `json:"port"`
-  
 }
-type StartScoringServiceOut struct {
-  
+
+type StartServiceOut struct {
   Service *ScoringService `json:"service"`
-  
 }
 
-type StopScoringServiceIn struct {
-  
+type StopServiceIn struct {
   ServiceId int64 `json:"service_id"`
-  
-}
-type StopScoringServiceOut struct {
-  
 }
 
-type GetScoringServiceIn struct {
-  
-  ServiceId int64 `json:"service_id"`
-  
+type StopServiceOut struct {
 }
-type GetScoringServiceOut struct {
-  
+
+type GetServiceIn struct {
+  ServiceId int64 `json:"service_id"`
+}
+
+type GetServiceOut struct {
   Service *ScoringService `json:"service"`
-  
 }
 
-type GetScoringServicesIn struct {
-  
+type GetServicesIn struct {
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
-}
-type GetScoringServicesOut struct {
-  
-  Services []*ScoringService `json:"services"`
-  
 }
 
-type GetScoringServicesForModelIn struct {
-  
+type GetServicesOut struct {
+  Services []*ScoringService `json:"services"`
+}
+
+type GetServicesForModelIn struct {
   ModelId int64 `json:"model_id"`
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
-}
-type GetScoringServicesForModelOut struct {
-  
-  Services []*ScoringService `json:"services"`
-  
 }
 
-type DeleteScoringServiceIn struct {
-  
-  ServiceId int64 `json:"service_id"`
-  
+type GetServicesForModelOut struct {
+  Services []*ScoringService `json:"services"`
 }
-type DeleteScoringServiceOut struct {
-  
+
+type DeleteServiceIn struct {
+  ServiceId int64 `json:"service_id"`
+}
+
+type DeleteServiceOut struct {
 }
 
 type AddEngineIn struct {
-  
   EngineName string `json:"engine_name"`
-  
   EnginePath string `json:"engine_path"`
-  
 }
+
 type AddEngineOut struct {
-  
   EngineId int64 `json:"engine_id"`
-  
 }
 
 type GetEngineIn struct {
-  
   EngineId int64 `json:"engine_id"`
-  
 }
+
 type GetEngineOut struct {
-  
   Engine *Engine `json:"engine"`
-  
 }
 
 type GetEnginesIn struct {
-  
 }
+
 type GetEnginesOut struct {
-  
   Engines []*Engine `json:"engines"`
-  
 }
 
 type DeleteEngineIn struct {
-  
   EngineId int64 `json:"engine_id"`
-  
 }
+
 type DeleteEngineOut struct {
-  
 }
 
-type GetSupportedEntityTypesIn struct {
-  
+type GetAllEntityTypesIn struct {
 }
-type GetSupportedEntityTypesOut struct {
-  
+
+type GetAllEntityTypesOut struct {
   EntityTypes []*EntityType `json:"entity_types"`
-  
 }
 
-type GetSupportedPermissionsIn struct {
-  
+type GetAllPermissionsIn struct {
 }
-type GetSupportedPermissionsOut struct {
-  
+
+type GetAllPermissionsOut struct {
   Permissions []*Permission `json:"permissions"`
-  
 }
 
-type GetSupportedClusterTypesIn struct {
-  
+type GetAllClusterTypesIn struct {
 }
-type GetSupportedClusterTypesOut struct {
-  
+
+type GetAllClusterTypesOut struct {
   ClusterTypes []*ClusterType `json:"cluster_types"`
-  
 }
 
 type GetPermissionsForRoleIn struct {
-  
   RoleId int64 `json:"role_id"`
-  
 }
+
 type GetPermissionsForRoleOut struct {
-  
   Permissions []*Permission `json:"permissions"`
-  
 }
 
 type GetPermissionsForIdentityIn struct {
-  
   IdentityId int64 `json:"identity_id"`
-  
 }
+
 type GetPermissionsForIdentityOut struct {
-  
   Permissions []*Permission `json:"permissions"`
-  
 }
 
 type CreateRoleIn struct {
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
 }
+
 type CreateRoleOut struct {
-  
   RoleId int64 `json:"role_id"`
-  
 }
 
 type GetRolesIn struct {
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
 }
+
 type GetRolesOut struct {
-  
   Roles []*Role `json:"roles"`
-  
 }
 
 type GetRolesForIdentityIn struct {
-  
   IdentityId int64 `json:"identity_id"`
-  
 }
+
 type GetRolesForIdentityOut struct {
-  
   Roles []*Role `json:"roles"`
-  
 }
 
 type GetRoleIn struct {
-  
   RoleId int64 `json:"role_id"`
-  
 }
+
 type GetRoleOut struct {
-  
   Role *Role `json:"role"`
-  
 }
 
 type GetRoleByNameIn struct {
-  
   Name string `json:"name"`
-  
 }
+
 type GetRoleByNameOut struct {
-  
   Role *Role `json:"role"`
-  
 }
 
 type UpdateRoleIn struct {
-  
   RoleId int64 `json:"role_id"`
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
-}
-type UpdateRoleOut struct {
-  
 }
 
-type LinkRoleAndPermissionsIn struct {
-  
-  RoleId int64 `json:"role_id"`
-  
-  PermissionIds []int64 `json:"permission_ids"`
-  
+type UpdateRoleOut struct {
 }
-type LinkRoleAndPermissionsOut struct {
-  
+
+type LinkRoleWithPermissionsIn struct {
+  RoleId int64 `json:"role_id"`
+  PermissionIds []int64 `json:"permission_ids"`
+}
+
+type LinkRoleWithPermissionsOut struct {
 }
 
 type DeleteRoleIn struct {
-  
   RoleId int64 `json:"role_id"`
-  
 }
+
 type DeleteRoleOut struct {
-  
 }
 
 type CreateWorkgroupIn struct {
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
 }
+
 type CreateWorkgroupOut struct {
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
 }
 
 type GetWorkgroupsIn struct {
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
 }
+
 type GetWorkgroupsOut struct {
-  
   Workgroups []*Workgroup `json:"workgroups"`
-  
 }
 
 type GetWorkgroupsForIdentityIn struct {
-  
   IdentityId int64 `json:"identity_id"`
-  
 }
+
 type GetWorkgroupsForIdentityOut struct {
-  
   Workgroups []*Workgroup `json:"workgroups"`
-  
 }
 
 type GetWorkgroupIn struct {
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
 }
+
 type GetWorkgroupOut struct {
-  
   Workgroup *Workgroup `json:"workgroup"`
-  
 }
 
 type GetWorkgroupByNameIn struct {
-  
   Name string `json:"name"`
-  
 }
+
 type GetWorkgroupByNameOut struct {
-  
   Workgroup *Workgroup `json:"workgroup"`
-  
 }
 
 type UpdateWorkgroupIn struct {
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
   Name string `json:"name"`
-  
   Description string `json:"description"`
-  
 }
+
 type UpdateWorkgroupOut struct {
-  
 }
 
 type DeleteWorkgroupIn struct {
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
 }
+
 type DeleteWorkgroupOut struct {
-  
 }
 
 type CreateIdentityIn struct {
-  
   Name string `json:"name"`
-  
   Password string `json:"password"`
-  
 }
+
 type CreateIdentityOut struct {
-  
   IdentityId int64 `json:"identity_id"`
-  
 }
 
 type GetIdentitiesIn struct {
-  
   Offset int64 `json:"offset"`
-  
   Limit int64 `json:"limit"`
-  
 }
+
 type GetIdentitiesOut struct {
-  
   Identities []*Identity `json:"identities"`
-  
 }
 
 type GetIdentitiesForWorkgroupIn struct {
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
 }
+
 type GetIdentitiesForWorkgroupOut struct {
-  
   Identities []*Identity `json:"identities"`
-  
 }
 
 type GetIdentitiesForRoleIn struct {
-  
   RoleId int64 `json:"role_id"`
-  
 }
+
 type GetIdentitiesForRoleOut struct {
-  
   Identities []*Identity `json:"identities"`
-  
 }
 
 type GetIdentityIn struct {
-  
   IdentityId int64 `json:"identity_id"`
-  
 }
+
 type GetIdentityOut struct {
-  
   Identity *Identity `json:"identity"`
-  
 }
 
 type GetIdentityByNameIn struct {
-  
   Name string `json:"name"`
-  
 }
+
 type GetIdentityByNameOut struct {
-  
   Identity *Identity `json:"identity"`
-  
 }
 
-type LinkIdentityAndWorkgroupIn struct {
-  
+type LinkIdentityWithWorkgroupIn struct {
   IdentityId int64 `json:"identity_id"`
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
-}
-type LinkIdentityAndWorkgroupOut struct {
-  
 }
 
-type UnlinkIdentityAndWorkgroupIn struct {
-  
+type LinkIdentityWithWorkgroupOut struct {
+}
+
+type UnlinkIdentityFromWorkgroupIn struct {
   IdentityId int64 `json:"identity_id"`
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
-}
-type UnlinkIdentityAndWorkgroupOut struct {
-  
 }
 
-type LinkIdentityAndRoleIn struct {
-  
-  IdentityId int64 `json:"identity_id"`
-  
-  RoleId int64 `json:"role_id"`
-  
-}
-type LinkIdentityAndRoleOut struct {
-  
+type UnlinkIdentityFromWorkgroupOut struct {
 }
 
-type UnlinkIdentityAndRoleIn struct {
-  
+type LinkIdentityWithRoleIn struct {
   IdentityId int64 `json:"identity_id"`
-  
   RoleId int64 `json:"role_id"`
-  
 }
-type UnlinkIdentityAndRoleOut struct {
-  
+
+type LinkIdentityWithRoleOut struct {
+}
+
+type UnlinkIdentityFromRoleIn struct {
+  IdentityId int64 `json:"identity_id"`
+  RoleId int64 `json:"role_id"`
+}
+
+type UnlinkIdentityFromRoleOut struct {
 }
 
 type UpdateIdentityIn struct {
-  
   IdentityId int64 `json:"identity_id"`
-  
   Password string `json:"password"`
-  
 }
+
 type UpdateIdentityOut struct {
-  
 }
 
 type DeactivateIdentityIn struct {
-  
   IdentityId int64 `json:"identity_id"`
-  
 }
+
 type DeactivateIdentityOut struct {
-  
 }
 
 type ShareEntityIn struct {
-  
   Kind string `json:"kind"`
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
   EntityTypeId int64 `json:"entity_type_id"`
-  
   EntityId int64 `json:"entity_id"`
-  
-}
-type ShareEntityOut struct {
-  
 }
 
-type GetEntityPrivilegesIn struct {
-  
-  EntityTypeId int64 `json:"entity_type_id"`
-  
-  EntityId int64 `json:"entity_id"`
-  
+type ShareEntityOut struct {
 }
-type GetEntityPrivilegesOut struct {
-  
+
+type GetPrivilegesIn struct {
+  EntityTypeId int64 `json:"entity_type_id"`
+  EntityId int64 `json:"entity_id"`
+}
+
+type GetPrivilegesOut struct {
   Privileges []*EntityPrivilege `json:"privileges"`
-  
 }
 
 type UnshareEntityIn struct {
-  
   Kind string `json:"kind"`
-  
   WorkgroupId int64 `json:"workgroup_id"`
-  
   EntityTypeId int64 `json:"entity_type_id"`
-  
   EntityId int64 `json:"entity_id"`
-  
-}
-type UnshareEntityOut struct {
-  
 }
 
-type GetEntityHistoryIn struct {
-  
-  EntityTypeId int64 `json:"entity_type_id"`
-  
-  EntityId int64 `json:"entity_id"`
-  
-  Offset int64 `json:"offset"`
-  
-  Limit int64 `json:"limit"`
-  
+type UnshareEntityOut struct {
 }
-type GetEntityHistoryOut struct {
-  
+
+type GetHistoryIn struct {
+  EntityTypeId int64 `json:"entity_type_id"`
+  EntityId int64 `json:"entity_id"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type GetHistoryOut struct {
   History []*EntityHistory `json:"history"`
-  
 }
 
 
@@ -1427,12 +955,12 @@ type Proc interface {
 
 
 
-func (this *Remote) Ping(input bool) (bool, error) {
-  in := PingIn{ input  }
-  var out PingOut
-  err := this.Proc.Call("Ping", &in, &out)
+func (this *Remote) PingServer(input string) (string, error) {
+  in := PingServerIn{ input  }
+  var out PingServerOut
+  err := this.Proc.Call("PingServer", &in, &out)
   if err != nil {
-    return false, err
+    return "", err
   }
   return out.Output, nil
 }
@@ -1457,20 +985,20 @@ func (this *Remote) UnregisterCluster(clusterId int64) (error) {
   return nil
 }
 
-func (this *Remote) StartYarnCluster(clusterName string, engineId int64, size int, memory string, username string) (int64, error) {
-  in := StartYarnClusterIn{ clusterName , engineId , size , memory , username  }
-  var out StartYarnClusterOut
-  err := this.Proc.Call("StartYarnCluster", &in, &out)
+func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size int, memory string, username string) (int64, error) {
+  in := StartClusterOnYarnIn{ clusterName , engineId , size , memory , username  }
+  var out StartClusterOnYarnOut
+  err := this.Proc.Call("StartClusterOnYarn", &in, &out)
   if err != nil {
     return 0, err
   }
   return out.ClusterId, nil
 }
 
-func (this *Remote) StopYarnCluster(clusterId int64) (error) {
-  in := StopYarnClusterIn{ clusterId  }
-  var out StopYarnClusterOut
-  err := this.Proc.Call("StopYarnCluster", &in, &out)
+func (this *Remote) StopClusterOnYarn(clusterId int64) (error) {
+  in := StopClusterOnYarnIn{ clusterId  }
+  var out StopClusterOnYarnOut
+  err := this.Proc.Call("StopClusterOnYarn", &in, &out)
   if err != nil {
     return err
   }
@@ -1487,10 +1015,10 @@ func (this *Remote) GetCluster(clusterId int64) (*Cluster, error) {
   return out.Cluster, nil
 }
 
-func (this *Remote) GetYarnCluster(clusterId int64) (*YarnCluster, error) {
-  in := GetYarnClusterIn{ clusterId  }
-  var out GetYarnClusterOut
-  err := this.Proc.Call("GetYarnCluster", &in, &out)
+func (this *Remote) GetClusterOnYarn(clusterId int64) (*YarnCluster, error) {
+  in := GetClusterOnYarnIn{ clusterId  }
+  var out GetClusterOnYarnOut
+  err := this.Proc.Call("GetClusterOnYarn", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -1707,10 +1235,10 @@ func (this *Remote) BuildModel(clusterId int64, datasetId int64, algorithm strin
   return out.ModelId, nil
 }
 
-func (this *Remote) BuildAutoModel(clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error) {
-  in := BuildAutoModelIn{ clusterId , dataset , targetName , maxRunTime  }
-  var out BuildAutoModelOut
-  err := this.Proc.Call("BuildAutoModel", &in, &out)
+func (this *Remote) BuildModelAuto(clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error) {
+  in := BuildModelAutoIn{ clusterId , dataset , targetName , maxRunTime  }
+  var out BuildModelAutoOut
+  err := this.Proc.Call("BuildModelAuto", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -1737,10 +1265,10 @@ func (this *Remote) GetModels(projectId int64, offset int64, limit int64) ([]*Mo
   return out.Models, nil
 }
 
-func (this *Remote) GetClusterModels(clusterId int64) ([]*Model, error) {
-  in := GetClusterModelsIn{ clusterId  }
-  var out GetClusterModelsOut
-  err := this.Proc.Call("GetClusterModels", &in, &out)
+func (this *Remote) GetModelsFromCluster(clusterId int64) ([]*Model, error) {
+  in := GetModelsFromClusterIn{ clusterId  }
+  var out GetModelsFromClusterOut
+  err := this.Proc.Call("GetModelsFromCluster", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -1767,60 +1295,60 @@ func (this *Remote) DeleteModel(modelId int64) (error) {
   return nil
 }
 
-func (this *Remote) StartScoringService(modelId int64, port int) (*ScoringService, error) {
-  in := StartScoringServiceIn{ modelId , port  }
-  var out StartScoringServiceOut
-  err := this.Proc.Call("StartScoringService", &in, &out)
+func (this *Remote) StartService(modelId int64, port int) (*ScoringService, error) {
+  in := StartServiceIn{ modelId , port  }
+  var out StartServiceOut
+  err := this.Proc.Call("StartService", &in, &out)
   if err != nil {
     return nil, err
   }
   return out.Service, nil
 }
 
-func (this *Remote) StopScoringService(serviceId int64) (error) {
-  in := StopScoringServiceIn{ serviceId  }
-  var out StopScoringServiceOut
-  err := this.Proc.Call("StopScoringService", &in, &out)
+func (this *Remote) StopService(serviceId int64) (error) {
+  in := StopServiceIn{ serviceId  }
+  var out StopServiceOut
+  err := this.Proc.Call("StopService", &in, &out)
   if err != nil {
     return err
   }
   return nil
 }
 
-func (this *Remote) GetScoringService(serviceId int64) (*ScoringService, error) {
-  in := GetScoringServiceIn{ serviceId  }
-  var out GetScoringServiceOut
-  err := this.Proc.Call("GetScoringService", &in, &out)
+func (this *Remote) GetService(serviceId int64) (*ScoringService, error) {
+  in := GetServiceIn{ serviceId  }
+  var out GetServiceOut
+  err := this.Proc.Call("GetService", &in, &out)
   if err != nil {
     return nil, err
   }
   return out.Service, nil
 }
 
-func (this *Remote) GetScoringServices(offset int64, limit int64) ([]*ScoringService, error) {
-  in := GetScoringServicesIn{ offset , limit  }
-  var out GetScoringServicesOut
-  err := this.Proc.Call("GetScoringServices", &in, &out)
+func (this *Remote) GetServices(offset int64, limit int64) ([]*ScoringService, error) {
+  in := GetServicesIn{ offset , limit  }
+  var out GetServicesOut
+  err := this.Proc.Call("GetServices", &in, &out)
   if err != nil {
     return nil, err
   }
   return out.Services, nil
 }
 
-func (this *Remote) GetScoringServicesForModel(modelId int64, offset int64, limit int64) ([]*ScoringService, error) {
-  in := GetScoringServicesForModelIn{ modelId , offset , limit  }
-  var out GetScoringServicesForModelOut
-  err := this.Proc.Call("GetScoringServicesForModel", &in, &out)
+func (this *Remote) GetServicesForModel(modelId int64, offset int64, limit int64) ([]*ScoringService, error) {
+  in := GetServicesForModelIn{ modelId , offset , limit  }
+  var out GetServicesForModelOut
+  err := this.Proc.Call("GetServicesForModel", &in, &out)
   if err != nil {
     return nil, err
   }
   return out.Services, nil
 }
 
-func (this *Remote) DeleteScoringService(serviceId int64) (error) {
-  in := DeleteScoringServiceIn{ serviceId  }
-  var out DeleteScoringServiceOut
-  err := this.Proc.Call("DeleteScoringService", &in, &out)
+func (this *Remote) DeleteService(serviceId int64) (error) {
+  in := DeleteServiceIn{ serviceId  }
+  var out DeleteServiceOut
+  err := this.Proc.Call("DeleteService", &in, &out)
   if err != nil {
     return err
   }
@@ -1867,30 +1395,30 @@ func (this *Remote) DeleteEngine(engineId int64) (error) {
   return nil
 }
 
-func (this *Remote) GetSupportedEntityTypes() ([]*EntityType, error) {
-  in := GetSupportedEntityTypesIn{  }
-  var out GetSupportedEntityTypesOut
-  err := this.Proc.Call("GetSupportedEntityTypes", &in, &out)
+func (this *Remote) GetAllEntityTypes() ([]*EntityType, error) {
+  in := GetAllEntityTypesIn{  }
+  var out GetAllEntityTypesOut
+  err := this.Proc.Call("GetAllEntityTypes", &in, &out)
   if err != nil {
     return nil, err
   }
   return out.EntityTypes, nil
 }
 
-func (this *Remote) GetSupportedPermissions() ([]*Permission, error) {
-  in := GetSupportedPermissionsIn{  }
-  var out GetSupportedPermissionsOut
-  err := this.Proc.Call("GetSupportedPermissions", &in, &out)
+func (this *Remote) GetAllPermissions() ([]*Permission, error) {
+  in := GetAllPermissionsIn{  }
+  var out GetAllPermissionsOut
+  err := this.Proc.Call("GetAllPermissions", &in, &out)
   if err != nil {
     return nil, err
   }
   return out.Permissions, nil
 }
 
-func (this *Remote) GetSupportedClusterTypes() ([]*ClusterType, error) {
-  in := GetSupportedClusterTypesIn{  }
-  var out GetSupportedClusterTypesOut
-  err := this.Proc.Call("GetSupportedClusterTypes", &in, &out)
+func (this *Remote) GetAllClusterTypes() ([]*ClusterType, error) {
+  in := GetAllClusterTypesIn{  }
+  var out GetAllClusterTypesOut
+  err := this.Proc.Call("GetAllClusterTypes", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -1977,10 +1505,10 @@ func (this *Remote) UpdateRole(roleId int64, name string, description string) (e
   return nil
 }
 
-func (this *Remote) LinkRoleAndPermissions(roleId int64, permissionIds []int64) (error) {
-  in := LinkRoleAndPermissionsIn{ roleId , permissionIds  }
-  var out LinkRoleAndPermissionsOut
-  err := this.Proc.Call("LinkRoleAndPermissions", &in, &out)
+func (this *Remote) LinkRoleWithPermissions(roleId int64, permissionIds []int64) (error) {
+  in := LinkRoleWithPermissionsIn{ roleId , permissionIds  }
+  var out LinkRoleWithPermissionsOut
+  err := this.Proc.Call("LinkRoleWithPermissions", &in, &out)
   if err != nil {
     return err
   }
@@ -2127,40 +1655,40 @@ func (this *Remote) GetIdentityByName(name string) (*Identity, error) {
   return out.Identity, nil
 }
 
-func (this *Remote) LinkIdentityAndWorkgroup(identityId int64, workgroupId int64) (error) {
-  in := LinkIdentityAndWorkgroupIn{ identityId , workgroupId  }
-  var out LinkIdentityAndWorkgroupOut
-  err := this.Proc.Call("LinkIdentityAndWorkgroup", &in, &out)
+func (this *Remote) LinkIdentityWithWorkgroup(identityId int64, workgroupId int64) (error) {
+  in := LinkIdentityWithWorkgroupIn{ identityId , workgroupId  }
+  var out LinkIdentityWithWorkgroupOut
+  err := this.Proc.Call("LinkIdentityWithWorkgroup", &in, &out)
   if err != nil {
     return err
   }
   return nil
 }
 
-func (this *Remote) UnlinkIdentityAndWorkgroup(identityId int64, workgroupId int64) (error) {
-  in := UnlinkIdentityAndWorkgroupIn{ identityId , workgroupId  }
-  var out UnlinkIdentityAndWorkgroupOut
-  err := this.Proc.Call("UnlinkIdentityAndWorkgroup", &in, &out)
+func (this *Remote) UnlinkIdentityFromWorkgroup(identityId int64, workgroupId int64) (error) {
+  in := UnlinkIdentityFromWorkgroupIn{ identityId , workgroupId  }
+  var out UnlinkIdentityFromWorkgroupOut
+  err := this.Proc.Call("UnlinkIdentityFromWorkgroup", &in, &out)
   if err != nil {
     return err
   }
   return nil
 }
 
-func (this *Remote) LinkIdentityAndRole(identityId int64, roleId int64) (error) {
-  in := LinkIdentityAndRoleIn{ identityId , roleId  }
-  var out LinkIdentityAndRoleOut
-  err := this.Proc.Call("LinkIdentityAndRole", &in, &out)
+func (this *Remote) LinkIdentityWithRole(identityId int64, roleId int64) (error) {
+  in := LinkIdentityWithRoleIn{ identityId , roleId  }
+  var out LinkIdentityWithRoleOut
+  err := this.Proc.Call("LinkIdentityWithRole", &in, &out)
   if err != nil {
     return err
   }
   return nil
 }
 
-func (this *Remote) UnlinkIdentityAndRole(identityId int64, roleId int64) (error) {
-  in := UnlinkIdentityAndRoleIn{ identityId , roleId  }
-  var out UnlinkIdentityAndRoleOut
-  err := this.Proc.Call("UnlinkIdentityAndRole", &in, &out)
+func (this *Remote) UnlinkIdentityFromRole(identityId int64, roleId int64) (error) {
+  in := UnlinkIdentityFromRoleIn{ identityId , roleId  }
+  var out UnlinkIdentityFromRoleOut
+  err := this.Proc.Call("UnlinkIdentityFromRole", &in, &out)
   if err != nil {
     return err
   }
@@ -2197,10 +1725,10 @@ func (this *Remote) ShareEntity(kind string, workgroupId int64, entityTypeId int
   return nil
 }
 
-func (this *Remote) GetEntityPrivileges(entityTypeId int64, entityId int64) ([]*EntityPrivilege, error) {
-  in := GetEntityPrivilegesIn{ entityTypeId , entityId  }
-  var out GetEntityPrivilegesOut
-  err := this.Proc.Call("GetEntityPrivileges", &in, &out)
+func (this *Remote) GetPrivileges(entityTypeId int64, entityId int64) ([]*EntityPrivilege, error) {
+  in := GetPrivilegesIn{ entityTypeId , entityId  }
+  var out GetPrivilegesOut
+  err := this.Proc.Call("GetPrivileges", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -2217,10 +1745,10 @@ func (this *Remote) UnshareEntity(kind string, workgroupId int64, entityTypeId i
   return nil
 }
 
-func (this *Remote) GetEntityHistory(entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error) {
-  in := GetEntityHistoryIn{ entityTypeId , entityId , offset , limit  }
-  var out GetEntityHistoryOut
-  err := this.Proc.Call("GetEntityHistory", &in, &out)
+func (this *Remote) GetHistory(entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error) {
+  in := GetHistoryIn{ entityTypeId , entityId , offset , limit  }
+  var out GetHistoryOut
+  err := this.Proc.Call("GetHistory", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -2239,16 +1767,16 @@ type Impl struct {
 
 
 
-func (this *Impl) Ping(r *http.Request, in *PingIn, out *PingOut) error {
+func (this *Impl) PingServer(r *http.Request, in *PingServerIn, out *PingServerOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "Ping")
+	log.Println(pz, "PingServer")
 
-	val0, err := this.Service.Ping(pz, in.Input)
+	val0, err := this.Service.PingServer(pz, in.Input)
 	if err != nil {
-		log.Printf("%s Failed Ping: %v", pz, err)
+		log.Printf("%s Failed PingServer: %v", pz, err)
 		return err
 	}
   
@@ -2291,16 +1819,16 @@ func (this *Impl) UnregisterCluster(r *http.Request, in *UnregisterClusterIn, ou
 	return nil
 }
 
-func (this *Impl) StartYarnCluster(r *http.Request, in *StartYarnClusterIn, out *StartYarnClusterOut) error {
+func (this *Impl) StartClusterOnYarn(r *http.Request, in *StartClusterOnYarnIn, out *StartClusterOnYarnOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "StartYarnCluster")
+	log.Println(pz, "StartClusterOnYarn")
 
-	val0, err := this.Service.StartYarnCluster(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Username)
+	val0, err := this.Service.StartClusterOnYarn(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Username)
 	if err != nil {
-		log.Printf("%s Failed StartYarnCluster: %v", pz, err)
+		log.Printf("%s Failed StartClusterOnYarn: %v", pz, err)
 		return err
 	}
   
@@ -2309,16 +1837,16 @@ func (this *Impl) StartYarnCluster(r *http.Request, in *StartYarnClusterIn, out 
 	return nil
 }
 
-func (this *Impl) StopYarnCluster(r *http.Request, in *StopYarnClusterIn, out *StopYarnClusterOut) error {
+func (this *Impl) StopClusterOnYarn(r *http.Request, in *StopClusterOnYarnIn, out *StopClusterOnYarnOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "StopYarnCluster")
+	log.Println(pz, "StopClusterOnYarn")
 
-	err := this.Service.StopYarnCluster(pz, in.ClusterId)
+	err := this.Service.StopClusterOnYarn(pz, in.ClusterId)
 	if err != nil {
-		log.Printf("%s Failed StopYarnCluster: %v", pz, err)
+		log.Printf("%s Failed StopClusterOnYarn: %v", pz, err)
 		return err
 	}
   
@@ -2343,16 +1871,16 @@ func (this *Impl) GetCluster(r *http.Request, in *GetClusterIn, out *GetClusterO
 	return nil
 }
 
-func (this *Impl) GetYarnCluster(r *http.Request, in *GetYarnClusterIn, out *GetYarnClusterOut) error {
+func (this *Impl) GetClusterOnYarn(r *http.Request, in *GetClusterOnYarnIn, out *GetClusterOnYarnOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetYarnCluster")
+	log.Println(pz, "GetClusterOnYarn")
 
-	val0, err := this.Service.GetYarnCluster(pz, in.ClusterId)
+	val0, err := this.Service.GetClusterOnYarn(pz, in.ClusterId)
 	if err != nil {
-		log.Printf("%s Failed GetYarnCluster: %v", pz, err)
+		log.Printf("%s Failed GetClusterOnYarn: %v", pz, err)
 		return err
 	}
   
@@ -2727,16 +2255,16 @@ func (this *Impl) BuildModel(r *http.Request, in *BuildModelIn, out *BuildModelO
 	return nil
 }
 
-func (this *Impl) BuildAutoModel(r *http.Request, in *BuildAutoModelIn, out *BuildAutoModelOut) error {
+func (this *Impl) BuildModelAuto(r *http.Request, in *BuildModelAutoIn, out *BuildModelAutoOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "BuildAutoModel")
+	log.Println(pz, "BuildModelAuto")
 
-	val0, err := this.Service.BuildAutoModel(pz, in.ClusterId, in.Dataset, in.TargetName, in.MaxRunTime)
+	val0, err := this.Service.BuildModelAuto(pz, in.ClusterId, in.Dataset, in.TargetName, in.MaxRunTime)
 	if err != nil {
-		log.Printf("%s Failed BuildAutoModel: %v", pz, err)
+		log.Printf("%s Failed BuildModelAuto: %v", pz, err)
 		return err
 	}
   
@@ -2781,16 +2309,16 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
 	return nil
 }
 
-func (this *Impl) GetClusterModels(r *http.Request, in *GetClusterModelsIn, out *GetClusterModelsOut) error {
+func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromClusterIn, out *GetModelsFromClusterOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetClusterModels")
+	log.Println(pz, "GetModelsFromCluster")
 
-	val0, err := this.Service.GetClusterModels(pz, in.ClusterId)
+	val0, err := this.Service.GetModelsFromCluster(pz, in.ClusterId)
 	if err != nil {
-		log.Printf("%s Failed GetClusterModels: %v", pz, err)
+		log.Printf("%s Failed GetModelsFromCluster: %v", pz, err)
 		return err
 	}
   
@@ -2833,16 +2361,16 @@ func (this *Impl) DeleteModel(r *http.Request, in *DeleteModelIn, out *DeleteMod
 	return nil
 }
 
-func (this *Impl) StartScoringService(r *http.Request, in *StartScoringServiceIn, out *StartScoringServiceOut) error {
+func (this *Impl) StartService(r *http.Request, in *StartServiceIn, out *StartServiceOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "StartScoringService")
+	log.Println(pz, "StartService")
 
-	val0, err := this.Service.StartScoringService(pz, in.ModelId, in.Port)
+	val0, err := this.Service.StartService(pz, in.ModelId, in.Port)
 	if err != nil {
-		log.Printf("%s Failed StartScoringService: %v", pz, err)
+		log.Printf("%s Failed StartService: %v", pz, err)
 		return err
 	}
   
@@ -2851,32 +2379,32 @@ func (this *Impl) StartScoringService(r *http.Request, in *StartScoringServiceIn
 	return nil
 }
 
-func (this *Impl) StopScoringService(r *http.Request, in *StopScoringServiceIn, out *StopScoringServiceOut) error {
+func (this *Impl) StopService(r *http.Request, in *StopServiceIn, out *StopServiceOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "StopScoringService")
+	log.Println(pz, "StopService")
 
-	err := this.Service.StopScoringService(pz, in.ServiceId)
+	err := this.Service.StopService(pz, in.ServiceId)
 	if err != nil {
-		log.Printf("%s Failed StopScoringService: %v", pz, err)
+		log.Printf("%s Failed StopService: %v", pz, err)
 		return err
 	}
   
 	return nil
 }
 
-func (this *Impl) GetScoringService(r *http.Request, in *GetScoringServiceIn, out *GetScoringServiceOut) error {
+func (this *Impl) GetService(r *http.Request, in *GetServiceIn, out *GetServiceOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetScoringService")
+	log.Println(pz, "GetService")
 
-	val0, err := this.Service.GetScoringService(pz, in.ServiceId)
+	val0, err := this.Service.GetService(pz, in.ServiceId)
 	if err != nil {
-		log.Printf("%s Failed GetScoringService: %v", pz, err)
+		log.Printf("%s Failed GetService: %v", pz, err)
 		return err
 	}
   
@@ -2885,16 +2413,16 @@ func (this *Impl) GetScoringService(r *http.Request, in *GetScoringServiceIn, ou
 	return nil
 }
 
-func (this *Impl) GetScoringServices(r *http.Request, in *GetScoringServicesIn, out *GetScoringServicesOut) error {
+func (this *Impl) GetServices(r *http.Request, in *GetServicesIn, out *GetServicesOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetScoringServices")
+	log.Println(pz, "GetServices")
 
-	val0, err := this.Service.GetScoringServices(pz, in.Offset, in.Limit)
+	val0, err := this.Service.GetServices(pz, in.Offset, in.Limit)
 	if err != nil {
-		log.Printf("%s Failed GetScoringServices: %v", pz, err)
+		log.Printf("%s Failed GetServices: %v", pz, err)
 		return err
 	}
   
@@ -2903,16 +2431,16 @@ func (this *Impl) GetScoringServices(r *http.Request, in *GetScoringServicesIn, 
 	return nil
 }
 
-func (this *Impl) GetScoringServicesForModel(r *http.Request, in *GetScoringServicesForModelIn, out *GetScoringServicesForModelOut) error {
+func (this *Impl) GetServicesForModel(r *http.Request, in *GetServicesForModelIn, out *GetServicesForModelOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetScoringServicesForModel")
+	log.Println(pz, "GetServicesForModel")
 
-	val0, err := this.Service.GetScoringServicesForModel(pz, in.ModelId, in.Offset, in.Limit)
+	val0, err := this.Service.GetServicesForModel(pz, in.ModelId, in.Offset, in.Limit)
 	if err != nil {
-		log.Printf("%s Failed GetScoringServicesForModel: %v", pz, err)
+		log.Printf("%s Failed GetServicesForModel: %v", pz, err)
 		return err
 	}
   
@@ -2921,16 +2449,16 @@ func (this *Impl) GetScoringServicesForModel(r *http.Request, in *GetScoringServ
 	return nil
 }
 
-func (this *Impl) DeleteScoringService(r *http.Request, in *DeleteScoringServiceIn, out *DeleteScoringServiceOut) error {
+func (this *Impl) DeleteService(r *http.Request, in *DeleteServiceIn, out *DeleteServiceOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "DeleteScoringService")
+	log.Println(pz, "DeleteService")
 
-	err := this.Service.DeleteScoringService(pz, in.ServiceId)
+	err := this.Service.DeleteService(pz, in.ServiceId)
 	if err != nil {
-		log.Printf("%s Failed DeleteScoringService: %v", pz, err)
+		log.Printf("%s Failed DeleteService: %v", pz, err)
 		return err
 	}
   
@@ -3007,16 +2535,16 @@ func (this *Impl) DeleteEngine(r *http.Request, in *DeleteEngineIn, out *DeleteE
 	return nil
 }
 
-func (this *Impl) GetSupportedEntityTypes(r *http.Request, in *GetSupportedEntityTypesIn, out *GetSupportedEntityTypesOut) error {
+func (this *Impl) GetAllEntityTypes(r *http.Request, in *GetAllEntityTypesIn, out *GetAllEntityTypesOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetSupportedEntityTypes")
+	log.Println(pz, "GetAllEntityTypes")
 
-	val0, err := this.Service.GetSupportedEntityTypes(pz)
+	val0, err := this.Service.GetAllEntityTypes(pz)
 	if err != nil {
-		log.Printf("%s Failed GetSupportedEntityTypes: %v", pz, err)
+		log.Printf("%s Failed GetAllEntityTypes: %v", pz, err)
 		return err
 	}
   
@@ -3025,16 +2553,16 @@ func (this *Impl) GetSupportedEntityTypes(r *http.Request, in *GetSupportedEntit
 	return nil
 }
 
-func (this *Impl) GetSupportedPermissions(r *http.Request, in *GetSupportedPermissionsIn, out *GetSupportedPermissionsOut) error {
+func (this *Impl) GetAllPermissions(r *http.Request, in *GetAllPermissionsIn, out *GetAllPermissionsOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetSupportedPermissions")
+	log.Println(pz, "GetAllPermissions")
 
-	val0, err := this.Service.GetSupportedPermissions(pz)
+	val0, err := this.Service.GetAllPermissions(pz)
 	if err != nil {
-		log.Printf("%s Failed GetSupportedPermissions: %v", pz, err)
+		log.Printf("%s Failed GetAllPermissions: %v", pz, err)
 		return err
 	}
   
@@ -3043,16 +2571,16 @@ func (this *Impl) GetSupportedPermissions(r *http.Request, in *GetSupportedPermi
 	return nil
 }
 
-func (this *Impl) GetSupportedClusterTypes(r *http.Request, in *GetSupportedClusterTypesIn, out *GetSupportedClusterTypesOut) error {
+func (this *Impl) GetAllClusterTypes(r *http.Request, in *GetAllClusterTypesIn, out *GetAllClusterTypesOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetSupportedClusterTypes")
+	log.Println(pz, "GetAllClusterTypes")
 
-	val0, err := this.Service.GetSupportedClusterTypes(pz)
+	val0, err := this.Service.GetAllClusterTypes(pz)
 	if err != nil {
-		log.Printf("%s Failed GetSupportedClusterTypes: %v", pz, err)
+		log.Printf("%s Failed GetAllClusterTypes: %v", pz, err)
 		return err
 	}
   
@@ -3203,16 +2731,16 @@ func (this *Impl) UpdateRole(r *http.Request, in *UpdateRoleIn, out *UpdateRoleO
 	return nil
 }
 
-func (this *Impl) LinkRoleAndPermissions(r *http.Request, in *LinkRoleAndPermissionsIn, out *LinkRoleAndPermissionsOut) error {
+func (this *Impl) LinkRoleWithPermissions(r *http.Request, in *LinkRoleWithPermissionsIn, out *LinkRoleWithPermissionsOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "LinkRoleAndPermissions")
+	log.Println(pz, "LinkRoleWithPermissions")
 
-	err := this.Service.LinkRoleAndPermissions(pz, in.RoleId, in.PermissionIds)
+	err := this.Service.LinkRoleWithPermissions(pz, in.RoleId, in.PermissionIds)
 	if err != nil {
-		log.Printf("%s Failed LinkRoleAndPermissions: %v", pz, err)
+		log.Printf("%s Failed LinkRoleWithPermissions: %v", pz, err)
 		return err
 	}
   
@@ -3465,64 +2993,64 @@ func (this *Impl) GetIdentityByName(r *http.Request, in *GetIdentityByNameIn, ou
 	return nil
 }
 
-func (this *Impl) LinkIdentityAndWorkgroup(r *http.Request, in *LinkIdentityAndWorkgroupIn, out *LinkIdentityAndWorkgroupOut) error {
+func (this *Impl) LinkIdentityWithWorkgroup(r *http.Request, in *LinkIdentityWithWorkgroupIn, out *LinkIdentityWithWorkgroupOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "LinkIdentityAndWorkgroup")
+	log.Println(pz, "LinkIdentityWithWorkgroup")
 
-	err := this.Service.LinkIdentityAndWorkgroup(pz, in.IdentityId, in.WorkgroupId)
+	err := this.Service.LinkIdentityWithWorkgroup(pz, in.IdentityId, in.WorkgroupId)
 	if err != nil {
-		log.Printf("%s Failed LinkIdentityAndWorkgroup: %v", pz, err)
+		log.Printf("%s Failed LinkIdentityWithWorkgroup: %v", pz, err)
 		return err
 	}
   
 	return nil
 }
 
-func (this *Impl) UnlinkIdentityAndWorkgroup(r *http.Request, in *UnlinkIdentityAndWorkgroupIn, out *UnlinkIdentityAndWorkgroupOut) error {
+func (this *Impl) UnlinkIdentityFromWorkgroup(r *http.Request, in *UnlinkIdentityFromWorkgroupIn, out *UnlinkIdentityFromWorkgroupOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "UnlinkIdentityAndWorkgroup")
+	log.Println(pz, "UnlinkIdentityFromWorkgroup")
 
-	err := this.Service.UnlinkIdentityAndWorkgroup(pz, in.IdentityId, in.WorkgroupId)
+	err := this.Service.UnlinkIdentityFromWorkgroup(pz, in.IdentityId, in.WorkgroupId)
 	if err != nil {
-		log.Printf("%s Failed UnlinkIdentityAndWorkgroup: %v", pz, err)
+		log.Printf("%s Failed UnlinkIdentityFromWorkgroup: %v", pz, err)
 		return err
 	}
   
 	return nil
 }
 
-func (this *Impl) LinkIdentityAndRole(r *http.Request, in *LinkIdentityAndRoleIn, out *LinkIdentityAndRoleOut) error {
+func (this *Impl) LinkIdentityWithRole(r *http.Request, in *LinkIdentityWithRoleIn, out *LinkIdentityWithRoleOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "LinkIdentityAndRole")
+	log.Println(pz, "LinkIdentityWithRole")
 
-	err := this.Service.LinkIdentityAndRole(pz, in.IdentityId, in.RoleId)
+	err := this.Service.LinkIdentityWithRole(pz, in.IdentityId, in.RoleId)
 	if err != nil {
-		log.Printf("%s Failed LinkIdentityAndRole: %v", pz, err)
+		log.Printf("%s Failed LinkIdentityWithRole: %v", pz, err)
 		return err
 	}
   
 	return nil
 }
 
-func (this *Impl) UnlinkIdentityAndRole(r *http.Request, in *UnlinkIdentityAndRoleIn, out *UnlinkIdentityAndRoleOut) error {
+func (this *Impl) UnlinkIdentityFromRole(r *http.Request, in *UnlinkIdentityFromRoleIn, out *UnlinkIdentityFromRoleOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "UnlinkIdentityAndRole")
+	log.Println(pz, "UnlinkIdentityFromRole")
 
-	err := this.Service.UnlinkIdentityAndRole(pz, in.IdentityId, in.RoleId)
+	err := this.Service.UnlinkIdentityFromRole(pz, in.IdentityId, in.RoleId)
 	if err != nil {
-		log.Printf("%s Failed UnlinkIdentityAndRole: %v", pz, err)
+		log.Printf("%s Failed UnlinkIdentityFromRole: %v", pz, err)
 		return err
 	}
   
@@ -3577,16 +3105,16 @@ func (this *Impl) ShareEntity(r *http.Request, in *ShareEntityIn, out *ShareEnti
 	return nil
 }
 
-func (this *Impl) GetEntityPrivileges(r *http.Request, in *GetEntityPrivilegesIn, out *GetEntityPrivilegesOut) error {
+func (this *Impl) GetPrivileges(r *http.Request, in *GetPrivilegesIn, out *GetPrivilegesOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetEntityPrivileges")
+	log.Println(pz, "GetPrivileges")
 
-	val0, err := this.Service.GetEntityPrivileges(pz, in.EntityTypeId, in.EntityId)
+	val0, err := this.Service.GetPrivileges(pz, in.EntityTypeId, in.EntityId)
 	if err != nil {
-		log.Printf("%s Failed GetEntityPrivileges: %v", pz, err)
+		log.Printf("%s Failed GetPrivileges: %v", pz, err)
 		return err
 	}
   
@@ -3611,16 +3139,16 @@ func (this *Impl) UnshareEntity(r *http.Request, in *UnshareEntityIn, out *Unsha
 	return nil
 }
 
-func (this *Impl) GetEntityHistory(r *http.Request, in *GetEntityHistoryIn, out *GetEntityHistoryOut) error {
+func (this *Impl) GetHistory(r *http.Request, in *GetHistoryIn, out *GetHistoryOut) error {
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "GetEntityHistory")
+	log.Println(pz, "GetHistory")
 
-	val0, err := this.Service.GetEntityHistory(pz, in.EntityTypeId, in.EntityId, in.Offset, in.Limit)
+	val0, err := this.Service.GetHistory(pz, in.EntityTypeId, in.EntityId, in.Offset, in.Limit)
 	if err != nil {
-		log.Printf("%s Failed GetEntityHistory: %v", pz, err)
+		log.Printf("%s Failed GetHistory: %v", pz, err)
 		return err
 	}
   
