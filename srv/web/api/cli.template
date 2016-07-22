@@ -1,0 +1,95 @@
+// ------------------------------
+// --- This is generated code ---
+// ---      DO NOT EDIT       ---
+// ------------------------------
+package cli2
+
+import (
+  "github.com/spf13/cobra"
+  "log"
+  "fmt"
+)
+
+{{define "call"}}
+  {{range .Outputs}}{{lower .Name}}, {{end}}err := c.remote.{{.Name}}(
+  {{range .Inputs}}
+    {{lower .Name}},
+  {{end}})
+  if err != nil {
+    log.Fatalln(err)
+  }
+  {{range .Outputs}}
+  fmt.Printf("%+v\n", {{lower .Name}})
+  {{end}}
+  return
+{{end}}
+
+func registerGeneratedCommands(c *context, cmd *cobra.Command) {
+  cmd.AddCommand(
+  {{- range .}}
+    {{.Func}}(c),
+  {{- end}}
+  )
+}
+
+{{range .}}
+
+var {{.Verb}}Help = `
+{{.Verb}} [?]
+{{.Help}}
+Commands:
+{{range .Variants}}
+    $ steam {{.Verb}} {{.Noun}} ...{{end}}
+`
+func {{.Func}}(c *context) *cobra.Command {
+  cmd := newCmd(c, {{.Verb}}Help, nil)
+{{range .Variants}}
+  cmd.AddCommand({{.Verb}}{{upper .Noun}}(c)){{end}}
+  return cmd
+}
+
+{{range .Variants}}
+var {{.Verb}}{{upper .Noun}}Help = `
+{{.Noun}} [?]
+{{.Help}}
+Examples:
+{{range .Methods}}
+    {{.Help}}
+    $ steam {{.Verb}} {{.Noun}}{{if .HasFlag}} --{{.Flag}}{{end}}{{range .Args}} \
+        --{{.}}=?{{end}}
+{{end}}
+`
+func {{.Verb}}{{upper .Noun}}(c *context) *cobra.Command {
+  {{range .Methods}}{{if .HasFlag}}var {{lower .Switch}} bool
+  {{end}}{{end}}
+  {{range .Inputs}}
+  var {{lower .Name}} {{.Type}}{{end}}
+  cmd := newCmd(c, {{.Verb}}{{upper .Noun}}Help, func(c *context, args []string) {
+    {{if .HasFlag}}
+    {{range .Methods}}
+    {{if .HasFlag}}
+    if {{lower .Switch}} {
+      {{template "call" .Method}}
+    }
+    {{end}}
+    {{end}}
+    {{range .Methods}}
+    {{if .HasFlag}}{{else}}
+    if true {
+      {{template "call" .Method}}
+    }
+    {{end}}
+    {{end}}
+    {{else}}
+    {{range .Methods}}{{template "call" .Method}}{{end}}
+    {{end}}
+  })
+  {{range .Methods}}{{if .HasFlag}}cmd.Flags().BoolVar(&{{lower .Switch}}, "{{flag .Switch}}", {{lower .Switch}}, "{{.Help}}")
+  {{end}}{{end}}
+  {{range .Inputs}}
+  cmd.Flags().{{upper .Type}}Var(&{{lower .Name}}, "{{flag .Name}}", {{lower .Name}}, "{{.Help}}"){{end}}
+  return cmd
+}
+{{end}}
+
+{{end}}
