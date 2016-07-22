@@ -2303,7 +2303,6 @@ func (ds *Datastore) ReadClusterByName(pz az.Principal, name string) (Cluster, b
 		WHERE
 			name = $1
 		`, name)
-
 	if err != nil {
 		return cluster, false, err
 	}
@@ -2666,6 +2665,39 @@ func (ds *Datastore) ReadDatasource(pz az.Principal, datasourceId int64) (Dataso
 	return ScanDatasource(row)
 }
 
+func (ds *Datastore) ReadDatasourceByProject(pz az.Principal, projectId int64) (Datasource, bool, error) {
+	var datasource Datasource
+
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, name, description, kind, configuration, created
+		FROM
+			datasource
+		WHERE
+			project_id = $1
+		`, projectId)
+	if err != nil {
+		return datasource, false, err
+	}
+	defer rows.Close()
+
+	return scanDatasources(rows)
+}
+
+func scanDatasources(rows *sql.Rows) (Datasource, bool, error) {
+	datasources, err := ScanDatasources(rows)
+	if err != nil {
+		return Datasource{}, false, err
+	}
+
+	if len(datasources) == 0 {
+		return Datasource{}, false, nil
+	}
+
+	return datasources[0], true, nil
+
+}
+
 func (ds *Datastore) UpdateDatasource(pz az.Principal, datasourceId int64, datasource Datasource) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Datasource, datasourceId); err != nil {
 		return err
@@ -2826,6 +2858,39 @@ func (ds *Datastore) ReadDataset(pz az.Principal, datasetId int64) (Dataset, err
 			id = $1
 		`, datasetId)
 	return ScanDataset(row)
+}
+
+func (ds *Datastore) ReadDatasetByDatasource(pz az.Principal, datasourceId int64) (Dataset, bool, error) {
+	var dataset Dataset
+	rows, err := ds.db.Query(`
+		SELECT
+			id, datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created
+		FROM
+			datasource
+		WHERE
+			datasource_id = $1
+		`, datasourceId)
+	if err != nil {
+		return dataset, false, err
+	}
+	defer rows.Close()
+
+	return scanDatasets(rows)
+}
+
+func scanDatasets(rows *sql.Rows) (Dataset, bool, error) {
+	var dataset Dataset
+
+	datasets, err := ScanDatasets(rows)
+	if err != nil {
+		return dataset, false, err
+	}
+
+	if len(datasets) == 0 {
+		return dataset, false, nil
+	}
+
+	return datasets[0], true, nil
 }
 
 func (ds *Datastore) UpdateDataset(pz az.Principal, datasetId int64, dataset Dataset) error {
@@ -3000,6 +3065,39 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 	}
 	defer rows.Close()
 	return ScanModels(rows)
+}
+
+func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {
+	var Model Model
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+		FROM
+			model
+		WHERE
+			training_dataset_id = $1
+			OR
+			validation_dataset_id = $1
+		`, datasetId)
+	if err != nil {
+		return Model, false, err
+	}
+	defer rows.Close()
+
+	return scanModels(rows)
+}
+
+func scanModels(rows *sql.Rows) (Model, bool, error) {
+	var model Model
+	models, err := ScanModels(rows)
+	if err != nil {
+		return model, false, err
+	}
+
+	if len(models) == 0 {
+		return model, false, nil
+	}
+	return models[0], true, nil
 }
 
 func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
