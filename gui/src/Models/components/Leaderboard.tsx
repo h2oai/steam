@@ -77,6 +77,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   render(): React.ReactElement<HTMLDivElement> {
+    console.log(this.props);
     return (
       <div className="leaderboard">
         <Deploy open={this.state.isDeployOpen} closeHandler={this.closeHandler}></Deploy>
@@ -113,32 +114,32 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
           {this.props.items.map((item, i) => {
             return (
               <Row key={i}>
-                <Cell>{item.rank + Leaderboard.getOrdinal(item.rank)}</Cell>
+                <Cell>{item.id + Leaderboard.getOrdinal(item.id)}</Cell>
                 <Cell>
                   <div className="metadata">
                     <div className="model-name">
-                      {item.metadata.modelName}
+                      {item.name}
                     </div>
                     <div>
-                      {item.metadata.createdBy}
+                      {item.cluster_name}
                     </div>
                     <div>
-                      {item.metadata.creationDate}
+                      {item.createdAt}
                     </div>
                     <div>
-                      {item.metadata.timing}
+                      {item.max_runtime}
                     </div>
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Train']}/>
+                  <RocGraph data={this.sampleData['gbmTrain']}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Validation']}/>
+                  <RocGraph data={this.sampleData['gbmValidation']}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
-                    <li><Link to={"/projects/models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
+                    <li><Link to={"/projects/" + "models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                     <li><span><i className="fa fa-database"></i></span><span>designate as baseline</span></li>
                     <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span><span>deploy model</span></li>
                     <li><span><i className="fa fa-ellipsis-h"></i></span><span>more actions</span></li>

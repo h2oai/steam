@@ -10,17 +10,19 @@ import Table from './Table';
 import Row from './Row';
 import Cell from './Cell';
 import {
-  fetchClusters, fetchModelsFromCluster, createProject,
-  importModelFromCluster, createProjectAndImportModelsFromCluster
+  fetchClusters, fetchModelsFromCluster,
+  importModelFromCluster, createProjectAndImportModelsFromCluster, registerCluster
 } from '../actions/projects.actions';
 import { Cluster, Model } from '../../Proxy/proxy';
 import '../styles/importnewproject.scss';
+import { hashHistory } from 'react-router';
 
 interface DispatchProps {
   fetchClusters: Function,
   fetchModelsFromCluster: Function,
   importModelFromCluster: Function,
-  createProjectAndImportModelsFromCluster: Function
+  createProjectAndImportModelsFromCluster: Function,
+  registerCluster: Function
 }
 
 interface Props {
@@ -60,7 +62,17 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
     $('.import-models input:checked').map((i, input) => {
       importModels.push($(input).prop('name'));
     });
-    this.props.createProjectAndImportModelsFromCluster(name, this.state.clusterId, importModels);
+    this.props.createProjectAndImportModelsFromCluster(name, this.state.clusterId, importModels).then((res) => {
+      console.log(res);
+      hashHistory.push('/projects/' + res + '/models');
+    });
+  }
+
+  registerCluster(event) {
+    event.preventDefault();
+    let ipAddress = $(event.target).find('input[name="ip-address"]').val();
+    let port = $(event.target).find('input[name="port"]').val();
+    this.props.registerCluster(ipAddress + ':' + port);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -101,9 +113,11 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
             <div>
               Connect to a H2O cluster where your existing models and data sets are located.
             </div>
-            <input type="text" placeholder="IP Address"/>
-            <input type="text" placeholder="Port"/>
-            <button className="default">Connect</button>
+            <form onSubmit={this.registerCluster.bind(this)}>
+              <input type="text" name="ip-address" placeholder="IP Address"/>
+              <input type="text" name="port" placeholder="Port"/>
+              <button type="submit" className="default">Connect</button>
+            </form>
           </div>
         </div>
         {!_.isEmpty(this.props.models) ? <div>
@@ -184,7 +198,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchClusters: bindActionCreators(fetchClusters, dispatch),
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
     createProjectAndImportModelsFromCluster: bindActionCreators(createProjectAndImportModelsFromCluster, dispatch),
-    importModelFromCluster: bindActionCreators(importModelFromCluster, dispatch)
+    importModelFromCluster: bindActionCreators(importModelFromCluster, dispatch),
+    registerCluster: bindActionCreators(registerCluster, dispatch)
   };
 }
 

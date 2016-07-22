@@ -72,30 +72,46 @@ export function fetchModelsFromCluster(clusterId: number) {
 
 export function createProject(name: string) {
   return (dispatch) => {
-    Remote.createProject(name, '', (error, res) => {
-      dispatch(createProjectCompleted(res));
+    return new Promise((resolve, reject) => {
+      Remote.createProject(name, '', (error, res) => {
+        dispatch(createProjectCompleted(res));
+        resolve(res);
+      });
     });
   };
 }
 
 export function importModelFromCluster(clusterId: number, projectId: number, modelName: string) {
   return (dispatch) => {
-    console.log(clusterId, projectId, modelName);
-    Remote.importModelFromCluster(clusterId, projectId, modelName, (error, res) => {
-      dispatch(importModelFromClusterCompleted(res))
+    return new Promise((resolve, reject) => {
+      Remote.importModelFromCluster(clusterId, projectId, modelName, (error, res) => {
+        dispatch(importModelFromClusterCompleted(res));
+        resolve(res);
+      });
     });
-  }
+  };
 }
 
 export function createProjectAndImportModelsFromCluster(projectName: string, clusterId: number, models: string[]) {
   return (dispatch) => {
-    Remote.createProject(name, '', (error, res) => {
-      dispatch(createProjectCompleted(res));
-      for (var i = 0; i < models.length; i++) {
-        Remote.importModelFromCluster(clusterId, res, models[i], (error, res) => {
-          dispatch(importModelFromClusterCompleted(res))
+    return new Promise((resolve, reject) => {
+      let promises = [];
+      dispatch(createProject(projectName)).then((projectId) => {
+        models.map((modelName) => {
+          promises.push(dispatch(importModelFromCluster(clusterId, projectId, modelName)));
         });
-      }
+        Promise.all(promises).then(() => {
+          resolve(projectId);
+        });
+      });
+    });
+  };
+}
+
+export function registerCluster(address: string) {
+  return (dispatch) => {
+    Remote.registerCluster(address, (error, res) => {
+      dispatch(fetchClusters());
     });
   };
 }

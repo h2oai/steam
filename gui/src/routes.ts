@@ -81,7 +81,7 @@ export const routes: IRoute[] = [{
       childRoutes: [
         // /projects/models
         {
-          path: 'models',
+          path: ':id/models',
           component: Models,
           name: 'Models',
           showInBreadcrumb: true,
@@ -97,7 +97,7 @@ export const routes: IRoute[] = [{
         },
         // /models/:id
         {
-          path: 'models/:id',
+          path: ':id/models/:modelId',
           component: ProjectDetails,
           name: 'Models',
           showInBreadcrumb: true,

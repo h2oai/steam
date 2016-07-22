@@ -26,7 +26,6 @@ let history: any = syncHistoryWithStore(hashHistory, store);
 
 ReactDOM.render(
   <Provider store={store}>
-
     <Router history={hashHistory} routes={routes}></Router>
   </Provider>,
   document.getElementById('app'));
