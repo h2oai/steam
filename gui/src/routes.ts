@@ -179,7 +179,7 @@ export const routes: IRoute[] = [{
       path: 'services',
       name: 'Services',
       icon: 'fa fa-cloud',
-      component: Dummy,
+      component: Deployments,
       showInBreadcrumb: true,
       showInNavigation: true,
       childRoutes: [

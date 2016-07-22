@@ -51,14 +51,14 @@ export function createProjectCompleted(project) {
   return {
     type: CREATE_PROJECT_COMPLETED,
     project
-  }
+  };
 }
 
 export function importModelFromClusterCompleted(model) {
   return {
     type: IMPORT_MODEL_FROM_CLUSTER_COMPLETED,
     model
-  }
+  };
 }
 
 export function fetchModelsFromCluster(clusterId: number) {

@@ -12,6 +12,7 @@ import Pagination from '../components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
+import { getOrdinal } from '../../utils/utils';
 import '../styles/leaderboard.scss';
 
 // sample data
@@ -27,7 +28,8 @@ import { naivebayesTrain } from '../tests/data/naivebayesTrain';
 import { naivebayesValidation } from '../tests/data/naivebayesValidation';
 
 interface Props {
-  items: any[]
+  items: any[],
+  projectId: number
 }
 
 interface DispatchProps {
@@ -58,12 +60,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
   }
 
-  static getOrdinal(rank: number): string {
-    let suffixes = ['th', 'st', 'nd', 'rd'];
-    let remainder = rank % 100;
-    return (suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]);
-  }
-
   openDeploy(): void {
     this.setState({
       isDeployOpen: true
@@ -84,7 +80,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
         <PageHeader>
           <span>Models</span>
           <div className="buttons">
-            <button className="default invert">Build Model in Flow</button>
             <button className="default">Import Model</button>
           </div>
         </PageHeader>
@@ -114,7 +109,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
           {this.props.items.map((item, i) => {
             return (
               <Row key={i}>
-                <Cell>{item.id + Leaderboard.getOrdinal(item.id)}</Cell>
+                <Cell>{item.id + getOrdinal(item.id)}</Cell>
                 <Cell>
                   <div className="metadata">
                     <div className="model-name">
@@ -139,8 +134,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                 </Cell>
                 <Cell>
                   <ul className="actions">
-                    <li><Link to={"/projects/" + "models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
-                    <li><span><i className="fa fa-database"></i></span><span>designate as baseline</span></li>
+                    <li><Link to={'/projects/' + this.props.projectId + '/models/' + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                     <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span><span>deploy model</span></li>
                     <li><span><i className="fa fa-ellipsis-h"></i></span><span>more actions</span></li>
                   </ul>

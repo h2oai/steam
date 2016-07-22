@@ -11,7 +11,7 @@ import { fetchLeaderboard } from './actions/leaderboard.actions';
 import { Model } from '../Proxy/proxy';
 
 interface Props {
-  leaderboard: Model[],
+  leaderboard: any,
   params: {
     id: string
   }
@@ -24,7 +24,7 @@ interface DispatchProps {
 export class Projects extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.leaderboard)) {
-      this.props.fetchLeaderboard(parseInt(this.props.params.id));
+      this.props.fetchLeaderboard(parseInt(this.props.params.id, 10));
     }
   }
 
@@ -34,13 +34,13 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="projects">
-        <Leaderboard items={this.props.leaderboard}></Leaderboard>
+        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.id, 10)}></Leaderboard>
       </div>
     );
   }
 }
 
-function mapStateToProps(state: Props): Props {
+function mapStateToProps(state: any): any {
   return {
     leaderboard: state.leaderboard.items
   };

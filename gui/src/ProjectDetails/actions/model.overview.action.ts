@@ -1,19 +1,11 @@
-import { MockFetchStrategy } from '../../App/utils/FetchStrategy/MockFetchStrategy';
 /**
  * Created by justin on 6/28/16.
  */
+import * as Remote from '../../Proxy/proxy';
 export const FETCH_MODEL_OVERVIEW = 'FETCH_MODEL_OVERVIEW';
 export const RECEIVE_MODEL_OVERVIEW = 'RECEIVE_MODEL_OVERVIEW';
-
-interface Basics {
-  label: string,
-  value: string | number
-}
-
-interface Parameters {
-  label: string,
-  value: number
-}
+export const FETCH_DOWNLOAD_MODEL = 'FETCH_DOWNLOAD_MODEL';
+export const RECEIVE_DOWNLOAD_MODEL = 'RECEIVE_DOWNLOAD_MODEL';
 
 export const requestModelOverview = () => {
   return {
@@ -21,66 +13,50 @@ export const requestModelOverview = () => {
   };
 };
 
-export function receiveModelOverview(modelOverview) {
+export function receiveModelOverview(model) {
   return {
     type: RECEIVE_MODEL_OVERVIEW,
-    modelOverview
+    model
   };
 }
 
-export function fetchModelOverview() {
+export const requestDownloadModel = () => {
+  return {
+    type: FETCH_DOWNLOAD_MODEL
+  };
+};
+
+export function receiveDownloadModel(model) {
+  return {
+    type: RECEIVE_DOWNLOAD_MODEL,
+    model
+  };
+}
+
+export function fetchModelOverview(modelId: number): Function {
   return (dispatch) => {
     dispatch(requestModelOverview());
-    let basics: Basics[] = [
-      {
-        label: 'Author',
-        value: 'Mark Landry'
-      },
-      {
-        label: 'Date',
-        value: '2016-06-06 17:17'
-      },
-      {
-        label: 'Size',
-        value: '286.3MB'
-      },
-      {
-        label: 'Training Time',
-        value: 47000
-      },
-      {
-        label: 'Classification Speed',
-        value: 131
-      },
-      {
-        label: 'Model Type',
-        value: 'GBM'
-      }
-    ];
-    let parameters: Parameters[] = [
-      {
-        label: 'ntree',
-        value: 50,
-      },
-      {
-        label: 'max_depth',
-        value: 5,
-      },
-      {
-        label: 'min_rows',
-        value: 10,
-      },
-      {
-        label: 'learn_rate',
-        value: 0.1,
-      }
-    ];
-    new MockFetchStrategy().request(dispatch, {
-      callback: receiveModelOverview,
-      data: {
-        basics,
-        parameters
-      }
+    Remote.getModel(modelId, (error, model) => {
+      dispatch(receiveModelOverview(model));
+    });
+  };
+}
+
+export function downloadModel(): Function {
+  /**
+   * TODO(justinloyola): Waiting on endpoint
+   */
+  return (dispatch) => {
+    dispatch(requestDownloadModel());
+    dispatch(receiveDownloadModel({}));
+    
+  };
+}
+
+export function deployModel(modelId: number, port: number): Function {
+  return (dispatch) => {
+    Remote.startScoringService(modelId, port, (error, res) => {
+      console.log(res);
     });
   };
 }

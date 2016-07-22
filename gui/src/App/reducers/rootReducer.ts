@@ -9,7 +9,7 @@ import { leaderboardReducer } from '../../Models/reducers/leaderboard.reducer';
 import { projectsReducer } from '../../Projects/reducers/projects.reducer';
 
 export const rootReducer = combineReducers({
-  modelOverview: modelOverviewReducer,
+  model: modelOverviewReducer,
   leaderboard: leaderboardReducer,
   projects: projectsReducer,
   routing: routerReducer

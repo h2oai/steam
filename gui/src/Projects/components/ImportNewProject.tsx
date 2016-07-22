@@ -63,7 +63,6 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
       importModels.push($(input).prop('name'));
     });
     this.props.createProjectAndImportModelsFromCluster(name, this.state.clusterId, importModels).then((res) => {
-      console.log(res);
       hashHistory.push('/projects/' + res + '/models');
     });
   }
@@ -185,7 +184,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
   }
 }
 
-function mapStateToProps(state): Props {
+function mapStateToProps(state): any {
   return {
     clusters: state.projects.clusters,
     models: state.projects.models,
