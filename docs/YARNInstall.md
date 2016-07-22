@@ -7,7 +7,7 @@ This document is provided for external users and describes how to install, start
 
 - Web browser with an Internet connection
 - Steam tar for OS X or Linux
-	- available from <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a>
+	- available from <a href="http://www.h2o.ai/steam/">h2o.ai/steam/</a>
 - JDK 1.7 or greater
 - PostgreSQL 9.1 or greater
 	- available from <a href="https://www.postgresql.org/" target="_blank">PostgreSQL.org</a>
@@ -18,7 +18,7 @@ Perform the following steps to install Steam.
 
 ***Note***: This installation should only be performed on a YARN edge node.
 
-1. Go to <a href="http://www.h2o.ai/product/steam" target="_blank">www.h2o.ai/product/steam</a> and download the Steam version for your platform (Linux or Mac). Be sure to accept the EULA.
+1. Go to <a href="http://www.h2o.ai/steam/">h2o.ai/steam/</a> and download the Steam version for your platform (Linux or Mac). Be sure to accept the EULA.
 
 2. Open a terminal window and SSH into your YARN edge node. 
 
