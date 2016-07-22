@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/h2oai/steamY/master/auth"
@@ -367,7 +366,8 @@ func Destroy(name, username, sslmode string) error {
 
 func connect(username, dbname, sslmode string) (*sql.DB, error) {
 
-	log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
+	// FIXME logging need to be handled for testing
+	// log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
 
 	// Open connection
 	db, err := sql.Open("postgres", fmt.Sprintf("user=%s dbname=%s sslmode=%s", username, dbname, sslmode))
@@ -407,7 +407,8 @@ func newDatastore(db *sql.DB) (*Datastore, error) {
 		return nil, fmt.Errorf("Failed reading schema version")
 	}
 
-	log.Println("Using schema version:", version)
+	// FIXME logging needs to be handled for testing
+	// log.Println("Using schema version:", version)
 
 	if err := upgrade(db, version); err != nil {
 		return nil, err
@@ -505,7 +506,8 @@ func isPrimed(db *sql.DB) (bool, error) {
 }
 
 func prime(db *sql.DB) error {
-	log.Println("Priming database for first time use...")
+	// FIXME logging needs to be handled for testing
+	// log.Println("Priming database for first time use...")
 	if err := createMetadata(db, "version", "1"); err != nil {
 		return err
 	}
@@ -610,7 +612,8 @@ func upgrade(db *sql.DB, currentVersion string) error {
 }
 
 func truncate(db *sql.DB) error {
-	log.Println("Truncating database...")
+	// FIXME logging needs to be handled for testing
+	// log.Println("Truncating database...")
 	return executeTransaction(db, func(tx *sql.Tx) error {
 		tables := []string{
 			"history",
