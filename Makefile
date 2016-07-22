@@ -46,6 +46,7 @@ ssb:
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
 
 generate:
+	cd ./tools/piping && go build && go install
 	piping
 	cd ./master/data && go generate && go fmt scans.go
 
