@@ -1,8 +1,4 @@
 /*
-* Utility functions for Steam UI
-*/
-
-/*
 * Takes an integer and returns a human readable ordinal.
 * @function
 * @example
