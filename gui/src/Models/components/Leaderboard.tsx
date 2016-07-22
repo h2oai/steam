@@ -12,7 +12,7 @@ import Pagination from '../components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
-import { getOrdinal } from '../../utils/utils';
+import { getOrdinal } from '../../App/utils/getOrdinal';
 import '../styles/leaderboard.scss';
 
 // sample data
