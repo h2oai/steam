@@ -1,14 +1,16 @@
 package web
 
 import (
+	"os"
+	"path"
+	"path/filepath"
+	"runtime/debug"
+	"testing"
+
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/master/data"
 	"github.com/h2oai/steamY/srv/web"
-	"os"
-	"path"
-	"path/filepath"
-	"testing"
 )
 
 const superuser = "superuser"
@@ -72,6 +74,7 @@ func (t *test) log(args ...interface{}) {
 }
 
 func (t *test) fail(format string, args ...interface{}) {
+	debug.PrintStack()
 	t.t.Fatalf(format, args...)
 }
 
