@@ -51,7 +51,7 @@ export default class ProjectDetails extends React.Component<Props, any> {
   }
 
   forkModel() {
-    hashHistory.push('/forkmodel');
+    hashHistory.push('/projects/forkmodel');
   }
 
   deployModel() {
