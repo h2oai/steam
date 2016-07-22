@@ -58,6 +58,17 @@ func lower(s string) string {
 	}
 }
 
+func upper(s string) string {
+	switch len(s) {
+	case 0:
+		return ""
+	case 1:
+		return strings.ToUpper(s)
+	default:
+		return strings.ToUpper(string(s[0])) + s[1:]
+	}
+}
+
 func jsTypeOf(t string) string {
 	switch t {
 	case "bool":
