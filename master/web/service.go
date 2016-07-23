@@ -1320,6 +1320,22 @@ func (s *Service) LinkRoleWithPermissions(pz az.Principal, roleId int64, permiss
 	return s.ds.LinkRoleAndPermissions(pz, roleId, permissionIds)
 }
 
+func (s *Service) LinkRoleWithPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
+		return err
+	}
+
+	return s.ds.LinkRoleWithPermission(pz, roleId, permissionId)
+}
+
+func (s *Service) UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
+		return err
+	}
+
+	return s.ds.UnlinkRoleFromPermission(pz, roleId, permissionId)
+}
+
 func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
 		return err

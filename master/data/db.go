@@ -800,14 +800,22 @@ func (ds *Datastore) exec(f func(*sql.Tx) error) (err error) {
 	return executeTransaction(ds.db, f)
 }
 
+func (ds *Datastore) toPermissionDescription(id int64) (string, error) {
+	if p, ok := ds.permissionMap[id]; ok {
+		return p.Description, nil
+	} else {
+		return "", fmt.Errorf("Invalid permission id: %d", id)
+	}
+}
+
 func (ds *Datastore) toPermissionDescriptions(ids []int64) ([]string, error) {
 	descriptions := make([]string, len(ids))
 	for i, id := range ids {
-		if p, ok := ds.permissionMap[id]; ok {
-			descriptions[i] = p.Description
-		} else {
-			return descriptions, fmt.Errorf("Invalid permission id: %d", id)
+		description, err := ds.toPermissionDescription(id)
+		if err != nil {
+			return nil, err
 		}
+		descriptions[i] = description
 	}
 	return descriptions, nil
 }
@@ -1240,6 +1248,61 @@ func (ds *Datastore) LinkRoleAndPermissions(pz az.Principal, roleId int64, permi
 			return err
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
+	})
+}
+
+func (ds *Datastore) LinkRoleWithPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			INSERT INTO
+				role_permission
+			VALUES
+				($1, $2)
+			`, roleId, permissionId); err != nil {
+			return err
+		}
+
+		permissionDescription, err := ds.toPermissionDescription(permissionId)
+		if err != nil {
+			return err
+		}
+		permissions, err := json.Marshal([]string{permissionDescription})
+		if err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, LinkOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
+	})
+}
+
+func (ds *Datastore) UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				role_permission
+			WHERE
+				role_id = $1 AND
+				permission_id = $2
+			`, roleId, permissionId); err != nil {
+			return err
+		}
+
+		permissionDescription, err := ds.toPermissionDescription(permissionId)
+		if err != nil {
+			return err
+		}
+		permissions, err := json.Marshal([]string{permissionDescription})
+		if err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
 	})
 }
 

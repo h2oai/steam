@@ -215,7 +215,9 @@ type Service struct {
 	GetRole                     GetRole                     `help:"Get role details"`
 	GetRoleByName               GetRoleByName               `help:"Get role details by name"`
 	UpdateRole                  UpdateRole                  `help:"Update a role"`
-	LinkRoleWithPermissions     LinkRoleWithPermissions     `help:"Link role with permissions"`
+	LinkRoleWithPermissions     LinkRoleWithPermissions     `help:"Link a role with permissions"`
+	LinkRoleWithPermission      LinkRoleWithPermission      `help:"Link a role with a permission"`
+	UnlinkRoleFromPermission    UnlinkRoleFromPermission    `help:"Unlink a role from a permission"`
 	DeleteRole                  DeleteRole                  `help:"Delete a role"`
 	CreateWorkgroup             CreateWorkgroup             `help:"Create a workgroup"`
 	GetWorkgroups               GetWorkgroups               `help:"List workgroups"`
@@ -541,6 +543,14 @@ type UpdateRole struct {
 type LinkRoleWithPermissions struct {
 	RoleId        int64
 	PermissionIds []int64
+}
+type LinkRoleWithPermission struct {
+	RoleId       int64
+	PermissionId int64
+}
+type UnlinkRoleFromPermission struct {
+	RoleId       int64
+	PermissionId int64
 }
 type DeleteRole struct {
 	RoleId int64
