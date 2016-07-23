@@ -47,6 +47,10 @@
 			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
 		{
+			"ImportPath": "github.com/rs/xid",
+			"Rev": "057f3c928c207d1e7e318929eeac93bb46e319e3"
+		},
+		{
 			"ImportPath": "github.com/russross/blackfriday",
 			"Comment": "v1.3-34-g18432fc",
 			"Rev": "18432fc942c4ea4846063a269f339ede7630bd71"
