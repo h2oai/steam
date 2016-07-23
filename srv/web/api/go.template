@@ -3,19 +3,21 @@
 // ---      DO NOT EDIT       ---
 // ------------------------------
 
-{{define "typeOf"}}{{if .IsArray}}[]{{end}}{{if .IsStruct}}*{{end}}{{.Type}}{{end}}
+{{- define "typeOf"}}{{if .IsArray}}[]{{end}}{{if .IsStruct}}*{{end}}{{.Type}}{{end}}
 
 package web
 
 import (
-	"github.com/h2oai/steamY/master/az"
-	"log"
-	"net/http"
+  "encoding/json"
+  "github.com/h2oai/steamY/master/az"
+  "github.com/rs/xid"
+  "log"
+  "net/http"
 )
 
 // --- Types ---
 
-{{range .Structs}}
+{{- range .Structs}}
 type {{.Name}} struct {
 {{- range .Fields}}
   {{.Name}} {{template "typeOf" .}} `json:"{{snake .Name}}"`
@@ -29,19 +31,19 @@ type Az interface {
 	Identify(r *http.Request) (az.Principal, error)
 }
 
-{{with .Facade}}
+{{- with .Facade}}
 type {{.Name}} interface {
   {{- range .Methods}}
   {{.Name}}(pz az.Principal{{range .Inputs}}, {{lower .Name}} {{template "typeOf" .}}{{end}}) ({{range .Outputs}}{{template "typeOf" .}}, {{end}}error)
   {{- end}}
 }
-{{end}}
+{{- end}}
 
 
 // --- Messages ---
 
-{{with .Facade}}
-{{range .Methods}}
+{{- with .Facade}}
+{{- range .Methods}}
 type {{.Name}}In struct {
   {{- range .Inputs}}
   {{.Name}} {{template "typeOf" .}} `json:"{{snake .Name}}"`
@@ -54,7 +56,7 @@ type {{.Name}}Out struct {
   {{- end}}
 }
 {{end}}
-{{end}}
+{{- end}}
 
 
 // --- Client Stub ---
@@ -67,8 +69,8 @@ type Proc interface {
 	Call(name string, in, out interface{}) error
 }
 
-{{with .Facade}}
-{{range .Methods}}
+{{- with .Facade}}
+{{- range .Methods}}
 func (this *Remote) {{.Name}}({{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{lower .Name}} {{template "typeOf" .}}{{end}}) ({{range .Outputs}}{{template "typeOf" .}}, {{end}}error) {
   in := {{.Name}}In{ {{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{lower .Name}} {{end}} }
   var out {{.Name}}Out
@@ -79,7 +81,7 @@ func (this *Remote) {{.Name}}({{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{low
   return {{range .Outputs}}out.{{.Name}}, {{end}}nil
 }
 {{end}}
-{{end}}
+{{- end}}
 
 
 // --- Server Stub ---
@@ -89,25 +91,43 @@ type Impl struct {
 	Az      az.Az
 }
 
-{{with .Facade}}
-{{range .Methods}}
+{{- with .Facade}}
+{{- range .Methods}}
 func (this *Impl) {{.Name}}(r *http.Request, in *{{.Name}}In, out *{{.Name}}Out) error {
+  const name = "{{.Name}}"
+
+  guid := xid.New().String()
+
 	pz, azerr := this.Az.Identify(r)
 	if azerr != nil {
 		return azerr
 	}
-	log.Println(pz, "{{.Name}}")
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
 
 	{{range $i, $e := .Outputs}}val{{$i}}, {{end}}err := this.Service.{{.Name}}(pz{{range .Inputs}}, in.{{.Name}}{{end}})
 	if err != nil {
-		log.Printf("%s Failed {{.Name}}: %v", pz, err)
+		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
   {{range $i, $e := .Outputs}}
 	out.{{.Name}} = val{{$i}} 
   {{end}}
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
 	return nil
 }
 {{end}}
-{{end}}
+{{- end}}
 
