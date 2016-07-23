@@ -1,25 +1,33 @@
 ## steam get permissions
 
-Get permissions and their corresponding codes.
+Get Permissions
 
 ### Synopsis
 
 
-Get permissions and their corresponding codes.
+Get Permissions
 
 Examples:
 
-	$ steam get permissions --role=2
+    List permissions for a role
+    $ steam get permissions --for-role \
+        --role-id=?
+
+    List permissions for an identity
+    $ steam get permissions --for-identity \
+        --identity-id=?
 
 ```
-steam get permissions
+steam get permissions [?]
 ```
 
 ### Options
 
 ```
-  -i, --identity="": View permissions for an identity.
-  -r, --role="": View permissions for a role.
+      --for-identity[=false]: List permissions for an identity
+      --for-role[=false]: List permissions for a role
+      --identity-id=0: No description available
+      --role-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -29,5 +37,5 @@ steam get permissions
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

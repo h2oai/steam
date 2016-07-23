@@ -1,15 +1,16 @@
 ## steam unlink
 
-Remove authentication permissions.
+Unlink entities
 
 ### Synopsis
 
 
-Remove authentication permissions.
+Unlink entities
 
-Examples:
+Commands:
 
-	$ steam unlink identity minksy role engineer
+    $ steam unlink identity ...
+    $ steam unlink role ...
 
 ### Options inherited from parent commands
 
@@ -19,5 +20,6 @@ Examples:
 
 ### SEE ALSO
 * [steam](steam.md)	 - steam v build : Command Line Interface to Steam
-* [steam unlink identity](steam_unlink_identity.md)	 - Unlink an identity from a permissions entityt
+* [steam unlink identity](steam_unlink_identity.md)	 - Unlink Identity
+* [steam unlink role](steam_unlink_role.md)	 - Unlink Role
 

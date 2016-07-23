@@ -1,24 +1,34 @@
 ## steam get workgroups
 
-List permission workgroups.
+Get Workgroups
 
 ### Synopsis
 
 
-List permission workgroups.
+Get Workgroups
 
-Exampes:
+Examples:
 
-	$ steam get workgroups --identity=2
+    List workgroups
+    $ steam get workgroups \
+        --offset=? \
+        --limit=?
+
+    List workgroups for an identity
+    $ steam get workgroups --for-identity \
+        --identity-id=?
 
 ```
-steam get workgroups
+steam get workgroups [?]
 ```
 
 ### Options
 
 ```
-  -i, --identity="": Search by identity.
+      --for-identity[=false]: List workgroups for an identity
+      --identity-id=0: No description available
+      --limit=0: No description available
+      --offset=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -28,5 +38,5 @@ steam get workgroups
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

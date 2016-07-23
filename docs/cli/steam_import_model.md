@@ -1,18 +1,33 @@
 ## steam import model
 
-Import a model from an H2O cluster into steam
+Import Model
 
 ### Synopsis
 
 
-Import a model from an H2O cluster into steam
+Import Model
 
 Examples:
 
-	$ steam import model 42 model3
+    Import models from a cluster
+    $ steam import model --from-cluster \
+        --cluster-id=? \
+        --project-id=? \
+        --model-key=? \
+        --model-name=?
 
 ```
-steam import model [clusterId] [modelName]
+steam import model [?]
+```
+
+### Options
+
+```
+      --cluster-id=0: No description available
+      --from-cluster[=false]: Import models from a cluster
+      --model-key="": No description available
+      --model-name="": No description available
+      --project-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +37,5 @@ steam import model [clusterId] [modelName]
 ```
 
 ### SEE ALSO
-* [steam import](steam_import.md)	 - Import a resource of the specified type into steam.
+* [steam import](steam_import.md)	 - Import entities
 

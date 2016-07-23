@@ -1,27 +1,27 @@
 ## steam stop cluster
 
-Stop a cluster.
+Stop Cluster
 
 ### Synopsis
 
 
-Stop a cluster.
+Stop Cluster
 
 Examples:
 
-    $ steam stop cluster 42
+    Stop a cluster using Yarn
+    $ steam stop cluster --on-yarn \
+        --cluster-id=?
 
 ```
-steam stop cluster [clusterId]
+steam stop cluster [?]
 ```
 
 ### Options
 
 ```
-      --force[=false]: Force-kill all H2O instances in the cluster
-      --kerberos[=true]: Set false on systems with no kerberos authentication.
-      --keytab="": The name of the keytab file to use
-      --username="": The valid kerberos username.
+      --cluster-id=0: No description available
+      --on-yarn[=false]: Stop a cluster using Yarn
 ```
 
 ### Options inherited from parent commands
@@ -31,5 +31,5 @@ steam stop cluster [clusterId]
 ```
 
 ### SEE ALSO
-* [steam stop](steam_stop.md)	 - Stop the specified resource.
+* [steam stop](steam_stop.md)	 - Stop entities
 

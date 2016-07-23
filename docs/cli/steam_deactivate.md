@@ -1,15 +1,15 @@
 ## steam deactivate
 
-Deactivate and entity type.
+Deactivate entities
 
 ### Synopsis
 
 
-Deactivate and entity type.
+Deactivate entities
 
-Examples:
+Commands:
 
-	$ steam deactivate identity
+    $ steam deactivate identity ...
 
 ### Options inherited from parent commands
 
@@ -19,5 +19,5 @@ Examples:
 
 ### SEE ALSO
 * [steam](steam.md)	 - steam v build : Command Line Interface to Steam
-* [steam deactivate identity](steam_deactivate_identity.md)	 - Deactivate a user.
+* [steam deactivate identity](steam_deactivate_identity.md)	 - Deactivate Identity
 

@@ -1,18 +1,28 @@
 ## steam create identity
 
-Creates a user.
+Create Identity
 
 ### Synopsis
 
 
-Creates a user.
+Create Identity
 
-Exampes:
+Examples:
 
-	$ steam create minsky m1n5kypassword
+    Create an identity
+    $ steam create identity \
+        --name=? \
+        --password=?
 
 ```
-steam create identity [username] [password]
+steam create identity [?]
+```
+
+### Options
+
+```
+      --name="": No description available
+      --password="": No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +32,5 @@ steam create identity [username] [password]
 ```
 
 ### SEE ALSO
-* [steam create](steam_create.md)	 - Creates an instance of the specified resource.
+* [steam create](steam_create.md)	 - Create entities
 

@@ -1,18 +1,19 @@
 ## steam get engines
 
-List all engines.
+Get Engines
 
 ### Synopsis
 
 
-List all engines.
+Get Engines
 
 Examples:
 
-	$ steam get engines
+    List engines
+    $ steam get engines
 
 ```
-steam get engines
+steam get engines [?]
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +23,5 @@ steam get engines
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

@@ -1,25 +1,40 @@
 ## steam get identities
 
-List all identies.
+Get Identities
 
 ### Synopsis
 
 
-List all identies.
+Get Identities
 
 Examples:
 
-	$ steam get identities --workgroup=production
+    List identities
+    $ steam get identities \
+        --offset=? \
+        --limit=?
+
+    List identities for a workgroup
+    $ steam get identities --for-workgroup \
+        --workgroup-id=?
+
+    List identities for a role
+    $ steam get identities --for-role \
+        --role-id=?
 
 ```
-steam get identities
+steam get identities [?]
 ```
 
 ### Options
 
 ```
-  -r, --role="": Search for users by role.
-  -w, --workgroup="": Search for users by workgroup.
+      --for-role[=false]: List identities for a role
+      --for-workgroup[=false]: List identities for a workgroup
+      --limit=0: No description available
+      --offset=0: No description available
+      --role-id=0: No description available
+      --workgroup-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -29,5 +44,5 @@ steam get identities
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 
