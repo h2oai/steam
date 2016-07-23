@@ -10,8 +10,8 @@ import (
   "fmt"
 )
 
-
-
+// registerGeneratedCommands appends generated commands to the
+//   supplied Cobra context.
 func registerGeneratedCommands(c *context, cmd *cobra.Command) {
   cmd.AddCommand(
     add(c),
@@ -63,29 +63,23 @@ Examples:
         --engine-path=?
 
 `
+
 func addEngine(c *context) *cobra.Command {
-  
-  
-  var engineName string
-  var enginePath string
+  var engineName string // No description available
+  var enginePath string // No description available
+
   cmd := newCmd(c, addEngineHelp, func(c *context, args []string) {
     
-    
-  engineId, err := c.remote.AddEngine(
-  
-    engineName,
-  
-    enginePath,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", engineId)
-  
-  return
-
-    
+      // Add an engine
+      engineId, err := c.remote.AddEngine(
+        engineName, // No description available
+        enginePath, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("EngineId:\t%v\n", engineId)
+      return
   })
   
   
@@ -131,81 +125,72 @@ Examples:
         --max-run-time=?
 
 `
+
 func buildModel(c *context) *cobra.Command {
-  var auto bool
-  
-  
-  var maxRunTime int
-  var clusterId int64
-  var datasetId int64
-  var algorithm string
-  var dataset string
-  var targetName string
+  var auto bool // Switch for BuildModelAuto()
+  var targetName string // No description available
+  var maxRunTime int // No description available
+  var clusterId int64 // No description available
+  var datasetId int64 // No description available
+  var algorithm string // No description available
+  var dataset string // No description available
+
   cmd := newCmd(c, buildModelHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if auto {
+    if auto { // BuildModelAuto
       
-  model, err := c.remote.BuildModelAuto(
-  
-    clusterId,
-  
-    dataset,
-  
-    targetName,
-  
-    maxRunTime,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", model)
-  
-  return
-
+      // Build an AutoML model
+      model, err := c.remote.BuildModelAuto(
+        clusterId, // No description available
+        dataset, // No description available
+        targetName, // No description available
+        maxRunTime, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", model.Id), // No description available
+        fmt.Sprintf("TrainingDatasetId:\t%v\t", model.TrainingDatasetId), // No description available
+        fmt.Sprintf("ValidationDatasetId:\t%v\t", model.ValidationDatasetId), // No description available
+        fmt.Sprintf("Name:\t%v\t", model.Name), // No description available
+        fmt.Sprintf("ClusterName:\t%v\t", model.ClusterName), // No description available
+        fmt.Sprintf("ModelKey:\t%v\t", model.ModelKey), // No description available
+        fmt.Sprintf("Algorithm:\t%v\t", model.Algorithm), // No description available
+        fmt.Sprintf("DatasetName:\t%v\t", model.DatasetName), // No description available
+        fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName), // No description available
+        fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName), // No description available
+        fmt.Sprintf("Location:\t%v\t", model.Location), // No description available
+        fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime), // No description available
+        fmt.Sprintf("Metrics:\t%v\t", model.Metrics), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  modelId, err := c.remote.BuildModel(
-  
-    clusterId,
-  
-    datasetId,
-  
-    algorithm,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", modelId)
-  
-  return
-
+      // Build a model
+      modelId, err := c.remote.BuildModel(
+        clusterId, // No description available
+        datasetId, // No description available
+        algorithm, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("ModelId:\t%v\n", modelId)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&auto, "auto", auto, "Build an AutoML model")
   
   
+  cmd.Flags().StringVar(&targetName, "target-name", targetName, "No description available")
   cmd.Flags().IntVar(&maxRunTime, "max-run-time", maxRunTime, "No description available")
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
   cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
   cmd.Flags().StringVar(&algorithm, "algorithm", algorithm, "No description available")
   cmd.Flags().StringVar(&dataset, "dataset", dataset, "No description available")
-  cmd.Flags().StringVar(&targetName, "target-name", targetName, "No description available")
   return cmd
 }
 
@@ -251,46 +236,37 @@ Examples:
         --response-column-name=?
 
 `
+
 func createDataset(c *context) *cobra.Command {
-  
-  
-  var clusterId int64
-  var datasourceId int64
-  var name string
-  var description string
-  var responseColumnName string
+  var datasourceId int64 // No description available
+  var name string // No description available
+  var description string // No description available
+  var responseColumnName string // No description available
+  var clusterId int64 // No description available
+
   cmd := newCmd(c, createDatasetHelp, func(c *context, args []string) {
     
-    
-  datasetId, err := c.remote.CreateDataset(
-  
-    clusterId,
-  
-    datasourceId,
-  
-    name,
-  
-    description,
-  
-    responseColumnName,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", datasetId)
-  
-  return
-
-    
+      // Create a dataset
+      datasetId, err := c.remote.CreateDataset(
+        clusterId, // No description available
+        datasourceId, // No description available
+        name, // No description available
+        description, // No description available
+        responseColumnName, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("DatasetId:\t%v\n", datasetId)
+      return
   })
   
   
-  cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
   cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
+  cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
   return cmd
 }
 
@@ -307,42 +283,34 @@ Examples:
         --path=?
 
 `
+
 func createDatasource(c *context) *cobra.Command {
-  
-  
-  var projectId int64
-  var name string
-  var description string
-  var path string
+  var description string // No description available
+  var path string // No description available
+  var projectId int64 // No description available
+  var name string // No description available
+
   cmd := newCmd(c, createDatasourceHelp, func(c *context, args []string) {
     
-    
-  datasourceId, err := c.remote.CreateDatasource(
-  
-    projectId,
-  
-    name,
-  
-    description,
-  
-    path,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", datasourceId)
-  
-  return
-
-    
+      // Create a datasource
+      datasourceId, err := c.remote.CreateDatasource(
+        projectId, // No description available
+        name, // No description available
+        description, // No description available
+        path, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("DatasourceId:\t%v\n", datasourceId)
+      return
   })
   
   
-  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-  cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().StringVar(&path, "path", path, "No description available")
+  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+  cmd.Flags().StringVar(&name, "name", name, "No description available")
   return cmd
 }
 
@@ -357,29 +325,23 @@ Examples:
         --password=?
 
 `
+
 func createIdentity(c *context) *cobra.Command {
-  
-  
-  var name string
-  var password string
+  var name string // No description available
+  var password string // No description available
+
   cmd := newCmd(c, createIdentityHelp, func(c *context, args []string) {
     
-    
-  identityId, err := c.remote.CreateIdentity(
-  
-    name,
-  
-    password,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", identityId)
-  
-  return
-
-    
+      // Create an identity
+      identityId, err := c.remote.CreateIdentity(
+        name, // No description available
+        password, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("IdentityId:\t%v\n", identityId)
+      return
   })
   
   
@@ -399,29 +361,23 @@ Examples:
         --description=?
 
 `
+
 func createProject(c *context) *cobra.Command {
-  
-  
-  var name string
-  var description string
+  var name string // No description available
+  var description string // No description available
+
   cmd := newCmd(c, createProjectHelp, func(c *context, args []string) {
     
-    
-  projectId, err := c.remote.CreateProject(
-  
-    name,
-  
-    description,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", projectId)
-  
-  return
-
-    
+      // Create a project
+      projectId, err := c.remote.CreateProject(
+        name, // No description available
+        description, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("ProjectId:\t%v\n", projectId)
+      return
   })
   
   
@@ -441,29 +397,23 @@ Examples:
         --description=?
 
 `
+
 func createRole(c *context) *cobra.Command {
-  
-  
-  var name string
-  var description string
+  var name string // No description available
+  var description string // No description available
+
   cmd := newCmd(c, createRoleHelp, func(c *context, args []string) {
     
-    
-  roleId, err := c.remote.CreateRole(
-  
-    name,
-  
-    description,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", roleId)
-  
-  return
-
-    
+      // Create a role
+      roleId, err := c.remote.CreateRole(
+        name, // No description available
+        description, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("RoleId:\t%v\n", roleId)
+      return
   })
   
   
@@ -483,29 +433,23 @@ Examples:
         --description=?
 
 `
+
 func createWorkgroup(c *context) *cobra.Command {
-  
-  
-  var name string
-  var description string
+  var name string // No description available
+  var description string // No description available
+
   cmd := newCmd(c, createWorkgroupHelp, func(c *context, args []string) {
     
-    
-  workgroupId, err := c.remote.CreateWorkgroup(
-  
-    name,
-  
-    description,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", workgroupId)
-  
-  return
-
-    
+      // Create a workgroup
+      workgroupId, err := c.remote.CreateWorkgroup(
+        name, // No description available
+        description, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("WorkgroupId:\t%v\n", workgroupId)
+      return
   })
   
   
@@ -542,24 +486,20 @@ Examples:
         --identity-id=?
 
 `
+
 func deactivateIdentity(c *context) *cobra.Command {
-  
-  
-  var identityId int64
+  var identityId int64 // No description available
+
   cmd := newCmd(c, deactivateIdentityHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeactivateIdentity(
-  
-    identityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Deactivate an identity
+      err := c.remote.DeactivateIdentity(
+        identityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -611,24 +551,20 @@ Examples:
         --cluster-id=?
 
 `
+
 func deleteCluster(c *context) *cobra.Command {
-  
-  
-  var clusterId int64
+  var clusterId int64 // No description available
+
   cmd := newCmd(c, deleteClusterHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteCluster(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a cluster
+      err := c.remote.DeleteCluster(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -646,24 +582,20 @@ Examples:
         --dataset-id=?
 
 `
+
 func deleteDataset(c *context) *cobra.Command {
-  
-  
-  var datasetId int64
+  var datasetId int64 // No description available
+
   cmd := newCmd(c, deleteDatasetHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteDataset(
-  
-    datasetId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a dataset
+      err := c.remote.DeleteDataset(
+        datasetId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -681,24 +613,20 @@ Examples:
         --datasource-id=?
 
 `
+
 func deleteDatasource(c *context) *cobra.Command {
-  
-  
-  var datasourceId int64
+  var datasourceId int64 // No description available
+
   cmd := newCmd(c, deleteDatasourceHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteDatasource(
-  
-    datasourceId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a datasource
+      err := c.remote.DeleteDatasource(
+        datasourceId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -716,24 +644,20 @@ Examples:
         --engine-id=?
 
 `
+
 func deleteEngine(c *context) *cobra.Command {
-  
-  
-  var engineId int64
+  var engineId int64 // No description available
+
   cmd := newCmd(c, deleteEngineHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteEngine(
-  
-    engineId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete an engine
+      err := c.remote.DeleteEngine(
+        engineId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -751,24 +675,20 @@ Examples:
         --model-id=?
 
 `
+
 func deleteModel(c *context) *cobra.Command {
-  
-  
-  var modelId int64
+  var modelId int64 // No description available
+
   cmd := newCmd(c, deleteModelHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteModel(
-  
-    modelId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a model
+      err := c.remote.DeleteModel(
+        modelId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -786,24 +706,20 @@ Examples:
         --project-id=?
 
 `
+
 func deleteProject(c *context) *cobra.Command {
-  
-  
-  var projectId int64
+  var projectId int64 // No description available
+
   cmd := newCmd(c, deleteProjectHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteProject(
-  
-    projectId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a project
+      err := c.remote.DeleteProject(
+        projectId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -821,24 +737,20 @@ Examples:
         --role-id=?
 
 `
+
 func deleteRole(c *context) *cobra.Command {
-  
-  
-  var roleId int64
+  var roleId int64 // No description available
+
   cmd := newCmd(c, deleteRoleHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteRole(
-  
-    roleId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a role
+      err := c.remote.DeleteRole(
+        roleId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -856,24 +768,20 @@ Examples:
         --service-id=?
 
 `
+
 func deleteService(c *context) *cobra.Command {
-  
-  
-  var serviceId int64
+  var serviceId int64 // No description available
+
   cmd := newCmd(c, deleteServiceHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteService(
-  
-    serviceId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a service
+      err := c.remote.DeleteService(
+        serviceId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -891,24 +799,20 @@ Examples:
         --workgroup-id=?
 
 `
+
 func deleteWorkgroup(c *context) *cobra.Command {
-  
-  
-  var workgroupId int64
+  var workgroupId int64 // No description available
+
   cmd := newCmd(c, deleteWorkgroupHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.DeleteWorkgroup(
-  
-    workgroupId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Delete a workgroup
+      err := c.remote.DeleteWorkgroup(
+        workgroupId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -999,71 +903,71 @@ Examples:
     $ steam get all --cluster-types
 
 `
+
 func getAll(c *context) *cobra.Command {
-  var entityTypes bool
-  var permissions bool
-  var clusterTypes bool
-  
-  
+  var entityTypes bool // Switch for GetAllEntityTypes()
+  var permissions bool // Switch for GetAllPermissions()
+  var clusterTypes bool // Switch for GetAllClusterTypes()
+
   cmd := newCmd(c, getAllHelp, func(c *context, args []string) {
-    
-    
-    
-    if entityTypes {
+    if entityTypes { // GetAllEntityTypes
       
-  entityTypes, err := c.remote.GetAllEntityTypes(
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", entityTypes)
-  
-  return
-
+      // List all entity types
+      entityTypes, err := c.remote.GetAllEntityTypes(
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(entityTypes))
+      for i, e := range entityTypes {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+        )
+      }
+      c.printt("Id\tName\t", lines)
+      return
     }
-    
-    
-    
-    if permissions {
+    if permissions { // GetAllPermissions
       
-  permissions, err := c.remote.GetAllPermissions(
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", permissions)
-  
-  return
-
+      // List all permissions
+      permissions, err := c.remote.GetAllPermissions(
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(permissions))
+      for i, e := range permissions {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Code, // No description available
+          e.Description, // No description available
+        )
+      }
+      c.printt("Id\tCode\tDescription\t", lines)
+      return
     }
-    
-    
-    
-    if clusterTypes {
+    if clusterTypes { // GetAllClusterTypes
       
-  clusterTypes, err := c.remote.GetAllClusterTypes(
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", clusterTypes)
-  
-  return
-
+      // List all cluster types
+      clusterTypes, err := c.remote.GetAllClusterTypes(
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(clusterTypes))
+      for i, e := range clusterTypes {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+        )
+      }
+      c.printt("Id\tName\t", lines)
+      return
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&entityTypes, "entity-types", entityTypes, "List all entity types")
   cmd.Flags().BoolVar(&permissions, "permissions", permissions, "List all permissions")
@@ -1091,77 +995,73 @@ Examples:
         --cluster-id=?
 
 `
+
 func getCluster(c *context) *cobra.Command {
-  var onYarn bool
-  var status bool
-  
-  
-  var clusterId int64
+  var onYarn bool // Switch for GetClusterOnYarn()
+  var status bool // Switch for GetClusterStatus()
+  var clusterId int64 // No description available
+
   cmd := newCmd(c, getClusterHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if onYarn {
+    if onYarn { // GetClusterOnYarn
       
-  cluster, err := c.remote.GetClusterOnYarn(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", cluster)
-  
-  return
-
+      // Get cluster details (Yarn only)
+      cluster, err := c.remote.GetClusterOnYarn(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", cluster.Id), // No description available
+        fmt.Sprintf("EngineId:\t%v\t", cluster.EngineId), // No description available
+        fmt.Sprintf("Size:\t%v\t", cluster.Size), // No description available
+        fmt.Sprintf("ApplicationId:\t%v\t", cluster.ApplicationId), // No description available
+        fmt.Sprintf("Memory:\t%v\t", cluster.Memory), // No description available
+        fmt.Sprintf("Username:\t%v\t", cluster.Username), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    if status {
+    if status { // GetClusterStatus
       
-  clusterStatus, err := c.remote.GetClusterStatus(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", clusterStatus)
-  
-  return
-
+      // Get cluster status
+      clusterStatus, err := c.remote.GetClusterStatus(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Version:\t%v\t", clusterStatus.Version), // No description available
+        fmt.Sprintf("Status:\t%v\t", clusterStatus.Status), // No description available
+        fmt.Sprintf("MaxMemory:\t%v\t", clusterStatus.MaxMemory), // No description available
+        fmt.Sprintf("TotalCpuCount:\t%v\t", clusterStatus.TotalCpuCount), // No description available
+        fmt.Sprintf("TotalAllowedCpuCount:\t%v\t", clusterStatus.TotalAllowedCpuCount), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  cluster, err := c.remote.GetCluster(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", cluster)
-  
-  return
-
+      // Get cluster details
+      cluster, err := c.remote.GetCluster(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", cluster.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", cluster.Name), // No description available
+        fmt.Sprintf("TypeId:\t%v\t", cluster.TypeId), // No description available
+        fmt.Sprintf("DetailId:\t%v\t", cluster.DetailId), // No description available
+        fmt.Sprintf("Address:\t%v\t", cluster.Address), // No description available
+        fmt.Sprintf("State:\t%v\t", cluster.State), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", cluster.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&onYarn, "on-yarn", onYarn, "Get cluster details (Yarn only)")
   cmd.Flags().BoolVar(&status, "status", status, "Get cluster status")
@@ -1182,29 +1082,36 @@ Examples:
         --limit=?
 
 `
+
 func getClusters(c *context) *cobra.Command {
-  
-  
-  var offset int64
-  var limit int64
+  var offset int64 // No description available
+  var limit int64 // No description available
+
   cmd := newCmd(c, getClustersHelp, func(c *context, args []string) {
     
-    
-  clusters, err := c.remote.GetClusters(
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", clusters)
-  
-  return
-
-    
+      // List clusters
+      clusters, err := c.remote.GetClusters(
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(clusters))
+      for i, e := range clusters {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.TypeId, // No description available
+          e.DetailId, // No description available
+          e.Address, // No description available
+          e.State, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tName\tTypeId\tDetailId\tAddress\tState\tCreatedAt\t", lines)
+      return
   })
   
   
@@ -1223,26 +1130,31 @@ Examples:
         --dataset-id=?
 
 `
+
 func getDataset(c *context) *cobra.Command {
-  
-  
-  var datasetId int64
+  var datasetId int64 // No description available
+
   cmd := newCmd(c, getDatasetHelp, func(c *context, args []string) {
     
-    
-  dataset, err := c.remote.GetDataset(
-  
-    datasetId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", dataset)
-  
-  return
-
-    
+      // Get dataset details
+      dataset, err := c.remote.GetDataset(
+        datasetId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", dataset.Id), // No description available
+        fmt.Sprintf("DatasourceId:\t%v\t", dataset.DatasourceId), // No description available
+        fmt.Sprintf("Name:\t%v\t", dataset.Name), // No description available
+        fmt.Sprintf("Description:\t%v\t", dataset.Description), // No description available
+        fmt.Sprintf("FrameName:\t%v\t", dataset.FrameName), // No description available
+        fmt.Sprintf("ResponseColumnName:\t%v\t", dataset.ResponseColumnName), // No description available
+        fmt.Sprintf("Properties:\t%v\t", dataset.Properties), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", dataset.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
@@ -1262,38 +1174,45 @@ Examples:
         --limit=?
 
 `
+
 func getDatasets(c *context) *cobra.Command {
-  
-  
-  var datasourceId int64
-  var offset int64
-  var limit int64
+  var offset int64 // No description available
+  var limit int64 // No description available
+  var datasourceId int64 // No description available
+
   cmd := newCmd(c, getDatasetsHelp, func(c *context, args []string) {
     
-    
-  datasets, err := c.remote.GetDatasets(
-  
-    datasourceId,
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", datasets)
-  
-  return
-
-    
+      // List datasets
+      datasets, err := c.remote.GetDatasets(
+        datasourceId, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(datasets))
+      for i, e := range datasets {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.DatasourceId, // No description available
+          e.Name, // No description available
+          e.Description, // No description available
+          e.FrameName, // No description available
+          e.ResponseColumnName, // No description available
+          e.Properties, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tDatasourceId\tName\tDescription\tFrameName\tResponseColumnName\tProperties\tCreatedAt\t", lines)
+      return
   })
   
   
-  cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+  cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
   return cmd
 }
 
@@ -1307,26 +1226,30 @@ Examples:
         --datasource-id=?
 
 `
+
 func getDatasource(c *context) *cobra.Command {
-  
-  
-  var datasourceId int64
+  var datasourceId int64 // No description available
+
   cmd := newCmd(c, getDatasourceHelp, func(c *context, args []string) {
     
-    
-  datasource, err := c.remote.GetDatasource(
-  
-    datasourceId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", datasource)
-  
-  return
-
-    
+      // Get datasource details
+      datasource, err := c.remote.GetDatasource(
+        datasourceId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", datasource.Id), // No description available
+        fmt.Sprintf("ProjectId:\t%v\t", datasource.ProjectId), // No description available
+        fmt.Sprintf("Name:\t%v\t", datasource.Name), // No description available
+        fmt.Sprintf("Description:\t%v\t", datasource.Description), // No description available
+        fmt.Sprintf("Kind:\t%v\t", datasource.Kind), // No description available
+        fmt.Sprintf("Configuration:\t%v\t", datasource.Configuration), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", datasource.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
@@ -1346,38 +1269,44 @@ Examples:
         --limit=?
 
 `
+
 func getDatasources(c *context) *cobra.Command {
-  
-  
-  var limit int64
-  var projectId int64
-  var offset int64
+  var projectId int64 // No description available
+  var offset int64 // No description available
+  var limit int64 // No description available
+
   cmd := newCmd(c, getDatasourcesHelp, func(c *context, args []string) {
     
-    
-  datasources, err := c.remote.GetDatasources(
-  
-    projectId,
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", datasources)
-  
-  return
-
-    
+      // List datasources
+      datasources, err := c.remote.GetDatasources(
+        projectId, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(datasources))
+      for i, e := range datasources {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.ProjectId, // No description available
+          e.Name, // No description available
+          e.Description, // No description available
+          e.Kind, // No description available
+          e.Configuration, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tProjectId\tName\tDescription\tKind\tConfiguration\tCreatedAt\t", lines)
+      return
   })
   
   
-  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   return cmd
 }
 
@@ -1391,26 +1320,27 @@ Examples:
         --engine-id=?
 
 `
+
 func getEngine(c *context) *cobra.Command {
-  
-  
-  var engineId int64
+  var engineId int64 // No description available
+
   cmd := newCmd(c, getEngineHelp, func(c *context, args []string) {
     
-    
-  engine, err := c.remote.GetEngine(
-  
-    engineId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", engine)
-  
-  return
-
-    
+      // Get engine details
+      engine, err := c.remote.GetEngine(
+        engineId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", engine.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", engine.Name), // No description available
+        fmt.Sprintf("Location:\t%v\t", engine.Location), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", engine.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
@@ -1427,23 +1357,29 @@ Examples:
     $ steam get engines
 
 `
+
 func getEngines(c *context) *cobra.Command {
-  
-  
+
   cmd := newCmd(c, getEnginesHelp, func(c *context, args []string) {
     
-    
-  engines, err := c.remote.GetEngines(
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", engines)
-  
-  return
-
-    
+      // List engines
+      engines, err := c.remote.GetEngines(
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(engines))
+      for i, e := range engines {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.Location, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tName\tLocation\tCreatedAt\t", lines)
+      return
   })
   
   
@@ -1463,42 +1399,44 @@ Examples:
         --limit=?
 
 `
+
 func getHistory(c *context) *cobra.Command {
-  
-  
-  var offset int64
-  var limit int64
-  var entityTypeId int64
-  var entityId int64
+  var entityTypeId int64 // No description available
+  var entityId int64 // No description available
+  var offset int64 // No description available
+  var limit int64 // No description available
+
   cmd := newCmd(c, getHistoryHelp, func(c *context, args []string) {
     
-    
-  history, err := c.remote.GetHistory(
-  
-    entityTypeId,
-  
-    entityId,
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", history)
-  
-  return
-
-    
+      // List audit trail records for an entity
+      history, err := c.remote.GetHistory(
+        entityTypeId, // No description available
+        entityId, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(history))
+      for i, e := range history {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.IdentityId, // No description available
+          e.Action, // No description available
+          e.Description, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("IdentityId\tAction\tDescription\tCreatedAt\t", lines)
+      return
   })
   
   
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
   cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
+  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   return cmd
 }
 
@@ -1521,82 +1459,86 @@ Examples:
         --role-id=?
 
 `
+
 func getIdentities(c *context) *cobra.Command {
-  var forWorkgroup bool
-  var forRole bool
-  
-  
-  var offset int64
-  var limit int64
-  var workgroupId int64
-  var roleId int64
+  var forWorkgroup bool // Switch for GetIdentitiesForWorkgroup()
+  var forRole bool // Switch for GetIdentitiesForRole()
+  var offset int64 // No description available
+  var limit int64 // No description available
+  var workgroupId int64 // No description available
+  var roleId int64 // No description available
+
   cmd := newCmd(c, getIdentitiesHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if forWorkgroup {
+    if forWorkgroup { // GetIdentitiesForWorkgroup
       
-  identities, err := c.remote.GetIdentitiesForWorkgroup(
-  
-    workgroupId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", identities)
-  
-  return
-
+      // List identities for a workgroup
+      identities, err := c.remote.GetIdentitiesForWorkgroup(
+        workgroupId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(identities))
+      for i, e := range identities {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.IsActive, // No description available
+          e.LastLogin, // No description available
+          e.Created, // No description available
+        )
+      }
+      c.printt("Id\tName\tIsActive\tLastLogin\tCreated\t", lines)
+      return
     }
-    
-    
-    
-    if forRole {
+    if forRole { // GetIdentitiesForRole
       
-  identities, err := c.remote.GetIdentitiesForRole(
-  
-    roleId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", identities)
-  
-  return
-
+      // List identities for a role
+      identities, err := c.remote.GetIdentitiesForRole(
+        roleId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(identities))
+      for i, e := range identities {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.IsActive, // No description available
+          e.LastLogin, // No description available
+          e.Created, // No description available
+        )
+      }
+      c.printt("Id\tName\tIsActive\tLastLogin\tCreated\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  identities, err := c.remote.GetIdentities(
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", identities)
-  
-  return
-
+      // List identities
+      identities, err := c.remote.GetIdentities(
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(identities))
+      for i, e := range identities {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.IsActive, // No description available
+          e.LastLogin, // No description available
+          e.Created, // No description available
+        )
+      }
+      c.printt("Id\tName\tIsActive\tLastLogin\tCreated\t", lines)
+      return
     }
-    
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&forWorkgroup, "for-workgroup", forWorkgroup, "List identities for a workgroup")
   cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List identities for a role")
@@ -1623,57 +1565,51 @@ Examples:
         --name=?
 
 `
+
 func getIdentity(c *context) *cobra.Command {
-  var byName bool
-  
-  
-  var identityId int64
-  var name string
+  var byName bool // Switch for GetIdentityByName()
+  var identityId int64 // No description available
+  var name string // No description available
+
   cmd := newCmd(c, getIdentityHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if byName {
+    if byName { // GetIdentityByName
       
-  identity, err := c.remote.GetIdentityByName(
-  
-    name,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", identity)
-  
-  return
-
+      // Get identity details by name
+      identity, err := c.remote.GetIdentityByName(
+        name, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", identity.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", identity.Name), // No description available
+        fmt.Sprintf("IsActive:\t%v\t", identity.IsActive), // No description available
+        fmt.Sprintf("LastLogin:\t%v\t", identity.LastLogin), // No description available
+        fmt.Sprintf("Created:\t%v\t", identity.Created), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  identity, err := c.remote.GetIdentity(
-  
-    identityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", identity)
-  
-  return
-
+      // Get identity details
+      identity, err := c.remote.GetIdentity(
+        identityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", identity.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", identity.Name), // No description available
+        fmt.Sprintf("IsActive:\t%v\t", identity.IsActive), // No description available
+        fmt.Sprintf("LastLogin:\t%v\t", identity.LastLogin), // No description available
+        fmt.Sprintf("Created:\t%v\t", identity.Created), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&byName, "by-name", byName, "Get identity details by name")
   
@@ -1694,34 +1630,36 @@ Examples:
         --job-name=?
 
 `
+
 func getJob(c *context) *cobra.Command {
-  
-  
-  var jobName string
-  var clusterId int64
+  var clusterId int64 // No description available
+  var jobName string // No description available
+
   cmd := newCmd(c, getJobHelp, func(c *context, args []string) {
     
-    
-  job, err := c.remote.GetJob(
-  
-    clusterId,
-  
-    jobName,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", job)
-  
-  return
-
-    
+      // Get job details
+      job, err := c.remote.GetJob(
+        clusterId, // No description available
+        jobName, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Name:\t%v\t", job.Name), // No description available
+        fmt.Sprintf("ClusterName:\t%v\t", job.ClusterName), // No description available
+        fmt.Sprintf("Description:\t%v\t", job.Description), // No description available
+        fmt.Sprintf("Progress:\t%v\t", job.Progress), // No description available
+        fmt.Sprintf("StartedAt:\t%v\t", job.StartedAt), // No description available
+        fmt.Sprintf("CompletedAt:\t%v\t", job.CompletedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
-  cmd.Flags().StringVar(&jobName, "job-name", jobName, "No description available")
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
+  cmd.Flags().StringVar(&jobName, "job-name", jobName, "No description available")
   return cmd
 }
 
@@ -1735,26 +1673,33 @@ Examples:
         --cluster-id=?
 
 `
+
 func getJobs(c *context) *cobra.Command {
-  
-  
-  var clusterId int64
+  var clusterId int64 // No description available
+
   cmd := newCmd(c, getJobsHelp, func(c *context, args []string) {
     
-    
-  jobs, err := c.remote.GetJobs(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", jobs)
-  
-  return
-
-    
+      // List jobs
+      jobs, err := c.remote.GetJobs(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(jobs))
+      for i, e := range jobs {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Name, // No description available
+          e.ClusterName, // No description available
+          e.Description, // No description available
+          e.Progress, // No description available
+          e.StartedAt, // No description available
+          e.CompletedAt, // No description available
+        )
+      }
+      c.printt("Name\tClusterName\tDescription\tProgress\tStartedAt\tCompletedAt\t", lines)
+      return
   })
   
   
@@ -1772,26 +1717,37 @@ Examples:
         --model-id=?
 
 `
+
 func getModel(c *context) *cobra.Command {
-  
-  
-  var modelId int64
+  var modelId int64 // No description available
+
   cmd := newCmd(c, getModelHelp, func(c *context, args []string) {
     
-    
-  model, err := c.remote.GetModel(
-  
-    modelId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", model)
-  
-  return
-
-    
+      // Get model details
+      model, err := c.remote.GetModel(
+        modelId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", model.Id), // No description available
+        fmt.Sprintf("TrainingDatasetId:\t%v\t", model.TrainingDatasetId), // No description available
+        fmt.Sprintf("ValidationDatasetId:\t%v\t", model.ValidationDatasetId), // No description available
+        fmt.Sprintf("Name:\t%v\t", model.Name), // No description available
+        fmt.Sprintf("ClusterName:\t%v\t", model.ClusterName), // No description available
+        fmt.Sprintf("ModelKey:\t%v\t", model.ModelKey), // No description available
+        fmt.Sprintf("Algorithm:\t%v\t", model.Algorithm), // No description available
+        fmt.Sprintf("DatasetName:\t%v\t", model.DatasetName), // No description available
+        fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName), // No description available
+        fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName), // No description available
+        fmt.Sprintf("Location:\t%v\t", model.Location), // No description available
+        fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime), // No description available
+        fmt.Sprintf("Metrics:\t%v\t", model.Metrics), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
@@ -1815,71 +1771,89 @@ Examples:
         --cluster-id=?
 
 `
+
 func getModels(c *context) *cobra.Command {
-  var fromCluster bool
-  
-  
-  var projectId int64
-  var offset int64
-  var limit int64
-  var clusterId int64
+  var fromCluster bool // Switch for GetModelsFromCluster()
+  var offset int64 // No description available
+  var limit int64 // No description available
+  var clusterId int64 // No description available
+  var projectId int64 // No description available
+
   cmd := newCmd(c, getModelsHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if fromCluster {
+    if fromCluster { // GetModelsFromCluster
       
-  models, err := c.remote.GetModelsFromCluster(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", models)
-  
-  return
-
+      // List models from a cluster
+      models, err := c.remote.GetModelsFromCluster(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(models))
+      for i, e := range models {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.TrainingDatasetId, // No description available
+          e.ValidationDatasetId, // No description available
+          e.Name, // No description available
+          e.ClusterName, // No description available
+          e.ModelKey, // No description available
+          e.Algorithm, // No description available
+          e.DatasetName, // No description available
+          e.ResponseColumnName, // No description available
+          e.LogicalName, // No description available
+          e.Location, // No description available
+          e.MaxRuntime, // No description available
+          e.Metrics, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  models, err := c.remote.GetModels(
-  
-    projectId,
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", models)
-  
-  return
-
+      // List models
+      models, err := c.remote.GetModels(
+        projectId, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(models))
+      for i, e := range models {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.TrainingDatasetId, // No description available
+          e.ValidationDatasetId, // No description available
+          e.Name, // No description available
+          e.ClusterName, // No description available
+          e.ModelKey, // No description available
+          e.Algorithm, // No description available
+          e.DatasetName, // No description available
+          e.ResponseColumnName, // No description available
+          e.LogicalName, // No description available
+          e.Location, // No description available
+          e.MaxRuntime, // No description available
+          e.Metrics, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "List models from a cluster")
   
   
-  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
+  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
   return cmd
 }
 
@@ -1897,58 +1871,56 @@ Examples:
         --identity-id=?
 
 `
+
 func getPermissions(c *context) *cobra.Command {
-  var forRole bool
-  var forIdentity bool
-  
-  
-  var roleId int64
-  var identityId int64
+  var forRole bool // Switch for GetPermissionsForRole()
+  var forIdentity bool // Switch for GetPermissionsForIdentity()
+  var roleId int64 // No description available
+  var identityId int64 // No description available
+
   cmd := newCmd(c, getPermissionsHelp, func(c *context, args []string) {
-    
-    
-    
-    if forRole {
+    if forRole { // GetPermissionsForRole
       
-  permissions, err := c.remote.GetPermissionsForRole(
-  
-    roleId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", permissions)
-  
-  return
-
+      // List permissions for a role
+      permissions, err := c.remote.GetPermissionsForRole(
+        roleId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(permissions))
+      for i, e := range permissions {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Code, // No description available
+          e.Description, // No description available
+        )
+      }
+      c.printt("Id\tCode\tDescription\t", lines)
+      return
     }
-    
-    
-    
-    if forIdentity {
+    if forIdentity { // GetPermissionsForIdentity
       
-  permissions, err := c.remote.GetPermissionsForIdentity(
-  
-    identityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", permissions)
-  
-  return
-
+      // List permissions for an identity
+      permissions, err := c.remote.GetPermissionsForIdentity(
+        identityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(permissions))
+      for i, e := range permissions {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Code, // No description available
+          e.Description, // No description available
+        )
+      }
+      c.printt("Id\tCode\tDescription\t", lines)
+      return
     }
-    
-    
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List permissions for a role")
   cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List permissions for an identity")
@@ -1970,29 +1942,33 @@ Examples:
         --entity-id=?
 
 `
+
 func getPrivileges(c *context) *cobra.Command {
-  
-  
-  var entityTypeId int64
-  var entityId int64
+  var entityTypeId int64 // No description available
+  var entityId int64 // No description available
+
   cmd := newCmd(c, getPrivilegesHelp, func(c *context, args []string) {
     
-    
-  privileges, err := c.remote.GetPrivileges(
-  
-    entityTypeId,
-  
-    entityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", privileges)
-  
-  return
-
-    
+      // List privileges for an entity
+      privileges, err := c.remote.GetPrivileges(
+        entityTypeId, // No description available
+        entityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(privileges))
+      for i, e := range privileges {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.Kind, // No description available
+          e.WorkgroupId, // No description available
+          e.WorkgroupName, // No description available
+          e.WorkgroupDescription, // No description available
+        )
+      }
+      c.printt("Kind\tWorkgroupId\tWorkgroupName\tWorkgroupDescription\t", lines)
+      return
   })
   
   
@@ -2011,26 +1987,27 @@ Examples:
         --project-id=?
 
 `
+
 func getProject(c *context) *cobra.Command {
-  
-  
-  var projectId int64
+  var projectId int64 // No description available
+
   cmd := newCmd(c, getProjectHelp, func(c *context, args []string) {
     
-    
-  project, err := c.remote.GetProject(
-  
-    projectId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", project)
-  
-  return
-
-    
+      // Get project details
+      project, err := c.remote.GetProject(
+        projectId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", project.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", project.Name), // No description available
+        fmt.Sprintf("Description:\t%v\t", project.Description), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", project.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
@@ -2049,34 +2026,38 @@ Examples:
         --limit=?
 
 `
+
 func getProjects(c *context) *cobra.Command {
-  
-  
-  var offset int64
-  var limit int64
+  var limit int64 // No description available
+  var offset int64 // No description available
+
   cmd := newCmd(c, getProjectsHelp, func(c *context, args []string) {
     
-    
-  projects, err := c.remote.GetProjects(
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", projects)
-  
-  return
-
-    
+      // List projects
+      projects, err := c.remote.GetProjects(
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(projects))
+      for i, e := range projects {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.Description, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tName\tDescription\tCreatedAt\t", lines)
+      return
   })
   
   
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
 }
 
@@ -2094,63 +2075,55 @@ Examples:
         --name=?
 
 `
+
 func getRole(c *context) *cobra.Command {
-  var byName bool
-  
-  
-  var name string
-  var roleId int64
+  var byName bool // Switch for GetRoleByName()
+  var roleId int64 // No description available
+  var name string // No description available
+
   cmd := newCmd(c, getRoleHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if byName {
+    if byName { // GetRoleByName
       
-  role, err := c.remote.GetRoleByName(
-  
-    name,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", role)
-  
-  return
-
+      // Get role details by name
+      role, err := c.remote.GetRoleByName(
+        name, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", role.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", role.Name), // No description available
+        fmt.Sprintf("Description:\t%v\t", role.Description), // No description available
+        fmt.Sprintf("Created:\t%v\t", role.Created), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  role, err := c.remote.GetRole(
-  
-    roleId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", role)
-  
-  return
-
+      // Get role details
+      role, err := c.remote.GetRole(
+        roleId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", role.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", role.Name), // No description available
+        fmt.Sprintf("Description:\t%v\t", role.Description), // No description available
+        fmt.Sprintf("Created:\t%v\t", role.Created), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&byName, "by-name", byName, "Get role details by name")
   
   
-  cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+  cmd.Flags().StringVar(&name, "name", name, "No description available")
   return cmd
 }
 
@@ -2169,60 +2142,59 @@ Examples:
         --identity-id=?
 
 `
+
 func getRoles(c *context) *cobra.Command {
-  var forIdentity bool
-  
-  
-  var offset int64
-  var limit int64
-  var identityId int64
+  var forIdentity bool // Switch for GetRolesForIdentity()
+  var offset int64 // No description available
+  var limit int64 // No description available
+  var identityId int64 // No description available
+
   cmd := newCmd(c, getRolesHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if forIdentity {
+    if forIdentity { // GetRolesForIdentity
       
-  roles, err := c.remote.GetRolesForIdentity(
-  
-    identityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", roles)
-  
-  return
-
+      // List roles for an identity
+      roles, err := c.remote.GetRolesForIdentity(
+        identityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(roles))
+      for i, e := range roles {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.Description, // No description available
+          e.Created, // No description available
+        )
+      }
+      c.printt("Id\tName\tDescription\tCreated\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  roles, err := c.remote.GetRoles(
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", roles)
-  
-  return
-
+      // List roles
+      roles, err := c.remote.GetRoles(
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(roles))
+      for i, e := range roles {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.Description, // No description available
+          e.Created, // No description available
+        )
+      }
+      c.printt("Id\tName\tDescription\tCreated\t", lines)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
   
@@ -2243,26 +2215,30 @@ Examples:
         --service-id=?
 
 `
+
 func getService(c *context) *cobra.Command {
-  
-  
-  var serviceId int64
+  var serviceId int64 // No description available
+
   cmd := newCmd(c, getServiceHelp, func(c *context, args []string) {
     
-    
-  service, err := c.remote.GetService(
-  
-    serviceId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", service)
-  
-  return
-
-    
+      // Get service details
+      service, err := c.remote.GetService(
+        serviceId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", service.Id), // No description available
+        fmt.Sprintf("ModelId:\t%v\t", service.ModelId), // No description available
+        fmt.Sprintf("Address:\t%v\t", service.Address), // No description available
+        fmt.Sprintf("Port:\t%v\t", service.Port), // No description available
+        fmt.Sprintf("ProcessId:\t%v\t", service.ProcessId), // No description available
+        fmt.Sprintf("State:\t%v\t", service.State), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", service.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
@@ -2287,71 +2263,74 @@ Examples:
         --limit=?
 
 `
+
 func getServices(c *context) *cobra.Command {
-  var forModel bool
-  
-  
-  var offset int64
-  var limit int64
-  var modelId int64
+  var forModel bool // Switch for GetServicesForModel()
+  var modelId int64 // No description available
+  var offset int64 // No description available
+  var limit int64 // No description available
+
   cmd := newCmd(c, getServicesHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if forModel {
+    if forModel { // GetServicesForModel
       
-  services, err := c.remote.GetServicesForModel(
-  
-    modelId,
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", services)
-  
-  return
-
+      // List services for a model
+      services, err := c.remote.GetServicesForModel(
+        modelId, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(services))
+      for i, e := range services {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.ModelId, // No description available
+          e.Address, // No description available
+          e.Port, // No description available
+          e.ProcessId, // No description available
+          e.State, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tModelId\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  services, err := c.remote.GetServices(
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", services)
-  
-  return
-
+      // List services
+      services, err := c.remote.GetServices(
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(services))
+      for i, e := range services {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.ModelId, // No description available
+          e.Address, // No description available
+          e.Port, // No description available
+          e.ProcessId, // No description available
+          e.State, // No description available
+          e.CreatedAt, // No description available
+        )
+      }
+      c.printt("Id\tModelId\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&forModel, "for-model", forModel, "List services for a model")
   
   
+  cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-  cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
   return cmd
 }
 
@@ -2369,57 +2348,49 @@ Examples:
         --name=?
 
 `
+
 func getWorkgroup(c *context) *cobra.Command {
-  var byName bool
-  
-  
-  var workgroupId int64
-  var name string
+  var byName bool // Switch for GetWorkgroupByName()
+  var workgroupId int64 // No description available
+  var name string // No description available
+
   cmd := newCmd(c, getWorkgroupHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if byName {
+    if byName { // GetWorkgroupByName
       
-  workgroup, err := c.remote.GetWorkgroupByName(
-  
-    name,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", workgroup)
-  
-  return
-
+      // Get workgroup details by name
+      workgroup, err := c.remote.GetWorkgroupByName(
+        name, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", workgroup.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", workgroup.Name), // No description available
+        fmt.Sprintf("Description:\t%v\t", workgroup.Description), // No description available
+        fmt.Sprintf("Created:\t%v\t", workgroup.Created), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  workgroup, err := c.remote.GetWorkgroup(
-  
-    workgroupId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", workgroup)
-  
-  return
-
+      // Get workgroup details
+      workgroup, err := c.remote.GetWorkgroup(
+        workgroupId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", workgroup.Id), // No description available
+        fmt.Sprintf("Name:\t%v\t", workgroup.Name), // No description available
+        fmt.Sprintf("Description:\t%v\t", workgroup.Description), // No description available
+        fmt.Sprintf("Created:\t%v\t", workgroup.Created), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&byName, "by-name", byName, "Get workgroup details by name")
   
@@ -2444,60 +2415,59 @@ Examples:
         --identity-id=?
 
 `
+
 func getWorkgroups(c *context) *cobra.Command {
-  var forIdentity bool
-  
-  
-  var offset int64
-  var limit int64
-  var identityId int64
+  var forIdentity bool // Switch for GetWorkgroupsForIdentity()
+  var offset int64 // No description available
+  var limit int64 // No description available
+  var identityId int64 // No description available
+
   cmd := newCmd(c, getWorkgroupsHelp, func(c *context, args []string) {
-    
-    
-    
-    
-    
-    if forIdentity {
+    if forIdentity { // GetWorkgroupsForIdentity
       
-  workgroups, err := c.remote.GetWorkgroupsForIdentity(
-  
-    identityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", workgroups)
-  
-  return
-
+      // List workgroups for an identity
+      workgroups, err := c.remote.GetWorkgroupsForIdentity(
+        identityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(workgroups))
+      for i, e := range workgroups {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.Description, // No description available
+          e.Created, // No description available
+        )
+      }
+      c.printt("Id\tName\tDescription\tCreated\t", lines)
+      return
     }
-    
-    
-    
-    
-    if true {
+    if true { // default
       
-  workgroups, err := c.remote.GetWorkgroups(
-  
-    offset,
-  
-    limit,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", workgroups)
-  
-  return
-
+      // List workgroups
+      workgroups, err := c.remote.GetWorkgroups(
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(workgroups))
+      for i, e := range workgroups {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.Name, // No description available
+          e.Description, // No description available
+          e.Created, // No description available
+        )
+      }
+      c.printt("Id\tName\tDescription\tCreated\t", lines)
+      return
     }
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List workgroups for an identity")
   
@@ -2539,45 +2509,30 @@ Examples:
         --model-name=?
 
 `
-func importModel(c *context) *cobra.Command {
-  var fromCluster bool
-  
-  
-  var modelKey string
-  var modelName string
-  var clusterId int64
-  var projectId int64
-  cmd := newCmd(c, importModelHelp, func(c *context, args []string) {
-    
-    
-    
-    if fromCluster {
-      
-  modelId, err := c.remote.ImportModelFromCluster(
-  
-    clusterId,
-  
-    projectId,
-  
-    modelKey,
-  
-    modelName,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", modelId)
-  
-  return
 
+func importModel(c *context) *cobra.Command {
+  var fromCluster bool // Switch for ImportModelFromCluster()
+  var modelKey string // No description available
+  var modelName string // No description available
+  var clusterId int64 // No description available
+  var projectId int64 // No description available
+
+  cmd := newCmd(c, importModelHelp, func(c *context, args []string) {
+    if fromCluster { // ImportModelFromCluster
+      
+      // Import models from a cluster
+      modelId, err := c.remote.ImportModelFromCluster(
+        clusterId, // No description available
+        projectId, // No description available
+        modelKey, // No description available
+        modelName, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("ModelId:\t%v\n", modelId)
+      return
     }
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "Import models from a cluster")
   
@@ -2623,59 +2578,39 @@ Examples:
         --role-id=?
 
 `
+
 func linkIdentity(c *context) *cobra.Command {
-  var withWorkgroup bool
-  var withRole bool
-  
-  
-  var identityId int64
-  var workgroupId int64
-  var roleId int64
+  var withWorkgroup bool // Switch for LinkIdentityWithWorkgroup()
+  var withRole bool // Switch for LinkIdentityWithRole()
+  var identityId int64 // No description available
+  var workgroupId int64 // No description available
+  var roleId int64 // No description available
+
   cmd := newCmd(c, linkIdentityHelp, func(c *context, args []string) {
-    
-    
-    
-    if withWorkgroup {
+    if withWorkgroup { // LinkIdentityWithWorkgroup
       
-  err := c.remote.LinkIdentityWithWorkgroup(
-  
-    identityId,
-  
-    workgroupId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
+      // Link an identity with a workgroup
+      err := c.remote.LinkIdentityWithWorkgroup(
+        identityId, // No description available
+        workgroupId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
     }
-    
-    
-    
-    if withRole {
+    if withRole { // LinkIdentityWithRole
       
-  err := c.remote.LinkIdentityWithRole(
-  
-    identityId,
-  
-    roleId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
+      // Link an identity with a role
+      err := c.remote.LinkIdentityWithRole(
+        identityId, // No description available
+        roleId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
     }
-    
-    
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&withWorkgroup, "with-workgroup", withWorkgroup, "Link an identity with a workgroup")
   cmd.Flags().BoolVar(&withRole, "with-role", withRole, "Link an identity with a role")
@@ -2715,26 +2650,21 @@ Examples:
         --input=?
 
 `
+
 func pingServer(c *context) *cobra.Command {
-  
-  
-  var input string
+  var input string // Message to send
+
   cmd := newCmd(c, pingServerHelp, func(c *context, args []string) {
     
-    
-  output, err := c.remote.PingServer(
-  
-    input,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", output)
-  
-  return
-
-    
+      // Ping the Steam server
+      output, err := c.remote.PingServer(
+        input, // Message to send
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("Output:\t%v\n", output)
+      return
   })
   
   
@@ -2770,26 +2700,21 @@ Examples:
         --address=?
 
 `
+
 func registerCluster(c *context) *cobra.Command {
-  
-  
-  var address string
+  var address string // No description available
+
   cmd := newCmd(c, registerClusterHelp, func(c *context, args []string) {
     
-    
-  clusterId, err := c.remote.RegisterCluster(
-  
-    address,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", clusterId)
-  
-  return
-
-    
+      // Connect to a cluster
+      clusterId, err := c.remote.RegisterCluster(
+        address, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("ClusterId:\t%v\n", clusterId)
+      return
   })
   
   
@@ -2828,40 +2753,33 @@ Examples:
         --entity-id=?
 
 `
+
 func shareEntity(c *context) *cobra.Command {
-  
-  
-  var kind string
-  var workgroupId int64
-  var entityTypeId int64
-  var entityId int64
+  var entityId int64 // No description available
+  var kind string // No description available
+  var workgroupId int64 // No description available
+  var entityTypeId int64 // No description available
+
   cmd := newCmd(c, shareEntityHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.ShareEntity(
-  
-    kind,
-  
-    workgroupId,
-  
-    entityTypeId,
-  
-    entityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Share an entity with a workgroup
+      err := c.remote.ShareEntity(
+        kind, // No description available
+        workgroupId, // No description available
+        entityTypeId, // No description available
+        entityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
+  cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
   cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
   cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
   cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
-  cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
   return cmd
 }
 
@@ -2895,32 +2813,25 @@ Examples:
         --ratio2=?
 
 `
+
 func splitDataset(c *context) *cobra.Command {
-  
-  
-  var datasetId int64
-  var ratio1 int
-  var ratio2 int
+  var datasetId int64 // No description available
+  var ratio1 int // No description available
+  var ratio2 int // No description available
+
   cmd := newCmd(c, splitDatasetHelp, func(c *context, args []string) {
     
-    
-  datasetIds, err := c.remote.SplitDataset(
-  
-    datasetId,
-  
-    ratio1,
-  
-    ratio2,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", datasetIds)
-  
-  return
-
-    
+      // Split a dataset
+      datasetIds, err := c.remote.SplitDataset(
+        datasetId, // No description available
+        ratio1, // No description available
+        ratio2, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("DatasetIds:\t%v\n", datasetIds)
+      return
   })
   
   
@@ -2964,48 +2875,32 @@ Examples:
         --username=?
 
 `
-func startCluster(c *context) *cobra.Command {
-  var onYarn bool
-  
-  
-  var clusterName string
-  var engineId int64
-  var size int
-  var memory string
-  var username string
-  cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
-    
-    
-    
-    if onYarn {
-      
-  clusterId, err := c.remote.StartClusterOnYarn(
-  
-    clusterName,
-  
-    engineId,
-  
-    size,
-  
-    memory,
-  
-    username,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", clusterId)
-  
-  return
 
+func startCluster(c *context) *cobra.Command {
+  var onYarn bool // Switch for StartClusterOnYarn()
+  var clusterName string // No description available
+  var engineId int64 // No description available
+  var size int // No description available
+  var memory string // No description available
+  var username string // No description available
+
+  cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
+    if onYarn { // StartClusterOnYarn
+      
+      // Start a cluster using Yarn
+      clusterId, err := c.remote.StartClusterOnYarn(
+        clusterName, // No description available
+        engineId, // No description available
+        size, // No description available
+        memory, // No description available
+        username, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("ClusterId:\t%v\n", clusterId)
+      return
     }
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&onYarn, "on-yarn", onYarn, "Start a cluster using Yarn")
   
@@ -3029,29 +2924,32 @@ Examples:
         --port=?
 
 `
+
 func startService(c *context) *cobra.Command {
-  
-  
-  var modelId int64
-  var port int
+  var modelId int64 // No description available
+  var port int // No description available
+
   cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
     
-    
-  service, err := c.remote.StartService(
-  
-    modelId,
-  
-    port,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  fmt.Printf("%+v\n", service)
-  
-  return
-
-    
+      // Start a service
+      service, err := c.remote.StartService(
+        modelId, // No description available
+        port, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", service.Id), // No description available
+        fmt.Sprintf("ModelId:\t%v\t", service.ModelId), // No description available
+        fmt.Sprintf("Address:\t%v\t", service.Address), // No description available
+        fmt.Sprintf("Port:\t%v\t", service.Port), // No description available
+        fmt.Sprintf("ProcessId:\t%v\t", service.ProcessId), // No description available
+        fmt.Sprintf("State:\t%v\t", service.State), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", service.CreatedAt), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
   })
   
   
@@ -3090,34 +2988,23 @@ Examples:
         --cluster-id=?
 
 `
-func stopCluster(c *context) *cobra.Command {
-  var onYarn bool
-  
-  
-  var clusterId int64
-  cmd := newCmd(c, stopClusterHelp, func(c *context, args []string) {
-    
-    
-    
-    if onYarn {
-      
-  err := c.remote.StopClusterOnYarn(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
 
+func stopCluster(c *context) *cobra.Command {
+  var onYarn bool // Switch for StopClusterOnYarn()
+  var clusterId int64 // No description available
+
+  cmd := newCmd(c, stopClusterHelp, func(c *context, args []string) {
+    if onYarn { // StopClusterOnYarn
+      
+      // Stop a cluster using Yarn
+      err := c.remote.StopClusterOnYarn(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
     }
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&onYarn, "on-yarn", onYarn, "Stop a cluster using Yarn")
   
@@ -3136,24 +3023,20 @@ Examples:
         --service-id=?
 
 `
+
 func stopService(c *context) *cobra.Command {
-  
-  
-  var serviceId int64
+  var serviceId int64 // No description available
+
   cmd := newCmd(c, stopServiceHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.StopService(
-  
-    serviceId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Stop a service
+      err := c.remote.StopService(
+        serviceId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -3195,59 +3078,39 @@ Examples:
         --role-id=?
 
 `
+
 func unlinkIdentity(c *context) *cobra.Command {
-  var fromWorkgroup bool
-  var fromRole bool
-  
-  
-  var identityId int64
-  var workgroupId int64
-  var roleId int64
+  var fromWorkgroup bool // Switch for UnlinkIdentityFromWorkgroup()
+  var fromRole bool // Switch for UnlinkIdentityFromRole()
+  var identityId int64 // No description available
+  var workgroupId int64 // No description available
+  var roleId int64 // No description available
+
   cmd := newCmd(c, unlinkIdentityHelp, func(c *context, args []string) {
-    
-    
-    
-    if fromWorkgroup {
+    if fromWorkgroup { // UnlinkIdentityFromWorkgroup
       
-  err := c.remote.UnlinkIdentityFromWorkgroup(
-  
-    identityId,
-  
-    workgroupId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
+      // Unlink an identity from a workgroup
+      err := c.remote.UnlinkIdentityFromWorkgroup(
+        identityId, // No description available
+        workgroupId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
     }
-    
-    
-    
-    if fromRole {
+    if fromRole { // UnlinkIdentityFromRole
       
-  err := c.remote.UnlinkIdentityFromRole(
-  
-    identityId,
-  
-    roleId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
+      // Unlink an identity from a role
+      err := c.remote.UnlinkIdentityFromRole(
+        identityId, // No description available
+        roleId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
     }
-    
-    
-    
-    
-    
-    
-    
-    
   })
   cmd.Flags().BoolVar(&fromWorkgroup, "from-workgroup", fromWorkgroup, "Unlink an identity from a workgroup")
   cmd.Flags().BoolVar(&fromRole, "from-role", fromRole, "Unlink an identity from a role")
@@ -3287,24 +3150,20 @@ Examples:
         --cluster-id=?
 
 `
+
 func unregisterCluster(c *context) *cobra.Command {
-  
-  
-  var clusterId int64
+  var clusterId int64 // No description available
+
   cmd := newCmd(c, unregisterClusterHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.UnregisterCluster(
-  
-    clusterId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Disconnect from a cluster
+      err := c.remote.UnregisterCluster(
+        clusterId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -3343,40 +3202,33 @@ Examples:
         --entity-id=?
 
 `
+
 func unshareEntity(c *context) *cobra.Command {
-  
-  
-  var entityId int64
-  var kind string
-  var workgroupId int64
-  var entityTypeId int64
+  var kind string // No description available
+  var workgroupId int64 // No description available
+  var entityTypeId int64 // No description available
+  var entityId int64 // No description available
+
   cmd := newCmd(c, unshareEntityHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.UnshareEntity(
-  
-    kind,
-  
-    workgroupId,
-  
-    entityTypeId,
-  
-    entityId,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Unshare an entity
+      err := c.remote.UnshareEntity(
+        kind, // No description available
+        workgroupId, // No description available
+        entityTypeId, // No description available
+        entityId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
-  cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
   cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
   cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
   cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
+  cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
   return cmd
 }
 
@@ -3419,40 +3271,33 @@ Examples:
         --response-column-name=?
 
 `
+
 func updateDataset(c *context) *cobra.Command {
-  
-  
-  var datasetId int64
-  var name string
-  var description string
-  var responseColumnName string
+  var name string // No description available
+  var description string // No description available
+  var responseColumnName string // No description available
+  var datasetId int64 // No description available
+
   cmd := newCmd(c, updateDatasetHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.UpdateDataset(
-  
-    datasetId,
-  
-    name,
-  
-    description,
-  
-    responseColumnName,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Update a dataset
+      err := c.remote.UpdateDataset(
+        datasetId, // No description available
+        name, // No description available
+        description, // No description available
+        responseColumnName, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
-  cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
+  cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
   return cmd
 }
 
@@ -3469,40 +3314,33 @@ Examples:
         --path=?
 
 `
+
 func updateDatasource(c *context) *cobra.Command {
-  
-  
-  var name string
-  var description string
-  var path string
-  var datasourceId int64
+  var datasourceId int64 // No description available
+  var name string // No description available
+  var description string // No description available
+  var path string // No description available
+
   cmd := newCmd(c, updateDatasourceHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.UpdateDatasource(
-  
-    datasourceId,
-  
-    name,
-  
-    description,
-  
-    path,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Update a datasource
+      err := c.remote.UpdateDatasource(
+        datasourceId, // No description available
+        name, // No description available
+        description, // No description available
+        path, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
+  cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().StringVar(&path, "path", path, "No description available")
-  cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
   return cmd
 }
 
@@ -3517,32 +3355,27 @@ Examples:
         --password=?
 
 `
+
 func updateIdentity(c *context) *cobra.Command {
-  
-  
-  var identityId int64
-  var password string
+  var password string // No description available
+  var identityId int64 // No description available
+
   cmd := newCmd(c, updateIdentityHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.UpdateIdentity(
-  
-    identityId,
-  
-    password,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Update an identity
+      err := c.remote.UpdateIdentity(
+        identityId, // No description available
+        password, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
-  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   cmd.Flags().StringVar(&password, "password", password, "No description available")
+  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   return cmd
 }
 
@@ -3558,30 +3391,24 @@ Examples:
         --description=?
 
 `
+
 func updateRole(c *context) *cobra.Command {
-  
-  
-  var roleId int64
-  var name string
-  var description string
+  var roleId int64 // No description available
+  var name string // No description available
+  var description string // No description available
+
   cmd := newCmd(c, updateRoleHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.UpdateRole(
-  
-    roleId,
-  
-    name,
-  
-    description,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Update a role
+      err := c.remote.UpdateRole(
+        roleId, // No description available
+        name, // No description available
+        description, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
@@ -3603,36 +3430,30 @@ Examples:
         --description=?
 
 `
+
 func updateWorkgroup(c *context) *cobra.Command {
-  
-  
-  var description string
-  var workgroupId int64
-  var name string
+  var workgroupId int64 // No description available
+  var name string // No description available
+  var description string // No description available
+
   cmd := newCmd(c, updateWorkgroupHelp, func(c *context, args []string) {
     
-    
-  err := c.remote.UpdateWorkgroup(
-  
-    workgroupId,
-  
-    name,
-  
-    description,
-  )
-  if err != nil {
-    log.Fatalln(err)
-  }
-  
-  return
-
-    
+      // Update a workgroup
+      err := c.remote.UpdateWorkgroup(
+        workgroupId, // No description available
+        name, // No description available
+        description, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
   })
   
   
-  cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
+  cmd.Flags().StringVar(&description, "description", description, "No description available")
   return cmd
 }
 

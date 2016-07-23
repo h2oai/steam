@@ -10,20 +10,57 @@ import (
   "fmt"
 )
 
-{{define "call"}}
-  {{range .Outputs}}{{lower .Name}}, {{end}}err := c.remote.{{.Name}}(
-  {{range .Inputs}}
-    {{lower .Name}},
-  {{end}})
-  if err != nil {
-    log.Fatalln(err)
-  }
-  {{range .Outputs}}
-  fmt.Printf("%+v\n", {{lower .Name}})
-  {{end}}
-  return
-{{end}}
+{{- define "call"}}
+      // {{.Help}}
+      {{range .Outputs}}{{lower .Name}}, {{end}}err := c.remote.{{.Name}}(
+      {{- range .Inputs}}
+        {{lower .Name}}, // {{.Help}}
+      {{- end}}
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
 
+      {{- range $i, $o := .Outputs}}
+      {{- if .IsStruct}}
+      {{- if .IsArray}}
+      lines := make([]string, len({{lower .Name}}))
+      for i, e := range {{lower .Name}} {
+        lines[i] = fmt.Sprintf(
+          {{- with .Struct}}
+          "{{range .Fields}}{{.Format}}\t{{end}}",
+          {{- range .Fields}}
+          e.{{.Name}}, // {{.Help}}
+          {{- end}}
+          {{- end}}
+        )
+      }
+      {{- with .Struct}}
+      c.printt("{{range .Fields}}{{.Name}}\t{{end}}", lines)
+      {{- end}}
+      {{- else}}
+      {{- with .Struct}}
+      lines := []string{
+        {{- range .Fields}}
+        fmt.Sprintf("{{.Name}}:\t{{.Format}}\t", {{lower $o.Name}}.{{.Name}}), // {{.Help}}
+        {{- end}}
+      }
+      {{- end}}
+      c.printt("Attribute\tValue\t", lines)
+      {{- end}}
+      {{- else}}
+      {{- if .IsArray}}
+      fmt.Printf("{{$o.Name}}:\t%v\n", {{lower $o.Name}})
+      {{- else}}
+      fmt.Printf("{{$o.Name}}:\t{{.Format}}\n", {{lower $o.Name}})
+      {{- end}}
+      {{- end}}
+      {{- end}}
+      return
+{{- end}}
+
+// registerGeneratedCommands appends generated commands to the
+//   supplied Cobra context.
 func registerGeneratedCommands(c *context, cmd *cobra.Command) {
   cmd.AddCommand(
   {{- range .}}
@@ -59,30 +96,38 @@ Examples:
         --{{.}}=?{{end}}
 {{end}}
 `
+
 func {{.Verb}}{{upper .Noun}}(c *context) *cobra.Command {
-  {{range .Methods}}{{if .HasFlag}}var {{lower .Switch}} bool
-  {{end}}{{end}}
-  {{range .Inputs}}
-  var {{lower .Name}} {{.Type}}{{end}}
+  {{- range .Methods}}
+  {{- if .HasFlag}}
+  var {{lower .Switch}} bool // Switch for {{.Method.Name}}()
+  {{- end}}
+  {{- end}}
+  {{- range .Inputs}}
+  var {{lower .Name}} {{.Type}} // {{.Help}}
+  {{- end}}
+
   cmd := newCmd(c, {{.Verb}}{{upper .Noun}}Help, func(c *context, args []string) {
-    {{if .HasFlag}}
-    {{range .Methods}}
-    {{if .HasFlag}}
-    if {{lower .Switch}} {
+    {{- if .HasFlag}}
+    {{- range .Methods}}
+    {{- if .HasFlag}}
+    if {{lower .Switch}} { // {{.Method.Name}}
       {{template "call" .Method}}
     }
-    {{end}}
-    {{end}}
-    {{range .Methods}}
-    {{if .HasFlag}}{{else}}
-    if true {
+    {{- end}}
+    {{- end}}
+    {{- range .Methods}}
+    {{- if .HasFlag}}{{else}}
+    if true { // default
       {{template "call" .Method}}
     }
-    {{end}}
-    {{end}}
-    {{else}}
-    {{range .Methods}}{{template "call" .Method}}{{end}}
-    {{end}}
+    {{- end}}
+    {{- end}}
+    {{- else}}
+    {{- range .Methods}}
+    {{template "call" .Method}}
+    {{- end}}
+    {{- end}}
   })
   {{range .Methods}}{{if .HasFlag}}cmd.Flags().BoolVar(&{{lower .Switch}}, "{{flag .Switch}}", {{lower .Switch}}, "{{.Help}}")
   {{end}}{{end}}
