@@ -14,6 +14,7 @@
 	build \
 	install \
 	generate \
+	cli-markdown \
 	linux \
 	darwin \
 	release
@@ -49,6 +50,13 @@ generate:
 	cd ./tools/piping && go build && go install
 	piping
 	cd ./master/data && go generate && go fmt scans.go
+
+cli-markdown:
+	cd ./tools/cli-md && go build && go install
+	mkdir -p ./docs/cli
+	rm -f ./docs/cli/*.md
+	cli-md ./docs/cli/
+	mv ./docs/cli/steam.md ./docs/cli/README.md
 
 lint:
 	@ go get -v github.com/golang/lint/golint
