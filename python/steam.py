@@ -1037,7 +1037,7 @@ class RPCClient:
 	
 	def link_role_with_permissions(self, role_id, permission_ids):
 		"""
-		Link role with permissions
+		Link a role with permissions
 
 		Parameters:
 		role_id: No description available (int64)
@@ -1050,6 +1050,40 @@ class RPCClient:
 			'permission_ids': permission_ids
 		}
 		response = self.connection.call("LinkRoleWithPermissions", request)
+		return 
+	
+	def link_role_with_permission(self, role_id, permission_id):
+		"""
+		Link a role with a permission
+
+		Parameters:
+		role_id: No description available (int64)
+		permission_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'role_id': role_id
+			'permission_id': permission_id
+		}
+		response = self.connection.call("LinkRoleWithPermission", request)
+		return 
+	
+	def unlink_role_from_permission(self, role_id, permission_id):
+		"""
+		Unlink a role from a permission
+
+		Parameters:
+		role_id: No description available (int64)
+		permission_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'role_id': role_id
+			'permission_id': permission_id
+		}
+		response = self.connection.call("UnlinkRoleFromPermission", request)
 		return 
 	
 	def delete_role(self, role_id):

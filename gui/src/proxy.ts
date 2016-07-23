@@ -275,8 +275,12 @@ module Proxy {
     getRoleByName: (name: string, go: (error: Error, role: Role) => void) => void
     // Update a role
     updateRole: (roleId: number, name: string, description: string, go: (error: Error) => void) => void
-    // Link role with permissions
+    // Link a role with permissions
     linkRoleWithPermissions: (roleId: number, permissionIds: number[], go: (error: Error) => void) => void
+    // Link a role with a permission
+    linkRoleWithPermission: (roleId: number, permissionId: number, go: (error: Error) => void) => void
+    // Unlink a role from a permission
+    unlinkRoleFromPermission: (roleId: number, permissionId: number, go: (error: Error) => void) => void
     // Delete a role
     deleteRole: (roleId: number, go: (error: Error) => void) => void
     // Create a workgroup
@@ -804,6 +808,22 @@ module Proxy {
   }
 
   interface LinkRoleWithPermissionsOut {
+  }
+  
+  interface LinkRoleWithPermissionIn {
+    role_id: number
+    permission_id: number
+  }
+
+  interface LinkRoleWithPermissionOut {
+  }
+  
+  interface UnlinkRoleFromPermissionIn {
+    role_id: number
+    permission_id: number
+  }
+
+  interface UnlinkRoleFromPermissionOut {
   }
   
   interface DeleteRoleIn {
@@ -1680,6 +1700,30 @@ module Proxy {
         return go(error)
       } else {
         const d: LinkRoleWithPermissionsOut = <LinkRoleWithPermissionsOut>data
+        return go(null)
+      }
+		})
+  }
+  
+  export function linkRoleWithPermission(roleId: number, permissionId: number, go: (error: Error) => void): void {
+    const req: LinkRoleWithPermissionIn = { role_id: roleId, permission_id: permissionId }
+    Proxy.Call("LinkRoleWithPermission", req, function(error, data) {
+      if (error) {
+        return go(error)
+      } else {
+        const d: LinkRoleWithPermissionOut = <LinkRoleWithPermissionOut>data
+        return go(null)
+      }
+		})
+  }
+  
+  export function unlinkRoleFromPermission(roleId: number, permissionId: number, go: (error: Error) => void): void {
+    const req: UnlinkRoleFromPermissionIn = { role_id: roleId, permission_id: permissionId }
+    Proxy.Call("UnlinkRoleFromPermission", req, function(error, data) {
+      if (error) {
+        return go(error)
+      } else {
+        const d: UnlinkRoleFromPermissionOut = <UnlinkRoleFromPermissionOut>data
         return go(null)
       }
 		})
