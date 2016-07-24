@@ -26,6 +26,12 @@ $ mkdir -p $HOME/go
 
 Then, edit your ~/.bash_profile and add `export GOPATH=$HOME/go` and then `$ source ~/.bash_profile`.
 
+Next, install this Go dependency management tool.
+
+```
+go get github.com/tools/godep
+```
+
 **Step 4**
 
 Finally, clone this repo:
@@ -37,4 +43,3 @@ $ git clone https://github.com/h2oai/steamY
 $ cd steamY
 $ make
 ```
-
