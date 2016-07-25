@@ -524,6 +524,7 @@ CREATE TABLE model (
     validation_dataset_id integer NOT NULL,
     name text NOT NULL,
     cluster_name text NOT NULL,
+    model_key text NOT NULL,
     algorithm text NOT NULL,
     dataset_name text NOT NULL,
     response_column_name text NOT NULL,

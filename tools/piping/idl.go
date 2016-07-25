@@ -37,6 +37,8 @@ type Field struct {
 	IsArray      bool
 	IsStruct     bool
 	DefaultValue string
+	Format       string
+	Struct       *Struct
 	Help         string
 }
 
@@ -49,7 +51,7 @@ func Define(name string, instance interface{}) (*Interface, error) {
 	return toInterface(name, dict)
 }
 
-func Generate(i *Interface, tmpl string, funcMap map[string]interface{}) ([]byte, error) {
+func Generate(i interface{}, tmpl string, funcMap map[string]interface{}) ([]byte, error) {
 	t, err := template.New("test").Funcs(funcMap).Parse(tmpl)
 	if err != nil {
 		return nil, err
@@ -127,6 +129,11 @@ func toStruct(s interface{}) (*Struct, error) {
 			isStruct = ft.Kind() == reflect.Struct
 		}
 
+		help := f.Tag.Get("help")
+		if len(help) == 0 {
+			help = "No description available"
+		}
+
 		fields[i] = &Field{
 			ft,
 			f.Name,
@@ -134,7 +141,9 @@ func toStruct(s interface{}) (*Struct, error) {
 			isArray,
 			isStruct,
 			defaultValueOf(ft.Name(), isArray, isStruct),
-			f.Tag.Get("help"),
+			formatOf(ft.Name(), isArray, isStruct),
+			nil,
+			help,
 		}
 	}
 	return &Struct{t.Name(), fields}, nil
@@ -151,6 +160,14 @@ func defaultValueOf(t string, isArray, isStruct bool) string {
 		return "\"\""
 	default:
 		return "0"
+	}
+}
+
+func formatOf(t string, isArray, isStruct bool) string {
+	if isArray || isStruct {
+		return "%+v"
+	} else {
+		return "%v"
 	}
 }
 
@@ -173,28 +190,42 @@ func toInterface(facadeName string, dict map[string]*Struct) (*Interface, error)
 		outputs := make([]*Field, 0)
 
 		in := true
-		for _, p := range method.Fields {
-			if p.Name == "_" { // "_" acts as a separator between input and output parameters
+		for _, f := range method.Fields {
+			if f.Name == "_" { // "_" acts as a separator between input and output parameters
 				in = false
 				continue
 			}
 			if in {
-				inputs = append(inputs, p)
+				inputs = append(inputs, f)
 			} else {
-				outputs = append(outputs, p)
+				outputs = append(outputs, f)
 			}
-			if p.IsStruct {
-				if _, ok := structs[p.Type]; !ok {
-					s, ok := dict[p.Type]
+			if f.IsStruct {
+				if _, ok := structs[f.Type]; !ok {
+					s, ok := dict[f.Type]
 					if !ok {
 						return nil, fmt.Errorf("Could not find parameter definition %s", m.Type)
 					}
-					structs[p.Type] = s
+					structs[f.Type] = s
 				}
 			}
 		}
 
 		methods = append(methods, &Method{m.Name, inputs, outputs, m.Help})
+	}
+
+	// Store a reference to the actual struct in the field, for downstream pretty-printing.
+	for _, m := range methods {
+		for _, i := range m.Inputs {
+			if i.IsStruct && i.Struct == nil {
+				i.Struct = structs[i.Type]
+			}
+		}
+		for _, o := range m.Outputs {
+			if o.IsStruct && o.Struct == nil {
+				o.Struct = structs[o.Type]
+			}
+		}
 	}
 
 	ks := make([]string, 0)

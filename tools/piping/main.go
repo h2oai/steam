@@ -9,27 +9,35 @@ import (
 )
 
 func main() {
-	i, err := Define("Service", &api.Service{})
+	ix, err := Define("Service", &api.Service{})
 	if err != nil {
 		panic(err)
 	}
-	generate(i, "srv/web/api/go.template", "srv/web/service.go", map[string]interface{}{
+
+	generate(ix, "srv/web/api/go.template", "srv/web/service.go", map[string]interface{}{
 		"lower": lower,
 		"snake": snaker.CamelToSnake,
 	})
-	generate(i, "srv/web/api/typescript.template", "gui/src/proxy.ts", map[string]interface{}{
+	generate(ix, "srv/web/api/typescript.template", "gui/src/proxy.ts", map[string]interface{}{
 		"lower":   lower,
 		"snake":   snaker.CamelToSnake,
 		"js_type": jsTypeOf,
 	})
-	generate(i, "srv/web/api/python.template", "python/steam.py", map[string]interface{}{
+	generate(ix, "srv/web/api/python.template", "python/steam.py", map[string]interface{}{
 		"lower": lower,
 		"snake": snaker.CamelToSnake,
 	})
 
+	methodGroups := toCLIMethodGroups(ix)
+	generate(methodGroups, "srv/web/api/cli.template", "cli2/cli.go", map[string]interface{}{
+		"lower": lower,
+		"upper": upper,
+		"snake": snaker.CamelToSnake,
+		"flag":  toFlagName,
+	})
 }
 
-func generate(i *Interface, input, output string, funcMap map[string]interface{}) {
+func generate(ix interface{}, input, output string, funcMap map[string]interface{}) {
 	fmt.Println(input, "-->", output)
 
 	tmpl, err := ioutil.ReadFile(input)
@@ -37,7 +45,7 @@ func generate(i *Interface, input, output string, funcMap map[string]interface{}
 		panic(err)
 	}
 
-	code, err := Generate(i, string(tmpl), funcMap)
+	code, err := Generate(ix, string(tmpl), funcMap)
 	if err != nil {
 		panic(err)
 	}
@@ -55,6 +63,17 @@ func lower(s string) string {
 		return strings.ToLower(s)
 	default:
 		return strings.ToLower(string(s[0])) + s[1:]
+	}
+}
+
+func upper(s string) string {
+	switch len(s) {
+	case 0:
+		return ""
+	case 1:
+		return strings.ToUpper(s)
+	default:
+		return strings.ToUpper(string(s[0])) + s[1:]
 	}
 }
 

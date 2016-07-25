@@ -1,15 +1,15 @@
 ## steam import
 
-Import a resource of the specified type into steam.
+Import entities
 
 ### Synopsis
 
 
-Import a resource of the specified type into steam.
+Import entities
 
-Examples:
+Commands:
 
-	$ steam import model
+    $ steam import model ...
 
 ### Options inherited from parent commands
 
@@ -19,5 +19,5 @@ Examples:
 
 ### SEE ALSO
 * [steam](steam.md)	 - steam v build : Command Line Interface to Steam
-* [steam import model](steam_import_model.md)	 - Import a model from an H2O cluster into steam
+* [steam import model](steam_import_model.md)	 - Import Model
 

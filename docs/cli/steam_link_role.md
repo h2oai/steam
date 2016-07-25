@@ -1,18 +1,29 @@
 ## steam link role
 
-Add permissions to a role. 
+Link Role
 
 ### Synopsis
 
 
-Add permissions to a role. 
+Link Role
 
 Examples:
 
-	$ steam link role 2 2,4,6
+    Link a role with a permission
+    $ steam link role --with-permission \
+        --role-id=? \
+        --permission-id=?
 
 ```
-steam link role [roleId] [permissionIds]
+steam link role [?]
+```
+
+### Options
+
+```
+      --permission-id=0: No description available
+      --role-id=0: No description available
+      --with-permission[=false]: Link a role with a permission
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +33,5 @@ steam link role [roleId] [permissionIds]
 ```
 
 ### SEE ALSO
-* [steam link](steam_link.md)	 - Add authentication permissions.
+* [steam link](steam_link.md)	 - Link entities
 

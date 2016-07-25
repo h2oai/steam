@@ -11,9 +11,9 @@ module Proxy {
 
   {{range .Structs}}
   export interface {{.Name}} {
-    {{range .Fields }}
-    {{snake .Name}}: {{template "typeOf" .}}
-    {{ end}}
+    {{- range .Fields}}
+    {{snake .Name}}: {{template "typeOf" .}} // {{.Help}}
+    {{- end}}
   }
   {{end}}
 
@@ -21,23 +21,24 @@ module Proxy {
 
   {{with .Facade}}
   export interface {{.Name}} {
-    {{range .Methods}}
+    {{- range .Methods}}
+    // {{.Help}}
     {{lower .Name}}: {{template "signature" .}} => void
-    {{end}}
+    {{- end}}
   }
 
   // --- Messages ---
   {{range .Methods}}
   interface {{.Name}}In {
-    {{range .Inputs}}
+    {{- range .Inputs}}
     {{snake .Name}}: {{template "typeOf" .}}
-    {{end}}
+    {{- end}}
   }
 
   interface {{.Name}}Out {
-    {{range .Outputs}}
+    {{- range .Outputs}}
     {{snake .Name}}: {{template "typeOf" .}}
-    {{end}}
+    {{- end}}
   }
   {{end}}
 

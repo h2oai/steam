@@ -28,13 +28,11 @@ func (a *DefaultAz) Authenticate(username string) string {
 		log.Printf("User %s does not exist\n", username)
 		return ""
 	}
-	log.Println("User logged in:", username)
 	return pz.Password()
 }
 
 func (a *DefaultAz) Identify(r *http.Request) (az.Principal, error) {
 	username := r.Header.Get(auth.AuthUsernameHeader)
-	log.Println("User identified:", username)
 	pz, err := a.directory.Lookup(username)
 	if err != nil {
 		return nil, err

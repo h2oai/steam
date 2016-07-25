@@ -1,24 +1,28 @@
 ## steam create role
 
-Creates a user permissions role.
+Create Role
 
 ### Synopsis
 
 
-Creates a user permissions role.
+Create Role
 
-Exampes:
+Examples:
 
-	$ steam create role engineer --desc="a default engineer role"
+    Create a role
+    $ steam create role \
+        --name=? \
+        --description=?
 
 ```
-steam create role [roleName] 
+steam create role [?]
 ```
 
 ### Options
 
 ```
-  -d, --desc="": A description for this role
+      --description="": No description available
+      --name="": No description available
 ```
 
 ### Options inherited from parent commands
@@ -28,5 +32,5 @@ steam create role [roleName]
 ```
 
 ### SEE ALSO
-* [steam create](steam_create.md)	 - Creates an instance of the specified resource.
+* [steam create](steam_create.md)	 - Create entities
 

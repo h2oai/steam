@@ -14,7 +14,7 @@ Examples:
 			--password=beeblebrox
 
 ```
-steam login [address]
+steam login [address:port] --username=[username] --password=[password]
 ```
 
 ### Options

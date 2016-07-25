@@ -51,7 +51,7 @@ func now() int64 {
 	return toTimestamp(time.Now())
 }
 
-func (s *Service) Ping(pz az.Principal, status bool) (bool, error) {
+func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 	return status, nil
 }
 
@@ -106,7 +106,7 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 	return nil
 }
 
-func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId int64, size int, memory, username string) (int64, error) {
+func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, username string) (int64, error) {
 
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return 0, err
@@ -149,7 +149,7 @@ func (s *Service) StartYarnCluster(pz az.Principal, clusterName string, engineId
 	return clusterId, nil
 }
 
-func (s *Service) StopYarnCluster(pz az.Principal, clusterId int64) error {
+func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, er
 	return toCluster(cluster), nil
 }
 
-func (s *Service) GetYarnCluster(pz az.Principal, clusterId int64) (*web.YarnCluster, error) {
+func (s *Service) GetClusterOnYarn(pz az.Principal, clusterId int64) (*web.YarnCluster, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
 		return nil, err
 	}
@@ -723,7 +723,7 @@ func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, 
 	return 0, nil // XXX Build default model, save to DB, return model id
 }
 
-func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
+func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
 
 	return nil, fmt.Errorf("AutoML is currently not supported")
 
@@ -740,17 +740,18 @@ func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targ
 
 	h2o := h2ov3.NewClient(cluster.Address)
 
-	modelName, err := h2o.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
+	modelKey, err := h2o.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
 	if err != nil {
 		return nil, err
 	}
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
-		modelName,
-		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
-		0, // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		modelKey, // TODO this should be a modelName
 		cluster.Name,
+		modelKey,
 		"AutoML",
 		dataset,
 		targetName,
@@ -765,7 +766,7 @@ func (s *Service) BuildAutoModel(pz az.Principal, clusterId int64, dataset, targ
 		return nil, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelName, modelId)
+	location, logicalName, err := s.exportModel(h2o, modelKey, modelId)
 	if err != nil {
 		return nil, err
 	}
@@ -820,7 +821,7 @@ func dataFrameName(m *bindings.ModelSchemaBase) string {
 }
 
 // TODO: add offset/limit to this call for future
-func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Model, error) {
+func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*web.Model, error) {
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
 		return nil, err
@@ -840,6 +841,7 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 			0,
 			m.ModelId.Name,
 			cluster.Name,
+			m.ModelId.Name,
 			m.AlgoFullName,
 			dataFrameName(m),
 			m.ResponseColumnName,
@@ -854,23 +856,26 @@ func (s *Service) GetClusterModels(pz az.Principal, clusterId int64) ([]*web.Mod
 	return models, nil
 }
 
-func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelName string) (*web.Model, error) {
+func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelKey, modelName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	log.Printf("Started: Searching for model %s in cluster %s...", modelName, cluster.Name)
+	// Default modelName to modelKey
+	if modelName == "" {
+		modelName = modelKey
+	}
 
 	// get model from the cloud
 	h2o := h2ov3.NewClient(cluster.Address)
-	rawModel, r, err := h2o.GetModelsFetch(modelName)
+	rawModel, r, err := h2o.GetModelsFetch(modelKey)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	m := r.Models[0]
@@ -878,7 +883,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	// fetch raw frame json from H2O
 	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	datasourceId, err := s.ds.CreateDatasource(pz, data.Datasource{
@@ -891,7 +896,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		time.Now(),
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	trainingDatasetId, err := s.ds.CreateDataset(pz, data.Dataset{
 		0,
@@ -905,15 +910,16 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		time.Now(),
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		trainingDatasetId,
+		trainingDatasetId,
 		modelName,
-		trainingDatasetId,
-		trainingDatasetId,
 		cluster.Name,
+		modelKey,
 		m.AlgoFullName,
 		dataFrameName(m),
 		m.ResponseColumnName,
@@ -925,25 +931,19 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		time.Now(),
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelName, modelId)
+	location, logicalName, err := s.exportModel(h2o, modelKey, modelId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	log.Println(modelId)
-	model, err := s.ds.ReadModel(pz, modelId)
-	if err != nil {
-		return nil, err
-	}
-
-	return toModel(model), nil
+	return modelId, nil
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
@@ -974,7 +974,7 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	return s.ds.DeleteModel(pz, modelId)
 }
 
-func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return nil, err
 	}
@@ -1052,7 +1052,7 @@ func (s *Service) StartScoringService(pz az.Principal, modelId int64, port int) 
 	return toScoringService(service), nil
 }
 
-func (s *Service) StopScoringService(pz az.Principal, serviceId int64) error {
+func (s *Service) StopService(pz az.Principal, serviceId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return err
 	}
@@ -1076,7 +1076,7 @@ func (s *Service) StopScoringService(pz az.Principal, serviceId int64) error {
 	return nil
 }
 
-func (s *Service) GetScoringService(pz az.Principal, serviceId int64) (*web.ScoringService, error) {
+func (s *Service) GetService(pz az.Principal, serviceId int64) (*web.ScoringService, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
 		return nil, err
 	}
@@ -1088,7 +1088,7 @@ func (s *Service) GetScoringService(pz az.Principal, serviceId int64) (*web.Scor
 	return toScoringService(service), nil
 }
 
-func (s *Service) GetScoringServices(pz az.Principal, offset, limit int64) ([]*web.ScoringService, error) {
+func (s *Service) GetServices(pz az.Principal, offset, limit int64) ([]*web.ScoringService, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
 		return nil, err
 	}
@@ -1105,7 +1105,7 @@ func (s *Service) GetScoringServices(pz az.Principal, offset, limit int64) ([]*w
 	return ss, nil
 }
 
-func (s *Service) GetScoringServicesForModel(pz az.Principal, modelId, offset, limit int64) ([]*web.ScoringService, error) {
+func (s *Service) GetServicesForModel(pz az.Principal, modelId, offset, limit int64) ([]*web.ScoringService, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
 		return nil, err
 	}
@@ -1123,7 +1123,7 @@ func (s *Service) GetScoringServicesForModel(pz az.Principal, modelId, offset, l
 	return ss, nil
 }
 
-func (s *Service) DeleteScoringService(pz az.Principal, serviceId int64) error {
+func (s *Service) DeleteService(pz az.Principal, serviceId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return err
 	}
@@ -1197,21 +1197,21 @@ func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
 	return s.ds.DeleteEngine(pz, engineId)
 }
 
-func (s *Service) GetSupportedClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
+func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
 
 	// No permission checks required
 
 	return toClusterTypes(s.ds.ReadClusterTypes(pz)), nil
 }
 
-func (s *Service) GetSupportedEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
 
 	// No permission checks required
 
 	return toEntityTypes(s.ds.ReadEntityTypes(pz)), nil
 }
 
-func (s *Service) GetSupportedPermissions(pz az.Principal) ([]*web.Permission, error) {
+func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
 
 	// No permission checks required
 
@@ -1312,12 +1312,28 @@ func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, descrip
 	return s.ds.UpdateRole(pz, roleId, name, description)
 }
 
-func (s *Service) LinkRoleAndPermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
+func (s *Service) LinkRoleWithPermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
 		return err
 	}
 
 	return s.ds.LinkRoleAndPermissions(pz, roleId, permissionIds)
+}
+
+func (s *Service) LinkRoleWithPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
+		return err
+	}
+
+	return s.ds.LinkRoleWithPermission(pz, roleId, permissionId)
+}
+
+func (s *Service) UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageRole); err != nil {
+		return err
+	}
+
+	return s.ds.UnlinkRoleFromPermission(pz, roleId, permissionId)
 }
 
 func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
@@ -1485,7 +1501,7 @@ func (s *Service) GetIdentityByName(pz az.Principal, name string) (*web.Identity
 	return toIdentity(identity), err
 }
 
-func (s *Service) LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+func (s *Service) LinkIdentityWithWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
@@ -1496,7 +1512,7 @@ func (s *Service) LinkIdentityAndWorkgroup(pz az.Principal, identityId int64, wo
 	return s.ds.LinkIdentityAndWorkgroup(pz, identityId, workgroupId)
 }
 
-func (s *Service) UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+func (s *Service) UnlinkIdentityFromWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
@@ -1507,7 +1523,7 @@ func (s *Service) UnlinkIdentityAndWorkgroup(pz az.Principal, identityId int64, 
 	return s.ds.UnlinkIdentityAndWorkgroup(pz, identityId, workgroupId)
 }
 
-func (s *Service) LinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
+func (s *Service) LinkIdentityWithRole(pz az.Principal, identityId int64, roleId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
@@ -1518,7 +1534,7 @@ func (s *Service) LinkIdentityAndRole(pz az.Principal, identityId int64, roleId 
 	return s.ds.LinkIdentityAndRole(pz, identityId, roleId)
 }
 
-func (s *Service) UnlinkIdentityAndRole(pz az.Principal, identityId int64, roleId int64) error {
+func (s *Service) UnlinkIdentityFromRole(pz az.Principal, identityId int64, roleId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err
 	}
@@ -1566,7 +1582,7 @@ func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityT
 	})
 }
 
-func (s *Service) GetEntityPrivileges(pz az.Principal, entityTypeId, entityId int64) ([]*web.EntityPrivilege, error) {
+func (s *Service) GetPrivileges(pz az.Principal, entityTypeId, entityId int64) ([]*web.EntityPrivilege, error) {
 	if err := pz.CheckPermission(s.ds.ViewPermissions[entityTypeId]); err != nil {
 		return nil, err
 	}
@@ -1597,7 +1613,7 @@ func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entit
 	})
 }
 
-func (s *Service) GetEntityHistory(pz az.Principal, entityTypeId, entityId, offset, limit int64) ([]*web.EntityHistory, error) {
+func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId, offset, limit int64) ([]*web.EntityHistory, error) {
 	if err := pz.CheckPermission(s.ds.ViewPermissions[entityTypeId]); err != nil {
 		return nil, err
 	}
@@ -1672,6 +1688,7 @@ func toModel(m data.Model) *web.Model {
 		m.ValidationDatasetId,
 		m.Name,
 		m.ClusterName,
+		m.ModelKey,
 		m.Algorithm,
 		m.DatasetName,
 		m.ResponseColumnName,

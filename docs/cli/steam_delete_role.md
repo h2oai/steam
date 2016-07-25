@@ -1,18 +1,26 @@
 ## steam delete role
 
-Deletes a role from the database.
+Delete Role
 
 ### Synopsis
 
 
-Deletes a role from the database.
+Delete Role
 
 Examples:
 
-	$ steam delete role engineer
+    Delete a role
+    $ steam delete role \
+        --role-id=?
 
 ```
-steam delete role [roleName]
+steam delete role [?]
+```
+
+### Options
+
+```
+      --role-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam delete role [roleName]
 ```
 
 ### SEE ALSO
-* [steam delete](steam_delete.md)	 - Deletes the specified resource from the database.
+* [steam delete](steam_delete.md)	 - Delete entities
 

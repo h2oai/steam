@@ -1,24 +1,34 @@
 ## steam get roles
 
-List permission roles.
+Get Roles
 
 ### Synopsis
 
 
-List permission roles.
+Get Roles
 
-Exampes:
+Examples:
 
-	$ steam get roles --identity=minksy
+    List roles
+    $ steam get roles \
+        --offset=? \
+        --limit=?
+
+    List roles for an identity
+    $ steam get roles --for-identity \
+        --identity-id=?
 
 ```
-steam get roles
+steam get roles [?]
 ```
 
 ### Options
 
 ```
-  -i, --identity="": Search by identity.
+      --for-identity[=false]: List roles for an identity
+      --identity-id=0: No description available
+      --limit=0: No description available
+      --offset=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -28,5 +38,5 @@ steam get roles
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

@@ -1,27 +1,35 @@
 ## steam start cluster
 
-Start a new cluster using the specified H2O package.
+Start Cluster
 
 ### Synopsis
 
 
-Start a new cluster using the specified H2O package.
+Start Cluster
 
 Examples:
 
-Start a 4 node H2O 3.2.0.9 cluster
-
-    $ steam start cluster42 2 --size=4
+    Start a cluster using Yarn
+    $ steam start cluster --on-yarn \
+        --cluster-name=? \
+        --engine-id=? \
+        --size=? \
+        --memory=? \
+        --username=?
 
 ```
-steam start cluster [clusterName] [engineId]
+steam start cluster [?]
 ```
 
 ### Options
 
 ```
-  -m, --memory="10g": The max amount of memory to use per node.
-  -n, --size=1: The number of nodes to provision.
+      --cluster-name="": No description available
+      --engine-id=0: No description available
+      --memory="": No description available
+      --on-yarn[=false]: Start a cluster using Yarn
+      --size=0: No description available
+      --username="": No description available
 ```
 
 ### Options inherited from parent commands
@@ -31,5 +39,5 @@ steam start cluster [clusterName] [engineId]
 ```
 
 ### SEE ALSO
-* [steam start](steam_start.md)	 - Start a new resource.
+* [steam start](steam_start.md)	 - Start entities
 

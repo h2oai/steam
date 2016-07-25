@@ -72,6 +72,7 @@ type Model struct {
 	ValidationDatasetId int64
 	Name                string
 	ClusterName         string
+	ModelKey            string
 	Algorithm           string
 	DatasetName         string
 	ResponseColumnName  string
@@ -159,86 +160,88 @@ type Workgroup struct {
 // --- API Facade ---
 
 type Service struct {
-	Ping                       Ping
-	RegisterCluster            RegisterCluster
-	UnregisterCluster          UnregisterCluster
-	StartYarnCluster           StartYarnCluster
-	StopYarnCluster            StopYarnCluster
-	GetCluster                 GetCluster
-	GetYarnCluster             GetYarnCluster
-	GetClusters                GetClusters
-	GetClusterStatus           GetClusterStatus
-	DeleteCluster              DeleteCluster
-	GetJob                     GetJob
-	GetJobs                    GetJobs
-	CreateProject              CreateProject
-	GetProjects                GetProjects
-	GetProject                 GetProject
-	DeleteProject              DeleteProject
-	CreateDatasource           CreateDatasource
-	GetDatasources             GetDatasources
-	GetDatasource              GetDatasource
-	UpdateDatasource           UpdateDatasource
-	DeleteDatasource           DeleteDatasource
-	CreateDataset              CreateDataset
-	GetDatasets                GetDatasets
-	GetDataset                 GetDataset
-	UpdateDataset              UpdateDataset
-	SplitDataset               SplitDataset
-	DeleteDataset              DeleteDataset
-	BuildModel                 BuildModel
-	BuildAutoModel             BuildAutoModel
-	GetModel                   GetModel
-	GetModels                  GetModels
-	GetClusterModels           GetClusterModels
-	ImportModelFromCluster     ImportModelFromCluster
-	DeleteModel                DeleteModel
-	StartScoringService        StartScoringService
-	StopScoringService         StopScoringService
-	GetScoringService          GetScoringService
-	GetScoringServices         GetScoringServices
-	GetScoringServicesForModel GetScoringServicesForModel
-	DeleteScoringService       DeleteScoringService
-	AddEngine                  AddEngine
-	GetEngine                  GetEngine
-	GetEngines                 GetEngines
-	DeleteEngine               DeleteEngine
-	GetSupportedEntityTypes    GetSupportedEntityTypes
-	GetSupportedPermissions    GetSupportedPermissions
-	GetSupportedClusterTypes   GetSupportedClusterTypes
-	GetPermissionsForRole      GetPermissionsForRole
-	GetPermissionsForIdentity  GetPermissionsForIdentity
-	CreateRole                 CreateRole
-	GetRoles                   GetRoles
-	GetRolesForIdentity        GetRolesForIdentity
-	GetRole                    GetRole
-	GetRoleByName              GetRoleByName
-	UpdateRole                 UpdateRole
-	LinkRoleAndPermissions     LinkRoleAndPermissions
-	DeleteRole                 DeleteRole
-	CreateWorkgroup            CreateWorkgroup
-	GetWorkgroups              GetWorkgroups
-	GetWorkgroupsForIdentity   GetWorkgroupsForIdentity
-	GetWorkgroup               GetWorkgroup
-	GetWorkgroupByName         GetWorkgroupByName
-	UpdateWorkgroup            UpdateWorkgroup
-	DeleteWorkgroup            DeleteWorkgroup
-	CreateIdentity             CreateIdentity
-	GetIdentities              GetIdentities
-	GetIdentitiesForWorkgroup  GetIdentitiesForWorkgroup
-	GetIdentitiesForRole       GetIdentitiesForRole
-	GetIdentity                GetIdentity
-	GetIdentityByName          GetIdentityByName
-	LinkIdentityAndWorkgroup   LinkIdentityAndWorkgroup
-	UnlinkIdentityAndWorkgroup UnlinkIdentityAndWorkgroup
-	LinkIdentityAndRole        LinkIdentityAndRole
-	UnlinkIdentityAndRole      UnlinkIdentityAndRole
-	UpdateIdentity             UpdateIdentity
-	DeactivateIdentity         DeactivateIdentity
-	ShareEntity                ShareEntity
-	GetEntityPrivileges        GetEntityPrivileges
-	UnshareEntity              UnshareEntity
-	GetEntityHistory           GetEntityHistory
+	PingServer                  PingServer                  `help:"Ping the Steam server"`
+	RegisterCluster             RegisterCluster             `help:"Connect to a cluster"`
+	UnregisterCluster           UnregisterCluster           `help:"Disconnect from a cluster"`
+	StartClusterOnYarn          StartClusterOnYarn          `help:"Start a cluster using Yarn"`
+	StopClusterOnYarn           StopClusterOnYarn           `help:"Stop a cluster using Yarn"`
+	GetCluster                  GetCluster                  `help:"Get cluster details"`
+	GetClusterOnYarn            GetClusterOnYarn            `help:"Get cluster details (Yarn only)"`
+	GetClusters                 GetClusters                 `help:"List clusters"`
+	GetClusterStatus            GetClusterStatus            `help:"Get cluster status"`
+	DeleteCluster               DeleteCluster               `help:"Delete a cluster"`
+	GetJob                      GetJob                      `help:"Get job details"`
+	GetJobs                     GetJobs                     `help:"List jobs"`
+	CreateProject               CreateProject               `help:"Create a project"`
+	GetProjects                 GetProjects                 `help:"List projects"`
+	GetProject                  GetProject                  `help:"Get project details"`
+	DeleteProject               DeleteProject               `help:"Delete a project"`
+	CreateDatasource            CreateDatasource            `help:"Create a datasource"`
+	GetDatasources              GetDatasources              `help:"List datasources"`
+	GetDatasource               GetDatasource               `help:"Get datasource details"`
+	UpdateDatasource            UpdateDatasource            `help:"Update a datasource"`
+	DeleteDatasource            DeleteDatasource            `help:"Delete a datasource"`
+	CreateDataset               CreateDataset               `help:"Create a dataset"`
+	GetDatasets                 GetDatasets                 `help:"List datasets"`
+	GetDataset                  GetDataset                  `help:"Get dataset details"`
+	UpdateDataset               UpdateDataset               `help:"Update a dataset"`
+	SplitDataset                SplitDataset                `help:"Split a dataset"`
+	DeleteDataset               DeleteDataset               `help:"Delete a dataset"`
+	BuildModel                  BuildModel                  `help:"Build a model"`
+	BuildModelAuto              BuildModelAuto              `help:"Build an AutoML model"`
+	GetModel                    GetModel                    `help:"Get model details"`
+	GetModels                   GetModels                   `help:"List models"`
+	GetModelsFromCluster        GetModelsFromCluster        `help:"List models from a cluster"`
+	ImportModelFromCluster      ImportModelFromCluster      `help:"Import models from a cluster"`
+	DeleteModel                 DeleteModel                 `help:"Delete a model"`
+	StartService                StartService                `help:"Start a service"`
+	StopService                 StopService                 `help:"Stop a service"`
+	GetService                  GetService                  `help:"Get service details"`
+	GetServices                 GetServices                 `help:"List services"`
+	GetServicesForModel         GetServicesForModel         `help:"List services for a model"`
+	DeleteService               DeleteService               `help:"Delete a service"`
+	AddEngine                   AddEngine                   `help:"Add an engine"`
+	GetEngine                   GetEngine                   `help:"Get engine details"`
+	GetEngines                  GetEngines                  `help:"List engines"`
+	DeleteEngine                DeleteEngine                `help:"Delete an engine"`
+	GetAllEntityTypes           GetAllEntityTypes           `help:"List all entity types"`
+	GetAllPermissions           GetAllPermissions           `help:"List all permissions"`
+	GetAllClusterTypes          GetAllClusterTypes          `help:"List all cluster types"`
+	GetPermissionsForRole       GetPermissionsForRole       `help:"List permissions for a role"`
+	GetPermissionsForIdentity   GetPermissionsForIdentity   `help:"List permissions for an identity"`
+	CreateRole                  CreateRole                  `help:"Create a role"`
+	GetRoles                    GetRoles                    `help:"List roles"`
+	GetRolesForIdentity         GetRolesForIdentity         `help:"List roles for an identity"`
+	GetRole                     GetRole                     `help:"Get role details"`
+	GetRoleByName               GetRoleByName               `help:"Get role details by name"`
+	UpdateRole                  UpdateRole                  `help:"Update a role"`
+	LinkRoleWithPermissions     LinkRoleWithPermissions     `help:"Link a role with permissions"`
+	LinkRoleWithPermission      LinkRoleWithPermission      `help:"Link a role with a permission"`
+	UnlinkRoleFromPermission    UnlinkRoleFromPermission    `help:"Unlink a role from a permission"`
+	DeleteRole                  DeleteRole                  `help:"Delete a role"`
+	CreateWorkgroup             CreateWorkgroup             `help:"Create a workgroup"`
+	GetWorkgroups               GetWorkgroups               `help:"List workgroups"`
+	GetWorkgroupsForIdentity    GetWorkgroupsForIdentity    `help:"List workgroups for an identity"`
+	GetWorkgroup                GetWorkgroup                `help:"Get workgroup details"`
+	GetWorkgroupByName          GetWorkgroupByName          `help:"Get workgroup details by name"`
+	UpdateWorkgroup             UpdateWorkgroup             `help:"Update a workgroup"`
+	DeleteWorkgroup             DeleteWorkgroup             `help:"Delete a workgroup"`
+	CreateIdentity              CreateIdentity              `help:"Create an identity"`
+	GetIdentities               GetIdentities               `help:"List identities"`
+	GetIdentitiesForWorkgroup   GetIdentitiesForWorkgroup   `help:"List identities for a workgroup"`
+	GetIdentitiesForRole        GetIdentitiesForRole        `help:"List identities for a role"`
+	GetIdentity                 GetIdentity                 `help:"Get identity details"`
+	GetIdentityByName           GetIdentityByName           `help:"Get identity details by name"`
+	LinkIdentityWithWorkgroup   LinkIdentityWithWorkgroup   `help:"Link an identity with a workgroup"`
+	UnlinkIdentityFromWorkgroup UnlinkIdentityFromWorkgroup `help:"Unlink an identity from a workgroup"`
+	LinkIdentityWithRole        LinkIdentityWithRole        `help:"Link an identity with a role"`
+	UnlinkIdentityFromRole      UnlinkIdentityFromRole      `help:"Unlink an identity from a role"`
+	UpdateIdentity              UpdateIdentity              `help:"Update an identity"`
+	DeactivateIdentity          DeactivateIdentity          `help:"Deactivate an identity"`
+	ShareEntity                 ShareEntity                 `help:"Share an entity with a workgroup"`
+	GetPrivileges               GetPrivileges               `help:"List privileges for an entity"`
+	UnshareEntity               UnshareEntity               `help:"Unshare an entity"`
+	GetHistory                  GetHistory                  `help:"List audit trail records for an entity"`
 }
 
 // --- API Method Definitions ---
@@ -246,10 +249,10 @@ type Service struct {
 // Note: Define each method as a struct, with fields representing parameters and returns.
 //       Place a dummy field "_" to separate inputs and outputs.
 
-type Ping struct {
-	Input  bool
+type PingServer struct {
+	Input  string `help:"Message to send"`
 	_      int
-	Output bool
+	Output string `help:"Echoed message"`
 }
 type RegisterCluster struct {
 	Address   string
@@ -259,7 +262,7 @@ type RegisterCluster struct {
 type UnregisterCluster struct {
 	ClusterId int64
 }
-type StartYarnCluster struct {
+type StartClusterOnYarn struct {
 	ClusterName string
 	EngineId    int64
 	Size        int
@@ -268,7 +271,7 @@ type StartYarnCluster struct {
 	_           int
 	ClusterId   int64
 }
-type StopYarnCluster struct {
+type StopClusterOnYarn struct {
 	ClusterId int64
 }
 type GetCluster struct {
@@ -276,7 +279,7 @@ type GetCluster struct {
 	_         int
 	Cluster   Cluster
 }
-type GetYarnCluster struct {
+type GetClusterOnYarn struct {
 	ClusterId int64
 	_         int
 	Cluster   YarnCluster
@@ -399,7 +402,7 @@ type BuildModel struct {
 	_         int
 	ModelId   int64
 }
-type BuildAutoModel struct {
+type BuildModelAuto struct {
 	ClusterId  int64
 	Dataset    string
 	TargetName string
@@ -419,7 +422,7 @@ type GetModels struct {
 	_         int
 	Models    []Model
 }
-type GetClusterModels struct {
+type GetModelsFromCluster struct {
 	ClusterId int64
 	_         int
 	Models    []Model
@@ -427,41 +430,42 @@ type GetClusterModels struct {
 type ImportModelFromCluster struct {
 	ClusterId int64
 	ProjectId int64
+	ModelKey  string
 	ModelName string
 	_         int
-	Model     Model
+	ModelId   int64
 }
 type DeleteModel struct {
 	ModelId int64
 }
-type StartScoringService struct {
+type StartService struct {
 	ModelId int64
 	Port    int
 	_       int
 	Service ScoringService
 }
-type StopScoringService struct {
+type StopService struct {
 	ServiceId int64
 }
-type GetScoringService struct {
+type GetService struct {
 	ServiceId int64
 	_         int
 	Service   ScoringService
 }
-type GetScoringServices struct {
+type GetServices struct {
 	Offset   int64
 	Limit    int64
 	_        int
 	Services []ScoringService
 }
-type GetScoringServicesForModel struct {
+type GetServicesForModel struct {
 	ModelId  int64
 	Offset   int64
 	Limit    int64
 	_        int
 	Services []ScoringService
 }
-type DeleteScoringService struct {
+type DeleteService struct {
 	ServiceId int64
 }
 type AddEngine struct {
@@ -482,15 +486,15 @@ type GetEngines struct {
 type DeleteEngine struct {
 	EngineId int64
 }
-type GetSupportedEntityTypes struct {
+type GetAllEntityTypes struct {
 	_           int
 	EntityTypes []EntityType
 }
-type GetSupportedPermissions struct {
+type GetAllPermissions struct {
 	_           int
 	Permissions []Permission
 }
-type GetSupportedClusterTypes struct {
+type GetAllClusterTypes struct {
 	_            int
 	ClusterTypes []ClusterType
 }
@@ -536,9 +540,17 @@ type UpdateRole struct {
 	Name        string
 	Description string
 }
-type LinkRoleAndPermissions struct {
+type LinkRoleWithPermissions struct {
 	RoleId        int64
 	PermissionIds []int64
+}
+type LinkRoleWithPermission struct {
+	RoleId       int64
+	PermissionId int64
+}
+type UnlinkRoleFromPermission struct {
+	RoleId       int64
+	PermissionId int64
 }
 type DeleteRole struct {
 	RoleId int64
@@ -610,19 +622,19 @@ type GetIdentityByName struct {
 	_        int
 	Identity Identity
 }
-type LinkIdentityAndWorkgroup struct {
+type LinkIdentityWithWorkgroup struct {
 	IdentityId  int64
 	WorkgroupId int64
 }
-type UnlinkIdentityAndWorkgroup struct {
+type UnlinkIdentityFromWorkgroup struct {
 	IdentityId  int64
 	WorkgroupId int64
 }
-type LinkIdentityAndRole struct {
+type LinkIdentityWithRole struct {
 	IdentityId int64
 	RoleId     int64
 }
-type UnlinkIdentityAndRole struct {
+type UnlinkIdentityFromRole struct {
 	IdentityId int64
 	RoleId     int64
 }
@@ -639,7 +651,7 @@ type ShareEntity struct {
 	EntityTypeId int64
 	EntityId     int64
 }
-type GetEntityPrivileges struct {
+type GetPrivileges struct {
 	EntityTypeId int64
 	EntityId     int64
 	_            int
@@ -651,7 +663,7 @@ type UnshareEntity struct {
 	EntityTypeId int64
 	EntityId     int64
 }
-type GetEntityHistory struct {
+type GetHistory struct {
 	EntityTypeId int64
 	EntityId     int64
 	Offset       int64

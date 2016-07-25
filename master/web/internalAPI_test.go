@@ -18,11 +18,15 @@ Service
 
 */
 
+const (
+	ClusterAddress = "localhost:54321"
+)
+
 //
 // -- Project --
 //
 
-func TestProjectCRUD(tt *testing.T) {
+func testProjectCRUD(tt *testing.T) {
 	t := newTest(tt)
 
 	const (
@@ -66,15 +70,12 @@ func TestExternalClusterCRUD(tt *testing.T) {
 	t := newTest(tt)
 
 	// Setup
-	const (
-		address = "localhost:54321"
-	)
 
 	// End setup
 
 	// -- C --
 
-	id, err := t.svc.RegisterCluster(t.su, address)
+	id, err := t.svc.RegisterCluster(t.su, ClusterAddress)
 	t.nil(err)
 
 	// -- R --
@@ -87,7 +88,7 @@ func TestExternalClusterCRUD(tt *testing.T) {
 	clusters, err := t.svc.GetClusters(t.su, 0, 1000)
 	t.nil(err)
 
-	t.ok(clusters[0].TypeId == 0 "Expected type %d go type %d", 0, clusters[0].TypeId)
+	t.ok(clusters[0].TypeId == 0, "Expected type %d go type %d", 0, clusters[0].TypeId)
 
 	// -- U --
 
@@ -163,6 +164,35 @@ func TestDatasourceCRUD(tt *testing.T) {
 // -- Model --
 //
 
+func TestExternalModelCRUD(tt *testing.T) {
+	t := newTest(tt)
+
+	// -- Setup --
+
+	clusterId, _ := t.svc.RegisterCluster(t.su, ClusterAddress)
+	projectId, _ := t.svc.CreateProject(t.su, "p1", "d1")
+
+	// -- End Setup --
+
+	// -- C --
+
+	id, err := t.svc.ImportModelFromCluster(t.su, clusterId, projectId, "modelName")
+	t.nil(err)
+
+}
+
 //
 // -- Service --
 //
+
+func TestScoringServicesCRUD(tt *testing.T) {
+	t := newTest(tt)
+
+	// -- Setup --
+
+	// -- End Setup --
+
+	// -- C --
+
+	id, err := t.svc.StartScoringService(t.su, modelId, port)
+}

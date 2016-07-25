@@ -1,18 +1,26 @@
 ## steam delete model
 
-Deletes a sepcified model from the database.
+Delete Model
 
 ### Synopsis
 
 
-Deletes a sepcified model from the database.
+Delete Model
 
 Examples:
-	
-	$ steam delete model 3
+
+    Delete a model
+    $ steam delete model \
+        --model-id=?
 
 ```
-steam delete model [modelId]
+steam delete model [?]
+```
+
+### Options
+
+```
+      --model-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam delete model [modelId]
 ```
 
 ### SEE ALSO
-* [steam delete](steam_delete.md)	 - Deletes the specified resource from the database.
+* [steam delete](steam_delete.md)	 - Delete entities
 

@@ -14,18 +14,26 @@ steam v build : Command Line Interface to Steam
 ```
 
 ### SEE ALSO
-* [steam create](steam_create.md)	 - Creates an instance of the specified resource.
-* [steam deactivate](steam_deactivate.md)	 - Deactivate and entity type.
-* [steam delete](steam_delete.md)	 - Deletes the specified resource from the database.
+* [steam add](steam_add.md)	 - Add entities
+* [steam build](steam_build.md)	 - Build entities
+* [steam create](steam_create.md)	 - Create entities
+* [steam deactivate](steam_deactivate.md)	 - Deactivate entities
+* [steam delete](steam_delete.md)	 - Delete entities
 * [steam deploy](steam_deploy.md)	 - Deploy a resource of the specified type.
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
-* [steam import](steam_import.md)	 - Import a resource of the specified type into steam.
-* [steam link](steam_link.md)	 - Add authentication permissions.
+* [steam get](steam_get.md)	 - Get entities
+* [steam import](steam_import.md)	 - Import entities
+* [steam link](steam_link.md)	 - Link entities
 * [steam login](steam_login.md)	 - Sign in to a Steam server.
+* [steam ping](steam_ping.md)	 - Ping entities
+* [steam register](steam_register.md)	 - Register entities
 * [steam reset](steam_reset.md)	 - Reset Steam client configuration.
 * [steam serve](steam_serve.md)	 - Launch a new service.
-* [steam start](steam_start.md)	 - Start a new resource.
-* [steam stop](steam_stop.md)	 - Stop the specified resource.
-* [steam unlink](steam_unlink.md)	 - Remove authentication permissions.
-* [steam update](steam_update.md)	 - Updates an entity in the database.
+* [steam share](steam_share.md)	 - Share entities
+* [steam split](steam_split.md)	 - Split entities
+* [steam start](steam_start.md)	 - Start entities
+* [steam stop](steam_stop.md)	 - Stop entities
+* [steam unlink](steam_unlink.md)	 - Unlink entities
+* [steam unregister](steam_unregister.md)	 - Unregister entities
+* [steam unshare](steam_unshare.md)	 - Unshare entities
+* [steam update](steam_update.md)	 - Update entities
 
