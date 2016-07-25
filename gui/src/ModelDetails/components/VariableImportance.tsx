@@ -8,7 +8,7 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import GroupedBarChart from './GroupedBarChart';
 import * as d3 from 'd3';
-import { getOrdinal } from '../../utils/utils';
+import { getOrdinal } from '../../App/utils/getOrdinal';
 import '../styles/variableimportance.scss';
 
 // sample data
@@ -103,7 +103,7 @@ export default class VariableImportance extends React.Component<Props, State> {
                         ry="0"
                         className="symbol yes"
                     />
-                    <text 
+                    <text
                        x="30"
                        y="10"
                        dy="12"
@@ -122,11 +122,11 @@ export default class VariableImportance extends React.Component<Props, State> {
                       ry="0"
                       className="symbol no"
                     />
-                    <text 
+                    <text
                        x="30"
                        y="10"
                        dy="12"
-                       className="legendText" 
+                       className="legendText"
                     >
                        No
                      </text>
