@@ -12,7 +12,7 @@ type KeyV3 struct {
 	Url string `json:"URL"`
 }
 
-func newKeyV3() *KeyV3 {
+func NewKeyV3() *KeyV3 {
 	return &KeyV3{
 		Name: "",
 		Type: "",

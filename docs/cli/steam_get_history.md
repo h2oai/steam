@@ -1,19 +1,32 @@
 ## steam get history
 
-View history for a specified entity. Only enity types identity, role, and workgroup can make call entities by name.
+Get History
 
 ### Synopsis
 
 
-View history for a specified entity. Only enity types identity, role, and workgroup can make call entities by name.
+Get History
 
 Examples:
 
-	$ steam get history identity minsky
-	$ steam get histroy cluster 9
+    List audit trail records for an entity
+    $ steam get history \
+        --entity-type-id=? \
+        --entity-id=? \
+        --offset=? \
+        --limit=?
 
 ```
-steam get history [entityType] [entityName | entityId]
+steam get history [?]
+```
+
+### Options
+
+```
+      --entity-id=0: No description available
+      --entity-type-id=0: No description available
+      --limit=0: No description available
+      --offset=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +36,5 @@ steam get history [entityType] [entityName | entityId]
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

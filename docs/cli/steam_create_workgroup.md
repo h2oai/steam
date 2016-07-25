@@ -1,24 +1,28 @@
 ## steam create workgroup
 
-Creates a user permissions workgroup.
+Create Workgroup
 
 ### Synopsis
 
 
-Creates a user permissions workgroup.
+Create Workgroup
 
-Exampes:
+Examples:
 
-	$ steam create workgroup production --desc="The production group"
+    Create a workgroup
+    $ steam create workgroup \
+        --name=? \
+        --description=?
 
 ```
-steam create workgroup [workgroupName] 
+steam create workgroup [?]
 ```
 
 ### Options
 
 ```
-  -d, --desc="": A description for this workgroup
+      --description="": No description available
+      --name="": No description available
 ```
 
 ### Options inherited from parent commands
@@ -28,5 +32,5 @@ steam create workgroup [workgroupName]
 ```
 
 ### SEE ALSO
-* [steam create](steam_create.md)	 - Creates an instance of the specified resource.
+* [steam create](steam_create.md)	 - Create entities
 

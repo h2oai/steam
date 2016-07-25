@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/h2oai/steamY/master/auth"
@@ -367,7 +366,8 @@ func Destroy(name, username, sslmode string) error {
 
 func connect(username, dbname, sslmode string) (*sql.DB, error) {
 
-	log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
+	// FIXME logging need to be handled for testing
+	// log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
 
 	// Open connection
 	db, err := sql.Open("postgres", fmt.Sprintf("user=%s dbname=%s sslmode=%s", username, dbname, sslmode))
@@ -407,7 +407,8 @@ func newDatastore(db *sql.DB) (*Datastore, error) {
 		return nil, fmt.Errorf("Failed reading schema version")
 	}
 
-	log.Println("Using schema version:", version)
+	// FIXME logging needs to be handled for testing
+	// log.Println("Using schema version:", version)
 
 	if err := upgrade(db, version); err != nil {
 		return nil, err
@@ -505,7 +506,8 @@ func isPrimed(db *sql.DB) (bool, error) {
 }
 
 func prime(db *sql.DB) error {
-	log.Println("Priming database for first time use...")
+	// FIXME logging needs to be handled for testing
+	// log.Println("Priming database for first time use...")
 	if err := createMetadata(db, "version", "1"); err != nil {
 		return err
 	}
@@ -610,7 +612,8 @@ func upgrade(db *sql.DB, currentVersion string) error {
 }
 
 func truncate(db *sql.DB) error {
-	log.Println("Truncating database...")
+	// FIXME logging needs to be handled for testing
+	// log.Println("Truncating database...")
 	return executeTransaction(db, func(tx *sql.Tx) error {
 		tables := []string{
 			"history",
@@ -797,14 +800,22 @@ func (ds *Datastore) exec(f func(*sql.Tx) error) (err error) {
 	return executeTransaction(ds.db, f)
 }
 
+func (ds *Datastore) toPermissionDescription(id int64) (string, error) {
+	if p, ok := ds.permissionMap[id]; ok {
+		return p.Description, nil
+	} else {
+		return "", fmt.Errorf("Invalid permission id: %d", id)
+	}
+}
+
 func (ds *Datastore) toPermissionDescriptions(ids []int64) ([]string, error) {
 	descriptions := make([]string, len(ids))
 	for i, id := range ids {
-		if p, ok := ds.permissionMap[id]; ok {
-			descriptions[i] = p.Description
-		} else {
-			return descriptions, fmt.Errorf("Invalid permission id: %d", id)
+		description, err := ds.toPermissionDescription(id)
+		if err != nil {
+			return nil, err
 		}
+		descriptions[i] = description
 	}
 	return descriptions, nil
 }
@@ -1237,6 +1248,61 @@ func (ds *Datastore) LinkRoleAndPermissions(pz az.Principal, roleId int64, permi
 			return err
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
+	})
+}
+
+func (ds *Datastore) LinkRoleWithPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			INSERT INTO
+				role_permission
+			VALUES
+				($1, $2)
+			`, roleId, permissionId); err != nil {
+			return err
+		}
+
+		permissionDescription, err := ds.toPermissionDescription(permissionId)
+		if err != nil {
+			return err
+		}
+		permissions, err := json.Marshal([]string{permissionDescription})
+		if err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, LinkOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
+	})
+}
+
+func (ds *Datastore) UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				role_permission
+			WHERE
+				role_id = $1 AND
+				permission_id = $2
+			`, roleId, permissionId); err != nil {
+			return err
+		}
+
+		permissionDescription, err := ds.toPermissionDescription(permissionId)
+		if err != nil {
+			return err
+		}
+		permissions, err := json.Marshal([]string{permissionDescription})
+		if err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
 	})
 }
 
@@ -2303,7 +2369,6 @@ func (ds *Datastore) ReadClusterByName(pz az.Principal, name string) (Cluster, b
 		WHERE
 			name = $1
 		`, name)
-
 	if err != nil {
 		return cluster, false, err
 	}
@@ -2666,6 +2731,39 @@ func (ds *Datastore) ReadDatasource(pz az.Principal, datasourceId int64) (Dataso
 	return ScanDatasource(row)
 }
 
+func (ds *Datastore) ReadDatasourceByProject(pz az.Principal, projectId int64) (Datasource, bool, error) {
+	var datasource Datasource
+
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, name, description, kind, configuration, created
+		FROM
+			datasource
+		WHERE
+			project_id = $1
+		`, projectId)
+	if err != nil {
+		return datasource, false, err
+	}
+	defer rows.Close()
+
+	return scanDatasources(rows)
+}
+
+func scanDatasources(rows *sql.Rows) (Datasource, bool, error) {
+	datasources, err := ScanDatasources(rows)
+	if err != nil {
+		return Datasource{}, false, err
+	}
+
+	if len(datasources) == 0 {
+		return Datasource{}, false, nil
+	}
+
+	return datasources[0], true, nil
+
+}
+
 func (ds *Datastore) UpdateDatasource(pz az.Principal, datasourceId int64, datasource Datasource) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Datasource, datasourceId); err != nil {
 		return err
@@ -2828,6 +2926,39 @@ func (ds *Datastore) ReadDataset(pz az.Principal, datasetId int64) (Dataset, err
 	return ScanDataset(row)
 }
 
+func (ds *Datastore) ReadDatasetByDatasource(pz az.Principal, datasourceId int64) (Dataset, bool, error) {
+	var dataset Dataset
+	rows, err := ds.db.Query(`
+		SELECT
+			id, datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created
+		FROM
+			datasource
+		WHERE
+			datasource_id = $1
+		`, datasourceId)
+	if err != nil {
+		return dataset, false, err
+	}
+	defer rows.Close()
+
+	return scanDatasets(rows)
+}
+
+func scanDatasets(rows *sql.Rows) (Dataset, bool, error) {
+	var dataset Dataset
+
+	datasets, err := ScanDatasets(rows)
+	if err != nil {
+		return dataset, false, err
+	}
+
+	if len(datasets) == 0 {
+		return dataset, false, nil
+	}
+
+	return datasets[0], true, nil
+}
+
 func (ds *Datastore) UpdateDataset(pz az.Principal, datasetId int64, dataset Dataset) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Dataset, datasetId); err != nil {
 		return err
@@ -2890,15 +3021,16 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		row := tx.QueryRow(`
 			INSERT INTO
 				model
-				(name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,   $2,                  $3,                    $4,           $5,        $6,           $7,                   $8,           $9,          $10,       $11,     $12,             now())
+				($1,                  $2,                    $3,    $4,           $5,        $6,       $7,           $8,                   $9,            $10,     $11,          $12,     $13,             now())
 			RETURNING id
 			`,
-			model.Name,
 			model.TrainingDatasetId,
 			model.ValidationDatasetId,
+			model.Name,
 			model.ClusterName,
+			model.ModelKey,
 			model.Algorithm,
 			model.DatasetName,
 			model.ResponseColumnName,
@@ -2924,6 +3056,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Model, id, metadata{
 			"name":               model.Name,
 			"clusterName":        model.ClusterName,
+			"modelKey":           model.ModelKey,
 			"algorithm":          model.Algorithm,
 			"datasetName":        model.DatasetName,
 			"responseColumnName": model.ResponseColumnName,
@@ -2939,7 +3072,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -2973,7 +3106,7 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 
 	rows, err := ds.db.Query(`
 		SELECT
-			m.id, m.name, m.training_dataset_id, m.validation_dataset_id, m.cluster_name, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
+			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
 		FROM
 			model m,
 			project_model pm
@@ -3002,6 +3135,39 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 	return ScanModels(rows)
 }
 
+func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {
+	var Model Model
+	rows, err := ds.db.Query(`
+		SELECT
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+		FROM
+			model
+		WHERE
+			training_dataset_id = $1
+			OR
+			validation_dataset_id = $1
+		`, datasetId)
+	if err != nil {
+		return Model, false, err
+	}
+	defer rows.Close()
+
+	return scanModels(rows)
+}
+
+func scanModels(rows *sql.Rows) (Model, bool, error) {
+	var model Model
+	models, err := ScanModels(rows)
+	if err != nil {
+		return model, false, err
+	}
+
+	if len(models) == 0 {
+		return model, false, nil
+	}
+	return models[0], true, nil
+}
+
 func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
 		return Model{}, err
@@ -3009,7 +3175,7 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE

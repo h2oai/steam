@@ -1,18 +1,26 @@
 ## steam delete cluster
 
-Deletes a specified cluster from the database.
+Delete Cluster
 
 ### Synopsis
 
 
-Deletes a specified cluster from the database.
+Delete Cluster
 
 Examples:
-	
-	$ steam delete cluster 42
+
+    Delete a cluster
+    $ steam delete cluster \
+        --cluster-id=?
 
 ```
-steam delete cluster [clusterId]
+steam delete cluster [?]
+```
+
+### Options
+
+```
+      --cluster-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam delete cluster [clusterId]
 ```
 
 ### SEE ALSO
-* [steam delete](steam_delete.md)	 - Deletes the specified resource from the database.
+* [steam delete](steam_delete.md)	 - Delete entities
 

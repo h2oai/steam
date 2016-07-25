@@ -15,7 +15,7 @@ type JobKeyV3 struct {
 	*/
 }
 
-func newJobKeyV3() *JobKeyV3 {
+func NewJobKeyV3() *JobKeyV3 {
 	return &JobKeyV3{
 		KeyV3: &KeyV3{
 			Name: "",

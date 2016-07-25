@@ -1,18 +1,36 @@
 ## steam get services
 
-List all services.
+Get Services
 
 ### Synopsis
 
 
-List all services.
+Get Services
 
 Examples:
 
-	$ steam get services
+    List services
+    $ steam get services \
+        --offset=? \
+        --limit=?
+
+    List services for a model
+    $ steam get services --for-model \
+        --model-id=? \
+        --offset=? \
+        --limit=?
 
 ```
-steam get services
+steam get services [?]
+```
+
+### Options
+
+```
+      --for-model[=false]: List services for a model
+      --limit=0: No description available
+      --model-id=0: No description available
+      --offset=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +40,5 @@ steam get services
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

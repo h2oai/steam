@@ -18,7 +18,7 @@ type TwoDimTableBase struct {
 	Data [][]Polymorphic `json:"data"`
 }
 
-func newTwoDimTableBase() *TwoDimTableBase {
+func NewTwoDimTableBase() *TwoDimTableBase {
 	return &TwoDimTableBase{
 		Name:        "",
 		Description: "",

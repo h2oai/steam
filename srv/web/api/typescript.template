@@ -1,4 +1,3 @@
-/// <reference path="xhr.ts" />
 // ------------------------------
 // --- This is generated code ---
 // ---      DO NOT EDIT       ---
@@ -6,56 +5,57 @@
 
 {{define "typeOf"}}{{js_type .Type}}{{if .IsArray}}[]{{end}}{{end}}
 {{define "signature"}}({{range .Inputs}}{{lower .Name}}: {{template "typeOf" .}}, {{end}}go: (error: Error{{range .Outputs}}, {{lower .Name}}: {{template "typeOf" .}}{{end}}) => void){{end}}
-module Proxy {
-  // --- Types ---
 
-  {{range .Structs}}
-  export interface {{.Name}} {
-    {{range .Fields }}
-    {{snake .Name}}: {{template "typeOf" .}}
-    {{ end}}
-  }
-  {{end}}
+// --- Types ---
+import * as Proxy from './xhr';
+{{range .Structs}}
+export interface {{.Name}} {
+  {{range .Fields }}
+  {{snake .Name}}: {{template "typeOf" .}}
+  {{ end}}
+}
+{{end}}
 
-	// --- Contract ---
+// --- Contract ---
 
-  {{with .Facade}}
-  export interface {{.Name}} {
-    {{range .Methods}}
-    {{lower .Name}}: {{template "signature" .}} => void
-    {{end}}
-  }
-
-  // --- Messages ---
+{{with .Facade}}
+export interface {{.Name}} {
   {{range .Methods}}
-  interface {{.Name}}In {
-    {{range .Inputs}}
-    {{snake .Name}}: {{template "typeOf" .}}
-    {{end}}
-  }
-
-  interface {{.Name}}Out {
-    {{range .Outputs}}
-    {{snake .Name}}: {{template "typeOf" .}}
-    {{end}}
-  }
-  {{end}}
-
-
-  // --- Client Stub ---
-
-  {{range .Methods}}
-  export function {{lower .Name}}{{template "signature" .}}: void {
-    const req: {{.Name}}In = { {{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{snake .Name}}: {{lower .Name}}{{end}} }
-    Proxy.Call("{{.Name}}", req, function(error, data) {
-      if (error) {
-        return go(error{{range .Outputs}}, null{{end}})
-      } else {
-        const d: {{.Name}}Out = <{{.Name}}Out>data
-        return go(null{{range .Outputs}}, d.{{snake .Name}}{{end}})
-      }
-		})
-  }
-  {{end}}
+  // {{.Help}}
+  {{lower .Name}}: {{template "signature" .}} => void
   {{end}}
 }
+
+// --- Messages ---
+{{range .Methods}}
+interface {{.Name}}In {
+  {{range .Inputs}}
+  {{snake .Name}}: {{template "typeOf" .}}
+  {{end}}
+}
+
+interface {{.Name}}Out {
+  {{range .Outputs}}
+  {{snake .Name}}: {{template "typeOf" .}}
+  {{end}}
+}
+{{end}}
+
+
+// --- Client Stub ---
+
+{{range .Methods}}
+export function {{lower .Name}}{{template "signature" .}}: void {
+const req: {{.Name}}In = { {{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{snake .Name}}: {{lower .Name}}{{end}} };
+Proxy.Call("{{.Name}}", req, function(error, data) {
+  if (error) {
+    return go(error{{range .Outputs}}, null{{end}})
+  } else {
+    const d: {{.Name}}Out = <{{.Name}}Out>data;
+    return go(null{{range .Outputs}}, d.{{snake .Name}}{{end}})
+  }
+    })
+}
+{{end}}
+{{end}}
+

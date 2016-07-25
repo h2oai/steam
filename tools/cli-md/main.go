@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/h2oai/steamY/cli"
+	cli "github.com/h2oai/steamY/cli2"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"

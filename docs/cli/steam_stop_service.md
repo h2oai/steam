@@ -1,18 +1,26 @@
 ## steam stop service
 
-Stop a scoring service.
+Stop Service
 
 ### Synopsis
 
 
-Stop a scoring service.
+Stop Service
 
 Examples:
 
-    $ steam stop service model3
+    Stop a service
+    $ steam stop service \
+        --service-id=?
 
 ```
-steam stop service [serviceId]
+steam stop service [?]
+```
+
+### Options
+
+```
+      --service-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam stop service [serviceId]
 ```
 
 ### SEE ALSO
-* [steam stop](steam_stop.md)	 - Stop the specified resource.
+* [steam stop](steam_stop.md)	 - Stop entities
 

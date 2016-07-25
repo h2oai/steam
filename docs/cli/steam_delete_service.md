@@ -1,18 +1,26 @@
 ## steam delete service
 
-Deletes a specified scoring service deployed on the specified port from the database.
+Delete Service
 
 ### Synopsis
 
 
-Deletes a specified scoring service deployed on the specified port from the database.
+Delete Service
 
 Examples:
 
-	$ steam delete service 76
+    Delete a service
+    $ steam delete service \
+        --service-id=?
 
 ```
-steam delete service [serviceId]
+steam delete service [?]
+```
+
+### Options
+
+```
+      --service-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam delete service [serviceId]
 ```
 
 ### SEE ALSO
-* [steam delete](steam_delete.md)	 - Deletes the specified resource from the database.
+* [steam delete](steam_delete.md)	 - Delete entities
 

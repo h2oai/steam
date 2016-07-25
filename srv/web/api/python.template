@@ -86,16 +86,22 @@ class RPCClient:
 	{{range .Methods}}
 	def {{snake .Name}}(self{{range .Inputs}}, {{snake .Name}}{{end}}):
 		"""
+		{{.Help}}
+
 		Parameters:
-		{{range .Inputs}}{{snake .Name}}: {{.Type}}
-		{{end}}
+		{{- range .Inputs}}
+		{{snake .Name}}: {{.Help}} ({{.Type}})
+		{{- end}}
+
 		Returns:
-		{{range .Outputs}}{{snake .Name}}: {{.Type}}
-    {{else}}None{{end}}
+		{{- range .Outputs}}
+		{{snake .Name}}: {{.Help}} ({{.Type}})
+		{{- else}}None{{end}}
 		"""
 		request = {
-			{{range .Inputs}}'{{snake .Name}}': {{snake .Name}}
-			{{end}}
+			{{- range .Inputs}}
+			'{{snake .Name}}': {{snake .Name}}
+			{{- end}}
 		}
 		response = self.connection.call("{{.Name}}", request)
 		return {{range $i, $e := .Outputs}}{{if $i}}, {{end}}response['{{snake .Name}}']{{end}}

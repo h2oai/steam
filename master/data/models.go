@@ -142,10 +142,11 @@ type Dataset struct {
 
 type Model struct {
 	Id                  int64
-	Name                string
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
+	Name                string
 	ClusterName         string
+	ModelKey            string
 	Algorithm           string
 	DatasetName         string
 	ResponseColumnName  string

@@ -13,7 +13,7 @@ type JobsV3 struct {
 	*/
 }
 
-func newJobsV3() *JobsV3 {
+func NewJobsV3() *JobsV3 {
 	return &JobsV3{
 		JobId: nil,
 		Jobs:  nil,

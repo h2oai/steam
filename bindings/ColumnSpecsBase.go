@@ -15,7 +15,7 @@ type ColumnSpecsBase struct {
 	Description string `json:"description"`
 }
 
-func newColumnSpecsBase() *ColumnSpecsBase {
+func NewColumnSpecsBase() *ColumnSpecsBase {
 	return &ColumnSpecsBase{
 		Name:        "",
 		Type:        "",

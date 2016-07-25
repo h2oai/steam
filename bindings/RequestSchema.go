@@ -6,7 +6,7 @@ type RequestSchema struct {
 	ExcludeFields string `json:"_exclude_fields"`
 }
 
-func newRequestSchema() *RequestSchema {
+func NewRequestSchema() *RequestSchema {
 	return &RequestSchema{
 		ExcludeFields: "",
 	}

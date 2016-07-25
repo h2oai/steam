@@ -1,24 +1,28 @@
 ## steam get clusters
 
-List all clusters.
+Get Clusters
 
 ### Synopsis
 
 
-List all clusters.
+Get Clusters
 
-Examples
+Examples:
 
-	$ steam get clusters
+    List clusters
+    $ steam get clusters \
+        --offset=? \
+        --limit=?
 
 ```
-steam get clusters
+steam get clusters [?]
 ```
 
 ### Options
 
 ```
-  -d, --details[=false]: Detailed cluster information
+      --limit=0: No description available
+      --offset=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -28,5 +32,5 @@ steam get clusters
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

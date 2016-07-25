@@ -15,7 +15,7 @@ type FrameKeyV3 struct {
 	*/
 }
 
-func newFrameKeyV3() *FrameKeyV3 {
+func NewFrameKeyV3() *FrameKeyV3 {
 	return &FrameKeyV3{
 		KeyV3: &KeyV3{
 			Name: "",
