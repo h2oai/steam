@@ -72,7 +72,7 @@ export function receiveProjects(projects) {
 export function fetchModelsFromCluster(clusterId: number) {
   return (dispatch) => {
     dispatch(requestModels());
-    Remote.getClusterModels(clusterId, (error, res) => {
+    Remote.getModelsFromCluster(clusterId, (error, res) => {
       dispatch(receiveModelsFromCluster(res));
     });
   };
@@ -92,7 +92,7 @@ export function createProject(name: string) {
 export function importModelFromCluster(clusterId: number, projectId: number, modelName: string) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
-      Remote.importModelFromCluster(clusterId, projectId, modelName, (error, res) => {
+      Remote.importModelFromCluster(clusterId, projectId, modelName, modelName, (error, res) => {
         dispatch(importModelFromClusterCompleted(res));
         resolve(res);
       });

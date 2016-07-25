@@ -28,7 +28,7 @@ export const stoppedService = () => {
 export function fetchServices() {
   return (dispatch) => {
     dispatch(requestServices());
-    Remote.getScoringServices(0, 5, (error, res) => {
+    Remote.getServices(0, 5, (error, res) => {
       dispatch(receiveServices(res));
     });
   };
@@ -36,7 +36,7 @@ export function fetchServices() {
 
 export function killService(serviceId: number) {
   return (dispatch) => {
-    Remote.stopScoringService(serviceId, (error) => {
+    Remote.stopService(serviceId, (error) => {
       dispatch(fetchServices());
     });
   };

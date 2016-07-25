@@ -146,32 +146,8 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
             })}
           </Table>
         </div> : null}
-        {!_.isEmpty(this.props.models) ? <div>
-          <h1>3. Verify Features</h1>
-          <div>
-            <div>Models in this project should use these features (or a subset) to generate predictions.</div>
-            <div>
-              <Table>
-                <Row header={true}>
-                  <Cell>
-                    COLUMN NAME
-                  </Cell>
-                  <Cell>
-                    DATA TYPE
-                  </Cell>
-                  <Cell>
-                    DISTRIBUTION
-                  </Cell>
-                  <Cell>
-                    STATISTICS
-                  </Cell>
-                </Row>
-              </Table>
-            </div>
-          </div>
-        </div> : null}
         {!_.isEmpty(this.props.models) ? <div className="name-project">
-          <h1>4. Name Project</h1>
+          <h1>3. Name Project</h1>
           <div>
             <input ref="projectName" type="text"/>
           </div>

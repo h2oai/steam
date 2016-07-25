@@ -55,7 +55,7 @@ export function downloadModel(): Function {
 
 export function deployModel(modelId: number, port: number): Function {
   return (dispatch) => {
-    Remote.startScoringService(modelId, port, (error, res) => {
+    Remote.startService(modelId, port, (error, res) => {
       console.log(res);
     });
   };
