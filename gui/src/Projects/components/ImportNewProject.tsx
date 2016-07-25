@@ -4,6 +4,7 @@
 import * as React from 'react';
 import * as $ from 'jquery';
 import * as _ from 'lodash';
+import * as classNames from 'classnames';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Table from './Table';
@@ -39,7 +40,8 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
   constructor() {
     super();
     this.state = {
-      clusterId: null
+      clusterId: null,
+      isModelSelected: false
     };
   }
 
@@ -59,12 +61,15 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
   createProject(): void {
     let name = $(this.refs.projectName).val();
     let importModels = [];
-    $('.import-models input:checked').map((i, input) => {
-      importModels.push($(input).prop('name'));
-    });
-    this.props.createProjectAndImportModelsFromCluster(name, this.state.clusterId, importModels).then((res) => {
-      hashHistory.push('/projects/' + res + '/models');
-    });
+    let checkedModels = $('.import-models input:checked');
+    if (checkedModels.length > 0) {
+      checkedModels.map((i, input) => {
+        importModels.push($(input).prop('name'));
+      });
+      this.props.createProjectAndImportModelsFromCluster(name, this.state.clusterId, importModels).then((res) => {
+        hashHistory.push('/projects/' + res + '/models');
+      });
+    }
   }
 
   registerCluster(event) {
@@ -72,6 +77,19 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
     let ipAddress = $(event.target).find('input[name="ip-address"]').val();
     let port = $(event.target).find('input[name="port"]').val();
     this.props.registerCluster(ipAddress + ':' + port);
+  }
+
+  selectModel() {
+    let checkedModels = $('.import-models input:checked');
+    if (checkedModels) {
+      this.setState({
+        isModelSelected: true
+      });
+    } else {
+      this.setState({
+        isModelSelected: false
+      });
+    }
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -132,14 +150,13 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               <Cell></Cell>
             </Row>
             {this.props.models.map((model, i) => {
-              console.log(model);
               return (
                 <Row key={i}>
                   <Cell>{model.name}</Cell>
                   <Cell>{model.response_column_name}</Cell>
                   <Cell>N/A</Cell>
                   <Cell>
-                    <input type="checkbox" name={model.name}/>&nbsp; Select for Import
+                    <input type="checkbox" name={model.name} onChange={this.selectModel.bind(this, model)}/>&nbsp; Select for Import
                   </Cell>
                 </Row>
               );
@@ -153,7 +170,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           </div>
         </div> : null}
         {!_.isEmpty(this.props.models) ? <div>
-          <button className="default" onClick={this.createProject.bind(this)}>Create Project</button>
+          <button className={classNames('default', {disabled: !this.state.isModelSelected})} onClick={this.createProject.bind(this)}>Create Project</button>
         </div> : null}
       </div>
     );
