@@ -17,6 +17,7 @@ import NewProjectStep3 from './Projects/components/NewProjectStep3';
 import Services from './Projects/components/Services';
 import CreateNewModel from './Projects/components/CreateNewModel';
 import Dummy from './Dummy/Dummy';
+import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
 
 interface IIndexRoute {
   component: any
@@ -75,7 +76,7 @@ export const routes: IRoute[] = [{
       showInNavigation: true,
       icon: 'fa fa-folder',
       indexRoute: {
-        component: WelcomeSplashScreen,
+        component: ProjectScreenStrategy,
         name: 'Welcome'
       },
       childRoutes: [

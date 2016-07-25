@@ -23,7 +23,10 @@ export class ProjectScreenStrategy extends React.Component<Props & DispatchProps
     this.props.fetchProjects();
   }
 
-  render() {
+  render(): any {
+    if (this.props.projects === null) {
+      return null;
+    }
     if (_.isEmpty(this.props.projects)) {
       return <WelcomeSplashScreen/>;
     }

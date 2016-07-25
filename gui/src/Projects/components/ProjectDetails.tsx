@@ -13,9 +13,8 @@ interface Props {
   projects: Project[]
 }
 
-export default class ProjectDetails extends React.Component<Props ,any> {
+export default class ProjectDetails extends React.Component<Props, any> {
   render() {
-    console.log(this.props.projects);
     let config = {
       margin: { top: 2, right: 2, bottom: 2, left: 2 },
       width: 231,
@@ -29,7 +28,8 @@ export default class ProjectDetails extends React.Component<Props ,any> {
       }],
       animate: false,
       hideAxes: true,
-      hideAUCText: true
+      hideAUCText: true,
+      hideBoundaries: true
     };
     return (
       <div className="project-details">
@@ -37,7 +37,7 @@ export default class ProjectDetails extends React.Component<Props ,any> {
         <div>
           <h1>Your Recent Projects</h1>
           <div className="panel-container">
-            {this.props.projects.map((project, i) => {
+            {this.props.projects.slice(0, 2).map((project, i) => {
               return (
                 <Panel key={'recent' + i}>
                   <article>

@@ -11,7 +11,7 @@ let initialState = {
   clusters: [],
   models: [],
   project: {},
-  availableProjects: []
+  availableProjects: null
 };
 
 export const projectsReducer = (state = initialState, action: any) => {

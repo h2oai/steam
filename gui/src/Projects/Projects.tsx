@@ -14,7 +14,6 @@ interface DispatchProps {
 }
 
 export default class Projects extends React.Component<Props & DispatchProps, any> {
-        // {this.props.children}
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="projects">
