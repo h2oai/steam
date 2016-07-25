@@ -205,12 +205,14 @@ type Service interface {
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
   GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*Model, error)
   ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
+  RenameModel(pz az.Principal, modelId int64, modelName string) (error)
   DeleteModel(pz az.Principal, modelId int64) (error)
   StartService(pz az.Principal, modelId int64, name string, port int) (int64, error)
   StopService(pz az.Principal, serviceId int64) (error)
   GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
   GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
   GetServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
+  RenameService(pz az.Principal, serviceId int64, serviceName string) (error)
   DeleteService(pz az.Principal, serviceId int64) (error)
   AddEngine(pz az.Principal, engineName string, enginePath string) (int64, error)
   GetEngine(pz az.Principal, engineId int64) (*Engine, error)
@@ -551,6 +553,14 @@ type ImportModelFromClusterOut struct {
   ModelId int64 `json:"model_id"`
 }
 
+type RenameModelIn struct {
+  ModelId int64 `json:"model_id"`
+  ModelName string `json:"model_name"`
+}
+
+type RenameModelOut struct {
+}
+
 type DeleteModelIn struct {
   ModelId int64 `json:"model_id"`
 }
@@ -600,6 +610,14 @@ type GetServicesForModelIn struct {
 
 type GetServicesForModelOut struct {
   Services []*ScoringService `json:"services"`
+}
+
+type RenameServiceIn struct {
+  ServiceId int64 `json:"service_id"`
+  ServiceName string `json:"service_name"`
+}
+
+type RenameServiceOut struct {
 }
 
 type DeleteServiceIn struct {
@@ -1295,6 +1313,16 @@ func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, mod
   return out.ModelId, nil
 }
 
+func (this *Remote) RenameModel(modelId int64, modelName string) (error) {
+  in := RenameModelIn{ modelId , modelName  }
+  var out RenameModelOut
+  err := this.Proc.Call("RenameModel", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
 func (this *Remote) DeleteModel(modelId int64) (error) {
   in := DeleteModelIn{ modelId  }
   var out DeleteModelOut
@@ -1353,6 +1381,16 @@ func (this *Remote) GetServicesForModel(modelId int64, offset int64, limit int64
     return nil, err
   }
   return out.Services, nil
+}
+
+func (this *Remote) RenameService(serviceId int64, serviceName string) (error) {
+  in := RenameServiceIn{ serviceId , serviceName  }
+  var out RenameServiceOut
+  err := this.Proc.Call("RenameService", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
 }
 
 func (this *Remote) DeleteService(serviceId int64) (error) {
@@ -2965,6 +3003,40 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 	return nil
 }
 
+func (this *Impl) RenameModel(r *http.Request, in *RenameModelIn, out *RenameModelOut) error {
+  const name = "RenameModel"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.RenameModel(pz, in.ModelId, in.ModelName)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
 func (this *Impl) DeleteModel(r *http.Request, in *DeleteModelIn, out *DeleteModelOut) error {
   const name = "DeleteModel"
 
@@ -3165,6 +3237,40 @@ func (this *Impl) GetServicesForModel(r *http.Request, in *GetServicesForModelIn
 	}
   
 	out.Services = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) RenameService(r *http.Request, in *RenameServiceIn, out *RenameServiceOut) error {
+  const name = "RenameService"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.RenameService(pz, in.ServiceId, in.ServiceName)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
   
 
   res, merr := json.Marshal(out)

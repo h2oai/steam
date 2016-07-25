@@ -678,6 +678,23 @@ class RPCClient:
 		response = self.connection.call("ImportModelFromCluster", request)
 		return response['model_id']
 	
+	def rename_model(self, model_id, model_name):
+		"""
+		Update a model name in the database
+
+		Parameters:
+		model_id: No description available (int64)
+		model_name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'model_id': model_id
+			'model_name': model_name
+		}
+		response = self.connection.call("RenameModel", request)
+		return 
+	
 	def delete_model(self, model_id):
 		"""
 		Delete a model
@@ -781,6 +798,23 @@ class RPCClient:
 		}
 		response = self.connection.call("GetServicesForModel", request)
 		return response['services']
+	
+	def rename_service(self, service_id, service_name):
+		"""
+		Update a service name in the database
+
+		Parameters:
+		service_id: No description available (int64)
+		service_name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'service_id': service_id
+			'service_name': service_name
+		}
+		response = self.connection.call("RenameService", request)
+		return 
 	
 	def delete_service(self, service_id):
 		"""

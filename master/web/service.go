@@ -946,6 +946,14 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	return modelId, nil
 }
 
+func (s *Service) RenameModel(pz az.Principal, modelId int64, modelName string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return err
+	}
+
+	return s.ds.UpdateModelName(pz, modelId, modelName)
+}
+
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return err
@@ -1042,6 +1050,14 @@ func (s *Service) StartService(pz az.Principal, modelId int64, serviceName strin
 	}
 
 	return serviceId, nil
+}
+
+func (s *Service) RenameService(pz az.Principal, serviceId int64, serviceName string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
+		return err
+	}
+
+	return s.ds.UpdateServiceName(pz, serviceId, serviceName)
 }
 
 func (s *Service) StopService(pz az.Principal, serviceId int64) error {
