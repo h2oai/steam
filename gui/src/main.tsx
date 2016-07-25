@@ -4,14 +4,13 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Router, Route, IndexRoute, IndexRedirect, hashHistory } from 'react-router';
+import { Router, hashHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
-import { Store, createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { routes } from './routes';
 import { rootReducer } from './App/reducers/rootReducer';
-
 import './variables.scss';
 import 'font-awesome/css/font-awesome.css';
 

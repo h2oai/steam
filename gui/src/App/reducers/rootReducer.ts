@@ -6,9 +6,11 @@ import { combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
 import { modelOverviewReducer } from '../../ProjectDetails/reducers/model.overview.reducer';
 import { leaderboardReducer } from '../../Models/reducers/leaderboard.reducer';
+import { projectsReducer } from '../../Projects/reducers/projects.reducer';
 
 export const rootReducer = combineReducers({
-  modelOverview: modelOverviewReducer,
+  model: modelOverviewReducer,
   leaderboard: leaderboardReducer,
+  projects: projectsReducer,
   routing: routerReducer
 });

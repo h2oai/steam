@@ -1,6 +1,45 @@
 @import '../../variables.scss';
 
 .new-project {
+  font-family: $font-text;
+  .project-description {
+    width: 30%;
+  }
+  .project-description-list {
+    list-style-type: square;
+    margin-bottom: $medium;
+    li {
+      padding: $xsmall / 3;
+    }
+  }
+  .cards-container {
+    display: flex;
+    .card:not(:first-of-type) {
+      margin: 0 10px;
+    }
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    &.small {
+      width: 20%;
+    }
+    padding: $xsmall;
+    header {
+      font-size: 1.5em;
+      font-weight: 800;
+      margin-bottom: $xsmall;
+    }
+    article {
+      font-family: $font-text;
+      margin-bottom: $small;
+    }
+    footer {
+      margin-top: auto;
+    }
+    border: $rule-solid-thin;
+    border-radius: 3px;
+  }
   form {
     margin: $small 0;
     label {

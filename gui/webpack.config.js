@@ -11,7 +11,7 @@ module.exports = {
     './src/index.html'
   ],
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, '../var/master/www'),
     publicPath: '/',
     filename: 'bundle.js'
   },
@@ -59,7 +59,7 @@ module.exports = {
     new BrowserSyncPlugin({
       host: 'localhost',
       port: 3000,
-      server: { baseDir: ['dist'] }
+      server: { baseDir: ['../var/master/www'] }
     })
   ],
   // more options in the optional tslint object

@@ -4,18 +4,19 @@
  * and add additional information, such as how to handle breadcrumbs
  */
 
- import App from './App/App';
- import Clusters from './Clusters/Clusters';
- import Models from './Models/Models';
- import Projects from './Projects/Projects';
- import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
- import ProjectDetails from './ProjectDetails/ProjectDetails';
- import NewProjectStep1 from './Projects/components/NewProjectStep1';
- import NewProjectStep2 from './Projects/components/NewProjectStep2';
- import NewProjectStep3 from './Projects/components/NewProjectStep3';
- import Deployments from './Projects/components/Deployments';
- import CreateNewModel from './Projects/components/CreateNewModel';
- import Dummy from './Dummy/Dummy';
+import App from './App/App';
+import Clusters from './Clusters/Clusters';
+import Models from './Models/Models';
+import Projects from './Projects/Projects';
+import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
+import ProjectDetails from './ProjectDetails/ProjectDetails';
+import NewProjectStep1 from './Projects/components/NewProjectStep1';
+import ImportNewProject from './Projects/components/ImportNewProject';
+import NewProjectStep2 from './Projects/components/NewProjectStep2';
+import NewProjectStep3 from './Projects/components/NewProjectStep3';
+import Deployments from './Projects/components/Deployments';
+import CreateNewModel from './Projects/components/CreateNewModel';
+import Dummy from './Dummy/Dummy';
 
 interface IIndexRoute {
   component: any
@@ -32,6 +33,27 @@ interface IRoute {
   indexRoute?: IIndexRoute
   childRoutes?: IRoute[]
 }
+
+// <<<<<<< HEAD
+//   <Router history={history}>
+// <Route path="/" component={App} isExcludedFromBreadcrumb={true}>
+// <IndexRoute component={WelcomeSplashScreen}/>
+// <Route path="projects" component={Projects} name="Projects" isExcludedFromBreadcrumb={true}>
+// <IndexRoute component={WelcomeSplashScreen}/>
+// <Route path=":id/models" component={Models}/>
+// <Route path="deployments" component={Deployments} name="Deployments"/>
+// <Route path="new" isExcludedFromBreadcrumb={true}>
+// <IndexRoute component={NewProjectStep1} name="Create New Project"/>
+// <Route path="import" component={ImportNewProject} name="Create New Project"/>
+// <Route path="3" component={NewProjectStep3} isExcludedFromBreadcrumb={true}/>
+// </Route>
+// </Route>
+// <Route path="clusters" component={Clusters}/>
+// <Route path="forkmodel" component={CreateNewModel} name="Create New Model"/>
+// <Route path="models/:id" component={ProjectDetails}/>
+// </Route>
+// </Router>
+// =======
 
 export const routes: IRoute[] = [{
   path: '/',
@@ -57,6 +79,14 @@ export const routes: IRoute[] = [{
         name: 'Welcome'
       },
       childRoutes: [
+        // /projects/models
+        {
+          path: ':id/models',
+          component: Models,
+          name: 'Models',
+          showInBreadcrumb: true,
+          showInNavigation: true
+        },
         // /projects/data
         {
           path: 'data',
@@ -65,17 +95,9 @@ export const routes: IRoute[] = [{
           showInBreadcrumb: true,
           showInNavigation: true
         },
-        // /projects/models
-        {
-          path: 'models',
-          component: Models,
-          name: 'Models',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
         // /models/:id
         {
-          path: 'models/:id',
+          path: ':id/models/:modelId',
           component: ProjectDetails,
           name: 'Models',
           showInBreadcrumb: true,
@@ -118,8 +140,8 @@ export const routes: IRoute[] = [{
           childRoutes: [
             // /projects/new/1
             {
-              path: '1',
-              component: NewProjectStep1,
+              path: 'import',
+              component: ImportNewProject,
               name: 'Step 1',
               showInBreadcrumb: true,
               showInNavigation: false
@@ -157,7 +179,7 @@ export const routes: IRoute[] = [{
       path: 'services',
       name: 'Services',
       icon: 'fa fa-cloud',
-      component: Dummy,
+      component: Deployments,
       showInBreadcrumb: true,
       showInNavigation: true,
       childRoutes: [
