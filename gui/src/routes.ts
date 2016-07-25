@@ -20,19 +20,19 @@ import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
 
 interface IIndexRoute {
-  component: any
-  name: string
+    component: any
+    name: string
 }
 
 interface IRoute {
-  path: string
-  component?: any
-  name: string;
-  showInBreadcrumb?: boolean
-  showInNavigation?: boolean
-  icon?: string
-  indexRoute?: IIndexRoute
-  childRoutes?: IRoute[]
+    path: string
+    component?: any
+    name: string;
+    showInBreadcrumb?: boolean
+    showInNavigation?: boolean
+    icon?: string
+    indexRoute?: IIndexRoute
+    childRoutes?: IRoute[]
 }
 
 export const routes: IRoute[] = [{
@@ -189,22 +189,7 @@ export const routes: IRoute[] = [{
           name: 'Sub Menu 1',
           showInBreadcrumb: true,
           showInNavigation: true
-        },
-        {
-          path: 'submenu2',
-          component: Dummy,
-          name: 'Sub Menu 2',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        {
-          path: 'submenu3',
-          component: Dummy,
-          name: 'Sub Menu 3',
-          showInBreadcrumb: true,
-          showInNavigation: true
         }
       ]
-    }
-  ]
+    }]
 }];
