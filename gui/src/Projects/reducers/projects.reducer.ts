@@ -2,12 +2,16 @@
  * Created by justin on 7/18/16.
  */
 import * as _ from 'lodash';
-import { RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED } from '../actions/projects.actions';
+import {
+  RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED,
+  RECEIVE_PROJECTS
+} from '../actions/projects.actions';
 
 let initialState = {
   clusters: [],
   models: [],
-  project: {}
+  project: {},
+  availableProjects: []
 };
 
 export const projectsReducer = (state = initialState, action: any) => {
@@ -23,6 +27,10 @@ export const projectsReducer = (state = initialState, action: any) => {
     case CREATE_PROJECT_COMPLETED:
       return _.assign({}, state, {
         project: action.project
+      });
+    case RECEIVE_PROJECTS:
+      return _.assign({}, state, {
+        availableProjects: action.projects
       });
     default:
       return state;

@@ -3,7 +3,7 @@
  */
 
 import * as Remote from '../../Proxy/proxy';
-import { Model } from '../../Proxy/proxy';
+import { Project } from '../../Proxy/proxy';
 
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
@@ -11,6 +11,7 @@ export const REQUEST_MODELS = 'REQUEST_MODELS';
 export const RECEIVE_MODELS = 'RECEIVE_MODELS';
 export const CREATE_PROJECT_COMPLETED = 'CREATE_PROJECT_COMPLETED';
 export const IMPORT_MODEL_FROM_CLUSTER_COMPLETED = 'IMPORT_MODEL_FROM_CLUSTER_COMPLETED';
+export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
 
 export const requestClusters = () => {
   return {
@@ -58,6 +59,13 @@ export function importModelFromClusterCompleted(model) {
   return {
     type: IMPORT_MODEL_FROM_CLUSTER_COMPLETED,
     model
+  };
+}
+
+export function receiveProjects(projects) {
+  return {
+    type: RECEIVE_PROJECTS,
+    projects
   };
 }
 
@@ -114,4 +122,12 @@ export function registerCluster(address: string) {
       dispatch(fetchClusters());
     });
   };
+}
+
+export function fetchProjects() {
+  return (dispatch) => {
+    Remote.getProjects(0, 5, (error, res) => {
+      dispatch(receiveProjects(<Project[]>res));
+    });
+  }
 }
