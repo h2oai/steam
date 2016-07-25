@@ -77,7 +77,7 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
               </div>
               <ul className='nav-list'>
               {_.map(this.sitemap, (route: any) => {
-                  return (
+                  return (!route.showInNavigation) ? null : (
                     <li key={route.path} className={classNames('nav-list--item', {active: this.props.router.isActive(route.path)})}>
                       <Link to={route.path}><i className={route.icon}></i><div className="nav-list--label">{route.name}</div></Link>
                     </li>
