@@ -7,6 +7,7 @@ import * as classNames from 'classnames';
 import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
 import GoodnessOfFit from './components/GoodnessOfFit';
+import VariableImportance from './components/VariableImportance';
 import PageHeader from '../Projects/components/PageHeader';
 import { hashHistory } from 'react-router';
 import './styles/projectdetails.scss';
@@ -97,12 +98,10 @@ export default class ProjectDetails extends React.Component<Props, any> {
         <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'variable')}><i
             className={classNames('fa', {'fa-minus-square-o': this.state.isVariableOpen, 'fa-plus-square-o': !this.state.isVariableOpen})}></i
-          >Variable Analysis</span>
+          >Variable Importance</span>
         </header>
         <Collapsible open={this.state.isVariableOpen}>
-          <div>
-            Variable body
-          </div>
+          <VariableImportance></VariableImportance>
         </Collapsible>
       </div>
     );

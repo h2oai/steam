@@ -41,8 +41,10 @@ export default class Breadcrumb extends React.Component<Props, any> {
 
     let path = '';
 
+    let breadClass = (crumbs.length <= 1) ? "breadcrumb" : "filled breadcrumb";
+
     return (
-      <ol className="breadcrumb">
+      <ol className={breadClass}>
         {crumbs.map((route, i) => {
           if (crumbs.length > 1) {
             path = (i > 0) ? path += '/' + route.path : path;

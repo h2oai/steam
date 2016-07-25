@@ -12,6 +12,7 @@ import Pagination from '../components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
+import { getOrdinal } from '../../App/utils/getOrdinal';
 import '../styles/leaderboard.scss';
 
 // sample data
@@ -56,12 +57,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
       naivebayesTrain,
       naivebayesValidation
     };
-  }
-
-  static getOrdinal(rank: number): string {
-    let suffixes = ['th', 'st', 'nd', 'rd'];
-    let remainder = rank % 100;
-    return (suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]);
   }
 
   openDeploy(): void {
@@ -113,7 +108,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
           {this.props.items.map((item, i) => {
             return (
               <Row key={i}>
-                <Cell>{item.rank + Leaderboard.getOrdinal(item.rank)}</Cell>
+                <Cell>{item.rank + getOrdinal(item.rank)}</Cell>
                 <Cell>
                   <div className="metadata">
                     <div className="model-name">
