@@ -1,25 +1,30 @@
 ## steam update workgroup
 
-Change or update a workgroup in the database.
+Update Workgroup
 
 ### Synopsis
 
 
-Change or update a workgroup in the database.
+Update Workgroup
 
 Examples:
 
-	$ steam update workgroup engineer --desc="A better engineer" --name=
+    Update a workgroup
+    $ steam update workgroup \
+        --workgroup-id=? \
+        --name=? \
+        --description=?
 
 ```
-steam update workgroup [workgroupName]
+steam update workgroup [?]
 ```
 
 ### Options
 
 ```
-  -d, --desc="": An updated workgroup description.
-  -n, --name="": An updated workgroup name.
+      --description="": No description available
+      --name="": No description available
+      --workgroup-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -29,5 +34,5 @@ steam update workgroup [workgroupName]
 ```
 
 ### SEE ALSO
-* [steam update](steam_update.md)	 - Updates an entity in the database.
+* [steam update](steam_update.md)	 - Update entities
 

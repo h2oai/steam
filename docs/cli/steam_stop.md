@@ -1,15 +1,16 @@
 ## steam stop
 
-Stop the specified resource.
+Stop entities
 
 ### Synopsis
 
 
-Stop the specified resource.
+Stop entities
 
-Examples:
+Commands:
 
-    $ steam stop cluster
+    $ steam stop cluster ...
+    $ steam stop service ...
 
 ### Options inherited from parent commands
 
@@ -19,6 +20,6 @@ Examples:
 
 ### SEE ALSO
 * [steam](steam.md)	 - steam v build : Command Line Interface to Steam
-* [steam stop cluster](steam_stop_cluster.md)	 - Stop a cluster.
-* [steam stop service](steam_stop_service.md)	 - Stop a scoring service.
+* [steam stop cluster](steam_stop_cluster.md)	 - Stop Cluster
+* [steam stop service](steam_stop_service.md)	 - Stop Service
 

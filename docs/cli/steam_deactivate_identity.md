@@ -1,18 +1,26 @@
 ## steam deactivate identity
 
-Deactivate a user.
+Deactivate Identity
 
 ### Synopsis
 
 
-Deactivate a user.
+Deactivate Identity
 
 Examples:
 
-	$ steam deactivate identity minsky
+    Deactivate an identity
+    $ steam deactivate identity \
+        --identity-id=?
 
 ```
-steam deactivate identity [identityName]
+steam deactivate identity [?]
+```
+
+### Options
+
+```
+      --identity-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam deactivate identity [identityName]
 ```
 
 ### SEE ALSO
-* [steam deactivate](steam_deactivate.md)	 - Deactivate and entity type.
+* [steam deactivate](steam_deactivate.md)	 - Deactivate entities
 

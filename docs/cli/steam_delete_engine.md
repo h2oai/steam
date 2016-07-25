@@ -1,18 +1,26 @@
 ## steam delete engine
 
-Deletes a specified engine from the database.
+Delete Engine
 
 ### Synopsis
 
 
-Deletes a specified engine from the database.
+Delete Engine
 
 Examples:
 
-	$ steam delete engine 2
+    Delete an engine
+    $ steam delete engine \
+        --engine-id=?
 
 ```
-steam delete engine [engineid]
+steam delete engine [?]
+```
+
+### Options
+
+```
+      --engine-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam delete engine [engineid]
 ```
 
 ### SEE ALSO
-* [steam delete](steam_delete.md)	 - Deletes the specified resource from the database.
+* [steam delete](steam_delete.md)	 - Delete entities
 

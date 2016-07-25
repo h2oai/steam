@@ -800,14 +800,22 @@ func (ds *Datastore) exec(f func(*sql.Tx) error) (err error) {
 	return executeTransaction(ds.db, f)
 }
 
+func (ds *Datastore) toPermissionDescription(id int64) (string, error) {
+	if p, ok := ds.permissionMap[id]; ok {
+		return p.Description, nil
+	} else {
+		return "", fmt.Errorf("Invalid permission id: %d", id)
+	}
+}
+
 func (ds *Datastore) toPermissionDescriptions(ids []int64) ([]string, error) {
 	descriptions := make([]string, len(ids))
 	for i, id := range ids {
-		if p, ok := ds.permissionMap[id]; ok {
-			descriptions[i] = p.Description
-		} else {
-			return descriptions, fmt.Errorf("Invalid permission id: %d", id)
+		description, err := ds.toPermissionDescription(id)
+		if err != nil {
+			return nil, err
 		}
+		descriptions[i] = description
 	}
 	return descriptions, nil
 }
@@ -1240,6 +1248,61 @@ func (ds *Datastore) LinkRoleAndPermissions(pz az.Principal, roleId int64, permi
 			return err
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
+	})
+}
+
+func (ds *Datastore) LinkRoleWithPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			INSERT INTO
+				role_permission
+			VALUES
+				($1, $2)
+			`, roleId, permissionId); err != nil {
+			return err
+		}
+
+		permissionDescription, err := ds.toPermissionDescription(permissionId)
+		if err != nil {
+			return err
+		}
+		permissions, err := json.Marshal([]string{permissionDescription})
+		if err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, LinkOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
+	})
+}
+
+func (ds *Datastore) UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Role, roleId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM
+				role_permission
+			WHERE
+				role_id = $1 AND
+				permission_id = $2
+			`, roleId, permissionId); err != nil {
+			return err
+		}
+
+		permissionDescription, err := ds.toPermissionDescription(permissionId)
+		if err != nil {
+			return err
+		}
+		permissions, err := json.Marshal([]string{permissionDescription})
+		if err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Role, roleId, metadata{"permissions": string(permissions)})
 	})
 }
 
@@ -2958,15 +3021,16 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		row := tx.QueryRow(`
 			INSERT INTO
 				model
-				(name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,   $2,                  $3,                    $4,           $5,        $6,           $7,                   $8,           $9,          $10,       $11,     $12,             now())
+				($1,                  $2,                    $3,    $4,           $5,        $6,       $7,           $8,                   $9,            $10,     $11,          $12,     $13,             now())
 			RETURNING id
 			`,
-			model.Name,
 			model.TrainingDatasetId,
 			model.ValidationDatasetId,
+			model.Name,
 			model.ClusterName,
+			model.ModelKey,
 			model.Algorithm,
 			model.DatasetName,
 			model.ResponseColumnName,
@@ -2992,6 +3056,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Model, id, metadata{
 			"name":               model.Name,
 			"clusterName":        model.ClusterName,
+			"modelKey":           model.ModelKey,
 			"algorithm":          model.Algorithm,
 			"datasetName":        model.DatasetName,
 			"responseColumnName": model.ResponseColumnName,
@@ -3007,7 +3072,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -3041,7 +3106,7 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 
 	rows, err := ds.db.Query(`
 		SELECT
-			m.id, m.name, m.training_dataset_id, m.validation_dataset_id, m.cluster_name, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
+			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
 		FROM
 			model m,
 			project_model pm
@@ -3074,7 +3139,7 @@ func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model
 	var Model Model
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -3110,7 +3175,7 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, training_dataset_id, validation_dataset_id, cluster_name, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE

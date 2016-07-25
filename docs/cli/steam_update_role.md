@@ -1,25 +1,30 @@
 ## steam update role
 
-Change or update a role in the database.
+Update Role
 
 ### Synopsis
 
 
-Change or update a role in the database.
+Update Role
 
 Examples:
 
-	$ steam update role engineer --desc="A better engineer" --name=
+    Update a role
+    $ steam update role \
+        --role-id=? \
+        --name=? \
+        --description=?
 
 ```
-steam update role [roleName]
+steam update role [?]
 ```
 
 ### Options
 
 ```
-  -d, --desc="": An updated role description.
-  -n, --name="": An updated role name.
+      --description="": No description available
+      --name="": No description available
+      --role-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -29,5 +34,5 @@ steam update role [roleName]
 ```
 
 ### SEE ALSO
-* [steam update](steam_update.md)	 - Updates an entity in the database.
+* [steam update](steam_update.md)	 - Update entities
 

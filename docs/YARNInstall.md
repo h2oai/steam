@@ -52,9 +52,9 @@ This step create a new user for the Steam database and then create the database.
 		./create-database.sh
 
 
-## Starting Steam and the Steam Scoring Service
+## Starting Steam, the Steam Scoring Service, and the Steam CLI
 
-Perform the following steps to start Steam and teh Steam Scoring Service. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
+Perform the following steps to start Steam and the Steam Scoring Service. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
 
 1. Change directories to your Steam directory, then set up the Jetty server using one of the following methods:
 
@@ -76,7 +76,7 @@ Perform the following steps to start Steam and teh Steam Scoring Service. Note t
 
 3. Change directories to the Steam directory (either **steam-master-linux-amd64** or **steam-master-darwin-amd64**), then start the Steam master node. For example, the following commands will start Steam on 192.168.2.182. Note that the port value must match the port running the Jetty server, which defaults to 8080. 
 
-		./steam serve master --compilation-service-address="192.168.2.182:8080"
+		./steam serve master --superusern-name=superuser --superuser-password=superuser --compilation-service-address="192.168.2.182:8080"
 		
 	**Note**: You can view all available options for starting Steam using `./steam help serve master`
 
@@ -89,6 +89,16 @@ Perform the following steps to start Steam and teh Steam Scoring Service. Note t
 		2016/04/28 13:34:57 Datastore location: /home/seb/steam--linux-amd64/var/master/db/steam.db
 		2016/04/28 13:34:57 Web server listening at 192.16.2.182:9000
 		2016/04/28 13:34:57 Point your web browser to http://192.16.2.182:9000/
+
+4. <a name="step7"></a>Open another terminal window. From within the Steam folder, log in to the machine running Steam. Use the password that you provided when you created superuser.
+
+		./steam login 192.168.2.182:8080 --username=superuser --password=superuser
+
+5. Run the following to verify that the CLI is working correctly.
+
+		./steam help
+		
+At this point, you can begin using Steam or continue adding more roles, workgroups, and users using the CLI. (Refer to <a href="StandaloneInstall.md#adding_roles_workgroups_and_users">Adding Roles, Workgroups, and Users</a>.)
 
 ## Using Steam
 

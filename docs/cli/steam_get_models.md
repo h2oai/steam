@@ -1,18 +1,36 @@
 ## steam get models
 
-List all models.
+Get Models
 
 ### Synopsis
 
 
-List all models.
+Get Models
 
 Examples:
 
-	$ steam get models
+    List models
+    $ steam get models \
+        --project-id=? \
+        --offset=? \
+        --limit=?
+
+    List models from a cluster
+    $ steam get models --from-cluster \
+        --cluster-id=?
 
 ```
-steam get models
+steam get models [?]
+```
+
+### Options
+
+```
+      --cluster-id=0: No description available
+      --from-cluster[=false]: List models from a cluster
+      --limit=0: No description available
+      --offset=0: No description available
+      --project-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +40,5 @@ steam get models
 ```
 
 ### SEE ALSO
-* [steam get](steam_get.md)	 - List or view resources of the specified type.
+* [steam get](steam_get.md)	 - Get entities
 

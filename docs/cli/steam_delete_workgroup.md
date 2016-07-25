@@ -1,18 +1,26 @@
 ## steam delete workgroup
 
-Deletes a workgroup from the database.
+Delete Workgroup
 
 ### Synopsis
 
 
-Deletes a workgroup from the database.
+Delete Workgroup
 
 Examples:
 
-	$ steam delete workgroup production
+    Delete a workgroup
+    $ steam delete workgroup \
+        --workgroup-id=?
 
 ```
-steam delete workgroup [workgroupName]
+steam delete workgroup [?]
+```
+
+### Options
+
+```
+      --workgroup-id=0: No description available
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +30,5 @@ steam delete workgroup [workgroupName]
 ```
 
 ### SEE ALSO
-* [steam delete](steam_delete.md)	 - Deletes the specified resource from the database.
+* [steam delete](steam_delete.md)	 - Delete entities
 

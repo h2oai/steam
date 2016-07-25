@@ -1,15 +1,16 @@
 ## steam start
 
-Start a new resource.
+Start entities
 
 ### Synopsis
 
 
-Start a new resource.
+Start entities
 
-Examples:
+Commands:
 
-    $ steam start cluster
+    $ steam start cluster ...
+    $ steam start service ...
 
 ### Options inherited from parent commands
 
@@ -19,5 +20,6 @@ Examples:
 
 ### SEE ALSO
 * [steam](steam.md)	 - steam v build : Command Line Interface to Steam
-* [steam start cluster](steam_start_cluster.md)	 - Start a new cluster using the specified H2O package.
+* [steam start cluster](steam_start_cluster.md)	 - Start Cluster
+* [steam start service](steam_start_service.md)	 - Start Service
 

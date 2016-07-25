@@ -1,15 +1,19 @@
 ## steam update
 
-Updates an entity in the database.
+Update entities
 
 ### Synopsis
 
 
-Updates an entity in the database.
+Update entities
 
-Examples:
+Commands:
 
-	$ steam update workgroup
+    $ steam update dataset ...
+    $ steam update datasource ...
+    $ steam update identity ...
+    $ steam update role ...
+    $ steam update workgroup ...
 
 ### Options inherited from parent commands
 
@@ -19,6 +23,9 @@ Examples:
 
 ### SEE ALSO
 * [steam](steam.md)	 - steam v build : Command Line Interface to Steam
-* [steam update role](steam_update_role.md)	 - Change or update a role in the database.
-* [steam update workgroup](steam_update_workgroup.md)	 - Change or update a workgroup in the database.
+* [steam update dataset](steam_update_dataset.md)	 - Update Dataset
+* [steam update datasource](steam_update_datasource.md)	 - Update Datasource
+* [steam update identity](steam_update_identity.md)	 - Update Identity
+* [steam update role](steam_update_role.md)	 - Update Role
+* [steam update workgroup](steam_update_workgroup.md)	 - Update Workgroup
 
