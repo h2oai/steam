@@ -669,6 +669,7 @@ func ScanService(r *sql.Row) (Service, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.ModelId,
+		&s.Name,
 		&s.Address,
 		&s.Port,
 		&s.ProcessId,
@@ -688,6 +689,7 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.ModelId,
+			&s.Name,
 			&s.Address,
 			&s.Port,
 			&s.ProcessId,

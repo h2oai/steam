@@ -161,6 +161,7 @@ type Model struct {
 type Service struct {
 	Id        int64
 	ModelId   int64
+	Name      string
 	Address   string
 	Port      int64
 	ProcessId int64

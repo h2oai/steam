@@ -965,7 +965,7 @@ module Main {
     function newDeployModelDialog(ctx: Context, model: Proxy.Model, go: Eff<DeployModelDialogResult>): DeployModelDialog {
 
         const error = sig<string>('')
-
+        const modelName = sig<string>('')
         const port = sig<string>('8000')
         const portNum = lift(port, (port): int =>
             parseInt(port, 10)
@@ -982,7 +982,7 @@ module Main {
 
         const deployModel: Act = () => {
             ctx.setBusy('Deploying model...')
-            ctx.remote.startService(model.id, portNum(), (err) => {
+            ctx.remote.startService(model.id, modelName(), portNum(), (err) => {
                 if (err) {
                     error(err.message)
                 } else {

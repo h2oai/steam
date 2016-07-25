@@ -693,23 +693,25 @@ class RPCClient:
 		response = self.connection.call("DeleteModel", request)
 		return 
 	
-	def start_service(self, model_id, port):
+	def start_service(self, model_id, name, port):
 		"""
 		Start a service
 
 		Parameters:
 		model_id: No description available (int64)
+		name: No description available (string)
 		port: No description available (int)
 
 		Returns:
-		service: No description available (ScoringService)
+		service_id: No description available (int64)
 		"""
 		request = {
 			'model_id': model_id
+			'name': name
 			'port': port
 		}
 		response = self.connection.call("StartService", request)
-		return response['service']
+		return response['service_id']
 	
 	def stop_service(self, service_id):
 		"""

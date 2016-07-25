@@ -137,6 +137,7 @@ module Proxy {
   export interface ScoringService {
     id: number // No description available
     model_id: number // No description available
+    name: string // No description available
     address: string // No description available
     port: number // No description available
     process_id: number // No description available
@@ -234,7 +235,7 @@ module Proxy {
     // Delete a model
     deleteModel: (modelId: number, go: (error: Error) => void) => void
     // Start a service
-    startService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
+    startService: (modelId: number, name: string, port: number, go: (error: Error, serviceId: number) => void) => void
     // Stop a service
     stopService: (serviceId: number, go: (error: Error) => void) => void
     // Get service details
@@ -635,11 +636,12 @@ module Proxy {
   
   interface StartServiceIn {
     model_id: number
+    name: string
     port: number
   }
 
   interface StartServiceOut {
-    service: ScoringService
+    service_id: number
   }
   
   interface StopServiceIn {
@@ -1441,14 +1443,14 @@ module Proxy {
 		})
   }
   
-  export function startService(modelId: number, port: number, go: (error: Error, service: ScoringService) => void): void {
-    const req: StartServiceIn = { model_id: modelId, port: port }
+  export function startService(modelId: number, name: string, port: number, go: (error: Error, serviceId: number) => void): void {
+    const req: StartServiceIn = { model_id: modelId, name: name, port: port }
     Proxy.Call("StartService", req, function(error, data) {
       if (error) {
         return go(error, null)
       } else {
         const d: StartServiceOut = <StartServiceOut>data
-        return go(null, d.service)
+        return go(null, d.service_id)
       }
 		})
   }

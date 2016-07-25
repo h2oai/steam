@@ -3239,12 +3239,13 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 		row := tx.QueryRow(`
 			INSERT INTO
 				service
-				(model_id, address, port, process_id, state, created)
+				(model_id, name, address, port, process_id, state, created)
 			VALUES
-				($1,       $2,      $3,   $4,         $5,    now())
+				($1,       $2,   $3,      $4,   $5,         $6, now())
 			RETURNING id
 			`,
 			service.ModelId,
+			service.Name,
 			service.Address,
 			service.Port,
 			service.ProcessId,
@@ -3265,6 +3266,7 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Service, id, metadata{
 			"modelId":   strconv.FormatInt(service.ModelId, 10),
+			"name":      service.Name,
 			"address":   service.Address,
 			"port":      strconv.FormatInt(service.Port, 10),
 			"processId": strconv.FormatInt(service.ProcessId, 10),
@@ -3277,7 +3279,7 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Service, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, model_id, name, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3310,7 +3312,7 @@ func (ds *Datastore) ReadServicesForModelId(pz az.Principal, modelId int64) ([]S
 
 	rows, err := ds.db.Query(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, model_id, name, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3332,7 +3334,7 @@ func (ds *Datastore) ReadService(pz az.Principal, serviceId int64) (Service, err
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, model_id, name, address, port, process_id, state, created
 		FROM
 			service
 		WHERE

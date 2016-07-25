@@ -86,6 +86,7 @@ type Model struct {
 type ScoringService struct {
 	Id        int64
 	ModelId   int64
+	Name      string
 	Address   string
 	Port      int
 	ProcessId int
@@ -439,10 +440,11 @@ type DeleteModel struct {
 	ModelId int64
 }
 type StartService struct {
-	ModelId int64
-	Port    int
-	_       int
-	Service ScoringService
+	ModelId   int64
+	Name      string
+	Port      int
+	_         int
+	ServiceId int64
 }
 type StopService struct {
 	ServiceId int64
