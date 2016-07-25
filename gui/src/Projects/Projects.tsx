@@ -3,7 +3,6 @@
  */
 
 import * as React from 'react';
-import ProjectScreenStrategy from './components/ProjectScreenStrategy';
 
 interface Props {
   leaderboard

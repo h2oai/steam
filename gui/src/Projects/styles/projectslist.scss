@@ -1,6 +1,15 @@
 @import '../../variables.scss';
 
 .project-details {
+  .page-header {
+    .new-project-button-container {
+      display: flex;
+      a {
+        font-size: 14px;
+        align-self: center;
+      }
+    }
+  }
   .panel-container {
     display: flex;
     flex-wrap: wrap;

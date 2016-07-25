@@ -73,7 +73,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    console.log(this.props);
     return (
       <div className="leaderboard">
         <Deploy open={this.state.isDeployOpen} closeHandler={this.closeHandler}></Deploy>

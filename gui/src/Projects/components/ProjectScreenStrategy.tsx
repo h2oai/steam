@@ -3,7 +3,7 @@
  */
 import * as React from 'react';
 import * as _ from 'lodash';
-import ProjectDetails from './ProjectDetails';
+import ProjectsList from './ProjectsList';
 import WelcomeSplashScreen from './WelcomeSplashScreen';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -31,7 +31,7 @@ export class ProjectScreenStrategy extends React.Component<Props & DispatchProps
       return <WelcomeSplashScreen/>;
     }
     return (
-      <ProjectDetails projects={this.props.projects}></ProjectDetails>
+      <ProjectsList projects={this.props.projects}></ProjectsList>
     );
   }
 }

@@ -13,7 +13,7 @@ import VariableImportance from './components/VariableImportance';
 import PageHeader from '../Projects/components/PageHeader';
 import ExportModal from './components/ExportModal';
 import { hashHistory } from 'react-router';
-import './styles/projectdetails.scss';
+import './styles/modeldetails.scss';
 import { fetchModelOverview, downloadModel, deployModel } from './actions/model.overview.action';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -31,7 +31,7 @@ interface DispatchProps {
   deployModel: Function
 }
 
-export class ProjectDetails extends React.Component<Props & DispatchProps, any> {
+export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
@@ -168,5 +168,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ProjectDetails);
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ModelDetails);
 
