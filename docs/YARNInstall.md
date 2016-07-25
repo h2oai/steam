@@ -54,7 +54,7 @@ This step create a new user for the Steam database and then create the database.
 
 ## Starting Steam and the Steam Scoring Service
 
-Perform the following steps to start Steam and teh Steam Scoring Service. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
+Perform the following steps to start Steam and the Steam Scoring Service. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
 
 1. Change directories to your Steam directory, then set up the Jetty server using one of the following methods:
 
