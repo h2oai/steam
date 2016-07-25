@@ -86,7 +86,7 @@ At this point, you can open a browser and navigate to localhost:9000. Note that 
 The next section describes how to add additional users to the Steam database. 
 
 
-### <a name="adding roles, workgroups, and users"></a>Adding Roles, Workgroups, and Users
+### <a name="adding_roles_workgroups_and_users"></a>Adding Roles, Workgroups, and Users
 
 The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference Appendix](CLIAppendix.md) for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
 

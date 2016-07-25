@@ -13,7 +13,129 @@ This document is meant for H2O developers and describes how to install, start, a
 - Node.js
 - JDK 1.7 or greater
 - H2O AutoML for Apache HDP2.2 or CDH 5.5.3 (internal only)
-- postgresql for using the CLI
+- PostgreSQL 9.1 or greater
+	- available from <a href="https://www.postgresql.org/" target="_blank">PostgreSQL.org</a>
+
+## User Management Overview
+
+Before using Steam, it is important to understand User Management within your YARN environment. In Steam, User Management is supported in a PostgreSQL database. The User Management functions in Steam determine the level of access that users have for Steam features.
+
+This section describes the user management features available in H2O Steam. This section includes the following subsections:
+
+- [Terms](#terms)
+- [Privileges/Access Control](#privileges)
+- [Authorization](#authorization)
+- [User Management Setup](#user management setup)
+- [User Management Workflow](#user management workflow)
+
+In addition to the above sections, a [CLI Command Reference Appendix](#CLI Command Reference) is available at the end of this document. 
+
+## <a name="terms"></a>Terms
+
+The following lists common terms used when describing Steam User Management.  
+
+- **Entities** represent *objects* in Steam. Examples of entities include Roles, Workgroups, Identities, Clusters, Projects, Models, and Services (engines). 
+
+- **Identities** represent *users* in Steam. Users sign in using an Identity, and then perform operations in Steam.
+
+- **Permissions** determine what operations you can perform. Examples of permissions include *Manage Clusters*, *View Clusters*, *Manage Models*, *View Models*, and so on.
+
+- **Privileges** determine the entities that you can perform operations on (i.e., data / access control).
+
+
+
+## <a name="privileges"></a>Privileges/Access Control
+
+Privileges are uniquely identified by the entity in question and the kind of privilege you have on the entity.
+
+The following privileges are available on an entity:
+
+- **Own** privileges allow you to share, view, edit, and delete entities.
+
+- **Edit** privileges allow you to view and edit entities, but not share or delete them.
+
+- **View** privileges allow you to view entities, but not share, edit, or delete them.
+
+When you create an entity, you immediately *Own* it. You can then share this entity with others and award them either *Edit* or *View* privileges. Entities are allowed to have more than one owner, so you can also add additional owners to entities. 
+
+The following table lists the kind of privileges you need in order to perform specific operations on entities:
+
+
+        Entity               Own  Edit View
+        -----------------------------------
+        Role
+          Read               x    x    x
+          Update             x    x
+          Assign Permission  x    x
+          Delete             x
+          Share              x
+          
+        Workgroup
+          Read               x    x    x
+          Update             x    x
+          Delete             x
+          Share              x
+        
+        Identity
+          Read               x    x    x
+          Assign Role        x    x
+          Assign Workgroup   x    x
+          Update             x    x
+          Delete             x
+          Share              x
+        
+        Cluster
+          Read               x    x    x
+          Start/Stop         x
+        
+        Project
+          Read               x    x    x
+          Assign Model       x    x
+          Update             x    x
+          Delete             x
+          Share              x
+        
+        Engine, Model
+          Read               x    x    x
+          Update             x    x
+          Delete             x
+          Share              x
+
+## <a name="authorization"></a>Authorization
+
+Permissions and privileges are set up using Roles and Workgroups, respectively.
+
+- Identities cannot be linked directly to permissions. For that, you'll need Roles.
+
+- Identities cannot be linked directly to privileges on entities. For that, you'll need Workgroups, i.e. when you share entities with others, you would be sharing those entities with workgroups, not individuals.
+
+### Roles
+A **Role** is a named set of permissions. Roles allow you define a cohesive set of permissions into operational roles and then have multiple identities *play* those roles, regardless of access control.
+For example:
+
+- a *Data Scientist* role can be composed of the permissions *View Clusters*, *Manage Models*, *View Models*.
+- an *Operations* role can be composed of the permissions *View Models*, *View Services*, *Manage Services*,
+- a *Manager* role can be composed of the permissions *Manage Roles*, *View Roles*, *Manage Workgroups*, *View Workgroups*
+
+### Workgroups
+A **Workgroup** is a named set of identities. Workgroups allow you to form collections of identities for access control purposes. For example, a *Demand Forecasting* workgroup can be composed of all the users working on demand forecasting, regardless of their role. This workgroup can be then used to control access to all the clusters, projects, models and services that are used for demand forecasting. 
+
+
+## <a name="user management workflow"></a>User Management Workflow
+
+The steps below provide a common workflow to follow when creating users. This workflow is followed in the example that follows.
+
+1. Define roles based on operational needs.
+2. Define workgroups based on data / access control needs.
+3. Then add a new user:
+
+ -	Create the user's identity.
+ - Associate the user with one or more roles.
+ - Optionally, associate the user with one or more workgroups. 
+
+## Next Steps
+
+Now that you understand User Management, you can begin building and then setting up the H2O Scoring Service and Steam.
 
 ## Building the H2O Scoring Service
 
@@ -100,6 +222,22 @@ Perform the following steps to install Steam.
 
 You will see a `BUILD SUCCESSFUL` message when the installation is complete. At this point, you are ready to start using Steam. 
 
+## Start the PostgreSQL Database
+
+The command starts PostgreSQL. This should be started from the folder where PostgreSQL was installed.
+
+		postgres -D /usr/local/var/postgres
+
+## Create a User
+
+This step create a new user for the Steam database and then create the database. The commands below only need to be performed once. The example below creates a steam **superuser** with a password ``superuser`` before creating the Steam database. Be sure to provide a secure password, and be sure to remember the password that you enter. This will be required each time you log in to Steam. 
+
+		createuser -P steam 
+		Enter password for new role: superuser
+		Enter it again: superuser
+		# Change directories to the Steam /var/master/scripts folder.
+		cd steam-master-darwin-amd64/var/master/scripts
+		./create-database.sh
 
 ## Starting Steam
 When Steam is installed, perform the following steps to start and use Steam. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
@@ -248,253 +386,58 @@ When you are finished, use the following process to safely shut down Steam:
 2. Stop all running clouds.
 
 
-## User Management
+# <a name="CLI Command Reference"></a>CLI Command Reference Appendix
 
-This section describes the user management features available in H2O Steam when Steam is connected to a database. The Steam database is useful for creating a new bash script and for automatic model deployment. The Steam database supports setup via Python functions and CLI commands. 
-
-This section includes the following subsections:
-
-- [Terms](#terms)
-- [Privileges/Access Control](#privileges)
-- [Authorization](#authorization)
-- [User Management Setup](#user management setup)
-- [User Management Workflow](#user management workflow)
-- [CLI Command Reference](#CLI Command Reference)
-
-<a name="terms"></a>
-### Terms
-
-The following lists common terms used when describing Steam User Management.  
-
-- **Entities** represent *objects* in Steam. Examples of entities include Roles, Workgroups, Identities, Clusters, Projects, Models, and Services (engines). 
-
-- **Identities** represent *users* in Steam. Users sign in using an Identity, and then perform operations in Steam.
-
-- **Permissions** determine what operations you can perform. Examples of permissions include *Manage Clusters*, *View Clusters*, *Manage Models*, *View Models*, and so on.
-
-- **Privileges** determine the entities that you can perform operations on (i.e., data / access control).
-
-
-<a name="privileges"></a>
-### Privileges/Access Control
-
-Privileges are uniquely identified by the entity in question and the kind of privilege you have on the entity.
-
-The following privileges are available on an entity:
-
-- **Own** privileges allow you to share, view, edit, and delete entities.
-
-- **Edit** privileges allow you to view and edit entities, but not share or delete them.
-
-- **View** privileges allow you to view entities, but not share, edit, or delete them.
-
-When you create an entity, you immediately *Own* it. You can then share this entity with others and award them either *Edit* or *View* privileges. Entities are allowed to have more than one owner, so you can also add additional owners to entities. 
-
-The following table lists the kind of privileges you need in order to perform specific operations on entities:
-
-
-        Entity               Own  Edit View
-        -----------------------------------
-        Role
-          Read               x    x    x
-          Update             x    x
-          Assign Permission  x    x
-          Delete             x
-          Share              x
-          
-        Workgroup
-          Read               x    x    x
-          Update             x    x
-          Delete             x
-          Share              x
-        
-        Identity
-          Read               x    x    x
-          Assign Role        x    x
-          Assign Workgroup   x    x
-          Update             x    x
-          Delete             x
-          Share              x
-        
-        Cluster
-          Read               x    x    x
-          Start/Stop         x
-        
-        Project
-          Read               x    x    x
-          Assign Model       x    x
-          Update             x    x
-          Delete             x
-          Share              x
-        
-        Engine, Model
-          Read               x    x    x
-          Update             x    x
-          Delete             x
-          Share              x
-
-        
-
-<a name="authorization"></a>
-### Authorization
-
-Permissions and privileges are set up using Roles and Workgroups, respectively.
-
-- Identities cannot be linked directly to permissions. For that, you'll need Roles.
-
-- Identities cannot be linked directly to privileges on entities. For that, you'll need Workgroups, i.e. when you share entities with others, you would be sharing those entities with workgroups, not individuals.
-
-#### Roles
-A **Role** is a named set of permissions. Roles allow you define a cohesive set of permissions into operational roles and then have multiple identities *play* those roles, regardless of access control.
-For example:
-
-- a *Data Scientist* role can be composed of the permissions *View Clusters*, *Manage Models*, *View Models*.
-- an *Operations* role can be composed of the permissions *View Models*, *View Services*, *Manage Services*,
-- a *Manager* role can be composed of the permissions *Manage Roles*, *View Roles*, *Manage Workgroups*, *View Workgroups*
-
-#### Workgroups
-A **Workgroup** is a named set of identities. Workgroups allow you to form collections of identities for access control purposes. For example, a *Demand Forecasting* workgroup can be composed of all the users working on demand forecasting, regardless of their role. This workgroup can be then used to control access to all the clusters, projects, models and services that are used for demand forecasting. 
-
-
-<a name="user management setup"></a>
-### User Management Setup
-
-This section describes how to set up and start the Steam  CLI for user management. Five terminal windows will be open the first time you run this setup; four terminal windows will be open for subsequent logins.
-
-1. Open a terminal window and start postgresql. This should be started from the folder where posgresql was installed.
-
-		postgres -D /usr/local/var/postgres
-
-2. Open a second terminal window to create a new user for the Steam database and then create the database. The commands below only need to be performed once. The example below creates a steam **superuser** with a password ``st3amUser`` before creating the Steam database. Be sure to provide a secure password, and be sure to remember the password that you enter. This will be required each time you log in to Steam. 
-
-		createuser -P steam 
-		Enter password for new role: st3amUser
-		Enter it again: st3amUser
-		# Change directories to the Steam /var/master/scripts folder.
-		cd steam-master-darwin-amd64/var/master/scripts
-		./create-database.sh
-
-3. Open a third terminal window. Navigate to the Steam folder and run the following command from within the Steam folder to start the Steam compilation service. 
-
-		cd ../../../
-		java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
-
-4. Open a fourth terminal window. From within the Steam folder, start Steam using the password that you provided in Step 2. This starts Steam on localhost:9000.
-
-		./steam serve master --superuser-name=superuser --superuser-password=superuser
-		
-5. <a name="step5"></a>Open a fifth terminal window. From within the Steam folder, log in to the maching running Steam (localhost:9000). Use the password that you provided in Step 2.
-
-		./steam login localhost:9000 --username=superuser --password=superuser
-
-6. Run the following to verify that the CLI is working correctly.
-
-		./steam help
-		
-	You should see the following output.
-	
-		steam vmaster build 2016-07-01T16:26:15+0000: Command Line Interface to Steam
-		
-		Usage:
-		  steam [command]
-		
-		Available Commands:
-		  login       Sign in to a Steam server.
-		  reset       Reset Steam client configuration.
-		  serve       Launch a new service.
-		  start       Start a new resource.
-		  stop        Stop the specified resource.
-		  register    Register an external resource.
-		  unregister  Unregister an external resource.
-		  deploy      Deploy a resource of the specified type.
-		  get         List or view resources of the specified type.
-		  delete      Deletes the specified resource from the database.
-		  import      Import a resource of the specified type into steam.
-		  create      Creates an instance of the specified resource.
-		  deactivate  Deactivate and entity type.
-		  update      Updates an entity in the database.
-		  link        Add authentication permissions.
-		  unlink      Remove authentication permissions.
-
-		Flags:
-		  -v, --verbose[=false]: verbose output
-
-		Use "steam [command] --help" for more information about a command. 
-
-
-<a name="user management workflow"></a>
-### User Management Workflow
-
-The steps below provide a common workflow to follow when creating users. This workflow is followed in the example that follows.
-
-1. Define roles based on operational needs.
-2. Define workgroups based on data / access control needs.
-3. Then add a new user:
-
- -	Create the user's identity.
- - Associate the user with one or more roles.
- - Optionally, associate the user with one or more workgroups. 
-
-#### Example
-
-The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference](#CLI Command Reference) section for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 5](#step5) above).
-
-		# Create engineer role and link that role to permissions
-		./steam create role engineer --desc="a default engineer role"
-		./steam link role engineer ViewClusters ViewModels ViewWorkgroups
-		
-		# Create data scientist role and link that role to permissions
-		./steam create role datascience --desc="a default data scientist role"
-		./steam link role datascience ViewClusters CreateModels ViewWorkgroups
-		
-		# Create preparation and production workgroups
-		./steam create workgroup preparation --desc="data prep group"
-		./steam create workgroup production --desc="production group"
-		
-		# Create two users - Bob and Jim
-		./steam create identity bob bobSpassword
-		./steam create identity jim j1mSpassword
-		
-		# Link Bob to engineer role; link Jim to datascience role
-		./steam link identity bob role engineer
-		./steam link identity jim role datascience
-		
-		# Link Bob to preparation workgroup; link Jim to production workgroup
-		./steam link identity bob workgroup preparation
-		./steam link identity jim workgroup production
-
-
-### Stopping the Steam Database
-
-Use Ctrl+C in each of the Steam, Compilation Service, and postgres terminal windows to stop the services end your session. 
-
-<a name="CLI Command Reference"></a>
-# CLI Command Reference
-
-- [`create identity`](#create identity)
-- [`deactivate identity`](#deactivate identity)
-- [`delete cluster`](#delete cluster)
-- [`delete engine`](#delete engine)
-- [`delete model`](#delete model)
-- [`delete role`](#delete role)
-- [`delete service`](#delete service)
-- [`delete workgroup`](#delete workgroup)
-- [`deploy engine`](#deploy engine)
-- [`get clusters`](#get clusters)
-- [`get engines`](#get engines)
-- [`register cluster`](#register cluster)
-- [`start cluster`](#start cluster)
-- [`stop cluster`](#stop cluster)
-- [`unregister cluster`](#unregister cluster)
-
+- [`create identity`](#createidentity)
+- [`create role`](#createrole)
+- [`create workgroup`](#createworkgroup)
+- [`deactivate identity`](#deactivateidentity)
+- [`delete cluster`](#deletecluster)
+- [`delete engine`](#deleteengine)
+- [`delete model`](#deletemodel)
+- [`delete role`](#deleterole)
+- [`delete service`](#deleteservice)
+- [`delete workgroup`](#deleteworkgroup)
+- [`deploy engine`](#deployengine)
+- [`get cluster`](#getcluster)
+- [`get clusters`](#getclusters)
+- [`get engine`](#getengine)
+- [`get engines`](#getengines)
+- [`get entities`](#getentities)
+- [`get history`](#gethistory)
+- [`get identities`](#getidentities)
+- [`get identity`](#getidentity)
+- [`get model`](#getmodel)
+- [`get models`](#getmodels)
+- [`get permissions`](#getpermissions)
+- [`get role`](#getrole)
+- [`get roles`](#getroles)
+- [`get service`](#getservice)
+- [`get services`](#getservices)
+- [`get workgroup`](#getworkgroup)
+- [`get workgroups`](#getworkgroups)
+- [`import model`](#importmodel)
+- [`link identity`](#linkidentity)
+- [`link role`](#linkrole)
+- [`login`](#login)
+- [`register cluster`](#registercluster)
+- [`reset`](#reset)
+- [`start cluster`](#startcluster)
+- [`stop cluster`](#stopcluster)
+- [`stop service`](#stopservice)
+- [`unlink identity`](#unlinkidentity)
+- [`unregister cluster`](#unregistercluster)
+- [`update role`](#updaterole)
+- [`update workgroup`](#updateworkgroup)
 
 ------
 
-#### <a name="create identity"></a>`create identity`
+<a name="createidentity"></a>
+### `create identity`
 
 **Description**
 
-Creates an instance of the specified resource.
+Creates a new user.
 
 **Usage**
 
@@ -503,18 +446,67 @@ Creates an instance of the specified resource.
 
 **Parameters**
 
-- `[username]`: Enter a string for the new user name
+- `[username]`: Enter a unique string for the new user name
 - `[password]`: Enter a string for the new user's password
 
 **Example**
 
 The following example creates a new user with a username of "minky" and a password of "m1n5kypassword". 
  
-	./steam create minsky m1n5kypassword
+	./steam create identity minsky m1n5kypassword
+	Created user minsky ID: 2
 	
 ------
 
-#### <a name="deactivate identity"></a>`deactivate identity`
+### <a name="createrole"></a>`create role`
+
+**Description**
+
+Creates a new role.
+
+**Usage**
+
+	./steam create role [rolename] --desc="[description]"
+
+
+**Parameters**
+
+- `[rolename]`: Enter a unique string for the new role
+- `--desc="[description]"`: Optionally enter a string that describes the new role
+
+**Example**
+
+The following example creates an engineer role. 
+ 
+	./steam create role engineer --desc="a default engineer role"
+	Created role engineer ID: 2
+		
+------
+
+### <a name="createworkgroup"></a>`create workgroup`
+
+**Description**
+
+Creates a new workgroup.
+
+**Usage**
+
+	./steam create workgroup [workgroupname] --desc="[description]"
+
+**Parameters**
+
+- `[workgroupname]`: Enter a unique string for the new workgroup
+- `--desc="[description]"`: Optionally enter a string that describes the new workgroup
+
+**Example**
+
+The following example creates a data preparation workgroup. 
+ 
+	./steam create workgroup preparation --desc="data prep group"	Created workgroup preparation ID: 1
+		
+------
+
+### <a name="deactivateidentity"></a>`deactivate identity`
 
 **Description**
 
@@ -536,23 +528,34 @@ The following example deactivates user "minsky".
 
 -----
 
-#### <a name="delete cluster"></a>`delete cluster`
+### <a name="deletecluster"></a>`delete cluster`
 
 **Description**
 
-Deletes the specified cluster from the database.
+Deletes the specified YARN cluster from the database. Note that this command can only be used with YARN clusters (i.e., those started using [`start cluster`](#start cluster).) This command will not work with local clusters. In addition, this commmand will only work on cluster that have been stopped using [`stop cluster`](#stop cluster).
 
 **Usage**
 
+	./steam delete cluster [id]
 
 **Parameters**
 
+- `[id]`: Specify the ID of the cluster that you want to delete.
 
 **Example**
 
------
+The following example deletes cluster 2.
 
-#### <a name="delete engine"></a>`delete engine`
+	./steam get engines
+	NAME			ID	AGE
+	automl-hdp2.2.jar	1	2016-07-14 11:48:42 -0700 PDT
+	h2o-genmodel.jar	2	2016-07-14 11:49:47 -0700 PDT
+	./steam delete engine 1
+	Engine deleted: 1
+
+------
+
+### <a name="deleteengine"></a>`delete engine`
 
 **Description**
 
@@ -560,78 +563,116 @@ Deletes the specified engine from the database.
 
 **Usage**
 
+	./steam delete engine [id]
 
 **Parameters**
 
+- `[id]`: Specify the ID of the engine that you want to delete.
 
 **Example**
 
------
-#### <a name="delete model"></a>`delete model`
+The following example retrieves a list of engines currently added to the database. It then specifies to delete that automodel-hdp2.2.jar engine.
+
+	./steam get engines
+	NAME			ID	AGE
+	automl-hdp2.2.jar	1	2016-07-14 11:48:42 -0700 PDT
+	h2o-genmodel.jar	2	2016-07-14 11:49:47 -0700 PDT
+	./steam delete engine 1
+	Engine deleted: 1
+
+------
+
+### <a name="deletemodel"></a>`delete model`
 
 **Description**
 
-Deletes the specified model from the database.
+Deletes a model from the database based on the model's ID.
 
 **Usage**
 
+	./steam delete model [modelId]
 
 **Parameters**
 
+- `[modelId]`: Specify the ID of the model that you want to delete.
 
 **Example**
 
+The following example deletes model 3 from the database. Note that you can use [`get models`]'(#get models) to retrieve a list of models.
+
+	./steam delete model 3
+
 -----
 
-#### <a name="delete role"></a>`delete role`
+### <a name="deleterole"></a>`delete role`
 
 **Description**
 
-Deletes the specified role from the database.
+Deletes a role from the database based on its ID.
 
 **Usage**
 
+	./steam delete role [roleId]
 
 **Parameters**
 
+- `[roleId]`: Specify the ID of the role that you want to delete.
 
 **Example**
 
+The following example deletes role 3 from the database. Note that you can use [`get roles`]'(#get roles) to retrieve a list of roles. In the case below, this role corresponds to the default data science role. 
+
+	./steam delete role 3
+
 -----
 
-#### <a name="delete service"></a>`delete service`
+### <a name="deleteservice"></a>`delete service`
 
 **Description**
 
-Deletes the specified service from the database.
+A service represents a successfully deployed model on the Steam Scoring Service. This command deletes a service from the database based on its ID. Note that you must first stop a service before it can be deleted. (See [`stop service`](#stop service).)
 
 **Usage**
 
+	./steam delete service [serviceId]
 
 **Parameters**
+
+- `[serviceId]`: Specify the ID of the service that you want to delete. Note that you can use [`get services`](#get services) to retrieve a list of services. 
 
 
 **Example**
 
+The following example stops and then deletes service 2. This service will no longer be available on the database.
+
+	./steam stop service 2
+	./steam delete service 2
+
 -----
 
-#### <a name="delete workgroup"></a>`delete workgroup`
+### <a name="deleteworkgroup"></a>`delete workgroup`
 
 **Description**
 
-Deletes the specified workgroup from the database.
+Deletes a workgroup from the database based on its ID.
 
 **Usage**
 
+	./steam delete workgroup [workgroupId]
 
 **Parameters**
 
+- `[workgroupId]`: Specify the ID of the role that you want to delete.
 
 **Example**
 
+The following example deletes workgroup 3 from the database. Note that you can use [`get workgroups`]'(#get workgroups) to retrieve a list of workgroups.  
+
+	./steam delete workgroup 3
+
 -----
 
-#### <a name="deploy engine"></a>`deploy engine` 
+### <a name="deployengine"></a>`deploy engine` 
 
 **Description**
 
@@ -653,7 +694,37 @@ The following specifies to deploy the H2O AutoML engine.
 
 -----
 
-#### <a name="get clusters"></a>`get clusters`
+### <a name="getcluster"></a>`get cluster`
+
+**Description** 
+
+Retrieves detailed information for a specific cluster based on its ID.
+
+**Usage**
+
+	./steam get cluster [clusterId]
+
+**Parameters**
+
+- `[clusterId]`: Specify the ID of the cluster that you want to retrieve
+
+**Example**
+
+The following example retrieves information for cluster ID 1.
+
+	./steam get cluster 1
+					user
+	TYPE:			external
+	STATE:			healthy
+	H2O VERSION:	3.8.2.8
+	MEMORY:			3.56 GB
+	TOTAL CPUS:		8
+	ID:				1
+	AGE:			2016-07-15 09:23:16 -0700 PDT
+
+-----
+
+### <a name="getclusters"></a>`get clusters`
 
 **Description** 
 
@@ -677,7 +748,32 @@ The following example retrieves a list of clusters that are running H2O and are 
 
 -----
 
-#### <a name="get engines"></a>`get engines`
+### <a name="getengine"></a>`get engine`
+
+**Description** 
+
+Retrieves information for a specific engine based on its ID.
+
+**Usage**
+
+	./steam get engine [engineId]
+
+**Parameters**
+
+- `[engineId]`: Specify the ID of the engine that you want to retrieve
+
+**Example**
+
+The following example retrieves information about engine 1.
+
+	./steam get engine 1
+		h2o-genmodel.jar
+	ID:		1
+	AGE:	2016-07-15 09:44:10 -0700 PDT
+
+-----
+
+### <a name="getengines"></a>`get engines`
 
 **Description** 
 
@@ -696,14 +792,474 @@ None
 The following example retrieves a list of engines that have been deployed. (Refer to [`deploy engine`](#deploy engine).)
 
 	./steam get engines
-	NAME			ID	AGE
+	NAME				ID	AGE
 	h2o-genmodel.jar	1	2016-07-01 13:30:50 -0700 PDT
-	h2o.jar			2	2016-07-01 13:32:10 -0700 PDT
+	h2o.jar				2	2016-07-01 13:32:10 -0700 PDT
 
 -----
 
+### <a name="getentities"></a>`get entities`
 
-#### <a name="register cluster"></a>`register cluster`
+**Description** 
+
+Retrieves a list of supported Steam entity types.
+
+**Usage**
+
+	./steam get entities
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of the supported Steam entity types.
+
+	./steam get entities
+	NAME		ID
+	role		1
+	workgroup	2
+	identity	3
+	engine		4
+	cluster		5
+	project		6
+	model		7
+	service		8
+
+-----
+
+### <a name="gethistory"></a>`get history`
+
+**Description** 
+
+Retrieves recent activity information related to a specific user or for a specific cluster.
+
+**Usage**
+
+	./steam get history [identity [identityName] | cluster [clusterId]]
+
+**Parameters**
+
+- `identity [identityName]`: Specifies to retrieve activity information related to a specific user
+- `cluster [clusterId]`: Specifies to retrieve a activity information related to a specific cluster
+
+**Example**
+
+The following example retrieves information for user "bob".
+
+	./steam get history identity bob
+	USER	ACTION	DESCRITPION						TIME
+	1		link	{"id":"2","name":"preparation","type":"workgroup"}	2016-07-15 09:32:55 -0700 PDT
+	1		link	{"id":"2","name":"engineer","type":"role"}		2016-07-15 09:32:44 -0700 PDT
+	1		create	{"name":"bob"}						2016-07-15 09:32:32 -0700 PDT
+
+-----
+
+### <a name="getidentities"></a>`get identities`
+
+**Description** 
+
+Retrieves a list of users.
+
+**Usage**
+
+	./steam get identities
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of users that are available on the database.
+
+	./steam get identities
+	NAME		ID	LAST LOGIN			AGE
+	bob			2	0000-12-31 16:00:00 -0800 PST	2016-07-15 09:32:32 -0700 PDT
+	jim			3	0000-12-31 16:00:00 -0800 PST	2016-07-15 09:32:38 -0700 PDT
+	superuser	1	0000-12-31 16:00:00 -0800 PST	2016-07-15 09:21:58 -0700 PDT
+
+-----
+
+### <a name="getidentity"></a>`get identity`
+
+**Description** 
+
+Retrieve information about a specific user.
+
+**Usage**
+
+	./steam get identity [identityId]
+
+**Parameters**
+
+- `[identityId]`: Specify the ID of the user you want to retrieve
+
+**Example**
+
+The following example retrieves information about user Jim.
+
+	./steam get identity jim
+				jim
+	STATUS:		Active
+	LAST LOGIN:	0000-12-31 16:00:00 -0800 PST
+	ID:		3
+	AGE:		2016-07-15 09:32:38 -0700 PDT
+
+	WORKGROUP	DESCRIPTION
+	production	production group
+
+	ROLE		DESCRIPTION
+	datascience	a default data scientist role
+
+	PERMISSIONS
+	Manage models
+	View clusters
+	Manage projects
+
+-----
+
+### <a name="getmodel"></a>`get model`
+
+**Description** 
+
+Retrieves detailed information for a specific model.
+
+**Usage**
+
+	./steam get model [modelId]
+
+**Parameters**
+
+- `[modelId]`: Specify the ID of the model that you want to retrieve
+
+**Example**
+
+The following example retrieves information for model 2.
+
+	./steam get model 2
+	
+-----
+
+### <a name="getmodels"></a>`get models`
+
+**Description** 
+
+Retrieves a list of models.
+
+**Usage**
+
+	./steam get models
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of models that are available on the database.
+
+	./steam get models
+	
+-----
+
+### <a name="getpermissions"></a>`get permissions`
+
+**Description** 
+
+Retrieves a list of permissions available in Steam along with the corresponding code. These permissions are currently hard coded into Steam. 
+
+**Usage**
+
+	./steam get permissions
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of Steam permissions.
+
+	./steam get permissions
+	ID	DESCRIPTION		CODE
+	9	Manage clusters		ManageCluster
+	7	Manage engines		ManageEngine
+	5	Manage identities	ManageIdentity
+	13	Manage models		ManageModel
+	11	Manage projects		ManageProject
+	1	Manage roles		ManageRole
+	15	Manage services		ManageService
+	3	Manage workgroups	ManageWorkgroup
+	10	View clusters		ViewCluster
+	8	View engines		ViewEngine
+	6	View identities		ViewIdentity
+	14	View models		ViewModel
+	12	View projects		ViewProject
+	2	View roles		ViewRole
+	16	View services		ViewService
+	4	View workgroups		ViewWorkgroup
+
+-----
+
+### <a name="getrole"></a>`get role`
+
+**Description** 
+
+Retrieves detailed information for a specific role based on its name.
+
+**Usage**
+
+	./steam get role [roleName]
+
+**Parameters**
+
+- `[roleName]`: Specify the name of the role that you want to retrieve
+
+**Example**
+
+The following example retrieves information about the datascience role.
+
+	./steam get role datascience
+				datascience
+	DESCRIPTION:	a default data scientist role
+	ID:		3
+	AGE:	2016-07-15 09:32:10 -0700 PDT
+
+	IDENTITES: 1
+	NAME	STATUS	LAST LOGIN
+	jim		Active	0000-12-31 16:00:00 -0800 PST
+
+	PERMISSIONS
+	Manage models
+	Manage projects
+	View clusters
+
+-----
+
+### <a name="getroles"></a>`get roles`
+
+**Description** 
+
+Retrieves a list of roles.
+
+**Usage**
+
+	./steam get roles
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of roles that are available on the database.
+
+	./steam get roles
+	NAME		ID	DESCRIPTION			AGE
+	Superuser	1	Superuser			2016-07-14 09:25:30 -0700 PDT
+	datascience	3	a default data scientist role	2016-07-14 15:39:03 -0700 PDT
+	engineer	2	a default engineer role		2016-07-14 15:38:10 -0700 PDT
+
+-----
+
+### <a name="getservice"></a>`get service`
+
+**Description** 
+
+A service represents a successfully deployed model on the Steam Scoring Service. This command retrieves detailed information about a specific service based on its ID.
+
+**Usage**
+
+	./steam get service [serviceId]
+
+**Parameters**
+
+- `[serviceId]`: Specify the ID of the service that you want to retrieve
+
+**Example**
+
+The following example retrieve information about service 2.
+
+	./steam get service 2
+
+-----
+
+### <a name="getservices"></a>`get services`
+
+**Description** 
+
+A service represents a successfully deployed model on the Steam Scoring Service. This command retrieves a list of services available on the database.
+
+**Usage**
+
+	./steam get services
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of services that are available on the database.
+
+	./steam get services
+
+-----
+
+### <a name="getworkgroup"></a>`get workgroup`
+
+**Description** 
+
+Retrieves information for a specific workgroup based on its name.
+
+**Usage**
+
+	./steam get workgroup [workgroupName]
+
+**Parameters**
+
+- `[workgroupName]`: Specify the name of the workgroup that you want to retrieve
+
+**Example**
+
+The following example retrieves information about the production workgroup
+
+	./steam get workgroup production
+					production
+	DESCRIPTION:	production group
+	ID:		3
+	AGE:	2016-07-15 09:32:27 -0700 PDT
+
+	IDENTITIES: 1
+	NAME	STATUS	LAST LOGIN
+	jim		Active	0000-12-31 16:00:00 -0800 PST
+	
+-----
+
+### <a name="getworkgroups"></a>`get workgroups`
+
+**Description** 
+
+Retrieves a list of workgroups currently available on the database.
+
+**Usage**
+
+	./steam get workgroups --identity=[identityName]
+
+**Parameters**
+
+- `--identity=[identityName]`: Optionally specify to view all workgroups associated with a specific user name
+
+**Example**
+
+The following example retrieves a list of workgroups that are available on the database.
+
+	./steam get workgroups
+	NAME		ID	DESCRIPTION		AGE
+	preparation	2	data prep group		2016-07-15 09:32:21 -0700 PDT
+	production	3	production group	2016-07-15 09:32:27 -0700 PDT
+
+-----
+
+### <a name="importmodel"></a>`import model`
+
+**Description** 
+
+Imports a model from H2O based on its ID. 
+
+**Usage**
+
+	./steam import model [clusterId] [modelName]
+
+**Parameters**
+
+- `[clusterId`]: Specify the H2O cluster that contains the model you want to import
+- `[modelName]`: Specify the name of the that you want to import into steam. 
+
+**Example**
+
+The following example specifies to import the GBM_model_python_1468599779202_1 model from Cluster 1.
+
+	./steam import model 1 GBM_model_python_1468599779202_1
+
+-----
+
+### <a name="linkidentity"></a>`link identity`
+
+**Description** 
+
+Links a user to a specific role or workgroup. 
+
+**Usage**
+
+	./steam link identity [identityName] [role [roleId] | workgroup [workgroupId]]
+
+**Parameters**
+
+- `[identityName]`: Specify the user that will be linked to a role or workgroup.
+- `role [roleId]`: Specify the role that the user will be linked to.
+- `workgroup [workgroupId]`: Specify the workgroup that the the user will be linked to.
+
+**Example**
+
+The following example links user Jim to datascience role and then to the production workgroup.
+
+	./steam link identity jim role datascience
+	./steam link identity jim workgroup production
+
+-----
+
+### <a name="linkrole"></a>`link role`
+
+**Description** 
+
+Links a role to a certain set of permissions. 
+
+**Usage**
+
+	./steam link role [roleId] [permissionId1 permissionId2 ...]
+
+**Parameters**
+
+- `[roleId]`: Specify the role that the user will be linked to.
+- `[permissionId]`: Specify a single permission or a list of permissions to assign to this role.  
+
+**Example**
+
+The following example links the datascience role to the ManageProject, ManageModel, and ViewCluster permissions.
+
+	./steam link role datascience ManageProject ManageModel ViewCluster 
+
+-----
+
+### <a name="login"></a>`login`
+
+**Description**
+
+Logs a user in to Steam
+
+**Usage**
+
+	./steam login [address:port] --username=[userName] --password=[password]
+	
+**Parameters**
+
+- `[address:port]`: Specify the address and port of the Steam server.
+- `--username=[userName]`: Specify the username.
+- `--password=[password]`: Specify the user's password.
+
+**Example**
+
+The following example logs user Bob into a Steam instance running on localhost:9000.
+
+	./steam login localhost:9000 --username=bob --password=bobSpassword
+	Login credentials saved for server localhost:9000
+
+-----
+
+### <a name="registercluster"></a>`register cluster`
 
 **Description**
 
@@ -721,27 +1277,50 @@ Note that clusters that are started using this command can be stopped from withi
 
 **Example**
 
-The following example registers Steam on localhost:54321. Note that this will only be successful if H2O is already running on this cluster. 
+The following example registers Steam on localhost:54323. Note that this will only be successful if H2O is already running on this cluster. 
 
-	./steam register cluster localhost:54321
-	Successfully connected to cluster 2 at address localhost:54321
+	./steam register cluster localhost:54323
+	Successfully connected to cluster 2 at address localhost:54323
 
 -----
 
-#### <a name="start cluster"></a>`start cluster`
+### <a name="reset"></a>`reset`
 
 **Description**
 
-Starts a new cluster through YARN using a specified engine. Note that this command is only valid when starting Steam on a YARN cluster. To start Steam on a local cluster, use [`register cluster`](#register cluster) instead.
+Resets the current Steam cluster instance. This removes the current authentication from Steam. You will have to re-authenticate in order to continue to use Steam. 
 
 **Usage**
 
-	./steam start cluster [id] [engineid] --size=[numNodes] --memory=[string]
+	./steam reset
+
+**Parameters**
+
+None
+
+**Examples**
+
+The following example resets the current Steam instance.
+
+	./steam reset
+	Configuration reset successfully. Use 'steam login <server-address>' to re-authenticate to Steam
+
+-----
+
+### <a name="startcluster"></a>`start cluster`
+
+**Description**
+
+After you have deployed engine, you can use this command to start a new cluster through YARN using a specified engine. Note that this command is only valid when starting Steam on a YARN cluster. To start Steam on a local cluster, use [`register cluster`](#register cluster) instead.
+
+**Usage**
+
+	./steam start cluster [id] [engineId] --size=[numNodes] --memory=[string]
 
 **Parameters**
 
 - `[id]`: Enter an ID for this new cluster.
-- `[engineid]`: Specify the ID of the engine that this cluster will use. If necessary, use [`get engines`](#get engines) to retrieve a list of all available engines.
+- `[engineId]`: Specify the ID of the engine that this cluster will use. If necessary, use [`get engines`](#get engines) to retrieve a list of all available engines.
 - `--size=[numNodes]`: Specify an integer for the number of nodes in this cluster.
 - `--memory=[string]`: Enter a string specifying the amount of memory available to Steam in each node (for example, "1024m", "2g", etc.)
 
@@ -757,7 +1336,7 @@ The following example retrieves a list of engines, then starts a cluster through
 	
 -----
 
-#### <a name="stop cluster"></a>`stop cluster`
+### <a name="stopcluster"></a>`stop cluster`
 
 **Description**
 
@@ -779,11 +1358,58 @@ The following example stops a cluster that has an ID of 9.
 
 -----
 
-#### <a name="unregister cluster"></a>`unregister cluster`
+### <a name="stopservice"></a>`stop service`
 
 **Description**
 
-Stops a cluster that was registered through the CLI or the web UI. (See [`register cluster`](#register cluster).) Note that you will receive an error if you attempt to unregister a cluster that was started using `start cluster`. 
+A service represents a successfully deployed model on the Steam Scoring Service. Use this command to stop a service. 
+
+**Usage**
+
+	./steam stop service [serviceId] 
+
+**Parameters**
+
+- `[serviceId]`: Specify the ID of the scoring service that you want to stop. If necessary, use [`get services`](#get clusters) to retrieve a list of running services. 
+
+**Example**
+
+The following example stops a service that has an ID of 2.
+
+	./steam stop service 2
+
+-----
+
+### <a name="unlinkidentity"></a>`unlink identity`
+
+**Description** 
+
+Removes a user's permissions from a specific role or workgroup.
+
+**Usage**
+
+	./steam unlink identity [identityName] [role [roleId] | workgroup [workgroupId]]
+
+**Parameters**
+
+- `[identityName]`: Specify the user that will be unlinked from a role or workgroup
+- `role [roleId]`: Specify the role that the user will be unlinked from
+- `workgroup [workgroupId]`: Specify the workgroup that the the user will be unlinked from
+
+**Example**
+
+The following example removes user Jim from the datascience role and then from the production workgroup.
+
+	./steam unlink identity jim role datascience
+	./steam unlink identity jim workgroup production
+
+-----
+
+### <a name="unregistercluster"></a>`unregister cluster`
+
+**Description**
+
+Stops a cluster that was registered through the CLI or the web UI. (See [`register cluster`](#register cluster).) Note that this does not delete the cluster. Also note that you will receive an error if you attempt to unregister a cluster that was started using `start cluster`. 
 
 **Usage**
 
@@ -801,3 +1427,54 @@ The following example stops a cluster that has an ID of 9.
 	Successfully unregisted cluster %d 2
 
 -----
+
+### <a name="updatedrole"></a>`update role`
+
+**Description**
+
+Edits the description and/or name of an existing role. When a role is edited, the edit will automatically propagate to all identities that are associated with this role.
+
+**Usage**
+
+	./steam update role [rolename] --desc="[description]" --name="[newRoleName]
+
+**Parameters**
+
+- `[rolename]`: Enter the role name that you want to edit
+- `desc="[description]"`: Optionally enter a string that describes the new role
+- `name="[newRoleName]"`: Enter a unique string for the new role name
+
+**Example**
+
+The following example changes the name of the engineer role to be "science engineer".  
+ 
+	./steam update role engineer --desc="A better engineer" --name="science engineer"
+	Successfully updated role: engineer
+		
+------
+
+### <a name="createworkgroup"></a>`create workgroup`
+
+**Description**
+
+Edits the description and/or name of an existing workgroup. When a workgroup is edited, the edit will automatically propagate to all identities that are associated with this workgroup.
+
+**Usage**
+
+	./steam update workgroup [workgroupname] --desc="[description]" --name="[newWorkgroupName]
+
+
+**Parameters**
+
+- `[workgroup]`: Enter the workgroup name that you want to edit
+- `desc="[description]"`: Optionally enter a string that describes the new workgroup
+- `name="[newWorkgroupName]"`: Enter a unique string for the new workgroup name
+
+**Example**
+
+The following example changes the name of the production workgroup to be "deploy". 
+ 
+	./steam update workgroup production --desc="A deploy workgroup" --name="deploy"
+	Successfully updated workgroup: production
+
+------
