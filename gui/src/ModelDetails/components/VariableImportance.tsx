@@ -12,7 +12,7 @@ import { getOrdinal } from '../../App/utils/getOrdinal';
 import '../styles/variableimportance.scss';
 
 // sample data
-import { responseDistributionSubset } from '../tests/data/responseDistributionSubset';
+import { responseDistributionSubset } from '../data/responseDistributionSubset';
 
 interface Props {
   columns?: any[]
