@@ -15,86 +15,39 @@ interface Props {
   children?: React.ReactChildren
 }
 
-export default class NewProject extends React.Component<Props, any> {
-  render() {
+export default class NewProjectStep1 extends React.Component<Props, any> {
+  render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="new-project">
         <PageHeader>New Project</PageHeader>
-        <form>
-          <label>Give your project a name</label>
-          <input type="text" placeholder="Name"/>
-        </form>
-        <form>
-          <label>Upload a CSV file</label>
-          <span>We will automatically infer a data dictionary based on the data</span>
-          <input type="file"/>
-          <button type="button" className="default">Upload</button>
-        </form>
-        <form>
-          <label>Verify Data Shape</label>
-          <span>Your models will be more accurate if H2O has an accurate understanding of the column types in your data.</span>
-        </form>
-        <div>
-          <Table>
-            <Row header={true}>
-              <Cell>COLUMN NAME</Cell>
-              <Cell>DATA TYPE</Cell>
-              <Cell>DISTRIBUTION</Cell>
-              <Cell>STATISTICS</Cell>
-              <Cell>ISSUES</Cell>
-            </Row>
-            <Row>
-              <Cell>setosa_length</Cell>
-              <Cell>numeric</Cell>
-              <Cell/>
-              <Cell>
-                <div className="statistics">
-                  <div className="headings">
-                    <div>min</div>
-                    <div>max</div>
-                    <div>mean</div>
-                  </div>
-                  <div className="values">
-                    <div>0.4</div>
-                    <div>5.1</div>
-                    <div>3.4</div>
-                  </div>
-                </div>
-              </Cell>
-              <Cell/>
-            </Row>
-            <Row>
-              <Cell>
-                class
-              </Cell>
-              <Cell>
-                categorical
-              </Cell>
-              <Cell/>
-              <Cell>
-                <div className="statistics">
-                  <div className="headings">
-                    <div>classes</div>
-                  </div>
-                  <div className="values">
-                    <div>3</div>
-                  </div>
-                </div>
-              </Cell>
-              <Cell/>
-            </Row>
-          </Table>
+        <div className="project-description">
+          <span>Steam organizes your data sets, your models, and your deployment configurations into one cohesive project. This enables you to:</span>
+          <ul className="project-description-list">
+            <li>Visually compare all models within a project</li>
+            <li>Manage how models from a project gets deployed</li>
+            <li>Track the history of model deployment</li>
+          </ul>
         </div>
-        <div>
-          <form>
-            <label>Select Response Column</label>
-            <span>Identify the column with the value you want to predict.</span>
-            <select>
-              <option>Test</option>
-            </select>
-          </form>
+        <div className="cards-container">
+          <div className="card small">
+            <header>Import Existing Models</header>
+            <article>
+              Choose this option if you already have H2O models built and stored in a H2O cluster in your network.
+            </article>
+            <footer>
+              <Link to="/projects/new/import" className="default">Start Import</Link>
+            </footer>
+          </div>
+          <div className="card small">
+            <header>Start from Scratch</header>
+            <article>
+              Choose this option if this is a completely new project.
+            </article>
+            <footer>
+              <Link to="/projects/new/import" className="default">Create New Project</Link>
+            </footer>
+          </div>
         </div>
-        <Link to="/projects/new/2" className="default">Next: Train Initial Models</Link>
       </div>
     );
   }

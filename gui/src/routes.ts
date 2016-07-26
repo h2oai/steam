@@ -4,18 +4,20 @@
  * and add additional information, such as how to handle breadcrumbs
  */
 
- import App from './App/App';
- import Clusters from './Clusters/Clusters';
- import Models from './Models/Models';
- import Projects from './Projects/Projects';
- import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
- import ProjectDetails from './ProjectDetails/ProjectDetails';
- import NewProjectStep1 from './Projects/components/NewProjectStep1';
- import NewProjectStep2 from './Projects/components/NewProjectStep2';
- import NewProjectStep3 from './Projects/components/NewProjectStep3';
- import Deployments from './Projects/components/Deployments';
- import CreateNewModel from './Projects/components/CreateNewModel';
- import Dummy from './Dummy/Dummy';
+import App from './App/App';
+import Clusters from './Clusters/Clusters';
+import Models from './Models/Models';
+import Projects from './Projects/Projects';
+import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
+import ModelDetails from './ModelDetails/ModelDetails';
+import NewProjectStep1 from './Projects/components/NewProjectStep1';
+import ImportNewProject from './Projects/components/ImportNewProject';
+import NewProjectStep2 from './Projects/components/NewProjectStep2';
+import NewProjectStep3 from './Projects/components/NewProjectStep3';
+import Services from './Projects/components/Services';
+import CreateNewModel from './Projects/components/CreateNewModel';
+import Dummy from './Dummy/Dummy';
+import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
 
 interface IIndexRoute {
   component: any
@@ -53,10 +55,18 @@ export const routes: IRoute[] = [{
       showInNavigation: true,
       icon: 'fa fa-folder',
       indexRoute: {
-        component: WelcomeSplashScreen,
+        component: ProjectScreenStrategy,
         name: 'Welcome'
       },
       childRoutes: [
+        // /projects/models
+        {
+          path: ':id/models',
+          component: Models,
+          name: 'Models',
+          showInBreadcrumb: true,
+          showInNavigation: true
+        },
         // /projects/data
         {
           path: 'data',
@@ -65,18 +75,10 @@ export const routes: IRoute[] = [{
           showInBreadcrumb: true,
           showInNavigation: true
         },
-        // /projects/models
-        {
-          path: 'models',
-          component: Models,
-          name: 'Models',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
         // /models/:id
         {
-          path: 'models/:id',
-          component: ProjectDetails,
+          path: ':id/models/:modelId',
+          component: ModelDetails,
           name: 'Models',
           showInBreadcrumb: true,
           showInNavigation: false
@@ -118,8 +120,8 @@ export const routes: IRoute[] = [{
           childRoutes: [
             // /projects/new/1
             {
-              path: '1',
-              component: NewProjectStep1,
+              path: 'import',
+              component: ImportNewProject,
               name: 'Step 1',
               showInBreadcrumb: true,
               showInNavigation: false
@@ -157,64 +159,20 @@ export const routes: IRoute[] = [{
       path: 'services',
       name: 'Services',
       icon: 'fa fa-cloud',
-      component: Dummy,
+      component: Services,
       showInBreadcrumb: true,
       showInNavigation: true,
-      childRoutes: [
-        {
-          path: 'submenu1',
-          component: Dummy,
-          name: 'Sub Menu 1',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        {
-          path: 'submenu2',
-          component: Dummy,
-          name: 'Sub Menu 2',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        {
-          path: 'submenu3',
-          component: Dummy,
-          name: 'Sub Menu 3',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        }
-      ]
+      childRoutes: []
     },
     // /clusters
     {
       path: 'clusters',
-      component: Dummy,
+      component: Clusters,
       name: 'Clusters',
       icon: 'fa fa-cube',
       showInBreadcrumb: true,
       showInNavigation: true,
-      childRoutes: [
-        {
-          path: 'submenu1',
-          component: Dummy,
-          name: 'Sub Menu 1',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        {
-          path: 'submenu2',
-          component: Dummy,
-          name: 'Sub Menu 2',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        {
-          path: 'submenu3',
-          component: Dummy,
-          name: 'Sub Menu 3',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        }
-      ]
+      childRoutes: []
     },
     // /team
     {

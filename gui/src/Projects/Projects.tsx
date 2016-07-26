@@ -3,7 +3,6 @@
  */
 
 import * as React from 'react';
-import WelcomeSplashScreen from './components/WelcomeSplashScreen';
 
 interface Props {
   leaderboard
@@ -13,7 +12,6 @@ interface DispatchProps {
   fetchLeaderboard: Function
 }
 
-        // <NewProject></NewProject>
 export default class Projects extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (

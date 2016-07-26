@@ -28,7 +28,8 @@ import { naivebayesTrain } from '../tests/data/naivebayesTrain';
 import { naivebayesValidation } from '../tests/data/naivebayesValidation';
 
 interface Props {
-  items: any[]
+  items: any[],
+  projectId: number
 }
 
 interface DispatchProps {
@@ -78,7 +79,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
         <PageHeader>
           <span>Models</span>
           <div className="buttons">
-            <button className="default invert">Build Model in Flow</button>
             <button className="default">Import Model</button>
           </div>
         </PageHeader>
@@ -108,33 +108,32 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
           {this.props.items.map((item, i) => {
             return (
               <Row key={i}>
-                <Cell>{item.rank + getOrdinal(item.rank)}</Cell>
+                <Cell>{item.id + getOrdinal(item.id)}</Cell>
                 <Cell>
                   <div className="metadata">
                     <div className="model-name">
-                      {item.metadata.modelName}
+                      {item.name}
                     </div>
                     <div>
-                      {item.metadata.createdBy}
+                      {item.cluster_name}
                     </div>
                     <div>
-                      {item.metadata.creationDate}
+                      {item.createdAt}
                     </div>
                     <div>
-                      {item.metadata.timing}
+                      {item.max_runtime}
                     </div>
                   </div>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Train']}/>
+                  <RocGraph data={this.sampleData['gbmTrain']}/>
                 </Cell>
                 <Cell className="graph">
-                  <RocGraph data={this.sampleData[item.metadata.modelType + 'Validation']}/>
+                  <RocGraph data={this.sampleData['gbmValidation']}/>
                 </Cell>
                 <Cell>
                   <ul className="actions">
-                    <li><Link to={"/projects/models/" + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
-                    <li><span><i className="fa fa-database"></i></span><span>designate as baseline</span></li>
+                    <li><Link to={'/projects/' + this.props.projectId + '/models/' + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                     <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span><span>deploy model</span></li>
                     <li><span><i className="fa fa-ellipsis-h"></i></span><span>more actions</span></li>
                   </ul>

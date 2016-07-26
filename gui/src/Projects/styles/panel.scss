@@ -34,6 +34,7 @@
     margin: $small;
     .panel-action {
       margin-bottom: $xsmall / 2;
+      cursor: pointer;
       div {
         display: inline-block;
       }

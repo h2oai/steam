@@ -4,7 +4,8 @@ import '../styles/rocgraph.scss';
 import { rocChart } from 'vis-components';
 
 interface Props {
-  data: any[]
+  data: any[],
+  config?: any
 }
 
 export default class RocGraph extends React.Component<Props, any> {
@@ -41,7 +42,7 @@ export default class RocGraph extends React.Component<Props, any> {
         hideAUCText: true
     };
 
-    rocChart.plot(this._mountNode, this.props.data, cfg);
+    rocChart.plot(this._mountNode, this.props.data, this.props.config || cfg);
   }
 
   render() {

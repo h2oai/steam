@@ -8,15 +8,15 @@ import TabNavigation from './TabNavigation';
 import DeployedServices from './DeployedServices';
 import Packaging from './Packaging';
 import ModelApi from './ModelApi';
-import '../styles/deployments.scss';
+import '../styles/services.scss';
 
-export default class Deployments extends React.Component<any, any> {
+export default class Services extends React.Component<any, any> {
   constructor() {
     super();
     this.state = {
       tabs: {
         deployedServices: {
-          label: 'Deployed Services',
+          label: 'Services',
           isSelected: true,
           onClick: this.clickHandler.bind(this),
           component: <DeployedServices/>
@@ -51,9 +51,8 @@ export default class Deployments extends React.Component<any, any> {
 
   render(): React.ReactElement<HTMLDivElement> {
     return (
-      <div>
-        <PageHeader>DEPLOYMENT</PageHeader>
-        <TabNavigation tabs={this.state.tabs}/>
+      <div className="services">
+        <PageHeader>Services</PageHeader>
         <main>
           {this.state.tabs[this.state.isSelected].component}
         </main>
