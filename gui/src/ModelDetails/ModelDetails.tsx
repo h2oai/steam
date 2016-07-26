@@ -88,7 +88,6 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   downloadModel(event) {
-    console.log($(event.target).find('input[type="radio"]:checked').val());
     event.preventDefault();
     this.props.downloadModel(event);
   }
@@ -104,7 +103,6 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     if (_.isEmpty(this.props.model)) {
       return <div></div>;
     }
-    console.log(this.state.isExportModalOpen);
     return (
       <div className="project-details">
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()} onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>

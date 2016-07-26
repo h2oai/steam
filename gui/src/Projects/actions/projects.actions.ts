@@ -127,7 +127,7 @@ export function registerCluster(address: string) {
 export function fetchProjects() {
   return (dispatch) => {
     Remote.getProjects(0, 5, (error, res) => {
-      dispatch(receiveProjects(<Project[]>res));
+      dispatch(receiveProjects(<Project[]> res));
     });
-  }
+  };
 }
