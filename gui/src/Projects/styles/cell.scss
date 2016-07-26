@@ -1,0 +1,22 @@
+@import '../../variables.scss';
+
+.table .row .cell {
+  box-sizing: border-box;
+  flex-grow: 1;
+  flex-basis: 0;
+  word-wrap: break-word;
+  .statistics {
+    .headings, .values {
+      display: flex;
+      flex-direction: row;
+      div {
+        flex-grow: 1;
+        flex-basis: 0;
+      }
+    }
+    .headings {
+      font-size: .8em;
+      color: $brand-dark-3;
+    }
+  }
+}

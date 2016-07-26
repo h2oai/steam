@@ -1,0 +1,16 @@
+@import '../../variables.scss';
+
+.pagination-container {
+  width: 100%;
+  display: flex;
+  padding: 10px 0;
+  font-size: 1.2em;
+  color: $brand-dark-3;
+  font-family: "Open Sans", sans-serif;
+  i {
+    font-size: 1.5em;
+  }
+  .page-info {
+    padding: 0 $xsmall;
+  }
+}

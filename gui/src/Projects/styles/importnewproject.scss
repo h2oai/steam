@@ -1,0 +1,24 @@
+@import '../../variables.scss';
+
+.import-new-project {
+  .step-1 {
+    display: flex;
+    .select-cluster {
+      margin-right: $medium;
+      flex: 1;
+    }
+    .connect-cluster {
+      margin-left: $medium;
+      flex: 1;
+    }
+  }
+  .name-project {
+    margin-bottom: $medium;
+  }
+  button.disabled {
+    background: $brand-dark-3;
+    border-color: $brand-dark-3;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+}

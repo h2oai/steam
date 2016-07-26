@@ -1,0 +1,12 @@
+@import '../../variables';
+
+.metrics {
+  height: 100%;
+  .metrics-summary {
+    &--title {
+      padding: $small 0;
+      font-size: 1.2em;
+      font-weight: 700;
+    }
+  }
+}

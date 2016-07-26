@@ -1,0 +1,10 @@
+@import '../../variables';
+
+.main-section {
+  overflow: auto;
+  .content {
+    height: 100%;
+    min-height: 100%;
+    padding: 0 $base-grid-unit;
+  }
+}

@@ -1,0 +1,77 @@
+@import '../../variables';
+
+.leaderboard {
+  width: 100%;
+  .row {
+    &.header {
+      .cell:first-child {
+        padding-top:0;
+      }
+    }
+    .cell {
+      flex-grow: 1;
+      font-family: "Open Sans", sans-serif;
+    }
+    .cell:first-child {
+      flex-grow: 0;
+      flex-basis: $medium;
+      color: $brand-dark-3;
+      padding-top:3px;
+    }
+    .cell:nth-of-type(2) {
+      flex-basis: 50%;
+      flex-grow: 2;
+      .metadata {
+        .model-name {
+          font-size: 1.3em;
+          font-weight: 600;
+        }
+      }
+      div:not(:first-child) {
+        color: $brand-dark-3;
+      }
+    }
+    .graph {
+      flex-basis: $xlarge + $medium;
+      align-self: center;
+      flex-grow: 0;
+      margin: auto;
+      svg {
+        rect {
+          shape-rendering: crispEdges;
+        }
+      }
+    }
+    .cell:last-child {
+      flex-basis: $xlarge * 3;
+      flex-grow: 1;
+      display: flex;
+    }
+  }
+  .actions {
+    padding: 0 $xsmall;
+    list-style: none;
+    color: $brand-dark-1;
+    li {
+      cursor: pointer;
+      a, &:visited {
+        text-decoration: none;
+        color: $brand-dark-1;
+      }
+    }
+    i {
+      margin-right: $xsmall / 2;
+    }
+  }
+  .filter {
+    width: 20%;
+    margin-bottom: $xsmall;
+    input {
+      border: 1px solid lighten($brand-dark-3, 10%);
+      height: $small;
+      width: 100%;
+      border-radius: 3px;
+      padding: 0 5px;
+    }
+  }
+}

@@ -1,0 +1,57 @@
+@import '../../variables';
+
+.metrics.variable-importance {
+  .variableImportance {
+    .columnName {
+      font-size: 1.3em;
+      font-weight: 600;
+    }
+
+    .detail {
+      color: $brand-dark-3;
+    }
+  }
+  .bar {
+    fill: $brand-orange;
+  }
+  .symbol.yes {
+    fill: $brand-yes;
+  }
+  .symbol.no {
+    fill: $brand-no;
+  }
+  .legendText {
+      font-size: 1em;
+      font-weight: 300;
+  }
+  font-family: $font-text;
+  .table {
+    .row {
+      &.header {
+        .cell:nth-child(1) {
+          padding-top:0;
+        }
+      }
+      .cell:nth-child(1) {
+        flex-basis:30px;
+        padding-top:3px;
+        color: $brand-dark-3;
+      }
+      .cell:nth-child(2) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(3) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(4) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(5) {
+        flex-basis:20%;
+      }
+      .cell:nth-child(6) {
+        flex-basis:20%;
+      }
+    }
+  }
+}

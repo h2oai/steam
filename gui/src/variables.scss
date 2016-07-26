@@ -1,0 +1,33 @@
+$brand-dark-1: rgb(74, 74, 74);
+$brand-dark-2: rgb(109, 109, 109);
+$brand-dark-3: rgb(155, 155, 155);
+$brand-dark-4: rgb(247, 247, 247);
+$brand-yellow: #fbe91f;
+$brand-blue: #1485CC;
+$brand-green-1: rgb(184, 233, 134);
+$brand-green-2: rgb(126, 211, 33);
+$brand-white: rgb(255, 255, 255);
+$brand-orange: rgb(245, 166, 35);
+$brand-yes: #A6CEE3;
+$brand-no: #1F78B4;
+$link-color: #4A90E2;
+
+$base-grid-unit: 60px;
+$body-index: 3;
+$xlarge: $base-grid-unit;
+$large: $base-grid-unit * (2/3);
+$medium: $base-grid-unit / 2;
+$small: $base-grid-unit / 3;
+$xsmall: $base-grid-unit / 4;
+
+$text-large: 48px;
+
+// rules
+$rule-solid-thick: 2px solid $brand-dark-3;
+$rule-solid-thin: 1px solid $brand-dark-3;
+$rule-dotted-thin: 1px dotted $brand-dark-3;
+
+// fonts
+$font-body: "Oswald", "Open Sans", Arial, sans-serif;
+$font-title: "Oswald", Arial, sans-serif;
+$font-text: "Open Sans", Arial, sans-serif;

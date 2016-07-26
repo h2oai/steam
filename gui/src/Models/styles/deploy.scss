@@ -1,0 +1,67 @@
+@import '../../variables.scss';
+
+.close-button-container {
+  position: relative;
+  .close-button {
+    position: absolute;
+    font-size: 2em;
+    top: 0;
+    background: transparent;
+    color: $brand-dark-1;
+    border: none;
+    cursor: pointer;
+    &:hover {
+      color: darken($brand-dark-1, 25%);
+    }
+  }
+}
+
+.deploy-modal {
+  .deployment-table .row {
+    &:first-of-type {
+      padding-top: 0;
+    }
+    padding: $small 0;
+    select {
+      width: $xlarge * 7;
+    }
+    .caption {
+      margin-bottom: $xsmall;
+    }
+    .cell:first-child {
+      flex-basis: $xlarge * 3;
+    }
+    .cell:last-child {
+      flex-basis: 100%;
+      font-family: "Open Sans", sans-serif;
+    }
+    &:last-of-type {
+      padding: 0;
+    }
+    &:last-of-type, &:nth-last-child(2) {
+      border-bottom: none;
+    }
+  }
+  section {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .deploy-button {
+    margin-right: $small;
+  }
+  .radio-container {
+    display: flex;
+    justify-content: space-between;
+    .radio-group {
+      margin: 0 5px;
+      border: 1px solid $brand-dark-1;
+      border-radius: 5px;
+      padding: 10px 10px $large 10px;
+      flex: 1 1;
+      &.selected {
+        border: 1px solid $brand-blue;
+      }
+    }
+  }
+}

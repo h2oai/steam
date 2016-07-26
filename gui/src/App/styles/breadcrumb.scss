@@ -1,0 +1,23 @@
+@import '../../variables.scss';
+
+.breadcrumb {
+  &.filled {
+    box-shadow: 0 0 7px rgba(0,0,0,0.35);
+  }
+  height: $base-grid-unit;
+  margin: 0;
+  padding: 0 $base-grid-unit;
+  list-style-type: none;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 1.5em;
+  font-family: "Open Sans", sans-serif;
+  color: $brand-dark-3;
+  > li+li::before {
+    content: '\f105';
+    font-family: FontAwesome;
+    font-size: 1.2em;
+    padding: 0 0.5rem;
+  }
+}

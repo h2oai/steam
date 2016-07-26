@@ -1,0 +1,15 @@
+@import '../../variables.scss';
+
+.project-details {
+  height: 100%;
+  width: 100%;
+  .overview-header {
+    font-size: $medium;
+    border-bottom: 2px solid $brand-dark-3;
+    i {
+      font-size: $small;
+      font-weight: 100;
+      margin-right: $xsmall;
+    }
+  }
+}
