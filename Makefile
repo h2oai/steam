@@ -25,6 +25,7 @@ DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 SSB=./scoring-service-builder
 WWW=./var/master/www
+GUI=./gui
 ASSETS = ./var/master/assets
 SCRIPTS = ./scripts
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
@@ -38,7 +39,7 @@ build:
 	go build
 
 gui:
-	$(MAKE) -C gui
+	cd $(GUI) && rm -rf node_modules/ && npm install && webpack -p
 
 ssb:
 	cd $(SSB) && ./gradlew build
