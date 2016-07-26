@@ -820,6 +820,19 @@ func dataFrameName(m *bindings.ModelSchemaBase) string {
 	return ""
 }
 
+func (s *Service) FilterModelsByName(pz az.Principal, projectId int64, namePart string, offset, limit int64) ([]*web.Model, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
+		return nil, err
+	}
+
+	models, err := s.ds.FilterModelsByName(pz, projectId, namePart, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toModels(models), nil
+}
+
 // TODO: add offset/limit to this call for future
 func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*web.Model, error) {
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
@@ -1698,6 +1711,14 @@ func toModel(m data.Model) *web.Model {
 		m.Metrics,
 		toTimestamp(m.Created),
 	}
+}
+
+func toModels(models []data.Model) []*web.Model {
+	array := make([]*web.Model, len(models))
+	for i, m := range models {
+		array[i] = toModel(m)
+	}
+	return array
 }
 
 func toScoringService(s data.Service) *web.ScoringService {

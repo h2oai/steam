@@ -3184,6 +3184,49 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 	return ScanModel(row)
 }
 
+func (ds *Datastore) FilterModelsByName(pz az.Principal, projectId int64, namePart string, offset, limit int64) ([]Model, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
+		FROM
+			model m,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = m.id AND
+			m.id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					$7 OR
+					(
+						workgroup_id IN 
+						(
+							SELECT 
+								workgroup_id 
+							FROM 
+								identity_workgroup 
+							WHERE 
+								identity_id = $2
+						) AND 
+						entity_type_id = $3
+					)
+			) AND
+			m.name LIKE '%' || $4 || '%'
+		ORDER BY
+			m.name
+		OFFSET $5
+		LIMIT $6`, projectId, pz.Id(), ds.EntityTypes.Model, namePart, offset, limit, pz.IsSuperuser())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanModels(rows)
+}
+
 func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, location, logicalName string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
 		return err
