@@ -1,0 +1,214 @@
+@import '../../../variables.scss';
+
+$navigation-width: $base-grid-unit * 5;
+.navigation-wrapper {
+  display: flex;
+  height: 100%;
+}
+
+.nav-container {
+  display: flex;
+  flex: 1 0 auto;
+  transition: transform .3s ease-in-out;
+}
+
+.active {
+  position:relative;
+  &::before {
+    right: 0;
+    top: 50%;
+    border: solid transparent;
+    content: '';
+    height: 0;
+    width: 0;
+    position: absolute;
+    border-color: transparent;
+    border-width: $xsmall;
+    margin-top: -($xsmall);
+    border-right-color: $brand-dark-2;
+  }
+}
+
+.primary-navigation {
+  z-index: $body-index - 2;
+  .navigation--primary {
+    .navigation {
+      .nav-list {
+        .nav-list--label {
+          text-align: left;
+          width:0;
+          transition: width .3s ease-in-out;
+        }
+        &:hover {
+          .nav-list--label {
+            width:150px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.secondary-navigation {
+  z-index: $body-index - 1;
+  background: $brand-dark-2;
+  box-shadow: inset -9px 0px 10px -5px rgba(0,0,0,0.35);
+  .nav-list--item {
+    position: relative;
+    padding: 0 $small;
+    &.active {
+      &::before {
+        border-right-color: $brand-white;
+      }
+    }
+  }
+}
+
+.navigation-container {
+  height: 100%;
+  min-height: 100%;
+  position: absolute;
+  left: 0;
+  perspective: 10000px;
+  transition: transform .3s;
+  transform: translate3d(100%, 0, 0);
+  .project-sidebar {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background: $brand-dark-1;
+    color: $brand-yellow;
+    .item {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid $brand-yellow;
+      height: $xlarge;
+      padding: 0 $small;
+      cursor: pointer;
+      &--label {
+        font-size: 2em;
+      }
+      &:hover {
+        background: $brand-yellow;
+        color: $brand-dark-1;
+        .avatar-container .avatar {
+          background: $brand-dark-1;
+        }
+      }
+    }
+    .project-sidebar-header {
+      justify-content: center;
+      flex-direction: column;
+      padding: $small;
+      height: auto;
+      .avatar-container {
+        display: flex;
+        .avatar {
+          background: $brand-yellow;
+          height: $xlarge;
+          width: $xlarge;
+          border-radius: 50%;
+          margin: 0 5px;
+        }
+      }
+    }
+    .models {
+      border-top: 1px solid $brand-yellow;
+      height: $xlarge;
+      .badge {
+        margin-left: auto;
+      }
+    }
+    .transformations {
+      height: $xlarge;
+    }
+  }
+}
+
+.header-content {
+  font-size: $text-large;
+  min-height: 3.5em;
+  color: $brand-dark-3;
+  padding: 0 $small;
+}
+.navigation {
+  height: 100%;
+  &--primary {
+    height: 100%;
+  }
+  display: flex;
+  flex-direction: column;
+  header {
+    height: $xlarge;
+    width: 100%;
+    .header-navigation {
+      height: $xlarge;
+      font-size: 1.5em;
+      color: $brand-dark-3;
+      font-family: "Open Sans", sans-serif;
+      justify-content: flex-start;
+      align-items: center;
+      display: flex;
+      padding: 0 $small;
+      i {
+        margin-right: 5px;
+      }
+    }
+    .logo-container {
+      height: $xlarge;
+      width: $xlarge;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .logo {
+        height: 26.5px;
+        width: 26.5px;
+        border-radius: 50%;
+        background: $brand-dark-1;
+        margin-right: 5px;
+        img {
+          margin-left: 2px;
+          width: 36.5px;
+        }
+      }
+    }
+  }
+  .nav-list {
+    padding: 0;
+    color: $brand-white;
+    list-style: none;
+    font-size: 1.5em;
+    height: 100%;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 500;
+    margin-bottom: 0;
+    &--label {
+      flex: 1;
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+      display: flex;
+    }
+    li {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: $xlarge;
+      i {
+        height: $xlarge;
+        width: $xlarge;
+        flex-basis: $xlarge;
+        line-height: $xlarge;
+        text-align: center;
+      }
+      a {
+        justify-content: flex-start;
+        align-items: center;
+        flex: 1;
+        display: flex;
+        text-decoration: none;
+        color: $brand-white;
+      }
+    }
+  }
+}

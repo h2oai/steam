@@ -1,0 +1,14 @@
+@import '../../variables.scss';
+
+.clusters {
+  .panel-container {
+    display: flex;
+    flex-wrap: wrap;
+    .panel {
+      flex-basis: 40%;
+      display: block;
+      margin: $xsmall;
+      min-height: $xlarge * 6;
+    }
+  }
+}

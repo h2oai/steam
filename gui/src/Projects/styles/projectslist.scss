@@ -1,0 +1,34 @@
+@import '../../variables.scss';
+
+.project-details {
+  .page-header {
+    .new-project-button-container {
+      display: flex;
+      a {
+        font-size: 14px;
+        align-self: center;
+      }
+    }
+  }
+  .panel-container {
+    display: flex;
+    flex-wrap: wrap;
+    .panel {
+      flex-basis: 40%;
+      margin: $xsmall;
+      max-height: $xlarge * 4;
+      min-height: $xlarge * 4;
+      header {
+        font-size: 18px;
+        font-family: $font-text;
+      }
+      article {
+        display: flex;
+        .project-metadata {
+          border-left: $rule-solid-thin;
+          padding: $small;
+        }
+      }
+    }
+  }
+}
