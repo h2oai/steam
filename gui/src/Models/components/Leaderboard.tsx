@@ -16,16 +16,16 @@ import { getOrdinal } from '../../App/utils/getOrdinal';
 import '../styles/leaderboard.scss';
 
 // sample data
-import { deeplearningTrain } from '../tests/data/deeplearningTrain';
-import { deeplearningValidation } from '../tests/data/deeplearningValidation';
-import { drfTrain } from '../tests/data/drfTrain';
-import { drfValidation } from '../tests/data/drfValidation';
-import { gbmTrain } from '../tests/data/gbmTrain';
-import { gbmValidation } from '../tests/data/gbmValidation';
-import { glmTrain } from '../tests/data/glmTrain';
-import { glmValidation } from '../tests/data/glmValidation';
-import { naivebayesTrain } from '../tests/data/naivebayesTrain';
-import { naivebayesValidation } from '../tests/data/naivebayesValidation';
+import { deeplearningTrain } from '../data/deeplearningTrain';
+import { deeplearningValidation } from '../data/deeplearningValidation';
+import { drfTrain } from '../data/drfTrain';
+import { drfValidation } from '../data/drfValidation';
+import { gbmTrain } from '../data/gbmTrain';
+import { gbmValidation } from '../data/gbmValidation';
+import { glmTrain } from '../data/glmTrain';
+import { glmValidation } from '../data/glmValidation';
+import { naivebayesTrain } from '../data/naivebayesTrain';
+import { naivebayesValidation } from '../data/naivebayesValidation';
 
 interface Props {
   items: any[],

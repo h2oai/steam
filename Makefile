@@ -78,6 +78,9 @@ pretest: lint vet fmtcheck
 test: pretest
 	go test
 
+guitest:
+	cd $(GUI) && npm test
+
 cov:
 	@ go get -v github.com/axw/gocov/gocov
 	@ go get golang.org/x/tools/cmd/cover
