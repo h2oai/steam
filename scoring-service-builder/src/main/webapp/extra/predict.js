@@ -39,9 +39,6 @@
     var domains = model.m._domains;
     var domainMap = model.domainMap;
 
-    // form = '<form id="allparams" action="" method="get">';
-    // form += '<fieldset class="form-group"><legend>Parameters</legend>'
-
     var form = '<legend>Parameters</legend>';
 
     for (var i in names) {
@@ -72,10 +69,10 @@
       form += '</div></div>\n';
     }
 
-
     outputDomain = domains[i1];
 
-    element.innerHTML = form;
+    if (element != null)
+      element.innerHTML = form;
 
   }
 
@@ -137,20 +134,21 @@
       var probs = data["classProbabilities"];
       var prob = probs[index];
 
-      if (probs.length == 2){
-          result += `<p>Predicting <span class="labelHighlight">` + label + `</span> based on max F1 threshold </p>`
+      result += '<p>Predicting <span class="labelHighlight">' + label + '</span>';
+      if (probs.length == 2) {
+          result += ' based on max F1 threshold </p>';
       }
-
-      result += `<table class="table" id="modelPredictions">
-                  <thead> 
-                    <tr>
-                      <th>Index</th>
-                      <th>Labels</th>
-                      <th>Probability</th>
-                    </tr>
-                   </thead>
-                   <tbody>
-                  `
+      result += ' </p>';
+      result += '<table class="table" id="modelPredictions"> \
+                  <thead> \
+                    <tr> \
+                      <th>Index</th> \
+                      <th>Labels</th> \
+                      <th>Probability</th> \
+                    </tr> \
+                   </thead> \
+                   <tbody> \
+                  ';
 
       for (var label_i in outputDomain) {
         if (parseInt(label_i) === index ){
@@ -162,11 +160,6 @@
       }
 
       result += '</tbody></table>';
-
-      // result = "Label <b>" + label + "</b> with probability <b>" + (prob * 100.0).toFixed(1) + "%</b>.<p>"
-      //     + "Output Labels: [" + outputDomain + "]<br>"
-      //     + "Class Probabilities: [" + probs + "]<br>"
-      //     + "Label Index: " + index;
     }
     else if ("cluster" in data) {
       // clustering result
@@ -184,8 +177,6 @@
       result = "Can't parse result: " + data;
     }
 
-    // result += "<p><code>" + JSON.stringify(data) + "</code>";
-
     div.innerHTML = result;
 }
 
@@ -196,38 +187,24 @@
     pardiv.innerHTML = '<a href="' + url + '" target="_blank"><code>' + url + '</code>';
   }
 
-  function showCurl(pardiv, params) {
+  function showCurl(pardiv, params, cmd) {
     // remove empty parameters returned by serialize.
     params = params.replace(/'/g, "\\'") // quote quotes
-    var url = "http://" + window.location.host + "/pypredict";
+    var url = "http://" + window.location.host + cmd;
     pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
   }
 
   function predResults(params) {
-    // var pardiv = document.querySelector(".params");
-    // add link that opens in new window
-    //showUrl(pardiv, params);
-
     var div = document.querySelector("#modelPredictions");
-
     var cmd = '/predict?' + params;
     $.get(cmd, function(data, status) {
       showResult(div, status, data);
     }, 'json')
       .fail(function(data, status, error) {
-        var down = "<b>Service is down</b>";
-        // div.innerHTML = down + "<br>status " + data.status + " statusText " + data.statusText;
-        div.innerHTML = 'Error: ' + data.statusText;
-        var stats = document.querySelector("#modelStats");
-        // stats.innerHTML = down;
-        // pardiv.innerHTML = "";
+        var down = "<b>GET to " + cmd + " Failed</b> " + error;
+        div.innerHTML = down + "<br><b>status</b> " + status;
       });
-
   }
-
-// function runpred(form) {
-//   predResults(form.p.value);
-// }
 
   window.runpred2 = function(form) {
 
@@ -244,25 +221,18 @@
     showStatistics();
   }
 
-//function runpred2(form) {
-//  predResults($('#allparams').serialize());
-//}
-
   function predResultsPost(params) {
     var pardiv = document.querySelector(".curl");
-    showCurl(pardiv, params);
+    var cmd = '/pypredict';
+    showCurl(pardiv, params, cmd);
 
     var div = document.querySelector(".results");
-    var cmd = '/pypredict';
     $.post(cmd, params, function(data, status) {
       showResult(div, status, data);
     }, 'json')
       .fail(function(data, status, error) {
-        // var down = "<b>POST to /pypredict Failed</b>";
-        // div.innerHTML = down + "<br>status " + data.status + "<br>statusText " + data.statusText;
-        div.innerHTML = 'Error: ' + data.statusText;
-        var stats = document.querySelector(".stats");
-        stats.innerHTML = down;
+         var down = "<b>POST to " + cmd + " Failed</b> " + error;
+         div.innerHTML = down + "<br><b>status</b> " + status;
       });
 
   }
@@ -272,6 +242,30 @@
     showStatistics();
   };
 
+  function predResultsPostJar(params) {
+    var pardiv = document.querySelector(".curl");
+    var cmd = '/predict';
+    showCurl(pardiv, params, cmd);
+
+    var div = document.querySelector(".results");
+    if (params == null || params == "") {
+      div.innerHTML = "No input";
+      return;
+    }
+    $.post(cmd, params, function(data, status) {
+      showResult(div, status, data);
+    }, 'json')
+      .fail(function(data, status, error) {
+         var down = "<b>POST to " + cmd + " Failed</b> " + error;
+         div.innerHTML = down + "<br><b>status</b> " + status;
+      });
+
+  }
+
+  window.runpredpostjar = function(form) {
+    predResultsPostJar(form.p.value);
+    showStatistics();
+  };
 
   function duration(days) {
     var r = days;
@@ -297,9 +291,6 @@
   }
 
   function showOneStat(label, data, warmupCount) {
-    // s = label + ' (' + data['count'] + ') Last took ' + Number(data['lastMs']).toFixed(3) + ' ms. '
-    // + 'Average time ' + Number(data['averageTime']).toFixed(3)
-    // + ' (after ' + warmUpCount + ' warmups ' + Number(data['averageAfterWarmupTime']).toFixed(3) + ') ms.';
     var newRow = '';
     newRow += '<tr class="stat-pad"></tr>';
     newRow += '<tr class="stat-group"><td>' + label + '</td><td>Last took: </td><td>' + Number(data['lastMs']).toFixed(3) + ' ms</td></tr>';
@@ -318,28 +309,6 @@
     return '';
   }
 
-// function showStats(div, data) {
-//     dayMs = 1000 * 60 * 60 * 24;
-//     upDays = Number(data['upTimeMs']) / dayMs;
-//     lastTimeAgoDays = Number(data['lastTimeAgoMs']) / dayMs;
-//     s = 'Service started ' + data['startTimeUTC'] + '. Uptime ' + duration(upDays) + "."; //upDays.toFixed(3) + ' days. ';
-//     n = Number(data['prediction']['count']);
-//     warmupCount = data['warmUpCount'];
-//     if (n > 0) {
-//         s +=  '<br>'
-//         + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'
-//         +  '<p>'
-//         + showOneStat('Prediction', data['prediction'], warmupCount);
-//         showStat(data['get'], 'Get');
-//         showStat(data['post'], 'Post');
-//         showStat(data['pythonget'], 'Python Get');
-//         showStat(data['pythonpost'], 'Python Post');
-//     }
-//     url = window.location.href + "stats";
-//     s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
-//     div.innerHTML = s;
-// }
-
   function showStats(div, data) {
     var dayMs = 1000 * 60 * 60 * 24;
     var upDays = Number(data.upTimeMs) / dayMs;
@@ -353,31 +322,19 @@
     s += '<tr class="stat-group"><td>Uptime</td><td>' + duration(upDays) + '</td></tr>';
 
 
-    // s = 'Service started ' + data['startTimeUTC'] + '. Uptime ' + duration(upDays) + "."; //upDays.toFixed(3) + ' days. ';
     var n = Number(data.prediction.count);
     var warmupCount = data.warmUpCount;
     if (n > 0) {
       s += '<tr class="stat-group"><td> Last prediction</td><td>' + data.lastTimeUTC + '</td></tr>';
       s += '<tr class="stat-group"><td> </td><td>' + duration(lastTimeAgoDays) + ' ago</td></tr>';
       s += '<tr class="stat-pad"><td> </td></tr>'
-      //     s +=  '<br>'
-      //     + 'Last prediction ' + data['lastTimeUTC'] + ', ' + duration(lastTimeAgoDays) + ' ago.'//lastTimeAgoDays.toFixed(3) + ' days ago.'
-      //     +  '<p>'
       s += showOneStat('Prediction', data.prediction, warmupCount);
       s += showStat(data.get, 'Get', warmupCount);
       s += showStat(data.post, 'Post', warmupCount);
       s += showStat(data.pythonget, 'Python Get', warmupCount);
       s += showStat(data.pythonpost, 'Python Post', warmupCount);
     }
-
-    // url = window.location.href + "stats";
-    //s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
-
     s += '</tbody></table>'
-
-    // url = "http://" + window.location.host + "/stats";
-    // s += '<p>More statistics at <code><a href="' + url + '" target="_blank">' + url + '</a>';
-
     div.innerHTML = s;
   }
 
@@ -405,15 +362,9 @@
     $('#url-prefix').append(window.location.href + 'predict?');
     window.setEmptyUrl();
 
-    // $('#results').hide();
-
     showInputParameters();
 
     showStatistics();
-
-    // $('#reset-btn').click(function(){
-    //   $('#results').hide();
-    // })
 
     $('#stats-btn').click(function() {
       window.open('/stats', '_blank');
