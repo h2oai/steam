@@ -35,27 +35,6 @@ interface IRoute {
   childRoutes?: IRoute[]
 }
 
-// <<<<<<< HEAD
-//   <Router history={history}>
-// <Route path="/" component={App} isExcludedFromBreadcrumb={true}>
-// <IndexRoute component={WelcomeSplashScreen}/>
-// <Route path="projects" component={Projects} name="Projects" isExcludedFromBreadcrumb={true}>
-// <IndexRoute component={WelcomeSplashScreen}/>
-// <Route path=":id/models" component={Models}/>
-// <Route path="deployments" component={Deployments} name="Deployments"/>
-// <Route path="new" isExcludedFromBreadcrumb={true}>
-// <IndexRoute component={NewProjectStep1} name="Create New Project"/>
-// <Route path="import" component={ImportNewProject} name="Create New Project"/>
-// <Route path="3" component={NewProjectStep3} isExcludedFromBreadcrumb={true}/>
-// </Route>
-// </Route>
-// <Route path="clusters" component={Clusters}/>
-// <Route path="forkmodel" component={CreateNewModel} name="Create New Model"/>
-// <Route path="models/:id" component={ProjectDetails}/>
-// </Route>
-// </Router>
-// =======
-
 export const routes: IRoute[] = [{
   path: '/',
   component: App,
