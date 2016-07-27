@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
 import { fetchLeaderboard } from './actions/leaderboard.actions';
-import { Model } from '../Proxy/proxy';
+import { Model } from '../Proxy/Proxy';
 
 interface Props {
   leaderboard: any,

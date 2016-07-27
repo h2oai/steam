@@ -14,7 +14,7 @@ import {
   fetchClusters, fetchModelsFromCluster,
   importModelFromCluster, createProjectAndImportModelsFromCluster, registerCluster
 } from '../actions/projects.actions';
-import { Cluster, Model } from '../../Proxy/proxy';
+import { Cluster, Model } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
 

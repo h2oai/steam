@@ -6,7 +6,7 @@ import {Link} from 'react-router';
 import PageHeader from './PageHeader';
 import Panel from './Panel';
 import RocGraph from '../../Models/components/RocGraph';
-import { Project } from '../../Proxy/proxy';
+import { Project } from '../../Proxy/Proxy';
 import { glmTrain } from '../../Models/data/glmTrain';
 import '../styles/projectslist.scss';
 
