@@ -481,7 +481,7 @@ CREATE TABLE identity_workgroup (
 ALTER TABLE identity_workgroup OWNER TO steam;
 
 --
--- Name: label; Type: TABLE; Schema: public; Owner: prithvi
+-- Name: label; Type: TABLE; Schema: public; Owner: steam
 --
 
 CREATE TABLE label (
@@ -494,10 +494,10 @@ CREATE TABLE label (
 );
 
 
-ALTER TABLE label OWNER TO prithvi;
+ALTER TABLE label OWNER TO steam;
 
 --
--- Name: label_id_seq; Type: SEQUENCE; Schema: public; Owner: prithvi
+-- Name: label_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
 --
 
 CREATE SEQUENCE label_id_seq
@@ -508,10 +508,10 @@ CREATE SEQUENCE label_id_seq
     CACHE 1;
 
 
-ALTER TABLE label_id_seq OWNER TO prithvi;
+ALTER TABLE label_id_seq OWNER TO steam;
 
 --
--- Name: label_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: prithvi
+-- Name: label_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
 --
 
 ALTER SEQUENCE label_id_seq OWNED BY label.id;
@@ -919,7 +919,7 @@ ALTER TABLE ONLY identity ALTER COLUMN id SET DEFAULT nextval('identity_id_seq':
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: prithvi
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
 --
 
 ALTER TABLE ONLY label ALTER COLUMN id SET DEFAULT nextval('label_id_seq'::regclass);
@@ -1063,7 +1063,7 @@ ALTER TABLE ONLY identity_workgroup
 
 
 --
--- Name: pk_label; Type: CONSTRAINT; Schema: public; Owner: prithvi
+-- Name: pk_label; Type: CONSTRAINT; Schema: public; Owner: steam
 --
 
 ALTER TABLE ONLY label
@@ -1263,14 +1263,14 @@ CREATE INDEX fki_identity_workgroup__workgroup_id ON identity_workgroup USING bt
 
 
 --
--- Name: fki_label__model_id; Type: INDEX; Schema: public; Owner: prithvi
+-- Name: fki_label__model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
 CREATE INDEX fki_label__model_id ON label USING btree (model_id);
 
 
 --
--- Name: fki_label__project_id; Type: INDEX; Schema: public; Owner: prithvi
+-- Name: fki_label__project_id; Type: INDEX; Schema: public; Owner: steam
 --
 
 CREATE INDEX fki_label__project_id ON label USING btree (project_id);
@@ -1404,7 +1404,7 @@ ALTER TABLE ONLY identity_workgroup
 
 
 --
--- Name: fk_label__model_id; Type: FK CONSTRAINT; Schema: public; Owner: prithvi
+-- Name: fk_label__model_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
 ALTER TABLE ONLY label
@@ -1412,7 +1412,7 @@ ALTER TABLE ONLY label
 
 
 --
--- Name: fk_label__project_id; Type: FK CONSTRAINT; Schema: public; Owner: prithvi
+-- Name: fk_label__project_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
 ALTER TABLE ONLY label
