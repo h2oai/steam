@@ -42,4 +42,3 @@ dist/
 typings/
 coverage/
 .npmrc
-src/Proxy/Proxy.ts
