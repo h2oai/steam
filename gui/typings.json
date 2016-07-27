@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "es6-promise": "registry:npm/es6-promise#3.0.0+20160211003958",
     "lodash": "registry:npm/lodash#4.0.0+20160416211519",
     "react-router": "registry:npm/react-router#2.4.0+20160628165748",
     "react-router-redux": "registry:npm/react-router-redux#4.0.0+20160602212457"
