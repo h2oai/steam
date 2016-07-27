@@ -9,6 +9,7 @@ import { Sidebar } from '../Sidebar/Sidebar';
 import './navigation.scss';
 import { routes } from '../../../routes';
 import * as _ from 'lodash';
+import { connect } from 'react-redux';
 const logo = require('../../../../assets/h2o-home.png');
 
 interface Props {
@@ -24,18 +25,22 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
-      isHidden: localStorage.getItem('steamDidAgreeToEula') === 'false'
-    }
+      isHidden: localStorage.getItem('steamDidAgreeToEula') === 'false',
+      isEulaAgreed: false
+    };
   }
 
   sitemap = routes[0].childRoutes;
 
-  isHidden() {
-    return localStorage.getItem('steamDidAgreeToEula') === 'false';
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps);
+    this.setState({
+      isEulaAgreed: nextProps.profile.isEulaAgreed
+    });
   }
 
-
   render(): React.ReactElement<HTMLElement> {
+    console.log(this.state.isEulaAgreed);
 
     let submenu = null;
 
@@ -69,7 +74,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     });
 
     return (
-      <div className={classNames('nav-container', {hidden: this.state.isHidden})}>
+      <div className={classNames('nav-container', {hidden: !this.state.isEulaAgreed})}>
         <Sidebar className="primary-navigation">
           <nav className="navigation--primary">
             <div className="navigation">
@@ -99,4 +104,10 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   }
 }
 
-export default withRouter(Navigation);
+function mapStateToProps(state): any {
+  return {
+    profile: state.profile
+  };
+}
+
+export default connect<any, DispatchProps, any>(mapStateToProps, {})(withRouter(Navigation));

@@ -21,7 +21,7 @@
       }
     }
   }
-  a {
+  a.start-project {
     align-self: center;
     padding: $xsmall $xlarge;
     font-size: 20px;
@@ -47,6 +47,7 @@
   .eula-content {
     height: 100%;
     width: 100%;
+    padding: $xsmall;
   }
   .eula-text {
     border: $rule-solid-thin;
@@ -60,4 +61,9 @@
       margin-right: $xsmall;
     }
   }
+}
+
+.nav-container.hidden {
+  opacity: .1;
+  pointer-events: none;
 }
