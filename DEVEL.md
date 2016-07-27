@@ -5,7 +5,7 @@
 
 Install Node.js (https://nodejs.org/en/)
 
-# Preparing NPM private registry
+###### Preparing NPM private registry
 Create an ```.npmrc``` file in the root folder - sample ```.npmrc``` can be found in [this gist](https://gist.github.com/justinloyola/29229513843722390fda39752439a5e8).
 
 The _auth value is a base64 encoding of Nexus Repository credentials. The credentials are available through Dev Ops.
