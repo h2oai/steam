@@ -161,6 +161,22 @@ export interface Job {
   
 }
 
+export interface Label {
+  
+  id: number
+  
+  project_id: number
+  
+  model_id: number
+  
+  name: string
+  
+  description: string
+  
+  created_at: number
+  
+}
+
 export interface Model {
   
   id: number
@@ -380,6 +396,24 @@ export interface Service {
   
   // Delete a model
   deleteModel: (modelId: number, go: (error: Error) => void) => void
+  
+  // Create a label
+  createLabel: (projectId: number, name: string, description: string, go: (error: Error, labelId: number) => void) => void
+  
+  // Update a label
+  updateLabel: (labelId: number, name: string, description: string, go: (error: Error) => void) => void
+  
+  // Delete a label
+  deleteLabel: (labelId: number, go: (error: Error) => void) => void
+  
+  // Label a model
+  linkLabelWithModel: (labelId: number, modelId: number, go: (error: Error) => void) => void
+  
+  // Remove a label from a model
+  unlinkLabelFromModel: (labelId: number, modelId: number, go: (error: Error) => void) => void
+  
+  // No description available
+  getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
   
   // Start a service
   startService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
@@ -990,6 +1024,82 @@ interface DeleteModelIn {
 }
 
 interface DeleteModelOut {
+  
+}
+
+interface CreateLabelIn {
+  
+  project_id: number
+  
+  name: string
+  
+  description: string
+  
+}
+
+interface CreateLabelOut {
+  
+  label_id: number
+  
+}
+
+interface UpdateLabelIn {
+  
+  label_id: number
+  
+  name: string
+  
+  description: string
+  
+}
+
+interface UpdateLabelOut {
+  
+}
+
+interface DeleteLabelIn {
+  
+  label_id: number
+  
+}
+
+interface DeleteLabelOut {
+  
+}
+
+interface LinkLabelWithModelIn {
+  
+  label_id: number
+  
+  model_id: number
+  
+}
+
+interface LinkLabelWithModelOut {
+  
+}
+
+interface UnlinkLabelFromModelIn {
+  
+  label_id: number
+  
+  model_id: number
+  
+}
+
+interface UnlinkLabelFromModelOut {
+  
+}
+
+interface GetLabelsForProjectIn {
+  
+  project_id: number
+  
+}
+
+interface GetLabelsForProjectOut {
+  
+  labels: Label[]
   
 }
 
@@ -2000,6 +2110,78 @@ export function deleteModel(modelId: number, go: (error: Error) => void): void {
     } else {
       const d: DeleteModelOut = <DeleteModelOut> data;
       return go(null);
+    }
+  });
+}
+
+export function createLabel(projectId: number, name: string, description: string, go: (error: Error, labelId: number) => void): void {
+  const req: CreateLabelIn = { project_id: projectId, name: name, description: description };
+  Proxy.Call("CreateLabel", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: CreateLabelOut = <CreateLabelOut> data;
+      return go(null, d.label_id);
+    }
+  });
+}
+
+export function updateLabel(labelId: number, name: string, description: string, go: (error: Error) => void): void {
+  const req: UpdateLabelIn = { label_id: labelId, name: name, description: description };
+  Proxy.Call("UpdateLabel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: UpdateLabelOut = <UpdateLabelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function deleteLabel(labelId: number, go: (error: Error) => void): void {
+  const req: DeleteLabelIn = { label_id: labelId };
+  Proxy.Call("DeleteLabel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: DeleteLabelOut = <DeleteLabelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function linkLabelWithModel(labelId: number, modelId: number, go: (error: Error) => void): void {
+  const req: LinkLabelWithModelIn = { label_id: labelId, model_id: modelId };
+  Proxy.Call("LinkLabelWithModel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: LinkLabelWithModelOut = <LinkLabelWithModelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function unlinkLabelFromModel(labelId: number, modelId: number, go: (error: Error) => void): void {
+  const req: UnlinkLabelFromModelIn = { label_id: labelId, model_id: modelId };
+  Proxy.Call("UnlinkLabelFromModel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: UnlinkLabelFromModelOut = <UnlinkLabelFromModelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function getLabelsForProject(projectId: number, go: (error: Error, labels: Label[]) => void): void {
+  const req: GetLabelsForProjectIn = { project_id: projectId };
+  Proxy.Call("GetLabelsForProject", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetLabelsForProjectOut = <GetLabelsForProjectOut> data;
+      return go(null, d.labels);
     }
   });
 }
