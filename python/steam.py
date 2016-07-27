@@ -693,6 +693,110 @@ class RPCClient:
 		response = self.connection.call("DeleteModel", request)
 		return 
 	
+	def create_label(self, project_id, name, description):
+		"""
+		Create a label
+
+		Parameters:
+		project_id: No description available (int64)
+		name: No description available (string)
+		description: No description available (string)
+
+		Returns:
+		label_id: No description available (int64)
+		"""
+		request = {
+			'project_id': project_id
+			'name': name
+			'description': description
+		}
+		response = self.connection.call("CreateLabel", request)
+		return response['label_id']
+	
+	def update_label(self, label_id, name, description):
+		"""
+		Update a label
+
+		Parameters:
+		label_id: No description available (int64)
+		name: No description available (string)
+		description: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+			'name': name
+			'description': description
+		}
+		response = self.connection.call("UpdateLabel", request)
+		return 
+	
+	def delete_label(self, label_id):
+		"""
+		Delete a label
+
+		Parameters:
+		label_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+		}
+		response = self.connection.call("DeleteLabel", request)
+		return 
+	
+	def link_label_with_model(self, label_id, model_id):
+		"""
+		Label a model
+
+		Parameters:
+		label_id: No description available (int64)
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+			'model_id': model_id
+		}
+		response = self.connection.call("LinkLabelWithModel", request)
+		return 
+	
+	def unlink_label_from_model(self, label_id, model_id):
+		"""
+		Remove a label from a model
+
+		Parameters:
+		label_id: No description available (int64)
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+			'model_id': model_id
+		}
+		response = self.connection.call("UnlinkLabelFromModel", request)
+		return 
+	
+	def get_labels_for_project(self, project_id):
+		"""
+		No description available
+
+		Parameters:
+		project_id: No description available (int64)
+
+		Returns:
+		labels: No description available (Label)
+		"""
+		request = {
+			'project_id': project_id
+		}
+		response = self.connection.call("GetLabelsForProject", request)
+		return response['labels']
+	
 	def start_service(self, model_id, port):
 		"""
 		Start a service

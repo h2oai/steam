@@ -83,6 +83,15 @@ type Model struct {
 	CreatedAt           int64
 }
 
+type Label struct {
+	Id          int64
+	ProjectId   int64
+	ModelId     int64
+	Name        string
+	Description string
+	CreatedAt   int64
+}
+
 type ScoringService struct {
 	Id        int64
 	ModelId   int64
@@ -194,6 +203,12 @@ type Service struct {
 	GetModelsFromCluster        GetModelsFromCluster        `help:"List models from a cluster"`
 	ImportModelFromCluster      ImportModelFromCluster      `help:"Import models from a cluster"`
 	DeleteModel                 DeleteModel                 `help:"Delete a model"`
+	CreateLabel                 CreateLabel                 `help:"Create a label"`
+	UpdateLabel                 UpdateLabel                 `help:"Update a label"`
+	DeleteLabel                 DeleteLabel                 `help:"Delete a label"`
+	LinkLabelWithModel          LinkLabelWithModel          `help:"Label a model"`
+	UnlinkLabelFromModel        UnlinkLabelFromModel        `help:"Remove a label from a model"`
+	GetLabelsForProject         GetLabelsForProject         `help:List labels for a project, with corresponding models, if any"`
 	StartService                StartService                `help:"Start a service"`
 	StopService                 StopService                 `help:"Stop a service"`
 	GetService                  GetService                  `help:"Get service details"`
@@ -437,6 +452,34 @@ type ImportModelFromCluster struct {
 }
 type DeleteModel struct {
 	ModelId int64
+}
+type CreateLabel struct {
+	ProjectId   int64
+	Name        string
+	Description string
+	_           int
+	LabelId     int64
+}
+type UpdateLabel struct {
+	LabelId     int64
+	Name        string
+	Description string
+}
+type DeleteLabel struct {
+	LabelId int64
+}
+type LinkLabelWithModel struct {
+	LabelId int64
+	ModelId int64
+}
+type UnlinkLabelFromModel struct {
+	LabelId int64
+	ModelId int64
+}
+type GetLabelsForProject struct {
+	ProjectId int64
+	_         int
+	Labels    []Label
 }
 type StartService struct {
 	ModelId int64

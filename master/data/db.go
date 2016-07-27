@@ -84,6 +84,7 @@ const (
 	DatasourceEntity = "datasource"
 	DatasetEntity    = "dataset"
 	ModelEntity      = "model"
+	LabelEntity      = "label"
 	ServiceEntity    = "service"
 
 	ClusterExternal = "external"
@@ -123,6 +124,8 @@ const (
 	ViewDataset      = "ViewDataset"
 	ManageModel      = "ManageModel"
 	ViewModel        = "ViewModel"
+	ManageLabel      = "ManageLabel"
+	ViewLabel        = "ViewLabel"
 	ManageService    = "ManageService"
 	ViewService      = "ViewService"
 )
@@ -160,6 +163,8 @@ func init() {
 		{0, ViewDataset, "View datasets"},
 		{0, ManageModel, "Manage models"},
 		{0, ViewModel, "View models"},
+		{0, ManageLabel, "Manage labels"},
+		{0, ViewLabel, "View labels"},
 		{0, ManageService, "Manage services"},
 		{0, ViewService, "View services"},
 	}
@@ -174,6 +179,7 @@ func init() {
 		{0, DatasourceEntity},
 		{0, DatasetEntity},
 		{0, ModelEntity},
+		{0, LabelEntity},
 		{0, ServiceEntity},
 	}
 
@@ -204,6 +210,8 @@ type PermissionKeys struct {
 	ViewDataset      int64
 	ManageModel      int64
 	ViewModel        int64
+	ManageLabel      int64
+	ViewLabel        int64
 	ManageService    int64
 	ViewService      int64
 }
@@ -218,6 +226,7 @@ type EntityTypeKeys struct {
 	Datasource int64
 	Dataset    int64
 	Model      int64
+	Label      int64
 	Service    int64
 }
 
@@ -251,6 +260,8 @@ func toPermissionKeys(permissions []Permission) *PermissionKeys {
 		m[ViewDataset],
 		m[ManageModel],
 		m[ViewModel],
+		m[ManageLabel],
+		m[ViewLabel],
 		m[ManageService],
 		m[ViewService],
 	}
@@ -272,6 +283,7 @@ func toEntityTypeKeys(entityTypes []EntityType) *EntityTypeKeys {
 		m[DatasourceEntity],
 		m[DatasetEntity],
 		m[ModelEntity],
+		m[LabelEntity],
 		m[ServiceEntity],
 	}
 }
@@ -455,6 +467,7 @@ func newDatastore(db *sql.DB) (*Datastore, error) {
 		entityTypeKeys.Datasource: permissionKeys.ViewDatasource,
 		entityTypeKeys.Dataset:    permissionKeys.ViewDataset,
 		entityTypeKeys.Model:      permissionKeys.ViewModel,
+		entityTypeKeys.Label:      permissionKeys.ViewLabel,
 		entityTypeKeys.Service:    permissionKeys.ViewService,
 		entityTypeKeys.Identity:   permissionKeys.ViewIdentity,
 		entityTypeKeys.Role:       permissionKeys.ViewRole,
@@ -468,6 +481,7 @@ func newDatastore(db *sql.DB) (*Datastore, error) {
 		entityTypeKeys.Datasource: permissionKeys.ManageDatasource,
 		entityTypeKeys.Dataset:    permissionKeys.ManageDataset,
 		entityTypeKeys.Model:      permissionKeys.ManageModel,
+		entityTypeKeys.Label:      permissionKeys.ManageLabel,
 		entityTypeKeys.Service:    permissionKeys.ManageService,
 		entityTypeKeys.Identity:   permissionKeys.ManageIdentity,
 		entityTypeKeys.Role:       permissionKeys.ManageRole,
@@ -627,6 +641,7 @@ func truncate(db *sql.DB) error {
 			"permission",
 			"entity_type",
 			"service",
+			"label",
 			"project_model",
 			"model",
 			"dataset",
