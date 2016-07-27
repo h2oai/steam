@@ -95,7 +95,7 @@ func TestRolePermissionLinking(tt *testing.T) {
 	roleId, err := t.svc.CreateRole(t.su, "name1", "description1")
 	t.nil(err)
 
-	expected, err := t.svc.GetSupportedPermissions(t.su)
+	expected, err := t.svc.GetAllPermissions(t.su)
 	t.nil(err)
 
 	pids1 := make([]int64, len(expected))
@@ -103,7 +103,7 @@ func TestRolePermissionLinking(tt *testing.T) {
 		pids1[i] = p.Id
 	}
 
-	err = t.svc.LinkRoleAndPermissions(t.su, roleId, pids1)
+	err = t.svc.LinkRoleWithPermissions(t.su, roleId, pids1)
 	t.nil(err)
 
 	actual, err := t.svc.GetPermissionsForRole(t.su, roleId)
@@ -115,7 +115,7 @@ func TestRolePermissionLinking(tt *testing.T) {
 
 	pids2 := pids1[0:5]
 
-	err = t.svc.LinkRoleAndPermissions(t.su, roleId, pids2)
+	err = t.svc.LinkRoleWithPermissions(t.su, roleId, pids2)
 	t.nil(err)
 
 	actual, err = t.svc.GetPermissionsForRole(t.su, roleId)
@@ -125,7 +125,7 @@ func TestRolePermissionLinking(tt *testing.T) {
 
 	// remove all permissions
 
-	err = t.svc.LinkRoleAndPermissions(t.su, roleId, []int64{})
+	err = t.svc.LinkRoleWithPermissions(t.su, roleId, []int64{})
 	t.nil(err)
 
 	actual, err = t.svc.GetPermissionsForRole(t.su, roleId)

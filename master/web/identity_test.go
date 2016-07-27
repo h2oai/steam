@@ -55,7 +55,7 @@ func TestIdentityWorkgroupLinking(tt *testing.T) {
 
 	t.ok(len(users) == 0, "users for group")
 
-	err = t.svc.LinkIdentityAndWorkgroup(t.su, userId, groupId)
+	err = t.svc.LinkIdentityWithWorkgroup(t.su, userId, groupId)
 	t.nil(err)
 
 	users, err = t.svc.GetIdentitiesForWorkgroup(t.su, groupId)
@@ -70,7 +70,7 @@ func TestIdentityWorkgroupLinking(tt *testing.T) {
 	t.ok(len(groups) == 1, "groups for user")
 	t.ok(groups[0].Name == "group1", "group name")
 
-	err = t.svc.UnlinkIdentityAndWorkgroup(t.su, userId, groupId)
+	err = t.svc.UnlinkIdentityFromWorkgroup(t.su, userId, groupId)
 	t.nil(err)
 
 	users, err = t.svc.GetIdentitiesForWorkgroup(t.su, groupId)
@@ -93,7 +93,7 @@ func TestIdentityAndRoleLinking(tt *testing.T) {
 
 	t.ok(len(users) == 0, "users for role")
 
-	err = t.svc.LinkIdentityAndRole(t.su, userId, roleId)
+	err = t.svc.LinkIdentityWithRole(t.su, userId, roleId)
 	t.nil(err)
 
 	users, err = t.svc.GetIdentitiesForRole(t.su, roleId)
@@ -111,7 +111,7 @@ func TestIdentityAndRoleLinking(tt *testing.T) {
 	perms, err := t.svc.GetPermissionsForIdentity(t.su, userId)
 	t.ok(len(perms) == 0, "permissions for user")
 
-	allPerms, err := t.svc.GetSupportedPermissions(t.su)
+	allPerms, err := t.svc.GetAllPermissions(t.su)
 	t.nil(err)
 
 	permIds := make([]int64, len(allPerms))
@@ -119,13 +119,13 @@ func TestIdentityAndRoleLinking(tt *testing.T) {
 		permIds[i] = p.Id
 	}
 
-	err = t.svc.LinkRoleAndPermissions(t.su, roleId, permIds)
+	err = t.svc.LinkRoleWithPermissions(t.su, roleId, permIds)
 	t.nil(err)
 
 	perms, err = t.svc.GetPermissionsForIdentity(t.su, userId)
 	t.ok(len(perms) == len(allPerms), "permissions for user")
 
-	err = t.svc.UnlinkIdentityAndRole(t.su, userId, roleId)
+	err = t.svc.UnlinkIdentityFromRole(t.su, userId, roleId)
 	t.nil(err)
 
 	users, err = t.svc.GetIdentitiesForRole(t.su, roleId)

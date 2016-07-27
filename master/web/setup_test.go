@@ -97,7 +97,7 @@ func (t *test) ok(condition bool, format string, args ...interface{}) {
 }
 
 func buildPermissionMap(t *test) map[string]int64 {
-	permissions, err := t.svc.GetSupportedPermissions(t.su)
+	permissions, err := t.svc.GetAllPermissions(t.su)
 	t.nil(err)
 
 	permissionMap := make(map[string]int64)
@@ -109,7 +109,7 @@ func buildPermissionMap(t *test) map[string]int64 {
 }
 
 func buildEntityTypeMap(t *test) map[string]int64 {
-	entityTypes, err := t.svc.GetSupportedEntityTypes(t.su)
+	entityTypes, err := t.svc.GetAllEntityTypes(t.su)
 	t.nil(err)
 
 	entityTypeMap := make(map[string]int64)
