@@ -30,166 +30,151 @@ interface IRoute {
     name: string;
     showInBreadcrumb?: boolean
     showInNavigation?: boolean
+    showChildrenAsSubmenu?: boolean
     icon?: string
     indexRoute?: IIndexRoute
     childRoutes?: IRoute[]
 }
 
-export const routes: IRoute[] = [{
-  path: '/',
-  component: App,
-  name: 'Home',
-  showInBreadcrumb: true,
-  showInNavigation: false,
-  indexRoute: {
-    component: WelcomeSplashScreen,
-    name: 'Welcome'
-  },
-  childRoutes: [
-    // /projects
+export const routes: IRoute[] = [
     {
-      path: 'projects',
-      component: Projects,
-      name: 'Projects',
-      showInBreadcrumb: true,
-      showInNavigation: true,
-      icon: 'fa fa-folder',
-      indexRoute: {
-        component: ProjectScreenStrategy,
-        name: 'Welcome'
-      },
-      childRoutes: [
-        // /projects/models
-        {
-          path: ':id/models',
-          component: Models,
-          name: 'Models',
-          showInBreadcrumb: true,
-          showInNavigation: true
+        path: '/',
+        component: App,
+        name: 'Home',
+        showInBreadcrumb: true,
+        showInNavigation: false,
+        indexRoute: {
+            component: WelcomeSplashScreen,
+            name: 'Welcome'
         },
-        // /projects/data
-        {
-          path: 'data',
-          component: Dummy,
-          name: 'Data',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        // /models/:id
-        {
-          path: ':id/models/:modelId',
-          component: ModelDetails,
-          name: 'Models',
-          showInBreadcrumb: true,
-          showInNavigation: false
-        },
-        // /projects/data
-        {
-          path: 'assets',
-          component: Dummy,
-          name: 'Assets',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        // /projects/deployments
-        {
-          path: 'deployment',
-          component: Deployment,
-          name: 'Deployment',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        // /projects/collaborators
-        {
-          path: 'collaborators',
-          component: Dummy,
-          name: 'Collaborators',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        },
-        // /projects/new
-        {
-          path: 'new',
-          name: 'New',
-          showInBreadcrumb: true,
-          showInNavigation: false,
-          indexRoute: {
-            component: NewProjectStep1,
-            name: '1'
-          },
-          childRoutes: [
-            // /projects/new/1
+        childRoutes: [
+            // /projects
             {
-              path: 'import',
-              component: ImportNewProject,
-              name: 'Step 1',
-              showInBreadcrumb: true,
-              showInNavigation: false
+                path: 'projects',
+                component: Projects,
+                name: 'Projects',
+                showInBreadcrumb: true,
+                showInNavigation: true,
+                icon: 'fa fa-folder'
             },
-            // /projects/new/2
             {
-              path: '2',
-              component: NewProjectStep2,
-              name: 'Step 2',
-              showInBreadcrumb: true,
-              showInNavigation: false
+                path: 'projects/:projectid',
+                component: Dummy,
+                name: 'Project Details',
+                showInBreadcrumb: true,
+                showInNavigation: false,
+                showChildrenAsSubmenu: true
             },
-            // /projects/new/3
+            // /projects/:id/models
             {
-              path: '3',
-              component: NewProjectStep3,
-              name: 'Step 3',
-              showInBreadcrumb: true,
-              showInNavigation: false
+                path: 'projects/:projectid/models',
+                component: Models,
+                name: "Models",
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/models/:id
+            {
+                path: 'projects/:projectid/models/:modelid',
+                component: Dummy,
+                name: "Model Detail",
+                showInBreadcrumb: true,
+                showInNavigation: false
+            },
+            // forkmodel
+            {
+                path: 'projects/:projectid/models/:modelid/forkmodel',
+                component: CreateNewModel,
+                name: 'Create New Model',
+                showInBreadcrumb: true,
+                showInNavigation: false
+            },
+            // /projects/:id/data
+            {
+                path: 'projects/:projectid/data',
+                component: Dummy,
+                name: 'Data',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/deployment
+            {
+                path: 'projects/:projectid/deployment',
+                component: Deployment,
+                name: 'Deployment',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/collaborators
+            {
+                path: 'projects/:projectid/collaborators',
+                component: Dummy,
+                name: 'Collaborators',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            {
+                path: 'newproject',
+                name: 'New',
+                showInBreadcrumb: true,
+                showInNavigation: false,
+                indexRoute: {
+                    component: NewProjectStep1,
+                    name: '1'
+                }
+            },
+            // /newproject/1
+            {
+                path: 'newproject/import',
+                component: Dummy,
+                name: 'Step 1',
+                showInBreadcrumb: true,
+                showInNavigation: false
+            },
+            // /newproject/2
+            {
+                path: 'newproject/2',
+                component: NewProjectStep2,
+                name: 'Step 2',
+                showInBreadcrumb: true,
+                showInNavigation: false
+            },
+            // /newproject/3
+            {
+                path: 'newproject/3',
+                component: NewProjectStep3,
+                name: 'Step 3',
+                showInBreadcrumb: true,
+                showInNavigation: false
+            },
+            // /services
+            {
+                path: 'services',
+                name: 'Services',
+                icon: 'fa fa-cloud',
+                component: Deployment,
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /clusters
+            {
+                path: 'clusters',
+                component: Dummy,
+                name: 'Clusters',
+                icon: 'fa fa-cube',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /team
+            {
+                path: 'team',
+                component: Dummy,
+                name: 'Team',
+                icon: 'fa fa-cube',
+                showInBreadcrumb: true,
+                showInNavigation: true
             }
-          ]
-        },
-        // /projects/forkmodel
-        {
-          path: 'forkmodel',
-          component: CreateNewModel,
-          name: 'Create New Model',
-          showInBreadcrumb: true,
-          showInNavigation: false
-        }
-      ]
-    },
-    // /services
-    {
-      path: 'services',
-      name: 'Services',
-      icon: 'fa fa-cloud',
-      component: Deployment,
-      showInBreadcrumb: true,
-      showInNavigation: true,
-      childRoutes: []
-    },
-    // /clusters
-    {
-      path: 'clusters',
-      component: Clusters,
-      name: 'Clusters',
-      icon: 'fa fa-cube',
-      showInBreadcrumb: true,
-      showInNavigation: true,
-      childRoutes: []
-    },
-    // /team
-    {
-      path: 'team',
-      component: Dummy,
-      name: 'Team',
-      showInBreadcrumb: true,
-      showInNavigation: true,
-      icon: 'fa fa-users',
-      childRoutes: [
-        {
-          path: 'submenu1',
-          component: Dummy,
-          name: 'Sub Menu 1',
-          showInBreadcrumb: true,
-          showInNavigation: true
-        }
-      ]
-    }]
-}];
+
+        ]
+    }
+];
