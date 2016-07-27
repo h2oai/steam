@@ -640,6 +640,28 @@ class RPCClient:
 		response = self.connection.call("GetModels", request)
 		return response['models']
 	
+	def filter_models_by_name(self, project_id, name_part, offset, limit):
+		"""
+		No description available
+
+		Parameters:
+		project_id: No description available (int64)
+		name_part: No description available (string)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		models: No description available (Model)
+		"""
+		request = {
+			'project_id': project_id
+			'name_part': name_part
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("FilterModelsByName", request)
+		return response['models']
+	
 	def get_models_from_cluster(self, cluster_id):
 		"""
 		List models from a cluster

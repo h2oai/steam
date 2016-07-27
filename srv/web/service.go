@@ -202,6 +202,7 @@ type Service interface {
   BuildModelAuto(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
   GetModel(pz az.Principal, modelId int64) (*Model, error)
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
+  FilterModelsByName(pz az.Principal, projectId int64, namePart string, offset int64, limit int64) ([]*Model, error)
   GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*Model, error)
   ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
   DeleteModel(pz az.Principal, modelId int64) (error)
@@ -528,6 +529,17 @@ type GetModelsIn struct {
 }
 
 type GetModelsOut struct {
+  Models []*Model `json:"models"`
+}
+
+type FilterModelsByNameIn struct {
+  ProjectId int64 `json:"project_id"`
+  NamePart string `json:"name_part"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type FilterModelsByNameOut struct {
   Models []*Model `json:"models"`
 }
 
@@ -1267,6 +1279,16 @@ func (this *Remote) GetModels(projectId int64, offset int64, limit int64) ([]*Mo
   in := GetModelsIn{ projectId , offset , limit  }
   var out GetModelsOut
   err := this.Proc.Call("GetModels", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Models, nil
+}
+
+func (this *Remote) FilterModelsByName(projectId int64, namePart string, offset int64, limit int64) ([]*Model, error) {
+  in := FilterModelsByNameIn{ projectId , namePart , offset , limit  }
+  var out FilterModelsByNameOut
+  err := this.Proc.Call("FilterModelsByName", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -2873,6 +2895,42 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
   }
 
 	val0, err := this.Service.GetModels(pz, in.ProjectId, in.Offset, in.Limit)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) FilterModelsByName(r *http.Request, in *FilterModelsByNameIn, out *FilterModelsByNameOut) error {
+  const name = "FilterModelsByName"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.FilterModelsByName(pz, in.ProjectId, in.NamePart, in.Offset, in.Limit)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
