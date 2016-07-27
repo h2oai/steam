@@ -974,6 +974,30 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	return s.ds.DeleteModel(pz, modelId)
 }
 
+func (s *Service) CreateLabel(pz az.Principal, projectId int64, name, description string) (int64, error) {
+	return 0, nil
+}
+
+func (s *Service) UpdateLabel(pz az.Principal, labelId int64, name, description string) error {
+	return nil
+}
+
+func (s *Service) DeleteLabel(pz az.Principal, labelId int64) error {
+	return nil
+}
+
+func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) error {
+	return nil
+}
+
+func (s *Service) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int64) error {
+	return nil
+}
+
+func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.Label, error) {
+	return nil, nil
+}
+
 func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return nil, err
