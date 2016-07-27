@@ -38,7 +38,7 @@ install: build
 build:
 	go build
 
-gui:
+gui: generate
 	cd $(GUI) && npm install && ./node_modules/.bin/webpack -p
 
 ssb:
