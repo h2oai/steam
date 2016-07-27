@@ -4,9 +4,6 @@ import pickle
 import argparse
 from textblob import TextBlob
 
-import lib.modelling as modelling
-
-# Should be input parameter
 MODELS_DESTINATION_DIR = "./lib"
 
 ## FIXME: should be provided by shared library
@@ -22,17 +19,6 @@ def split_into_lemmas(message):
 
 def score1(vectorizer, message):
     v = vectorizer.transform([message])
-    # nz = v.nonzero()[1]
-    # dat = v.data
-    # r = ""
-    # i = 0
-    # len = nz.size
-    # while i < len:
-    #     index = nz[i]
-    #     value = dat[i]
-    #     r += repr(index) + ":" + repr(value) + " "
-    #     i += 1
-    # return r
     return sparsify(v)
 
 def sparsify(v):
@@ -48,6 +34,23 @@ def sparsify(v):
         i += 1
     return r
 
+def mappify(v, labels):
+    nz = v.nonzero()[1]
+    dat = v.data
+    r = ""
+    i = 0
+    len = nz.size
+    while i < len:
+        index = nz[i]
+        value = dat[i]
+        r += str(labels[index]) + ":" + repr(round(value, 6)) + " "
+        i += 1
+    return r
+
+def score2(vectorizer, message):
+    v = vectorizer.transform([message])
+    return sparsify(v)
+
 
 class Scorer(object):
     def __init__(self, model_file):
@@ -55,9 +58,16 @@ class Scorer(object):
 
     def _init_model(self, model_file):
         self.model = loadModel(model_file)
+        self.labels = self.model.get_feature_names()
+
+    # def score0(self, message):
+    #     return score2(self.model, message)
 
     def score(self, message):
-        return score1(self.model, message)
+        v = self.model.transform([message])
+        # s = sparsify(v)
+        s = mappify(v, self.labels)
+        return s
 
 #
 # Main entry point. Accepts parameters
@@ -73,8 +83,8 @@ if __name__ == "__main__":
     print >> sys.stderr, "python ready"
 
     while True:
-        logString = raw_input()
-        if len(logString) > 0:
-            res = scorer.score(logString)
+        input = raw_input()
+        if len(input) > 0:
+            res = scorer.score(input)
             print res
             sys.stdout.flush()
