@@ -28,6 +28,10 @@ export class WelcomeSplashScreen extends React.Component<Props & DispatchProps, 
     };
   }
 
+  componentWillMount() {
+    this.props.fetchProfile();
+  }
+
   componentWillReceiveProps(nextProps) {
     this.setState({
       isEulaAgreed: nextProps.profile.isEulaAgreed
@@ -69,7 +73,6 @@ export class WelcomeSplashScreen extends React.Component<Props & DispatchProps, 
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    console.log(this.props.profile, this.state.isEulaAgreed);
     return (
       <div className="welcome-splash-screen">
         <DefaultModal className="eula-modal" open={this.state.isEulaOpen}>

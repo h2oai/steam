@@ -33,14 +33,12 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   sitemap = routes[0].childRoutes;
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
     this.setState({
       isEulaAgreed: nextProps.profile.isEulaAgreed
     });
   }
 
   render(): React.ReactElement<HTMLElement> {
-    console.log(this.state.isEulaAgreed);
 
     let submenu = null;
 
