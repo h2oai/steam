@@ -194,14 +194,14 @@ type Service struct {
 	GetModels                   GetModels                   `help:"List models"`
 	GetModelsFromCluster        GetModelsFromCluster        `help:"List models from a cluster"`
 	ImportModelFromCluster      ImportModelFromCluster      `help:"Import models from a cluster"`
-	RenameModel                 RenameModel                 `help:"Update a model name in the database"`
+	UpdateModel                 UpdateModel                 `help:"Updates a model"`
 	DeleteModel                 DeleteModel                 `help:"Delete a model"`
 	StartService                StartService                `help:"Start a service"`
 	StopService                 StopService                 `help:"Stop a service"`
 	GetService                  GetService                  `help:"Get service details"`
 	GetServices                 GetServices                 `help:"List services"`
 	GetServicesForModel         GetServicesForModel         `help:"List services for a model"`
-	RenameService               RenameService               `help:"Update a service name in the database"`
+	UpdateService               UpdateService               `help:"Update a service"`
 	DeleteService               DeleteService               `help:"Delete a service"`
 	AddEngine                   AddEngine                   `help:"Add an engine"`
 	GetEngine                   GetEngine                   `help:"Get engine details"`
@@ -438,7 +438,7 @@ type ImportModelFromCluster struct {
 	_         int
 	ModelId   int64
 }
-type RenameModel struct {
+type UpdateModel struct {
 	ModelId   int64
 	ModelName string
 	_         int
@@ -474,7 +474,7 @@ type GetServicesForModel struct {
 	_        int
 	Services []ScoringService
 }
-type RenameService struct {
+type UpdateService struct {
 	ServiceId   int64
 	ServiceName string
 	_           int

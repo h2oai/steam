@@ -232,8 +232,8 @@ module Proxy {
     getModelsFromCluster: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
     // Import models from a cluster
     importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
-    // Update a model name in the database
-    renameModel: (modelId: number, modelName: string, go: (error: Error) => void) => void
+    // Updates a model
+    updateModel: (modelId: number, modelName: string, go: (error: Error) => void) => void
     // Delete a model
     deleteModel: (modelId: number, go: (error: Error) => void) => void
     // Start a service
@@ -246,8 +246,8 @@ module Proxy {
     getServices: (offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
     // List services for a model
     getServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
-    // Update a service name in the database
-    renameService: (serviceId: number, serviceName: string, go: (error: Error) => void) => void
+    // Update a service
+    updateService: (serviceId: number, serviceName: string, go: (error: Error) => void) => void
     // Delete a service
     deleteService: (serviceId: number, go: (error: Error) => void) => void
     // Add an engine
@@ -631,12 +631,12 @@ module Proxy {
     model_id: number
   }
   
-  interface RenameModelIn {
+  interface UpdateModelIn {
     model_id: number
     model_name: string
   }
 
-  interface RenameModelOut {
+  interface UpdateModelOut {
   }
   
   interface DeleteModelIn {
@@ -690,12 +690,12 @@ module Proxy {
     services: ScoringService[]
   }
   
-  interface RenameServiceIn {
+  interface UpdateServiceIn {
     service_id: number
     service_name: string
   }
 
-  interface RenameServiceOut {
+  interface UpdateServiceOut {
   }
   
   interface DeleteServiceIn {
@@ -1451,13 +1451,13 @@ module Proxy {
 		})
   }
   
-  export function renameModel(modelId: number, modelName: string, go: (error: Error) => void): void {
-    const req: RenameModelIn = { model_id: modelId, model_name: modelName }
-    Proxy.Call("RenameModel", req, function(error, data) {
+  export function updateModel(modelId: number, modelName: string, go: (error: Error) => void): void {
+    const req: UpdateModelIn = { model_id: modelId, model_name: modelName }
+    Proxy.Call("UpdateModel", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: RenameModelOut = <RenameModelOut>data
+        const d: UpdateModelOut = <UpdateModelOut>data
         return go(null)
       }
 		})
@@ -1535,13 +1535,13 @@ module Proxy {
 		})
   }
   
-  export function renameService(serviceId: number, serviceName: string, go: (error: Error) => void): void {
-    const req: RenameServiceIn = { service_id: serviceId, service_name: serviceName }
-    Proxy.Call("RenameService", req, function(error, data) {
+  export function updateService(serviceId: number, serviceName: string, go: (error: Error) => void): void {
+    const req: UpdateServiceIn = { service_id: serviceId, service_name: serviceName }
+    Proxy.Call("UpdateService", req, function(error, data) {
       if (error) {
         return go(error)
       } else {
-        const d: RenameServiceOut = <RenameServiceOut>data
+        const d: UpdateServiceOut = <UpdateServiceOut>data
         return go(null)
       }
 		})

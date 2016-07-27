@@ -946,12 +946,23 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	return modelId, nil
 }
 
-func (s *Service) RenameModel(pz az.Principal, modelId int64, modelName string) error {
+func (s *Service) UpdateModel(pz az.Principal, modelId int64, modelName string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return err
 	}
 
-	return s.ds.UpdateModelName(pz, modelId, modelName)
+	// Verify model exists
+	if _, err := s.ds.ReadModel(pz, modelId); err != nil {
+		return err
+	}
+
+	// Rename model
+	if modelName != "" {
+		if err := s.ds.UpdateModelName(pz, modelId, modelName); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
@@ -1052,12 +1063,23 @@ func (s *Service) StartService(pz az.Principal, modelId int64, serviceName strin
 	return serviceId, nil
 }
 
-func (s *Service) RenameService(pz az.Principal, serviceId int64, serviceName string) error {
+func (s *Service) UpdateService(pz az.Principal, serviceId int64, serviceName string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return err
 	}
 
-	return s.ds.UpdateServiceName(pz, serviceId, serviceName)
+	// Verify service exists
+	if _, err := s.ds.ReadService(pz, serviceId); err != nil {
+		return err
+	}
+
+	// Rename service
+	if serviceName != "" {
+		if err := s.ds.UpdateServiceName(pz, serviceId, serviceName); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) StopService(pz az.Principal, serviceId int64) error {

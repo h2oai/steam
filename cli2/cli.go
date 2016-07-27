@@ -24,7 +24,6 @@ func registerGeneratedCommands(c *context, cmd *cobra.Command) {
     link(c),
     ping(c),
     register(c),
-    rename(c),
     share(c),
     split(c),
     start(c),
@@ -1085,8 +1084,8 @@ Examples:
 `
 
 func getClusters(c *context) *cobra.Command {
-  var offset int64 // No description available
   var limit int64 // No description available
+  var offset int64 // No description available
 
   cmd := newCmd(c, getClustersHelp, func(c *context, args []string) {
     
@@ -1116,8 +1115,8 @@ func getClusters(c *context) *cobra.Command {
   })
   
   
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
 }
 
@@ -1464,10 +1463,10 @@ Examples:
 func getIdentities(c *context) *cobra.Command {
   var forWorkgroup bool // Switch for GetIdentitiesForWorkgroup()
   var forRole bool // Switch for GetIdentitiesForRole()
-  var offset int64 // No description available
   var limit int64 // No description available
   var workgroupId int64 // No description available
   var roleId int64 // No description available
+  var offset int64 // No description available
 
   cmd := newCmd(c, getIdentitiesHelp, func(c *context, args []string) {
     if forWorkgroup { // GetIdentitiesForWorkgroup
@@ -1545,10 +1544,10 @@ func getIdentities(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List identities for a role")
   
   
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
   cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
 }
 
@@ -1775,10 +1774,10 @@ Examples:
 
 func getModels(c *context) *cobra.Command {
   var fromCluster bool // Switch for GetModelsFromCluster()
-  var projectId int64 // No description available
-  var offset int64 // No description available
   var limit int64 // No description available
   var clusterId int64 // No description available
+  var projectId int64 // No description available
+  var offset int64 // No description available
 
   cmd := newCmd(c, getModelsHelp, func(c *context, args []string) {
     if fromCluster { // GetModelsFromCluster
@@ -1851,10 +1850,10 @@ func getModels(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "List models from a cluster")
   
   
-  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
+  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
 }
 
@@ -1876,8 +1875,8 @@ Examples:
 func getPermissions(c *context) *cobra.Command {
   var forRole bool // Switch for GetPermissionsForRole()
   var forIdentity bool // Switch for GetPermissionsForIdentity()
-  var identityId int64 // No description available
   var roleId int64 // No description available
+  var identityId int64 // No description available
 
   cmd := newCmd(c, getPermissionsHelp, func(c *context, args []string) {
     if forRole { // GetPermissionsForRole
@@ -1927,8 +1926,8 @@ func getPermissions(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List permissions for an identity")
   
   
-  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   return cmd
 }
 
@@ -2146,9 +2145,9 @@ Examples:
 
 func getRoles(c *context) *cobra.Command {
   var forIdentity bool // Switch for GetRolesForIdentity()
+  var identityId int64 // No description available
   var offset int64 // No description available
   var limit int64 // No description available
-  var identityId int64 // No description available
 
   cmd := newCmd(c, getRolesHelp, func(c *context, args []string) {
     if forIdentity { // GetRolesForIdentity
@@ -2200,9 +2199,9 @@ func getRoles(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
   
   
+  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   return cmd
 }
 
@@ -2268,9 +2267,9 @@ Examples:
 
 func getServices(c *context) *cobra.Command {
   var forModel bool // Switch for GetServicesForModel()
+  var offset int64 // No description available
   var limit int64 // No description available
   var modelId int64 // No description available
-  var offset int64 // No description available
 
   cmd := newCmd(c, getServicesHelp, func(c *context, args []string) {
     if forModel { // GetServicesForModel
@@ -2332,9 +2331,9 @@ func getServices(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&forModel, "for-model", forModel, "List services for a model")
   
   
+  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
 }
 
@@ -2770,96 +2769,6 @@ func registerCluster(c *context) *cobra.Command {
 
 
 
-var renameHelp = `
-rename [?]
-Rename entities
-Commands:
-
-    $ steam rename model ...
-    $ steam rename service ...
-`
-func rename(c *context) *cobra.Command {
-  cmd := newCmd(c, renameHelp, nil)
-
-  cmd.AddCommand(renameModel(c))
-  cmd.AddCommand(renameService(c))
-  return cmd
-}
-
-
-var renameModelHelp = `
-model [?]
-Rename Model
-Examples:
-
-    Update a model name in the database
-    $ steam rename model \
-        --model-id=? \
-        --model-name=?
-
-`
-
-func renameModel(c *context) *cobra.Command {
-  var modelId int64 // No description available
-  var modelName string // No description available
-
-  cmd := newCmd(c, renameModelHelp, func(c *context, args []string) {
-    
-      // Update a model name in the database
-      err := c.remote.RenameModel(
-        modelId, // No description available
-        modelName, // No description available
-      )
-      if err != nil {
-        log.Fatalln(err)
-      }
-      return
-  })
-  
-  
-  cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
-  cmd.Flags().StringVar(&modelName, "model-name", modelName, "No description available")
-  return cmd
-}
-
-var renameServiceHelp = `
-service [?]
-Rename Service
-Examples:
-
-    Update a service name in the database
-    $ steam rename service \
-        --service-id=? \
-        --service-name=?
-
-`
-
-func renameService(c *context) *cobra.Command {
-  var serviceName string // No description available
-  var serviceId int64 // No description available
-
-  cmd := newCmd(c, renameServiceHelp, func(c *context, args []string) {
-    
-      // Update a service name in the database
-      err := c.remote.RenameService(
-        serviceId, // No description available
-        serviceName, // No description available
-      )
-      if err != nil {
-        log.Fatalln(err)
-      }
-      return
-  })
-  
-  
-  cmd.Flags().StringVar(&serviceName, "service-name", serviceName, "No description available")
-  cmd.Flags().Int64Var(&serviceId, "service-id", serviceId, "No description available")
-  return cmd
-}
-
-
-
-
 var shareHelp = `
 share [?]
 Share entities
@@ -2950,9 +2859,9 @@ Examples:
 `
 
 func splitDataset(c *context) *cobra.Command {
+  var ratio2 int // No description available
   var datasetId int64 // No description available
   var ratio1 int // No description available
-  var ratio2 int // No description available
 
   cmd := newCmd(c, splitDatasetHelp, func(c *context, args []string) {
     
@@ -2970,9 +2879,9 @@ func splitDataset(c *context) *cobra.Command {
   })
   
   
+  cmd.Flags().IntVar(&ratio2, "ratio2", ratio2, "No description available")
   cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
   cmd.Flags().IntVar(&ratio1, "ratio1", ratio1, "No description available")
-  cmd.Flags().IntVar(&ratio2, "ratio2", ratio2, "No description available")
   return cmd
 }
 
@@ -3013,11 +2922,11 @@ Examples:
 
 func startCluster(c *context) *cobra.Command {
   var onYarn bool // Switch for StartClusterOnYarn()
+  var clusterName string // No description available
   var engineId int64 // No description available
   var size int // No description available
   var memory string // No description available
   var username string // No description available
-  var clusterName string // No description available
 
   cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
     if onYarn { // StartClusterOnYarn
@@ -3040,11 +2949,11 @@ func startCluster(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&onYarn, "on-yarn", onYarn, "Start a cluster using Yarn")
   
   
+  cmd.Flags().StringVar(&clusterName, "cluster-name", clusterName, "No description available")
   cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
   cmd.Flags().IntVar(&size, "size", size, "No description available")
   cmd.Flags().StringVar(&memory, "memory", memory, "No description available")
   cmd.Flags().StringVar(&username, "username", username, "No description available")
-  cmd.Flags().StringVar(&clusterName, "cluster-name", clusterName, "No description available")
   return cmd
 }
 
@@ -3414,7 +3323,9 @@ Commands:
     $ steam update dataset ...
     $ steam update datasource ...
     $ steam update identity ...
+    $ steam update model ...
     $ steam update role ...
+    $ steam update service ...
     $ steam update workgroup ...
 `
 func update(c *context) *cobra.Command {
@@ -3423,7 +3334,9 @@ func update(c *context) *cobra.Command {
   cmd.AddCommand(updateDataset(c))
   cmd.AddCommand(updateDatasource(c))
   cmd.AddCommand(updateIdentity(c))
+  cmd.AddCommand(updateModel(c))
   cmd.AddCommand(updateRole(c))
+  cmd.AddCommand(updateService(c))
   cmd.AddCommand(updateWorkgroup(c))
   return cmd
 }
@@ -3487,10 +3400,10 @@ Examples:
 `
 
 func updateDatasource(c *context) *cobra.Command {
+  var description string // No description available
   var path string // No description available
   var datasourceId int64 // No description available
   var name string // No description available
-  var description string // No description available
 
   cmd := newCmd(c, updateDatasourceHelp, func(c *context, args []string) {
     
@@ -3508,10 +3421,10 @@ func updateDatasource(c *context) *cobra.Command {
   })
   
   
+  cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().StringVar(&path, "path", path, "No description available")
   cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
-  cmd.Flags().StringVar(&description, "description", description, "No description available")
   return cmd
 }
 
@@ -3547,6 +3460,41 @@ func updateIdentity(c *context) *cobra.Command {
   
   cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   cmd.Flags().StringVar(&password, "password", password, "No description available")
+  return cmd
+}
+
+var updateModelHelp = `
+model [?]
+Update Model
+Examples:
+
+    Updates a model
+    $ steam update model \
+        --model-id=? \
+        --model-name=?
+
+`
+
+func updateModel(c *context) *cobra.Command {
+  var modelId int64 // No description available
+  var modelName string // No description available
+
+  cmd := newCmd(c, updateModelHelp, func(c *context, args []string) {
+    
+      // Updates a model
+      err := c.remote.UpdateModel(
+        modelId, // No description available
+        modelName, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
+  })
+  
+  
+  cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
+  cmd.Flags().StringVar(&modelName, "model-name", modelName, "No description available")
   return cmd
 }
 
@@ -3586,6 +3534,41 @@ func updateRole(c *context) *cobra.Command {
   cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&description, "description", description, "No description available")
+  return cmd
+}
+
+var updateServiceHelp = `
+service [?]
+Update Service
+Examples:
+
+    Update a service
+    $ steam update service \
+        --service-id=? \
+        --service-name=?
+
+`
+
+func updateService(c *context) *cobra.Command {
+  var serviceName string // No description available
+  var serviceId int64 // No description available
+
+  cmd := newCmd(c, updateServiceHelp, func(c *context, args []string) {
+    
+      // Update a service
+      err := c.remote.UpdateService(
+        serviceId, // No description available
+        serviceName, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      return
+  })
+  
+  
+  cmd.Flags().StringVar(&serviceName, "service-name", serviceName, "No description available")
+  cmd.Flags().Int64Var(&serviceId, "service-id", serviceId, "No description available")
   return cmd
 }
 
