@@ -60,7 +60,8 @@ module.exports = {
       host: 'localhost',
       port: 3000,
       server: { baseDir: ['../var/master/www'] }
-    })
+    }),
+    require('webpack-fail-plugin')
   ],
   // more options in the optional tslint object
   tslint: {
