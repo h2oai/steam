@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { groupedBarChart } from 'vis-components';
+const visComponents: any = require('vis-components');
+const groupedBarChart = visComponents.groupedBarChart;
 
 type IBarColors = [string, string, string, string, string, string, string];
 

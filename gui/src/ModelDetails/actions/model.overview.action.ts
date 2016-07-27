@@ -1,7 +1,7 @@
 /**
  * Created by justin on 6/28/16.
  */
-import * as Remote from '../../Proxy/proxy';
+import * as Remote from '../../Proxy/Proxy';
 export const FETCH_MODEL_OVERVIEW = 'FETCH_MODEL_OVERVIEW';
 export const RECEIVE_MODEL_OVERVIEW = 'RECEIVE_MODEL_OVERVIEW';
 export const FETCH_DOWNLOAD_MODEL = 'FETCH_DOWNLOAD_MODEL';
@@ -49,7 +49,7 @@ export function downloadModel(): Function {
   return (dispatch) => {
     dispatch(requestDownloadModel());
     dispatch(receiveDownloadModel({}));
-    
+
   };
 }
 

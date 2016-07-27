@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import Panel from './Panel';
 import { fetchServices, killService } from '../actions/services.actions';
 import '../styles/deployedservices.scss';
-import { ScoringService } from '../../Proxy/proxy';
+import { ScoringService } from '../../Proxy/Proxy';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 

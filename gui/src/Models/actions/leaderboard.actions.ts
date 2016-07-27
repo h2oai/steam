@@ -3,7 +3,7 @@
  */
 import { MockFetchStrategy } from '../../App/utils/FetchStrategy/MockFetchStrategy';
 import { AjaxStrategy } from '../../App/utils/FetchStrategy/AjaxStrategy';
-import * as Remote from '../../Proxy/proxy';
+import * as Remote from '../../Proxy/Proxy';
 export const FETCH_LEADERBOARD = 'FETCH_LEADERBOARD';
 export const RECEIVE_LEADERBOARD = 'RECEIVE_LEADERBOARD';
 

@@ -7,12 +7,12 @@ import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import GroupedBarChart from './GroupedBarChart';
-import * as d3 from 'd3';
+const d3: any = require('d3');
 import { getOrdinal } from '../../App/utils/getOrdinal';
 import '../styles/variableimportance.scss';
 
 // sample data
-import { responseDistributionSubset } from '../tests/data/responseDistributionSubset';
+import { responseDistributionSubset } from '../data/responseDistributionSubset';
 
 interface Props {
   columns?: any[]

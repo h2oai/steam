@@ -7,7 +7,7 @@ import Panel from '../Projects/components/Panel';
 import PageHeader from '../Projects/components/PageHeader';
 import { fetchModelsFromCluster, fetchClusters, registerCluster } from '../Projects/actions/projects.actions';
 import { bindActionCreators } from 'redux';
-import { Cluster } from '../Proxy/proxy';
+import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
 import './styles/clusters.scss';
 

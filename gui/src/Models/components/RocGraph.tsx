@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import '../styles/rocgraph.scss';
-import { rocChart } from 'vis-components';
+const visComponents: any = require('vis-components');
+const rocChart = visComponents.rocChart;
 
 interface Props {
   data: any[],

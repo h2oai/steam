@@ -1,7 +1,7 @@
 /**
  * Created by justin on 7/22/16.
  */
-import * as Remote from '../../Proxy/proxy';
+import * as Remote from '../../Proxy/Proxy';
 
 export const REQUEST_SERVICES = 'REQUEST_SERVICES';
 export const RECEIVE_SERVICES = 'RECEIVE_SERVICES';

@@ -2,8 +2,8 @@
  * Created by justin on 7/18/16.
  */
 
-import * as Remote from '../../Proxy/proxy';
-import { Project } from '../../Proxy/proxy';
+import * as Remote from '../../Proxy/Proxy';
+import { Project } from '../../Proxy/Proxy';
 
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';

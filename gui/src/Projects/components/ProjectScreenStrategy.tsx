@@ -8,7 +8,7 @@ import WelcomeSplashScreen from './WelcomeSplashScreen';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { fetchProjects } from '../actions/projects.actions';
-import { Project } from '../../Proxy/proxy';
+import { Project } from '../../Proxy/Proxy';
 
 interface DispatchProps {
   fetchProjects: Function

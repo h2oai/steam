@@ -41,7 +41,7 @@
     "webpack": "^1.13.1"
   },
   "scripts": {
-    "postinstall": "typings install",
+    "postinstall": "typings prune && typings install",
     "start": "webpack --watch",
     "test": "jest"
   },
