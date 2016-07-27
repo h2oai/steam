@@ -39,7 +39,7 @@ build:
 	go build
 
 gui:
-	cd $(GUI) && rm -rf node_modules/ && npm install && webpack -p
+	cd $(GUI) && npm install && webpack -p
 
 ssb:
 	cd $(SSB) && ./gradlew build
