@@ -14,8 +14,8 @@ import NewProjectStep1 from './Projects/components/NewProjectStep1';
 import ImportNewProject from './Projects/components/ImportNewProject';
 import NewProjectStep2 from './Projects/components/NewProjectStep2';
 import NewProjectStep3 from './Projects/components/NewProjectStep3';
-import Services from './Projects/components/Services';
 import CreateNewModel from './Projects/components/CreateNewModel';
+import Deployment from './Deployment/Deployment';
 import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
 
@@ -94,7 +94,7 @@ export const routes: IRoute[] = [{
         // /projects/deployments
         {
           path: 'deployment',
-          component: Dummy,
+          component: Deployment,
           name: 'Deployment',
           showInBreadcrumb: true,
           showInNavigation: true
@@ -159,7 +159,7 @@ export const routes: IRoute[] = [{
       path: 'services',
       name: 'Services',
       icon: 'fa fa-cloud',
-      component: Services,
+      component: Deployment,
       showInBreadcrumb: true,
       showInNavigation: true,
       childRoutes: []

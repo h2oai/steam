@@ -4,6 +4,7 @@
   position: relative;
   z-index: 1;
   white-space: nowrap;
+  border-bottom: $rule-solid-thick;
   .tab {
     position: relative;
     display: inline-block;
@@ -17,7 +18,8 @@
       background: $brand-dark-4;
     }
     &.selected:before {
-      border-bottom: none;
+      border-bottom: $brand-white;
+      margin-bottom: -2px;
     }
     &:before {
       content: '';
@@ -27,13 +29,11 @@
       bottom: 0;
       left: 0;
       z-index: -1;
+      border: $rule-solid-thick;
       border-bottom: none;
       background: $brand-white;
       transform: perspective(5px) rotateX(1deg);
       transform-origin: bottom;
-    }
-    &:before {
-      border: $rule-solid-thick;
     }
   }
 }
