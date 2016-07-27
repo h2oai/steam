@@ -19,17 +19,21 @@ interface Props {
 interface DispatchProps {
 }
 
-interface State {
-  isOpen: boolean
-}
-
-export class Navigation extends React.Component<Props & DispatchProps, State> {
+export class Navigation extends React.Component<Props & DispatchProps, any> {
 
   constructor() {
     super();
+    this.state = {
+      isHidden: localStorage.getItem('steamDidAgreeToEula') === 'false'
+    }
   }
 
   sitemap = routes[0].childRoutes;
+
+  isHidden() {
+    return localStorage.getItem('steamDidAgreeToEula') === 'false';
+  }
+
 
   render(): React.ReactElement<HTMLElement> {
 
@@ -63,8 +67,9 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
         );
       }
     });
+
     return (
-      <div className='nav-container'>
+      <div className={classNames('nav-container', {hidden: this.state.isHidden})}>
         <Sidebar className="primary-navigation">
           <nav className="navigation--primary">
             <div className="navigation">
