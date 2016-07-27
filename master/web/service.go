@@ -648,6 +648,49 @@ func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, er
 	return toDataset(dataset), nil
 }
 
+func framesToDatasets(frames *bindings.FramesV3) []data.Dataset {
+	array := make([]data.Dataset, len(frames.Frames))
+	for i, frame := range frames.Frames {
+		array[i] = frameToDataset(frame)
+	}
+	return array
+}
+
+func frameToDataset(frame *bindings.FrameBase) data.Dataset {
+	return data.Dataset{
+		0,
+		0,
+		frame.FrameId.Name,
+		"",
+		frame.FrameId.Name,
+		"",
+		"",
+		"",
+		time.Now(),
+	}
+}
+
+func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*web.Dataset, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
+		return nil, err
+	}
+
+	// Get cluster information
+	cluster, err := s.ds.ReadCluster(pz, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Start h2o communication
+	h2o := h2ov3.NewClient(cluster.Address)
+	frames, err := h2o.GetFramesList()
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasets(framesToDatasets(frames)), nil
+}
+
 func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDataset); err != nil {
 		return err

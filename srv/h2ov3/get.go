@@ -64,6 +64,29 @@ func (h *H2O) GetFramesFetch(frame_id string) ([]byte, *bindings.FramesV3, error
 	return data, &out, nil
 }
 
+// GetFramesList Return all Frames in the H2O distributed K/V store. */
+func (h *H2O) GetFramesList() (*bindings.FramesV3, error) {
+	//@GET
+	u := h.url("/3/Frames")
+
+	res, err := http.Get(u)
+	if err != nil {
+		return nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
+	}
+
+	data, err := h.handleResponse(res, u)
+	if err != nil {
+		return nil, err
+	}
+
+	var out bindings.FramesV3
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
+	}
+
+	return &out, nil
+}
+
 ////////////////////
 ////////////////////
 ////// InitID //////
