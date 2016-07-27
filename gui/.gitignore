@@ -38,3 +38,7 @@ bin
 tmpl/index.jade
 tmpl/index.tmp.jade
 .vscode
+dist/
+typings/
+coverage/
+.npmrc

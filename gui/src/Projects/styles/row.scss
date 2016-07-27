@@ -1,0 +1,15 @@
+@import '../../variables.scss';
+
+.table .row {
+  width: 100%;
+  border-bottom: $rule-dotted-thin;
+  padding: 15px 0;
+  @media (min-width: 500px) {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+  &.header {
+    border-bottom: $rule-solid-thick;
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "lodash": "registry:npm/lodash#4.0.0+20160416211519",
+    "react-router": "registry:npm/react-router#2.4.0+20160628165748",
+    "react-router-redux": "registry:npm/react-router-redux#4.0.0+20160602212457"
+  },
+  "globalDependencies": {
+    "classnames": "registry:dt/classnames#0.0.0+20160316155526",
+    "es6-promise": "registry:dt/es6-promise#0.0.0+20160614011821",
+    "jest": "registry:dt/jest#0.9.0+20160706021812",
+    "jquery": "registry:dt/jquery#1.10.0+20160417213236",
+    "react": "registry:dt/react#0.14.0+20160602151522",
+    "react-addons-test-utils": "registry:dt/react-addons-test-utils#0.14.0+20160427035638",
+    "react-addons-update": "registry:dt/react-addons-update#0.14.0+20160316155526",
+    "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
+    "react-redux": "registry:dt/react-redux#4.4.0+20160501125835",
+    "react-router/history": "registry:dt/react-router/history#2.0.0+20160608102730",
+    "redux": "registry:dt/redux#3.3.1+20160326112656",
+    "redux-thunk": "registry:dt/redux-thunk#2.0.1+20160317120654",
+    "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160524142046"
+  }
+}

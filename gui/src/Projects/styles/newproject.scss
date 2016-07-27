@@ -1,0 +1,92 @@
+@import '../../variables.scss';
+
+.new-project {
+  font-family: $font-text;
+  .project-description {
+    width: 30%;
+  }
+  .project-description-list {
+    list-style-type: square;
+    margin-bottom: $medium;
+    li {
+      padding: $xsmall / 3;
+    }
+  }
+  .cards-container {
+    display: flex;
+    .card:not(:first-of-type) {
+      margin: 0 10px;
+    }
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    &.small {
+      width: 20%;
+    }
+    padding: $xsmall;
+    header {
+      font-size: 1.5em;
+      font-weight: 800;
+      margin-bottom: $xsmall;
+    }
+    article {
+      font-family: $font-text;
+      margin-bottom: $small;
+    }
+    footer {
+      margin-top: auto;
+    }
+    border: $rule-solid-thin;
+    border-radius: 3px;
+  }
+  form {
+    margin: $small 0;
+    label {
+      font-size: 1.5em;
+      display: block;
+      margin: ($xsmall / 2) 0;
+    }
+    span {
+      font-size: 1em;
+      font-family: "Open Sans", sans-serif;
+      display: block;
+    }
+    input {
+      width: $base-grid-unit * 3;
+    }
+  }
+  .save-dictionary, .train-models {
+    margin: $medium 0;
+  }
+  .build-model {
+    margin-bottom: $medium;
+    .row.header {
+      padding: 0;
+    }
+    .row {
+      padding: $xsmall 0;
+      .cell:first-child {
+        flex-basis: $xlarge * 2;
+        flex-grow: 0;
+      }
+    }
+    .mode-checkboxes {
+      width: 50%;
+      display: flex;
+      justify-content: space-between;
+    }
+    .dataframe-range {
+      display: flex;
+      flex-direction: column;
+      width: $xlarge * 5;
+      input[type="range"] {
+        width: $xlarge * 5;
+      }
+      &-labels {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+  }
+}

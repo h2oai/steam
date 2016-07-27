@@ -120,7 +120,11 @@ public class MakeWarServlet extends HttpServlet {
       String extraPath = "extra" + File.separator;
       String webInfPath = extraPath + File.separator + "WEB-INF" + File.separator;
       String srcPath = extraPath + "src" + File.separator;
-      copyExtraFile(servletPath, extraPath, tmpDir, "index.html", "index.html");
+
+      if (transformerClassName == null)
+        copyExtraFile(servletPath, extraPath, tmpDir, "index.html", "index.html");
+      else
+        copyExtraFile(servletPath, extraPath, tmpDir, "jarindex.html", "index.html");
       copyExtraFile(servletPath, extraPath, tmpDir, "jquery.js", "jquery.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "predict.js", "predict.js");
       copyExtraFile(servletPath, extraPath, tmpDir, "custom.css", "custom.css");
