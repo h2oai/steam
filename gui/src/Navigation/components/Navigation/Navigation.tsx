@@ -25,7 +25,6 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
-      isHidden: localStorage.getItem('steamDidAgreeToEula') === 'false',
       isEulaAgreed: false
     };
   }
