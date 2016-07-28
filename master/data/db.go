@@ -3246,6 +3246,224 @@ func (ds *Datastore) DeleteModel(pz az.Principal, modelId int64) error {
 	})
 }
 
+// --- Label ---
+
+func (ds *Datastore) CreateLabel(pz az.Principal, projectId int64, name, description string) (int64, error) {
+	if err := pz.CheckEdit(ds.EntityTypes.Project, projectId); err != nil {
+		return 0, err
+	}
+
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				label
+				(project_id, name, description, created)
+			VALUES
+				($1,         $2,   $3,          now())
+			RETURNING id
+			`,
+			projectId,
+			name,
+			description,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			pz.WorkgroupId(),
+			ds.EntityTypes.Label,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Label, id, metadata{
+			"projectId":   strconv.FormatInt(projectId, 10),
+			"name":        name,
+			"description": description,
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) UpdateLabel(pz az.Principal, labelId int64, name, description string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				label
+			SET
+				name = $1,
+				description = $2
+			WHERE
+				id = $3
+			`, name, description, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Label, labelId, metadata{"name": name, "description": description})
+	})
+}
+
+func (ds *Datastore) DeleteLabel(pz az.Principal, labelId int64) error {
+	if err := pz.CheckOwns(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		var id int64
+		row := tx.QueryRow(`
+			DELETE FROM
+				label
+			WHERE
+				id = $1
+			RETURNING id
+			`, labelId)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Label, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, DeleteOp, ds.EntityTypes.Label, labelId, metadata{})
+	})
+}
+
+func readModelName(tx *sql.Tx, modelId int64) (string, error) {
+	row := tx.QueryRow("SELECT name FROM model WHERE id = $1", modelId)
+	var name string
+	err := row.Scan(&name)
+	return name, err
+}
+
+func (ds *Datastore) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		modelName, err := readModelName(tx, modelId)
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.Exec(`
+			UPDATE
+				label
+			SET
+				model_id = $1,
+			WHERE
+				id = $2
+			`, modelId, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Label, labelId, metadata{"modelName": modelName})
+	})
+}
+
+func (ds *Datastore) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		modelName, err := readModelName(tx, modelId)
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.Exec(`
+			UPDATE
+				label
+			SET
+				model_id = null,
+			WHERE
+				id = $1
+			`, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Label, labelId, metadata{"modelName": modelName})
+	})
+}
+
+func (ds *Datastore) ReadLabelsForProject(pz az.Principal, projectId int64) ([]Label, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, model_id, name, description, created
+		FROM
+			label
+		WHERE
+			project_id = $1 AND
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					$4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			)
+		ORDER BY
+			name
+		`, projectId, pz.Id(), ds.EntityTypes.Label, pz.IsSuperuser())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanLabels(rows)
+}
+
+func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, model_id, name, description, created
+		FROM
+			label
+		WHERE
+			id = $1 AND
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					$4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			)
+		ORDER BY
+			name
+		`, labelId, pz.Id(), ds.EntityTypes.Label, pz.IsSuperuser())
+	if err != nil {
+		return Label{}, err
+	}
+	defer rows.Close()
+
+	labels, err := ScanLabels(rows)
+	if err != nil {
+		return Label{}, err
+	}
+	if len(labels) > 0 {
+		return labels[0], nil
+	}
+	return Label{}, fmt.Errorf("Label %d not found", labelId)
+}
+
 // --- Service ---
 
 func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, error) {

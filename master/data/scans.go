@@ -664,6 +664,44 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 	return structs, nil
 }
 
+func ScanLabel(r *sql.Row) (Label, error) {
+	var s Label
+	if err := r.Scan(
+		&s.Id,
+		&s.ProjectId,
+		&s.ModelId,
+		&s.Name,
+		&s.Description,
+		&s.Created,
+	); err != nil {
+		return Label{}, err
+	}
+	return s, nil
+}
+
+func ScanLabels(rs *sql.Rows) ([]Label, error) {
+	structs := make([]Label, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Label
+		if err = rs.Scan(
+			&s.Id,
+			&s.ProjectId,
+			&s.ModelId,
+			&s.Name,
+			&s.Description,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanService(r *sql.Row) (Service, error) {
 	var s Service
 	if err := r.Scan(

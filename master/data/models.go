@@ -158,6 +158,15 @@ type Model struct {
 	Created             time.Time
 }
 
+type Label struct {
+	Id          int64
+	ProjectId   int64
+	ModelId     int64
+	Name        string
+	Description string
+	Created     time.Time
+}
+
 type Service struct {
 	Id        int64
 	ModelId   int64

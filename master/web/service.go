@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/h2oai/steamY/bindings"
@@ -975,27 +976,104 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 }
 
 func (s *Service) CreateLabel(pz az.Principal, projectId int64, name, description string) (int64, error) {
-	return 0, nil
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return 0, err
+	}
+
+	name = strings.TrimSpace(name)
+	if len(name) == 0 {
+		return 0, fmt.Errorf("Label name cannot be empty")
+	}
+
+	if err := s.checkForDuplicateLabel(pz, projectId, name); err != nil {
+		return 0, err
+	}
+
+	id, err := s.ds.CreateLabel(pz, projectId, name, description)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
 func (s *Service) UpdateLabel(pz az.Principal, labelId int64, name, description string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+
+	name = strings.TrimSpace(name)
+	if len(name) == 0 {
+		return fmt.Errorf("Label name cannot be empty")
+	}
+
+	label, err := s.ds.ReadLabel(pz, labelId)
+	if err != nil {
+		return err
+	}
+
+	if err := s.checkForDuplicateLabel(pz, label.ProjectId, name); err != nil {
+		return err
+	}
+
+	return s.ds.UpdateLabel(pz, labelId, name, description)
+}
+
+func (s *Service) checkForDuplicateLabel(pz az.Principal, projectId int64, name string) error {
+	labels, err := s.ds.ReadLabelsForProject(pz, projectId)
+	if err != nil {
+		return err
+	}
+
+	for _, label := range labels {
+		if label.Name == name {
+			return fmt.Errorf("A label named %s is already associated with this project", name)
+		}
+	}
 	return nil
 }
 
 func (s *Service) DeleteLabel(pz az.Principal, labelId int64) error {
-	return nil
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+
+	return s.ds.DeleteLabel(pz, labelId)
 }
 
 func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) error {
-	return nil
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return err
+	}
+
+	return s.ds.LinkLabelWithModel(pz, labelId, modelId)
 }
 
 func (s *Service) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int64) error {
-	return nil
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return err
+	}
+
+	return s.ds.UnlinkLabelFromModel(pz, labelId, modelId)
 }
 
 func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.Label, error) {
-	return nil, nil
+	if err := pz.CheckPermission(s.ds.Permissions.ViewLabel); err != nil {
+		return nil, err
+	}
+
+	labels, err := s.ds.ReadLabelsForProject(pz, projectId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toLabels(labels), nil
 }
 
 func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
@@ -1874,6 +1952,21 @@ func toProjects(projects []data.Project) []*web.Project {
 	array := make([]*web.Project, len(projects))
 	for i, project := range projects {
 		array[i] = toProject(project)
+	}
+	return array
+}
+
+func toLabels(labels []data.Label) []*web.Label {
+	array := make([]*web.Label, len(labels))
+	for i, label := range labels {
+		array[i] = &web.Label{
+			label.Id,
+			label.ProjectId,
+			label.ModelId,
+			label.Name,
+			label.Description,
+			toTimestamp(label.Created),
+		}
 	}
 	return array
 }
