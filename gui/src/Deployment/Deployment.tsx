@@ -3,12 +3,11 @@
  */
 import * as React from 'react';
 import * as _ from 'lodash';
-import PageHeader from './PageHeader';
-import TabNavigation from './TabNavigation';
-import DeployedServices from './DeployedServices';
-import Packaging from './Packaging';
-import ModelApi from './ModelApi';
-import '../styles/services.scss';
+import PageHeader from '../Projects/components/PageHeader';
+import TabNavigation from '../Projects/components/TabNavigation';
+import DeployedServices from '../Projects/components/DeployedServices';
+import Packaging from './components/Packaging';
+import './styles/deployment.scss';
 
 export default class Services extends React.Component<any, any> {
   constructor() {
@@ -16,22 +15,16 @@ export default class Services extends React.Component<any, any> {
     this.state = {
       tabs: {
         deployedServices: {
-          label: 'Services',
+          label: 'DEPLOYED SERVICES',
           isSelected: true,
           onClick: this.clickHandler.bind(this),
           component: <DeployedServices/>
         },
         packaging: {
-          label: 'Packaging',
+          label: 'PACKAGING',
           isSelected: false,
           onClick: this.clickHandler.bind(this),
           component: <Packaging/>
-        },
-        modelApi: {
-          label: 'Model API',
-          isSelected: false,
-          onClick: this.clickHandler.bind(this),
-          component: <ModelApi/>
         }
       },
       isSelected: 'deployedServices'
@@ -49,10 +42,18 @@ export default class Services extends React.Component<any, any> {
     this.setState(newState);
   }
 
+  uploadNewPackage() {
+
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="services">
-        <PageHeader>Services</PageHeader>
+        <PageHeader>
+          <span>Deployment</span>
+          <span><button className="default" onClick={this.uploadNewPackage.bind(this)}>Upload New Package</button></span>
+        </PageHeader>
+        <TabNavigation tabs={this.state.tabs}/>
         <main>
           {this.state.tabs[this.state.isSelected].component}
         </main>
