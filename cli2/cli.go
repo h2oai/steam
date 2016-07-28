@@ -127,7 +127,6 @@ Examples:
 `
 
 func buildModel(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var auto bool // Switch for BuildModelAuto()
   var algorithm string // No description available
   var clusterId int64 // No description available
@@ -135,81 +134,6 @@ func buildModel(c *context) *cobra.Command {
   var datasetId int64 // No description available
   var maxRunTime int // No description available
   var targetName string // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var auto bool         // Switch for BuildModelAuto()
-	var algorithm string  // No description available
-	var clusterId int64   // No description available
-	var dataset string    // No description available
-	var datasetId int64   // No description available
-	var maxRunTime int    // No description available
-	var targetName string // No description available
-
-	cmd := newCmd(c, buildModelHelp, func(c *context, args []string) {
-		if auto { // BuildModelAuto
-
-			// Build an AutoML model
-			model, err := c.remote.BuildModelAuto(
-				clusterId,  // No description available
-				dataset,    // No description available
-				targetName, // No description available
-				maxRunTime, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := []string{
-				fmt.Sprintf("Id:\t%v\t", model.Id),                                   // No description available
-				fmt.Sprintf("TrainingDatasetId:\t%v\t", model.TrainingDatasetId),     // No description available
-				fmt.Sprintf("ValidationDatasetId:\t%v\t", model.ValidationDatasetId), // No description available
-				fmt.Sprintf("Name:\t%v\t", model.Name),                               // No description available
-				fmt.Sprintf("ClusterName:\t%v\t", model.ClusterName),                 // No description available
-				fmt.Sprintf("ModelKey:\t%v\t", model.ModelKey),                       // No description available
-				fmt.Sprintf("Algorithm:\t%v\t", model.Algorithm),                     // No description available
-				fmt.Sprintf("DatasetName:\t%v\t", model.DatasetName),                 // No description available
-				fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName),   // No description available
-				fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName),                 // No description available
-				fmt.Sprintf("Location:\t%v\t", model.Location),                       // No description available
-				fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime),                   // No description available
-				fmt.Sprintf("Metrics:\t%v\t", model.Metrics),                         // No description available
-				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
-			}
-			c.printt("Attribute\tValue\t", lines)
-			return
-		}
-		if true { // default
-
-			// Build a model
-			modelId, err := c.remote.BuildModel(
-				clusterId, // No description available
-				datasetId, // No description available
-				algorithm, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Printf("ModelId:\t%v\n", modelId)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&auto, "auto", auto, "Build an AutoML model")
-
-	cmd.Flags().StringVar(&algorithm, "algorithm", algorithm, "No description available")
-	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-	cmd.Flags().StringVar(&dataset, "dataset", dataset, "No description available")
-	cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
-	cmd.Flags().IntVar(&maxRunTime, "max-run-time", maxRunTime, "No description available")
-	cmd.Flags().StringVar(&targetName, "target-name", targetName, "No description available")
-	return cmd
-=======
-  var auto bool // Switch for BuildModelAuto()
-  var clusterId int64 // No description available
-  var datasetId int64 // No description available
-  var algorithm string // No description available
-  var dataset string // No description available
-  var targetName string // No description available
-  var maxRunTime int // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, buildModelHelp, func(c *context, args []string) {
     if auto { // BuildModelAuto
@@ -232,10 +156,7 @@ func buildModel(c *context) *cobra.Command {
         fmt.Sprintf("ClusterName:\t%v\t", model.ClusterName), // No description available
         fmt.Sprintf("ModelKey:\t%v\t", model.ModelKey), // No description available
         fmt.Sprintf("Algorithm:\t%v\t", model.Algorithm), // No description available
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
         fmt.Sprintf("ModelCategory:\t%v\t", model.ModelCategory), // No description available
-=======
->>>>>>> STEAM-340: reading models by project and linking models to project
         fmt.Sprintf("DatasetName:\t%v\t", model.DatasetName), // No description available
         fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName), // No description available
         fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName), // No description available
@@ -265,7 +186,6 @@ func buildModel(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&auto, "auto", auto, "Build an AutoML model")
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().StringVar(&algorithm, "algorithm", algorithm, "No description available")
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
   cmd.Flags().StringVar(&dataset, "dataset", dataset, "No description available")
@@ -273,16 +193,6 @@ func buildModel(c *context) *cobra.Command {
   cmd.Flags().IntVar(&maxRunTime, "max-run-time", maxRunTime, "No description available")
   cmd.Flags().StringVar(&targetName, "target-name", targetName, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-  cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
-  cmd.Flags().StringVar(&algorithm, "algorithm", algorithm, "No description available")
-  cmd.Flags().StringVar(&dataset, "dataset", dataset, "No description available")
-  cmd.Flags().StringVar(&targetName, "target-name", targetName, "No description available")
-  cmd.Flags().IntVar(&maxRunTime, "max-run-time", maxRunTime, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 
@@ -331,50 +241,11 @@ Examples:
 `
 
 func createDataset(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var clusterId int64 // No description available
   var datasourceId int64 // No description available
   var description string // No description available
   var name string // No description available
   var responseColumnName string // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var clusterId int64           // No description available
-	var datasourceId int64        // No description available
-	var description string        // No description available
-	var name string               // No description available
-	var responseColumnName string // No description available
-
-	cmd := newCmd(c, createDatasetHelp, func(c *context, args []string) {
-
-		// Create a dataset
-		datasetId, err := c.remote.CreateDataset(
-			clusterId,          // No description available
-			datasourceId,       // No description available
-			name,               // No description available
-			description,        // No description available
-			responseColumnName, // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Printf("DatasetId:\t%v\n", datasetId)
-		return
-	})
-
-	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-	cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
-	return cmd
-=======
-  var description string // No description available
-  var responseColumnName string // No description available
-  var clusterId int64 // No description available
-  var datasourceId int64 // No description available
-  var name string // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, createDatasetHelp, func(c *context, args []string) {
     
@@ -394,22 +265,12 @@ func createDataset(c *context) *cobra.Command {
   })
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
   cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
   cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
   return cmd
-=======
-  cmd.Flags().StringVar(&description, "description", description, "No description available")
-  cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
-  cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-  cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
-  cmd.Flags().StringVar(&name, "name", name, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var createDatasourceHelp = `
@@ -427,45 +288,10 @@ Examples:
 `
 
 func createDatasource(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var description string // No description available
   var name string // No description available
   var path string // No description available
   var projectId int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var description string // No description available
-	var name string        // No description available
-	var path string        // No description available
-	var projectId int64    // No description available
-
-	cmd := newCmd(c, createDatasourceHelp, func(c *context, args []string) {
-
-		// Create a datasource
-		datasourceId, err := c.remote.CreateDatasource(
-			projectId,   // No description available
-			name,        // No description available
-			description, // No description available
-			path,        // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Printf("DatasourceId:\t%v\n", datasourceId)
-		return
-	})
-
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().StringVar(&path, "path", path, "No description available")
-	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-	return cmd
-=======
-  var description string // No description available
-  var path string // No description available
-  var projectId int64 // No description available
-  var name string // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, createDatasourceHelp, func(c *context, args []string) {
     
@@ -485,18 +311,10 @@ func createDatasource(c *context) *cobra.Command {
   
   
   cmd.Flags().StringVar(&description, "description", description, "No description available")
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&path, "path", path, "No description available")
   cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
   return cmd
-=======
-  cmd.Flags().StringVar(&path, "path", path, "No description available")
-  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-  cmd.Flags().StringVar(&name, "name", name, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var createIdentityHelp = `
@@ -1444,7 +1262,6 @@ Examples:
 `
 
 func getDatasets(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var fromCluster bool // Switch for GetDatasetsFromCluster()
   var clusterId int64 // No description available
   var datasourceId int64 // No description available
@@ -1480,53 +1297,6 @@ func getDatasets(c *context) *cobra.Command {
     }
     if true { // default
       
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var datasourceId int64 // No description available
-	var limit int64        // No description available
-	var offset int64       // No description available
-
-	cmd := newCmd(c, getDatasetsHelp, func(c *context, args []string) {
-
-		// List datasets
-		datasets, err := c.remote.GetDatasets(
-			datasourceId, // No description available
-			offset,       // No description available
-			limit,        // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		lines := make([]string, len(datasets))
-		for i, e := range datasets {
-			lines[i] = fmt.Sprintf(
-				"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
-				e.Id,                 // No description available
-				e.DatasourceId,       // No description available
-				e.Name,               // No description available
-				e.Description,        // No description available
-				e.FrameName,          // No description available
-				e.ResponseColumnName, // No description available
-				e.Properties,         // No description available
-				e.CreatedAt,          // No description available
-			)
-		}
-		c.printt("Id\tDatasourceId\tName\tDescription\tFrameName\tResponseColumnName\tProperties\tCreatedAt\t", lines)
-		return
-	})
-
-	cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-	return cmd
-=======
-  var datasourceId int64 // No description available
-  var offset int64 // No description available
-  var limit int64 // No description available
-
-  cmd := newCmd(c, getDatasetsHelp, func(c *context, args []string) {
-    
->>>>>>> STEAM-340: reading models by project and linking models to project
       // List datasets
       datasets, err := c.remote.GetDatasets(
         datasourceId, // No description available
@@ -1552,7 +1322,6 @@ func getDatasets(c *context) *cobra.Command {
       }
       c.printt("Id\tDatasourceId\tName\tDescription\tFrameName\tResponseColumnName\tProperties\tCreatedAt\t", lines)
       return
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
     }
   })
   cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "Get a list of datasets on a cluster")
@@ -1563,16 +1332,6 @@ func getDatasets(c *context) *cobra.Command {
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
-=======
-  })
-  
-  
-  cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var getDatasourceHelp = `
@@ -1630,53 +1389,9 @@ Examples:
 `
 
 func getDatasources(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var limit int64 // No description available
   var offset int64 // No description available
   var projectId int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var limit int64     // No description available
-	var offset int64    // No description available
-	var projectId int64 // No description available
-
-	cmd := newCmd(c, getDatasourcesHelp, func(c *context, args []string) {
-
-		// List datasources
-		datasources, err := c.remote.GetDatasources(
-			projectId, // No description available
-			offset,    // No description available
-			limit,     // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		lines := make([]string, len(datasources))
-		for i, e := range datasources {
-			lines[i] = fmt.Sprintf(
-				"%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
-				e.Id,            // No description available
-				e.ProjectId,     // No description available
-				e.Name,          // No description available
-				e.Description,   // No description available
-				e.Kind,          // No description available
-				e.Configuration, // No description available
-				e.CreatedAt,     // No description available
-			)
-		}
-		c.printt("Id\tProjectId\tName\tDescription\tKind\tConfiguration\tCreatedAt\t", lines)
-		return
-	})
-
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-	return cmd
-=======
-  var limit int64 // No description available
-  var projectId int64 // No description available
-  var offset int64 // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, getDatasourcesHelp, func(c *context, args []string) {
     
@@ -1708,16 +1423,9 @@ func getDatasources(c *context) *cobra.Command {
   
   
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var getEngineHelp = `
@@ -1871,108 +1579,11 @@ Examples:
 `
 
 func getIdentities(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var forWorkgroup bool // Switch for GetIdentitiesForWorkgroup()
   var forRole bool // Switch for GetIdentitiesForRole()
   var limit int64 // No description available
   var offset int64 // No description available
   var roleId int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var forWorkgroup bool // Switch for GetIdentitiesForWorkgroup()
-	var forRole bool      // Switch for GetIdentitiesForRole()
-	var limit int64       // No description available
-	var offset int64      // No description available
-	var roleId int64      // No description available
-	var workgroupId int64 // No description available
-
-	cmd := newCmd(c, getIdentitiesHelp, func(c *context, args []string) {
-		if forWorkgroup { // GetIdentitiesForWorkgroup
-
-			// List identities for a workgroup
-			identities, err := c.remote.GetIdentitiesForWorkgroup(
-				workgroupId, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(identities))
-			for i, e := range identities {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t",
-					e.Id,        // No description available
-					e.Name,      // No description available
-					e.IsActive,  // No description available
-					e.LastLogin, // No description available
-					e.Created,   // No description available
-				)
-			}
-			c.printt("Id\tName\tIsActive\tLastLogin\tCreated\t", lines)
-			return
-		}
-		if forRole { // GetIdentitiesForRole
-
-			// List identities for a role
-			identities, err := c.remote.GetIdentitiesForRole(
-				roleId, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(identities))
-			for i, e := range identities {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t",
-					e.Id,        // No description available
-					e.Name,      // No description available
-					e.IsActive,  // No description available
-					e.LastLogin, // No description available
-					e.Created,   // No description available
-				)
-			}
-			c.printt("Id\tName\tIsActive\tLastLogin\tCreated\t", lines)
-			return
-		}
-		if true { // default
-
-			// List identities
-			identities, err := c.remote.GetIdentities(
-				offset, // No description available
-				limit,  // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(identities))
-			for i, e := range identities {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t",
-					e.Id,        // No description available
-					e.Name,      // No description available
-					e.IsActive,  // No description available
-					e.LastLogin, // No description available
-					e.Created,   // No description available
-				)
-			}
-			c.printt("Id\tName\tIsActive\tLastLogin\tCreated\t", lines)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&forWorkgroup, "for-workgroup", forWorkgroup, "List identities for a workgroup")
-	cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List identities for a role")
-
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
-	return cmd
-=======
-  var forWorkgroup bool // Switch for GetIdentitiesForWorkgroup()
-  var forRole bool // Switch for GetIdentitiesForRole()
-  var roleId int64 // No description available
-  var offset int64 // No description available
-  var limit int64 // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
   var workgroupId int64 // No description available
 
   cmd := newCmd(c, getIdentitiesHelp, func(c *context, args []string) {
@@ -2051,20 +1662,11 @@ func getIdentities(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List identities for a role")
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
   cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-  cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var getIdentityHelp = `
@@ -2148,43 +1750,8 @@ Examples:
 `
 
 func getJob(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var clusterId int64 // No description available
   var jobName string // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var clusterId int64 // No description available
-	var jobName string  // No description available
-
-	cmd := newCmd(c, getJobHelp, func(c *context, args []string) {
-
-		// Get job details
-		job, err := c.remote.GetJob(
-			clusterId, // No description available
-			jobName,   // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		lines := []string{
-			fmt.Sprintf("Name:\t%v\t", job.Name),               // No description available
-			fmt.Sprintf("ClusterName:\t%v\t", job.ClusterName), // No description available
-			fmt.Sprintf("Description:\t%v\t", job.Description), // No description available
-			fmt.Sprintf("Progress:\t%v\t", job.Progress),       // No description available
-			fmt.Sprintf("StartedAt:\t%v\t", job.StartedAt),     // No description available
-			fmt.Sprintf("CompletedAt:\t%v\t", job.CompletedAt), // No description available
-		}
-		c.printt("Attribute\tValue\t", lines)
-		return
-	})
-
-	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-	cmd.Flags().StringVar(&jobName, "job-name", jobName, "No description available")
-	return cmd
-=======
-  var jobName string // No description available
-  var clusterId int64 // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, getJobHelp, func(c *context, args []string) {
     
@@ -2209,16 +1776,9 @@ func getJob(c *context) *cobra.Command {
   })
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
   cmd.Flags().StringVar(&jobName, "job-name", jobName, "No description available")
   return cmd
-=======
-  cmd.Flags().StringVar(&jobName, "job-name", jobName, "No description available")
-  cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var getJobsHelp = `
@@ -2381,103 +1941,12 @@ Examples:
 `
 
 func getModels(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var fromCluster bool // Switch for GetModelsFromCluster()
   var clusterId int64 // No description available
   var frameKey string // No description available
   var limit int64 // No description available
   var offset int64 // No description available
   var projectId int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var fromCluster bool // Switch for GetModelsFromCluster()
-	var clusterId int64  // No description available
-	var limit int64      // No description available
-	var offset int64     // No description available
-	var projectId int64  // No description available
-
-	cmd := newCmd(c, getModelsHelp, func(c *context, args []string) {
-		if fromCluster { // GetModelsFromCluster
-
-			// List models from a cluster
-			models, err := c.remote.GetModelsFromCluster(
-				clusterId, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(models))
-			for i, e := range models {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
-					e.Id,                  // No description available
-					e.TrainingDatasetId,   // No description available
-					e.ValidationDatasetId, // No description available
-					e.Name,                // No description available
-					e.ClusterName,         // No description available
-					e.ModelKey,            // No description available
-					e.Algorithm,           // No description available
-					e.DatasetName,         // No description available
-					e.ResponseColumnName,  // No description available
-					e.LogicalName,         // No description available
-					e.Location,            // No description available
-					e.MaxRuntime,          // No description available
-					e.Metrics,             // No description available
-					e.CreatedAt,           // No description available
-				)
-			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
-			return
-		}
-		if true { // default
-
-			// List models
-			models, err := c.remote.GetModels(
-				projectId, // No description available
-				offset,    // No description available
-				limit,     // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(models))
-			for i, e := range models {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
-					e.Id,                  // No description available
-					e.TrainingDatasetId,   // No description available
-					e.ValidationDatasetId, // No description available
-					e.Name,                // No description available
-					e.ClusterName,         // No description available
-					e.ModelKey,            // No description available
-					e.Algorithm,           // No description available
-					e.DatasetName,         // No description available
-					e.ResponseColumnName,  // No description available
-					e.LogicalName,         // No description available
-					e.Location,            // No description available
-					e.MaxRuntime,          // No description available
-					e.Metrics,             // No description available
-					e.CreatedAt,           // No description available
-				)
-			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "List models from a cluster")
-
-	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-	return cmd
-=======
-  var fromCluster bool // Switch for GetModelsFromCluster()
-  var projectId int64 // No description available
-  var offset int64 // No description available
-  var limit int64 // No description available
-  var clusterId int64 // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, getModelsHelp, func(c *context, args []string) {
     if fromCluster { // GetModelsFromCluster
@@ -2485,10 +1954,7 @@ func getModels(c *context) *cobra.Command {
       // List models from a cluster
       models, err := c.remote.GetModelsFromCluster(
         clusterId, // No description available
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
         frameKey, // No description available
-=======
->>>>>>> STEAM-340: reading models by project and linking models to project
       )
       if err != nil {
         log.Fatalln(err)
@@ -2496,11 +1962,7 @@ func getModels(c *context) *cobra.Command {
       lines := make([]string, len(models))
       for i, e := range models {
         lines[i] = fmt.Sprintf(
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
           "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
-=======
-          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
->>>>>>> STEAM-340: reading models by project and linking models to project
           e.Id, // No description available
           e.TrainingDatasetId, // No description available
           e.ValidationDatasetId, // No description available
@@ -2508,10 +1970,7 @@ func getModels(c *context) *cobra.Command {
           e.ClusterName, // No description available
           e.ModelKey, // No description available
           e.Algorithm, // No description available
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
           e.ModelCategory, // No description available
-=======
->>>>>>> STEAM-340: reading models by project and linking models to project
           e.DatasetName, // No description available
           e.ResponseColumnName, // No description available
           e.LogicalName, // No description available
@@ -2521,11 +1980,7 @@ func getModels(c *context) *cobra.Command {
           e.CreatedAt, // No description available
         )
       }
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
       c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
-=======
-      c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
->>>>>>> STEAM-340: reading models by project and linking models to project
       return
     }
     if true { // default
@@ -2542,11 +1997,7 @@ func getModels(c *context) *cobra.Command {
       lines := make([]string, len(models))
       for i, e := range models {
         lines[i] = fmt.Sprintf(
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
           "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
-=======
-          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
->>>>>>> STEAM-340: reading models by project and linking models to project
           e.Id, // No description available
           e.TrainingDatasetId, // No description available
           e.ValidationDatasetId, // No description available
@@ -2554,10 +2005,7 @@ func getModels(c *context) *cobra.Command {
           e.ClusterName, // No description available
           e.ModelKey, // No description available
           e.Algorithm, // No description available
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
           e.ModelCategory, // No description available
-=======
->>>>>>> STEAM-340: reading models by project and linking models to project
           e.DatasetName, // No description available
           e.ResponseColumnName, // No description available
           e.LogicalName, // No description available
@@ -2567,32 +2015,19 @@ func getModels(c *context) *cobra.Command {
           e.CreatedAt, // No description available
         )
       }
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
       c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
-=======
-      c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\t", lines)
->>>>>>> STEAM-340: reading models by project and linking models to project
       return
     }
   })
   cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "List models from a cluster")
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
   cmd.Flags().StringVar(&frameKey, "frame-key", frameKey, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-  cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var getPermissionsHelp = `
@@ -2817,64 +2252,9 @@ Examples:
 `
 
 func getRole(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var byName bool // Switch for GetRoleByName()
   var name string // No description available
   var roleId int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var byName bool  // Switch for GetRoleByName()
-	var name string  // No description available
-	var roleId int64 // No description available
-
-	cmd := newCmd(c, getRoleHelp, func(c *context, args []string) {
-		if byName { // GetRoleByName
-
-			// Get role details by name
-			role, err := c.remote.GetRoleByName(
-				name, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := []string{
-				fmt.Sprintf("Id:\t%v\t", role.Id),                   // No description available
-				fmt.Sprintf("Name:\t%v\t", role.Name),               // No description available
-				fmt.Sprintf("Description:\t%v\t", role.Description), // No description available
-				fmt.Sprintf("Created:\t%v\t", role.Created),         // No description available
-			}
-			c.printt("Attribute\tValue\t", lines)
-			return
-		}
-		if true { // default
-
-			// Get role details
-			role, err := c.remote.GetRole(
-				roleId, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := []string{
-				fmt.Sprintf("Id:\t%v\t", role.Id),                   // No description available
-				fmt.Sprintf("Name:\t%v\t", role.Name),               // No description available
-				fmt.Sprintf("Description:\t%v\t", role.Description), // No description available
-				fmt.Sprintf("Created:\t%v\t", role.Created),         // No description available
-			}
-			c.printt("Attribute\tValue\t", lines)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&byName, "by-name", byName, "Get role details by name")
-
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-	return cmd
-=======
-  var byName bool // Switch for GetRoleByName()
-  var roleId int64 // No description available
-  var name string // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, getRoleHelp, func(c *context, args []string) {
     if byName { // GetRoleByName
@@ -2917,16 +2297,9 @@ func getRole(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&byName, "by-name", byName, "Get role details by name")
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-  cmd.Flags().StringVar(&name, "name", name, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var getRolesHelp = `
@@ -2946,75 +2319,9 @@ Examples:
 `
 
 func getRoles(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var forIdentity bool // Switch for GetRolesForIdentity()
   var identityId int64 // No description available
   var limit int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var forIdentity bool // Switch for GetRolesForIdentity()
-	var identityId int64 // No description available
-	var limit int64      // No description available
-	var offset int64     // No description available
-
-	cmd := newCmd(c, getRolesHelp, func(c *context, args []string) {
-		if forIdentity { // GetRolesForIdentity
-
-			// List roles for an identity
-			roles, err := c.remote.GetRolesForIdentity(
-				identityId, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(roles))
-			for i, e := range roles {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t",
-					e.Id,          // No description available
-					e.Name,        // No description available
-					e.Description, // No description available
-					e.Created,     // No description available
-				)
-			}
-			c.printt("Id\tName\tDescription\tCreated\t", lines)
-			return
-		}
-		if true { // default
-
-			// List roles
-			roles, err := c.remote.GetRoles(
-				offset, // No description available
-				limit,  // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(roles))
-			for i, e := range roles {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t",
-					e.Id,          // No description available
-					e.Name,        // No description available
-					e.Description, // No description available
-					e.Created,     // No description available
-				)
-			}
-			c.printt("Id\tName\tDescription\tCreated\t", lines)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
-
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-	return cmd
-=======
-  var forIdentity bool // Switch for GetRolesForIdentity()
-  var limit int64 // No description available
-  var identityId int64 // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
   var offset int64 // No description available
 
   cmd := newCmd(c, getRolesHelp, func(c *context, args []string) {
@@ -3067,18 +2374,10 @@ func getRoles(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var getServiceHelp = `
@@ -3293,77 +2592,10 @@ Examples:
 `
 
 func getWorkgroups(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var forIdentity bool // Switch for GetWorkgroupsForIdentity()
   var identityId int64 // No description available
   var limit int64 // No description available
   var offset int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var forIdentity bool // Switch for GetWorkgroupsForIdentity()
-	var identityId int64 // No description available
-	var limit int64      // No description available
-	var offset int64     // No description available
-
-	cmd := newCmd(c, getWorkgroupsHelp, func(c *context, args []string) {
-		if forIdentity { // GetWorkgroupsForIdentity
-
-			// List workgroups for an identity
-			workgroups, err := c.remote.GetWorkgroupsForIdentity(
-				identityId, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(workgroups))
-			for i, e := range workgroups {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t",
-					e.Id,          // No description available
-					e.Name,        // No description available
-					e.Description, // No description available
-					e.Created,     // No description available
-				)
-			}
-			c.printt("Id\tName\tDescription\tCreated\t", lines)
-			return
-		}
-		if true { // default
-
-			// List workgroups
-			workgroups, err := c.remote.GetWorkgroups(
-				offset, // No description available
-				limit,  // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			lines := make([]string, len(workgroups))
-			for i, e := range workgroups {
-				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t",
-					e.Id,          // No description available
-					e.Name,        // No description available
-					e.Description, // No description available
-					e.Created,     // No description available
-				)
-			}
-			c.printt("Id\tName\tDescription\tCreated\t", lines)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List workgroups for an identity")
-
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-	return cmd
-=======
-  var forIdentity bool // Switch for GetWorkgroupsForIdentity()
-  var identityId int64 // No description available
-  var offset int64 // No description available
-  var limit int64 // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, getWorkgroupsHelp, func(c *context, args []string) {
     if forIdentity { // GetWorkgroupsForIdentity
@@ -3416,16 +2648,9 @@ func getWorkgroups(c *context) *cobra.Command {
   
   
   cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
   cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 
@@ -3787,44 +3012,10 @@ Examples:
 `
 
 func shareEntity(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var entityId int64 // No description available
   var entityTypeId int64 // No description available
   var kind string // No description available
   var workgroupId int64 // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var entityId int64     // No description available
-	var entityTypeId int64 // No description available
-	var kind string        // No description available
-	var workgroupId int64  // No description available
-
-	cmd := newCmd(c, shareEntityHelp, func(c *context, args []string) {
-
-		// Share an entity with a workgroup
-		err := c.remote.ShareEntity(
-			kind,         // No description available
-			workgroupId,  // No description available
-			entityTypeId, // No description available
-			entityId,     // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return
-	})
-
-	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
-	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
-	cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
-	return cmd
-=======
-  var workgroupId int64 // No description available
-  var entityTypeId int64 // No description available
-  var entityId int64 // No description available
-  var kind string // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, shareEntityHelp, func(c *context, args []string) {
     
@@ -3842,20 +3033,11 @@ func shareEntity(c *context) *cobra.Command {
   })
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
   cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
   cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
   cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
-  cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
-  cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
-  cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 
@@ -3952,56 +3134,12 @@ Examples:
 `
 
 func startCluster(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var onYarn bool // Switch for StartClusterOnYarn()
   var clusterName string // No description available
   var engineId int64 // No description available
   var memory string // No description available
   var size int // No description available
   var username string // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var onYarn bool        // Switch for StartClusterOnYarn()
-	var clusterName string // No description available
-	var engineId int64     // No description available
-	var memory string      // No description available
-	var size int           // No description available
-	var username string    // No description available
-
-	cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
-		if onYarn { // StartClusterOnYarn
-
-			// Start a cluster using Yarn
-			clusterId, err := c.remote.StartClusterOnYarn(
-				clusterName, // No description available
-				engineId,    // No description available
-				size,        // No description available
-				memory,      // No description available
-				username,    // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Printf("ClusterId:\t%v\n", clusterId)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&onYarn, "on-yarn", onYarn, "Start a cluster using Yarn")
-
-	cmd.Flags().StringVar(&clusterName, "cluster-name", clusterName, "No description available")
-	cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
-	cmd.Flags().StringVar(&memory, "memory", memory, "No description available")
-	cmd.Flags().IntVar(&size, "size", size, "No description available")
-	cmd.Flags().StringVar(&username, "username", username, "No description available")
-	return cmd
-=======
-  var onYarn bool // Switch for StartClusterOnYarn()
-  var engineId int64 // No description available
-  var size int // No description available
-  var memory string // No description available
-  var username string // No description available
-  var clusterName string // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
 
   cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
     if onYarn { // StartClusterOnYarn
@@ -4024,22 +3162,12 @@ func startCluster(c *context) *cobra.Command {
   cmd.Flags().BoolVar(&onYarn, "on-yarn", onYarn, "Start a cluster using Yarn")
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().StringVar(&clusterName, "cluster-name", clusterName, "No description available")
   cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
   cmd.Flags().StringVar(&memory, "memory", memory, "No description available")
   cmd.Flags().IntVar(&size, "size", size, "No description available")
   cmd.Flags().StringVar(&username, "username", username, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
-  cmd.Flags().IntVar(&size, "size", size, "No description available")
-  cmd.Flags().StringVar(&memory, "memory", memory, "No description available")
-  cmd.Flags().StringVar(&username, "username", username, "No description available")
-  cmd.Flags().StringVar(&clusterName, "cluster-name", clusterName, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var startServiceHelp = `
@@ -4307,34 +3435,6 @@ Examples:
 `
 
 func unlinkRole(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var fromPermission bool // Switch for UnlinkRoleFromPermission()
-	var permissionId int64  // No description available
-	var roleId int64        // No description available
-
-	cmd := newCmd(c, unlinkRoleHelp, func(c *context, args []string) {
-		if fromPermission { // UnlinkRoleFromPermission
-
-			// Unlink a role from a permission
-			err := c.remote.UnlinkRoleFromPermission(
-				roleId,       // No description available
-				permissionId, // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&fromPermission, "from-permission", fromPermission, "Unlink a role from a permission")
-
-	cmd.Flags().Int64Var(&permissionId, "permission-id", permissionId, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-	return cmd
-=======
->>>>>>> STEAM-340: reading models by project and linking models to project
   var fromPermission bool // Switch for UnlinkRoleFromPermission()
   var permissionId int64 // No description available
   var roleId int64 // No description available
@@ -4359,10 +3459,6 @@ func unlinkRole(c *context) *cobra.Command {
   cmd.Flags().Int64Var(&permissionId, "permission-id", permissionId, "No description available")
   cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
   return cmd
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
-=======
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 
@@ -4518,42 +3614,9 @@ Examples:
 `
 
 func updateDataset(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var datasetId int64 // No description available
   var description string // No description available
   var name string // No description available
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var datasetId int64           // No description available
-	var description string        // No description available
-	var name string               // No description available
-	var responseColumnName string // No description available
-
-	cmd := newCmd(c, updateDatasetHelp, func(c *context, args []string) {
-
-		// Update a dataset
-		err := c.remote.UpdateDataset(
-			datasetId,          // No description available
-			name,               // No description available
-			description,        // No description available
-			responseColumnName, // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return
-	})
-
-	cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
-	return cmd
-=======
-  var datasetId int64 // No description available
-  var name string // No description available
-  var description string // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
   var responseColumnName string // No description available
 
   cmd := newCmd(c, updateDatasetHelp, func(c *context, args []string) {
@@ -4573,18 +3636,10 @@ func updateDataset(c *context) *cobra.Command {
   
   
   cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
   return cmd
-=======
-  cmd.Flags().StringVar(&name, "name", name, "No description available")
-  cmd.Flags().StringVar(&description, "description", description, "No description available")
-  cmd.Flags().StringVar(&responseColumnName, "response-column-name", responseColumnName, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var updateDatasourceHelp = `
@@ -4643,7 +3698,6 @@ Examples:
 `
 
 func updateIdentity(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var identityId int64 // No description available
   var password string // No description available
 
@@ -4664,28 +3718,6 @@ func updateIdentity(c *context) *cobra.Command {
   cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
   cmd.Flags().StringVar(&password, "password", password, "No description available")
   return cmd
-=======
-<<<<<<< 7b39f0b5a7bc0bb3fba2c7de4f08cf58c9838a75
-	var identityId int64 // No description available
-	var password string  // No description available
-
-	cmd := newCmd(c, updateIdentityHelp, func(c *context, args []string) {
-
-		// Update an identity
-		err := c.remote.UpdateIdentity(
-			identityId, // No description available
-			password,   // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return
-	})
-
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().StringVar(&password, "password", password, "No description available")
-	return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var updateLabelHelp = `
@@ -4702,7 +3734,6 @@ Examples:
 `
 
 func updateLabel(c *context) *cobra.Command {
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   var description string // No description available
   var labelId int64 // No description available
   var name string // No description available
@@ -4714,40 +3745,6 @@ func updateLabel(c *context) *cobra.Command {
         labelId, // No description available
         name, // No description available
         description, // No description available
-=======
-	var description string // No description available
-	var labelId int64      // No description available
-	var name string        // No description available
-
-	cmd := newCmd(c, updateLabelHelp, func(c *context, args []string) {
-
-		// Update a label
-		err := c.remote.UpdateLabel(
-			labelId,     // No description available
-			name,        // No description available
-			description, // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return
-	})
-
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().Int64Var(&labelId, "label-id", labelId, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	return cmd
-=======
-  var identityId int64 // No description available
-  var password string // No description available
-
-  cmd := newCmd(c, updateIdentityHelp, func(c *context, args []string) {
-    
-      // Update an identity
-      err := c.remote.UpdateIdentity(
-        identityId, // No description available
-        password, // No description available
->>>>>>> STEAM-340: reading models by project and linking models to project
       )
       if err != nil {
         log.Fatalln(err)
@@ -4756,17 +3753,10 @@ func updateLabel(c *context) *cobra.Command {
   })
   
   
-<<<<<<< d99a5e38087be7fe6482be60a58fba3a50dd89f8
   cmd.Flags().StringVar(&description, "description", description, "No description available")
   cmd.Flags().Int64Var(&labelId, "label-id", labelId, "No description available")
   cmd.Flags().StringVar(&name, "name", name, "No description available")
   return cmd
-=======
-  cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-  cmd.Flags().StringVar(&password, "password", password, "No description available")
-  return cmd
->>>>>>> STEAM-340: reading models by project and linking models to project
->>>>>>> STEAM-340: reading models by project and linking models to project
 }
 
 var updateRoleHelp = `
