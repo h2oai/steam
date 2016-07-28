@@ -16,8 +16,8 @@ import NewProjectStep2 from './Projects/components/NewProjectStep2';
 import NewProjectStep3 from './Projects/components/NewProjectStep3';
 import CreateNewModel from './Projects/components/CreateNewModel';
 import Deployment from './Deployment/Deployment';
-import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
+import Dummy from './Dummy/Dummy';
 
 interface IIndexRoute {
     component: any
@@ -114,20 +114,96 @@ export const routes: IRoute[] = [
                 showInNavigation: true
             },
             {
+              path: 'projects',
+              component: Projects,
+              name: 'Projects',
+              showInBreadcrumb: true,
+              showInNavigation: true,
+              icon: 'fa fa-folder',
+              indexRoute: {
+                component: ProjectScreenStrategy,
+                name: 'Welcome'
+              }
+            },
+            {
+                path: 'projects/:projectid',
+                component: Dummy,
+                name: 'Project',
+                showInBreadcrumb: true,
+                showInNavigation: false,
+                showChildrenAsSubmenu: true
+            },
+            // /projects/:id/models
+            {
+                path: 'projects/:projectid/models',
+                component: Models,
+                name: "Models",
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/models/:id
+            {
+                path: 'projects/:projectid/models/:modelid',
+                component: ModelDetails,
+                name: "Model Detail",
+                showInBreadcrumb: true,
+                showInNavigation: false
+            },
+            // forkmodel
+            {
+                path: 'projects/:projectid/models/:modelid/forkmodel',
+                component: CreateNewModel,
+                name: 'Create New Model',
+                showInBreadcrumb: true,
+                showInNavigation: false
+            },
+            // /projects/:id/data
+            {
+                path: 'projects/:projectid/data',
+                component: Dummy,
+                name: 'Data',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/deployments
+            {
+                path: 'projects/:projectid/deployment',
+                component: Deployment,
+                name: 'Deployment',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/deployments
+            {
+                path: 'projects/:projectid/assets',
+                component: Dummy,
+                name: 'Assets',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/collaborators
+            {
+                path: 'projects/:projectid/collaborators',
+                component: Dummy,
+                name: 'Collaborators',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            {
                 path: 'newproject',
                 name: 'New',
                 showInBreadcrumb: true,
                 showInNavigation: false,
                 indexRoute: {
                     component: NewProjectStep1,
-                    name: '1'
+                    name: 'Step 1'
                 }
             },
             // /newproject/1
             {
                 path: 'newproject/import',
-                component: Dummy,
-                name: 'Step 1',
+                component: ImportNewProject,
+                name: 'Import',
                 showInBreadcrumb: true,
                 showInNavigation: false
             },
@@ -174,7 +250,6 @@ export const routes: IRoute[] = [
                 showInBreadcrumb: true,
                 showInNavigation: true
             }
-
         ]
     }
 ];
