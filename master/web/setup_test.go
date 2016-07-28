@@ -13,7 +13,12 @@ import (
 	"github.com/h2oai/steamY/srv/web"
 )
 
-const superuser = "superuser"
+const (
+	superuser      = "superuser"
+	clusterAddress = "localhost:54321"
+	h2oModelKey    = "test_gbm"
+	h2oFrameKey    = "test.hex"
+)
 
 type test struct {
 	t   *testing.T
