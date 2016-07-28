@@ -25,7 +25,7 @@ $navigation-width: $base-grid-unit * 5;
     border-color: transparent;
     border-width: $xsmall;
     margin-top: -($xsmall);
-    border-right-color: $brand-dark-2;
+    border-right-color: $brand-white;
   }
 }
 
@@ -34,6 +34,13 @@ $navigation-width: $base-grid-unit * 5;
   .navigation--primary {
     .navigation {
       .nav-list {
+        .nav-list--item {
+          &.active.activeChildren {
+            &::before {
+              border-right-color: $brand-dark-2;
+            }
+          }
+        }
         .nav-list--label {
           text-align: left;
           width:0;

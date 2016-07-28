@@ -90,7 +90,7 @@ export class WelcomeSplashScreen extends React.Component<Props & DispatchProps, 
           <div>WELCOME TO</div>
           <div className="welcome-splash-screen--content--product-name">H<sub>2</sub>O STEAM</div>
           <div>Fast, distributed data science for teams</div>
-          <div><Link to="/projects/new"
+          <div><Link to="/newproject"
                      className={classNames('default', 'start-project', {disabled: !this.state.isEulaAgreed})}>Start A New Project</Link>
           </div>
           <div className="eula-line">
