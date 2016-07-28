@@ -12,6 +12,8 @@ export const RECEIVE_MODELS = 'RECEIVE_MODELS';
 export const CREATE_PROJECT_COMPLETED = 'CREATE_PROJECT_COMPLETED';
 export const IMPORT_MODEL_FROM_CLUSTER_COMPLETED = 'IMPORT_MODEL_FROM_CLUSTER_COMPLETED';
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
+export const REQUEST_DATASETS_FROM_CLUSTER = 'REQUEST_DATASETS_FROM_CLUSTER';
+export const RECEIVE_DATASETS_FROM_CLUSTER = 'RECEIVE_DATASETS_FROM_CLUSTER';
 
 export const requestClusters = () => {
   return {
@@ -69,19 +71,41 @@ export function receiveProjects(projects) {
   };
 }
 
-export function fetchModelsFromCluster(clusterId: number) {
+export function requestDatasetsFromCluster() {
+  return {
+    type: REQUEST_DATASETS_FROM_CLUSTER
+  };
+}
+
+export function receiveDatasetsFromCluster(datasets) {
+  return {
+    type: RECEIVE_DATASETS_FROM_CLUSTER,
+    datasets
+  };
+}
+
+export function fetchModelsFromCluster(clusterId: number, frameKey: string) {
   return (dispatch) => {
     dispatch(requestModels());
-    Remote.getModelsFromCluster(clusterId, (error, res) => {
+    Remote.getModelsFromCluster(clusterId, frameKey, (error, res) => {
       dispatch(receiveModelsFromCluster(res));
     });
   };
 }
 
-export function createProject(name: string) {
+export function fetchDatasetsFromCluster(clusterId: number) {
+  return (dispatch) => {
+    dispatch(requestDatasetsFromCluster());
+    Remote.getDatasetsFromCluster(clusterId, (error, res) => {
+      dispatch(receiveDatasetsFromCluster(res));    
+    });
+  };
+}
+
+export function createProject(name: string, modelCategory: string) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
-      Remote.createProject(name, '', (error, res) => {
+      Remote.createProject(name, '', modelCategory, (error, res) => {
         dispatch(createProjectCompleted(res));
         resolve(res);
       });
@@ -100,11 +124,11 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   };
 }
 
-export function createProjectAndImportModelsFromCluster(projectName: string, clusterId: number, models: string[]) {
+export function createProjectAndImportModelsFromCluster(projectName: string, clusterId: number, modelCategory: string, models: string[]) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
       let promises = [];
-      dispatch(createProject(projectName)).then((projectId) => {
+      dispatch(createProject(projectName, modelCategory)).then((projectId) => {
         models.map((modelName) => {
           promises.push(dispatch(importModelFromCluster(clusterId, projectId, modelName)));
         });
