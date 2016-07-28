@@ -5,10 +5,10 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import Panel from './Panel';
 import { fetchServices, killService } from '../actions/services.actions';
-import '../styles/deployedservices.scss';
 import { ScoringService } from '../../Proxy/Proxy';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import '../styles/deployedservices.scss';
 
 interface Props {
   services: {
@@ -50,12 +50,12 @@ export class DeployedServices extends React.Component<Props & DispatchProps, any
                   </div>
                   <div className="panel-info">
                     <div className="panel-info-row">
-                      <span><i className="fa fa-cube"/></span><span>Model ID</span>
+                      <span><i className="fa fa-cube"/></span><span>Model</span>
                       <span>{service.model_id}</span>
                     </div>
                     <div className="panel-info-row">
-                      <span><i className="fa fa-folder-o"/></span><span>Project</span>
-                      <span>N/A</span>
+                      <span><i className="fa fa-folder-o"/></span><span>Status</span>
+                      <span>{service.state === 'started' ? 'OK' : 'Error'}</span>
                     </div>
                   </div>
                 </div>

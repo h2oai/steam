@@ -7,6 +7,7 @@ import PageHeader from '../Projects/components/PageHeader';
 import TabNavigation from '../Projects/components/TabNavigation';
 import DeployedServices from '../Projects/components/DeployedServices';
 import Packaging from './components/Packaging';
+import UploadPreProcessingModal from './components/UploadPreProcessingModal';
 import './styles/deployment.scss';
 
 export default class Services extends React.Component<any, any> {
@@ -27,7 +28,8 @@ export default class Services extends React.Component<any, any> {
           component: <Packaging/>
         }
       },
-      isSelected: 'deployedServices'
+      isSelected: 'deployedServices',
+      uploadOpen: false
     };
   }
 
@@ -42,16 +44,29 @@ export default class Services extends React.Component<any, any> {
     this.setState(newState);
   }
 
-  uploadNewPackage() {
+  openUpload() {
+    this.setState({
+      uploadOpen: true
+    });
+  }
 
+  closeUpload() {
+    this.setState({
+      uploadOpen: false
+    });
+  }
+
+  upload() {
+    console.log(this);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="services">
+        <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)} upload={this.upload.bind(this)}/>
         <PageHeader>
           <span>Deployment</span>
-          <span><button className="default" onClick={this.uploadNewPackage.bind(this)}>Upload New Package</button></span>
+          <span><button className="default" onClick={this.openUpload.bind(this)}>Upload New Package</button></span>
         </PageHeader>
         <TabNavigation tabs={this.state.tabs}/>
         <main>
