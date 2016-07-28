@@ -496,6 +496,7 @@ func ScanProject(r *sql.Row) (Project, error) {
 		&s.Id,
 		&s.Name,
 		&s.Description,
+		&s.ModelCategory,
 		&s.Created,
 	); err != nil {
 		return Project{}, err
@@ -512,6 +513,7 @@ func ScanProjects(rs *sql.Rows) ([]Project, error) {
 			&s.Id,
 			&s.Name,
 			&s.Description,
+			&s.ModelCategory,
 			&s.Created,
 		); err != nil {
 			return nil, err
@@ -618,6 +620,7 @@ func ScanModel(r *sql.Row) (Model, error) {
 		&s.ClusterName,
 		&s.ModelKey,
 		&s.Algorithm,
+		&s.ModelCategory,
 		&s.DatasetName,
 		&s.ResponseColumnName,
 		&s.LogicalName,
@@ -645,6 +648,7 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.ClusterName,
 			&s.ModelKey,
 			&s.Algorithm,
+			&s.ModelCategory,
 			&s.DatasetName,
 			&s.ResponseColumnName,
 			&s.LogicalName,

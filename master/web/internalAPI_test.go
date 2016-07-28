@@ -26,7 +26,7 @@ const (
 // -- Project --
 //
 
-func testProjectCRUD(tt *testing.T) {
+func TestProjectCRUD(tt *testing.T) {
 	t := newTest(tt)
 
 	const (
@@ -36,7 +36,7 @@ func testProjectCRUD(tt *testing.T) {
 
 	// -- C --
 
-	id, err := t.svc.CreateProject(t.su, name1, desc1)
+	id, err := t.svc.CreateProject(t.su, name1, desc1, "")
 	t.nil(err)
 
 	// -- R --
@@ -116,7 +116,7 @@ func TestDatasourceCRUD(tt *testing.T) {
 
 	// -- C --
 
-	projectId, err := t.svc.CreateProject(t.su, "p1", "d1") // This is not being tested here
+	projectId, err := t.svc.CreateProject(t.su, "p1", "d1", "") // This is not being tested here
 
 	id, err := t.svc.CreateDatasource(t.su, projectId, name1, desc1, path1)
 	t.nil(err)
