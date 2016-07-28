@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/h2oai/steamY/bindings"
 )
@@ -43,9 +44,10 @@ func (h *H2O) GetCloudStatus() (*bindings.CloudV3, error) {
 ////////////////////
 
 // GetFramesFetch Return the specified Frame. */
-func (h *H2O) GetFramesFetch(frame_id string) ([]byte, *bindings.FramesV3, error) {
+func (h *H2O) GetFramesFetch(frame_id string, find_compatible_models bool) ([]byte, *bindings.FramesV3, error) {
 	//@GET
 	u := h.url("/3/Frames/?{frame_id}", frame_id)
+	u = u + "?find_compatible_models=" + strconv.FormatBool(find_compatible_models)
 
 	res, err := http.Get(u)
 	if err != nil {
@@ -61,7 +63,31 @@ func (h *H2O) GetFramesFetch(frame_id string) ([]byte, *bindings.FramesV3, error
 	if err := json.Unmarshal(data, &out); err != nil {
 		return nil, nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
 	}
+
 	return data, &out, nil
+}
+
+// GetFramesList Return all Frames in the H2O distributed K/V store. */
+func (h *H2O) GetFramesList() (*bindings.FramesV3, error) {
+	//@GET
+	u := h.url("/3/Frames")
+
+	res, err := http.Get(u)
+	if err != nil {
+		return nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
+	}
+
+	data, err := h.handleResponse(res, u)
+	if err != nil {
+		return nil, err
+	}
+
+	var out bindings.FramesV3
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil, fmt.Errorf("H2O response unmarshal failed: %v", err)
+	}
+
+	return &out, nil
 }
 
 ////////////////////

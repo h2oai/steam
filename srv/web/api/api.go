@@ -39,10 +39,11 @@ type Job struct {
 }
 
 type Project struct {
-	Id          int64
-	Name        string
-	Description string
-	CreatedAt   int64
+	Id            int64
+	Name          string
+	Description   string
+	ModelCategory string
+	CreatedAt     int64
 }
 
 type Datasource struct {
@@ -74,6 +75,7 @@ type Model struct {
 	ClusterName         string
 	ModelKey            string
 	Algorithm           string
+	ModelCategory       string
 	DatasetName         string
 	ResponseColumnName  string
 	LogicalName         string
@@ -193,6 +195,7 @@ type Service struct {
 	CreateDataset               CreateDataset               `help:"Create a dataset"`
 	GetDatasets                 GetDatasets                 `help:"List datasets"`
 	GetDataset                  GetDataset                  `help:"Get dataset details"`
+	GetDatasetsFromCluster      GetDatasetsFromCluster      `help:"Get a list of datasets on a cluster"`
 	UpdateDataset               UpdateDataset               `help:"Update a dataset"`
 	SplitDataset                SplitDataset                `help:"Split a dataset"`
 	DeleteDataset               DeleteDataset               `help:"Delete a dataset"`
@@ -208,7 +211,7 @@ type Service struct {
 	DeleteLabel                 DeleteLabel                 `help:"Delete a label"`
 	LinkLabelWithModel          LinkLabelWithModel          `help:"Label a model"`
 	UnlinkLabelFromModel        UnlinkLabelFromModel        `help:"Remove a label from a model"`
-	GetLabelsForProject         GetLabelsForProject         `help:List labels for a project, with corresponding models, if any"`
+	GetLabelsForProject         GetLabelsForProject         `help:"List labels for a project, with corresponding models, if any"`
 	StartService                StartService                `help:"Start a service"`
 	StopService                 StopService                 `help:"Stop a service"`
 	GetService                  GetService                  `help:"Get service details"`
@@ -325,10 +328,11 @@ type GetJobs struct {
 	Jobs      []Job
 }
 type CreateProject struct {
-	Name        string
-	Description string
-	_           int
-	ProjectId   int64
+	Name          string
+	Description   string
+	ModelCategory string
+	_             int
+	ProjectId     int64
 }
 type GetProjects struct {
 	Offset   int64
@@ -394,6 +398,11 @@ type GetDataset struct {
 	_         int
 	Dataset   Dataset
 }
+type GetDatasetsFromCluster struct {
+	ClusterId int64
+	_         int
+	Dataset   []Dataset
+}
 type UpdateDataset struct {
 	DatasetId          int64
 	Name               string
@@ -439,6 +448,7 @@ type GetModels struct {
 }
 type GetModelsFromCluster struct {
 	ClusterId int64
+	FrameKey  string
 	_         int
 	Models    []Model
 }

@@ -372,12 +372,12 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 
 // --- Project ---
 
-func (s *Service) CreateProject(pz az.Principal, name, description string) (int64, error) {
+func (s *Service) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
 		return 0, err
 	}
 
-	projectId, err := s.ds.CreateProject(pz, name, description)
+	projectId, err := s.ds.CreateProject(pz, name, description, modelCategory)
 	if err != nil {
 		return 0, err
 	}
@@ -575,7 +575,7 @@ func (s *Service) importDataset(name, configuration, address string) ([]byte, st
 	if err != nil {
 		return nil, "", err
 	}
-	rawFrame, _, err := h2o.GetFramesFetch(job.Dest.Name)
+	rawFrame, _, err := h2o.GetFramesFetch(job.Dest.Name, false)
 	if err != nil {
 		return nil, "", err
 	}
@@ -646,6 +646,51 @@ func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, er
 	}
 
 	return toDataset(dataset), nil
+}
+
+// -- H2O to STEAM conversions --
+
+func framesToDatasets(frames *bindings.FramesV3) []data.Dataset {
+	array := make([]data.Dataset, len(frames.Frames))
+	for i, frame := range frames.Frames {
+		array[i] = frameToDataset(frame)
+	}
+	return array
+}
+
+func frameToDataset(frame *bindings.FrameBase) data.Dataset {
+	return data.Dataset{
+		0,
+		0,
+		frame.FrameId.Name,
+		"",
+		frame.FrameId.Name,
+		"",
+		"",
+		"",
+		time.Now(),
+	}
+}
+
+func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*web.Dataset, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
+		return nil, err
+	}
+
+	// Get cluster information
+	cluster, err := s.ds.ReadCluster(pz, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Start h2o communication
+	h2o := h2ov3.NewClient(cluster.Address)
+	frames, err := h2o.GetFramesList()
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasets(framesToDatasets(frames)), nil
 }
 
 func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
@@ -754,6 +799,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		cluster.Name,
 		modelKey,
 		"AutoML",
+		"", // ModelCategory
 		dataset,
 		targetName,
 		"",
@@ -813,7 +859,7 @@ func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int6
 }
 
 // Use this instead of model.DataFrame.Name because model.DataFrame can be nil
-func dataFrameName(m *bindings.ModelSchemaBase) string {
+func dataFrameName(m *bindings.ModelSchema) string {
 	if m.DataFrame != nil {
 		return m.DataFrame.Name
 	}
@@ -821,40 +867,61 @@ func dataFrameName(m *bindings.ModelSchemaBase) string {
 	return ""
 }
 
-// TODO: add offset/limit to this call for future
-func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*web.Model, error) {
+func h2oToModel(model *bindings.ModelSchema) data.Model {
+	return data.Model{
+		0,
+		0,
+		0,
+		model.ModelId.Name,
+		"",
+		model.ModelId.Name,
+		model.AlgoFullName,
+		string(model.Output.ModelCategory),
+		dataFrameName(model),
+		model.ResponseColumnName,
+		"",
+		"",
+		0,
+		"",
+		"",
+		time.Now(),
+	}
+}
+
+func h2oToModels(models []*bindings.ModelSchema) []data.Model {
+	array := make([]data.Model, len(models))
+	for i, model := range models {
+		array[i] = h2oToModel(model)
+	}
+	return array
+}
+
+func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*web.Model, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
+		return nil, err
+	}
+
+	// Get cluster information
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
 		return nil, err
 	}
 
-	h := h2ov3.NewClient(cluster.Address)
-	ms, err := h.GetModelsList()
+	// Connect to h2o
+	h2o := h2ov3.NewClient(cluster.Address)
+	_, frame, err := h2o.GetFramesFetch(frameKey, true)
 	if err != nil {
 		return nil, err
 	}
 
-	models := make([]*web.Model, len(ms.Models))
-	for i, m := range ms.Models {
-		models[i] = &web.Model{
-			0,
-			0,
-			0,
-			m.ModelId.Name,
-			cluster.Name,
-			m.ModelId.Name,
-			m.AlgoFullName,
-			dataFrameName(m),
-			m.ResponseColumnName,
-			"",
-			"",
-			0,
-			"", // TODO Fill in raw metrics (Maybe not, this is an H2O call not a db call)
-			m.Timestamp,
-		}
+	models := h2oToModels(frame.CompatibleModels)
+
+	ms := make([]*web.Model, len(models))
+	for i, m := range models {
+		ms[i] = toModel(m)
 	}
 
-	return models, nil
+	return ms, nil
 }
 
 func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelKey, modelName string) (int64, error) {
@@ -882,7 +949,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	m := r.Models[0]
 
 	// fetch raw frame json from H2O
-	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name)
+	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name, false)
 	if err != nil {
 		return 0, err
 	}
@@ -922,6 +989,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		cluster.Name,
 		modelKey,
 		m.AlgoFullName,
+		string(m.Output.ModelCategory),
 		dataFrameName(m),
 		m.ResponseColumnName,
 		"",
@@ -1792,6 +1860,7 @@ func toModel(m data.Model) *web.Model {
 		m.ClusterName,
 		m.ModelKey,
 		m.Algorithm,
+		m.ModelCategory,
 		m.DatasetName,
 		m.ResponseColumnName,
 		m.LogicalName,
@@ -1944,6 +2013,7 @@ func toProject(project data.Project) *web.Project {
 		project.Id,
 		project.Name,
 		project.Description,
+		project.ModelCategory,
 		toTimestamp(project.Created),
 	}
 }

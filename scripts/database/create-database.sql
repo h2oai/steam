@@ -563,6 +563,7 @@ CREATE TABLE model (
     cluster_name text NOT NULL,
     model_key text NOT NULL,
     algorithm text NOT NULL,
+    model_category text NOT NULL,
     dataset_name text NOT NULL,
     response_column_name text NOT NULL,
     logical_name text NOT NULL,
@@ -695,6 +696,7 @@ CREATE TABLE project (
     id integer NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
+    model_category text NOT NULL,
     created timestamp with time zone NOT NULL
 );
 

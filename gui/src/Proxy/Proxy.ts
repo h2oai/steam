@@ -193,6 +193,8 @@ export interface Model {
   
   algorithm: string
   
+  model_category: string
+  
   dataset_name: string
   
   response_column_name: string
@@ -226,6 +228,8 @@ export interface Project {
   name: string
   
   description: string
+  
+  model_category: string
   
   created_at: number
   
@@ -332,7 +336,7 @@ export interface Service {
   getJobs: (clusterId: number, go: (error: Error, jobs: Job[]) => void) => void
   
   // Create a project
-  createProject: (name: string, description: string, go: (error: Error, projectId: number) => void) => void
+  createProject: (name: string, description: string, modelCategory: string, go: (error: Error, projectId: number) => void) => void
   
   // List projects
   getProjects: (offset: number, limit: number, go: (error: Error, projects: Project[]) => void) => void
@@ -367,6 +371,9 @@ export interface Service {
   // Get dataset details
   getDataset: (datasetId: number, go: (error: Error, dataset: Dataset) => void) => void
   
+  // Get a list of datasets on a cluster
+  getDatasetsFromCluster: (clusterId: number, go: (error: Error, dataset: Dataset[]) => void) => void
+  
   // Update a dataset
   updateDataset: (datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void) => void
   
@@ -389,7 +396,7 @@ export interface Service {
   getModels: (projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
   
   // List models from a cluster
-  getModelsFromCluster: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
+  getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
   
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
@@ -412,7 +419,7 @@ export interface Service {
   // Remove a label from a model
   unlinkLabelFromModel: (labelId: number, modelId: number, go: (error: Error) => void) => void
   
-  // No description available
+  // List labels for a project, with corresponding models, if any
   getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
   
   // Start a service
@@ -719,6 +726,8 @@ interface CreateProjectIn {
   
   description: string
   
+  model_category: string
+  
 }
 
 interface CreateProjectOut {
@@ -883,6 +892,18 @@ interface GetDatasetOut {
   
 }
 
+interface GetDatasetsFromClusterIn {
+  
+  cluster_id: number
+  
+}
+
+interface GetDatasetsFromClusterOut {
+  
+  dataset: Dataset[]
+  
+}
+
 interface UpdateDatasetIn {
   
   dataset_id: number
@@ -990,6 +1011,8 @@ interface GetModelsOut {
 interface GetModelsFromClusterIn {
   
   cluster_id: number
+  
+  frame_key: string
   
 }
 
@@ -1850,8 +1873,8 @@ export function getJobs(clusterId: number, go: (error: Error, jobs: Job[]) => vo
   });
 }
 
-export function createProject(name: string, description: string, go: (error: Error, projectId: number) => void): void {
-  const req: CreateProjectIn = { name: name, description: description };
+export function createProject(name: string, description: string, modelCategory: string, go: (error: Error, projectId: number) => void): void {
+  const req: CreateProjectIn = { name: name, description: description, model_category: modelCategory };
   Proxy.Call("CreateProject", req, function(error, data) {
     if (error) {
       return go(error, null);
@@ -1994,6 +2017,18 @@ export function getDataset(datasetId: number, go: (error: Error, dataset: Datase
   });
 }
 
+export function getDatasetsFromCluster(clusterId: number, go: (error: Error, dataset: Dataset[]) => void): void {
+  const req: GetDatasetsFromClusterIn = { cluster_id: clusterId };
+  Proxy.Call("GetDatasetsFromCluster", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetDatasetsFromClusterOut = <GetDatasetsFromClusterOut> data;
+      return go(null, d.dataset);
+    }
+  });
+}
+
 export function updateDataset(datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void): void {
   const req: UpdateDatasetIn = { dataset_id: datasetId, name: name, description: description, response_column_name: responseColumnName };
   Proxy.Call("UpdateDataset", req, function(error, data) {
@@ -2078,8 +2113,8 @@ export function getModels(projectId: number, offset: number, limit: number, go: 
   });
 }
 
-export function getModelsFromCluster(clusterId: number, go: (error: Error, models: Model[]) => void): void {
-  const req: GetModelsFromClusterIn = { cluster_id: clusterId };
+export function getModelsFromCluster(clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void): void {
+  const req: GetModelsFromClusterIn = { cluster_id: clusterId, frame_key: frameKey };
   Proxy.Call("GetModelsFromCluster", req, function(error, data) {
     if (error) {
       return go(error, null);

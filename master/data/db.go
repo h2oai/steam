@@ -2493,17 +2493,17 @@ func (ds *Datastore) DeleteCluster(pz az.Principal, clusterId int64) error {
 
 // --- Project ---
 
-func (ds *Datastore) CreateProject(pz az.Principal, name, description string) (int64, error) {
+func (ds *Datastore) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		row := tx.QueryRow(`
 			INSERT INTO
 				project
-				(name, description, created)
+				(name, description, model_category, created)
 			VALUES
-				($1,   $2,       now())
+				($1,   $2,          $3,             now())
 			RETURNING id
-			`, name, description)
+			`, name, description, modelCategory)
 		if err := row.Scan(&id); err != nil {
 			return err
 		}
@@ -2518,8 +2518,9 @@ func (ds *Datastore) CreateProject(pz az.Principal, name, description string) (i
 		}
 
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Project, id, metadata{
-			"name":        name,
-			"description": description,
+			"name":           name,
+			"description":    description,
+			"model_category": modelCategory,
 		})
 	})
 	return id, err
@@ -2578,7 +2579,7 @@ func (ds *Datastore) UnlinkProjectAndModel(pz az.Principal, projectId, modelId i
 func (ds *Datastore) ReadProjects(pz az.Principal, offset, limit int64) ([]Project, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, description, created
+			id, name, description, model_category, created
 		FROM
 			project
 		WHERE
@@ -2611,7 +2612,7 @@ func (ds *Datastore) ReadProject(pz az.Principal, projectId int64) (Project, err
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, description, created
+			id, name, description, model_category, created
 		FROM
 			project
 		WHERE
@@ -3036,9 +3037,9 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		row := tx.QueryRow(`
 			INSERT INTO
 				model
-				(training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,                  $2,                    $3,    $4,           $5,        $6,       $7,           $8,                   $9,            $10,     $11,          $12,     $13,             now())
+				($1,                  $2,                    $3,    $4,           $5,        $6,        $7,             $8,           $9,                   $10,          $11,      $12,          $13,     $14,             now())
 			RETURNING id
 			`,
 			model.TrainingDatasetId,
@@ -3047,6 +3048,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 			model.ClusterName,
 			model.ModelKey,
 			model.Algorithm,
+			model.ModelCategory,
 			model.DatasetName,
 			model.ResponseColumnName,
 			model.LogicalName,
@@ -3087,7 +3089,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -3121,7 +3123,7 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 
 	rows, err := ds.db.Query(`
 		SELECT
-			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
+			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.model_category, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
 		FROM
 			model m,
 			project_model pm
@@ -3154,7 +3156,7 @@ func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model
 	var Model Model
 	rows, err := ds.db.Query(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -3190,7 +3192,7 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
