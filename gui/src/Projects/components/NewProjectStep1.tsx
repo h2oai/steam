@@ -35,7 +35,7 @@ export default class NewProjectStep1 extends React.Component<Props, any> {
               Choose this option if you already have H2O models built and stored in a H2O cluster in your network.
             </article>
             <footer>
-              <Link to="/projects/new/import" className="default">Start Import</Link>
+              <Link to="/newproject/import" className="default">Start Import</Link>
             </footer>
           </div>
           <div className="card small">
@@ -44,7 +44,7 @@ export default class NewProjectStep1 extends React.Component<Props, any> {
               Choose this option if this is a completely new project.
             </article>
             <footer>
-              <Link to="/projects/new/import" className="default">Create New Project</Link>
+              <Link to="/newproject/import" className="default">Create New Project</Link>
             </footer>
           </div>
         </div>

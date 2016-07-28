@@ -10,8 +10,8 @@ import Models from './Models/Models';
 import Projects from './Projects/Projects';
 import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ModelDetails from './ModelDetails/ModelDetails';
-import NewProjectStep1 from './Projects/components/NewProjectStep1';
 import ImportNewProject from './Projects/components/ImportNewProject';
+import NewProjectStep1 from './Projects/components/NewProjectStep1';
 import NewProjectStep2 from './Projects/components/NewProjectStep2';
 import NewProjectStep3 from './Projects/components/NewProjectStep3';
 import CreateNewModel from './Projects/components/CreateNewModel';
@@ -60,7 +60,7 @@ export const routes: IRoute[] = [
             {
                 path: 'projects/:projectid',
                 component: Dummy,
-                name: 'Project Details',
+                name: 'Project',
                 showInBreadcrumb: true,
                 showInNavigation: false,
                 showChildrenAsSubmenu: true
@@ -76,7 +76,7 @@ export const routes: IRoute[] = [
             // /projects/:id/models/:id
             {
                 path: 'projects/:projectid/models/:modelid',
-                component: Dummy,
+                component: ModelDetails,
                 name: "Model Detail",
                 showInBreadcrumb: true,
                 showInNavigation: false
@@ -170,7 +170,7 @@ export const routes: IRoute[] = [
                 path: 'team',
                 component: Dummy,
                 name: 'Team',
-                icon: 'fa fa-cube',
+                icon: 'fa fa-users',
                 showInBreadcrumb: true,
                 showInNavigation: true
             }

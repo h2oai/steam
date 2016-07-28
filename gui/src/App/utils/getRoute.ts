@@ -16,4 +16,4 @@ export const getRoute = (path: string): any => {
         }
     }
     return route;
-}
+};
