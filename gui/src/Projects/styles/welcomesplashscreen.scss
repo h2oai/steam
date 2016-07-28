@@ -4,6 +4,8 @@
   display: flex;
   justify-content: center;
   font-size: 32px;
+  height: 100%;
+  width: 100%;
   &--content {
     display: flex;
     flex-direction: column;
@@ -19,11 +21,8 @@
       }
     }
   }
-  a {
+  a.start-project {
     align-self: center;
-    background: $brand-orange;
-    border: none;
-    color: $brand-white;
     padding: $xsmall $xlarge;
     font-size: 20px;
     font-weight: 600;
@@ -37,4 +36,34 @@
       color: $brand-white;
     }
   }
+  .eula-line {
+    margin-top: $xsmall;
+    font-family: $font-text;
+    font-size: 12px;
+  }
+}
+
+.eula-modal {
+  .eula-content {
+    height: 100%;
+    width: 100%;
+    padding: $xsmall;
+  }
+  .eula-text {
+    border: $rule-solid-thin;
+    height: 80%;
+    width: 100%;
+    overflow: auto;
+  }
+  .buttons-container {
+    margin-top: $xsmall;
+    button:first-of-type {
+      margin-right: $xsmall;
+    }
+  }
+}
+
+.nav-container.hidden {
+  opacity: .1;
+  pointer-events: none;
 }
