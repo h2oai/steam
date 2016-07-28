@@ -44,6 +44,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
     this.state = {
       clusterId: null,
       datasetId: null,
+      modelCategory: null,
       isModelSelected: false
     };
   }
@@ -55,7 +56,6 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
   }
 
   selectDataset(event): void {
-    console.log(event.target.value);
     this.setState({
       datasetId: event.target.value
     });
@@ -94,6 +94,12 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         isModelSelected: false
       });
     }
+  }
+
+  selectCategory(event) {
+    this.setState({
+      modelCategory: event.target.value
+    });
   }
 
   retrieveClusterDataframes(clusterId: number) {
@@ -152,23 +158,31 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         </div>
         {this.state.clusterId ? <div>
           <h1>2. Select Dataset</h1>
+          Frame
           <select onChange={this.selectDataset.bind(this)}>
             <option></option>
             {this.props.datasets ? this.props.datasets.map((dataset, i) => {
               return <option key={i} value={dataset.frame_name}>{dataset.name}</option>;
             }) : null}
           </select>
+          Category
+          <select onChange={this.selectCategory.bind(this)}>
+            <option></option>
+            {this.props.models ? _.uniqBy(this.props.models, 'model_category').map((model, i) => {
+              return <option key={i} value={model.model_category}>{model.model_category}</option>;
+            }) : null}
+          </select>
         </div> : null}
-        {!_.isEmpty(this.props.models) ? <div>
+        {!_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <h1>3. Pick Models to Import</h1>
           <div>
             Models in a project must share the same feature set and response column to enable comparison.
           </div>
           <Table className="import-models">
             <Row header={true}>
-              <Cell>DATA SET</Cell>
+              <Cell>MODEL</Cell>
               <Cell>RESPONSE COLUMN</Cell>
-              <Cell>MODELS</Cell>
+              <Cell>CATEGORICAL</Cell>
               <Cell></Cell>
             </Row>
             {this.props.models.map((model, i) => {
@@ -176,7 +190,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                 <Row key={i}>
                   <Cell>{model.name}</Cell>
                   <Cell>{model.response_column_name}</Cell>
-                  <Cell>N/A</Cell>
+                  <Cell>{model.model_category}</Cell>
                   <Cell>
                     <input type="checkbox" name={model.name} onChange={this.selectModel.bind(this, model)}/>&nbsp; Select for Import
                   </Cell>
@@ -185,13 +199,13 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
             })}
           </Table>
         </div> : null}
-        {!_.isEmpty(this.props.models) ? <div className="name-project">
+        {!_.isEmpty(this.props.models && this.state.modelCategory) ? <div className="name-project">
           <h1>4. Name Project</h1>
           <div>
             <input ref="projectName" type="text"/>
           </div>
         </div> : null}
-        {!_.isEmpty(this.props.models) ? <div>
+        {!_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <button className={classNames('default', {disabled: !this.state.isModelSelected})}
                   onClick={this.createProject.bind(this)}>Create Project
           </button>
