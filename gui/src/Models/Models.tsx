@@ -13,7 +13,7 @@ import { Model } from '../Proxy/Proxy';
 interface Props {
   leaderboard: any,
   params: {
-    id: string
+    projectid: string
   }
 }
 
@@ -24,7 +24,7 @@ interface DispatchProps {
 export class Projects extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.leaderboard)) {
-      this.props.fetchLeaderboard(parseInt(this.props.params.id, 10));
+      this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10));
     }
   }
 
@@ -34,7 +34,7 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="projects">
-        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.id, 10)}></Leaderboard>
+        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)}></Leaderboard>
       </div>
     );
   }
