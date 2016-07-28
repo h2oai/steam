@@ -37,7 +37,7 @@ export default class ProjectsList extends React.Component<Props, any> {
         <PageHeader>
           <span>PROJECTS</span>
           <span className="new-project-button-container">
-            <Link to="/projects/new" className="default">Create New Project</Link>
+            <Link to="/newproject" className="default">Create New Project</Link>
           </span>
         </PageHeader>
         <div>

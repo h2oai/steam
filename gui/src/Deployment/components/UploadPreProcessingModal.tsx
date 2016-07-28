@@ -18,6 +18,7 @@ interface Props {
 
 export default class UploadPreProcessingModal extends React.Component<Props, any> {
   refs: {
+    [key: string]: Element
     packageName: HTMLInputElement
   };
 

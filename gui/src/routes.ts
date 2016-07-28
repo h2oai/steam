@@ -51,7 +51,7 @@ export const routes: IRoute[] = [
             // /projects
             {
                 path: 'projects',
-                component: Projects,
+                component: ProjectScreenStrategy,
                 name: 'Projects',
                 showInBreadcrumb: true,
                 showInNavigation: true,

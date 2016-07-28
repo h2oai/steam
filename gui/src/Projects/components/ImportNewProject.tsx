@@ -70,7 +70,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
       checkedModels.map((i, input) => {
         importModels.push($(input).prop('name'));
       });
-      this.props.createProjectAndImportModelsFromCluster(name, this.state.clusterId, importModels).then((res) => {
+      this.props.createProjectAndImportModelsFromCluster(name, this.state.clusterId, this.state.modelCategory, importModels).then((res) => {
         hashHistory.push('/projects/' + res + '/models');
       });
     }
@@ -158,20 +158,28 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         </div>
         {this.state.clusterId ? <div>
           <h1>2. Select Dataset</h1>
-          Frame
-          <select onChange={this.selectDataset.bind(this)}>
-            <option></option>
-            {this.props.datasets ? this.props.datasets.map((dataset, i) => {
-              return <option key={i} value={dataset.frame_name}>{dataset.name}</option>;
-            }) : null}
-          </select>
-          Category
-          <select onChange={this.selectCategory.bind(this)}>
-            <option></option>
-            {this.props.models ? _.uniqBy(this.props.models, 'model_category').map((model, i) => {
-              return <option key={i} value={model.model_category}>{model.model_category}</option>;
-            }) : null}
-          </select>
+          <div className="select-dataset">
+            <div>
+              <div>Frame</div>
+              <select onChange={this.selectDataset.bind(this)}>
+                <option></option>
+                {this.props.datasets ? this.props.datasets.map((dataset, i) => {
+                  return <option key={i} value={dataset.frame_name}>{dataset.name}</option>;
+                }) : null}
+              </select>
+            </div>
+            <div>
+              <div>Category</div>
+              <select onChange={this.selectCategory.bind(this)}>
+                <option></option>
+                {this.props.models ? _.uniqBy(this.props.models, 'model_category').map((model, i) => {
+                  return <option key={i} value={model.model_category}>{model.model_category}</option>;
+                }) : null}
+              </select>
+            </div>
+          </div>
+          <div>
+          </div>
         </div> : null}
         {!_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <h1>3. Pick Models to Import</h1>
