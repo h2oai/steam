@@ -11,8 +11,9 @@ type ModelsBase struct {
 	/** Find and return compatible frames? */
 	FindCompatibleFrames bool `json:"find_compatible_frames"`
 
+	// FIXME can't get model category unless this is modelschema (not modelschemabase)
 	/** Models */
-	Models []*ModelSchemaBase `json:"models"`
+	Models []*ModelSchema `json:"models"`
 
 	/** Compatible frames */
 	CompatibleFrames []*FrameV3 `json:"compatible_frames"`

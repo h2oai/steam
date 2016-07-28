@@ -8,11 +8,13 @@ import { modelOverviewReducer } from '../../ModelDetails/reducers/model.overview
 import { leaderboardReducer } from '../../Models/reducers/leaderboard.reducer';
 import { projectsReducer } from '../../Projects/reducers/projects.reducer';
 import { servicesReducer } from '../../Projects/reducers/services.reducer';
+import { profileReducer } from '../../Profile/reducers/profile.reducers';
 
 export const rootReducer = combineReducers({
   model: modelOverviewReducer,
   leaderboard: leaderboardReducer,
   projects: projectsReducer,
   services: servicesReducer,
+  profile: profileReducer,
   routing: routerReducer
 });

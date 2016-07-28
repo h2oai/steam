@@ -112,10 +112,11 @@ type YarnCluster struct {
 }
 
 type Project struct {
-	Id          int64
-	Name        string
-	Description string
-	Created     time.Time
+	Id            int64
+	Name          string
+	Description   string
+	ModelCategory string
+	Created       time.Time
 }
 
 type Datasource struct {
@@ -148,6 +149,7 @@ type Model struct {
 	ClusterName         string
 	ModelKey            string
 	Algorithm           string
+	ModelCategory       string
 	DatasetName         string
 	ResponseColumnName  string
 	LogicalName         string
@@ -156,6 +158,15 @@ type Model struct {
 	Metrics             string
 	MetricsVersion      string
 	Created             time.Time
+}
+
+type Label struct {
+	Id          int64
+	ProjectId   int64
+	ModelId     int64
+	Name        string
+	Description string
+	Created     time.Time
 }
 
 type Service struct {

@@ -285,13 +285,14 @@ class RPCClient:
 		response = self.connection.call("GetJobs", request)
 		return response['jobs']
 	
-	def create_project(self, name, description):
+	def create_project(self, name, description, model_category):
 		"""
 		Create a project
 
 		Parameters:
 		name: No description available (string)
 		description: No description available (string)
+		model_category: No description available (string)
 
 		Returns:
 		project_id: No description available (int64)
@@ -299,6 +300,7 @@ class RPCClient:
 		request = {
 			'name': name
 			'description': description
+			'model_category': model_category
 		}
 		response = self.connection.call("CreateProject", request)
 		return response['project_id']
@@ -506,6 +508,22 @@ class RPCClient:
 		response = self.connection.call("GetDataset", request)
 		return response['dataset']
 	
+	def get_datasets_from_cluster(self, cluster_id):
+		"""
+		Get a list of datasets on a cluster
+
+		Parameters:
+		cluster_id: No description available (int64)
+
+		Returns:
+		dataset: No description available (Dataset)
+		"""
+		request = {
+			'cluster_id': cluster_id
+		}
+		response = self.connection.call("GetDatasetsFromCluster", request)
+		return response['dataset']
+	
 	def update_dataset(self, dataset_id, name, description, response_column_name):
 		"""
 		Update a dataset
@@ -640,18 +658,20 @@ class RPCClient:
 		response = self.connection.call("GetModels", request)
 		return response['models']
 	
-	def get_models_from_cluster(self, cluster_id):
+	def get_models_from_cluster(self, cluster_id, frame_key):
 		"""
 		List models from a cluster
 
 		Parameters:
 		cluster_id: No description available (int64)
+		frame_key: No description available (string)
 
 		Returns:
 		models: No description available (Model)
 		"""
 		request = {
 			'cluster_id': cluster_id
+			'frame_key': frame_key
 		}
 		response = self.connection.call("GetModelsFromCluster", request)
 		return response['models']
@@ -783,7 +803,7 @@ class RPCClient:
 	
 	def get_labels_for_project(self, project_id):
 		"""
-		No description available
+		List labels for a project, with corresponding models, if any
 
 		Parameters:
 		project_id: No description available (int64)
