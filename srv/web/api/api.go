@@ -39,10 +39,11 @@ type Job struct {
 }
 
 type Project struct {
-	Id          int64
-	Name        string
-	Description string
-	CreatedAt   int64
+	Id            int64
+	Name          string
+	Description   string
+	ModelCategory string
+	CreatedAt     int64
 }
 
 type Datasource struct {
@@ -327,10 +328,11 @@ type GetJobs struct {
 	Jobs      []Job
 }
 type CreateProject struct {
-	Name        string
-	Description string
-	_           int
-	ProjectId   int64
+	Name          string
+	Description   string
+	ModelCategory string
+	_             int
+	ProjectId     int64
 }
 type GetProjects struct {
 	Offset   int64

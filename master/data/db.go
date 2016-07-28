@@ -2493,17 +2493,17 @@ func (ds *Datastore) DeleteCluster(pz az.Principal, clusterId int64) error {
 
 // --- Project ---
 
-func (ds *Datastore) CreateProject(pz az.Principal, name, description string) (int64, error) {
+func (ds *Datastore) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		row := tx.QueryRow(`
 			INSERT INTO
 				project
-				(name, description, created)
+				(name, description, model_category, created)
 			VALUES
-				($1,   $2,       now())
+				($1,   $2,          $3,             now())
 			RETURNING id
-			`, name, description)
+			`, name, description, modelCategory)
 		if err := row.Scan(&id); err != nil {
 			return err
 		}
@@ -2518,8 +2518,9 @@ func (ds *Datastore) CreateProject(pz az.Principal, name, description string) (i
 		}
 
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Project, id, metadata{
-			"name":        name,
-			"description": description,
+			"name":           name,
+			"description":    description,
+			"model_category": modelCategory,
 		})
 	})
 	return id, err
@@ -2578,7 +2579,7 @@ func (ds *Datastore) UnlinkProjectAndModel(pz az.Principal, projectId, modelId i
 func (ds *Datastore) ReadProjects(pz az.Principal, offset, limit int64) ([]Project, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, description, created
+			id, name, description, model_category, created
 		FROM
 			project
 		WHERE
@@ -2611,7 +2612,7 @@ func (ds *Datastore) ReadProject(pz az.Principal, projectId int64) (Project, err
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, description, created
+			id, name, description, model_category, created
 		FROM
 			project
 		WHERE

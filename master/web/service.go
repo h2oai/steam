@@ -372,12 +372,12 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 
 // --- Project ---
 
-func (s *Service) CreateProject(pz az.Principal, name, description string) (int64, error) {
+func (s *Service) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
 		return 0, err
 	}
 
-	projectId, err := s.ds.CreateProject(pz, name, description)
+	projectId, err := s.ds.CreateProject(pz, name, description, modelCategory)
 	if err != nil {
 		return 0, err
 	}
@@ -2013,6 +2013,7 @@ func toProject(project data.Project) *web.Project {
 		project.Id,
 		project.Name,
 		project.Description,
+		project.ModelCategory,
 		toTimestamp(project.Created),
 	}
 }

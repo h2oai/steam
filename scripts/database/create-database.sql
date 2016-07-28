@@ -696,6 +696,7 @@ CREATE TABLE project (
     id integer NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
+    model_category text NOT NULL,
     created timestamp with time zone NOT NULL
 );
 
