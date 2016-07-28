@@ -25,9 +25,14 @@
     display: none;
   }
   .upload-info {
-    i:first-of-type {
+    display: flex;
+    i {
+      font-size: 1.3em;
       color: $brand-orange;
-      margin-right: $xsmall;
     }
+  }
+  .file-list {
+    margin: 0 $medium;
+    flex-basis: 30%;
   }
 }

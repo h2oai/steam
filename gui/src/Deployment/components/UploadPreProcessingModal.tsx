@@ -20,7 +20,7 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
   constructor() {
     super();
     this.state = {
-      mainFiles: [],
+      mainFiles: '',
       libraryFiles: []
     };
   }
@@ -61,12 +61,16 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <div>Select a main Python file for pre-processing.</div>
                 <span className="muted">The output from this Python file should be one row of an H2O data from that your model is expecting.</span>
                 <div className="upload">
-                  <span className="upload-info" onClick={this.selectMain.bind(this)}>
-                    <i className="fa fa-folder"/>
-                    <span>{this.state.mainFiles.name}</span>
+                  <div className="upload-info" onClick={this.selectMain.bind(this)}>
+                    <span>
+                      <i className="fa fa-folder-o"/>
+                    </span>
+                    <span className="file-list">{this.state.mainFiles ? this.state.mainFiles.name : 'N/A'}</span>
+                    <span>
+                      <i className="fa fa-close"/>
+                    </span>
                     <input type="file" name="selectMain" onChange={this.selectMainHandler.bind(this)}/>
-                  </span>
-                  <i className="fa fa-close"/>
+                  </div>
                 </div>
               </Cell>
             </Row>
@@ -78,14 +82,18 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <div>Select a main Python file for pre-processing.</div>
                 <span className="muted">Any non-standard libraries called here should be installed into your deployment environment prior to launching services.</span>
                 <div className="upload">
-                  <span className="upload-info" onClick={this.selectLibraries.bind(this)}>
-                    <i className="fa fa-folder"/>
-                    <span>{this.state.libraryFiles.map((file, i) => {
+                  <div className="upload-info" onClick={this.selectLibraries.bind(this)}>
+                    <span>
+                      <i className="fa fa-folder-o"/>
+                    </span>
+                    <span className="file-list">{this.state.libraryFiles.length > 0 ? this.state.libraryFiles.map((file, i) => {
                       return <div key={i}>{file.name}</div>;
-                    })}</span>
+                    }) : 'N/A'}</span>
+                    <span>
+                      <i className="fa fa-close"/>
+                    </span>
                     <input type="file" name="selectLibraries" onChange={this.selectLibrariesHandler.bind(this)} multiple/>
-                  </span>
-                  <i className="fa fa-close"/>
+                  </div>
                 </div>
               </Cell>
             </Row>
