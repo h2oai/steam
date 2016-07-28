@@ -15,10 +15,4 @@
   .name-project {
     margin-bottom: $medium;
   }
-  button.disabled {
-    background: $brand-dark-3;
-    border-color: $brand-dark-3;
-    pointer-events: none;
-    cursor: not-allowed;
-  }
 }

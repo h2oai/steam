@@ -3,7 +3,8 @@ package bindings
 type ModelSchema struct {
 	*ModelSchemaBase
 	/** The build parameters for the model (e.g. K for KMeans). */
-	Parameters *ModelParametersSchema `json:"parameters,omitempty"`
+	// FIXME hack: removed modelparameters because unused and problematic unmarshal (it's always empty anyway...)
+	// Parameters *ModelParametersSchema `json:"parameters,omitempty"`
 	/** The build output for the model (e.g. the cluster centers for KMeans). */
 	Output *ModelOutputSchema `json:"output,omitempty"`
 	/** Compatible frames, if requested */
@@ -32,7 +33,7 @@ type ModelSchema struct {
 
 func NewModelSchema() *ModelSchema {
 	return &ModelSchema{
-		Parameters:       nil,
+		// Parameters:       nil,
 		Output:           nil,
 		CompatibleFrames: nil,
 		Checksum:         0,
