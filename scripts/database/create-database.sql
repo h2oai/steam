@@ -563,6 +563,7 @@ CREATE TABLE model (
     cluster_name text NOT NULL,
     model_key text NOT NULL,
     algorithm text NOT NULL,
+    model_category text NOT NULL,
     dataset_name text NOT NULL,
     response_column_name text NOT NULL,
     logical_name text NOT NULL,

@@ -799,6 +799,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		cluster.Name,
 		modelKey,
 		"AutoML",
+		"", // ModelCategory
 		dataset,
 		targetName,
 		"",
@@ -858,7 +859,7 @@ func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int6
 }
 
 // Use this instead of model.DataFrame.Name because model.DataFrame can be nil
-func dataFrameName(m *bindings.ModelSchemaBase) string {
+func dataFrameName(m *bindings.ModelSchema) string {
 	if m.DataFrame != nil {
 		return m.DataFrame.Name
 	}
@@ -866,7 +867,7 @@ func dataFrameName(m *bindings.ModelSchemaBase) string {
 	return ""
 }
 
-func h2oToModel(model *bindings.ModelSchemaBase) data.Model {
+func h2oToModel(model *bindings.ModelSchema) data.Model {
 	return data.Model{
 		0,
 		0,
@@ -875,6 +876,7 @@ func h2oToModel(model *bindings.ModelSchemaBase) data.Model {
 		"",
 		model.ModelId.Name,
 		model.AlgoFullName,
+		string(model.Output.ModelCategory),
 		dataFrameName(model),
 		model.ResponseColumnName,
 		"",
@@ -889,7 +891,7 @@ func h2oToModel(model *bindings.ModelSchemaBase) data.Model {
 func h2oToModels(models []*bindings.ModelSchema) []data.Model {
 	array := make([]data.Model, len(models))
 	for i, model := range models {
-		array[i] = h2oToModel(model.ModelSchemaBase)
+		array[i] = h2oToModel(model)
 	}
 	return array
 }
@@ -987,6 +989,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		cluster.Name,
 		modelKey,
 		m.AlgoFullName,
+		string(m.Output.ModelCategory),
 		dataFrameName(m),
 		m.ResponseColumnName,
 		"",
@@ -1857,6 +1860,7 @@ func toModel(m data.Model) *web.Model {
 		m.ClusterName,
 		m.ModelKey,
 		m.Algorithm,
+		m.ModelCategory,
 		m.DatasetName,
 		m.ResponseColumnName,
 		m.LogicalName,

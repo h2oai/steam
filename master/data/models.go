@@ -148,6 +148,7 @@ type Model struct {
 	ClusterName         string
 	ModelKey            string
 	Algorithm           string
+	ModelCategory       string
 	DatasetName         string
 	ResponseColumnName  string
 	LogicalName         string
