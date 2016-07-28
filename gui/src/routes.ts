@@ -170,7 +170,7 @@ export const routes: IRoute[] = [
                 path: 'team',
                 component: Dummy,
                 name: 'Team',
-                icon: 'fa fa-cube',
+                icon: 'fa fa-users',
                 showInBreadcrumb: true,
                 showInNavigation: true
             }

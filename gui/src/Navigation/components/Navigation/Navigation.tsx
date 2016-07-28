@@ -141,7 +141,7 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
                                     let activeChildren = route.path === this.state.activeTopLevelPath && this.state.isSubMenuActive;
                                     return (
                                         <li key={route.path} className={classNames('nav-list--item', { active: isActive}, {activeChildren: activeChildren}) }>
-                                            <Link to={route.path}><i className={route.icon}></i><div className="nav-list--label">{route.name}</div></Link>
+                                            <Link to={'/' + route.path}><i className={route.icon}></i><div className="nav-list--label">{route.name}</div></Link>
                                         </li>
                                     );
                                 })
