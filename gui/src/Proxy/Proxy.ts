@@ -372,6 +372,9 @@ export interface Service {
   // List models
   getModels: (projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
   
+  // No description available
+  filterModelsByName: (projectId: number, namePart: string, offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
+  
   // List models from a cluster
   getModelsFromCluster: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
   
@@ -948,6 +951,24 @@ interface GetModelsIn {
 }
 
 interface GetModelsOut {
+  
+  models: Model[]
+  
+}
+
+interface FilterModelsByNameIn {
+  
+  project_id: number
+  
+  name_part: string
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface FilterModelsByNameOut {
   
   models: Model[]
   
@@ -1963,6 +1984,18 @@ export function getModels(projectId: number, offset: number, limit: number, go: 
       return go(error, null);
     } else {
       const d: GetModelsOut = <GetModelsOut> data;
+      return go(null, d.models);
+    }
+  });
+}
+
+export function filterModelsByName(projectId: number, namePart: string, offset: number, limit: number, go: (error: Error, models: Model[]) => void): void {
+  const req: FilterModelsByNameIn = { project_id: projectId, name_part: namePart, offset: offset, limit: limit };
+  Proxy.Call("FilterModelsByName", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FilterModelsByNameOut = <FilterModelsByNameOut> data;
       return go(null, d.models);
     }
   });

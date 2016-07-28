@@ -191,6 +191,7 @@ type Service struct {
 	BuildModelAuto              BuildModelAuto              `help:"Build an AutoML model"`
 	GetModel                    GetModel                    `help:"Get model details"`
 	GetModels                   GetModels                   `help:"List models"`
+	FilterModelsByName          FilterModelsByName          `help:"Filter a list of models by name`
 	GetModelsFromCluster        GetModelsFromCluster        `help:"List models from a cluster"`
 	ImportModelFromCluster      ImportModelFromCluster      `help:"Import models from a cluster"`
 	DeleteModel                 DeleteModel                 `help:"Delete a model"`
@@ -417,6 +418,14 @@ type GetModel struct {
 }
 type GetModels struct {
 	ProjectId int64
+	Offset    int64
+	Limit     int64
+	_         int
+	Models    []Model
+}
+type FilterModelsByName struct {
+	ProjectId int64
+	NamePart  string
 	Offset    int64
 	Limit     int64
 	_         int
