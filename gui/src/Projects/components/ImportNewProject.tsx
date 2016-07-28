@@ -193,7 +193,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               <Cell>CATEGORICAL</Cell>
               <Cell></Cell>
             </Row>
-            {this.props.models.map((model, i) => {
+            {_.filter(this.props.models, model => model.model_category === this.state.modelCategory).map((model, i) => {
               return (
                 <Row key={i}>
                   <Cell>{model.name}</Cell>
