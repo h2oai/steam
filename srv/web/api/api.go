@@ -445,6 +445,7 @@ type GetModels struct {
 }
 type GetModelsFromCluster struct {
 	ClusterId int64
+	FrameKey  string
 	_         int
 	Models    []Model
 }
