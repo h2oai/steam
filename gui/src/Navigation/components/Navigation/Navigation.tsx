@@ -32,7 +32,7 @@ interface State {
   isEulaAgreed: boolean
 }
 
-export class Navigation extends React.Component<Props & DispatchProps, State> {
+export class Navigation extends React.Component<Props & DispatchProps, any> {
 
     constructor() {
         super();
@@ -47,10 +47,10 @@ export class Navigation extends React.Component<Props & DispatchProps, State> {
       this.setMenuState(this.props.routes);
     }
 
-    componentWillReceiveProps(nextProps): void {
+    componentWillReceiveProps(nextProps: Props): void {
       this.setMenuState(nextProps.routes);
       this.setState({
-        isEulaAgreed: nextProps.profile.isEulaAgreed
+        isEulaAgreed: nextProps.profile.isEulaAgreed as boolean
       });
     }
 

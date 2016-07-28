@@ -126,7 +126,7 @@ export const routes: IRoute[] = [
             // /newproject/1
             {
                 path: 'newproject/import',
-                component: Dummy,
+                component: ImportNewProject,
                 name: 'Step 1',
                 showInBreadcrumb: true,
                 showInNavigation: false
