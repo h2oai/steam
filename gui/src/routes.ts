@@ -10,13 +10,11 @@ import Models from './Models/Models';
 import Projects from './Projects/Projects';
 import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ModelDetails from './ModelDetails/ModelDetails';
-import ProjectDetails from './ProjectDetails/ProjectDetails';
 import ImportNewProject from './Projects/components/ImportNewProject';
 import NewProjectStep1 from './Projects/components/NewProjectStep1';
 import NewProjectStep2 from './Projects/components/NewProjectStep2';
 import NewProjectStep3 from './Projects/components/NewProjectStep3';
 import Services from './Projects/components/Services';
-import Deployments from './Projects/components/Deployments';
 import CreateNewModel from './Projects/components/CreateNewModel';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
 import Dummy from './Dummy/Dummy';
@@ -65,8 +63,8 @@ export const routes: IRoute[] = [
             },
             {
                 path: 'projects/:projectid',
-                component: ProjectDetails,
-                name: 'Project Details',
+                component: Dummy,
+                name: 'Project',
                 showInBreadcrumb: true,
                 showInNavigation: false,
                 showChildrenAsSubmenu: true
@@ -82,7 +80,7 @@ export const routes: IRoute[] = [
             // /projects/:id/models/:id
             {
                 path: 'projects/:projectid/models/:modelid',
-                component: Dummy,
+                component: ModelDetails,
                 name: "Model Detail",
                 showInBreadcrumb: true,
                 showInNavigation: false
@@ -166,7 +164,7 @@ export const routes: IRoute[] = [
                 path: 'services',
                 name: 'Services',
                 icon: 'fa fa-cloud',
-                component: Deployments,
+                component: Services,
                 showInBreadcrumb: true,
                 showInNavigation: true
             },
@@ -184,7 +182,7 @@ export const routes: IRoute[] = [
                 path: 'team',
                 component: Dummy,
                 name: 'Team',
-                icon: 'fa fa-cube',
+                icon: 'fa fa-users',
                 showInBreadcrumb: true,
                 showInNavigation: true
             }
