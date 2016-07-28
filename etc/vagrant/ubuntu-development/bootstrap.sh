@@ -27,6 +27,9 @@ sudo apt-get install -y oracle-java7-installer
 curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
+# Postgres
+sudo apt-get install -y postgresql
+
 # Golang
 wget https://storage.googleapis.com/golang/go1.6.3.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.6.3.linux-amd64.tar.gz
@@ -37,11 +40,13 @@ echo "export PATH=\$PATH:/usr/local/go/bin" >> /home/vagrant/.profile
 mkdir -p /home/vagrant/go
 echo "export GOPATH=/home/vagrant/go" >> /home/vagrant/.profile
 
-echo "**************************************************"
-echo "* VM ready. Complete these steps manually:       *"
-echo "* -----------------------------------------------*"
-echo "* vagrant ssh                                    *"
-echo "* cd ~/go                                        *"
-echo "* git clone https://github.com/h2oai/steamY.git  *"
-echo "* make                                           *"
-echo "**************************************************"
+echo "*************************************************************************"
+echo "* VM ready. Complete these steps manually:                              *"
+echo "* --------------------------------------------------------------------- *"
+echo "* vagrant ssh                                                           *"
+echo "* Create postgres user:                                                 *"
+echo "*   https://github.com/h2oai/steamY/tree/develop/tools/ec2/ubuntu-14.04 *"
+echo "* cd ~/go                                                               *"
+echo "* git clone https://github.com/h2oai/steamY.git                         *"
+echo "* make                                                                  *"
+echo "*************************************************************************"
