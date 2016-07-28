@@ -10,7 +10,7 @@ import Packaging from './components/Packaging';
 import UploadPreProcessingModal from './components/UploadPreProcessingModal';
 import './styles/deployment.scss';
 
-export default class Services extends React.Component<any, any> {
+export default class Deployment extends React.Component<any, any> {
   constructor() {
     super();
     this.state = {
@@ -56,8 +56,8 @@ export default class Services extends React.Component<any, any> {
     });
   }
 
-  upload() {
-    console.log(this);
+  upload(uploadedPackage) {
+    this.closeUpload();
   }
 
   render(): React.ReactElement<HTMLDivElement> {

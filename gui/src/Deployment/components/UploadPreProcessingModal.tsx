@@ -17,6 +17,10 @@ interface Props {
 }
 
 export default class UploadPreProcessingModal extends React.Component<Props, any> {
+  refs: {
+    packageName: HTMLInputElement
+  };
+
   constructor() {
     super();
     this.state = {
@@ -43,6 +47,13 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     this.setState({
       libraryFiles: Array.prototype.slice.call(event.target.files)
     });
+  }
+
+  uploadPackage() {
+    let uploadedPackage = {
+      name: $(this.refs.packageName).val()
+    };
+    this.props.upload(uploadedPackage);
   }
 
   render(): React.ReactElement<DefaultModal> {
@@ -104,13 +115,13 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
               <Cell>
                 <div>Pick a name for this pre-processing package. You will use it as a reference when deploying models.</div>
                 <div className="package-name-label muted">Package name</div>
-                <input type="text"/>
+                <input ref="packageName" type="text"/>
               </Cell>
             </Row>
             <Row>
               <Cell/>
               <Cell className="button-container">
-                <button className="default" onClick={this.props.upload.bind(this)}>
+                <button className="default" onClick={this.uploadPackage.bind(this)}>
                   Upload
                 </button>
                 <button className="default invert" onClick={this.props.cancel.bind(this)}>
