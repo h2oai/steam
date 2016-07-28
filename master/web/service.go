@@ -798,7 +798,13 @@ func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int6
 	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
-	ms, err := s.ds.ReadModels(pz, offset, limit)
+
+	// Verifty project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	ms, err := s.ds.ReadModelsForProject(pz, projectId, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -940,6 +946,10 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	}
 
 	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
+		return 0, err
+	}
+
+	if err := s.ds.LinkProjectAndModel(pz, projectId, modelId); err != nil {
 		return 0, err
 	}
 
