@@ -9,8 +9,10 @@ import * as $ from 'jquery';
 import '../styles/dropdown.scss';
 
 interface Props {
-  text: string,
-  options: any
+  dropdownContent: Element | React.ReactElement<any>,
+  className?: any,
+  invokerContainerClass: any,
+  target?: Element
 }
 
 export default class Dropdown extends React.Component<Props, any> {
@@ -40,7 +42,7 @@ export default class Dropdown extends React.Component<Props, any> {
   componentWillMount() {
     this.appendToElement();
     $(document).bind('click.dropdown', (event) => {
-      if (event.target === this.refs.dropdownInvoker) {
+      if (ReactDOM.findDOMNode(this.refs.dropdownInvokerContainer).contains(event.target)) {
         this.setState({
           open: !this.state.open
         });
@@ -48,8 +50,8 @@ export default class Dropdown extends React.Component<Props, any> {
         this.setState({
           open: false
         });
-        this.updateDropdownStyle();
       }
+      this.updateDropdownStyle();
     });
     $(window).bind('resize.dropdown', () => {
       this.updateDropdownStyle();
@@ -73,6 +75,7 @@ export default class Dropdown extends React.Component<Props, any> {
     if (this._mountNode) {
       ReactDOM.unmountComponentAtNode(this._mountNode);
       this._mountNode = null;
+      this._mountNode.remove();
     }
   }
 
@@ -83,25 +86,23 @@ export default class Dropdown extends React.Component<Props, any> {
   appendToElement() {
     this._mountNode = document.createElement('div');
     $(this._mountNode).addClass('dropdown-container');
-    document.body.appendChild(this._mountNode);
+    $(this._mountNode).addClass(this.props.className);
+    let target = $(document.body);
+    target.append(this._mountNode);
   }
 
   getDropdown() {
     return (
       <div className="dropdown-menu">
-        <ul>
-          {this.props.options.map((option, i) => {
-            return <li key={i} value={option.value}>{option.text}</li>;
-          })}
-        </ul>
+        {this.props.dropdownContent}
       </div>
     );
   }
 
   render() {
     return (
-      <div ref="dropdownInvokerContainer" className={classNames('dropdown', { open: this.state.open})}>
-        <button ref="dropdownInvoker" type="button">{this.props.text}</button>
+      <div ref="dropdownInvokerContainer" className={classNames('dropdown', this.props.invokerContainerClass, { open: this.state.open})}>
+        {this.props.children}
       </div>
     );
   }

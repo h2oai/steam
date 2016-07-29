@@ -20,20 +20,6 @@
     flex-direction: column;
     position: relative;
     opacity: 0;
-    height: 0;
-    ul {
-      background-color: lighten($brand-dark-3, 20%);
-      margin: 0;
-      padding: 0;
-      border: 1px solid black;
-      list-style-type: none;
-      li {
-        padding: 5px 5px;
-        &:hover {
-          background-color: lighten($brand-dark-3, 30%);
-        }
-      }
-    }
   }
   &.open {
     .dropdown-menu {
