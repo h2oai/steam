@@ -86,6 +86,7 @@ type Model struct {
 type ScoringService struct {
 	Id        int64
 	ModelId   int64
+	Name      string
 	Address   string
 	Port      int
 	ProcessId int
@@ -193,12 +194,14 @@ type Service struct {
 	GetModels                   GetModels                   `help:"List models"`
 	GetModelsFromCluster        GetModelsFromCluster        `help:"List models from a cluster"`
 	ImportModelFromCluster      ImportModelFromCluster      `help:"Import models from a cluster"`
+	UpdateModel                 UpdateModel                 `help:"Updates a model"`
 	DeleteModel                 DeleteModel                 `help:"Delete a model"`
 	StartService                StartService                `help:"Start a service"`
 	StopService                 StopService                 `help:"Stop a service"`
 	GetService                  GetService                  `help:"Get service details"`
 	GetServices                 GetServices                 `help:"List services"`
 	GetServicesForModel         GetServicesForModel         `help:"List services for a model"`
+	UpdateService               UpdateService               `help:"Update a service"`
 	DeleteService               DeleteService               `help:"Delete a service"`
 	AddEngine                   AddEngine                   `help:"Add an engine"`
 	GetEngine                   GetEngine                   `help:"Get engine details"`
@@ -435,14 +438,20 @@ type ImportModelFromCluster struct {
 	_         int
 	ModelId   int64
 }
+type UpdateModel struct {
+	ModelId   int64
+	ModelName string
+	_         int
+}
 type DeleteModel struct {
 	ModelId int64
 }
 type StartService struct {
-	ModelId int64
-	Port    int
-	_       int
-	Service ScoringService
+	ModelId   int64
+	Name      string
+	Port      int
+	_         int
+	ServiceId int64
 }
 type StopService struct {
 	ServiceId int64
@@ -464,6 +473,11 @@ type GetServicesForModel struct {
 	Limit    int64
 	_        int
 	Services []ScoringService
+}
+type UpdateService struct {
+	ServiceId   int64
+	ServiceName string
+	_           int
 }
 type DeleteService struct {
 	ServiceId int64

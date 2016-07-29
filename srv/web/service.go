@@ -141,6 +141,7 @@ type Role struct {
 type ScoringService struct {
   Id int64 `json:"id"`
   ModelId int64 `json:"model_id"`
+  Name string `json:"name"`
   Address string `json:"address"`
   Port int `json:"port"`
   ProcessId int `json:"process_id"`
@@ -204,12 +205,14 @@ type Service interface {
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
   GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*Model, error)
   ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
+  UpdateModel(pz az.Principal, modelId int64, modelName string) (error)
   DeleteModel(pz az.Principal, modelId int64) (error)
-  StartService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
+  StartService(pz az.Principal, modelId int64, name string, port int) (int64, error)
   StopService(pz az.Principal, serviceId int64) (error)
   GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
   GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
   GetServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
+  UpdateService(pz az.Principal, serviceId int64, serviceName string) (error)
   DeleteService(pz az.Principal, serviceId int64) (error)
   AddEngine(pz az.Principal, engineName string, enginePath string) (int64, error)
   GetEngine(pz az.Principal, engineId int64) (*Engine, error)
@@ -550,6 +553,14 @@ type ImportModelFromClusterOut struct {
   ModelId int64 `json:"model_id"`
 }
 
+type UpdateModelIn struct {
+  ModelId int64 `json:"model_id"`
+  ModelName string `json:"model_name"`
+}
+
+type UpdateModelOut struct {
+}
+
 type DeleteModelIn struct {
   ModelId int64 `json:"model_id"`
 }
@@ -559,11 +570,12 @@ type DeleteModelOut struct {
 
 type StartServiceIn struct {
   ModelId int64 `json:"model_id"`
+  Name string `json:"name"`
   Port int `json:"port"`
 }
 
 type StartServiceOut struct {
-  Service *ScoringService `json:"service"`
+  ServiceId int64 `json:"service_id"`
 }
 
 type StopServiceIn struct {
@@ -598,6 +610,14 @@ type GetServicesForModelIn struct {
 
 type GetServicesForModelOut struct {
   Services []*ScoringService `json:"services"`
+}
+
+type UpdateServiceIn struct {
+  ServiceId int64 `json:"service_id"`
+  ServiceName string `json:"service_name"`
+}
+
+type UpdateServiceOut struct {
 }
 
 type DeleteServiceIn struct {
@@ -1293,6 +1313,16 @@ func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, mod
   return out.ModelId, nil
 }
 
+func (this *Remote) UpdateModel(modelId int64, modelName string) (error) {
+  in := UpdateModelIn{ modelId , modelName  }
+  var out UpdateModelOut
+  err := this.Proc.Call("UpdateModel", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
 func (this *Remote) DeleteModel(modelId int64) (error) {
   in := DeleteModelIn{ modelId  }
   var out DeleteModelOut
@@ -1303,14 +1333,14 @@ func (this *Remote) DeleteModel(modelId int64) (error) {
   return nil
 }
 
-func (this *Remote) StartService(modelId int64, port int) (*ScoringService, error) {
-  in := StartServiceIn{ modelId , port  }
+func (this *Remote) StartService(modelId int64, name string, port int) (int64, error) {
+  in := StartServiceIn{ modelId , name , port  }
   var out StartServiceOut
   err := this.Proc.Call("StartService", &in, &out)
   if err != nil {
-    return nil, err
+    return 0, err
   }
-  return out.Service, nil
+  return out.ServiceId, nil
 }
 
 func (this *Remote) StopService(serviceId int64) (error) {
@@ -1351,6 +1381,16 @@ func (this *Remote) GetServicesForModel(modelId int64, offset int64, limit int64
     return nil, err
   }
   return out.Services, nil
+}
+
+func (this *Remote) UpdateService(serviceId int64, serviceName string) (error) {
+  in := UpdateServiceIn{ serviceId , serviceName  }
+  var out UpdateServiceOut
+  err := this.Proc.Call("UpdateService", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
 }
 
 func (this *Remote) DeleteService(serviceId int64) (error) {
@@ -2963,6 +3003,40 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 	return nil
 }
 
+func (this *Impl) UpdateModel(r *http.Request, in *UpdateModelIn, out *UpdateModelOut) error {
+  const name = "UpdateModel"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.UpdateModel(pz, in.ModelId, in.ModelName)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
 func (this *Impl) DeleteModel(r *http.Request, in *DeleteModelIn, out *DeleteModelOut) error {
   const name = "DeleteModel"
 
@@ -3014,13 +3088,13 @@ func (this *Impl) StartService(r *http.Request, in *StartServiceIn, out *StartSe
     log.Println(guid, "REQ", pz, name, string(req))
   }
 
-	val0, err := this.Service.StartService(pz, in.ModelId, in.Port)
+	val0, err := this.Service.StartService(pz, in.ModelId, in.Name, in.Port)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
   
-	out.Service = val0 
+	out.ServiceId = val0 
   
 
   res, merr := json.Marshal(out)
@@ -3163,6 +3237,40 @@ func (this *Impl) GetServicesForModel(r *http.Request, in *GetServicesForModelIn
 	}
   
 	out.Services = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) UpdateService(r *http.Request, in *UpdateServiceIn, out *UpdateServiceOut) error {
+  const name = "UpdateService"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.UpdateService(pz, in.ServiceId, in.ServiceName)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
   
 
   res, merr := json.Marshal(out)

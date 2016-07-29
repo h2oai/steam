@@ -946,6 +946,25 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	return modelId, nil
 }
 
+func (s *Service) UpdateModel(pz az.Principal, modelId int64, modelName string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return err
+	}
+
+	// Verify model exists
+	if _, err := s.ds.ReadModel(pz, modelId); err != nil {
+		return err
+	}
+
+	// Rename model
+	if modelName != "" {
+		if err := s.ds.UpdateModelName(pz, modelId, modelName); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return err
@@ -974,9 +993,9 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	return s.ds.DeleteModel(pz, modelId)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, serviceName string, port int) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// FIXME: change sequence to:
@@ -986,12 +1005,12 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	compilationService := compiler.NewServer(s.compilationServiceAddress)
 	if err := compilationService.Ping(); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// do not recompile if war file is already available
@@ -1004,7 +1023,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 			"makewar",
 		)
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 	}
 
@@ -1015,12 +1034,12 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 		port,
 	)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	address, err := fs.GetExternalHost() // FIXME there is no need to re-scan this every time. Can be a property on *Service at init time.
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	log.Printf("Scoring service started at %s:%d\n", address, port)
@@ -1028,6 +1047,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 	service := data.Service{
 		0,
 		model.Id,
+		serviceName,
 		address,
 		int64(port), // FIXME change to int
 		int64(pid),  // FIXME change to int
@@ -1037,19 +1057,29 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 
 	serviceId, err := s.ds.CreateService(pz, service)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	service, err = s.ds.ReadService(pz, serviceId)
-	if err != nil {
-		return nil, err
+	return serviceId, nil
+}
+
+func (s *Service) UpdateService(pz az.Principal, serviceId int64, serviceName string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
+		return err
 	}
 
-	// s.scoreActivity.Lock()
-	// s.scoreActivity.latest[modelName] = ss.CreatedAt
-	// s.scoreActivity.Unlock()
+	// Verify service exists
+	if _, err := s.ds.ReadService(pz, serviceId); err != nil {
+		return err
+	}
 
-	return toScoringService(service), nil
+	// Rename service
+	if serviceName != "" {
+		if err := s.ds.UpdateServiceName(pz, serviceId, serviceName); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) StopService(pz az.Principal, serviceId int64) error {
@@ -1704,6 +1734,7 @@ func toScoringService(s data.Service) *web.ScoringService {
 	return &web.ScoringService{
 		s.Id,
 		s.ModelId,
+		s.Name,
 		s.Address,
 		int(s.Port),      // FIXME change db field to int
 		int(s.ProcessId), // FIXME change db field to int
@@ -1851,6 +1882,7 @@ func toProjects(projects []data.Project) []*web.Project {
 	for i, project := range projects {
 		array[i] = toProject(project)
 	}
+
 	return array
 }
 

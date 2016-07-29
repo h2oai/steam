@@ -678,6 +678,23 @@ class RPCClient:
 		response = self.connection.call("ImportModelFromCluster", request)
 		return response['model_id']
 	
+	def update_model(self, model_id, model_name):
+		"""
+		Updates a model
+
+		Parameters:
+		model_id: No description available (int64)
+		model_name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'model_id': model_id
+			'model_name': model_name
+		}
+		response = self.connection.call("UpdateModel", request)
+		return 
+	
 	def delete_model(self, model_id):
 		"""
 		Delete a model
@@ -693,23 +710,25 @@ class RPCClient:
 		response = self.connection.call("DeleteModel", request)
 		return 
 	
-	def start_service(self, model_id, port):
+	def start_service(self, model_id, name, port):
 		"""
 		Start a service
 
 		Parameters:
 		model_id: No description available (int64)
+		name: No description available (string)
 		port: No description available (int)
 
 		Returns:
-		service: No description available (ScoringService)
+		service_id: No description available (int64)
 		"""
 		request = {
 			'model_id': model_id
+			'name': name
 			'port': port
 		}
 		response = self.connection.call("StartService", request)
-		return response['service']
+		return response['service_id']
 	
 	def stop_service(self, service_id):
 		"""
@@ -779,6 +798,23 @@ class RPCClient:
 		}
 		response = self.connection.call("GetServicesForModel", request)
 		return response['services']
+	
+	def update_service(self, service_id, service_name):
+		"""
+		Update a service
+
+		Parameters:
+		service_id: No description available (int64)
+		service_name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'service_id': service_id
+			'service_name': service_name
+		}
+		response = self.connection.call("UpdateService", request)
+		return 
 	
 	def delete_service(self, service_id):
 		"""
