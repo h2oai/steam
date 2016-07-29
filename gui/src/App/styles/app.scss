@@ -15,7 +15,7 @@ article {
   h1 {
     font-size:2em;
     text-transform:uppercase;
-    letter-spacing:2;
+    letter-spacing:1px;
     font-weight:300;
     margin:.25em 0;
   }
@@ -104,4 +104,37 @@ button, a {
     display: flex;
     flex-direction: column;
   }
+}
+
+// forms
+
+input[type="text"], textarea {
+  border: solid 1px $brand-dark-3;
+  padding:5px;
+  border-radius:3px;
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.35);
+  background: #fff;
+  font-size: $text-size;
+  font-family: $font-text;
+}
+
+.form-group {
+  .form-item {
+    padding:10px 0;
+    input, textarea {
+      width:100%;
+    }
+    label {
+      display:block;
+      color: $brand-dark-3;
+      font-size:.9em;
+      margin-bottom:0.3em;
+    }
+  }
+}
+
+// miscellaneous
+
+.muted {
+  color: $brand-dark-3;
 }

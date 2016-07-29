@@ -52,7 +52,7 @@ export default class Labels extends React.Component<any, any> {
                         Create New Label
                     </button>
                 </span>
-                <CreateNewLabelModal open={this.state.modalOpen} cancel={this.closeModal.bind(this) } upload={this.newLabel.bind(this) }/>
+                <CreateNewLabelModal open={this.state.modalOpen} cancel={this.closeModal.bind(this) } save={this.newLabel.bind(this) }/>
             </div>
         );
     }
