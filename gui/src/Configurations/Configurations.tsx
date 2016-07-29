@@ -9,6 +9,11 @@ import Labels from './components/Labels';
 import './styles/configurations.scss';
 
 export default class Configurations extends React.Component<any, any> {
+
+  /**
+   * TODO(jefffohl): Make the tab container a generalized container, like <TabContainer>, to keep things DRY.
+   */
+
   constructor() {
     super();
     this.state = {
