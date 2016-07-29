@@ -74,7 +74,6 @@ public class PredictServlet extends HttpServlet {
         logger.debug("{} = {}", k, tr.get(k));
         row.put(k, tr.get(k));
       }
-      System.out.println(row);
     }
     try {
       if (model == null)
@@ -137,7 +136,6 @@ public class PredictServlet extends HttpServlet {
             logger.debug("{} = {}", k, tr.get(k));
             row.put(k, tr.get(k));
           }
-          System.out.println(row);
         }
         logger.debug("row {}", row);
         if (row != null) {

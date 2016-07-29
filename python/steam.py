@@ -676,6 +676,84 @@ class RPCClient:
 		response = self.connection.call("GetModelsFromCluster", request)
 		return response['models']
 	
+	def find_models_binomial(self, project_id, name_part, sort_by, ascending, offset, limit):
+		"""
+		List binomial models
+
+		Parameters:
+		project_id: No description available (int64)
+		name_part: No description available (string)
+		sort_by: No description available (string)
+		ascending: No description available (bool)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		models: No description available (BinomialModel)
+		"""
+		request = {
+			'project_id': project_id
+			'name_part': name_part
+			'sort_by': sort_by
+			'ascending': ascending
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("FindModelsBinomial", request)
+		return response['models']
+	
+	def find_models_multinomial(self, project_id, name_part, sort_by, ascending, offset, limit):
+		"""
+		List multinomial models
+
+		Parameters:
+		project_id: No description available (int64)
+		name_part: No description available (string)
+		sort_by: No description available (string)
+		ascending: No description available (bool)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		models: No description available (MultinomialModel)
+		"""
+		request = {
+			'project_id': project_id
+			'name_part': name_part
+			'sort_by': sort_by
+			'ascending': ascending
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("FindModelsMultinomial", request)
+		return response['models']
+	
+	def find_models_regression(self, project_id, name_part, sort_by, ascending, offset, limit):
+		"""
+		List regression models
+
+		Parameters:
+		project_id: No description available (int64)
+		name_part: No description available (string)
+		sort_by: No description available (string)
+		ascending: No description available (bool)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		models: No description available (RegressionModel)
+		"""
+		request = {
+			'project_id': project_id
+			'name_part': name_part
+			'sort_by': sort_by
+			'ascending': ascending
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("FindModelsRegression", request)
+		return response['models']
+	
 	def import_model_from_cluster(self, cluster_id, project_id, model_key, model_name):
 		"""
 		Import models from a cluster

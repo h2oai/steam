@@ -14,6 +14,29 @@ import (
 )
 
 // --- Types ---
+type BinomialModel struct {
+  Id int64 `json:"id"`
+  TrainingDatasetId int64 `json:"training_dataset_id"`
+  ValidationDatasetId int64 `json:"validation_dataset_id"`
+  Name string `json:"name"`
+  ClusterName string `json:"cluster_name"`
+  ModelKey string `json:"model_key"`
+  Algorithm string `json:"algorithm"`
+  ModelCategory string `json:"model_category"`
+  DatasetName string `json:"dataset_name"`
+  ResponseColumnName string `json:"response_column_name"`
+  LogicalName string `json:"logical_name"`
+  Location string `json:"location"`
+  MaxRuntime int `json:"max_runtime"`
+  Metrics string `json:"metrics"`
+  CreatedAt int64 `json:"created_at"`
+  Mse float64 `json:"mse"`
+  RSquared float64 `json:"r_squared"`
+  Logloss float64 `json:"logloss"`
+  Auc float64 `json:"auc"`
+  Gini float64 `json:"gini"`
+}
+
 type Cluster struct {
   Id int64 `json:"id"`
   Name string `json:"name"`
@@ -128,6 +151,27 @@ type Model struct {
   CreatedAt int64 `json:"created_at"`
 }
 
+type MultinomialModel struct {
+  Id int64 `json:"id"`
+  TrainingDatasetId int64 `json:"training_dataset_id"`
+  ValidationDatasetId int64 `json:"validation_dataset_id"`
+  Name string `json:"name"`
+  ClusterName string `json:"cluster_name"`
+  ModelKey string `json:"model_key"`
+  Algorithm string `json:"algorithm"`
+  ModelCategory string `json:"model_category"`
+  DatasetName string `json:"dataset_name"`
+  ResponseColumnName string `json:"response_column_name"`
+  LogicalName string `json:"logical_name"`
+  Location string `json:"location"`
+  MaxRuntime int `json:"max_runtime"`
+  Metrics string `json:"metrics"`
+  CreatedAt int64 `json:"created_at"`
+  Mse float64 `json:"mse"`
+  RSquared float64 `json:"r_squared"`
+  Logloss float64 `json:"logloss"`
+}
+
 type Permission struct {
   Id int64 `json:"id"`
   Code string `json:"code"`
@@ -140,6 +184,27 @@ type Project struct {
   Description string `json:"description"`
   ModelCategory string `json:"model_category"`
   CreatedAt int64 `json:"created_at"`
+}
+
+type RegressionModel struct {
+  Id int64 `json:"id"`
+  TrainingDatasetId int64 `json:"training_dataset_id"`
+  ValidationDatasetId int64 `json:"validation_dataset_id"`
+  Name string `json:"name"`
+  ClusterName string `json:"cluster_name"`
+  ModelKey string `json:"model_key"`
+  Algorithm string `json:"algorithm"`
+  ModelCategory string `json:"model_category"`
+  DatasetName string `json:"dataset_name"`
+  ResponseColumnName string `json:"response_column_name"`
+  LogicalName string `json:"logical_name"`
+  Location string `json:"location"`
+  MaxRuntime int `json:"max_runtime"`
+  Metrics string `json:"metrics"`
+  CreatedAt int64 `json:"created_at"`
+  Mse float64 `json:"mse"`
+  RSquared float64 `json:"r_squared"`
+  MeanResidualDeviance float64 `json:"mean_residual_deviance"`
 }
 
 type Role struct {
@@ -215,6 +280,9 @@ type Service interface {
   GetModel(pz az.Principal, modelId int64) (*Model, error)
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
   GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*Model, error)
+  FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error)
+  FindModelsMultinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error)
+  FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error)
   ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
   DeleteModel(pz az.Principal, modelId int64) (error)
   CreateLabel(pz az.Principal, projectId int64, name string, description string) (int64, error)
@@ -565,6 +633,45 @@ type GetModelsFromClusterIn struct {
 
 type GetModelsFromClusterOut struct {
   Models []*Model `json:"models"`
+}
+
+type FindModelsBinomialIn struct {
+  ProjectId int64 `json:"project_id"`
+  NamePart string `json:"name_part"`
+  SortBy string `json:"sort_by"`
+  Ascending bool `json:"ascending"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type FindModelsBinomialOut struct {
+  Models []*BinomialModel `json:"models"`
+}
+
+type FindModelsMultinomialIn struct {
+  ProjectId int64 `json:"project_id"`
+  NamePart string `json:"name_part"`
+  SortBy string `json:"sort_by"`
+  Ascending bool `json:"ascending"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type FindModelsMultinomialOut struct {
+  Models []*MultinomialModel `json:"models"`
+}
+
+type FindModelsRegressionIn struct {
+  ProjectId int64 `json:"project_id"`
+  NamePart string `json:"name_part"`
+  SortBy string `json:"sort_by"`
+  Ascending bool `json:"ascending"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type FindModelsRegressionOut struct {
+  Models []*RegressionModel `json:"models"`
 }
 
 type ImportModelFromClusterIn struct {
@@ -1365,6 +1472,36 @@ func (this *Remote) GetModelsFromCluster(clusterId int64, frameKey string) ([]*M
   in := GetModelsFromClusterIn{ clusterId , frameKey  }
   var out GetModelsFromClusterOut
   err := this.Proc.Call("GetModelsFromCluster", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Models, nil
+}
+
+func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error) {
+  in := FindModelsBinomialIn{ projectId , namePart , sortBy , ascending , offset , limit  }
+  var out FindModelsBinomialOut
+  err := this.Proc.Call("FindModelsBinomial", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Models, nil
+}
+
+func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error) {
+  in := FindModelsMultinomialIn{ projectId , namePart , sortBy , ascending , offset , limit  }
+  var out FindModelsMultinomialOut
+  err := this.Proc.Call("FindModelsMultinomial", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Models, nil
+}
+
+func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error) {
+  in := FindModelsRegressionIn{ projectId , namePart , sortBy , ascending , offset , limit  }
+  var out FindModelsRegressionOut
+  err := this.Proc.Call("FindModelsRegression", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -3093,6 +3230,114 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
   }
 
 	val0, err := this.Service.GetModelsFromCluster(pz, in.ClusterId, in.FrameKey)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, out *FindModelsBinomialOut) error {
+  const name = "FindModelsBinomial"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.FindModelsBinomial(pz, in.ProjectId, in.NamePart, in.SortBy, in.Ascending, in.Offset, in.Limit)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) FindModelsMultinomial(r *http.Request, in *FindModelsMultinomialIn, out *FindModelsMultinomialOut) error {
+  const name = "FindModelsMultinomial"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.FindModelsMultinomial(pz, in.ProjectId, in.NamePart, in.SortBy, in.Ascending, in.Offset, in.Limit)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegressionIn, out *FindModelsRegressionOut) error {
+  const name = "FindModelsRegression"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.FindModelsRegression(pz, in.ProjectId, in.NamePart, in.SortBy, in.Ascending, in.Offset, in.Limit)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err

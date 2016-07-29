@@ -119,6 +119,44 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: binomial_model; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE binomial_model (
+    id integer NOT NULL,
+    model_id integer NOT NULL,
+    mse double precision,
+    r_squared double precision,
+    logloss double precision,
+    auc double precision,
+    gini double precision
+);
+
+
+ALTER TABLE binomial_model OWNER TO steam;
+
+--
+-- Name: binomial_model_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE binomial_model_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE binomial_model_id_seq OWNER TO steam;
+
+--
+-- Name: binomial_model_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE binomial_model_id_seq OWNED BY binomial_model.id;
+
+
+--
 -- Name: cluster; Type: TABLE; Schema: public; Owner: steam
 --
 
@@ -641,6 +679,42 @@ ALTER SEQUENCE model_id_seq OWNED BY model.id;
 
 
 --
+-- Name: multinomial_model; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE multinomial_model (
+    id integer NOT NULL,
+    model_id integer NOT NULL,
+    mse double precision,
+    r_squared double precision,
+    logloss double precision
+);
+
+
+ALTER TABLE multinomial_model OWNER TO steam;
+
+--
+-- Name: multinomial_model_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE multinomial_model_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE multinomial_model_id_seq OWNER TO steam;
+
+--
+-- Name: multinomial_model_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE multinomial_model_id_seq OWNED BY multinomial_model.id;
+
+
+--
 -- Name: permission; Type: TABLE; Schema: public; Owner: steam
 --
 
@@ -735,6 +809,42 @@ CREATE TABLE project_model (
 
 
 ALTER TABLE project_model OWNER TO steam;
+
+--
+-- Name: regression_model; Type: TABLE; Schema: public; Owner: steam
+--
+
+CREATE TABLE regression_model (
+    id integer NOT NULL,
+    model_id integer NOT NULL,
+    mse double precision,
+    r_squared double precision,
+    mean_residual_deviance double precision
+);
+
+
+ALTER TABLE regression_model OWNER TO steam;
+
+--
+-- Name: regression_model_id_seq; Type: SEQUENCE; Schema: public; Owner: steam
+--
+
+CREATE SEQUENCE regression_model_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE regression_model_id_seq OWNER TO steam;
+
+--
+-- Name: regression_model_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: steam
+--
+
+ALTER SEQUENCE regression_model_id_seq OWNED BY regression_model.id;
+
 
 --
 -- Name: role; Type: TABLE; Schema: public; Owner: steam
@@ -861,6 +971,13 @@ ALTER SEQUENCE workgroup_id_seq OWNED BY workgroup.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: steam
 --
 
+ALTER TABLE ONLY binomial_model ALTER COLUMN id SET DEFAULT nextval('binomial_model_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
 ALTER TABLE ONLY cluster ALTER COLUMN id SET DEFAULT nextval('cluster_id_seq'::regclass);
 
 
@@ -945,6 +1062,13 @@ ALTER TABLE ONLY model ALTER COLUMN id SET DEFAULT nextval('model_id_seq'::regcl
 -- Name: id; Type: DEFAULT; Schema: public; Owner: steam
 --
 
+ALTER TABLE ONLY multinomial_model ALTER COLUMN id SET DEFAULT nextval('multinomial_model_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
 ALTER TABLE ONLY permission ALTER COLUMN id SET DEFAULT nextval('permission_id_seq'::regclass);
 
 
@@ -953,6 +1077,13 @@ ALTER TABLE ONLY permission ALTER COLUMN id SET DEFAULT nextval('permission_id_s
 --
 
 ALTER TABLE ONLY project ALTER COLUMN id SET DEFAULT nextval('project_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY regression_model ALTER COLUMN id SET DEFAULT nextval('regression_model_id_seq'::regclass);
 
 
 --
@@ -974,6 +1105,14 @@ ALTER TABLE ONLY service ALTER COLUMN id SET DEFAULT nextval('service_id_seq'::r
 --
 
 ALTER TABLE ONLY workgroup ALTER COLUMN id SET DEFAULT nextval('workgroup_id_seq'::regclass);
+
+
+--
+-- Name: pk_binomial_model; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY binomial_model
+    ADD CONSTRAINT pk_binomial_model PRIMARY KEY (id);
 
 
 --
@@ -1089,6 +1228,14 @@ ALTER TABLE ONLY model
 
 
 --
+-- Name: pk_multinomial_model; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY multinomial_model
+    ADD CONSTRAINT pk_multinomial_model PRIMARY KEY (id);
+
+
+--
 -- Name: pk_permission; Type: CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -1118,6 +1265,14 @@ ALTER TABLE ONLY project
 
 ALTER TABLE ONLY project_model
     ADD CONSTRAINT pk_project_model PRIMARY KEY (project_id, model_id);
+
+
+--
+-- Name: pk_regression_model; Type: CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY regression_model
+    ADD CONSTRAINT pk_regression_model PRIMARY KEY (id);
 
 
 --
@@ -1206,6 +1361,13 @@ ALTER TABLE ONLY role
 
 ALTER TABLE ONLY workgroup
     ADD CONSTRAINT uq_workgroup_name UNIQUE (name);
+
+
+--
+-- Name: fki_binomial_model__model_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_binomial_model__model_id ON binomial_model USING btree (model_id);
 
 
 --
@@ -1300,6 +1462,13 @@ CREATE INDEX fki_model_validation__dataset_id ON model USING btree (validation_d
 
 
 --
+-- Name: fki_multinomial_model__model_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_multinomial_model__model_id ON multinomial_model USING btree (model_id);
+
+
+--
 -- Name: fki_privilege__entity_type_id; Type: INDEX; Schema: public; Owner: steam
 --
 
@@ -1321,6 +1490,13 @@ CREATE INDEX fki_project_model__model_id ON project_model USING btree (model_id)
 
 
 --
+-- Name: fki_regression_model__model_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_regression_model__model_id ON regression_model USING btree (model_id);
+
+
+--
 -- Name: fki_role_permission__permission_id; Type: INDEX; Schema: public; Owner: steam
 --
 
@@ -1339,6 +1515,14 @@ CREATE INDEX fki_role_permission__role_id ON role_permission USING btree (role_i
 --
 
 CREATE INDEX fki_workgroup_id ON identity USING btree (workgroup_id);
+
+
+--
+-- Name: fk_binomial_model__model_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY binomial_model
+    ADD CONSTRAINT fk_binomial_model__model_id FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE;
 
 
 --
@@ -1438,6 +1622,14 @@ ALTER TABLE ONLY model
 
 
 --
+-- Name: fk_multinomial_model__model_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY multinomial_model
+    ADD CONSTRAINT fk_multinomial_model__model_id FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE;
+
+
+--
 -- Name: fk_privilege__entity_type_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -1458,7 +1650,7 @@ ALTER TABLE ONLY privilege
 --
 
 ALTER TABLE ONLY project_model
-    ADD CONSTRAINT fk_project_model__model_id FOREIGN KEY (model_id) REFERENCES model(id);
+    ADD CONSTRAINT fk_project_model__model_id FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE;
 
 
 --
@@ -1467,6 +1659,14 @@ ALTER TABLE ONLY project_model
 
 ALTER TABLE ONLY project_model
     ADD CONSTRAINT fk_project_model__project_id FOREIGN KEY (project_id) REFERENCES project(id);
+
+
+--
+-- Name: fk_regression_model__model_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY regression_model
+    ADD CONSTRAINT fk_regression_model__model_id FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE;
 
 
 --

@@ -19,6 +19,7 @@ func registerGeneratedCommands(c *context, cmd *cobra.Command) {
     create(c),
     deactivate(c),
     delete_(c),
+    find(c),
     get(c),
     import_(c),
     link(c),
@@ -897,6 +898,210 @@ func deleteWorkgroup(c *context) *cobra.Command {
   
   
   cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+  return cmd
+}
+
+
+
+
+var findHelp = `
+find [?]
+Find entities
+Commands:
+
+    $ steam find models ...
+`
+func find(c *context) *cobra.Command {
+  cmd := newCmd(c, findHelp, nil)
+
+  cmd.AddCommand(findModels(c))
+  return cmd
+}
+
+
+var findModelsHelp = `
+models [?]
+Find Models
+Examples:
+
+    List binomial models
+    $ steam find models --binomial \
+        --project-id=? \
+        --name-part=? \
+        --sort-by=? \
+        --ascending=? \
+        --offset=? \
+        --limit=?
+
+    List multinomial models
+    $ steam find models --multinomial \
+        --project-id=? \
+        --name-part=? \
+        --sort-by=? \
+        --ascending=? \
+        --offset=? \
+        --limit=?
+
+    List regression models
+    $ steam find models --regression \
+        --project-id=? \
+        --name-part=? \
+        --sort-by=? \
+        --ascending=? \
+        --offset=? \
+        --limit=?
+
+`
+
+func findModels(c *context) *cobra.Command {
+  var binomial bool // Switch for FindModelsBinomial()
+  var multinomial bool // Switch for FindModelsMultinomial()
+  var regression bool // Switch for FindModelsRegression()
+  var ascending bool // No description available
+  var limit int64 // No description available
+  var namePart string // No description available
+  var offset int64 // No description available
+  var projectId int64 // No description available
+  var sortBy string // No description available
+
+  cmd := newCmd(c, findModelsHelp, func(c *context, args []string) {
+    if binomial { // FindModelsBinomial
+      
+      // List binomial models
+      models, err := c.remote.FindModelsBinomial(
+        projectId, // No description available
+        namePart, // No description available
+        sortBy, // No description available
+        ascending, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(models))
+      for i, e := range models {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.TrainingDatasetId, // No description available
+          e.ValidationDatasetId, // No description available
+          e.Name, // No description available
+          e.ClusterName, // No description available
+          e.ModelKey, // No description available
+          e.Algorithm, // No description available
+          e.ModelCategory, // No description available
+          e.DatasetName, // No description available
+          e.ResponseColumnName, // No description available
+          e.LogicalName, // No description available
+          e.Location, // No description available
+          e.MaxRuntime, // No description available
+          e.Metrics, // No description available
+          e.CreatedAt, // No description available
+          e.Mse, // No description available
+          e.RSquared, // No description available
+          e.Logloss, // No description available
+          e.Auc, // No description available
+          e.Gini, // No description available
+        )
+      }
+      c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tMse\tRSquared\tLogloss\tAuc\tGini\t", lines)
+      return
+    }
+    if multinomial { // FindModelsMultinomial
+      
+      // List multinomial models
+      models, err := c.remote.FindModelsMultinomial(
+        projectId, // No description available
+        namePart, // No description available
+        sortBy, // No description available
+        ascending, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(models))
+      for i, e := range models {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.TrainingDatasetId, // No description available
+          e.ValidationDatasetId, // No description available
+          e.Name, // No description available
+          e.ClusterName, // No description available
+          e.ModelKey, // No description available
+          e.Algorithm, // No description available
+          e.ModelCategory, // No description available
+          e.DatasetName, // No description available
+          e.ResponseColumnName, // No description available
+          e.LogicalName, // No description available
+          e.Location, // No description available
+          e.MaxRuntime, // No description available
+          e.Metrics, // No description available
+          e.CreatedAt, // No description available
+          e.Mse, // No description available
+          e.RSquared, // No description available
+          e.Logloss, // No description available
+        )
+      }
+      c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tMse\tRSquared\tLogloss\t", lines)
+      return
+    }
+    if regression { // FindModelsRegression
+      
+      // List regression models
+      models, err := c.remote.FindModelsRegression(
+        projectId, // No description available
+        namePart, // No description available
+        sortBy, // No description available
+        ascending, // No description available
+        offset, // No description available
+        limit, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := make([]string, len(models))
+      for i, e := range models {
+        lines[i] = fmt.Sprintf(
+          "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+          e.Id, // No description available
+          e.TrainingDatasetId, // No description available
+          e.ValidationDatasetId, // No description available
+          e.Name, // No description available
+          e.ClusterName, // No description available
+          e.ModelKey, // No description available
+          e.Algorithm, // No description available
+          e.ModelCategory, // No description available
+          e.DatasetName, // No description available
+          e.ResponseColumnName, // No description available
+          e.LogicalName, // No description available
+          e.Location, // No description available
+          e.MaxRuntime, // No description available
+          e.Metrics, // No description available
+          e.CreatedAt, // No description available
+          e.Mse, // No description available
+          e.RSquared, // No description available
+          e.MeanResidualDeviance, // No description available
+        )
+      }
+      c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tMse\tRSquared\tMeanResidualDeviance\t", lines)
+      return
+    }
+  })
+  cmd.Flags().BoolVar(&binomial, "binomial", binomial, "List binomial models")
+  cmd.Flags().BoolVar(&multinomial, "multinomial", multinomial, "List multinomial models")
+  cmd.Flags().BoolVar(&regression, "regression", regression, "List regression models")
+  
+  
+  cmd.Flags().BoolVar(&ascending, "ascending", ascending, "No description available")
+  cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+  cmd.Flags().StringVar(&namePart, "name-part", namePart, "No description available")
+  cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+  cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+  cmd.Flags().StringVar(&sortBy, "sort-by", sortBy, "No description available")
   return cmd
 }
 
