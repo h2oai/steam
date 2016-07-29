@@ -930,6 +930,60 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKe
 	return ms, nil
 }
 
+func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.BinomialModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// Verify project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	models, err := s.ds.ReadBinomialModels(pz, projectId, namePart, sortBy, ascending, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toBinomialModels(models), nil
+}
+
+func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.MultinomialModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// Verify project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	models, err := s.ds.ReadMultinomialModels(pz, projectId, namePart, sortBy, ascending, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toMultinomialModels(models), nil
+}
+
+func (s *Service) FindModelsRegression(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.RegressionModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// Verify project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	models, err := s.ds.ReadRegressionModels(pz, projectId, namePart, sortBy, ascending, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toRegressionModels(models), nil
+}
+
 func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelKey, modelName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return 0, err
@@ -1924,6 +1978,101 @@ func toModel(m data.Model) *web.Model {
 		m.Metrics,
 		toTimestamp(m.Created),
 	}
+}
+
+func toBinomialModel(model data.BinomialModel) *web.BinomialModel {
+	return &web.BinomialModel{
+		model.Id,
+		model.TrainingDatasetId,
+		model.ValidationDatasetId,
+		model.Name,
+		model.ClusterName,
+		model.ModelKey,
+		model.Algorithm,
+		model.ModelCategory,
+		model.DatasetName,
+		model.ResponseColumnName,
+		model.LogicalName,
+		model.Location,
+		int(model.MaxRunTime), // FIXME change db field to int
+		model.Metrics,
+		toTimestamp(model.Created),
+		model.Mse,
+		model.RSquared,
+		model.Logloss,
+		model.Auc,
+		model.Gini,
+	}
+}
+
+func toBinomialModels(models []data.BinomialModel) []*web.BinomialModel {
+	array := make([]*web.BinomialModel, len(models))
+	for i, model := range models {
+		array[i] = toBinomialModel(model)
+	}
+	return array
+}
+
+func toMultinomialModel(model data.MultinomialModel) *web.MultinomialModel {
+	return &web.MultinomialModel{
+		model.Id,
+		model.TrainingDatasetId,
+		model.ValidationDatasetId,
+		model.Name,
+		model.ClusterName,
+		model.ModelKey,
+		model.Algorithm,
+		model.ModelCategory,
+		model.DatasetName,
+		model.ResponseColumnName,
+		model.LogicalName,
+		model.Location,
+		int(model.MaxRunTime), // FIXME change db field to int
+		model.Metrics,
+		toTimestamp(model.Created),
+		model.Mse,
+		model.RSquared,
+		model.Logloss,
+	}
+}
+
+func toMultinomialModels(models []data.MultinomialModel) []*web.MultinomialModel {
+	array := make([]*web.MultinomialModel, len(models))
+	for i, model := range models {
+		array[i] = toMultinomialModel(model)
+	}
+	return array
+}
+
+func toRegressionModel(model data.RegressionModel) *web.RegressionModel {
+	return &web.RegressionModel{
+		model.Id,
+		model.TrainingDatasetId,
+		model.ValidationDatasetId,
+		model.Name,
+		model.ClusterName,
+		model.ModelKey,
+		model.Algorithm,
+		model.ModelCategory,
+		model.DatasetName,
+		model.ResponseColumnName,
+		model.LogicalName,
+		model.Location,
+		int(model.MaxRunTime), // FIXME change db field to int
+		model.Metrics,
+		toTimestamp(model.Created),
+		model.Mse,
+		model.RSquared,
+		model.MeanResidualDeviance,
+	}
+}
+
+func toRegressionModels(models []data.RegressionModel) []*web.RegressionModel {
+	array := make([]*web.RegressionModel, len(models))
+	for i, model := range models {
+		array[i] = toRegressionModel(model)
+	}
+	return array
 }
 
 func toScoringService(s data.Service) *web.ScoringService {

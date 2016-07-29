@@ -85,6 +85,71 @@ type Model struct {
 	CreatedAt           int64
 }
 
+type BinomialModel struct {
+	Id                  int64
+	TrainingDatasetId   int64
+	ValidationDatasetId int64
+	Name                string
+	ClusterName         string
+	ModelKey            string
+	Algorithm           string
+	ModelCategory       string
+	DatasetName         string
+	ResponseColumnName  string
+	LogicalName         string
+	Location            string
+	MaxRuntime          int
+	Metrics             string
+	CreatedAt           int64
+	Mse                 float64
+	RSquared            float64
+	Logloss             float64
+	Auc                 float64
+	Gini                float64
+}
+
+type MultinomialModel struct {
+	Id                  int64
+	TrainingDatasetId   int64
+	ValidationDatasetId int64
+	Name                string
+	ClusterName         string
+	ModelKey            string
+	Algorithm           string
+	ModelCategory       string
+	DatasetName         string
+	ResponseColumnName  string
+	LogicalName         string
+	Location            string
+	MaxRuntime          int
+	Metrics             string
+	CreatedAt           int64
+	Mse                 float64
+	RSquared            float64
+	Logloss             float64
+}
+
+type RegressionModel struct {
+	Id                   int64
+	TrainingDatasetId    int64
+	ValidationDatasetId  int64
+	Name                 string
+	ClusterName          string
+	ModelKey             string
+	Algorithm            string
+	ModelCategory        string
+	DatasetName          string
+	ResponseColumnName   string
+	LogicalName          string
+	Location             string
+	MaxRuntime           int
+	Metrics              string
+	CreatedAt            int64
+	Mse                  float64
+	RSquared             float64
+	MeanResidualDeviance float64
+}
+
 type Label struct {
 	Id          int64
 	ProjectId   int64
@@ -204,6 +269,9 @@ type Service struct {
 	GetModel                    GetModel                    `help:"Get model details"`
 	GetModels                   GetModels                   `help:"List models"`
 	GetModelsFromCluster        GetModelsFromCluster        `help:"List models from a cluster"`
+	FindModelsBinomial          FindModelsBinomial          `help:"List binomial models"`
+	FindModelsMultinomial       FindModelsMultinomial       `help:"List multinomial models"`
+	FindModelsRegression        FindModelsRegression        `help:"List regression models"`
 	ImportModelFromCluster      ImportModelFromCluster      `help:"Import models from a cluster"`
 	DeleteModel                 DeleteModel                 `help:"Delete a model"`
 	CreateLabel                 CreateLabel                 `help:"Create a label"`
@@ -451,6 +519,36 @@ type GetModelsFromCluster struct {
 	FrameKey  string
 	_         int
 	Models    []Model
+}
+type FindModelsBinomial struct {
+	ProjectId int64
+	NamePart  string
+	SortBy    string
+	Ascending bool
+	Offset    int64
+	Limit     int64
+	_         int
+	Models    []BinomialModel
+}
+type FindModelsMultinomial struct {
+	ProjectId int64
+	NamePart  string
+	SortBy    string
+	Ascending bool
+	Offset    int64
+	Limit     int64
+	_         int
+	Models    []MultinomialModel
+}
+type FindModelsRegression struct {
+	ProjectId int64
+	NamePart  string
+	SortBy    string
+	Ascending bool
+	Offset    int64
+	Limit     int64
+	_         int
+	Models    []RegressionModel
 }
 type ImportModelFromCluster struct {
 	ClusterId int64
