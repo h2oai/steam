@@ -3,7 +3,7 @@
  */
 
 import * as React from 'react';
-import * as classNames from 'classnames';
+import * as $ from 'jquery';
 import { Link } from 'react-router';
 import Deploy from '../components/Deploy';
 import RocGraph from '../components/RocGraph';
@@ -12,6 +12,7 @@ import Pagination from '../components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
+import FilterDropdown from './FilterDropdown';
 import { getOrdinal } from '../../App/utils/getOrdinal';
 import '../styles/leaderboard.scss';
 
@@ -72,9 +73,15 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     });
   }
 
+  onFilter(filters) {
+    /**
+     * TODO(justinloyola): AJAX call to filter models
+     */
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
-      <div className="leaderboard">
+      <div ref="leaderboard" className="leaderboard">
         <Deploy open={this.state.isDeployOpen} closeHandler={this.closeHandler}></Deploy>
         <PageHeader>
           <span>Models</span>
@@ -88,7 +95,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
         <Table>
           <Row header={true}>
             <Cell>
-              <i className="fa fa-caret-down"/>
+              <FilterDropdown onFilter={this.onFilter.bind(this)}/>
             </Cell>
             <Cell>
               MODEL
