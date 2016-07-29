@@ -4,7 +4,6 @@
 
 import * as React from 'react';
 import * as classNames from 'classnames';
-import * as $ from 'jquery';
 import * as _ from 'lodash';
 import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
@@ -12,6 +11,7 @@ import GoodnessOfFit from './components/GoodnessOfFit';
 import VariableImportance from './components/VariableImportance';
 import PageHeader from '../Projects/components/PageHeader';
 import ExportModal from './components/ExportModal';
+import ModelSelectionModal from './components/ModelSelectionModal';
 import { hashHistory } from 'react-router';
 import './styles/modeldetails.scss';
 import { fetchModelOverview, downloadModel, deployModel } from './actions/model.overview.action';
@@ -20,7 +20,8 @@ import { connect } from 'react-redux';
 
 interface Props {
   params: {
-    modelid: string
+    modelid: string,
+    projectid: string
   },
   model: any
 }
@@ -39,7 +40,9 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
       isResidualOpen: true,
       isVariableOpen: true,
       isGoodnessOpen: true,
-      isExportModalOpen: false
+      isExportModalOpen: false,
+      isModelSelectionModal: false,
+      comparisonModel: null
     };
     this.exportModel = this.exportModel.bind(this);
   }
@@ -99,18 +102,49 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     this.props.deployModel(this.props.model.id, 12345);
   }
 
+  openComparisonModal() {
+    this.setState({
+      isModelSelectionModalOpen: true
+    });
+  }
+
+  closeComparisonModal() {
+    this.setState({
+      isModelSelectionModalOpen: false
+    });
+  }
+
+  onSelectModel(model) {
+    this.closeComparisonModal();
+    this.setState({
+      comparisonModel: model
+    });
+  }
+
+  onCancel() {
+    this.closeComparisonModal();
+  }
+
+
   render(): React.ReactElement<HTMLDivElement> {
     if (_.isEmpty(this.props.model)) {
       return <div></div>;
     }
     return (
       <div className="model-details">
-        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()} onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
+        <ModelSelectionModal open={this.state.isModelSelectionModalOpen} projectId={this.props.params.projectid}
+                             onSelectModel={this.onSelectModel.bind(this)} onCancel={this.onCancel.bind(this)}/>
+        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
+                     onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
           <div className="buttons">
             <button className="default invert" onClick={this.exportModel.bind(this)}>Export Model</button>
             <button className="default" onClick={this.deployModel.bind(this)}>Deploy Model</button>
+          </div>
+          <div className="comparison-selection">
+            <span><span>compared to:</span><button className="model-selection-button"
+                                                   onClick={this.openComparisonModal.bind(this)}>{this.state.comparisonModel ? this.state.comparisonModel.name : 'SELECT MODEL FOR COMPARISON'}</button></span>
           </div>
         </PageHeader>
         <header className="overview-header">
