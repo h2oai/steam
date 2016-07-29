@@ -20,7 +20,7 @@ import { connect } from 'react-redux';
 
 interface Props {
   params: {
-    modelId: string
+    modelid: string
   },
   model: any
 }
@@ -45,7 +45,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   componentWillMount() {
-    this.props.fetchModelOverview(parseInt(this.props.params.modelId, 10));
+    this.props.fetchModelOverview(parseInt(this.props.params.modelid, 10));
   }
 
   toggleOpen(accordian: string) {
@@ -167,4 +167,3 @@ function mapDispatchToProps(dispatch) {
 }
 
 export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ModelDetails);
-
