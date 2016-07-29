@@ -74,7 +74,9 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   onFilter(filters) {
-    console.log(filters);
+    /**
+     * TODO(justinloyola): AJAX call to filter models
+     */
   }
 
   render(): React.ReactElement<HTMLDivElement> {
