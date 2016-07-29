@@ -3287,6 +3287,25 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 	return ScanBinomialModels(rows)
 }
 
+func (ds *Datastore) ReadBinomialModel(pz az.Principal, modelId int64) (BinomialModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return BinomialModel{}, err
+	}
+
+	row := ds.db.QueryRow(`
+		SELECT
+			model.*, 
+			mm.mse, mm.r_squared, mm.logloss, mm.auc, mm.gini
+		FROM
+			model,
+			binomial_model mm
+		WHERE
+			model.id = $1 AND
+			mm.model_id = $1
+		`, modelId)
+	return ScanBinomialModel(row)
+}
+
 func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]MultinomialModel, error) {
 	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
 		return nil, err
@@ -3348,6 +3367,25 @@ func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, nam
 	return ScanMultinomialModels(rows)
 }
 
+func (ds *Datastore) ReadMultinomialModel(pz az.Principal, modelId int64) (MultinomialModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return MultinomialModel{}, err
+	}
+
+	row := ds.db.QueryRow(`
+		SELECT
+			model.*, 
+			mm.mse, mm.r_squared, mm.logloss
+		FROM
+			model,
+			multinomial_model mm
+		WHERE
+			model.id = $1 AND
+			mm.model_id = $1
+		`, modelId)
+	return ScanMultinomialModel(row)
+}
+
 func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]RegressionModel, error) {
 	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
 		return nil, err
@@ -3407,6 +3445,25 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 	}
 	defer rows.Close()
 	return ScanRegressionModels(rows)
+}
+
+func (ds *Datastore) ReadRegressionModel(pz az.Principal, modelId int64) (RegressionModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return RegressionModel{}, err
+	}
+
+	row := ds.db.QueryRow(`
+		SELECT
+			model.*, 
+			mm.mse, mm.r_squared, mm.mean_squared_deviance
+		FROM
+			model,
+			regression_model mm
+		WHERE
+			model.id = $1 AND
+			mm.model_id = $1
+		`, modelId)
+	return ScanRegressionModel(row)
 }
 
 func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {
