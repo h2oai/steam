@@ -80,8 +80,6 @@ button, a {
 .app-container {
   display: flex;
   .body-container {
-    height: 100%;
-    min-height: 100%;
     background-color: $brand-white;
     width: 100%;
     z-index: $body-index;

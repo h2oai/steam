@@ -20,7 +20,7 @@ import { connect } from 'react-redux';
 
 interface Props {
   params: {
-    modelId: string
+    modelid: string
   },
   model: any
 }
@@ -45,7 +45,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   componentWillMount() {
-    this.props.fetchModelOverview(parseInt(this.props.params.modelId, 10));
+    this.props.fetchModelOverview(parseInt(this.props.params.modelid, 10));
   }
 
   toggleOpen(accordian: string) {
@@ -104,7 +104,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
       return <div></div>;
     }
     return (
-      <div className="project-details">
+      <div className="model-details">
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()} onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
@@ -167,4 +167,3 @@ function mapDispatchToProps(dispatch) {
 }
 
 export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ModelDetails);
-
