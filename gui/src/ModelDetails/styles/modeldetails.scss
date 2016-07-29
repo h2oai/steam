@@ -28,4 +28,13 @@
     line-height: 100%;
     margin-left: $xsmall;
   }
+  .model-selection-button {
+    border-radius: 0;
+    font-family: $font-body;
+    border: none;
+    color: $brand-dark-3;
+    font-size: 1em;
+    border-bottom: $rule-solid-thick;
+    background: $brand-white;
+  }
 }

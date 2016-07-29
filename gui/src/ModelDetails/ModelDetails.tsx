@@ -115,7 +115,6 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   onSelectModel(model) {
-    console.log(model);
     this.closeComparisonModal();
     this.setState({
       comparisonModel: model
@@ -129,8 +128,10 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="model-details">
-        <ModelSelectionModal open={this.state.isModelSelectionModalOpen} projectId={this.props.params.projectid} onSelectModel={this.onSelectModel.bind(this)}/>
-        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()} onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
+        <ModelSelectionModal open={this.state.isModelSelectionModalOpen} projectId={this.props.params.projectid}
+                             onSelectModel={this.onSelectModel.bind(this)}/>
+        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
+                     onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
           <div className="buttons">
@@ -138,7 +139,8 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
             <button className="default" onClick={this.deployModel.bind(this)}>Deploy Model</button>
           </div>
           <div className="comparison-selection">
-            <span><span>compared to:</span><button onClick={this.openComparisonModal.bind(this)}>{this.state.comparisonModel ? this.state.comparisonModel.name : 'SELECT MODEL TO COMPARE'}</button></span>
+            <span><span>compared to:</span><button className="model-selection-button"
+                                                   onClick={this.openComparisonModal.bind(this)}>{this.state.comparisonModel ? this.state.comparisonModel.name : 'SELECT MODEL FOR COMPARISON'}</button></span>
           </div>
         </PageHeader>
         <header className="overview-header">
