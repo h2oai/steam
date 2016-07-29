@@ -37,7 +37,6 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
         <PageHeader>CLUSTERS</PageHeader>
         <div className="panel-container">
           {this.props.clusters.map((cluster, i) => {
-            console.log(cluster);
             return (
               <Panel key={i}>
                 <header>
