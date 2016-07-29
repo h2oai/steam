@@ -1,5 +1,83 @@
 @import '../../variables.scss';
 
 .labels {
-  
+  .label-table {
+    padding-top: 30px;
+    .label-bullet {
+      height: 14px;
+      width: 14px;
+      border-radius:2px 0 0 2px;
+      display: inline-block;
+      background-color: $brand-blue;
+      position: relative;
+      margin-top:3px;
+      &::after {
+        display: block;
+        position: absolute;
+        content: '';
+        border: solid 7px transparent;
+        border-left-color: $brand-blue;
+        right: -14px;
+      }
+    }
+    .table {
+      font-family: $font-text;
+      .row {
+        padding: 10px 0;
+        &.head {
+          border-bottom: $rule-solid-thin;
+          text-transform: uppercase;
+          font-family: $font-body;
+        }
+        .cell {
+          &:nth-child(1) {
+            flex-grow: 1;
+          }
+          &:nth-child(2) {
+            flex-grow: 5;
+          }
+          &:nth-child(3) {
+            flex-grow: 5;
+          }
+          &:nth-child(4) {
+            flex-grow: 8;
+          }
+          &:nth-child(5) {
+            flex-grow: 1;
+            text-align: right;
+            color: $brand-orange;
+            font-size:1.2em;
+            span {
+              cursor: pointer;
+              &:hover {
+                color: darken($brand-orange, 10%);
+              }
+              &:first-child {
+                margin-right: 10px;
+              }
+            }
+          }
+          &.label-names {
+            .label-name {
+              font-weight:600;
+            }
+          }
+          &.label-permissions {
+            ul {
+              padding:0;
+              margin:0;
+              list-style:none;
+              li {
+                margin:0;
+                padding:0 0 5px 0;
+                &:last-child {
+                  padding-bottom:0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
