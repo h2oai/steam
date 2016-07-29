@@ -7,8 +7,18 @@
     .panel {
       flex-basis: 40%;
       display: block;
+      padding: $small;
       margin: $xsmall;
-      min-height: $xlarge * 6;
+      min-height: $xlarge * 2;
+      header {
+        font-size: 1.5em;
+        a {
+          text-decoration: none;
+        }
+      }
+      .cluster-status {
+        color: $brand-green-3;
+      }
     }
   }
 }

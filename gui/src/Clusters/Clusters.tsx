@@ -37,18 +37,19 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
         <PageHeader>CLUSTERS</PageHeader>
         <div className="panel-container">
           {this.props.clusters.map((cluster, i) => {
+            console.log(cluster);
             return (
               <Panel key={i}>
                 <header>
-                  {cluster.name} @ {cluster.address}
+                  <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank" rel="noopener">{cluster.name} @ {cluster.address}</a></span>
                 </header>
                 <article>
-                  <div>
+                  <h3>
                     STATUS
-                  </div>
-                  <div>
-                    {cluster.state}
-                  </div>
+                  </h3>
+                  <h2 className="cluster-status">
+                    {cluster.state === 'started' ? 'OK' : cluster.state}
+                  </h2>
                 </article>
               </Panel>
             );
