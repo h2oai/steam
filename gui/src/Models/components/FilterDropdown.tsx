@@ -4,7 +4,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as classNames from 'classnames';
-import * as $ from 'jquery';
 import '../styles/filterdropdown.scss';
 
 interface Props {
@@ -26,17 +25,24 @@ export default class FilterDropdown extends React.Component<Props, any> {
       sortBy: null,
       orderBy: null
     };
+    this.bodyClickHandler = this.bodyClickHandler.bind(this);
   }
 
   componentWillMount() {
-    $(document.body).bind('click.body', (event) => {
-      if (!ReactDOM.findDOMNode(this.refs.filterDropdown).contains(event.target) &&
-        !ReactDOM.findDOMNode(this.refs.filterDropdownInvoker).contains(event.target)) {
-        this.setState({
-          open: false
-        });
-      }
-    });
+    document.body.addEventListener('click', this.bodyClickHandler);
+  }
+
+  componentWillUnmount() {
+    document.body.removeEventListener('click', this.bodyClickHandler);
+  }
+
+  bodyClickHandler(event) {
+    if (!ReactDOM.findDOMNode(this.refs.filterDropdown).contains(event.target) &&
+      !ReactDOM.findDOMNode(this.refs.filterDropdownInvoker).contains(event.target)) {
+      this.setState({
+        open: false
+      });
+    }
   }
 
   openDropdown() {
@@ -46,7 +52,6 @@ export default class FilterDropdown extends React.Component<Props, any> {
   }
 
   selectSort(selection: string) {
-    $(event.target).addClass('selected');
     this.setState({
       sortBy: selection
     });
@@ -57,7 +62,6 @@ export default class FilterDropdown extends React.Component<Props, any> {
   }
 
   selectOrder(selection: string) {
-    $(event.target).addClass('selected');
     this.setState({
       orderBy: selection
     });
