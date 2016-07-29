@@ -16,6 +16,7 @@ export default class FilterDropdown extends React.Component<Props, any> {
   refs: {
     [key: string]: Element
     filterDropdown: Element
+    filterDropdownInvoker: Element
   };
 
   constructor() {
@@ -29,7 +30,8 @@ export default class FilterDropdown extends React.Component<Props, any> {
 
   componentWillMount() {
     $(document.body).bind('click.body', (event) => {
-      if (!ReactDOM.findDOMNode(this.refs.filterDropdown).contains(event.target)) {
+      if (!ReactDOM.findDOMNode(this.refs.filterDropdown).contains(event.target) &&
+        !ReactDOM.findDOMNode(this.refs.filterDropdownInvoker).contains(event.target)) {
         this.setState({
           open: false
         });
@@ -68,7 +70,7 @@ export default class FilterDropdown extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="filter-dropdown">
-        <button className={classNames('filter-dropdown-invoker', {open: this.state.open})} onClick={this.openDropdown.bind(this)}><i className="fa fa-sort-amount-desc"/></button>
+        <button ref="filterDropdownInvoker" className={classNames('filter-dropdown-invoker', {open: this.state.open})} onClick={this.openDropdown.bind(this)}><i className="fa fa-sort-amount-desc"/></button>
         <div ref="filterDropdown" className={classNames('filter-dropdown-menu', {open: this.state.open})}>
           <div className="filter-option">
             <div className="filter-labels">SORT BY</div>
