@@ -34,3 +34,11 @@ export function fetchLeaderboard(projectId: number) {
     });
   };
 }
+
+export function filterModels(projectId: number, namePart: string, sortBy: string, ascending: boolean) {
+  return (dispatch) => {
+    Remote.findModelsRegression(projectId, namePart, sortBy, ascending, 0, 5, (error, res) => {
+      console.log(res);
+    });
+  };
+}

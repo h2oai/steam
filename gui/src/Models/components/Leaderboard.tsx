@@ -30,7 +30,8 @@ import { naivebayesValidation } from '../data/naivebayesValidation';
 
 interface Props {
   items: any[],
-  projectId: number
+  projectId: number,
+  onFilter: Function
 }
 
 interface DispatchProps {
@@ -74,9 +75,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   onFilter(filters) {
-    /**
-     * TODO(justinloyola): AJAX call to filter models
-     */
+    this.props.onFilter(filters);
   }
 
   render(): React.ReactElement<HTMLDivElement> {

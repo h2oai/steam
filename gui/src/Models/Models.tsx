@@ -7,7 +7,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
-import { fetchLeaderboard } from './actions/leaderboard.actions';
+import { fetchLeaderboard, filterModels } from './actions/leaderboard.actions';
 import { Model } from '../Proxy/Proxy';
 
 interface Props {
@@ -18,14 +18,20 @@ interface Props {
 }
 
 interface DispatchProps {
-  fetchLeaderboard: Function
+  fetchLeaderboard: Function,
+  filterModels: Function
 }
 
-export class Projects extends React.Component<Props & DispatchProps, any> {
+export class Models extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.leaderboard)) {
       this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10));
     }
+  }
+
+  onFilter(filters) {
+    console.log(filters);
+    this.props.filterModels(parseInt(this.props.params.projectid, 10), '', 'mse', filters.orderBy === 'asc');
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -34,7 +40,7 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="projects">
-        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)}></Leaderboard>
+        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)} onFilter={this.onFilter.bind(this)}></Leaderboard>
       </div>
     );
   }
@@ -48,8 +54,9 @@ function mapStateToProps(state: any): any {
 
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
-    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch)
+    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch),
+    filterModels: bindActionCreators(filterModels, dispatch)
   };
 }
 
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Projects);
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Models);

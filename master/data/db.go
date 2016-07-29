@@ -3355,7 +3355,7 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 
 	dir := "ASC"
 	if !ascending {
-		dir = "DEC"
+		dir = "DESC"
 	}
 
 	var filter string
