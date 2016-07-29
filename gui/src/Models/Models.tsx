@@ -31,7 +31,7 @@ export class Models extends React.Component<Props & DispatchProps, any> {
 
   onFilter(filters) {
     console.log(filters);
-    this.props.filterModels(parseInt(this.props.params.projectid, 10), '', 'mse', filters.orderBy === 'asc');
+    this.props.filterModels(parseInt(this.props.params.projectid, 10), this.props.leaderboard[0] ? this.props.leaderboard[0].model_category : null, '', filters.sortBy, filters.orderBy === 'asc');
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -47,6 +47,7 @@ export class Models extends React.Component<Props & DispatchProps, any> {
 }
 
 function mapStateToProps(state: any): any {
+  console.log(state);
   return {
     leaderboard: state.leaderboard.items
   };

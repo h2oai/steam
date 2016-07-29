@@ -35,10 +35,21 @@ export function fetchLeaderboard(projectId: number) {
   };
 }
 
-export function filterModels(projectId: number, namePart: string, sortBy: string, ascending: boolean) {
+export function filterModels(projectId: number, modelCategory: string, namePart: string, sortBy: string, ascending: boolean) {
   return (dispatch) => {
-    Remote.findModelsRegression(projectId, namePart, sortBy, ascending, 0, 5, (error, res) => {
-      console.log(res);
+    let filter: Function = filterStrategy(modelCategory);
+    filter(projectId, namePart, sortBy, ascending, 0, 5, (error, res) => {
+      dispatch(receiveLeaderboard(res));
     });
   };
+}
+
+function filterStrategy(modelCategory: string): Function {
+  if (modelCategory.toLowerCase() === 'regression') {
+    return Remote.findModelsRegression;
+  } else if (modelCategory.toLowerCase() === 'binomial') {
+    return Remote.findModelsBinomial;
+  } else if (modelCategory.toLowerCase() === 'multinomial') {
+    return Remote.findModelsMultinomial;
+  }
 }
