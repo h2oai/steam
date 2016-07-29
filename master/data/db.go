@@ -3458,7 +3458,7 @@ func (ds *Datastore) ReadRegressionModel(pz az.Principal, modelId int64) (Regres
 	row := ds.db.QueryRow(`
 		SELECT
 			model.*, 
-			mm.mse, mm.r_squared, mm.mean_squared_deviance
+			mm.mse, mm.r_squared, mm.mean_residual_deviance
 		FROM
 			model,
 			regression_model mm
