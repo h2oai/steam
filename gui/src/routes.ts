@@ -159,7 +159,7 @@ export const routes: IRoute[] = [
             // /clusters
             {
                 path: 'clusters',
-                component: Dummy,
+                component: Clusters,
                 name: 'Clusters',
                 icon: 'fa fa-cube',
                 showInBreadcrumb: true,
