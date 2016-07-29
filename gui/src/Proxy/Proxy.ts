@@ -9,6 +9,50 @@
 // --- Types ---
 import * as Proxy from './xhr';
 
+export interface BinomialModel {
+  
+  id: number
+  
+  training_dataset_id: number
+  
+  validation_dataset_id: number
+  
+  name: string
+  
+  cluster_name: string
+  
+  model_key: string
+  
+  algorithm: string
+  
+  model_category: string
+  
+  dataset_name: string
+  
+  response_column_name: string
+  
+  logical_name: string
+  
+  location: string
+  
+  max_runtime: number
+  
+  metrics: string
+  
+  created_at: number
+  
+  mse: number
+  
+  r_squared: number
+  
+  logloss: number
+  
+  auc: number
+  
+  gini: number
+  
+}
+
 export interface Cluster {
   
   id: number
@@ -211,6 +255,46 @@ export interface Model {
   
 }
 
+export interface MultinomialModel {
+  
+  id: number
+  
+  training_dataset_id: number
+  
+  validation_dataset_id: number
+  
+  name: string
+  
+  cluster_name: string
+  
+  model_key: string
+  
+  algorithm: string
+  
+  model_category: string
+  
+  dataset_name: string
+  
+  response_column_name: string
+  
+  logical_name: string
+  
+  location: string
+  
+  max_runtime: number
+  
+  metrics: string
+  
+  created_at: number
+  
+  mse: number
+  
+  r_squared: number
+  
+  logloss: number
+  
+}
+
 export interface Permission {
   
   id: number
@@ -232,6 +316,46 @@ export interface Project {
   model_category: string
   
   created_at: number
+  
+}
+
+export interface RegressionModel {
+  
+  id: number
+  
+  training_dataset_id: number
+  
+  validation_dataset_id: number
+  
+  name: string
+  
+  cluster_name: string
+  
+  model_key: string
+  
+  algorithm: string
+  
+  model_category: string
+  
+  dataset_name: string
+  
+  response_column_name: string
+  
+  logical_name: string
+  
+  location: string
+  
+  max_runtime: number
+  
+  metrics: string
+  
+  created_at: number
+  
+  mse: number
+  
+  r_squared: number
+  
+  mean_residual_deviance: number
   
 }
 
@@ -397,6 +521,15 @@ export interface Service {
   
   // List models from a cluster
   getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
+  
+  // List binomial models
+  findModelsBinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void) => void
+  
+  // List multinomial models
+  findModelsMultinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: MultinomialModel[]) => void) => void
+  
+  // List regression models
+  findModelsRegression: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void) => void
   
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
@@ -1019,6 +1152,72 @@ interface GetModelsFromClusterIn {
 interface GetModelsFromClusterOut {
   
   models: Model[]
+  
+}
+
+interface FindModelsBinomialIn {
+  
+  project_id: number
+  
+  name_part: string
+  
+  sort_by: string
+  
+  ascending: boolean
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface FindModelsBinomialOut {
+  
+  models: BinomialModel[]
+  
+}
+
+interface FindModelsMultinomialIn {
+  
+  project_id: number
+  
+  name_part: string
+  
+  sort_by: string
+  
+  ascending: boolean
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface FindModelsMultinomialOut {
+  
+  models: MultinomialModel[]
+  
+}
+
+interface FindModelsRegressionIn {
+  
+  project_id: number
+  
+  name_part: string
+  
+  sort_by: string
+  
+  ascending: boolean
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface FindModelsRegressionOut {
+  
+  models: RegressionModel[]
   
 }
 
@@ -2120,6 +2319,42 @@ export function getModelsFromCluster(clusterId: number, frameKey: string, go: (e
       return go(error, null);
     } else {
       const d: GetModelsFromClusterOut = <GetModelsFromClusterOut> data;
+      return go(null, d.models);
+    }
+  });
+}
+
+export function findModelsBinomial(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void): void {
+  const req: FindModelsBinomialIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
+  Proxy.Call("FindModelsBinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsBinomialOut = <FindModelsBinomialOut> data;
+      return go(null, d.models);
+    }
+  });
+}
+
+export function findModelsMultinomial(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: MultinomialModel[]) => void): void {
+  const req: FindModelsMultinomialIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
+  Proxy.Call("FindModelsMultinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsMultinomialOut = <FindModelsMultinomialOut> data;
+      return go(null, d.models);
+    }
+  });
+}
+
+export function findModelsRegression(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void): void {
+  const req: FindModelsRegressionIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
+  Proxy.Call("FindModelsRegression", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsRegressionOut = <FindModelsRegressionOut> data;
       return go(null, d.models);
     }
   });
