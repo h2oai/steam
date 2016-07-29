@@ -35,9 +35,6 @@ public class PredictPythonServlet extends HttpServlet {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
       logger.debug("servletPath {}",servletPath);
 
-//      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-//      model = new EasyPredictModelWrapper(rawModel);
-
       if (rawModel == null || model == null)
         throw new ServletException("can't load model");
 
@@ -147,7 +144,7 @@ public class PredictPythonServlet extends HttpServlet {
       logger.debug("result {}", result);
 
       // should now be in sparse format from python
-      RowData row = sparseToRowData(colNames, result);
+      RowData row = strMapToRowData(result);
       logger.debug("row: {}", row);
 
       AbstractPrediction pr = predict(row);
@@ -195,11 +192,30 @@ public class PredictPythonServlet extends HttpServlet {
       }
     }
     catch (NumberFormatException e) {
-//      throw new Exception("Failed to parse " + result);
       logger.error("Failed to parse {}", result);
     }
     return row;
   }
+
+  private RowData strMapToRowData(String result) throws Exception {
+    RowData row = new RowData();
+    if (result == null || result.length() == 0)
+      return row;
+    String[] pairs = result.split(" ");
+    try {
+      for (String p : pairs) {
+        String[] a = p.split(":");
+        String term = a[0];
+        double value = Float.parseFloat(a[1]);
+        row.put(term, value);
+      }
+    }
+    catch (NumberFormatException e) {
+      logger.error("Failed to parse {}", result);
+    }
+    return row;
+  }
+
 
   private RowData csvToRowData(String[] colNames, String result) throws Exception {
     String[] vals = result.split(",");
@@ -249,7 +265,7 @@ public class PredictPythonServlet extends HttpServlet {
           throw new Exception(result);
 
         // should now be in sparse format from python
-        row = sparseToRowData(colNames, result);
+        row = strMapToRowData(result);
         logger.debug("row: {}", row);
 
         // do the prediction
