@@ -1,6 +1,7 @@
 @import '../../variables';
 
 .main-section {
+  padding-top:$small;
   overflow: auto;
   .content {
     padding: 0 $base-grid-unit;
