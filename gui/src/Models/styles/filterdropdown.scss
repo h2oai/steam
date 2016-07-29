@@ -1,22 +1,42 @@
 @import '../../variables.scss';
 
+.filter-icon {
+  width:12px;
+  height:15px;
+  span {
+    height: 3px;
+    display:block;
+    background: $brand-dark-2;
+    margin-bottom:2px;
+    &:nth-child(2) {
+      width:66%;
+    }
+    &:nth-child(3) {
+      width:33%;
+    }
+  }
+}
+
 .filter-dropdown {
   position: relative;
   .filter-dropdown-invoker {
     background: $brand-white;
-    border: $rule-solid-thin;
-    position: relative;
+    border: none;
+    position: absolute;
+    z-index:1;
+    padding-top:5px;
     &.open {
+      border: $rule-solid-thin;
+      box-shadow: 0 0 3px rgba(0,0,0,0.35);
       &:before {
         background: $brand-white;
         z-index: 2;
         content: '';
-        margin: -1px 0;
         position: absolute;
         width: 100%;
-        height: 1px;
+        height: 5px;
         left: 0;
-        bottom: 0;
+        bottom: -5px;
       }
     }
   }
@@ -26,8 +46,9 @@
     background: $brand-white;
     border: $rule-solid-thin;
     width: $xlarge * 3;
-    margin-top: -1px;
+    top:23px;
     padding: 10px;
+    box-shadow: 0 0 3px rgba(0,0,0,0.35);
     .filter-option {
       width: 50%;
       display: flex;
@@ -35,7 +56,9 @@
       ul {
         list-style-type: none;
         padding: 0;
+        margin:0;
         li {
+          cursor: pointer;
           padding: 5px 0;
           font-weight: 800;
           color: $brand-dark-3;
@@ -49,6 +72,7 @@
       font-family: $font-title;
       font-weight: 800;
       font-size: .7em;
+      color: $brand-dark-1;
     }
     &.open {
       display: flex;
