@@ -45,10 +45,6 @@ export default class FilterDropdown extends React.Component<Props, any> {
     }
   }
 
-  componentWillUnmount() {
-    $(document.body).unbind('click.body');
-  }
-
   openDropdown() {
     this.setState({
       open: !this.state.open
