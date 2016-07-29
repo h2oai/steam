@@ -16,6 +16,7 @@ import NewProjectStep2 from './Projects/components/NewProjectStep2';
 import NewProjectStep3 from './Projects/components/NewProjectStep3';
 import CreateNewModel from './Projects/components/CreateNewModel';
 import Deployment from './Deployment/Deployment';
+import Configurations from './Configurations/Configurations';
 import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
 
@@ -60,7 +61,7 @@ export const routes: IRoute[] = [
             {
                 path: 'projects/:projectid',
                 component: Dummy,
-                name: 'Project Details',
+                name: 'Project',
                 showInBreadcrumb: true,
                 showInNavigation: false,
                 showChildrenAsSubmenu: true
@@ -110,6 +111,14 @@ export const routes: IRoute[] = [
                 path: 'projects/:projectid/collaborators',
                 component: Dummy,
                 name: 'Collaborators',
+                showInBreadcrumb: true,
+                showInNavigation: true
+            },
+            // /projects/:id/collaborators
+            {
+                path: 'projects/:projectid/configurations',
+                component: Configurations,
+                name: 'Configurations',
                 showInBreadcrumb: true,
                 showInNavigation: true
             },
