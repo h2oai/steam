@@ -22,6 +22,7 @@ func TestModelCRUD(tt *testing.T) {
 
 	modelId, err := t.svc.ImportModelFromCluster(t.su, clusterId, projectId, h2oModelKey, name)
 	t.nil(err)
+	// TODO Import at least one of each model
 
 	// -- R --
 	model, err := t.svc.GetModel(t.su, modelId)
@@ -44,13 +45,25 @@ func TestModelCRUD(tt *testing.T) {
 	t.nil(err)
 	t.log(binModels)
 
+	// binModel, err := t.svc.GetModelBinomial(t.su, binModelId)
+	// t.nil(err)
+	// t.log(binModel)
+
 	mulModels, err := t.svc.FindModelsMultinomial(t.su, projectId, "", "", true, 0, 1000)
 	t.nil(err)
 	t.log(mulModels)
 
+	// mulModel, err := t.svc.GetModelMultinomial(t.su, mulModelId)
+	// t.nil(err)
+	// t.log(mulModel)
+
 	regModels, err := t.svc.FindModelsRegression(t.su, projectId, "", "", true, 0, 1000)
 	t.nil(err)
 	t.log(regModels)
+
+	// regModel, err := t.svc.GetModelRegression(t.su, regModelId)
+	// t.nil(err)
+	// t.log(regModel)
 
 	// -- U --
 

@@ -1180,6 +1180,15 @@ all [?]
 Get All
 Examples:
 
+    List sort criteria for a binomial models
+    $ steam get all --binomial-sort-criteria
+
+    List sort criteria for a multinomial models
+    $ steam get all --multinomial-sort-criteria
+
+    List sort criteria for a regression models
+    $ steam get all --regression-sort-criteria
+
     List all entity types
     $ steam get all --entity-types
 
@@ -1192,11 +1201,47 @@ Examples:
 `
 
 func getAll(c *context) *cobra.Command {
+  var binomialSortCriteria bool // Switch for GetAllBinomialSortCriteria()
+  var multinomialSortCriteria bool // Switch for GetAllMultinomialSortCriteria()
+  var regressionSortCriteria bool // Switch for GetAllRegressionSortCriteria()
   var entityTypes bool // Switch for GetAllEntityTypes()
   var permissions bool // Switch for GetAllPermissions()
   var clusterTypes bool // Switch for GetAllClusterTypes()
 
   cmd := newCmd(c, getAllHelp, func(c *context, args []string) {
+    if binomialSortCriteria { // GetAllBinomialSortCriteria
+      
+      // List sort criteria for a binomial models
+      criteria, err := c.remote.GetAllBinomialSortCriteria(
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("Criteria:\t%v\n", criteria)
+      return
+    }
+    if multinomialSortCriteria { // GetAllMultinomialSortCriteria
+      
+      // List sort criteria for a multinomial models
+      criteria, err := c.remote.GetAllMultinomialSortCriteria(
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("Criteria:\t%v\n", criteria)
+      return
+    }
+    if regressionSortCriteria { // GetAllRegressionSortCriteria
+      
+      // List sort criteria for a regression models
+      criteria, err := c.remote.GetAllRegressionSortCriteria(
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Printf("Criteria:\t%v\n", criteria)
+      return
+    }
     if entityTypes { // GetAllEntityTypes
       
       // List all entity types
@@ -1256,6 +1301,9 @@ func getAll(c *context) *cobra.Command {
       return
     }
   })
+  cmd.Flags().BoolVar(&binomialSortCriteria, "binomial-sort-criteria", binomialSortCriteria, "List sort criteria for a binomial models")
+  cmd.Flags().BoolVar(&multinomialSortCriteria, "multinomial-sort-criteria", multinomialSortCriteria, "List sort criteria for a multinomial models")
+  cmd.Flags().BoolVar(&regressionSortCriteria, "regression-sort-criteria", regressionSortCriteria, "List sort criteria for a regression models")
   cmd.Flags().BoolVar(&entityTypes, "entity-types", entityTypes, "List all entity types")
   cmd.Flags().BoolVar(&permissions, "permissions", permissions, "List all permissions")
   cmd.Flags().BoolVar(&clusterTypes, "cluster-types", clusterTypes, "List all cluster types")
@@ -2087,13 +2135,127 @@ Examples:
     $ steam get model \
         --model-id=?
 
+    View a binomial model
+    $ steam get model --binomial \
+        --model-id=?
+
+    View a binomial model
+    $ steam get model --multinomial \
+        --model-id=?
+
+    View a binomial model
+    $ steam get model --regression \
+        --model-id=?
+
 `
 
 func getModel(c *context) *cobra.Command {
+  var binomial bool // Switch for GetModelBinomial()
+  var multinomial bool // Switch for GetModelMultinomial()
+  var regression bool // Switch for GetModelRegression()
   var modelId int64 // No description available
 
   cmd := newCmd(c, getModelHelp, func(c *context, args []string) {
-    
+    if binomial { // GetModelBinomial
+      
+      // View a binomial model
+      model, err := c.remote.GetModelBinomial(
+        modelId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", model.Id), // No description available
+        fmt.Sprintf("TrainingDatasetId:\t%v\t", model.TrainingDatasetId), // No description available
+        fmt.Sprintf("ValidationDatasetId:\t%v\t", model.ValidationDatasetId), // No description available
+        fmt.Sprintf("Name:\t%v\t", model.Name), // No description available
+        fmt.Sprintf("ClusterName:\t%v\t", model.ClusterName), // No description available
+        fmt.Sprintf("ModelKey:\t%v\t", model.ModelKey), // No description available
+        fmt.Sprintf("Algorithm:\t%v\t", model.Algorithm), // No description available
+        fmt.Sprintf("ModelCategory:\t%v\t", model.ModelCategory), // No description available
+        fmt.Sprintf("DatasetName:\t%v\t", model.DatasetName), // No description available
+        fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName), // No description available
+        fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName), // No description available
+        fmt.Sprintf("Location:\t%v\t", model.Location), // No description available
+        fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime), // No description available
+        fmt.Sprintf("Metrics:\t%v\t", model.Metrics), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt), // No description available
+        fmt.Sprintf("Mse:\t%v\t", model.Mse), // No description available
+        fmt.Sprintf("RSquared:\t%v\t", model.RSquared), // No description available
+        fmt.Sprintf("Logloss:\t%v\t", model.Logloss), // No description available
+        fmt.Sprintf("Auc:\t%v\t", model.Auc), // No description available
+        fmt.Sprintf("Gini:\t%v\t", model.Gini), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
+    }
+    if multinomial { // GetModelMultinomial
+      
+      // View a binomial model
+      model, err := c.remote.GetModelMultinomial(
+        modelId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", model.Id), // No description available
+        fmt.Sprintf("TrainingDatasetId:\t%v\t", model.TrainingDatasetId), // No description available
+        fmt.Sprintf("ValidationDatasetId:\t%v\t", model.ValidationDatasetId), // No description available
+        fmt.Sprintf("Name:\t%v\t", model.Name), // No description available
+        fmt.Sprintf("ClusterName:\t%v\t", model.ClusterName), // No description available
+        fmt.Sprintf("ModelKey:\t%v\t", model.ModelKey), // No description available
+        fmt.Sprintf("Algorithm:\t%v\t", model.Algorithm), // No description available
+        fmt.Sprintf("ModelCategory:\t%v\t", model.ModelCategory), // No description available
+        fmt.Sprintf("DatasetName:\t%v\t", model.DatasetName), // No description available
+        fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName), // No description available
+        fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName), // No description available
+        fmt.Sprintf("Location:\t%v\t", model.Location), // No description available
+        fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime), // No description available
+        fmt.Sprintf("Metrics:\t%v\t", model.Metrics), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt), // No description available
+        fmt.Sprintf("Mse:\t%v\t", model.Mse), // No description available
+        fmt.Sprintf("RSquared:\t%v\t", model.RSquared), // No description available
+        fmt.Sprintf("Logloss:\t%v\t", model.Logloss), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
+    }
+    if regression { // GetModelRegression
+      
+      // View a binomial model
+      model, err := c.remote.GetModelRegression(
+        modelId, // No description available
+      )
+      if err != nil {
+        log.Fatalln(err)
+      }
+      lines := []string{
+        fmt.Sprintf("Id:\t%v\t", model.Id), // No description available
+        fmt.Sprintf("TrainingDatasetId:\t%v\t", model.TrainingDatasetId), // No description available
+        fmt.Sprintf("ValidationDatasetId:\t%v\t", model.ValidationDatasetId), // No description available
+        fmt.Sprintf("Name:\t%v\t", model.Name), // No description available
+        fmt.Sprintf("ClusterName:\t%v\t", model.ClusterName), // No description available
+        fmt.Sprintf("ModelKey:\t%v\t", model.ModelKey), // No description available
+        fmt.Sprintf("Algorithm:\t%v\t", model.Algorithm), // No description available
+        fmt.Sprintf("ModelCategory:\t%v\t", model.ModelCategory), // No description available
+        fmt.Sprintf("DatasetName:\t%v\t", model.DatasetName), // No description available
+        fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName), // No description available
+        fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName), // No description available
+        fmt.Sprintf("Location:\t%v\t", model.Location), // No description available
+        fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime), // No description available
+        fmt.Sprintf("Metrics:\t%v\t", model.Metrics), // No description available
+        fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt), // No description available
+        fmt.Sprintf("Mse:\t%v\t", model.Mse), // No description available
+        fmt.Sprintf("RSquared:\t%v\t", model.RSquared), // No description available
+        fmt.Sprintf("MeanResidualDeviance:\t%v\t", model.MeanResidualDeviance), // No description available
+      }
+      c.printt("Attribute\tValue\t", lines)
+      return
+    }
+    if true { // default
+      
       // Get model details
       model, err := c.remote.GetModel(
         modelId, // No description available
@@ -2120,7 +2282,11 @@ func getModel(c *context) *cobra.Command {
       }
       c.printt("Attribute\tValue\t", lines)
       return
+    }
   })
+  cmd.Flags().BoolVar(&binomial, "binomial", binomial, "View a binomial model")
+  cmd.Flags().BoolVar(&multinomial, "multinomial", multinomial, "View a binomial model")
+  cmd.Flags().BoolVar(&regression, "regression", regression, "View a binomial model")
   
   
   cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")

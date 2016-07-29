@@ -280,9 +280,15 @@ type Service interface {
   GetModel(pz az.Principal, modelId int64) (*Model, error)
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
   GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*Model, error)
+  GetAllBinomialSortCriteria(pz az.Principal) ([]string, error)
   FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error)
+  GetModelBinomial(pz az.Principal, modelId int64) (*BinomialModel, error)
+  GetAllMultinomialSortCriteria(pz az.Principal) ([]string, error)
   FindModelsMultinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error)
+  GetModelMultinomial(pz az.Principal, modelId int64) (*MultinomialModel, error)
+  GetAllRegressionSortCriteria(pz az.Principal) ([]string, error)
   FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error)
+  GetModelRegression(pz az.Principal, modelId int64) (*RegressionModel, error)
   ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
   DeleteModel(pz az.Principal, modelId int64) (error)
   CreateLabel(pz az.Principal, projectId int64, name string, description string) (int64, error)
@@ -635,6 +641,13 @@ type GetModelsFromClusterOut struct {
   Models []*Model `json:"models"`
 }
 
+type GetAllBinomialSortCriteriaIn struct {
+}
+
+type GetAllBinomialSortCriteriaOut struct {
+  Criteria []string `json:"criteria"`
+}
+
 type FindModelsBinomialIn struct {
   ProjectId int64 `json:"project_id"`
   NamePart string `json:"name_part"`
@@ -646,6 +659,21 @@ type FindModelsBinomialIn struct {
 
 type FindModelsBinomialOut struct {
   Models []*BinomialModel `json:"models"`
+}
+
+type GetModelBinomialIn struct {
+  ModelId int64 `json:"model_id"`
+}
+
+type GetModelBinomialOut struct {
+  Model *BinomialModel `json:"model"`
+}
+
+type GetAllMultinomialSortCriteriaIn struct {
+}
+
+type GetAllMultinomialSortCriteriaOut struct {
+  Criteria []string `json:"criteria"`
 }
 
 type FindModelsMultinomialIn struct {
@@ -661,6 +689,21 @@ type FindModelsMultinomialOut struct {
   Models []*MultinomialModel `json:"models"`
 }
 
+type GetModelMultinomialIn struct {
+  ModelId int64 `json:"model_id"`
+}
+
+type GetModelMultinomialOut struct {
+  Model *MultinomialModel `json:"model"`
+}
+
+type GetAllRegressionSortCriteriaIn struct {
+}
+
+type GetAllRegressionSortCriteriaOut struct {
+  Criteria []string `json:"criteria"`
+}
+
 type FindModelsRegressionIn struct {
   ProjectId int64 `json:"project_id"`
   NamePart string `json:"name_part"`
@@ -672,6 +715,14 @@ type FindModelsRegressionIn struct {
 
 type FindModelsRegressionOut struct {
   Models []*RegressionModel `json:"models"`
+}
+
+type GetModelRegressionIn struct {
+  ModelId int64 `json:"model_id"`
+}
+
+type GetModelRegressionOut struct {
+  Model *RegressionModel `json:"model"`
 }
 
 type ImportModelFromClusterIn struct {
@@ -1478,6 +1529,16 @@ func (this *Remote) GetModelsFromCluster(clusterId int64, frameKey string) ([]*M
   return out.Models, nil
 }
 
+func (this *Remote) GetAllBinomialSortCriteria() ([]string, error) {
+  in := GetAllBinomialSortCriteriaIn{  }
+  var out GetAllBinomialSortCriteriaOut
+  err := this.Proc.Call("GetAllBinomialSortCriteria", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Criteria, nil
+}
+
 func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error) {
   in := FindModelsBinomialIn{ projectId , namePart , sortBy , ascending , offset , limit  }
   var out FindModelsBinomialOut
@@ -1486,6 +1547,26 @@ func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy 
     return nil, err
   }
   return out.Models, nil
+}
+
+func (this *Remote) GetModelBinomial(modelId int64) (*BinomialModel, error) {
+  in := GetModelBinomialIn{ modelId  }
+  var out GetModelBinomialOut
+  err := this.Proc.Call("GetModelBinomial", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Model, nil
+}
+
+func (this *Remote) GetAllMultinomialSortCriteria() ([]string, error) {
+  in := GetAllMultinomialSortCriteriaIn{  }
+  var out GetAllMultinomialSortCriteriaOut
+  err := this.Proc.Call("GetAllMultinomialSortCriteria", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Criteria, nil
 }
 
 func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error) {
@@ -1498,6 +1579,26 @@ func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sort
   return out.Models, nil
 }
 
+func (this *Remote) GetModelMultinomial(modelId int64) (*MultinomialModel, error) {
+  in := GetModelMultinomialIn{ modelId  }
+  var out GetModelMultinomialOut
+  err := this.Proc.Call("GetModelMultinomial", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Model, nil
+}
+
+func (this *Remote) GetAllRegressionSortCriteria() ([]string, error) {
+  in := GetAllRegressionSortCriteriaIn{  }
+  var out GetAllRegressionSortCriteriaOut
+  err := this.Proc.Call("GetAllRegressionSortCriteria", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Criteria, nil
+}
+
 func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error) {
   in := FindModelsRegressionIn{ projectId , namePart , sortBy , ascending , offset , limit  }
   var out FindModelsRegressionOut
@@ -1506,6 +1607,16 @@ func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortB
     return nil, err
   }
   return out.Models, nil
+}
+
+func (this *Remote) GetModelRegression(modelId int64) (*RegressionModel, error) {
+  in := GetModelRegressionIn{ modelId  }
+  var out GetModelRegressionOut
+  err := this.Proc.Call("GetModelRegression", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Model, nil
 }
 
 func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, modelKey string, modelName string) (int64, error) {
@@ -3248,6 +3359,42 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
 	return nil
 }
 
+func (this *Impl) GetAllBinomialSortCriteria(r *http.Request, in *GetAllBinomialSortCriteriaIn, out *GetAllBinomialSortCriteriaOut) error {
+  const name = "GetAllBinomialSortCriteria"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetAllBinomialSortCriteria(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Criteria = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
 func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, out *FindModelsBinomialOut) error {
   const name = "FindModelsBinomial"
 
@@ -3272,6 +3419,78 @@ func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, 
 	}
   
 	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) GetModelBinomial(r *http.Request, in *GetModelBinomialIn, out *GetModelBinomialOut) error {
+  const name = "GetModelBinomial"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetModelBinomial(pz, in.ModelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Model = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) GetAllMultinomialSortCriteria(r *http.Request, in *GetAllMultinomialSortCriteriaIn, out *GetAllMultinomialSortCriteriaOut) error {
+  const name = "GetAllMultinomialSortCriteria"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetAllMultinomialSortCriteria(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Criteria = val0 
   
 
   res, merr := json.Marshal(out)
@@ -3320,6 +3539,78 @@ func (this *Impl) FindModelsMultinomial(r *http.Request, in *FindModelsMultinomi
 	return nil
 }
 
+func (this *Impl) GetModelMultinomial(r *http.Request, in *GetModelMultinomialIn, out *GetModelMultinomialOut) error {
+  const name = "GetModelMultinomial"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetModelMultinomial(pz, in.ModelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Model = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) GetAllRegressionSortCriteria(r *http.Request, in *GetAllRegressionSortCriteriaIn, out *GetAllRegressionSortCriteriaOut) error {
+  const name = "GetAllRegressionSortCriteria"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetAllRegressionSortCriteria(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Criteria = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
 func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegressionIn, out *FindModelsRegressionOut) error {
   const name = "FindModelsRegression"
 
@@ -3344,6 +3635,42 @@ func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegression
 	}
   
 	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) GetModelRegression(r *http.Request, in *GetModelRegressionIn, out *GetModelRegressionOut) error {
+  const name = "GetModelRegression"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetModelRegression(pz, in.ModelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Model = val0 
   
 
   res, merr := json.Marshal(out)
