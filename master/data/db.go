@@ -3085,6 +3085,80 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 	return id, err
 }
 
+func (ds *Datastore) CreateBinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss, auc, gini float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				binomial_model
+				(model_id, mse, r_squared, logloss, auc, gini)
+			VALUES
+				($1,      $2,  $3,        $4,      $5,  $6)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			logloss,
+			auc,
+			gini,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func (ds *Datastore) CreateMultinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				multinomial_model
+				(model_id, mse, r_squared, logloss)
+			VALUES
+				($1,      $2,  $3,        $4)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			logloss,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func (ds *Datastore) CreateRegressionModel(pz az.Principal, modelId int64, mse, rSquared, deviance float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				regression_model
+				(model_id, mse, r_squared, mean_residual_deviance)
+			VALUES
+				($1,      $2,  $3,        $4)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			deviance,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
 // TODO: Deprecate
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`

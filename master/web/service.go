@@ -1022,7 +1022,52 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return 0, err
 	}
 
+	if err := s.createMetricsTable(pz, modelId, m.Output.TrainingMetrics, string(m.Output.ModelCategory)); err != nil {
+		return 0, err
+	}
+
 	return modelId, nil
+}
+
+func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bindings.ModelMetrics, category string) error {
+	log.Println("iama", category)
+	switch category {
+	case "Binomial":
+		if err := s.ds.CreateBinomialModel(
+			pz,
+			modelId,
+			metrics.Mse,
+			metrics.R2,
+			metrics.Logloss,
+			metrics.Auc,
+			metrics.Gini,
+		); err != nil {
+			return err
+		}
+	case "Multinomial":
+		if err := s.ds.CreateMultinomialModel(
+			pz,
+			modelId,
+			metrics.Mse,
+			metrics.R2,
+			metrics.Logloss,
+		); err != nil {
+			return err
+		}
+	case "Regression":
+		if err := s.ds.CreateRegressionModel(
+			pz,
+			modelId,
+			metrics.Mse,
+			metrics.R2,
+			metrics.MeanResidualDeviance); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("Model category %s not supported", category)
+	}
+
+	return nil
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
