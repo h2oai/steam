@@ -1650,7 +1650,7 @@ ALTER TABLE ONLY privilege
 --
 
 ALTER TABLE ONLY project_model
-    ADD CONSTRAINT fk_project_model__model_id FOREIGN KEY (model_id) REFERENCES model(id);
+    ADD CONSTRAINT fk_project_model__model_id FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE;
 
 
 --
