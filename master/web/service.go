@@ -930,6 +930,11 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKe
 	return ms, nil
 }
 
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllBinomialSortCriteria() []string {
+	return []string{"mse", "r_squared", "logloss", "auc", "gini"}
+}
+
 func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.BinomialModel, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
 		return nil, err
@@ -948,6 +953,11 @@ func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart,
 	return toBinomialModels(models), nil
 }
 
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllMultinomialSortCriteria() []string {
+	return []string{"mse", "r_squared", "logloss"}
+}
+
 func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.MultinomialModel, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
 		return nil, err
@@ -964,6 +974,11 @@ func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePa
 	}
 
 	return toMultinomialModels(models), nil
+}
+
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllRegressionSortCriteria() []string {
+	return []string{"mse", "r_squared", "mean_residual_deviance"}
 }
 
 func (s *Service) FindModelsRegression(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.RegressionModel, error) {
