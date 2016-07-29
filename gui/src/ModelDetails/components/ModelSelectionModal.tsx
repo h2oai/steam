@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import * as moment from 'moment';
 import FilterDropdown from '../../Models/components/FilterDropdown';
 import DefaultModal from '../../App/components/DefaultModal';
 import PageHeader from '../../Projects/components/PageHeader';
@@ -19,7 +20,9 @@ interface Props {
   open: boolean,
   models: Model[]
   projectId: string,
-  onSelectModel: Function
+  onSelectModel: Function,
+  onCancel: Function
+  
 }
 
 interface DispatchProps {
@@ -76,7 +79,7 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
                     {model.name}
                   </Cell>
                   <Cell>
-                    {model.created_at}
+                    {moment.unix(model.created_at).format('YYYY-MM-DD HH:mm')}
                   </Cell>
                   <Cell>
                     1
@@ -95,6 +98,9 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
             })}
           </Table>
         </div>
+        <footer>
+          <button className="default" onClick={this.props.onCancel.bind(this)}>Cancel</button>
+        </footer>
       </DefaultModal>
     );
   }

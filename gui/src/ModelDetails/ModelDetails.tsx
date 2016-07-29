@@ -121,6 +121,10 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     });
   }
 
+  onCancel() {
+    this.closeComparisonModal();
+  }
+
 
   render(): React.ReactElement<HTMLDivElement> {
     if (_.isEmpty(this.props.model)) {
@@ -129,7 +133,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="model-details">
         <ModelSelectionModal open={this.state.isModelSelectionModalOpen} projectId={this.props.params.projectid}
-                             onSelectModel={this.onSelectModel.bind(this)}/>
+                             onSelectModel={this.onSelectModel.bind(this)} onCancel={this.onCancel.bind(this)}/>
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
                      onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
         <PageHeader>

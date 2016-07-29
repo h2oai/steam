@@ -2,6 +2,7 @@
  * Created by justin on 6/27/16.
  */
 import * as React from 'react';
+import * as moment from 'moment';
 import DetailLine from './DetailLine';
 import '../styles/modeloverview.scss';
 
@@ -22,7 +23,7 @@ export default class ModelOverview extends React.Component<Props, any> {
     let basics = [
       {
         label: 'Date',
-        value: this.props.model.created_at
+        value: moment.unix(this.props.model.created_at).format('YYYY-MM-DD HH:mm')
       },
       {
         label: 'Training Time',
