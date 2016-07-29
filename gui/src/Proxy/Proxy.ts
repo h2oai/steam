@@ -522,14 +522,32 @@ export interface Service {
   // List models from a cluster
   getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
   
+  // List sort criteria for a binomial models
+  getAllBinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
+  
   // List binomial models
   findModelsBinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void) => void
+  
+  // View a binomial model
+  getModelBinomial: (modelId: number, go: (error: Error, model: BinomialModel) => void) => void
+  
+  // List sort criteria for a multinomial models
+  getAllMultinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
   
   // List multinomial models
   findModelsMultinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: MultinomialModel[]) => void) => void
   
+  // View a binomial model
+  getModelMultinomial: (modelId: number, go: (error: Error, model: MultinomialModel) => void) => void
+  
+  // List sort criteria for a regression models
+  getAllRegressionSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
+  
   // List regression models
   findModelsRegression: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void) => void
+  
+  // View a binomial model
+  getModelRegression: (modelId: number, go: (error: Error, model: RegressionModel) => void) => void
   
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
@@ -1155,6 +1173,16 @@ interface GetModelsFromClusterOut {
   
 }
 
+interface GetAllBinomialSortCriteriaIn {
+  
+}
+
+interface GetAllBinomialSortCriteriaOut {
+  
+  criteria: string[]
+  
+}
+
 interface FindModelsBinomialIn {
   
   project_id: number
@@ -1174,6 +1202,28 @@ interface FindModelsBinomialIn {
 interface FindModelsBinomialOut {
   
   models: BinomialModel[]
+  
+}
+
+interface GetModelBinomialIn {
+  
+  model_id: number
+  
+}
+
+interface GetModelBinomialOut {
+  
+  model: BinomialModel
+  
+}
+
+interface GetAllMultinomialSortCriteriaIn {
+  
+}
+
+interface GetAllMultinomialSortCriteriaOut {
+  
+  criteria: string[]
   
 }
 
@@ -1199,6 +1249,28 @@ interface FindModelsMultinomialOut {
   
 }
 
+interface GetModelMultinomialIn {
+  
+  model_id: number
+  
+}
+
+interface GetModelMultinomialOut {
+  
+  model: MultinomialModel
+  
+}
+
+interface GetAllRegressionSortCriteriaIn {
+  
+}
+
+interface GetAllRegressionSortCriteriaOut {
+  
+  criteria: string[]
+  
+}
+
 interface FindModelsRegressionIn {
   
   project_id: number
@@ -1218,6 +1290,18 @@ interface FindModelsRegressionIn {
 interface FindModelsRegressionOut {
   
   models: RegressionModel[]
+  
+}
+
+interface GetModelRegressionIn {
+  
+  model_id: number
+  
+}
+
+interface GetModelRegressionOut {
+  
+  model: RegressionModel
   
 }
 
@@ -2324,6 +2408,18 @@ export function getModelsFromCluster(clusterId: number, frameKey: string, go: (e
   });
 }
 
+export function getAllBinomialSortCriteria(go: (error: Error, criteria: string[]) => void): void {
+  const req: GetAllBinomialSortCriteriaIn = {  };
+  Proxy.Call("GetAllBinomialSortCriteria", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetAllBinomialSortCriteriaOut = <GetAllBinomialSortCriteriaOut> data;
+      return go(null, d.criteria);
+    }
+  });
+}
+
 export function findModelsBinomial(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void): void {
   const req: FindModelsBinomialIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
   Proxy.Call("FindModelsBinomial", req, function(error, data) {
@@ -2332,6 +2428,30 @@ export function findModelsBinomial(projectId: number, namePart: string, sortBy: 
     } else {
       const d: FindModelsBinomialOut = <FindModelsBinomialOut> data;
       return go(null, d.models);
+    }
+  });
+}
+
+export function getModelBinomial(modelId: number, go: (error: Error, model: BinomialModel) => void): void {
+  const req: GetModelBinomialIn = { model_id: modelId };
+  Proxy.Call("GetModelBinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetModelBinomialOut = <GetModelBinomialOut> data;
+      return go(null, d.model);
+    }
+  });
+}
+
+export function getAllMultinomialSortCriteria(go: (error: Error, criteria: string[]) => void): void {
+  const req: GetAllMultinomialSortCriteriaIn = {  };
+  Proxy.Call("GetAllMultinomialSortCriteria", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetAllMultinomialSortCriteriaOut = <GetAllMultinomialSortCriteriaOut> data;
+      return go(null, d.criteria);
     }
   });
 }
@@ -2348,6 +2468,30 @@ export function findModelsMultinomial(projectId: number, namePart: string, sortB
   });
 }
 
+export function getModelMultinomial(modelId: number, go: (error: Error, model: MultinomialModel) => void): void {
+  const req: GetModelMultinomialIn = { model_id: modelId };
+  Proxy.Call("GetModelMultinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetModelMultinomialOut = <GetModelMultinomialOut> data;
+      return go(null, d.model);
+    }
+  });
+}
+
+export function getAllRegressionSortCriteria(go: (error: Error, criteria: string[]) => void): void {
+  const req: GetAllRegressionSortCriteriaIn = {  };
+  Proxy.Call("GetAllRegressionSortCriteria", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetAllRegressionSortCriteriaOut = <GetAllRegressionSortCriteriaOut> data;
+      return go(null, d.criteria);
+    }
+  });
+}
+
 export function findModelsRegression(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void): void {
   const req: FindModelsRegressionIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
   Proxy.Call("FindModelsRegression", req, function(error, data) {
@@ -2356,6 +2500,18 @@ export function findModelsRegression(projectId: number, namePart: string, sortBy
     } else {
       const d: FindModelsRegressionOut = <FindModelsRegressionOut> data;
       return go(null, d.models);
+    }
+  });
+}
+
+export function getModelRegression(modelId: number, go: (error: Error, model: RegressionModel) => void): void {
+  const req: GetModelRegressionIn = { model_id: modelId };
+  Proxy.Call("GetModelRegression", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetModelRegressionOut = <GetModelRegressionOut> data;
+      return go(null, d.model);
     }
   });
 }

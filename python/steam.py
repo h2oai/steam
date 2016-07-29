@@ -676,6 +676,20 @@ class RPCClient:
 		response = self.connection.call("GetModelsFromCluster", request)
 		return response['models']
 	
+	def get_all_binomial_sort_criteria(self):
+		"""
+		List sort criteria for a binomial models
+
+		Parameters:
+
+		Returns:
+		criteria: No description available (string)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetAllBinomialSortCriteria", request)
+		return response['criteria']
+	
 	def find_models_binomial(self, project_id, name_part, sort_by, ascending, offset, limit):
 		"""
 		List binomial models
@@ -701,6 +715,36 @@ class RPCClient:
 		}
 		response = self.connection.call("FindModelsBinomial", request)
 		return response['models']
+	
+	def get_model_binomial(self, model_id):
+		"""
+		View a binomial model
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:
+		model: No description available (BinomialModel)
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("GetModelBinomial", request)
+		return response['model']
+	
+	def get_all_multinomial_sort_criteria(self):
+		"""
+		List sort criteria for a multinomial models
+
+		Parameters:
+
+		Returns:
+		criteria: No description available (string)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetAllMultinomialSortCriteria", request)
+		return response['criteria']
 	
 	def find_models_multinomial(self, project_id, name_part, sort_by, ascending, offset, limit):
 		"""
@@ -728,6 +772,36 @@ class RPCClient:
 		response = self.connection.call("FindModelsMultinomial", request)
 		return response['models']
 	
+	def get_model_multinomial(self, model_id):
+		"""
+		View a binomial model
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:
+		model: No description available (MultinomialModel)
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("GetModelMultinomial", request)
+		return response['model']
+	
+	def get_all_regression_sort_criteria(self):
+		"""
+		List sort criteria for a regression models
+
+		Parameters:
+
+		Returns:
+		criteria: No description available (string)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetAllRegressionSortCriteria", request)
+		return response['criteria']
+	
 	def find_models_regression(self, project_id, name_part, sort_by, ascending, offset, limit):
 		"""
 		List regression models
@@ -753,6 +827,22 @@ class RPCClient:
 		}
 		response = self.connection.call("FindModelsRegression", request)
 		return response['models']
+	
+	def get_model_regression(self, model_id):
+		"""
+		View a binomial model
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:
+		model: No description available (RegressionModel)
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("GetModelRegression", request)
+		return response['model']
 	
 	def import_model_from_cluster(self, cluster_id, project_id, model_key, model_name):
 		"""
