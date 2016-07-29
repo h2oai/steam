@@ -3085,6 +3085,80 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 	return id, err
 }
 
+func (ds *Datastore) CreateBinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss, auc, gini float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				binomial_model
+				(model_id, mse, r_squared, logloss, auc, gini)
+			VALUES
+				($1,      $2,  $3,        $4,      $5,  $6)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			logloss,
+			auc,
+			gini,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func (ds *Datastore) CreateMultinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				multinomial_model
+				(model_id, mse, r_squared, logloss)
+			VALUES
+				($1,      $2,  $3,        $4)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			logloss,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func (ds *Datastore) CreateRegressionModel(pz az.Principal, modelId int64, mse, rSquared, deviance float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				regression_model
+				(model_id, mse, r_squared, mean_residual_deviance)
+			VALUES
+				($1,      $2,  $3,        $4)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			deviance,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
 // TODO: Deprecate
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
@@ -3150,6 +3224,189 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 	}
 	defer rows.Close()
 	return ScanModels(rows)
+}
+
+func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]BinomialModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	dir := "ASC"
+	if !ascending {
+		dir = "DEC"
+	}
+
+	var filter string
+	switch sortBy {
+	case "mse", "r_squared", "logloss", "auc", "gini":
+		filter = "mm." + sortBy + " " + dir
+	default:
+		filter = "model.name " + dir
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			model.*,
+			mm.mse, mm.r_squared, mm.logloss, mm.auc, mm.gini
+		FROM
+			model,
+			binomial_model mm,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = model.id AND
+			mm.model_id = model.id AND
+			model.id IN
+			( 
+				SELECT DISTINCT
+					entity_id
+				FROM
+					privilege
+				WHERE
+					$7 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			) AND
+			model.name LIKE '%' || $4 || '%'
+		ORDER BY
+			`+filter+`
+		OFFSET $5
+		LIMIT $6
+		`,
+		projectId,            // $1
+		pz.Id(),              // $2
+		ds.EntityTypes.Model, // $3
+		namePart,             // $4
+		offset,               // $5
+		limit,                // $6
+		pz.IsSuperuser(),     // $7
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanBinomialModels(rows)
+}
+
+func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]MultinomialModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	dir := "ASC"
+	if !ascending {
+		dir = "DEC"
+	}
+
+	var filter string
+	switch sortBy {
+	case "mse", "r_squared", "logloss":
+		filter = "mm." + sortBy + " " + dir
+	default:
+		filter = "model.name " + dir
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			model.*,
+			mm.mse, mm.r_squared, mm.logloss
+		FROM
+			model,
+			multinomial_model mm,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = model.id AND
+			mm.model_id = model.id AND
+			model.id IN
+			( 
+				SELECT DISTINCT
+					entity_id
+				FROM
+					privilege
+				WHERE
+					$7 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			) AND
+			model.name LIKE '%' || $4 || '%'
+		ORDER BY
+			`+filter+`
+		OFFSET $5
+		LIMIT $6
+		`,
+		projectId,            // $1
+		pz.Id(),              // $2
+		ds.EntityTypes.Model, // $3
+		namePart,             // $4
+		offset,               // $5
+		limit,                // $6
+		pz.IsSuperuser(),     // $7
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanMultinomialModels(rows)
+}
+
+func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]RegressionModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	dir := "ASC"
+	if !ascending {
+		dir = "DEC"
+	}
+
+	var filter string
+	switch sortBy {
+	case "mse", "r_squared", "mean_residual_deviance":
+		filter = "mm." + sortBy + " " + dir
+	default:
+		filter = "model.name " + dir
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			model.*,
+			mm.mse, mm.r_squared, mm.mean_residual_deviance
+		FROM
+			model,
+			regression_model mm,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = model.id AND
+			mm.model_id = model.id AND
+			model.id IN
+			( 
+				SELECT DISTINCT
+					entity_id
+				FROM
+					privilege
+				WHERE
+					$7 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			) AND
+			model.name LIKE '%' || $4 || '%'
+		ORDER BY
+			`+filter+`
+		OFFSET $5
+		LIMIT $6
+		`,
+		projectId,            // $1
+		pz.Id(),              // $2
+		ds.EntityTypes.Model, // $3
+		namePart,             // $4
+		offset,               // $5
+		limit,                // $6
+		pz.IsSuperuser(),     // $7
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanRegressionModels(rows)
 }
 
 func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {

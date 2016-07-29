@@ -160,6 +160,74 @@ type Model struct {
 	Created             time.Time
 }
 
+type BinomialModel struct {
+	Id                  int64
+	TrainingDatasetId   int64
+	ValidationDatasetId int64
+	Name                string
+	ClusterName         string
+	ModelKey            string
+	Algorithm           string
+	ModelCategory       string
+	DatasetName         string
+	ResponseColumnName  string
+	LogicalName         string
+	Location            string
+	MaxRunTime          int64
+	Metrics             string
+	MetricsVersion      string
+	Created             time.Time
+	Mse                 float64
+	RSquared            float64
+	Logloss             float64
+	Auc                 float64
+	Gini                float64
+}
+
+type MultinomialModel struct {
+	Id                  int64
+	TrainingDatasetId   int64
+	ValidationDatasetId int64
+	Name                string
+	ClusterName         string
+	ModelKey            string
+	Algorithm           string
+	ModelCategory       string
+	DatasetName         string
+	ResponseColumnName  string
+	LogicalName         string
+	Location            string
+	MaxRunTime          int64
+	Metrics             string
+	MetricsVersion      string
+	Created             time.Time
+	Mse                 float64
+	RSquared            float64
+	Logloss             float64
+}
+
+type RegressionModel struct {
+	Id                   int64
+	TrainingDatasetId    int64
+	ValidationDatasetId  int64
+	Name                 string
+	ClusterName          string
+	ModelKey             string
+	Algorithm            string
+	ModelCategory        string
+	DatasetName          string
+	ResponseColumnName   string
+	LogicalName          string
+	Location             string
+	MaxRunTime           int64
+	Metrics              string
+	MetricsVersion       string
+	Created              time.Time
+	Mse                  float64
+	RSquared             float64
+	MeanResidualDeviance float64
+}
+
 type Label struct {
 	Id          int64
 	ProjectId   int64
