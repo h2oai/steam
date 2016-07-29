@@ -76,7 +76,7 @@ export const routes: IRoute[] = [
             // /projects/:id/models/:id
             {
                 path: 'projects/:projectid/models/:modelid',
-                component: Dummy,
+                component: ModelDetails,
                 name: "Model Detail",
                 showInBreadcrumb: true,
                 showInNavigation: false
