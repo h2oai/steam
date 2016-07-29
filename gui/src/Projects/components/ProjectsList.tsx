@@ -1,37 +1,25 @@
 /**
  * Created by justin on 7/22/16.
  */
-import * as React from 'react';
-import {Link} from 'react-router';
+import * as moment from 'moment';
+import { Link } from 'react-router';
 import PageHeader from './PageHeader';
 import Panel from './Panel';
-import RocGraph from '../../Models/components/RocGraph';
+import * as React from 'react';
 import { Project } from '../../Proxy/Proxy';
-import { glmTrain } from '../../Models/data/glmTrain';
 import '../styles/projectslist.scss';
+import { hashHistory } from 'react-router';
 
 interface Props {
   projects: Project[]
 }
 
 export default class ProjectsList extends React.Component<Props, any> {
-  render() {
-    let config = {
-      margin: { top: 2, right: 2, bottom: 2, left: 2 },
-      width: 231,
-      height: 231,
-      interpolationMode: 'basis',
-      smooth: true,
-      fpr: 'fpr',
-      tprVariables: [{
-        name: 'tpr',
-        label: 'tpr'
-      }],
-      animate: false,
-      hideAxes: true,
-      hideAUCText: true,
-      hideBoundaries: true
-    };
+  openProject(projectId) {
+    hashHistory.push('/projects/' + projectId + '/models');
+  }
+
+  render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="project-details">
         <PageHeader>
@@ -41,41 +29,21 @@ export default class ProjectsList extends React.Component<Props, any> {
           </span>
         </PageHeader>
         <div>
-          <h1>Your Recent Projects</h1>
+          <h1>All Projects</h1>
           <div className="panel-container">
-            {this.props.projects.slice(0, 2).map((project, i) => {
+            {this.props.projects.map((project, i) => {
               return (
-                <Panel key={'recent' + i}>
+                <Panel key={i} onClick={this.openProject.bind(this, project.id)}>
                   <article>
-                    <div>
-                      <RocGraph config={config} data={glmTrain}/>
-                    </div>
                     <div className="project-metadata">
                       <header>{project.name}</header>
+                      <div>{project.model_category}</div>
+                      <div>{moment.unix(project.created_at).format('YYYY-MM-DD HH:mm')}</div>
                     </div>
                   </article>
                 </Panel>
               );
             })}
-          </div>
-          <div>
-            <h1>All Projects</h1>
-            <div className="panel-container">
-              {this.props.projects.map((project, i) => {
-                return (
-                  <Panel key={'all' + i}>
-                    <article>
-                      <div>
-                        <RocGraph config={config} data={glmTrain}/>
-                      </div>
-                      <div className="project-metadata">
-                        <header>{project.name}</header>
-                      </div>
-                    </article>
-                  </Panel>
-                );
-              })}
-            </div>
           </div>
         </div>
       </div>
