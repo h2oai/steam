@@ -3236,7 +3236,7 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 
 	dir := "ASC"
 	if !ascending {
-		dir = "DEC"
+		dir = "DESC"
 	}
 
 	var filter string
@@ -3316,7 +3316,7 @@ func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, nam
 
 	dir := "ASC"
 	if !ascending {
-		dir = "DEC"
+		dir = "DESC"
 	}
 
 	var filter string
@@ -3396,7 +3396,7 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 
 	dir := "ASC"
 	if !ascending {
-		dir = "DEC"
+		dir = "DESC"
 	}
 
 	var filter string
