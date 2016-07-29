@@ -104,7 +104,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
       return <div></div>;
     }
     return (
-      <div className="project-details">
+      <div className="model-details">
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()} onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
