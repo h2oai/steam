@@ -26,11 +26,11 @@ type ModelOutputSchema struct {
 	/** Scoring history */
 	ScoringHistory *TwoDimTableBase `json:"scoring_history,omitempty"`
 	/** Training data model metrics */
-	TrainingMetrics *ModelMetricsBase `json:"training_metrics,omitempty"`
+	TrainingMetrics *ModelMetrics `json:"training_metrics,omitempty"`
 	/** Validation data model metrics */
-	ValidationMetrics *ModelMetricsBase `json:"validation_metrics,omitempty"`
+	ValidationMetrics *ModelMetrics `json:"validation_metrics,omitempty"`
 	/** Cross-validation model metrics */
-	CrossValidationMetrics *ModelMetricsBase `json:"cross_validation_metrics,omitempty"`
+	CrossValidationMetrics *ModelMetrics `json:"cross_validation_metrics,omitempty"`
 	/** Cross-validation model metrics summary */
 	CrossValidationMetricsSummary *TwoDimTableBase `json:"cross_validation_metrics_summary,omitempty"`
 	/** Job status */

@@ -14,8 +14,8 @@ func TestLookupTables(tt *testing.T) {
 }
 
 func testPing(t *test) {
-	expected := true
-	actual, err := t.svc.Ping(t.su, expected)
+	expected := "hello"
+	actual, err := t.svc.PingServer(t.su, expected)
 	t.nil(err)
 	t.ok(actual == expected, "ping mismatch")
 }
@@ -25,7 +25,10 @@ func testGetSupportedPermissions(t *test) {
 		"ManageCluster",
 		"ManageEngine",
 		"ManageIdentity",
+		"ManageDataset",
+		"ManageDatasource",
 		"ManageModel",
+		"ManageLabel",
 		"ManageProject",
 		"ManageRole",
 		"ManageService",
@@ -33,14 +36,17 @@ func testGetSupportedPermissions(t *test) {
 		"ViewCluster",
 		"ViewEngine",
 		"ViewIdentity",
+		"ViewDataset",
+		"ViewDatasource",
 		"ViewModel",
+		"ViewLabel",
 		"ViewProject",
 		"ViewRole",
 		"ViewService",
 		"ViewWorkgroup",
 	}
 
-	perms, err := t.svc.GetSupportedPermissions(t.su)
+	perms, err := t.svc.GetAllPermissions(t.su)
 	t.nil(err)
 
 	if len(perms) != len(expected) {
@@ -65,7 +71,7 @@ func testGetSupportedClusterTypes(t *test) {
 		"yarn",
 	}
 
-	cts, err := t.svc.GetSupportedClusterTypes(t.su)
+	cts, err := t.svc.GetAllClusterTypes(t.su)
 	t.nil(err)
 
 	if len(cts) != len(expected) {
@@ -92,11 +98,14 @@ func testGetSupportedEntityTypes(t *test) {
 		"engine",
 		"cluster",
 		"project",
+		"dataset",
+		"datasource",
+		"label",
 		"model",
 		"service",
 	}
 
-	ets, err := t.svc.GetSupportedEntityTypes(t.su)
+	ets, err := t.svc.GetAllEntityTypes(t.su)
 	t.nil(err)
 
 	if len(ets) != len(expected) {

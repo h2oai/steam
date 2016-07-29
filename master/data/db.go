@@ -84,6 +84,7 @@ const (
 	DatasourceEntity = "datasource"
 	DatasetEntity    = "dataset"
 	ModelEntity      = "model"
+	LabelEntity      = "label"
 	ServiceEntity    = "service"
 
 	ClusterExternal = "external"
@@ -123,6 +124,8 @@ const (
 	ViewDataset      = "ViewDataset"
 	ManageModel      = "ManageModel"
 	ViewModel        = "ViewModel"
+	ManageLabel      = "ManageLabel"
+	ViewLabel        = "ViewLabel"
 	ManageService    = "ManageService"
 	ViewService      = "ViewService"
 )
@@ -160,6 +163,8 @@ func init() {
 		{0, ViewDataset, "View datasets"},
 		{0, ManageModel, "Manage models"},
 		{0, ViewModel, "View models"},
+		{0, ManageLabel, "Manage labels"},
+		{0, ViewLabel, "View labels"},
 		{0, ManageService, "Manage services"},
 		{0, ViewService, "View services"},
 	}
@@ -174,6 +179,7 @@ func init() {
 		{0, DatasourceEntity},
 		{0, DatasetEntity},
 		{0, ModelEntity},
+		{0, LabelEntity},
 		{0, ServiceEntity},
 	}
 
@@ -204,6 +210,8 @@ type PermissionKeys struct {
 	ViewDataset      int64
 	ManageModel      int64
 	ViewModel        int64
+	ManageLabel      int64
+	ViewLabel        int64
 	ManageService    int64
 	ViewService      int64
 }
@@ -218,6 +226,7 @@ type EntityTypeKeys struct {
 	Datasource int64
 	Dataset    int64
 	Model      int64
+	Label      int64
 	Service    int64
 }
 
@@ -251,6 +260,8 @@ func toPermissionKeys(permissions []Permission) *PermissionKeys {
 		m[ViewDataset],
 		m[ManageModel],
 		m[ViewModel],
+		m[ManageLabel],
+		m[ViewLabel],
 		m[ManageService],
 		m[ViewService],
 	}
@@ -272,6 +283,7 @@ func toEntityTypeKeys(entityTypes []EntityType) *EntityTypeKeys {
 		m[DatasourceEntity],
 		m[DatasetEntity],
 		m[ModelEntity],
+		m[LabelEntity],
 		m[ServiceEntity],
 	}
 }
@@ -455,6 +467,7 @@ func newDatastore(db *sql.DB) (*Datastore, error) {
 		entityTypeKeys.Datasource: permissionKeys.ViewDatasource,
 		entityTypeKeys.Dataset:    permissionKeys.ViewDataset,
 		entityTypeKeys.Model:      permissionKeys.ViewModel,
+		entityTypeKeys.Label:      permissionKeys.ViewLabel,
 		entityTypeKeys.Service:    permissionKeys.ViewService,
 		entityTypeKeys.Identity:   permissionKeys.ViewIdentity,
 		entityTypeKeys.Role:       permissionKeys.ViewRole,
@@ -468,6 +481,7 @@ func newDatastore(db *sql.DB) (*Datastore, error) {
 		entityTypeKeys.Datasource: permissionKeys.ManageDatasource,
 		entityTypeKeys.Dataset:    permissionKeys.ManageDataset,
 		entityTypeKeys.Model:      permissionKeys.ManageModel,
+		entityTypeKeys.Label:      permissionKeys.ManageLabel,
 		entityTypeKeys.Service:    permissionKeys.ManageService,
 		entityTypeKeys.Identity:   permissionKeys.ManageIdentity,
 		entityTypeKeys.Role:       permissionKeys.ManageRole,
@@ -627,6 +641,7 @@ func truncate(db *sql.DB) error {
 			"permission",
 			"entity_type",
 			"service",
+			"label",
 			"project_model",
 			"model",
 			"dataset",
@@ -2478,17 +2493,17 @@ func (ds *Datastore) DeleteCluster(pz az.Principal, clusterId int64) error {
 
 // --- Project ---
 
-func (ds *Datastore) CreateProject(pz az.Principal, name, description string) (int64, error) {
+func (ds *Datastore) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		row := tx.QueryRow(`
 			INSERT INTO
 				project
-				(name, description, created)
+				(name, description, model_category, created)
 			VALUES
-				($1,   $2,       now())
+				($1,   $2,          $3,             now())
 			RETURNING id
-			`, name, description)
+			`, name, description, modelCategory)
 		if err := row.Scan(&id); err != nil {
 			return err
 		}
@@ -2503,8 +2518,9 @@ func (ds *Datastore) CreateProject(pz az.Principal, name, description string) (i
 		}
 
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Project, id, metadata{
-			"name":        name,
-			"description": description,
+			"name":           name,
+			"description":    description,
+			"model_category": modelCategory,
 		})
 	})
 	return id, err
@@ -2563,7 +2579,7 @@ func (ds *Datastore) UnlinkProjectAndModel(pz az.Principal, projectId, modelId i
 func (ds *Datastore) ReadProjects(pz az.Principal, offset, limit int64) ([]Project, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, description, created
+			id, name, description, model_category, created
 		FROM
 			project
 		WHERE
@@ -2596,7 +2612,7 @@ func (ds *Datastore) ReadProject(pz az.Principal, projectId int64) (Project, err
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, description, created
+			id, name, description, model_category, created
 		FROM
 			project
 		WHERE
@@ -3021,9 +3037,9 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		row := tx.QueryRow(`
 			INSERT INTO
 				model
-				(training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,                  $2,                    $3,    $4,           $5,        $6,       $7,           $8,                   $9,            $10,     $11,          $12,     $13,             now())
+				($1,                  $2,                    $3,    $4,           $5,        $6,        $7,             $8,           $9,                   $10,          $11,      $12,          $13,     $14,             now())
 			RETURNING id
 			`,
 			model.TrainingDatasetId,
@@ -3032,6 +3048,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 			model.ClusterName,
 			model.ModelKey,
 			model.Algorithm,
+			model.ModelCategory,
 			model.DatasetName,
 			model.ResponseColumnName,
 			model.LogicalName,
@@ -3068,11 +3085,85 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 	return id, err
 }
 
+func (ds *Datastore) CreateBinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss, auc, gini float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				binomial_model
+				(model_id, mse, r_squared, logloss, auc, gini)
+			VALUES
+				($1,      $2,  $3,        $4,      $5,  $6)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			logloss,
+			auc,
+			gini,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func (ds *Datastore) CreateMultinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				multinomial_model
+				(model_id, mse, r_squared, logloss)
+			VALUES
+				($1,      $2,  $3,        $4)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			logloss,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func (ds *Datastore) CreateRegressionModel(pz az.Principal, modelId int64, mse, rSquared, deviance float64) error {
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				regression_model
+				(model_id, mse, r_squared, mean_residual_deviance)
+			VALUES
+				($1,      $2,  $3,        $4)
+			RETURNING id
+			`,
+			modelId,
+			mse,
+			rSquared,
+			deviance,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
 // TODO: Deprecate
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -3106,7 +3197,7 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 
 	rows, err := ds.db.Query(`
 		SELECT
-			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
+			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.model_category, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
 		FROM
 			model m,
 			project_model pm
@@ -3135,11 +3226,194 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 	return ScanModels(rows)
 }
 
+func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]BinomialModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	dir := "ASC"
+	if !ascending {
+		dir = "DEC"
+	}
+
+	var filter string
+	switch sortBy {
+	case "mse", "r_squared", "logloss", "auc", "gini":
+		filter = "mm." + sortBy + " " + dir
+	default:
+		filter = "model.name " + dir
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			model.*,
+			mm.mse, mm.r_squared, mm.logloss, mm.auc, mm.gini
+		FROM
+			model,
+			binomial_model mm,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = model.id AND
+			mm.model_id = model.id AND
+			model.id IN
+			( 
+				SELECT DISTINCT
+					entity_id
+				FROM
+					privilege
+				WHERE
+					$7 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			) AND
+			model.name LIKE '%' || $4 || '%'
+		ORDER BY
+			`+filter+`
+		OFFSET $5
+		LIMIT $6
+		`,
+		projectId,            // $1
+		pz.Id(),              // $2
+		ds.EntityTypes.Model, // $3
+		namePart,             // $4
+		offset,               // $5
+		limit,                // $6
+		pz.IsSuperuser(),     // $7
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanBinomialModels(rows)
+}
+
+func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]MultinomialModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	dir := "ASC"
+	if !ascending {
+		dir = "DEC"
+	}
+
+	var filter string
+	switch sortBy {
+	case "mse", "r_squared", "logloss":
+		filter = "mm." + sortBy + " " + dir
+	default:
+		filter = "model.name " + dir
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			model.*,
+			mm.mse, mm.r_squared, mm.logloss
+		FROM
+			model,
+			multinomial_model mm,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = model.id AND
+			mm.model_id = model.id AND
+			model.id IN
+			( 
+				SELECT DISTINCT
+					entity_id
+				FROM
+					privilege
+				WHERE
+					$7 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			) AND
+			model.name LIKE '%' || $4 || '%'
+		ORDER BY
+			`+filter+`
+		OFFSET $5
+		LIMIT $6
+		`,
+		projectId,            // $1
+		pz.Id(),              // $2
+		ds.EntityTypes.Model, // $3
+		namePart,             // $4
+		offset,               // $5
+		limit,                // $6
+		pz.IsSuperuser(),     // $7
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanMultinomialModels(rows)
+}
+
+func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]RegressionModel, error) {
+	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	dir := "ASC"
+	if !ascending {
+		dir = "DEC"
+	}
+
+	var filter string
+	switch sortBy {
+	case "mse", "r_squared", "mean_residual_deviance":
+		filter = "mm." + sortBy + " " + dir
+	default:
+		filter = "model.name " + dir
+	}
+
+	rows, err := ds.db.Query(`
+		SELECT
+			model.*,
+			mm.mse, mm.r_squared, mm.mean_residual_deviance
+		FROM
+			model,
+			regression_model mm,
+			project_model pm
+		WHERE
+			pm.project_id = $1 AND
+			pm.model_id = model.id AND
+			mm.model_id = model.id AND
+			model.id IN
+			( 
+				SELECT DISTINCT
+					entity_id
+				FROM
+					privilege
+				WHERE
+					$7 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			) AND
+			model.name LIKE '%' || $4 || '%'
+		ORDER BY
+			`+filter+`
+		OFFSET $5
+		LIMIT $6
+		`,
+		projectId,            // $1
+		pz.Id(),              // $2
+		ds.EntityTypes.Model, // $3
+		namePart,             // $4
+		offset,               // $5
+		limit,                // $6
+		pz.IsSuperuser(),     // $7
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanRegressionModels(rows)
+}
+
 func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {
 	var Model Model
 	rows, err := ds.db.Query(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -3175,7 +3449,7 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
 		FROM
 			model
 		WHERE
@@ -3229,6 +3503,224 @@ func (ds *Datastore) DeleteModel(pz az.Principal, modelId int64) error {
 		}
 		return ds.audit(pz, tx, DeleteOp, ds.EntityTypes.Model, modelId, metadata{})
 	})
+}
+
+// --- Label ---
+
+func (ds *Datastore) CreateLabel(pz az.Principal, projectId int64, name, description string) (int64, error) {
+	if err := pz.CheckEdit(ds.EntityTypes.Project, projectId); err != nil {
+		return 0, err
+	}
+
+	var id int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			INSERT INTO
+				label
+				(project_id, name, description, created)
+			VALUES
+				($1,         $2,   $3,          now())
+			RETURNING id
+			`,
+			projectId,
+			name,
+			description,
+		)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := createPrivilege(tx, Privilege{
+			Owns,
+			pz.WorkgroupId(),
+			ds.EntityTypes.Label,
+			id,
+		}); err != nil {
+			return err
+		}
+
+		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Label, id, metadata{
+			"projectId":   strconv.FormatInt(projectId, 10),
+			"name":        name,
+			"description": description,
+		})
+	})
+	return id, err
+}
+
+func (ds *Datastore) UpdateLabel(pz az.Principal, labelId int64, name, description string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				label
+			SET
+				name = $1,
+				description = $2
+			WHERE
+				id = $3
+			`, name, description, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Label, labelId, metadata{"name": name, "description": description})
+	})
+}
+
+func (ds *Datastore) DeleteLabel(pz az.Principal, labelId int64) error {
+	if err := pz.CheckOwns(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		var id int64
+		row := tx.QueryRow(`
+			DELETE FROM
+				label
+			WHERE
+				id = $1
+			RETURNING id
+			`, labelId)
+		if err := row.Scan(&id); err != nil {
+			return err
+		}
+
+		if err := deletePrivilegesOn(tx, ds.EntityTypes.Label, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, DeleteOp, ds.EntityTypes.Label, labelId, metadata{})
+	})
+}
+
+func readModelName(tx *sql.Tx, modelId int64) (string, error) {
+	row := tx.QueryRow("SELECT name FROM model WHERE id = $1", modelId)
+	var name string
+	err := row.Scan(&name)
+	return name, err
+}
+
+func (ds *Datastore) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		modelName, err := readModelName(tx, modelId)
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.Exec(`
+			UPDATE
+				label
+			SET
+				model_id = $1,
+			WHERE
+				id = $2
+			`, modelId, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Label, labelId, metadata{"modelName": modelName})
+	})
+}
+
+func (ds *Datastore) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int64) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Label, labelId); err != nil {
+		return err
+	}
+
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		modelName, err := readModelName(tx, modelId)
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.Exec(`
+			UPDATE
+				label
+			SET
+				model_id = null,
+			WHERE
+				id = $1
+			`, labelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Label, labelId, metadata{"modelName": modelName})
+	})
+}
+
+func (ds *Datastore) ReadLabelsForProject(pz az.Principal, projectId int64) ([]Label, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, model_id, name, description, created
+		FROM
+			label
+		WHERE
+			project_id = $1 AND
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					$4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			)
+		ORDER BY
+			name
+		`, projectId, pz.Id(), ds.EntityTypes.Label, pz.IsSuperuser())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanLabels(rows)
+}
+
+func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, model_id, name, description, created
+		FROM
+			label
+		WHERE
+			id = $1 AND
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					$4 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
+			)
+		ORDER BY
+			name
+		`, labelId, pz.Id(), ds.EntityTypes.Label, pz.IsSuperuser())
+	if err != nil {
+		return Label{}, err
+	}
+	defer rows.Close()
+
+	labels, err := ScanLabels(rows)
+	if err != nil {
+		return Label{}, err
+	}
+	if len(labels) > 0 {
+		return labels[0], nil
+	}
+	return Label{}, fmt.Errorf("Label %d not found", labelId)
 }
 
 // --- Service ---

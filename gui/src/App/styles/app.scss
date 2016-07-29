@@ -57,6 +57,12 @@ button, a {
         color: $brand-orange;
       }
     }
+    &.disabled {
+      background: $brand-dark-3;
+      border-color: $brand-dark-3;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
   }
   &.link {
     display:inline;
@@ -74,10 +80,7 @@ button, a {
 .app-container {
   display: flex;
   .body-container {
-    height: 100%;
-    min-height: 100%;
     background-color: $brand-white;
-    overflow: auto;
     width: 100%;
     z-index: $body-index;
     display: flex;

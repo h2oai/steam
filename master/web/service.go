@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/h2oai/steamY/bindings"
@@ -371,12 +372,12 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 
 // --- Project ---
 
-func (s *Service) CreateProject(pz az.Principal, name, description string) (int64, error) {
+func (s *Service) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
 		return 0, err
 	}
 
-	projectId, err := s.ds.CreateProject(pz, name, description)
+	projectId, err := s.ds.CreateProject(pz, name, description, modelCategory)
 	if err != nil {
 		return 0, err
 	}
@@ -574,7 +575,7 @@ func (s *Service) importDataset(name, configuration, address string) ([]byte, st
 	if err != nil {
 		return nil, "", err
 	}
-	rawFrame, _, err := h2o.GetFramesFetch(job.Dest.Name)
+	rawFrame, _, err := h2o.GetFramesFetch(job.Dest.Name, false)
 	if err != nil {
 		return nil, "", err
 	}
@@ -645,6 +646,51 @@ func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, er
 	}
 
 	return toDataset(dataset), nil
+}
+
+// -- H2O to STEAM conversions --
+
+func framesToDatasets(frames *bindings.FramesV3) []data.Dataset {
+	array := make([]data.Dataset, len(frames.Frames))
+	for i, frame := range frames.Frames {
+		array[i] = frameToDataset(frame)
+	}
+	return array
+}
+
+func frameToDataset(frame *bindings.FrameBase) data.Dataset {
+	return data.Dataset{
+		0,
+		0,
+		frame.FrameId.Name,
+		"",
+		frame.FrameId.Name,
+		"",
+		"",
+		"",
+		time.Now(),
+	}
+}
+
+func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*web.Dataset, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
+		return nil, err
+	}
+
+	// Get cluster information
+	cluster, err := s.ds.ReadCluster(pz, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Start h2o communication
+	h2o := h2ov3.NewClient(cluster.Address)
+	frames, err := h2o.GetFramesList()
+	if err != nil {
+		return nil, err
+	}
+
+	return toDatasets(framesToDatasets(frames)), nil
 }
 
 func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
@@ -753,6 +799,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		cluster.Name,
 		modelKey,
 		"AutoML",
+		"", // ModelCategory
 		dataset,
 		targetName,
 		"",
@@ -798,7 +845,13 @@ func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int6
 	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
 		return nil, err
 	}
-	ms, err := s.ds.ReadModels(pz, offset, limit)
+
+	// Verifty project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	ms, err := s.ds.ReadModelsForProject(pz, projectId, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -812,7 +865,7 @@ func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int6
 }
 
 // Use this instead of model.DataFrame.Name because model.DataFrame can be nil
-func dataFrameName(m *bindings.ModelSchemaBase) string {
+func dataFrameName(m *bindings.ModelSchema) string {
 	if m.DataFrame != nil {
 		return m.DataFrame.Name
 	}
@@ -820,40 +873,130 @@ func dataFrameName(m *bindings.ModelSchemaBase) string {
 	return ""
 }
 
-// TODO: add offset/limit to this call for future
-func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*web.Model, error) {
+func h2oToModel(model *bindings.ModelSchema) data.Model {
+	return data.Model{
+		0,
+		0,
+		0,
+		model.ModelId.Name,
+		"",
+		model.ModelId.Name,
+		model.AlgoFullName,
+		string(model.Output.ModelCategory),
+		dataFrameName(model),
+		model.ResponseColumnName,
+		"",
+		"",
+		0,
+		"",
+		"",
+		time.Now(),
+	}
+}
+
+func h2oToModels(models []*bindings.ModelSchema) []data.Model {
+	array := make([]data.Model, len(models))
+	for i, model := range models {
+		array[i] = h2oToModel(model)
+	}
+	return array
+}
+
+func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*web.Model, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewCluster); err != nil {
+		return nil, err
+	}
+
+	// Get cluster information
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
 		return nil, err
 	}
 
-	h := h2ov3.NewClient(cluster.Address)
-	ms, err := h.GetModelsList()
+	// Connect to h2o
+	h2o := h2ov3.NewClient(cluster.Address)
+	_, frame, err := h2o.GetFramesFetch(frameKey, true)
 	if err != nil {
 		return nil, err
 	}
 
-	models := make([]*web.Model, len(ms.Models))
-	for i, m := range ms.Models {
-		models[i] = &web.Model{
-			0,
-			0,
-			0,
-			m.ModelId.Name,
-			cluster.Name,
-			m.ModelId.Name,
-			m.AlgoFullName,
-			dataFrameName(m),
-			m.ResponseColumnName,
-			"",
-			"",
-			0,
-			"", // TODO Fill in raw metrics (Maybe not, this is an H2O call not a db call)
-			m.Timestamp,
-		}
+	models := h2oToModels(frame.CompatibleModels)
+
+	ms := make([]*web.Model, len(models))
+	for i, m := range models {
+		ms[i] = toModel(m)
 	}
 
-	return models, nil
+	return ms, nil
+}
+
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllBinomialSortCriteria() []string {
+	return []string{"mse", "r_squared", "logloss", "auc", "gini"}
+}
+
+func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.BinomialModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// Verify project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	models, err := s.ds.ReadBinomialModels(pz, projectId, namePart, sortBy, ascending, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toBinomialModels(models), nil
+}
+
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllMultinomialSortCriteria() []string {
+	return []string{"mse", "r_squared", "logloss"}
+}
+
+func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.MultinomialModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// Verify project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	models, err := s.ds.ReadMultinomialModels(pz, projectId, namePart, sortBy, ascending, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toMultinomialModels(models), nil
+}
+
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllRegressionSortCriteria() []string {
+	return []string{"mse", "r_squared", "mean_residual_deviance"}
+}
+
+func (s *Service) FindModelsRegression(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.RegressionModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// Verify project exists
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return nil, err
+	}
+
+	models, err := s.ds.ReadRegressionModels(pz, projectId, namePart, sortBy, ascending, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return toRegressionModels(models), nil
 }
 
 func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelKey, modelName string) (int64, error) {
@@ -881,7 +1024,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	m := r.Models[0]
 
 	// fetch raw frame json from H2O
-	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name)
+	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name, false)
 	if err != nil {
 		return 0, err
 	}
@@ -921,6 +1064,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		cluster.Name,
 		modelKey,
 		m.AlgoFullName,
+		string(m.Output.ModelCategory),
 		dataFrameName(m),
 		m.ResponseColumnName,
 		"",
@@ -943,7 +1087,56 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return 0, err
 	}
 
+	if err := s.ds.LinkProjectAndModel(pz, projectId, modelId); err != nil {
+		return 0, err
+	}
+
+	if err := s.createMetricsTable(pz, modelId, m.Output.TrainingMetrics, string(m.Output.ModelCategory)); err != nil {
+		return 0, err
+	}
+
 	return modelId, nil
+}
+
+func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bindings.ModelMetrics, category string) error {
+	log.Println("iama", category)
+	switch category {
+	case "Binomial":
+		if err := s.ds.CreateBinomialModel(
+			pz,
+			modelId,
+			metrics.Mse,
+			metrics.R2,
+			metrics.Logloss,
+			metrics.Auc,
+			metrics.Gini,
+		); err != nil {
+			return err
+		}
+	case "Multinomial":
+		if err := s.ds.CreateMultinomialModel(
+			pz,
+			modelId,
+			metrics.Mse,
+			metrics.R2,
+			metrics.Logloss,
+		); err != nil {
+			return err
+		}
+	case "Regression":
+		if err := s.ds.CreateRegressionModel(
+			pz,
+			modelId,
+			metrics.Mse,
+			metrics.R2,
+			metrics.MeanResidualDeviance); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("Model category %s not supported", category)
+	}
+
+	return nil
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
@@ -972,6 +1165,107 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	}
 
 	return s.ds.DeleteModel(pz, modelId)
+}
+
+func (s *Service) CreateLabel(pz az.Principal, projectId int64, name, description string) (int64, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return 0, err
+	}
+
+	name = strings.TrimSpace(name)
+	if len(name) == 0 {
+		return 0, fmt.Errorf("Label name cannot be empty")
+	}
+
+	if err := s.checkForDuplicateLabel(pz, projectId, name); err != nil {
+		return 0, err
+	}
+
+	id, err := s.ds.CreateLabel(pz, projectId, name, description)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (s *Service) UpdateLabel(pz az.Principal, labelId int64, name, description string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+
+	name = strings.TrimSpace(name)
+	if len(name) == 0 {
+		return fmt.Errorf("Label name cannot be empty")
+	}
+
+	label, err := s.ds.ReadLabel(pz, labelId)
+	if err != nil {
+		return err
+	}
+
+	if err := s.checkForDuplicateLabel(pz, label.ProjectId, name); err != nil {
+		return err
+	}
+
+	return s.ds.UpdateLabel(pz, labelId, name, description)
+}
+
+func (s *Service) checkForDuplicateLabel(pz az.Principal, projectId int64, name string) error {
+	labels, err := s.ds.ReadLabelsForProject(pz, projectId)
+	if err != nil {
+		return err
+	}
+
+	for _, label := range labels {
+		if label.Name == name {
+			return fmt.Errorf("A label named %s is already associated with this project", name)
+		}
+	}
+	return nil
+}
+
+func (s *Service) DeleteLabel(pz az.Principal, labelId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+
+	return s.ds.DeleteLabel(pz, labelId)
+}
+
+func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return err
+	}
+
+	return s.ds.LinkLabelWithModel(pz, labelId, modelId)
+}
+
+func (s *Service) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageLabel); err != nil {
+		return err
+	}
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return err
+	}
+
+	return s.ds.UnlinkLabelFromModel(pz, labelId, modelId)
+}
+
+func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.Label, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewLabel); err != nil {
+		return nil, err
+	}
+
+	labels, err := s.ds.ReadLabelsForProject(pz, projectId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toLabels(labels), nil
 }
 
 func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
@@ -1690,6 +1984,7 @@ func toModel(m data.Model) *web.Model {
 		m.ClusterName,
 		m.ModelKey,
 		m.Algorithm,
+		m.ModelCategory,
 		m.DatasetName,
 		m.ResponseColumnName,
 		m.LogicalName,
@@ -1698,6 +1993,101 @@ func toModel(m data.Model) *web.Model {
 		m.Metrics,
 		toTimestamp(m.Created),
 	}
+}
+
+func toBinomialModel(model data.BinomialModel) *web.BinomialModel {
+	return &web.BinomialModel{
+		model.Id,
+		model.TrainingDatasetId,
+		model.ValidationDatasetId,
+		model.Name,
+		model.ClusterName,
+		model.ModelKey,
+		model.Algorithm,
+		model.ModelCategory,
+		model.DatasetName,
+		model.ResponseColumnName,
+		model.LogicalName,
+		model.Location,
+		int(model.MaxRunTime), // FIXME change db field to int
+		model.Metrics,
+		toTimestamp(model.Created),
+		model.Mse,
+		model.RSquared,
+		model.Logloss,
+		model.Auc,
+		model.Gini,
+	}
+}
+
+func toBinomialModels(models []data.BinomialModel) []*web.BinomialModel {
+	array := make([]*web.BinomialModel, len(models))
+	for i, model := range models {
+		array[i] = toBinomialModel(model)
+	}
+	return array
+}
+
+func toMultinomialModel(model data.MultinomialModel) *web.MultinomialModel {
+	return &web.MultinomialModel{
+		model.Id,
+		model.TrainingDatasetId,
+		model.ValidationDatasetId,
+		model.Name,
+		model.ClusterName,
+		model.ModelKey,
+		model.Algorithm,
+		model.ModelCategory,
+		model.DatasetName,
+		model.ResponseColumnName,
+		model.LogicalName,
+		model.Location,
+		int(model.MaxRunTime), // FIXME change db field to int
+		model.Metrics,
+		toTimestamp(model.Created),
+		model.Mse,
+		model.RSquared,
+		model.Logloss,
+	}
+}
+
+func toMultinomialModels(models []data.MultinomialModel) []*web.MultinomialModel {
+	array := make([]*web.MultinomialModel, len(models))
+	for i, model := range models {
+		array[i] = toMultinomialModel(model)
+	}
+	return array
+}
+
+func toRegressionModel(model data.RegressionModel) *web.RegressionModel {
+	return &web.RegressionModel{
+		model.Id,
+		model.TrainingDatasetId,
+		model.ValidationDatasetId,
+		model.Name,
+		model.ClusterName,
+		model.ModelKey,
+		model.Algorithm,
+		model.ModelCategory,
+		model.DatasetName,
+		model.ResponseColumnName,
+		model.LogicalName,
+		model.Location,
+		int(model.MaxRunTime), // FIXME change db field to int
+		model.Metrics,
+		toTimestamp(model.Created),
+		model.Mse,
+		model.RSquared,
+		model.MeanResidualDeviance,
+	}
+}
+
+func toRegressionModels(models []data.RegressionModel) []*web.RegressionModel {
+	array := make([]*web.RegressionModel, len(models))
+	for i, model := range models {
+		array[i] = toRegressionModel(model)
+	}
+	return array
 }
 
 func toScoringService(s data.Service) *web.ScoringService {
@@ -1842,6 +2232,7 @@ func toProject(project data.Project) *web.Project {
 		project.Id,
 		project.Name,
 		project.Description,
+		project.ModelCategory,
 		toTimestamp(project.Created),
 	}
 }
@@ -1850,6 +2241,21 @@ func toProjects(projects []data.Project) []*web.Project {
 	array := make([]*web.Project, len(projects))
 	for i, project := range projects {
 		array[i] = toProject(project)
+	}
+	return array
+}
+
+func toLabels(labels []data.Label) []*web.Label {
+	array := make([]*web.Label, len(labels))
+	for i, label := range labels {
+		array[i] = &web.Label{
+			label.Id,
+			label.ProjectId,
+			label.ModelId,
+			label.Name,
+			label.Description,
+			toTimestamp(label.Created),
+		}
 	}
 	return array
 }

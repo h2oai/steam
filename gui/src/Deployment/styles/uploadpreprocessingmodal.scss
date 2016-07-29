@@ -1,0 +1,38 @@
+@import '../../variables.scss';
+
+.upload-preprocessing-modal {
+  .row .cell:first-of-type {
+    flex-basis: $xlarge * 3;
+    flex-grow: 0;
+  }
+  .row:nth-last-of-type(2), .row:last-of-type {
+    border-bottom: none;
+  }
+  .button-container {
+    margin-top: $small;
+    button:first-of-type {
+      margin-right: $xsmall;
+    }
+  }
+  .package-name-label {
+    margin-top: $xsmall;
+    font-size: .7em;
+  }
+  .muted {
+    color: $brand-dark-3;
+  }
+  input[type="file"] {
+    display: none;
+  }
+  .upload-info {
+    display: flex;
+    i {
+      font-size: 1.3em;
+      color: $brand-orange;
+    }
+  }
+  .file-list {
+    margin: 0 $medium;
+    flex-basis: 30%;
+  }
+}

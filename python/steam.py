@@ -285,13 +285,14 @@ class RPCClient:
 		response = self.connection.call("GetJobs", request)
 		return response['jobs']
 	
-	def create_project(self, name, description):
+	def create_project(self, name, description, model_category):
 		"""
 		Create a project
 
 		Parameters:
 		name: No description available (string)
 		description: No description available (string)
+		model_category: No description available (string)
 
 		Returns:
 		project_id: No description available (int64)
@@ -299,6 +300,7 @@ class RPCClient:
 		request = {
 			'name': name
 			'description': description
+			'model_category': model_category
 		}
 		response = self.connection.call("CreateProject", request)
 		return response['project_id']
@@ -506,6 +508,22 @@ class RPCClient:
 		response = self.connection.call("GetDataset", request)
 		return response['dataset']
 	
+	def get_datasets_from_cluster(self, cluster_id):
+		"""
+		Get a list of datasets on a cluster
+
+		Parameters:
+		cluster_id: No description available (int64)
+
+		Returns:
+		dataset: No description available (Dataset)
+		"""
+		request = {
+			'cluster_id': cluster_id
+		}
+		response = self.connection.call("GetDatasetsFromCluster", request)
+		return response['dataset']
+	
 	def update_dataset(self, dataset_id, name, description, response_column_name):
 		"""
 		Update a dataset
@@ -640,20 +658,100 @@ class RPCClient:
 		response = self.connection.call("GetModels", request)
 		return response['models']
 	
-	def get_models_from_cluster(self, cluster_id):
+	def get_models_from_cluster(self, cluster_id, frame_key):
 		"""
 		List models from a cluster
 
 		Parameters:
 		cluster_id: No description available (int64)
+		frame_key: No description available (string)
 
 		Returns:
 		models: No description available (Model)
 		"""
 		request = {
 			'cluster_id': cluster_id
+			'frame_key': frame_key
 		}
 		response = self.connection.call("GetModelsFromCluster", request)
+		return response['models']
+	
+	def find_models_binomial(self, project_id, name_part, sort_by, ascending, offset, limit):
+		"""
+		List binomial models
+
+		Parameters:
+		project_id: No description available (int64)
+		name_part: No description available (string)
+		sort_by: No description available (string)
+		ascending: No description available (bool)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		models: No description available (BinomialModel)
+		"""
+		request = {
+			'project_id': project_id
+			'name_part': name_part
+			'sort_by': sort_by
+			'ascending': ascending
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("FindModelsBinomial", request)
+		return response['models']
+	
+	def find_models_multinomial(self, project_id, name_part, sort_by, ascending, offset, limit):
+		"""
+		List multinomial models
+
+		Parameters:
+		project_id: No description available (int64)
+		name_part: No description available (string)
+		sort_by: No description available (string)
+		ascending: No description available (bool)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		models: No description available (MultinomialModel)
+		"""
+		request = {
+			'project_id': project_id
+			'name_part': name_part
+			'sort_by': sort_by
+			'ascending': ascending
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("FindModelsMultinomial", request)
+		return response['models']
+	
+	def find_models_regression(self, project_id, name_part, sort_by, ascending, offset, limit):
+		"""
+		List regression models
+
+		Parameters:
+		project_id: No description available (int64)
+		name_part: No description available (string)
+		sort_by: No description available (string)
+		ascending: No description available (bool)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		models: No description available (RegressionModel)
+		"""
+		request = {
+			'project_id': project_id
+			'name_part': name_part
+			'sort_by': sort_by
+			'ascending': ascending
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("FindModelsRegression", request)
 		return response['models']
 	
 	def import_model_from_cluster(self, cluster_id, project_id, model_key, model_name):
@@ -692,6 +790,110 @@ class RPCClient:
 		}
 		response = self.connection.call("DeleteModel", request)
 		return 
+	
+	def create_label(self, project_id, name, description):
+		"""
+		Create a label
+
+		Parameters:
+		project_id: No description available (int64)
+		name: No description available (string)
+		description: No description available (string)
+
+		Returns:
+		label_id: No description available (int64)
+		"""
+		request = {
+			'project_id': project_id
+			'name': name
+			'description': description
+		}
+		response = self.connection.call("CreateLabel", request)
+		return response['label_id']
+	
+	def update_label(self, label_id, name, description):
+		"""
+		Update a label
+
+		Parameters:
+		label_id: No description available (int64)
+		name: No description available (string)
+		description: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+			'name': name
+			'description': description
+		}
+		response = self.connection.call("UpdateLabel", request)
+		return 
+	
+	def delete_label(self, label_id):
+		"""
+		Delete a label
+
+		Parameters:
+		label_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+		}
+		response = self.connection.call("DeleteLabel", request)
+		return 
+	
+	def link_label_with_model(self, label_id, model_id):
+		"""
+		Label a model
+
+		Parameters:
+		label_id: No description available (int64)
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+			'model_id': model_id
+		}
+		response = self.connection.call("LinkLabelWithModel", request)
+		return 
+	
+	def unlink_label_from_model(self, label_id, model_id):
+		"""
+		Remove a label from a model
+
+		Parameters:
+		label_id: No description available (int64)
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'label_id': label_id
+			'model_id': model_id
+		}
+		response = self.connection.call("UnlinkLabelFromModel", request)
+		return 
+	
+	def get_labels_for_project(self, project_id):
+		"""
+		List labels for a project, with corresponding models, if any
+
+		Parameters:
+		project_id: No description available (int64)
+
+		Returns:
+		labels: No description available (Label)
+		"""
+		request = {
+			'project_id': project_id
+		}
+		response = self.connection.call("GetLabelsForProject", request)
+		return response['labels']
 	
 	def start_service(self, model_id, port):
 		"""

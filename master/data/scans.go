@@ -496,6 +496,7 @@ func ScanProject(r *sql.Row) (Project, error) {
 		&s.Id,
 		&s.Name,
 		&s.Description,
+		&s.ModelCategory,
 		&s.Created,
 	); err != nil {
 		return Project{}, err
@@ -512,6 +513,7 @@ func ScanProjects(rs *sql.Rows) ([]Project, error) {
 			&s.Id,
 			&s.Name,
 			&s.Description,
+			&s.ModelCategory,
 			&s.Created,
 		); err != nil {
 			return nil, err
@@ -618,6 +620,7 @@ func ScanModel(r *sql.Row) (Model, error) {
 		&s.ClusterName,
 		&s.ModelKey,
 		&s.Algorithm,
+		&s.ModelCategory,
 		&s.DatasetName,
 		&s.ResponseColumnName,
 		&s.LogicalName,
@@ -645,6 +648,7 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.ClusterName,
 			&s.ModelKey,
 			&s.Algorithm,
+			&s.ModelCategory,
 			&s.DatasetName,
 			&s.ResponseColumnName,
 			&s.LogicalName,
@@ -652,6 +656,240 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.MaxRunTime,
 			&s.Metrics,
 			&s.MetricsVersion,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanBinomialModel(r *sql.Row) (BinomialModel, error) {
+	var s BinomialModel
+	if err := r.Scan(
+		&s.Id,
+		&s.TrainingDatasetId,
+		&s.ValidationDatasetId,
+		&s.Name,
+		&s.ClusterName,
+		&s.ModelKey,
+		&s.Algorithm,
+		&s.ModelCategory,
+		&s.DatasetName,
+		&s.ResponseColumnName,
+		&s.LogicalName,
+		&s.Location,
+		&s.MaxRunTime,
+		&s.Metrics,
+		&s.MetricsVersion,
+		&s.Created,
+		&s.Mse,
+		&s.RSquared,
+		&s.Logloss,
+		&s.Auc,
+		&s.Gini,
+	); err != nil {
+		return BinomialModel{}, err
+	}
+	return s, nil
+}
+
+func ScanBinomialModels(rs *sql.Rows) ([]BinomialModel, error) {
+	structs := make([]BinomialModel, 0, 16)
+	var err error
+	for rs.Next() {
+		var s BinomialModel
+		if err = rs.Scan(
+			&s.Id,
+			&s.TrainingDatasetId,
+			&s.ValidationDatasetId,
+			&s.Name,
+			&s.ClusterName,
+			&s.ModelKey,
+			&s.Algorithm,
+			&s.ModelCategory,
+			&s.DatasetName,
+			&s.ResponseColumnName,
+			&s.LogicalName,
+			&s.Location,
+			&s.MaxRunTime,
+			&s.Metrics,
+			&s.MetricsVersion,
+			&s.Created,
+			&s.Mse,
+			&s.RSquared,
+			&s.Logloss,
+			&s.Auc,
+			&s.Gini,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanMultinomialModel(r *sql.Row) (MultinomialModel, error) {
+	var s MultinomialModel
+	if err := r.Scan(
+		&s.Id,
+		&s.TrainingDatasetId,
+		&s.ValidationDatasetId,
+		&s.Name,
+		&s.ClusterName,
+		&s.ModelKey,
+		&s.Algorithm,
+		&s.ModelCategory,
+		&s.DatasetName,
+		&s.ResponseColumnName,
+		&s.LogicalName,
+		&s.Location,
+		&s.MaxRunTime,
+		&s.Metrics,
+		&s.MetricsVersion,
+		&s.Created,
+		&s.Mse,
+		&s.RSquared,
+		&s.Logloss,
+	); err != nil {
+		return MultinomialModel{}, err
+	}
+	return s, nil
+}
+
+func ScanMultinomialModels(rs *sql.Rows) ([]MultinomialModel, error) {
+	structs := make([]MultinomialModel, 0, 16)
+	var err error
+	for rs.Next() {
+		var s MultinomialModel
+		if err = rs.Scan(
+			&s.Id,
+			&s.TrainingDatasetId,
+			&s.ValidationDatasetId,
+			&s.Name,
+			&s.ClusterName,
+			&s.ModelKey,
+			&s.Algorithm,
+			&s.ModelCategory,
+			&s.DatasetName,
+			&s.ResponseColumnName,
+			&s.LogicalName,
+			&s.Location,
+			&s.MaxRunTime,
+			&s.Metrics,
+			&s.MetricsVersion,
+			&s.Created,
+			&s.Mse,
+			&s.RSquared,
+			&s.Logloss,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanRegressionModel(r *sql.Row) (RegressionModel, error) {
+	var s RegressionModel
+	if err := r.Scan(
+		&s.Id,
+		&s.TrainingDatasetId,
+		&s.ValidationDatasetId,
+		&s.Name,
+		&s.ClusterName,
+		&s.ModelKey,
+		&s.Algorithm,
+		&s.ModelCategory,
+		&s.DatasetName,
+		&s.ResponseColumnName,
+		&s.LogicalName,
+		&s.Location,
+		&s.MaxRunTime,
+		&s.Metrics,
+		&s.MetricsVersion,
+		&s.Created,
+		&s.Mse,
+		&s.RSquared,
+		&s.MeanResidualDeviance,
+	); err != nil {
+		return RegressionModel{}, err
+	}
+	return s, nil
+}
+
+func ScanRegressionModels(rs *sql.Rows) ([]RegressionModel, error) {
+	structs := make([]RegressionModel, 0, 16)
+	var err error
+	for rs.Next() {
+		var s RegressionModel
+		if err = rs.Scan(
+			&s.Id,
+			&s.TrainingDatasetId,
+			&s.ValidationDatasetId,
+			&s.Name,
+			&s.ClusterName,
+			&s.ModelKey,
+			&s.Algorithm,
+			&s.ModelCategory,
+			&s.DatasetName,
+			&s.ResponseColumnName,
+			&s.LogicalName,
+			&s.Location,
+			&s.MaxRunTime,
+			&s.Metrics,
+			&s.MetricsVersion,
+			&s.Created,
+			&s.Mse,
+			&s.RSquared,
+			&s.MeanResidualDeviance,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanLabel(r *sql.Row) (Label, error) {
+	var s Label
+	if err := r.Scan(
+		&s.Id,
+		&s.ProjectId,
+		&s.ModelId,
+		&s.Name,
+		&s.Description,
+		&s.Created,
+	); err != nil {
+		return Label{}, err
+	}
+	return s, nil
+}
+
+func ScanLabels(rs *sql.Rows) ([]Label, error) {
+	structs := make([]Label, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Label
+		if err = rs.Scan(
+			&s.Id,
+			&s.ProjectId,
+			&s.ModelId,
+			&s.Name,
+			&s.Description,
 			&s.Created,
 		); err != nil {
 			return nil, err

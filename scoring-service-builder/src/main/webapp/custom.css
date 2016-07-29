@@ -138,7 +138,7 @@ form {
 	margin: 1em 0em;
 }
 
-#python form, #jar form {
+#python form{
 	border: 1px dashed rgba(89, 195, 200, 0.8) ;
 }
 

@@ -7,13 +7,14 @@ import * as classNames from 'classnames';
 import '../styles/panel.scss';
 
 interface Props {
-  className?: any
+  className?: any,
+  onClick?: Function
 }
 
 export default class Panel extends React.Component<Props, any> {
   render() {
     return (
-      <div className={classNames('panel', this.props.className)}>
+      <div className={classNames('panel', this.props.className)} onClick={this.props.onClick}>
         {this.props.children}
       </div>
     );

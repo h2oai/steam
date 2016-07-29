@@ -1,8 +1,8 @@
 .collapsible {
-  height: 100%;
-  transition: height .3s ease-in-out;
+  max-height: 10000px;
+  transition: max-height 0.5s;
   overflow: hidden;
   &.closed {
-    height: 0;
+    max-height: 0;
   }
 }

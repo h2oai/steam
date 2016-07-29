@@ -96,9 +96,15 @@ func collateInputs(methods []*CLIMethod) []*Field {
 		}
 	}
 
-	inputs := make([]*Field, 0)
-	for _, v := range dict {
-		inputs = append(inputs, v)
+	inputNames := make([]string, 0)
+	for name, _ := range dict {
+		inputNames = append(inputNames, name)
+	}
+	sort.Strings(inputNames)
+
+	inputs := make([]*Field, len(inputNames))
+	for i, name := range inputNames {
+		inputs[i] = dict[name]
 	}
 
 	return inputs

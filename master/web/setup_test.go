@@ -13,7 +13,12 @@ import (
 	"github.com/h2oai/steamY/srv/web"
 )
 
-const superuser = "superuser"
+const (
+	superuser      = "superuser"
+	clusterAddress = "localhost:54321"
+	h2oModelKey    = "test_gbm"
+	h2oFrameKey    = "test.hex"
+)
 
 type test struct {
 	t   *testing.T
@@ -97,7 +102,7 @@ func (t *test) ok(condition bool, format string, args ...interface{}) {
 }
 
 func buildPermissionMap(t *test) map[string]int64 {
-	permissions, err := t.svc.GetSupportedPermissions(t.su)
+	permissions, err := t.svc.GetAllPermissions(t.su)
 	t.nil(err)
 
 	permissionMap := make(map[string]int64)
@@ -109,7 +114,7 @@ func buildPermissionMap(t *test) map[string]int64 {
 }
 
 func buildEntityTypeMap(t *test) map[string]int64 {
-	entityTypes, err := t.svc.GetSupportedEntityTypes(t.su)
+	entityTypes, err := t.svc.GetAllEntityTypes(t.su)
 	t.nil(err)
 
 	entityTypeMap := make(map[string]int64)

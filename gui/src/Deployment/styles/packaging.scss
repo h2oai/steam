@@ -1,0 +1,8 @@
+@import '../../variables.scss';
+.packaging {
+  .cell.folder-icon {
+    flex-grow: 0;
+    margin-right: $xsmall;
+    color: $brand-blue;
+  }
+}

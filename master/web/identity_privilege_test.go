@@ -18,7 +18,7 @@ func TestOwnSharingOfIdentity(tt *testing.T) {
 	group1Id, err := t.svc.CreateWorkgroup(t.su, "group1", "group1 description")
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndWorkgroup(t.su, userId, group1Id)
+	err = t.svc.LinkIdentityWithWorkgroup(t.su, userId, group1Id)
 	t.nil(err)
 
 	user1, err := t.dir.Lookup(user1Name)
@@ -29,7 +29,7 @@ func TestOwnSharingOfIdentity(tt *testing.T) {
 
 	permissionMap := buildPermissionMap(t)
 
-	err = t.svc.LinkRoleAndPermissions(t.su, role1Id, []int64{
+	err = t.svc.LinkRoleWithPermissions(t.su, role1Id, []int64{
 		permissionMap[data.ViewWorkgroup],
 		permissionMap[data.ManageIdentity],
 		permissionMap[data.ViewIdentity],
@@ -37,7 +37,7 @@ func TestOwnSharingOfIdentity(tt *testing.T) {
 
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndRole(t.su, userId, role1Id)
+	err = t.svc.LinkIdentityWithRole(t.su, userId, role1Id)
 	t.nil(err)
 
 	// edit as user1 -- should fail
@@ -67,18 +67,18 @@ func TestOwnSharingOfIdentity(tt *testing.T) {
 	group2Id, err := t.svc.CreateWorkgroup(t.su, "group2", "group2 description")
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndWorkgroup(t.su, user2Id, group2Id)
+	err = t.svc.LinkIdentityWithWorkgroup(t.su, user2Id, group2Id)
 	t.nil(err)
 
 	role2Id, err := t.svc.CreateRole(t.su, "role2", "role2 description")
 	t.nil(err)
 
-	err = t.svc.LinkRoleAndPermissions(t.su, role2Id, []int64{
+	err = t.svc.LinkRoleWithPermissions(t.su, role2Id, []int64{
 		permissionMap[data.ViewIdentity],
 	})
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndRole(t.su, user2Id, role2Id)
+	err = t.svc.LinkIdentityWithRole(t.su, user2Id, role2Id)
 	t.nil(err)
 
 	user2, err := t.dir.Lookup("user2")
@@ -126,7 +126,7 @@ func TestEditSharingOfIdentity(tt *testing.T) {
 	groupId, err := t.svc.CreateWorkgroup(t.su, "group1", "group1 description")
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndWorkgroup(t.su, userId, groupId)
+	err = t.svc.LinkIdentityWithWorkgroup(t.su, userId, groupId)
 	t.nil(err)
 
 	user, err := t.dir.Lookup(username)
@@ -137,13 +137,13 @@ func TestEditSharingOfIdentity(tt *testing.T) {
 
 	permissionMap := buildPermissionMap(t)
 
-	err = t.svc.LinkRoleAndPermissions(t.su, roleId, []int64{
+	err = t.svc.LinkRoleWithPermissions(t.su, roleId, []int64{
 		permissionMap[data.ViewIdentity],
 		permissionMap[data.ManageIdentity],
 	})
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndRole(t.su, userId, roleId)
+	err = t.svc.LinkIdentityWithRole(t.su, userId, roleId)
 	t.nil(err)
 
 	// edit as user -- should fail
@@ -181,7 +181,7 @@ func TestViewSharingOfIdentity(tt *testing.T) {
 	groupId, err := t.svc.CreateWorkgroup(t.su, "group1", "group1 description")
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndWorkgroup(t.su, userId, groupId)
+	err = t.svc.LinkIdentityWithWorkgroup(t.su, userId, groupId)
 	t.nil(err)
 
 	user, err := t.dir.Lookup(username)
@@ -192,12 +192,12 @@ func TestViewSharingOfIdentity(tt *testing.T) {
 
 	permissionMap := buildPermissionMap(t)
 
-	err = t.svc.LinkRoleAndPermissions(t.su, roleId, []int64{
+	err = t.svc.LinkRoleWithPermissions(t.su, roleId, []int64{
 		permissionMap[data.ViewIdentity],
 	})
 	t.nil(err)
 
-	err = t.svc.LinkIdentityAndRole(t.su, userId, roleId)
+	err = t.svc.LinkIdentityWithRole(t.su, userId, roleId)
 	t.nil(err)
 
 	// view as user -- should fail

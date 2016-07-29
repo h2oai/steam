@@ -14,6 +14,29 @@ import (
 )
 
 // --- Types ---
+type BinomialModel struct {
+  Id int64 `json:"id"`
+  TrainingDatasetId int64 `json:"training_dataset_id"`
+  ValidationDatasetId int64 `json:"validation_dataset_id"`
+  Name string `json:"name"`
+  ClusterName string `json:"cluster_name"`
+  ModelKey string `json:"model_key"`
+  Algorithm string `json:"algorithm"`
+  ModelCategory string `json:"model_category"`
+  DatasetName string `json:"dataset_name"`
+  ResponseColumnName string `json:"response_column_name"`
+  LogicalName string `json:"logical_name"`
+  Location string `json:"location"`
+  MaxRuntime int `json:"max_runtime"`
+  Metrics string `json:"metrics"`
+  CreatedAt int64 `json:"created_at"`
+  Mse float64 `json:"mse"`
+  RSquared float64 `json:"r_squared"`
+  Logloss float64 `json:"logloss"`
+  Auc float64 `json:"auc"`
+  Gini float64 `json:"gini"`
+}
+
 type Cluster struct {
   Id int64 `json:"id"`
   Name string `json:"name"`
@@ -101,6 +124,15 @@ type Job struct {
   CompletedAt int64 `json:"completed_at"`
 }
 
+type Label struct {
+  Id int64 `json:"id"`
+  ProjectId int64 `json:"project_id"`
+  ModelId int64 `json:"model_id"`
+  Name string `json:"name"`
+  Description string `json:"description"`
+  CreatedAt int64 `json:"created_at"`
+}
+
 type Model struct {
   Id int64 `json:"id"`
   TrainingDatasetId int64 `json:"training_dataset_id"`
@@ -109,6 +141,7 @@ type Model struct {
   ClusterName string `json:"cluster_name"`
   ModelKey string `json:"model_key"`
   Algorithm string `json:"algorithm"`
+  ModelCategory string `json:"model_category"`
   DatasetName string `json:"dataset_name"`
   ResponseColumnName string `json:"response_column_name"`
   LogicalName string `json:"logical_name"`
@@ -116,6 +149,27 @@ type Model struct {
   MaxRuntime int `json:"max_runtime"`
   Metrics string `json:"metrics"`
   CreatedAt int64 `json:"created_at"`
+}
+
+type MultinomialModel struct {
+  Id int64 `json:"id"`
+  TrainingDatasetId int64 `json:"training_dataset_id"`
+  ValidationDatasetId int64 `json:"validation_dataset_id"`
+  Name string `json:"name"`
+  ClusterName string `json:"cluster_name"`
+  ModelKey string `json:"model_key"`
+  Algorithm string `json:"algorithm"`
+  ModelCategory string `json:"model_category"`
+  DatasetName string `json:"dataset_name"`
+  ResponseColumnName string `json:"response_column_name"`
+  LogicalName string `json:"logical_name"`
+  Location string `json:"location"`
+  MaxRuntime int `json:"max_runtime"`
+  Metrics string `json:"metrics"`
+  CreatedAt int64 `json:"created_at"`
+  Mse float64 `json:"mse"`
+  RSquared float64 `json:"r_squared"`
+  Logloss float64 `json:"logloss"`
 }
 
 type Permission struct {
@@ -128,7 +182,29 @@ type Project struct {
   Id int64 `json:"id"`
   Name string `json:"name"`
   Description string `json:"description"`
+  ModelCategory string `json:"model_category"`
   CreatedAt int64 `json:"created_at"`
+}
+
+type RegressionModel struct {
+  Id int64 `json:"id"`
+  TrainingDatasetId int64 `json:"training_dataset_id"`
+  ValidationDatasetId int64 `json:"validation_dataset_id"`
+  Name string `json:"name"`
+  ClusterName string `json:"cluster_name"`
+  ModelKey string `json:"model_key"`
+  Algorithm string `json:"algorithm"`
+  ModelCategory string `json:"model_category"`
+  DatasetName string `json:"dataset_name"`
+  ResponseColumnName string `json:"response_column_name"`
+  LogicalName string `json:"logical_name"`
+  Location string `json:"location"`
+  MaxRuntime int `json:"max_runtime"`
+  Metrics string `json:"metrics"`
+  CreatedAt int64 `json:"created_at"`
+  Mse float64 `json:"mse"`
+  RSquared float64 `json:"r_squared"`
+  MeanResidualDeviance float64 `json:"mean_residual_deviance"`
 }
 
 type Role struct {
@@ -183,7 +259,7 @@ type Service interface {
   DeleteCluster(pz az.Principal, clusterId int64) (error)
   GetJob(pz az.Principal, clusterId int64, jobName string) (*Job, error)
   GetJobs(pz az.Principal, clusterId int64) ([]*Job, error)
-  CreateProject(pz az.Principal, name string, description string) (int64, error)
+  CreateProject(pz az.Principal, name string, description string, modelCategory string) (int64, error)
   GetProjects(pz az.Principal, offset int64, limit int64) ([]*Project, error)
   GetProject(pz az.Principal, projectId int64) (*Project, error)
   DeleteProject(pz az.Principal, projectId int64) (error)
@@ -195,6 +271,7 @@ type Service interface {
   CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error)
   GetDatasets(pz az.Principal, datasourceId int64, offset int64, limit int64) ([]*Dataset, error)
   GetDataset(pz az.Principal, datasetId int64) (*Dataset, error)
+  GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*Dataset, error)
   UpdateDataset(pz az.Principal, datasetId int64, name string, description string, responseColumnName string) (error)
   SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error)
   DeleteDataset(pz az.Principal, datasetId int64) (error)
@@ -202,9 +279,18 @@ type Service interface {
   BuildModelAuto(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
   GetModel(pz az.Principal, modelId int64) (*Model, error)
   GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
-  GetModelsFromCluster(pz az.Principal, clusterId int64) ([]*Model, error)
+  GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*Model, error)
+  FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error)
+  FindModelsMultinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error)
+  FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error)
   ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
   DeleteModel(pz az.Principal, modelId int64) (error)
+  CreateLabel(pz az.Principal, projectId int64, name string, description string) (int64, error)
+  UpdateLabel(pz az.Principal, labelId int64, name string, description string) (error)
+  DeleteLabel(pz az.Principal, labelId int64) (error)
+  LinkLabelWithModel(pz az.Principal, labelId int64, modelId int64) (error)
+  UnlinkLabelFromModel(pz az.Principal, labelId int64, modelId int64) (error)
+  GetLabelsForProject(pz az.Principal, projectId int64) ([]*Label, error)
   StartService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
   StopService(pz az.Principal, serviceId int64) (error)
   GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
@@ -359,6 +445,7 @@ type GetJobsOut struct {
 type CreateProjectIn struct {
   Name string `json:"name"`
   Description string `json:"description"`
+  ModelCategory string `json:"model_category"`
 }
 
 type CreateProjectOut struct {
@@ -465,6 +552,14 @@ type GetDatasetOut struct {
   Dataset *Dataset `json:"dataset"`
 }
 
+type GetDatasetsFromClusterIn struct {
+  ClusterId int64 `json:"cluster_id"`
+}
+
+type GetDatasetsFromClusterOut struct {
+  Dataset []*Dataset `json:"dataset"`
+}
+
 type UpdateDatasetIn struct {
   DatasetId int64 `json:"dataset_id"`
   Name string `json:"name"`
@@ -533,10 +628,50 @@ type GetModelsOut struct {
 
 type GetModelsFromClusterIn struct {
   ClusterId int64 `json:"cluster_id"`
+  FrameKey string `json:"frame_key"`
 }
 
 type GetModelsFromClusterOut struct {
   Models []*Model `json:"models"`
+}
+
+type FindModelsBinomialIn struct {
+  ProjectId int64 `json:"project_id"`
+  NamePart string `json:"name_part"`
+  SortBy string `json:"sort_by"`
+  Ascending bool `json:"ascending"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type FindModelsBinomialOut struct {
+  Models []*BinomialModel `json:"models"`
+}
+
+type FindModelsMultinomialIn struct {
+  ProjectId int64 `json:"project_id"`
+  NamePart string `json:"name_part"`
+  SortBy string `json:"sort_by"`
+  Ascending bool `json:"ascending"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type FindModelsMultinomialOut struct {
+  Models []*MultinomialModel `json:"models"`
+}
+
+type FindModelsRegressionIn struct {
+  ProjectId int64 `json:"project_id"`
+  NamePart string `json:"name_part"`
+  SortBy string `json:"sort_by"`
+  Ascending bool `json:"ascending"`
+  Offset int64 `json:"offset"`
+  Limit int64 `json:"limit"`
+}
+
+type FindModelsRegressionOut struct {
+  Models []*RegressionModel `json:"models"`
 }
 
 type ImportModelFromClusterIn struct {
@@ -555,6 +690,56 @@ type DeleteModelIn struct {
 }
 
 type DeleteModelOut struct {
+}
+
+type CreateLabelIn struct {
+  ProjectId int64 `json:"project_id"`
+  Name string `json:"name"`
+  Description string `json:"description"`
+}
+
+type CreateLabelOut struct {
+  LabelId int64 `json:"label_id"`
+}
+
+type UpdateLabelIn struct {
+  LabelId int64 `json:"label_id"`
+  Name string `json:"name"`
+  Description string `json:"description"`
+}
+
+type UpdateLabelOut struct {
+}
+
+type DeleteLabelIn struct {
+  LabelId int64 `json:"label_id"`
+}
+
+type DeleteLabelOut struct {
+}
+
+type LinkLabelWithModelIn struct {
+  LabelId int64 `json:"label_id"`
+  ModelId int64 `json:"model_id"`
+}
+
+type LinkLabelWithModelOut struct {
+}
+
+type UnlinkLabelFromModelIn struct {
+  LabelId int64 `json:"label_id"`
+  ModelId int64 `json:"model_id"`
+}
+
+type UnlinkLabelFromModelOut struct {
+}
+
+type GetLabelsForProjectIn struct {
+  ProjectId int64 `json:"project_id"`
+}
+
+type GetLabelsForProjectOut struct {
+  Labels []*Label `json:"labels"`
 }
 
 type StartServiceIn struct {
@@ -1083,8 +1268,8 @@ func (this *Remote) GetJobs(clusterId int64) ([]*Job, error) {
   return out.Jobs, nil
 }
 
-func (this *Remote) CreateProject(name string, description string) (int64, error) {
-  in := CreateProjectIn{ name , description  }
+func (this *Remote) CreateProject(name string, description string, modelCategory string) (int64, error) {
+  in := CreateProjectIn{ name , description , modelCategory  }
   var out CreateProjectOut
   err := this.Proc.Call("CreateProject", &in, &out)
   if err != nil {
@@ -1203,6 +1388,16 @@ func (this *Remote) GetDataset(datasetId int64) (*Dataset, error) {
   return out.Dataset, nil
 }
 
+func (this *Remote) GetDatasetsFromCluster(clusterId int64) ([]*Dataset, error) {
+  in := GetDatasetsFromClusterIn{ clusterId  }
+  var out GetDatasetsFromClusterOut
+  err := this.Proc.Call("GetDatasetsFromCluster", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Dataset, nil
+}
+
 func (this *Remote) UpdateDataset(datasetId int64, name string, description string, responseColumnName string) (error) {
   in := UpdateDatasetIn{ datasetId , name , description , responseColumnName  }
   var out UpdateDatasetOut
@@ -1273,10 +1468,40 @@ func (this *Remote) GetModels(projectId int64, offset int64, limit int64) ([]*Mo
   return out.Models, nil
 }
 
-func (this *Remote) GetModelsFromCluster(clusterId int64) ([]*Model, error) {
-  in := GetModelsFromClusterIn{ clusterId  }
+func (this *Remote) GetModelsFromCluster(clusterId int64, frameKey string) ([]*Model, error) {
+  in := GetModelsFromClusterIn{ clusterId , frameKey  }
   var out GetModelsFromClusterOut
   err := this.Proc.Call("GetModelsFromCluster", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Models, nil
+}
+
+func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error) {
+  in := FindModelsBinomialIn{ projectId , namePart , sortBy , ascending , offset , limit  }
+  var out FindModelsBinomialOut
+  err := this.Proc.Call("FindModelsBinomial", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Models, nil
+}
+
+func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error) {
+  in := FindModelsMultinomialIn{ projectId , namePart , sortBy , ascending , offset , limit  }
+  var out FindModelsMultinomialOut
+  err := this.Proc.Call("FindModelsMultinomial", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Models, nil
+}
+
+func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error) {
+  in := FindModelsRegressionIn{ projectId , namePart , sortBy , ascending , offset , limit  }
+  var out FindModelsRegressionOut
+  err := this.Proc.Call("FindModelsRegression", &in, &out)
   if err != nil {
     return nil, err
   }
@@ -1301,6 +1526,66 @@ func (this *Remote) DeleteModel(modelId int64) (error) {
     return err
   }
   return nil
+}
+
+func (this *Remote) CreateLabel(projectId int64, name string, description string) (int64, error) {
+  in := CreateLabelIn{ projectId , name , description  }
+  var out CreateLabelOut
+  err := this.Proc.Call("CreateLabel", &in, &out)
+  if err != nil {
+    return 0, err
+  }
+  return out.LabelId, nil
+}
+
+func (this *Remote) UpdateLabel(labelId int64, name string, description string) (error) {
+  in := UpdateLabelIn{ labelId , name , description  }
+  var out UpdateLabelOut
+  err := this.Proc.Call("UpdateLabel", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
+func (this *Remote) DeleteLabel(labelId int64) (error) {
+  in := DeleteLabelIn{ labelId  }
+  var out DeleteLabelOut
+  err := this.Proc.Call("DeleteLabel", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
+func (this *Remote) LinkLabelWithModel(labelId int64, modelId int64) (error) {
+  in := LinkLabelWithModelIn{ labelId , modelId  }
+  var out LinkLabelWithModelOut
+  err := this.Proc.Call("LinkLabelWithModel", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
+func (this *Remote) UnlinkLabelFromModel(labelId int64, modelId int64) (error) {
+  in := UnlinkLabelFromModelIn{ labelId , modelId  }
+  var out UnlinkLabelFromModelOut
+  err := this.Proc.Call("UnlinkLabelFromModel", &in, &out)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
+func (this *Remote) GetLabelsForProject(projectId int64) ([]*Label, error) {
+  in := GetLabelsForProjectIn{ projectId  }
+  var out GetLabelsForProjectOut
+  err := this.Proc.Call("GetLabelsForProject", &in, &out)
+  if err != nil {
+    return nil, err
+  }
+  return out.Labels, nil
 }
 
 func (this *Remote) StartService(modelId int64, port int) (*ScoringService, error) {
@@ -2234,7 +2519,7 @@ func (this *Impl) CreateProject(r *http.Request, in *CreateProjectIn, out *Creat
     log.Println(guid, "REQ", pz, name, string(req))
   }
 
-	val0, err := this.Service.CreateProject(pz, in.Name, in.Description)
+	val0, err := this.Service.CreateProject(pz, in.Name, in.Description, in.ModelCategory)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
@@ -2643,6 +2928,42 @@ func (this *Impl) GetDataset(r *http.Request, in *GetDatasetIn, out *GetDatasetO
 	return nil
 }
 
+func (this *Impl) GetDatasetsFromCluster(r *http.Request, in *GetDatasetsFromClusterIn, out *GetDatasetsFromClusterOut) error {
+  const name = "GetDatasetsFromCluster"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetDatasetsFromCluster(pz, in.ClusterId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Dataset = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
 func (this *Impl) UpdateDataset(r *http.Request, in *UpdateDatasetIn, out *UpdateDatasetOut) error {
   const name = "UpdateDataset"
 
@@ -2908,7 +3229,115 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
     log.Println(guid, "REQ", pz, name, string(req))
   }
 
-	val0, err := this.Service.GetModelsFromCluster(pz, in.ClusterId)
+	val0, err := this.Service.GetModelsFromCluster(pz, in.ClusterId, in.FrameKey)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, out *FindModelsBinomialOut) error {
+  const name = "FindModelsBinomial"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.FindModelsBinomial(pz, in.ProjectId, in.NamePart, in.SortBy, in.Ascending, in.Offset, in.Limit)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) FindModelsMultinomial(r *http.Request, in *FindModelsMultinomialIn, out *FindModelsMultinomialOut) error {
+  const name = "FindModelsMultinomial"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.FindModelsMultinomial(pz, in.ProjectId, in.NamePart, in.SortBy, in.Ascending, in.Offset, in.Limit)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Models = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegressionIn, out *FindModelsRegressionOut) error {
+  const name = "FindModelsRegression"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.FindModelsRegression(pz, in.ProjectId, in.NamePart, in.SortBy, in.Ascending, in.Offset, in.Limit)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
@@ -2985,6 +3414,214 @@ func (this *Impl) DeleteModel(r *http.Request, in *DeleteModelIn, out *DeleteMod
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) CreateLabel(r *http.Request, in *CreateLabelIn, out *CreateLabelOut) error {
+  const name = "CreateLabel"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.CreateLabel(pz, in.ProjectId, in.Name, in.Description)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.LabelId = val0 
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) UpdateLabel(r *http.Request, in *UpdateLabelIn, out *UpdateLabelOut) error {
+  const name = "UpdateLabel"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.UpdateLabel(pz, in.LabelId, in.Name, in.Description)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) DeleteLabel(r *http.Request, in *DeleteLabelIn, out *DeleteLabelOut) error {
+  const name = "DeleteLabel"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.DeleteLabel(pz, in.LabelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) LinkLabelWithModel(r *http.Request, in *LinkLabelWithModelIn, out *LinkLabelWithModelOut) error {
+  const name = "LinkLabelWithModel"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.LinkLabelWithModel(pz, in.LabelId, in.ModelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) UnlinkLabelFromModel(r *http.Request, in *UnlinkLabelFromModelIn, out *UnlinkLabelFromModelOut) error {
+  const name = "UnlinkLabelFromModel"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	err := this.Service.UnlinkLabelFromModel(pz, in.LabelId, in.ModelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+
+  res, merr := json.Marshal(out)
+  if merr != nil {
+    log.Println(guid, "RES", pz, name, merr)
+  } else {
+    log.Println(guid, "RES", pz, name, string(res))
+  }
+
+	return nil
+}
+
+func (this *Impl) GetLabelsForProject(r *http.Request, in *GetLabelsForProjectIn, out *GetLabelsForProjectOut) error {
+  const name = "GetLabelsForProject"
+
+  guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+  req, merr := json.Marshal(in)
+  if merr != nil {
+    log.Println(guid, "REQ", pz, name, merr)
+  } else {
+    log.Println(guid, "REQ", pz, name, string(req))
+  }
+
+	val0, err := this.Service.GetLabelsForProject(pz, in.ProjectId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+  
+	out.Labels = val0 
   
 
   res, merr := json.Marshal(out)

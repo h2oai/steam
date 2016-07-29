@@ -9,6 +9,50 @@
 // --- Types ---
 import * as Proxy from './xhr';
 
+export interface BinomialModel {
+  
+  id: number
+  
+  training_dataset_id: number
+  
+  validation_dataset_id: number
+  
+  name: string
+  
+  cluster_name: string
+  
+  model_key: string
+  
+  algorithm: string
+  
+  model_category: string
+  
+  dataset_name: string
+  
+  response_column_name: string
+  
+  logical_name: string
+  
+  location: string
+  
+  max_runtime: number
+  
+  metrics: string
+  
+  created_at: number
+  
+  mse: number
+  
+  r_squared: number
+  
+  logloss: number
+  
+  auc: number
+  
+  gini: number
+  
+}
+
 export interface Cluster {
   
   id: number
@@ -161,6 +205,22 @@ export interface Job {
   
 }
 
+export interface Label {
+  
+  id: number
+  
+  project_id: number
+  
+  model_id: number
+  
+  name: string
+  
+  description: string
+  
+  created_at: number
+  
+}
+
 export interface Model {
   
   id: number
@@ -177,6 +237,8 @@ export interface Model {
   
   algorithm: string
   
+  model_category: string
+  
   dataset_name: string
   
   response_column_name: string
@@ -190,6 +252,46 @@ export interface Model {
   metrics: string
   
   created_at: number
+  
+}
+
+export interface MultinomialModel {
+  
+  id: number
+  
+  training_dataset_id: number
+  
+  validation_dataset_id: number
+  
+  name: string
+  
+  cluster_name: string
+  
+  model_key: string
+  
+  algorithm: string
+  
+  model_category: string
+  
+  dataset_name: string
+  
+  response_column_name: string
+  
+  logical_name: string
+  
+  location: string
+  
+  max_runtime: number
+  
+  metrics: string
+  
+  created_at: number
+  
+  mse: number
+  
+  r_squared: number
+  
+  logloss: number
   
 }
 
@@ -211,7 +313,49 @@ export interface Project {
   
   description: string
   
+  model_category: string
+  
   created_at: number
+  
+}
+
+export interface RegressionModel {
+  
+  id: number
+  
+  training_dataset_id: number
+  
+  validation_dataset_id: number
+  
+  name: string
+  
+  cluster_name: string
+  
+  model_key: string
+  
+  algorithm: string
+  
+  model_category: string
+  
+  dataset_name: string
+  
+  response_column_name: string
+  
+  logical_name: string
+  
+  location: string
+  
+  max_runtime: number
+  
+  metrics: string
+  
+  created_at: number
+  
+  mse: number
+  
+  r_squared: number
+  
+  mean_residual_deviance: number
   
 }
 
@@ -316,7 +460,7 @@ export interface Service {
   getJobs: (clusterId: number, go: (error: Error, jobs: Job[]) => void) => void
   
   // Create a project
-  createProject: (name: string, description: string, go: (error: Error, projectId: number) => void) => void
+  createProject: (name: string, description: string, modelCategory: string, go: (error: Error, projectId: number) => void) => void
   
   // List projects
   getProjects: (offset: number, limit: number, go: (error: Error, projects: Project[]) => void) => void
@@ -351,6 +495,9 @@ export interface Service {
   // Get dataset details
   getDataset: (datasetId: number, go: (error: Error, dataset: Dataset) => void) => void
   
+  // Get a list of datasets on a cluster
+  getDatasetsFromCluster: (clusterId: number, go: (error: Error, dataset: Dataset[]) => void) => void
+  
   // Update a dataset
   updateDataset: (datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void) => void
   
@@ -373,13 +520,40 @@ export interface Service {
   getModels: (projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
   
   // List models from a cluster
-  getModelsFromCluster: (clusterId: number, go: (error: Error, models: Model[]) => void) => void
+  getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
+  
+  // List binomial models
+  findModelsBinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void) => void
+  
+  // List multinomial models
+  findModelsMultinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: MultinomialModel[]) => void) => void
+  
+  // List regression models
+  findModelsRegression: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void) => void
   
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
   
   // Delete a model
   deleteModel: (modelId: number, go: (error: Error) => void) => void
+  
+  // Create a label
+  createLabel: (projectId: number, name: string, description: string, go: (error: Error, labelId: number) => void) => void
+  
+  // Update a label
+  updateLabel: (labelId: number, name: string, description: string, go: (error: Error) => void) => void
+  
+  // Delete a label
+  deleteLabel: (labelId: number, go: (error: Error) => void) => void
+  
+  // Label a model
+  linkLabelWithModel: (labelId: number, modelId: number, go: (error: Error) => void) => void
+  
+  // Remove a label from a model
+  unlinkLabelFromModel: (labelId: number, modelId: number, go: (error: Error) => void) => void
+  
+  // List labels for a project, with corresponding models, if any
+  getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
   
   // Start a service
   startService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
@@ -685,6 +859,8 @@ interface CreateProjectIn {
   
   description: string
   
+  model_category: string
+  
 }
 
 interface CreateProjectOut {
@@ -849,6 +1025,18 @@ interface GetDatasetOut {
   
 }
 
+interface GetDatasetsFromClusterIn {
+  
+  cluster_id: number
+  
+}
+
+interface GetDatasetsFromClusterOut {
+  
+  dataset: Dataset[]
+  
+}
+
 interface UpdateDatasetIn {
   
   dataset_id: number
@@ -957,11 +1145,79 @@ interface GetModelsFromClusterIn {
   
   cluster_id: number
   
+  frame_key: string
+  
 }
 
 interface GetModelsFromClusterOut {
   
   models: Model[]
+  
+}
+
+interface FindModelsBinomialIn {
+  
+  project_id: number
+  
+  name_part: string
+  
+  sort_by: string
+  
+  ascending: boolean
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface FindModelsBinomialOut {
+  
+  models: BinomialModel[]
+  
+}
+
+interface FindModelsMultinomialIn {
+  
+  project_id: number
+  
+  name_part: string
+  
+  sort_by: string
+  
+  ascending: boolean
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface FindModelsMultinomialOut {
+  
+  models: MultinomialModel[]
+  
+}
+
+interface FindModelsRegressionIn {
+  
+  project_id: number
+  
+  name_part: string
+  
+  sort_by: string
+  
+  ascending: boolean
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface FindModelsRegressionOut {
+  
+  models: RegressionModel[]
   
 }
 
@@ -990,6 +1246,82 @@ interface DeleteModelIn {
 }
 
 interface DeleteModelOut {
+  
+}
+
+interface CreateLabelIn {
+  
+  project_id: number
+  
+  name: string
+  
+  description: string
+  
+}
+
+interface CreateLabelOut {
+  
+  label_id: number
+  
+}
+
+interface UpdateLabelIn {
+  
+  label_id: number
+  
+  name: string
+  
+  description: string
+  
+}
+
+interface UpdateLabelOut {
+  
+}
+
+interface DeleteLabelIn {
+  
+  label_id: number
+  
+}
+
+interface DeleteLabelOut {
+  
+}
+
+interface LinkLabelWithModelIn {
+  
+  label_id: number
+  
+  model_id: number
+  
+}
+
+interface LinkLabelWithModelOut {
+  
+}
+
+interface UnlinkLabelFromModelIn {
+  
+  label_id: number
+  
+  model_id: number
+  
+}
+
+interface UnlinkLabelFromModelOut {
+  
+}
+
+interface GetLabelsForProjectIn {
+  
+  project_id: number
+  
+}
+
+interface GetLabelsForProjectOut {
+  
+  labels: Label[]
   
 }
 
@@ -1740,8 +2072,8 @@ export function getJobs(clusterId: number, go: (error: Error, jobs: Job[]) => vo
   });
 }
 
-export function createProject(name: string, description: string, go: (error: Error, projectId: number) => void): void {
-  const req: CreateProjectIn = { name: name, description: description };
+export function createProject(name: string, description: string, modelCategory: string, go: (error: Error, projectId: number) => void): void {
+  const req: CreateProjectIn = { name: name, description: description, model_category: modelCategory };
   Proxy.Call("CreateProject", req, function(error, data) {
     if (error) {
       return go(error, null);
@@ -1884,6 +2216,18 @@ export function getDataset(datasetId: number, go: (error: Error, dataset: Datase
   });
 }
 
+export function getDatasetsFromCluster(clusterId: number, go: (error: Error, dataset: Dataset[]) => void): void {
+  const req: GetDatasetsFromClusterIn = { cluster_id: clusterId };
+  Proxy.Call("GetDatasetsFromCluster", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetDatasetsFromClusterOut = <GetDatasetsFromClusterOut> data;
+      return go(null, d.dataset);
+    }
+  });
+}
+
 export function updateDataset(datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void): void {
   const req: UpdateDatasetIn = { dataset_id: datasetId, name: name, description: description, response_column_name: responseColumnName };
   Proxy.Call("UpdateDataset", req, function(error, data) {
@@ -1968,13 +2312,49 @@ export function getModels(projectId: number, offset: number, limit: number, go: 
   });
 }
 
-export function getModelsFromCluster(clusterId: number, go: (error: Error, models: Model[]) => void): void {
-  const req: GetModelsFromClusterIn = { cluster_id: clusterId };
+export function getModelsFromCluster(clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void): void {
+  const req: GetModelsFromClusterIn = { cluster_id: clusterId, frame_key: frameKey };
   Proxy.Call("GetModelsFromCluster", req, function(error, data) {
     if (error) {
       return go(error, null);
     } else {
       const d: GetModelsFromClusterOut = <GetModelsFromClusterOut> data;
+      return go(null, d.models);
+    }
+  });
+}
+
+export function findModelsBinomial(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void): void {
+  const req: FindModelsBinomialIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
+  Proxy.Call("FindModelsBinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsBinomialOut = <FindModelsBinomialOut> data;
+      return go(null, d.models);
+    }
+  });
+}
+
+export function findModelsMultinomial(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: MultinomialModel[]) => void): void {
+  const req: FindModelsMultinomialIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
+  Proxy.Call("FindModelsMultinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsMultinomialOut = <FindModelsMultinomialOut> data;
+      return go(null, d.models);
+    }
+  });
+}
+
+export function findModelsRegression(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void): void {
+  const req: FindModelsRegressionIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
+  Proxy.Call("FindModelsRegression", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsRegressionOut = <FindModelsRegressionOut> data;
       return go(null, d.models);
     }
   });
@@ -2000,6 +2380,78 @@ export function deleteModel(modelId: number, go: (error: Error) => void): void {
     } else {
       const d: DeleteModelOut = <DeleteModelOut> data;
       return go(null);
+    }
+  });
+}
+
+export function createLabel(projectId: number, name: string, description: string, go: (error: Error, labelId: number) => void): void {
+  const req: CreateLabelIn = { project_id: projectId, name: name, description: description };
+  Proxy.Call("CreateLabel", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: CreateLabelOut = <CreateLabelOut> data;
+      return go(null, d.label_id);
+    }
+  });
+}
+
+export function updateLabel(labelId: number, name: string, description: string, go: (error: Error) => void): void {
+  const req: UpdateLabelIn = { label_id: labelId, name: name, description: description };
+  Proxy.Call("UpdateLabel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: UpdateLabelOut = <UpdateLabelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function deleteLabel(labelId: number, go: (error: Error) => void): void {
+  const req: DeleteLabelIn = { label_id: labelId };
+  Proxy.Call("DeleteLabel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: DeleteLabelOut = <DeleteLabelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function linkLabelWithModel(labelId: number, modelId: number, go: (error: Error) => void): void {
+  const req: LinkLabelWithModelIn = { label_id: labelId, model_id: modelId };
+  Proxy.Call("LinkLabelWithModel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: LinkLabelWithModelOut = <LinkLabelWithModelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function unlinkLabelFromModel(labelId: number, modelId: number, go: (error: Error) => void): void {
+  const req: UnlinkLabelFromModelIn = { label_id: labelId, model_id: modelId };
+  Proxy.Call("UnlinkLabelFromModel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: UnlinkLabelFromModelOut = <UnlinkLabelFromModelOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function getLabelsForProject(projectId: number, go: (error: Error, labels: Label[]) => void): void {
+  const req: GetLabelsForProjectIn = { project_id: projectId };
+  Proxy.Call("GetLabelsForProject", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetLabelsForProjectOut = <GetLabelsForProjectOut> data;
+      return go(null, d.labels);
     }
   });
 }
