@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
+	"net"
 	"os"
 	"sort"
 	"strconv"
@@ -27,17 +29,21 @@ type Service struct {
 	ds                        *data.Datastore
 	compilationServiceAddress string
 	scoringServiceAddress     string
+	scoringServicePortMin     int
+	scoringServicePortMax     int
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
 }
 
-func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *Service {
+func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, scoringServicePortsRange [2]int, kerberos bool, username, keytab string) *Service {
 	return &Service{
 		workingDir,
 		ds,
 		compilationServiceAddress,
 		scoringServiceAddress,
+		scoringServicePortsRange[0],
+		scoringServicePortsRange[1],
 		kerberos,
 		username,
 		keytab,
@@ -1307,7 +1313,29 @@ func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.
 	return toLabels(labels), nil
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
+func isPortOpen(port int) bool {
+	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+
+func (s *Service) assignPort() (int, error) {
+	randPort := rand.New(rand.NewSource(time.Now().UnixNano()))
+	portRange := s.scoringServicePortMax - (s.scoringServicePortMin + 1)
+
+	for i := s.scoringServicePortMin; i < s.scoringServicePortMax; i++ {
+		port := randPort.Intn(portRange) + s.scoringServicePortMin + 1
+		if isPortOpen(port) {
+			return port, nil
+		}
+	}
+	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
+}
+
+func (s *Service) StartService(pz az.Principal, modelId int64) (*web.ScoringService, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return nil, err
 	}
@@ -1341,6 +1369,11 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 		}
 	}
 
+	// Assign a port from allowed range
+	port, err := s.assignPort()
+	if err != nil {
+		return nil, err
+	}
 	pid, err := svc.Start(
 		warFilePath,
 		fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),

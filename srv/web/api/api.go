@@ -624,7 +624,6 @@ type GetLabelsForProject struct {
 }
 type StartService struct {
 	ModelId int64
-	Port    int
 	_       int
 	Service ScoringService
 }
