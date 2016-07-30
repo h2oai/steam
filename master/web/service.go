@@ -754,18 +754,17 @@ func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (
 
 	// Use modelId because it'll provide a unique directory name every time with
 	// a persistend db; no need to purge/overwrite any files on disk
-	modelStringId := strconv.FormatInt(modelId, 10)
+	location := strconv.FormatInt(modelId, 10)
 
-	var location, logicalName string
-	location = fs.GetModelPath(s.workingDir, modelStringId)
-	javaModelPath, err := h2o.ExportJavaModel(modelName, location)
+	modelPath := fs.GetModelPath(s.workingDir, location)
+	javaModelPath, err := h2o.ExportJavaModel(modelName, modelPath)
 	if err != nil {
-		return location, logicalName, err
+		return "", "", err
 	}
-	logicalName = fs.GetBasenameWithoutExt(javaModelPath)
+	logicalName := fs.GetBasenameWithoutExt(javaModelPath)
 
-	if _, err := h2o.ExportGenModel(location); err != nil {
-		return location, logicalName, err
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return "", "", err
 	}
 
 	return location, logicalName, err
