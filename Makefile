@@ -50,6 +50,7 @@ ssb:
 generate:
 	cd ./tools/piping && go build && go install
 	piping
+	go fmt ./srv/web/service.go
 	cd ./master/data && go generate && go fmt scans.go
 
 cli-markdown:
