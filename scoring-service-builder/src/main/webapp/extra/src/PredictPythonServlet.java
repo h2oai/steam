@@ -14,7 +14,7 @@ import hex.genmodel.*;
 import com.google.gson.Gson;
 
 public class PredictPythonServlet extends HttpServlet {
-  private static final Logger logger = LoggerFactory.getLogger("PredictPythonServlet");
+  private final Logger logger = Logging.getLogger(this.getClass());
 
   private static GenModel rawModel = ServletUtil.rawModel;
   private static EasyPredictModelWrapper model = ServletUtil.model;
@@ -77,7 +77,7 @@ public class PredictPythonServlet extends HttpServlet {
     super.destroy();
   }
 
-  public static synchronized AbstractPrediction predict(RowData row) throws PredictException {
+  public synchronized AbstractPrediction predict(RowData row) throws PredictException {
     long start = System.nanoTime();
     AbstractPrediction p = model.predict(row);
     long done = System.nanoTime();

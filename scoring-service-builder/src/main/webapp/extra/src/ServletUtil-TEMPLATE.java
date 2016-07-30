@@ -10,6 +10,7 @@ import hex.genmodel.easy.*;
 import hex.genmodel.*;
 
 class ServletUtil {
+  //private final Logger logger = Logging.getLogger(this.getClass());
 
   // load model
   static String modelName = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";

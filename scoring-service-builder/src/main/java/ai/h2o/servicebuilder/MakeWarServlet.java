@@ -6,7 +6,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -35,9 +34,7 @@ import static ai.h2o.servicebuilder.Util.*;
  * Errors are sent back if any
  */
 public class MakeWarServlet extends HttpServlet {
-  private static boolean VERBOSE = false;
-
-  private static final Logger logger = LoggerFactory.getLogger("MakeWarServlet");
+  private final Logger logger = Logging.getLogger(this.getClass());
 
   private File servletPath = null;
 
@@ -45,7 +42,7 @@ public class MakeWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      if (VERBOSE) logger.info("servletPath = {}", servletPath);
+      logger.info("servletPath = {}", servletPath);
     }
     catch (MalformedURLException e) {
       logger.error("Can't init servlet", e);
@@ -58,7 +55,7 @@ public class MakeWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      if (VERBOSE) logger.info("tmpDir {}", tmpDir);
+      logger.debug("tmpDir {}", tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -145,11 +142,12 @@ public class MakeWarServlet extends HttpServlet {
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "Transform.java", "Transform.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "Logging.java", "Logging.java");
 
       // compile extra
       List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java");
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java", "Logging.java");
       runCmd(tmpDir, cmd, "Compilation of extra failed");
 
       // create the war jar file

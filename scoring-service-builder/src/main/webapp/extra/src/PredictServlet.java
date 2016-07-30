@@ -18,7 +18,7 @@ import hex.genmodel.*;
 import com.google.gson.Gson;
 
 public class PredictServlet extends HttpServlet {
-  private static final Logger logger = LoggerFactory.getLogger("PredictServlet");
+  private final Logger logger = Logging.getLogger(this.getClass());
 
   private static final Class ROW_DATA_TYPE = new RowData().getClass();
 
@@ -99,7 +99,7 @@ public class PredictServlet extends HttpServlet {
     logger.debug("Get time {}", ServletUtil.getTimes);
   }
 
-  public static synchronized AbstractPrediction predict(RowData row) throws PredictException {
+  public synchronized AbstractPrediction predict(RowData row) throws PredictException {
     long start = System.nanoTime();
     AbstractPrediction p = model.predict(row);
     long done = System.nanoTime();
