@@ -993,13 +993,13 @@ class RPCClient:
 		model_id: No description available (int64)
 
 		Returns:
-		service: No description available (ScoringService)
+		service_id: No description available (int64)
 		"""
 		request = {
 			'model_id': model_id
 		}
 		response = self.connection.call("StartService", request)
-		return response['service']
+		return response['service_id']
 	
 	def stop_service(self, service_id):
 		"""

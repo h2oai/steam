@@ -623,9 +623,9 @@ type GetLabelsForProject struct {
 	Labels    []Label
 }
 type StartService struct {
-	ModelId int64
-	_       int
-	Service ScoringService
+	ModelId   int64
+	_         int
+	ServiceId int64
 }
 type StopService struct {
 	ServiceId int64

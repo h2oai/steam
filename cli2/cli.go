@@ -3558,22 +3558,13 @@ func startService(c *context) *cobra.Command {
   cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
     
       // Start a service
-      service, err := c.remote.StartService(
+      serviceId, err := c.remote.StartService(
         modelId, // No description available
       )
       if err != nil {
         log.Fatalln(err)
       }
-      lines := []string{
-        fmt.Sprintf("Id:\t%v\t", service.Id), // No description available
-        fmt.Sprintf("ModelId:\t%v\t", service.ModelId), // No description available
-        fmt.Sprintf("Address:\t%v\t", service.Address), // No description available
-        fmt.Sprintf("Port:\t%v\t", service.Port), // No description available
-        fmt.Sprintf("ProcessId:\t%v\t", service.ProcessId), // No description available
-        fmt.Sprintf("State:\t%v\t", service.State), // No description available
-        fmt.Sprintf("CreatedAt:\t%v\t", service.CreatedAt), // No description available
-      }
-      c.printt("Attribute\tValue\t", lines)
+      fmt.Printf("ServiceId:\t%v\n", serviceId)
       return
   })
   

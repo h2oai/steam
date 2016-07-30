@@ -1335,9 +1335,9 @@ func (s *Service) assignPort() (int, error) {
 	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64) (*web.ScoringService, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// FIXME: change sequence to:
@@ -1347,12 +1347,12 @@ func (s *Service) StartService(pz az.Principal, modelId int64) (*web.ScoringServ
 
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	compilationService := compiler.NewServer(s.compilationServiceAddress)
 	if err := compilationService.Ping(); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// do not recompile if war file is already available
@@ -1365,14 +1365,14 @@ func (s *Service) StartService(pz az.Principal, modelId int64) (*web.ScoringServ
 			"makewar",
 		)
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 	}
 
 	// Assign a port from allowed range
 	port, err := s.assignPort()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	pid, err := svc.Start(
 		warFilePath,
@@ -1381,12 +1381,12 @@ func (s *Service) StartService(pz az.Principal, modelId int64) (*web.ScoringServ
 		port,
 	)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	address, err := fs.GetExternalHost() // FIXME there is no need to re-scan this every time. Can be a property on *Service at init time.
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	log.Printf("Scoring service started at %s:%d\n", address, port)
@@ -1403,19 +1403,10 @@ func (s *Service) StartService(pz az.Principal, modelId int64) (*web.ScoringServ
 
 	serviceId, err := s.ds.CreateService(pz, service)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	service, err = s.ds.ReadService(pz, serviceId)
-	if err != nil {
-		return nil, err
-	}
-
-	// s.scoreActivity.Lock()
-	// s.scoreActivity.latest[modelName] = ss.CreatedAt
-	// s.scoreActivity.Unlock()
-
-	return toScoringService(service), nil
+	return serviceId, nil
 }
 
 func (s *Service) StopService(pz az.Principal, serviceId int64) error {

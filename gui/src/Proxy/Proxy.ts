@@ -574,7 +574,7 @@ export interface Service {
   getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
   
   // Start a service
-  startService: (modelId: number, go: (error: Error, service: ScoringService) => void) => void
+  startService: (modelId: number, go: (error: Error, serviceId: number) => void) => void
   
   // Stop a service
   stopService: (serviceId: number, go: (error: Error) => void) => void
@@ -1417,7 +1417,7 @@ interface StartServiceIn {
 
 interface StartServiceOut {
   
-  service: ScoringService
+  service_id: number
   
 }
 
@@ -2610,14 +2610,14 @@ export function getLabelsForProject(projectId: number, go: (error: Error, labels
   });
 }
 
-export function startService(modelId: number, go: (error: Error, service: ScoringService) => void): void {
+export function startService(modelId: number, go: (error: Error, serviceId: number) => void): void {
   const req: StartServiceIn = { model_id: modelId };
   Proxy.Call("StartService", req, function(error, data) {
     if (error) {
       return go(error, null);
     } else {
       const d: StartServiceOut = <StartServiceOut> data;
-      return go(null, d.service);
+      return go(null, d.service_id);
     }
   });
 }
