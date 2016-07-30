@@ -297,7 +297,7 @@ type Service interface {
   LinkLabelWithModel(pz az.Principal, labelId int64, modelId int64) (error)
   UnlinkLabelFromModel(pz az.Principal, labelId int64, modelId int64) (error)
   GetLabelsForProject(pz az.Principal, projectId int64) ([]*Label, error)
-  StartService(pz az.Principal, modelId int64, port int) (*ScoringService, error)
+  StartService(pz az.Principal, modelId int64) (*ScoringService, error)
   StopService(pz az.Principal, serviceId int64) (error)
   GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
   GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
@@ -795,7 +795,6 @@ type GetLabelsForProjectOut struct {
 
 type StartServiceIn struct {
   ModelId int64 `json:"model_id"`
-  Port int `json:"port"`
 }
 
 type StartServiceOut struct {
@@ -1699,8 +1698,8 @@ func (this *Remote) GetLabelsForProject(projectId int64) ([]*Label, error) {
   return out.Labels, nil
 }
 
-func (this *Remote) StartService(modelId int64, port int) (*ScoringService, error) {
-  in := StartServiceIn{ modelId , port  }
+func (this *Remote) StartService(modelId int64) (*ScoringService, error) {
+  in := StartServiceIn{ modelId  }
   var out StartServiceOut
   err := this.Proc.Call("StartService", &in, &out)
   if err != nil {
@@ -3978,7 +3977,7 @@ func (this *Impl) StartService(r *http.Request, in *StartServiceIn, out *StartSe
     log.Println(guid, "REQ", pz, name, string(req))
   }
 
-	val0, err := this.Service.StartService(pz, in.ModelId, in.Port)
+	val0, err := this.Service.StartService(pz, in.ModelId)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
