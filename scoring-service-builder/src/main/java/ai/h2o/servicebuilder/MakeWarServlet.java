@@ -42,7 +42,7 @@ public class MakeWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      logger.info("servletPath = {}", servletPath);
+      logger.debug("servletPath = {}", servletPath);
     }
     catch (MalformedURLException e) {
       logger.error("Can't init servlet", e);
