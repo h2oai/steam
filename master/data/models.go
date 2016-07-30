@@ -3,9 +3,9 @@
 package data
 
 import (
-	"time"
-
+	"database/sql"
 	"github.com/lib/pq"
+	"time"
 )
 
 type Meta struct {
@@ -231,7 +231,7 @@ type RegressionModel struct {
 type Label struct {
 	Id          int64
 	ProjectId   int64
-	ModelId     int64
+	ModelId     sql.NullInt64
 	Name        string
 	Description string
 	Created     time.Time

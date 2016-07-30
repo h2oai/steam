@@ -2311,10 +2311,14 @@ func toProjects(projects []data.Project) []*web.Project {
 func toLabels(labels []data.Label) []*web.Label {
 	array := make([]*web.Label, len(labels))
 	for i, label := range labels {
+		var modelId int64 = -1
+		if label.ModelId.Valid {
+			modelId = label.ModelId.Int64
+		}
 		array[i] = &web.Label{
 			label.Id,
 			label.ProjectId,
-			label.ModelId,
+			modelId,
 			label.Name,
 			label.Description,
 			toTimestamp(label.Created),

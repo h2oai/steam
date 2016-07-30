@@ -3680,7 +3680,7 @@ func (ds *Datastore) LinkLabelWithModel(pz az.Principal, labelId, modelId int64)
 			UPDATE
 				label
 			SET
-				model_id = $1,
+				model_id = $1
 			WHERE
 				id = $2
 			`, modelId, labelId); err != nil {
@@ -3709,7 +3709,7 @@ func (ds *Datastore) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int6
 			UPDATE
 				label
 			SET
-				model_id = null,
+				model_id = null
 			WHERE
 				id = $1
 			`, labelId); err != nil {
