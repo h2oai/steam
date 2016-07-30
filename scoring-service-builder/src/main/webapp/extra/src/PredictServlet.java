@@ -11,6 +11,8 @@ import javax.servlet.*;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import hex.genmodel.easy.prediction.AbstractPrediction;
+import hex.genmodel.easy.prediction.BinomialModelPrediction;
+import hex.genmodel.easy.prediction.MultinomialModelPrediction;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.*;
 import hex.genmodel.*;
@@ -80,14 +82,13 @@ public class PredictServlet extends HttpServlet {
         throw new Exception("No predictor model");
 
       // we have a model loaded, do the prediction
-      AbstractPrediction pr = predict(row);
+      AbstractPrediction pr = ServletUtil.predict(row);
 
       // assemble json result
       String prJson = gson.toJson(pr);
 
       response.getWriter().write(prJson);
       response.setStatus(HttpServletResponse.SC_OK);
-
     }
     catch (Exception e) {
       // Prediction failed.
@@ -97,17 +98,6 @@ public class PredictServlet extends HttpServlet {
     long done = System.nanoTime();
     ServletUtil.getTimes.add(start, done);
     logger.debug("Get time {}", ServletUtil.getTimes);
-  }
-
-  public synchronized AbstractPrediction predict(RowData row) throws PredictException {
-    long start = System.nanoTime();
-    AbstractPrediction p = model.predict(row);
-    long done = System.nanoTime();
-    ServletUtil.lastTime = System.currentTimeMillis();
-    ServletUtil.predictionTimes.add(start, done);
-
-    logger.debug("Prediction time {}", ServletUtil.predictionTimes);
-    return p;
   }
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -140,7 +130,7 @@ public class PredictServlet extends HttpServlet {
         logger.debug("row {}", row);
         if (row != null) {
           // do the prediction
-          pr = predict(row);
+          pr = ServletUtil.predict(row);
 
           // assemble json result
           prJson = gson.toJson(pr);

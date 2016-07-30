@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.GsonBuilder;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.prediction.AbstractPrediction;
+import hex.genmodel.easy.prediction.BinomialModelPrediction;
+import hex.genmodel.easy.prediction.MultinomialModelPrediction;
 import hex.genmodel.easy.*;
 import hex.genmodel.*;
 
@@ -77,17 +79,6 @@ public class PredictPythonServlet extends HttpServlet {
     super.destroy();
   }
 
-  public synchronized AbstractPrediction predict(RowData row) throws PredictException {
-    long start = System.nanoTime();
-    AbstractPrediction p = model.predict(row);
-    long done = System.nanoTime();
-    ServletUtil.lastTime = System.currentTimeMillis();
-    ServletUtil.predictionTimes.add(start, done);
-
-    logger.debug("Prediction time {}", ServletUtil.predictionTimes);
-    return p;
-  }
-
   static private String jsonModel() {
     Gson gson = new Gson();
     String modelJson = gson.toJson(model);
@@ -147,7 +138,7 @@ public class PredictPythonServlet extends HttpServlet {
       RowData row = strMapToRowData(result);
       logger.debug("row: {}", row);
 
-      AbstractPrediction pr = predict(row);
+      AbstractPrediction pr = ServletUtil.predict(row);
       logger.debug("pr: {}", pr);
 
       // assemble json result
@@ -269,7 +260,7 @@ public class PredictPythonServlet extends HttpServlet {
         logger.debug("row: {}", row);
 
         // do the prediction
-        pr = predict(row);
+        pr = ServletUtil.predict(row);
 
         // assemble json result
         prJson = gson.toJson(pr);
