@@ -26,6 +26,12 @@ func newUploadHandler(az az.Az, wd string, webService srvweb.Service) *UploadHan
 func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("File upload request received.")
 
+	pz, azerr := s.az.Identify(r)
+	if azerr != nil {
+		log.Println(azerr)
+		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusForbidden)
+	}
+
 	r.ParseMultipartForm(0)
 
 	kind := r.FormValue("kind")
@@ -60,13 +66,6 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer dst.Close()
 	io.Copy(dst, src)
-
-	pz, azerr := s.az.Identify(r)
-	if azerr != nil {
-		log.Println(azerr)
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprintf(w, "Authentication failed: %s", err)
-	}
 
 	if _, err := s.webService.AddEngine(pz, fileBaseName, dstPath); err != nil {
 		log.Println("Failed saving engine to datastore", err)
