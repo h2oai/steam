@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/rand"
 	"net"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -1349,22 +1348,15 @@ func (s *Service) StartService(pz az.Principal, modelId int64) (int64, error) {
 		return 0, err
 	}
 
-	compilationService := compiler.NewServer(s.compilationServiceAddress)
-	if err := compilationService.Ping(); err != nil {
+	compilerService := compiler.NewService(s.compilationServiceAddress)
+	warFilePath, err := compilerService.CompileModel(
+		s.workingDir,
+		model.Location,
+		model.LogicalName,
+		"war",
+	)
+	if err != nil {
 		return 0, err
-	}
-
-	// do not recompile if war file is already available
-	warFilePath := fs.GetWarFilePath(s.workingDir, model.Location, model.LogicalName)
-	if _, err := os.Stat(warFilePath); os.IsNotExist(err) {
-		warFilePath, err = compilationService.CompilePojo(
-			fs.GetJavaModelPath(s.workingDir, model.Location, model.LogicalName),
-			fs.GetGenModelPath(s.workingDir, model.Location),
-			"makewar",
-		)
-		if err != nil {
-			return 0, err
-		}
 	}
 
 	// Assign a port from allowed range
