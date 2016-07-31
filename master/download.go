@@ -22,6 +22,7 @@ const (
 	// model artifact types
 	javaClass    = "java-class"     // foo.java
 	javaClassDep = "java-class-dep" // gen-model.jar
+	javaJar      = "java-jar"       // foo.jar
 	javaWar      = "java-war"       // foo.war
 )
 
@@ -69,7 +70,7 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		switch artifact {
-		case javaClass, javaClassDep, javaWar:
+		case javaClass, javaClassDep, javaJar, javaWar:
 			projectIdValue := values.Get(paramProjectId)
 			if len(projectIdValue) == 0 {
 				http.Error(w, fmt.Sprintf("Missing %s", paramProjectId), http.StatusBadRequest)
@@ -121,6 +122,7 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						switch artifact {
 						case javaClass:
 							filePath = fs.GetJavaModelPath(s.workingDirectory, model.Location, model.LogicalName)
+
 						case javaClassDep:
 							filePath = fs.GetGenModelPath(s.workingDirectory, model.Location)
 						case javaWar:
@@ -136,6 +138,20 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								return
 							}
 							filePath = warFilePath
+
+						case javaJar:
+							compilerService := compiler.NewService(s.compilerServiceAddress)
+							jarFilePath, err := compilerService.CompileModel(
+								s.workingDirectory,
+								model.Location,
+								model.LogicalName,
+								"jar",
+							)
+							if err != nil {
+								http.Error(w, err.Error(), http.StatusInternalServerError)
+								return
+							}
+							filePath = jarFilePath
 						}
 
 						// Delegate to builtin.
