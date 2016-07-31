@@ -141,7 +141,7 @@ func Run(version, buildDate string, opts Opts) {
 	webServeMux.Handle("/logout", authProvider.Logout())
 	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))
 	webServeMux.Handle("/upload", authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service)))
-	webServeMux.Handle("/download", authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service)))
+	webServeMux.Handle("/download", authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)))
 	webServeMux.Handle("/", authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))))
 
 	if opts.EnableProfiler {

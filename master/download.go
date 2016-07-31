@@ -8,6 +8,7 @@ import (
 
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steamY/srv/compiler"
 	srvweb "github.com/h2oai/steamY/srv/web"
 )
 
@@ -25,13 +26,19 @@ const (
 )
 
 type DownloadHandler struct {
-	az               az.Az
-	workingDirectory string
-	webService       srvweb.Service
+	az                     az.Az
+	workingDirectory       string
+	webService             srvweb.Service
+	compilerServiceAddress string
 }
 
-func newDownloadHandler(az az.Az, workingDirectory string, webService srvweb.Service) *DownloadHandler {
-	return &DownloadHandler{az, workingDirectory, webService}
+func newDownloadHandler(az az.Az, workingDirectory string, webService srvweb.Service, compilerServiceAddress string) *DownloadHandler {
+	return &DownloadHandler{
+		az,
+		workingDirectory,
+		webService,
+		compilerServiceAddress,
+	}
 }
 
 func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +124,18 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						case javaClassDep:
 							filePath = fs.GetGenModelPath(s.workingDirectory, model.Location)
 						case javaWar:
-							filePath = fs.GetWarFilePath(s.workingDirectory, model.Location, model.LogicalName)
+							compilerService := compiler.NewService(s.compilerServiceAddress)
+							warFilePath, err := compilerService.CompileModel(
+								s.workingDirectory,
+								model.Location,
+								model.LogicalName,
+								"war",
+							)
+							if err != nil {
+								http.Error(w, err.Error(), http.StatusInternalServerError)
+								return
+							}
+							filePath = warFilePath
 						}
 
 						// Delegate to builtin.
