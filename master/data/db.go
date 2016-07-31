@@ -2717,6 +2717,7 @@ func (ds *Datastore) ReadDatasources(pz az.Principal, projectId, offset, limit i
 							)
 							AND
 							entity_type_id = $2
+						)
 				)
 				AND
 				project_id = $3
@@ -2884,7 +2885,7 @@ func (ds *Datastore) CreateDataset(pz az.Principal, dataset Dataset) (int64, err
 	return id, err
 }
 
-func (ds *Datastore) ReadDatasets(pz az.Principal, datasetId, offset, limit int64) ([]Dataset, error) {
+func (ds *Datastore) ReadDatasets(pz az.Principal, datasourceId, offset, limit int64) ([]Dataset, error) {
 	rows, err := ds.db.Query(`
 			SELECT
 				id, datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created
@@ -2912,16 +2913,15 @@ func (ds *Datastore) ReadDatasets(pz az.Principal, datasetId, offset, limit int6
 							)
 							AND
 							entity_type_id = $2
+						)
 				)
 				AND
-				project_id = $3
+				datasource_id = $3
 			ORDER BY
 				name
 			OFFSET $4
 			LIMIT $5
-
-
-			`, pz.Id(), ds.EntityTypes.Dataset, datasetId, offset, limit, pz.IsSuperuser())
+			`, pz.Id(), ds.EntityTypes.Dataset, datasourceId, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
