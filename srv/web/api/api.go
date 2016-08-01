@@ -334,6 +334,17 @@ type Service struct {
 	GetPrivileges                 GetPrivileges                 `help:"List privileges for an entity"`
 	UnshareEntity                 UnshareEntity                 `help:"Unshare an entity"`
 	GetHistory                    GetHistory                    `help:"List audit trail records for an entity"`
+	CreatePackage                 CreatePackage                 `help:"Create a package for a project"`
+	GetPackages                   GetPackages                   `help:"List packages for a project "`
+	GetPackageDirectories         GetPackageDirectories         `help:"List directories in a project package"`
+	GetPackageFiles               GetPackageFiles               `help:"List files in a project package"`
+	DeletePackage                 DeletePackage                 `help:"Delete a project package"`
+	DeletePackageDirectory        DeletePackageDirectory        `help:"Delete a directory in a project package"`
+	DeletePackageFile             DeletePackageFile             `help:"Delete a file in a project package"`
+	SetAttributeForPackage        SetAttributeForPackage        `help:" "`
+	GetAttributeForPackage        GetAttributeForPackage        `help:""`
+	GetAttributesForPackage       GetAttributesForPackage       `help:""`
+	DeleteAttributeForPackage     DeleteAttributeForPackage     `help:""`
 }
 
 // --- API Method Definitions ---
@@ -853,4 +864,76 @@ type GetHistory struct {
 	Limit        int64
 	_            int
 	History      []EntityHistory
+}
+
+type CreatePackage struct {
+	ProjectId int64
+	Name      string
+}
+
+type GetPackages struct {
+	ProjectId int64
+	_         int
+	Packages  []string
+}
+
+type GetPackageDirectories struct {
+	ProjectId   int64
+	PackageName string
+	Path        string
+	_           int
+	Directories []string
+}
+
+type GetPackageFiles struct {
+	ProjectId   int64
+	PackageName string
+	Path        string
+	_           int
+	Files       []string
+}
+
+type DeletePackage struct {
+	ProjectId int64
+	Name      string
+}
+
+type DeletePackageDirectory struct {
+	ProjectId   int64
+	PackageName string
+	Path        string
+}
+
+type DeletePackageFile struct {
+	ProjectId   int64
+	PackageName string
+	Path        string
+}
+
+type SetAttributeForPackage struct {
+	ProjectId   int64
+	PackageName string
+	Key         string
+	Value       string
+}
+
+type GetAttributeForPackage struct {
+	ProjectId   int64
+	PackageName string
+	Key         string
+	_           int
+	Value       string
+}
+
+type GetAttributesForPackage struct {
+	ProjectId   int64
+	PackageName string
+	_           int
+	Keys        string
+}
+
+type DeleteAttributeForPackage struct {
+	ProjectId   int64
+	PackageName string
+	Key         string
 }

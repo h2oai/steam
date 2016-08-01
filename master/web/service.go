@@ -1967,6 +1967,46 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId, offset, li
 	return toEntityHistory(history), nil
 }
 
+func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) error {
+	return nil
+}
+func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
+	return nil, nil
+}
+func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, path string) ([]string, error) {
+	return nil, nil
+}
+func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, path string) ([]string, error) {
+	return nil, nil
+}
+func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) error {
+
+	return nil
+}
+func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, path string) error {
+
+	return nil
+}
+func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, path string) error {
+
+	return nil
+}
+func (s *Service) SetAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string, value string) error {
+
+	return nil
+}
+func (s *Service) GetAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string) (string, error) {
+	return "", nil
+}
+func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error) {
+
+	return "", nil
+}
+func (s *Service) DeleteAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string) error {
+
+	return nil
+}
+
 // Helper function to convert from int to bytes
 func toSizeBytes(i int64) string {
 	f := float64(i)
