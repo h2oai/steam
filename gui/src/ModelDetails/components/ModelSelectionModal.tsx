@@ -12,17 +12,18 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { fetchLeaderboard } from '../../Models/actions/leaderboard.actions';
 import { Model, RegressionModel, MultinomialModel, BinomialModel } from '../../Proxy/Proxy';
+import { fetchModelsFromProject } from '../../Projects/actions/projects.actions';
 import '../styles/modelselectionmodal.scss';
+import { fetchLeaderboard } from '../../Models/actions/leaderboard.actions';
 
 interface Props {
   open: boolean,
   models: any,
   projectId: string,
   onSelectModel: Function,
-  onCancel: Function
-
+  onCancel: Function,
+  project: any
 }
 
 interface DispatchProps {
@@ -35,9 +36,7 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
   }
 
   onFilter(filters) {
-    /**
-     * TODO(justinloyola): AJAX call to filter models
-     */
+    this.props.fetchLeaderboard(parseInt(this.props.projectId, 10), this.props.project.model_category, filters.sortBy, filters.orderBy === 'asc');
   }
 
   render(): React.ReactElement<DefaultModal> {
@@ -108,7 +107,8 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
 
 function mapStateToProps(state: any): any {
   return {
-    models: state.leaderboard.items
+    models: state.leaderboard.items,
+    project: state.projects.project
   };
 }
 

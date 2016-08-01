@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
 import { fetchModelsFromProject, fetchProject } from '../Projects/actions/projects.actions';
+import { fetchLeaderboard } from './actions/leaderboard.actions';
 
 interface Props {
   leaderboard: any,
@@ -18,16 +19,25 @@ interface Props {
 }
 
 interface DispatchProps {
-  fetchModelsFromProject: Function,
+  fetchLeaderboard: Function,
   fetchProject: Function
 }
 
-export class Projects extends React.Component<Props & DispatchProps, any> {
+export class Models extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
-    if (_.isEmpty(this.props.leaderboard)) {
-      this.props.fetchModelsFromProject(parseInt(this.props.params.projectid, 10));
+    if (_.isEmpty(this.props.project)) {
       this.props.fetchProject(parseInt(this.props.params.projectid, 10));
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (_.isEmpty(this.props.leaderboard) && nextProps.project.model_category) {
+      this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), nextProps.project.model_category);
+    }
+  }
+
+  onFilter(filters) {
+    this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.props.project.model_category, filters.sortBy, filters.orderBy === 'asc');
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -36,7 +46,7 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="projects">
-        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)} modelCategory={this.props.project.model_category}></Leaderboard>
+        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)} modelCategory={this.props.project.model_category} onFilter={this.onFilter.bind(this)}></Leaderboard>
       </div>
     );
   }
@@ -44,16 +54,16 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state: any): any {
   return {
-    leaderboard: state.projects.models,
+    leaderboard: state.leaderboard.items,
     project: state.projects.project
   };
 }
 
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
-    fetchModelsFromProject: bindActionCreators(fetchModelsFromProject, dispatch),
+    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch),
     fetchProject: bindActionCreators(fetchProject, dispatch)
   };
 }
 
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Projects);
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Models);
