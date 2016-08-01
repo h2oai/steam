@@ -16,7 +16,7 @@ import java.util.jar.Manifest;
  * Created by magnus on 5/10/16.
  */
 public class Util {
-  private static final Logger logger = LoggerFactory.getLogger("Util");
+  private static final Logger logger = Logging.getLogger(Util.class);
 
   public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
   public static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
@@ -153,7 +153,7 @@ public class Util {
    * @return jar as byte array
    * @throws IOException
    */
-  static byte[] createJarArchiveByteArray(File[] tobeJared, String relativeToDir) throws IOException {
+  public static byte[] createJarArchiveByteArray(File[] tobeJared, String relativeToDir) throws IOException {
     int BUFFER_SIZE = 10240;
     byte buffer[] = new byte[BUFFER_SIZE];
     ByteArrayOutputStream stream = new ByteArrayOutputStream();

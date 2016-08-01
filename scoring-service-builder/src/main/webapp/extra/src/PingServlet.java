@@ -9,6 +9,7 @@ import java.io.IOException;
  * Check for aliveness.
  */
 public class PingServlet extends HttpServlet  {
+//  private final Logger logger = Logging.getLogger(this.getClass());
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setStatus(HttpServletResponse.SC_OK);

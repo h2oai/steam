@@ -36,9 +36,7 @@ import static ai.h2o.servicebuilder.Util.*;
  * Errors are sent back if any
  */
 public class MakePythonWarServlet extends HttpServlet {
-  private static boolean VERBOSE = false;
-
-  private static final Logger logger = LoggerFactory.getLogger("MakePythonWarServlet");
+  private final Logger logger = Logging.getLogger(this.getClass());
 
   private File servletPath = null;
 
@@ -46,7 +44,7 @@ public class MakePythonWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      if (VERBOSE) logger.info("servletPath = " + servletPath);
+      logger.debug("servletPath = " + servletPath);
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -59,7 +57,7 @@ public class MakePythonWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      if (VERBOSE) logger.info("tmpDir " + tmpDir);
+      logger.debug("tmpDir " + tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -133,11 +131,12 @@ public class MakePythonWarServlet extends HttpServlet {
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "Transform.java", "Transform.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "Logging.java", "Logging.java");
 
       // compile extra
       runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java"),
+          "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java", "Logging.java"),
           "Compilation of servlet failed");
 
       // create the war jar file

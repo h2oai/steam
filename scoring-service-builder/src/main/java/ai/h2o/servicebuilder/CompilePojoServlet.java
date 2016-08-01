@@ -30,7 +30,7 @@ import static ai.h2o.servicebuilder.Util.*;
  * Errors are sent back if any
  */
 public class CompilePojoServlet extends HttpServlet {
-  private static final Logger logger = LoggerFactory.getLogger("CompilePojoServlet");
+  private final Logger logger = Logging.getLogger(this.getClass());
 
   private static boolean VERBOSE = true;
 
