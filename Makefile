@@ -78,7 +78,7 @@ fmtcheck:
 pretest: lint vet fmtcheck
 
 test: pretest
-	go test
+	cd tests/go_coverage && ./goh2orunner.sh
 
 guitest:
 	cd $(GUI) && npm test
