@@ -13,12 +13,12 @@ import Cell from '../../Projects/components/Cell';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { fetchLeaderboard } from '../../Models/actions/leaderboard.actions';
-import { Model } from '../../Proxy/Proxy';
+import { Model, RegressionModel, MultinomialModel, BinomialModel } from '../../Proxy/Proxy';
 import '../styles/modelselectionmodal.scss';
 
 interface Props {
   open: boolean,
-  models: Model[]
+  models: BinomialModel[] | MultinomialModel[] | RegressionModel[]
   projectId: string,
   onSelectModel: Function,
   onCancel: Function
@@ -41,6 +41,7 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
   }
 
   render(): React.ReactElement<DefaultModal> {
+    console.log(this.props.models);
     return (
       <DefaultModal className="model-comparison-modal" open={this.props.open}>
         <PageHeader>
@@ -71,7 +72,8 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
               </Cell>
               <Cell/>
             </Row>
-            {this.props.models.map((model, i) => {
+            {this.props.models.map((model: BinomialModel | MultinomialModel | RegressionModel, i: number) => {
+              console.log(model);
               return (
                 <Row key={i}>
                   <Cell/>
@@ -88,7 +90,7 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
                     {model.r_squared}
                   </Cell>
                   <Cell>
-                    {model.r_squared}
+
                   </Cell>
                   <Cell>
                     <button className="default" onClick={this.props.onSelectModel.bind(this, model)}>Select</button>

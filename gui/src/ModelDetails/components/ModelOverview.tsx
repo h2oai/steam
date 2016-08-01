@@ -12,6 +12,7 @@ interface Props {
 
 export default class ModelOverview extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
+    console.log(this.props.model);
     let iconMap = {
       Author: 'fa fa-user',
       Date: 'fa fa-calendar-o',

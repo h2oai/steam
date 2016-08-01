@@ -37,10 +37,11 @@ export function fetchModelOverview(modelId: number): Function {
   return (dispatch) => {
     dispatch(requestModelOverview());
     Remote.getModel(modelId, (error, model) => {
-      dispatch(receiveModelOverview(model));
-      Remote.getModelRegression(modelId, (error, res) => {
-        console.log(res);
-      });
+      if (model.model_category === 'Regression') {
+        Remote.getModelRegression(modelId, (error, res) => {
+          dispatch(receiveModelOverview(res));
+        });
+      }
     });
   };
 }
