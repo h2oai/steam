@@ -38,6 +38,9 @@ export function fetchModelOverview(modelId: number): Function {
     dispatch(requestModelOverview());
     Remote.getModel(modelId, (error, model) => {
       dispatch(receiveModelOverview(model));
+      Remote.getModelRegression(modelId, (error, res) => {
+        console.log(res);
+      });
     });
   };
 }

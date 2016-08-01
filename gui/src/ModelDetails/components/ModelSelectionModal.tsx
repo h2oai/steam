@@ -22,7 +22,7 @@ interface Props {
   projectId: string,
   onSelectModel: Function,
   onCancel: Function
-  
+
 }
 
 interface DispatchProps {
@@ -82,13 +82,13 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
                     {moment.unix(model.created_at).format('YYYY-MM-DD HH:mm')}
                   </Cell>
                   <Cell>
-                    1
+                    {model.mse}
                   </Cell>
                   <Cell>
-                    1
+                    {model.r_squared}
                   </Cell>
                   <Cell>
-                    1
+                    {model.r_squared}
                   </Cell>
                   <Cell>
                     <button className="default" onClick={this.props.onSelectModel.bind(this, model)}>Select</button>
