@@ -14,22 +14,22 @@ import (
 	"github.com/h2oai/steamY/lib/fs"
 )
 
-type CompileServer struct {
+type Service struct {
 	Address string
 }
 
-func NewServer(address string) *CompileServer {
-	return &CompileServer{
+func NewService(address string) *Service {
+	return &Service{
 		address,
 	}
 }
 
-func (cs *CompileServer) url(p string) string {
-	return (&url.URL{Scheme: "http", Host: cs.Address, Path: p}).String()
+func (s *Service) urlFor(slug string) string {
+	return (&url.URL{Scheme: "http", Host: s.Address, Path: slug}).String()
 }
 
-func (cs *CompileServer) Ping() error {
-	if _, err := http.Get(cs.url("Ping")); err != nil {
+func (s *Service) Ping() error {
+	if _, err := http.Get(s.urlFor("Ping")); err != nil {
 		return err
 	}
 	return nil
@@ -51,7 +51,7 @@ func uploadFile(filePath, kind string, w *multipart.Writer) error {
 	return nil
 }
 
-func uploadJavaFiles(url, pojoPath, jarPath string) (*http.Response, error) {
+func compile(url, pojoPath, jarPath string) (*http.Response, error) {
 	pojoPath, err := fs.ResolvePath(pojoPath)
 	if err != nil {
 		return nil, err
@@ -90,37 +90,48 @@ func uploadJavaFiles(url, pojoPath, jarPath string) (*http.Response, error) {
 	return res, nil
 }
 
-func (cs *CompileServer) CompilePojo(modelPath, jarPath, servlet string) (string, error) {
-	res, err := uploadJavaFiles(cs.url(servlet), modelPath, jarPath)
+func (s *Service) CompileModel(wd, modelLocation, modelLogicalName, artifact string) (string, error) {
+
+	genModelPath := fs.GetGenModelPath(wd, modelLocation)
+	javaModelPath := fs.GetJavaModelPath(wd, modelLocation, modelLogicalName)
+
+	var targetFile string
+
+	switch artifact {
+	case "war":
+		targetFile = fs.GetWarFilePath(wd, modelLocation, modelLogicalName)
+	case "jar":
+		targetFile = fs.GetModelJarFilePath(wd, modelLocation, modelLogicalName)
+	}
+
+	if _, err := os.Stat(targetFile); os.IsNotExist(err) {
+	} else {
+		return targetFile, nil
+	}
+
+	if err := s.Ping(); err != nil {
+		return "", err
+	}
+
+	slug := "makewar"
+	if artifact == "jar" {
+		slug = "compile"
+	}
+
+	res, err := compile(s.urlFor(slug), javaModelPath, genModelPath)
 	if err != nil {
 		return "", err
 	}
 	defer res.Body.Close()
 
-	outname := path.Base(modelPath)
-	outname = outname[0 : len(outname)-5]
-
-	var p string
-	d := path.Dir(modelPath)
-	if servlet == "compile" {
-		p = path.Join(d, outname+".jar")
-	} else if servlet == "makewar" {
-		p = path.Join(d, outname+".war")
-	}
-
-	p, err = fs.ResolvePath(p)
+	dst, err := os.OpenFile(targetFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		return "", err
-	}
-
-	dst, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return "", fmt.Errorf("Download file createion failed: %s: %v", p, err)
+		return "", fmt.Errorf("Download file createion failed: %s: %v", targetFile, err)
 	}
 	defer dst.Close()
 
 	if _, err := io.Copy(dst, res.Body); err != nil {
-		return "", fmt.Errorf("Download file copy failed: Service to %s: %v", p, err)
+		return "", fmt.Errorf("Download file copy failed: Service to %s: %v", targetFile, err)
 	}
-	return p, nil
+	return targetFile, nil
 }

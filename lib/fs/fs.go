@@ -169,6 +169,10 @@ func GetWarFilePath(wd, modelName, logicalName string) string {
 	return path.Join(GetModelPath(wd, modelName), logicalName) + ".war"
 }
 
+func GetModelJarFilePath(wd, modelName, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelName), logicalName) + ".jar"
+}
+
 func GetGenModelPath(wd, modelName string) string {
 	return path.Join(GetModelPath(wd, modelName), "h2o-genmodel.jar")
 }

@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
+	"math/rand"
+	"net"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,17 +28,21 @@ type Service struct {
 	ds                        *data.Datastore
 	compilationServiceAddress string
 	scoringServiceAddress     string
+	scoringServicePortMin     int
+	scoringServicePortMax     int
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
 }
 
-func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *Service {
+func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, scoringServicePortsRange [2]int, kerberos bool, username, keytab string) *Service {
 	return &Service{
 		workingDir,
 		ds,
 		compilationServiceAddress,
 		scoringServiceAddress,
+		scoringServicePortsRange[0],
+		scoringServicePortsRange[1],
 		kerberos,
 		username,
 		keytab,
@@ -748,18 +753,17 @@ func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (
 
 	// Use modelId because it'll provide a unique directory name every time with
 	// a persistend db; no need to purge/overwrite any files on disk
-	modelStringId := strconv.FormatInt(modelId, 10)
+	location := strconv.FormatInt(modelId, 10)
 
-	var location, logicalName string
-	location = fs.GetModelPath(s.workingDir, modelStringId)
-	javaModelPath, err := h2o.ExportJavaModel(modelName, location)
+	modelPath := fs.GetModelPath(s.workingDir, location)
+	javaModelPath, err := h2o.ExportJavaModel(modelName, modelPath)
 	if err != nil {
-		return location, logicalName, err
+		return "", "", err
 	}
-	logicalName = fs.GetBasenameWithoutExt(javaModelPath)
+	logicalName := fs.GetBasenameWithoutExt(javaModelPath)
 
-	if _, err := h2o.ExportGenModel(location); err != nil {
-		return location, logicalName, err
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return "", "", err
 	}
 
 	return location, logicalName, err
@@ -1307,9 +1311,31 @@ func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.
 	return toLabels(labels), nil
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
+func isPortOpen(port int) bool {
+	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+
+func (s *Service) assignPort() (int, error) {
+	randPort := rand.New(rand.NewSource(time.Now().UnixNano()))
+	portRange := s.scoringServicePortMax - (s.scoringServicePortMin + 1)
+
+	for i := s.scoringServicePortMin; i < s.scoringServicePortMax; i++ {
+		port := randPort.Intn(portRange) + s.scoringServicePortMin + 1
+		if isPortOpen(port) {
+			return port, nil
+		}
+	}
+	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
+}
+
+func (s *Service) StartService(pz az.Principal, modelId int64) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// FIXME: change sequence to:
@@ -1319,28 +1345,25 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	compilationService := compiler.NewServer(s.compilationServiceAddress)
-	if err := compilationService.Ping(); err != nil {
-		return nil, err
+	compilerService := compiler.NewService(s.compilationServiceAddress)
+	warFilePath, err := compilerService.CompileModel(
+		s.workingDir,
+		model.Location,
+		model.LogicalName,
+		"war",
+	)
+	if err != nil {
+		return 0, err
 	}
 
-	// do not recompile if war file is already available
-	modelDir := strconv.FormatInt(modelId, 10)
-	warFilePath := fs.GetWarFilePath(s.workingDir, modelDir, model.LogicalName)
-	if _, err := os.Stat(warFilePath); os.IsNotExist(err) {
-		warFilePath, err = compilationService.CompilePojo(
-			fs.GetJavaModelPath(s.workingDir, modelDir, model.LogicalName),
-			fs.GetGenModelPath(s.workingDir, modelDir),
-			"makewar",
-		)
-		if err != nil {
-			return nil, err
-		}
+	// Assign a port from allowed range
+	port, err := s.assignPort()
+	if err != nil {
+		return 0, err
 	}
-
 	pid, err := svc.Start(
 		warFilePath,
 		fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),
@@ -1348,12 +1371,12 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 		port,
 	)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	address, err := fs.GetExternalHost() // FIXME there is no need to re-scan this every time. Can be a property on *Service at init time.
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	log.Printf("Scoring service started at %s:%d\n", address, port)
@@ -1370,19 +1393,10 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 
 	serviceId, err := s.ds.CreateService(pz, service)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	service, err = s.ds.ReadService(pz, serviceId)
-	if err != nil {
-		return nil, err
-	}
-
-	// s.scoreActivity.Lock()
-	// s.scoreActivity.latest[modelName] = ss.CreatedAt
-	// s.scoreActivity.Unlock()
-
-	return toScoringService(service), nil
+	return serviceId, nil
 }
 
 func (s *Service) StopService(pz az.Principal, serviceId int64) error {
@@ -2287,10 +2301,14 @@ func toProjects(projects []data.Project) []*web.Project {
 func toLabels(labels []data.Label) []*web.Label {
 	array := make([]*web.Label, len(labels))
 	for i, label := range labels {
+		var modelId int64 = -1
+		if label.ModelId.Valid {
+			modelId = label.ModelId.Int64
+		}
 		array[i] = &web.Label{
 			label.Id,
 			label.ProjectId,
-			label.ModelId,
+			modelId,
 			label.Name,
 			label.Description,
 			toTimestamp(label.Created),

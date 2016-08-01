@@ -56,9 +56,9 @@ export function downloadModel(): Function {
   };
 }
 
-export function deployModel(modelId: number, port: number): Function {
+export function deployModel(modelId: number): Function {
   return (dispatch) => {
-    Remote.startService(modelId, port, (error, res) => {
+    Remote.startService(modelId, (error, res) => {
       console.log(res);
     });
   };

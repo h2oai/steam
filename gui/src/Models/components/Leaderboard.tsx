@@ -141,8 +141,16 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                 <Cell>
                   <ul className="actions">
                     <li><Link to={'/projects/' + this.props.projectId + '/models/' + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
-                    <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span><span>deploy model</span></li>
-                    <li><span><i className="fa fa-ellipsis-h"></i></span><span>more actions</span></li>
+                    <li className="labels"><span><i className="fa fa-tags"></i></span> label as
+                        <span className="label-selector">
+                          <select name="labelSelect">
+                            <option value="prod">test</option>
+                            <option value="test">stage</option>
+                            <option value="prod">prod</option>
+                          </select>
+                        </span>
+                    </li>
+                    <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span> <span>deploy model</span></li>
                   </ul>
                 </Cell>
               </Row>

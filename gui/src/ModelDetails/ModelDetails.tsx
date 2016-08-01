@@ -96,10 +96,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   deployModel() {
-    /**
-     * TODO(justinloyola): Backend not ready - pass projectId and port being eliminated as a parameter
-     */
-    this.props.deployModel(this.props.model.id, 12345);
+    this.props.deployModel(this.props.model.id);
   }
 
   openComparisonModal() {

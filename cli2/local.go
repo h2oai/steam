@@ -3,15 +3,17 @@ package cli2
 import (
 	"bufio"
 	"fmt"
+	"log"
+	"os"
+	"path"
+	"strconv"
+	"strings"
+	"syscall"
+
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
-	"log"
-	"os"
-	"path"
-	"strings"
-	"syscall"
 )
 
 var loginHelp = `
@@ -127,6 +129,7 @@ func serveMaster(c *context) *cobra.Command {
 		clusterProxyAddress       string
 		compilationServiceAddress string
 		scoringServiceHost        string
+		scoringServicePortsString string
 		enableProfiler            bool
 		yarnEnableKerberos        bool
 		yarnUserName              string
@@ -141,6 +144,25 @@ func serveMaster(c *context) *cobra.Command {
 	opts := master.DefaultOpts
 
 	cmd := newCmd(c, serveMasterHelp, func(c *context, args []string) {
+		ports := strings.Split(scoringServicePortsString, ":")
+		if len(ports) != 2 {
+			log.Fatalln("Invalid usage of scoring service ports range. See 'steam help serve master'.")
+		}
+		var scoringServicePorts [2]int
+		for i, port := range ports {
+			var err error
+			scoringServicePorts[i], err = strconv.Atoi(port)
+			if err != nil {
+				log.Fatalln("Invalid usage of scoring service ports range. See 'steam help serve master'.")
+			}
+			if scoringServicePorts[i] < 1025 || scoringServicePorts[i] > 65535 {
+				log.Fatalln("Invalid port range.")
+			}
+		}
+		if scoringServicePorts[0] > scoringServicePorts[1] {
+			log.Fatalln("Invalid port range.")
+		}
+
 		master.Run(c.version, c.buildDate, master.Opts{
 			webAddress,
 			webTLSCertPath,
@@ -150,6 +172,7 @@ func serveMaster(c *context) *cobra.Command {
 			clusterProxyAddress,
 			compilationServiceAddress,
 			scoringServiceHost,
+			scoringServicePorts,
 			enableProfiler,
 			master.YarnOpts{
 				yarnEnableKerberos,
@@ -174,6 +197,8 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
 	cmd.Flags().StringVar(&scoringServiceHost, "scoring-service-address", opts.ScoringServiceHost, "Address to start scoring services on (\"<ip>\")")
+	// TODO: this uses a hardcoded port range, not the default const
+	cmd.Flags().StringVar(&scoringServicePortsString, "scoring-service-port-range", "1025:65535", "Specified port range to create scoring services on. (\"<from>:<to>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
 	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.Yarn.Username, "Username to enable Kerberos")

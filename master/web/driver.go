@@ -1,11 +1,12 @@
 package web
 
 import (
+	"log"
+
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/master/data"
 	web "github.com/h2oai/steamY/srv/web"
-	"log"
 )
 
 type driverOpts struct {
@@ -13,6 +14,7 @@ type driverOpts struct {
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
 	ScoringServiceHost        string
+	ScoringServicePorts       [2]int
 	Yarn                      driverYarnOpts
 	DB                        driverDBOpts
 }
@@ -54,6 +56,7 @@ func newService(opts driverOpts) (web.Service, az.Directory, error) {
 		ds,
 		opts.CompilationServiceAddress,
 		opts.ScoringServiceHost,
+		opts.ScoringServicePorts,
 		opts.Yarn.KerberosEnabled,
 		opts.Yarn.Username,
 		opts.Yarn.Keytab,

@@ -10,12 +10,10 @@
   width: 100%;
   justify-content: center;
   max-height: 70%;
-  height: 70%;
 }
 
 .default-modal {
   width: 50%;
-  height: 100%;
   background: $brand-white;
   border-radius: 2px;
   border: 1px solid $brand-dark-1;
@@ -25,11 +23,16 @@
   header {
     font-size: 2.5em;
     border-bottom: 2px solid $brand-dark-3;
-    padding: $small 0;
+    padding: 0 0 $small 0;
     margin-bottom: $xsmall;
     color: $brand-orange;
   }
-  .content {
-    height: 100%;
+  .button-row {
+    button {
+      margin-right:10px;
+    }
+    button:last-of-type {
+      margin-right: 0;
+    }
   }
 }
