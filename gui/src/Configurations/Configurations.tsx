@@ -6,9 +6,20 @@ import * as _ from 'lodash';
 import PageHeader from '../Projects/components/PageHeader';
 import TabNavigation from '../Projects/components/TabNavigation';
 import Labels from './components/Labels';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { fetchLabels } from './actions/configuration.labels.action';
 import './styles/configurations.scss';
 
-export default class Configurations extends React.Component<any, any> {
+interface Props {
+  labels?: any
+}
+
+interface DispatchProps {
+  fetchLabels: Function
+}
+
+class Configurations extends React.Component<Props & DispatchProps, any> {
 
   /**
    * TODO(jefffohl): Make the tab container a generalized container, like <TabContainer>, to keep things DRY.
@@ -22,7 +33,7 @@ export default class Configurations extends React.Component<any, any> {
           label: 'Labels',
           isSelected: true,
           onClick: this.clickHandler.bind(this),
-          component: <Labels/>
+          component: <Labels labels={this.props.labels}/>
         }
       },
       isSelected: 'labels'
@@ -54,3 +65,17 @@ export default class Configurations extends React.Component<any, any> {
     );
   }
 }
+
+function mapStateToProps(state: any): any {
+  return {
+    labels: state.projects[this.props.params.projectId].labels
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchLabels: bindActionCreators(fetchLabels, dispatch)
+  };
+}
+
+export default connect<Props, any, any>(mapStateToProps, mapDispatchToProps)(Configurations);

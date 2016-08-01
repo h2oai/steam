@@ -8,7 +8,11 @@ import Cell from '../../Projects/components/Cell';
 import CreateNewLabelModal from './CreateNewLabelModal';
 import '../styles/labels.scss';
 
-export default class Labels extends React.Component<any, any> {
+interface Props {
+  labels: any
+}
+
+export default class Labels extends React.Component<Props, any> {
 
     constructor() {
         super();
