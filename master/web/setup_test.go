@@ -20,6 +20,20 @@ const (
 	h2oFrameKey    = "test.hex"
 )
 
+var h2oModels = []struct {
+	name     string
+	category string
+}{
+	{"bin_gbm", "Binomial"},
+	{"bin_glm", "Binomial"},
+	{"bin_dpl", "Binomial"},
+	{"mul_gbm", "Multinomial"},
+	{"mul_dpl", "Multinomial"},
+	{"reg_gbm", "Regression"},
+	{"reg_glm", "Regression"},
+	{"reg_dpl", "Regression"},
+}
+
 type test struct {
 	t   *testing.T
 	svc web.Service
@@ -56,6 +70,7 @@ func newTest(t *testing.T) *test {
 		":9001",
 		":8080",
 		"",
+		[2]int{1025, 65535},
 		driverYarnOpts{false, "", ""},
 		dbOpts,
 	}
