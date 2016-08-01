@@ -30,7 +30,8 @@ import { naivebayesValidation } from '../data/naivebayesValidation';
 
 interface Props {
   items: any[],
-  projectId: number
+  projectId: number,
+  modelCategory: string
 }
 
 interface DispatchProps {
@@ -95,7 +96,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
         <Table>
           <Row header={true}>
             <Cell>
-              <FilterDropdown onFilter={this.onFilter.bind(this)}/>
+              <FilterDropdown onFilter={this.onFilter.bind(this)} category={this.props.modelCategory}/>
             </Cell>
             <Cell>
               MODEL

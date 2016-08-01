@@ -7,24 +7,26 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
-import { fetchLeaderboard } from './actions/leaderboard.actions';
-import { Model } from '../Proxy/Proxy';
+import { fetchModelsFromProject, fetchProject } from '../Projects/actions/projects.actions';
 
 interface Props {
   leaderboard: any,
   params: {
     projectid: string
-  }
+  },
+  project: any
 }
 
 interface DispatchProps {
-  fetchLeaderboard: Function
+  fetchModelsFromProject: Function,
+  fetchProject: Function
 }
 
 export class Projects extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.leaderboard)) {
-      this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10));
+      this.props.fetchModelsFromProject(parseInt(this.props.params.projectid, 10));
+      this.props.fetchProject(parseInt(this.props.params.projectid, 10));
     }
   }
 
@@ -34,7 +36,7 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="projects">
-        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)}></Leaderboard>
+        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)} modelCategory={this.props.project.model_category}></Leaderboard>
       </div>
     );
   }
@@ -42,13 +44,15 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state: any): any {
   return {
-    leaderboard: state.leaderboard.items
+    leaderboard: state.projects.models,
+    project: state.projects.project
   };
 }
 
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
-    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch)
+    fetchModelsFromProject: bindActionCreators(fetchModelsFromProject, dispatch),
+    fetchProject: bindActionCreators(fetchProject, dispatch)
   };
 }
 

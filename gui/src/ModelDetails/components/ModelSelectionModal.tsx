@@ -18,7 +18,7 @@ import '../styles/modelselectionmodal.scss';
 
 interface Props {
   open: boolean,
-  models: BinomialModel[] | MultinomialModel[] | RegressionModel[]
+  models: any,
   projectId: string,
   onSelectModel: Function,
   onCancel: Function
@@ -41,7 +41,6 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
   }
 
   render(): React.ReactElement<DefaultModal> {
-    console.log(this.props.models);
     return (
       <DefaultModal className="model-comparison-modal" open={this.props.open}>
         <PageHeader>
@@ -72,8 +71,7 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
               </Cell>
               <Cell/>
             </Row>
-            {this.props.models.map((model: BinomialModel | MultinomialModel | RegressionModel, i: number) => {
-              console.log(model);
+            {this.props.models.map((model, i: number) => {
               return (
                 <Row key={i}>
                   <Cell/>
@@ -84,13 +82,13 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
                     {moment.unix(model.created_at).format('YYYY-MM-DD HH:mm')}
                   </Cell>
                   <Cell>
-                    {model.mse}
+                    {model.mse.toFixed(6)}
                   </Cell>
                   <Cell>
-                    {model.r_squared}
+                    {model.r_squared.toFixed(6)}
                   </Cell>
                   <Cell>
-
+                    {model.mean_residual_deviance}
                   </Cell>
                   <Cell>
                     <button className="default" onClick={this.props.onSelectModel.bind(this, model)}>Select</button>

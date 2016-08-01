@@ -158,7 +158,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
           >Goodness of Fit</span>
         </header>
         <Collapsible open={this.state.isGoodnessOpen}>
-          <GoodnessOfFit></GoodnessOfFit>
+          <GoodnessOfFit model={this.props.model} comparisonModel={this.state.comparisonModel}></GoodnessOfFit>
         </Collapsible>
         <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'residual')}><i

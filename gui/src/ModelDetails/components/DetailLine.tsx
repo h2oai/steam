@@ -3,27 +3,31 @@
  */
 
 import * as React from 'react';
+import * as classNames from 'classnames';
 import '../styles/detailline.scss';
 
 interface Props {
   icon?: string,
-  label: string,
-  value: string | number
+  label: string | React.ReactElement<Element>,
+  value: any,
+  comparisonValue?: any,
+  className?: any
 }
 
 export default class DetailLine extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
+    console.log(this.props);
     return (
-      <div className="details">
+      <div className={classNames('details', this.props.className)}>
         <div className="details--label">
           {this.props.icon ? <i className={this.props.icon}></i> : null}{this.props.label}
         </div>
         <div className="details--line">
         </div>
         <div className="details--value">
-          {this.props.value}
+          <span>{this.props.value}</span><span>{this.props.comparisonValue}</span>
         </div>
-      </div>  
+      </div>
     );
   }
 }
