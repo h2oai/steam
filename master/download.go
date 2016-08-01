@@ -152,15 +152,15 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 		var filePath string
 		switch artifact {
 		case javaClass:
-			filePath = fs.GetJavaModelPath(s.workingDirectory, model.Location, model.LogicalName)
+			filePath = fs.GetJavaModelPath(s.workingDirectory, modelId, model.LogicalName)
 
 		case javaClassDep:
-			filePath = fs.GetGenModelPath(s.workingDirectory, model.Location)
+			filePath = fs.GetGenModelPath(s.workingDirectory, modelId)
 		case javaWar:
 			compilerService := compiler.NewService(s.compilerServiceAddress)
 			warFilePath, err := compilerService.CompileModel(
 				s.workingDirectory,
-				model.Location,
+				modelId,
 				model.LogicalName,
 				"war",
 			)
@@ -174,7 +174,7 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 			compilerService := compiler.NewService(s.compilerServiceAddress)
 			jarFilePath, err := compilerService.CompileModel(
 				s.workingDirectory,
-				model.Location,
+				modelId,
 				model.LogicalName,
 				"jar",
 			)

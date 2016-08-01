@@ -148,41 +148,41 @@ func GetPacks(wd, kind string) ([]*Package, error) {
 	return packs, nil
 }
 
-// FIXME obsolete
-func GetDbPath(wd string) string {
-	return path.Join(wd, DbDir, "steam.db")
-}
-
 func GetWwwRoot(wd string) string {
 	return path.Join(wd, WwwDir)
 }
 
-func GetModelPath(wd, modelName string) string {
-	return path.Join(wd, ModelDir, modelName)
+func GetModelPath(wd string, modelId int64) string {
+	location := strconv.FormatInt(modelId, 10)
+	return path.Join(wd, ModelDir, location)
 }
 
-func GetJavaModelPath(wd, modelName, logicalName string) string {
-	return path.Join(GetModelPath(wd, modelName), logicalName) + ".java"
+func GetJavaModelPath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + ".java"
 }
 
-func GetWarFilePath(wd, modelName, logicalName string) string {
-	return path.Join(GetModelPath(wd, modelName), logicalName) + ".war"
+func GetWarFilePath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + ".war"
 }
 
-func GetModelJarFilePath(wd, modelName, logicalName string) string {
-	return path.Join(GetModelPath(wd, modelName), logicalName) + ".jar"
+func GetPythonWarFilePath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + "_py.war"
 }
 
-func GetGenModelPath(wd, modelName string) string {
-	return path.Join(GetModelPath(wd, modelName), "h2o-genmodel.jar")
+func GetModelJarFilePath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + ".jar"
+}
+
+func GetGenModelPath(wd string, modelId int64) string {
+	return path.Join(GetModelPath(wd, modelId), "h2o-genmodel.jar")
 }
 
 func GetAssetsPath(wd, asset string) string {
 	return path.Join(wd, AssetsDir, asset)
 }
 
-func GetModelDirs(wd, modelName string) ([]string, error) {
-	modelDir := path.Join(wd, ModelDir, modelName)
+func GetModelDirs(wd string, modelId int64) ([]string, error) {
+	modelDir := GetModelPath(wd, modelId)
 	files, err := ioutil.ReadDir(modelDir)
 	if err != nil {
 		return nil, fmt.Errorf("Model directory read failed: %s: %v", modelDir, err)

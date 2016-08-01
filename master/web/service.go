@@ -750,12 +750,7 @@ func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
 // --- Model ---
 
 func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (string, string, error) {
-
-	// Use modelId because it'll provide a unique directory name every time with
-	// a persistend db; no need to purge/overwrite any files on disk
-	location := strconv.FormatInt(modelId, 10)
-
-	modelPath := fs.GetModelPath(s.workingDir, location)
+	modelPath := fs.GetModelPath(s.workingDir, modelId)
 	javaModelPath, err := h2o.ExportJavaModel(modelName, modelPath)
 	if err != nil {
 		return "", "", err
@@ -766,7 +761,7 @@ func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (
 		return "", "", err
 	}
 
-	return location, logicalName, err
+	return strconv.FormatInt(modelId, 10), logicalName, err
 }
 
 func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
@@ -1351,7 +1346,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64) (int64, error) {
 	compilerService := compiler.NewService(s.compilationServiceAddress)
 	warFilePath, err := compilerService.CompileModel(
 		s.workingDir,
-		model.Location,
+		model.Id,
 		model.LogicalName,
 		"war",
 	)
