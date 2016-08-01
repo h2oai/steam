@@ -1062,7 +1062,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	m := r.Models[0]
 
 	// fetch raw frame json from H2O
-	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name, false)
+	rawFrame, _, err := h2o.GetFramesFetch(dataFrameName(m), false)
 	if err != nil {
 		return 0, err
 	}
