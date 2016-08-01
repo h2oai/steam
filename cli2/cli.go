@@ -613,7 +613,7 @@ attribute [?]
 Delete Attribute
 Examples:
 
-    No description available
+    Delete an attribute on a project package
     $ steam delete attribute --for-package \
         --project-id=? \
         --package-name=? \
@@ -630,7 +630,7 @@ func deleteAttribute(c *context) *cobra.Command {
 	cmd := newCmd(c, deleteAttributeHelp, func(c *context, args []string) {
 		if forPackage { // DeleteAttributeForPackage
 
-			// No description available
+			// Delete an attribute on a project package
 			err := c.remote.DeleteAttributeForPackage(
 				projectId,   // No description available
 				packageName, // No description available
@@ -642,7 +642,7 @@ func deleteAttribute(c *context) *cobra.Command {
 			return
 		}
 	})
-	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "No description available")
+	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "Delete an attribute on a project package")
 
 	cmd.Flags().StringVar(&key, "key", key, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
@@ -1442,7 +1442,7 @@ attribute [?]
 Get Attribute
 Examples:
 
-    No description available
+    Get an attribute of a project package
     $ steam get attribute --for-package \
         --project-id=? \
         --package-name=? \
@@ -1459,7 +1459,7 @@ func getAttribute(c *context) *cobra.Command {
 	cmd := newCmd(c, getAttributeHelp, func(c *context, args []string) {
 		if forPackage { // GetAttributeForPackage
 
-			// No description available
+			// Get an attribute of a project package
 			value, err := c.remote.GetAttributeForPackage(
 				projectId,   // No description available
 				packageName, // No description available
@@ -1472,7 +1472,7 @@ func getAttribute(c *context) *cobra.Command {
 			return
 		}
 	})
-	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "No description available")
+	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "Get an attribute of a project package")
 
 	cmd.Flags().StringVar(&key, "key", key, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
@@ -1485,7 +1485,7 @@ attributes [?]
 Get Attributes
 Examples:
 
-    No description available
+    List attributes for a project package
     $ steam get attributes --for-package \
         --project-id=? \
         --package-name=?
@@ -1500,7 +1500,7 @@ func getAttributes(c *context) *cobra.Command {
 	cmd := newCmd(c, getAttributesHelp, func(c *context, args []string) {
 		if forPackage { // GetAttributesForPackage
 
-			// No description available
+			// List attributes for a project package
 			keys, err := c.remote.GetAttributesForPackage(
 				projectId,   // No description available
 				packageName, // No description available
@@ -1512,7 +1512,7 @@ func getAttributes(c *context) *cobra.Command {
 			return
 		}
 	})
-	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "No description available")
+	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "List attributes for a project package")
 
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
@@ -3628,7 +3628,7 @@ attribute [?]
 Set Attribute
 Examples:
 
-     
+    Set attributes on a project package
     $ steam set attribute --for-package \
         --project-id=? \
         --package-name=? \
@@ -3647,7 +3647,7 @@ func setAttribute(c *context) *cobra.Command {
 	cmd := newCmd(c, setAttributeHelp, func(c *context, args []string) {
 		if forPackage { // SetAttributeForPackage
 
-			//
+			// Set attributes on a project package
 			err := c.remote.SetAttributeForPackage(
 				projectId,   // No description available
 				packageName, // No description available
@@ -3660,7 +3660,7 @@ func setAttribute(c *context) *cobra.Command {
 			return
 		}
 	})
-	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, " ")
+	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "Set attributes on a project package")
 
 	cmd.Flags().StringVar(&key, "key", key, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")

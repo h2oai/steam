@@ -1921,7 +1921,7 @@ class RPCClient:
 	
 	def set_attribute_for_package(self, project_id, package_name, key, value):
 		"""
-		 
+		Set attributes on a project package
 
 		Parameters:
 		project_id: No description available (int64)
@@ -1942,7 +1942,7 @@ class RPCClient:
 	
 	def get_attribute_for_package(self, project_id, package_name, key):
 		"""
-		No description available
+		Get an attribute of a project package
 
 		Parameters:
 		project_id: No description available (int64)
@@ -1962,7 +1962,7 @@ class RPCClient:
 	
 	def get_attributes_for_package(self, project_id, package_name):
 		"""
-		No description available
+		List attributes for a project package
 
 		Parameters:
 		project_id: No description available (int64)
@@ -1980,7 +1980,7 @@ class RPCClient:
 	
 	def delete_attribute_for_package(self, project_id, package_name, key):
 		"""
-		No description available
+		Delete an attribute on a project package
 
 		Parameters:
 		project_id: No description available (int64)

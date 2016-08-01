@@ -738,16 +738,16 @@ export interface Service {
   // Delete a file in a project package
   deletePackageFile: (projectId: number, packageName: string, path: string, go: (error: Error) => void) => void
   
-  //  
+  // Set attributes on a project package
   setAttributeForPackage: (projectId: number, packageName: string, key: string, value: string, go: (error: Error) => void) => void
   
-  // No description available
+  // Get an attribute of a project package
   getAttributeForPackage: (projectId: number, packageName: string, key: string, go: (error: Error, value: string) => void) => void
   
-  // No description available
+  // List attributes for a project package
   getAttributesForPackage: (projectId: number, packageName: string, go: (error: Error, keys: string) => void) => void
   
-  // No description available
+  // Delete an attribute on a project package
   deleteAttributeForPackage: (projectId: number, packageName: string, key: string, go: (error: Error) => void) => void
   
 }
