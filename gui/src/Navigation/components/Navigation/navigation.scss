@@ -136,7 +136,7 @@ $navigation-width: $base-grid-unit * 5;
   font-size: $text-large;
   min-height: 3.5em;
   color: $brand-dark-3;
-  padding: 0 $small;
+  padding: $small $small 0 $small;
 }
 .navigation {
   height: 100%;
@@ -184,7 +184,7 @@ $navigation-width: $base-grid-unit * 5;
     padding: 0;
     color: $brand-white;
     list-style: none;
-    font-size: 1.5em;
+    font-size: 1.3em;
     height: 100%;
     font-family: "Open Sans", sans-serif;
     font-weight: 500;

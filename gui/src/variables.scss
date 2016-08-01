@@ -21,8 +21,6 @@ $medium: $base-grid-unit / 2;
 $small: $base-grid-unit / 3;
 $xsmall: $base-grid-unit / 4;
 
-$text-large: 48px;
-
 // rules
 $rule-solid-thick: 2px solid $brand-dark-3;
 $rule-solid-thin: 1px solid $brand-dark-3;
@@ -32,3 +30,5 @@ $rule-dotted-thin: 1px dotted $brand-dark-3;
 $font-body: "Oswald", "Open Sans", Arial, sans-serif;
 $font-title: "Oswald", Arial, sans-serif;
 $font-text: "Open Sans", Arial, sans-serif;
+$text-size: 14px;
+$text-large: 48px;

@@ -4,6 +4,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as classNames from 'classnames';
+import FilterIcon from './FilterIcon';
 import '../styles/filterdropdown.scss';
 
 interface Props {
@@ -74,7 +75,7 @@ export default class FilterDropdown extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="filter-dropdown">
-        <button ref="filterDropdownInvoker" className={classNames('filter-dropdown-invoker', {open: this.state.open})} onClick={this.openDropdown.bind(this)}><i className="fa fa-sort-amount-desc"/></button>
+        <button ref="filterDropdownInvoker" className={classNames('filter-dropdown-invoker', {open: this.state.open})} onClick={this.openDropdown.bind(this)}><FilterIcon/></button>
         <div ref="filterDropdown" className={classNames('filter-dropdown-menu', {open: this.state.open})}>
           <div className="filter-option">
             <div className="filter-labels">SORT BY</div>

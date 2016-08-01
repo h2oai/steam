@@ -119,9 +119,9 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <input ref="packageName" type="text"/>
               </Cell>
             </Row>
-            <Row>
+            <Row className="button-row">
               <Cell/>
-              <Cell className="button-container">
+              <Cell>
                 <button className="default" onClick={this.uploadPackage.bind(this)}>
                   Upload
                 </button>

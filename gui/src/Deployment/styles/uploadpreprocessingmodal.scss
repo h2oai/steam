@@ -8,18 +8,9 @@
   .row:nth-last-of-type(2), .row:last-of-type {
     border-bottom: none;
   }
-  .button-container {
-    margin-top: $small;
-    button:first-of-type {
-      margin-right: $xsmall;
-    }
-  }
   .package-name-label {
     margin-top: $xsmall;
     font-size: .7em;
-  }
-  .muted {
-    color: $brand-dark-3;
   }
   input[type="file"] {
     display: none;

@@ -2,6 +2,7 @@
 
 .leaderboard {
   width: 100%;
+  min-height: 400px;
   .row {
     &.header {
       .cell:first-child {
@@ -15,14 +16,15 @@
     .cell:first-child {
       flex-grow: 0;
       flex-basis: $medium;
-      padding-top:3px;
+      color: $brand-dark-3;
+      padding-top:1px;
     }
     .cell:nth-of-type(2) {
       flex-basis: 50%;
       flex-grow: 2;
       .metadata {
         .model-name {
-          font-size: 1.3em;
+          font-size: 1.1em;
           font-weight: 600;
         }
       }
@@ -32,9 +34,7 @@
     }
     .graph {
       flex-basis: $xlarge + $medium;
-      align-self: center;
       flex-grow: 0;
-      margin: auto;
       svg {
         rect {
           shape-rendering: crispEdges;
@@ -49,28 +49,41 @@
   }
   .actions {
     padding: 0 $xsmall;
+    margin:0;
     list-style: none;
     color: $brand-dark-1;
-    li {
-      cursor: pointer;
-      a, &:visited {
-        text-decoration: none;
-        color: $brand-dark-1;
+      li {
+        cursor: pointer;
+        margin-bottom: 5px;
+        a, &:visited {
+          text-decoration: none;
+          color: $brand-dark-1;
+        }
+        &.labels {
+          .label-selector {
+            display: inline-block;
+            margin-left: 7px;
+            select {
+              border: solid 1px $brand-orange;
+              width: auto;
+              height: auto;
+              box-shadow: none;
+              background: none;
+              font-size:14px;
+              color: darken($brand-orange, 10%);
+            }
+          }
+        }
       }
-    }
     i {
       margin-right: $xsmall / 2;
     }
   }
   .filter {
-    width: 20%;
+    width: 30%;
     margin-bottom: $xsmall;
     input {
-      border: 1px solid lighten($brand-dark-3, 10%);
-      height: $small;
       width: 100%;
-      border-radius: 3px;
-      padding: 0 5px;
     }
   }
 }

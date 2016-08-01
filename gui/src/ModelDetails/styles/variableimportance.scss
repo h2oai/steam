@@ -3,7 +3,7 @@
 .metrics.variable-importance {
   .variableImportance {
     .columnName {
-      font-size: 1.3em;
+      font-size: 1.1em;
       font-weight: 600;
     }
 
@@ -34,7 +34,7 @@
       }
       .cell:nth-child(1) {
         flex-basis:30px;
-        padding-top:3px;
+        padding-top:1px;
         color: $brand-dark-3;
       }
       .cell:nth-child(2) {
