@@ -16,9 +16,15 @@ import (
 const (
 	superuser      = "superuser"
 	clusterAddress = "localhost:54321"
-	h2oModelKey    = "test_gbm"
-	h2oFrameKey    = "test.hex"
 )
+
+var h2oFrames = []struct {
+	name string
+}{
+	{"bin_hex"},
+	{"mul_hex"},
+	{"reg_hex"},
+}
 
 var h2oModels = []struct {
 	name     string
