@@ -30,7 +30,7 @@ func (s *Service) urlFor(slug string) string {
 
 func (s *Service) Ping() error {
 	if _, err := http.Get(s.urlFor("Ping")); err != nil {
-		return err
+		return fmt.Errorf("Failed to reach compilation service: %v", err)
 	}
 	return nil
 }
