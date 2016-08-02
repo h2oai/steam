@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
 import { fetchLeaderboard } from './actions/leaderboard.actions';
 import { Model } from '../Proxy/Proxy';
+import { deployModel } from '../ModelDetails/actions/model.overview.action';
 
 interface Props {
   leaderboard: any,
@@ -18,7 +19,8 @@ interface Props {
 }
 
 interface DispatchProps {
-  fetchLeaderboard: Function
+  fetchLeaderboard: Function,
+  deployModel: Function
 }
 
 export class Projects extends React.Component<Props & DispatchProps, any> {
@@ -34,7 +36,7 @@ export class Projects extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="projects">
-        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)}></Leaderboard>
+        <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)} deployModel={this.props.deployModel}></Leaderboard>
       </div>
     );
   }
@@ -48,7 +50,8 @@ function mapStateToProps(state: any): any {
 
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
-    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch)
+    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch),
+    deployModel: bindActionCreators(deployModel, dispatch)
   };
 }
 

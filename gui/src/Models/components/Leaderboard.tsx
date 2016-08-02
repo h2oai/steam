@@ -30,7 +30,8 @@ import { naivebayesValidation } from '../data/naivebayesValidation';
 
 interface Props {
   items: any[],
-  projectId: number
+  projectId: number,
+  deployModel: Function
 }
 
 interface DispatchProps {
@@ -43,7 +44,8 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   constructor() {
     super();
     this.state = {
-      isDeployOpen: false
+      isDeployOpen: false,
+      openDeployModel: null
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
@@ -61,9 +63,11 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
   }
 
-  openDeploy(): void {
+  openDeploy(model): void {
+    console.log(model);
     this.setState({
-      isDeployOpen: true
+      isDeployOpen: true,
+      openDeployModel: model
     });
   }
 
@@ -79,10 +83,19 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
      */
   }
 
+  onDeploy(model, name) {
+    this.setState({
+      isDeployOpen: false
+    });
+    console.log(model, name);
+    this.props.deployModel(model.id, name);
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
+    console.log(this.state);
     return (
       <div ref="leaderboard" className="leaderboard">
-        <Deploy open={this.state.isDeployOpen} closeHandler={this.closeHandler}></Deploy>
+        <Deploy open={this.state.isDeployOpen} onCancel={this.closeHandler} model={this.state.openDeployModel} onDeploy={this.onDeploy.bind(this)}></Deploy>
         <PageHeader>
           <span>Models</span>
           <div className="buttons">
@@ -150,7 +163,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                           </select>
                         </span>
                     </li>
-                    <li onClick={this.openDeploy}><span><i className="fa fa-arrow-up"></i></span> <span>deploy model</span></li>
+                    <li onClick={this.openDeploy.bind(this, item)}><span><i className="fa fa-arrow-up"></i></span> <span>deploy model</span></li>
                   </ul>
                 </Cell>
               </Row>

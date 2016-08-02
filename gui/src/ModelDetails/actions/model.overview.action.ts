@@ -53,10 +53,9 @@ export function downloadModel(): Function {
   };
 }
 
-export function deployModel(modelId: number): Function {
+export function deployModel(modelId: number, name: string): Function {
   return (dispatch) => {
     /**
-     * TODO(justinloyola):
      *   if arg2 is "", deploys a vanilla war file as a service
      *   if arg2 is a valid package name, the python scripts from the package are
      *     bundled into the war file. 

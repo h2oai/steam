@@ -13,6 +13,19 @@ interface Props {
 }
 
 export default class ExportModal extends React.Component<Props, any> {
+  constructor() {
+    super();
+    this.state = {
+      artifact: 'java-class'
+    };
+  }
+
+  selectArtifact(event) {
+    this.setState({
+      artifact: event.target.value
+    });
+  }
+
   render(): React.ReactElement<DefaultModal> {
     return (
       <DefaultModal className="export-modal" open={this.props.open}>
