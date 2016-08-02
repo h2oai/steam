@@ -116,7 +116,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     this.setState({
       isDeployOpen: false
     });
-    console.log(model, name);
     this.props.deployModel(model.id, name);
   }
 

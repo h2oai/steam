@@ -11,6 +11,7 @@ import GoodnessOfFit from './components/GoodnessOfFit';
 import VariableImportance from './components/VariableImportance';
 import PageHeader from '../Projects/components/PageHeader';
 import ExportModal from './components/ExportModal';
+import Deploy from '../Models/components/Deploy';
 import ModelSelectionModal from './components/ModelSelectionModal';
 import { hashHistory } from 'react-router';
 import './styles/modeldetails.scss';
@@ -113,7 +114,9 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   deployModel() {
-    this.props.deployModel(this.props.model.id);
+    this.setState({
+      isDeployModalOpen: true
+    });
   }
 
   openComparisonModal() {
@@ -143,6 +146,19 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc', offset);
   }
 
+  closeDeployModal() {
+    this.setState({
+      isDeployModalOpen: false
+    });
+  }
+
+  onDeploy(model) {
+    this.setState({
+      isDeployModalOpen: false
+    });
+    this.props.deployModel(model.id, name);
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     if (_.isEmpty(this.props.model)) {
       return <div></div>;
@@ -157,6 +173,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
                              onCancel={this.onCancel.bind(this)}/>
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
                      onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
+        <Deploy open={this.state.isDeployModalOpen} onCancel={this.closeDeployModal.bind(this)} model={this.props.model} onDeploy={this.onDeploy.bind(this)}></Deploy>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
           <div className="buttons">
