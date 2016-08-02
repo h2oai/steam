@@ -20,11 +20,14 @@ import (
 )
 
 const (
-	defaultWebAddress          = ":9000"
-	defaultClusterProxyAddress = ":9001"
-	defaultCompilationAddress  = ":8080"
-	defaultScoringServiceHost  = ""
+	defaultWebAddress                = ":9000"
+	defaultClusterProxyAddress       = ":9001"
+	defaultCompilationAddress        = ":8080"
+	defaultScoringServiceHost        = ""
+	DefaultScoringServicePortsString = "1025:65535"
 )
+
+var defaultScoringServicePorts = [...]int{1025, 65535}
 
 type DBOpts struct {
 	Name              string
@@ -49,6 +52,7 @@ type Opts struct {
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
 	ScoringServiceHost        string
+	ScoringServicePorts       [2]int
 	EnableProfiler            bool
 	Yarn                      YarnOpts
 	DB                        DBOpts
@@ -63,6 +67,7 @@ var DefaultOpts = &Opts{
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
 	defaultScoringServiceHost,
+	defaultScoringServicePorts,
 	false,
 	YarnOpts{false, "", ""},
 	DBOpts{"steam", "steam", "disable", "", ""},
@@ -126,6 +131,7 @@ func Run(version, buildDate string, opts Opts) {
 		ds,
 		opts.CompilationServiceAddress,
 		opts.ScoringServiceHost,
+		opts.ScoringServicePorts,
 		opts.Yarn.KerberosEnabled,
 		opts.Yarn.Username,
 		opts.Yarn.Keytab,
@@ -134,7 +140,8 @@ func Run(version, buildDate string, opts Opts) {
 
 	webServeMux.Handle("/logout", authProvider.Logout())
 	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))
-	webServeMux.Handle("/upload", authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service)))
+	webServeMux.Handle("/upload", authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds)))
+	webServeMux.Handle("/download", authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)))
 	webServeMux.Handle("/", authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))))
 
 	if opts.EnableProfiler {

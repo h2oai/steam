@@ -676,6 +676,20 @@ class RPCClient:
 		response = self.connection.call("GetModelsFromCluster", request)
 		return response['models']
 	
+	def get_all_binomial_sort_criteria(self):
+		"""
+		List sort criteria for a binomial models
+
+		Parameters:
+
+		Returns:
+		criteria: No description available (string)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetAllBinomialSortCriteria", request)
+		return response['criteria']
+	
 	def find_models_binomial(self, project_id, name_part, sort_by, ascending, offset, limit):
 		"""
 		List binomial models
@@ -701,6 +715,36 @@ class RPCClient:
 		}
 		response = self.connection.call("FindModelsBinomial", request)
 		return response['models']
+	
+	def get_model_binomial(self, model_id):
+		"""
+		View a binomial model
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:
+		model: No description available (BinomialModel)
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("GetModelBinomial", request)
+		return response['model']
+	
+	def get_all_multinomial_sort_criteria(self):
+		"""
+		List sort criteria for a multinomial models
+
+		Parameters:
+
+		Returns:
+		criteria: No description available (string)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetAllMultinomialSortCriteria", request)
+		return response['criteria']
 	
 	def find_models_multinomial(self, project_id, name_part, sort_by, ascending, offset, limit):
 		"""
@@ -728,6 +772,36 @@ class RPCClient:
 		response = self.connection.call("FindModelsMultinomial", request)
 		return response['models']
 	
+	def get_model_multinomial(self, model_id):
+		"""
+		View a binomial model
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:
+		model: No description available (MultinomialModel)
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("GetModelMultinomial", request)
+		return response['model']
+	
+	def get_all_regression_sort_criteria(self):
+		"""
+		List sort criteria for a regression models
+
+		Parameters:
+
+		Returns:
+		criteria: No description available (string)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetAllRegressionSortCriteria", request)
+		return response['criteria']
+	
 	def find_models_regression(self, project_id, name_part, sort_by, ascending, offset, limit):
 		"""
 		List regression models
@@ -753,6 +827,22 @@ class RPCClient:
 		}
 		response = self.connection.call("FindModelsRegression", request)
 		return response['models']
+	
+	def get_model_regression(self, model_id):
+		"""
+		View a binomial model
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:
+		model: No description available (RegressionModel)
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("GetModelRegression", request)
+		return response['model']
 	
 	def import_model_from_cluster(self, cluster_id, project_id, model_key, model_name):
 		"""
@@ -895,23 +985,23 @@ class RPCClient:
 		response = self.connection.call("GetLabelsForProject", request)
 		return response['labels']
 	
-	def start_service(self, model_id, port):
+	def start_service(self, model_id, package_name):
 		"""
 		Start a service
 
 		Parameters:
 		model_id: No description available (int64)
-		port: No description available (int)
+		package_name: No description available (string)
 
 		Returns:
-		service: No description available (ScoringService)
+		service_id: No description available (int64)
 		"""
 		request = {
 			'model_id': model_id
-			'port': port
+			'package_name': package_name
 		}
 		response = self.connection.call("StartService", request)
-		return response['service']
+		return response['service_id']
 	
 	def stop_service(self, service_id):
 		"""
@@ -1702,6 +1792,171 @@ class RPCClient:
 		}
 		response = self.connection.call("GetHistory", request)
 		return response['history']
+	
+	def create_package(self, project_id, name):
+		"""
+		Create a package for a project
+
+		Parameters:
+		project_id: No description available (int64)
+		name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'name': name
+		}
+		response = self.connection.call("CreatePackage", request)
+		return 
+	
+	def get_packages(self, project_id):
+		"""
+		List packages for a project 
+
+		Parameters:
+		project_id: No description available (int64)
+
+		Returns:
+		packages: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+		}
+		response = self.connection.call("GetPackages", request)
+		return response['packages']
+	
+	def get_package_directories(self, project_id, package_name, relative_path):
+		"""
+		List directories in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:
+		directories: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("GetPackageDirectories", request)
+		return response['directories']
+	
+	def get_package_files(self, project_id, package_name, relative_path):
+		"""
+		List files in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:
+		files: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("GetPackageFiles", request)
+		return response['files']
+	
+	def delete_package(self, project_id, name):
+		"""
+		Delete a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'name': name
+		}
+		response = self.connection.call("DeletePackage", request)
+		return 
+	
+	def delete_package_directory(self, project_id, package_name, relative_path):
+		"""
+		Delete a directory in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("DeletePackageDirectory", request)
+		return 
+	
+	def delete_package_file(self, project_id, package_name, relative_path):
+		"""
+		Delete a file in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("DeletePackageFile", request)
+		return 
+	
+	def set_attributes_for_package(self, project_id, package_name, attributes):
+		"""
+		Set attributes on a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		attributes: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'attributes': attributes
+		}
+		response = self.connection.call("SetAttributesForPackage", request)
+		return 
+	
+	def get_attributes_for_package(self, project_id, package_name):
+		"""
+		List attributes for a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+
+		Returns:
+		attributes: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+		}
+		response = self.connection.call("GetAttributesForPackage", request)
+		return response['attributes']
 	
 	
 

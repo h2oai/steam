@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
+	"math/rand"
+	"net"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,17 +28,21 @@ type Service struct {
 	ds                        *data.Datastore
 	compilationServiceAddress string
 	scoringServiceAddress     string
+	scoringServicePortMin     int
+	scoringServicePortMax     int
 	kerberosEnabled           bool
 	username                  string
 	keytab                    string
 }
 
-func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, kerberos bool, username, keytab string) *Service {
+func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, scoringServicePortsRange [2]int, kerberos bool, username, keytab string) *Service {
 	return &Service{
 		workingDir,
 		ds,
 		compilationServiceAddress,
 		scoringServiceAddress,
+		scoringServicePortsRange[0],
+		scoringServicePortsRange[1],
 		kerberos,
 		username,
 		keytab,
@@ -434,12 +439,12 @@ func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 
 // --- Datasource ---
 
-func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, path string) (int64, error) {
+func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, filePath string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return 0, err
 	}
 
-	mapPath := map[string]string{"path": path}
+	mapPath := map[string]string{"path": filePath}
 	jsonPath, err := json.Marshal(mapPath)
 	if err != nil {
 		return 0, err
@@ -489,12 +494,12 @@ func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datas
 	return toDatasource(datasource), nil
 }
 
-func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, path string) error {
+func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, filePath string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return err
 	}
 
-	mapPath := map[string]string{"path": path}
+	mapPath := map[string]string{"path": filePath}
 	jsonPath, err := json.Marshal(mapPath)
 	if err != nil {
 		return err
@@ -548,12 +553,12 @@ func (s *Service) importDataset(name, configuration, address string) ([]byte, st
 	if err := json.Unmarshal([]byte(configuration), &rawJson); err != nil {
 		return nil, "", err
 	}
-	path, ok := rawJson["path"]
+	filePath, ok := rawJson["path"]
 	if !ok {
 		return nil, "", fmt.Errorf("Cannot locate path: Empty datasource configuration")
 	}
 
-	importBody, err := h2o.PostImportFilesImportfiles(path)
+	importBody, err := h2o.PostImportFilesImportfiles(filePath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -745,24 +750,18 @@ func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
 // --- Model ---
 
 func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (string, string, error) {
-
-	// Use modelId because it'll provide a unique directory name every time with
-	// a persistend db; no need to purge/overwrite any files on disk
-	modelStringId := strconv.FormatInt(modelId, 10)
-
-	var location, logicalName string
-	location = fs.GetModelPath(s.workingDir, modelStringId)
-	javaModelPath, err := h2o.ExportJavaModel(modelName, location)
+	modelPath := fs.GetModelPath(s.workingDir, modelId)
+	javaModelPath, err := h2o.ExportJavaModel(modelName, modelPath)
 	if err != nil {
-		return location, logicalName, err
+		return "", "", err
 	}
-	logicalName = fs.GetBasenameWithoutExt(javaModelPath)
+	logicalName := fs.GetBasenameWithoutExt(javaModelPath)
 
-	if _, err := h2o.ExportGenModel(location); err != nil {
-		return location, logicalName, err
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return "", "", err
 	}
 
-	return location, logicalName, err
+	return strconv.FormatInt(modelId, 10), logicalName, err
 }
 
 func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
@@ -931,8 +930,8 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKe
 }
 
 // TODO: hardcoded; should be determined by h2o metrics
-func (s *Service) GetAllBinomialSortCriteria() []string {
-	return []string{"mse", "r_squared", "logloss", "auc", "gini"}
+func (s *Service) GetAllBinomialSortCriteria(pz az.Principal) ([]string, error) {
+	return []string{"mse", "r_squared", "logloss", "auc", "gini"}, nil
 }
 
 func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.BinomialModel, error) {
@@ -953,9 +952,22 @@ func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart,
 	return toBinomialModels(models), nil
 }
 
+func (s *Service) GetModelBinomial(pz az.Principal, modelId int64) (*web.BinomialModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
+		return nil, err
+	}
+
+	model, err := s.ds.ReadBinomialModel(pz, modelId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toBinomialModel(model), nil
+}
+
 // TODO: hardcoded; should be determined by h2o metrics
-func (s *Service) GetAllMultinomialSortCriteria() []string {
-	return []string{"mse", "r_squared", "logloss"}
+func (s *Service) GetAllMultinomialSortCriteria(pz az.Principal) ([]string, error) {
+	return []string{"mse", "r_squared", "logloss"}, nil
 }
 
 func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.MultinomialModel, error) {
@@ -976,9 +988,22 @@ func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePa
 	return toMultinomialModels(models), nil
 }
 
+func (s *Service) GetModelMultinomial(pz az.Principal, modelId int64) (*web.MultinomialModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
+		return nil, err
+	}
+
+	model, err := s.ds.ReadMultinomialModel(pz, modelId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toMultinomialModel(model), nil
+}
+
 // TODO: hardcoded; should be determined by h2o metrics
-func (s *Service) GetAllRegressionSortCriteria() []string {
-	return []string{"mse", "r_squared", "mean_residual_deviance"}
+func (s *Service) GetAllRegressionSortCriteria(pz az.Principal) ([]string, error) {
+	return []string{"mse", "r_squared", "mean_residual_deviance"}, nil
 }
 
 func (s *Service) FindModelsRegression(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]*web.RegressionModel, error) {
@@ -997,6 +1022,19 @@ func (s *Service) FindModelsRegression(pz az.Principal, projectId int64, namePar
 	}
 
 	return toRegressionModels(models), nil
+}
+
+func (s *Service) GetModelRegression(pz az.Principal, modelId int64) (*web.RegressionModel, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewModel); err != nil {
+		return nil, err
+	}
+
+	model, err := s.ds.ReadRegressionModel(pz, modelId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toRegressionModel(model), nil
 }
 
 func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelKey, modelName string) (int64, error) {
@@ -1268,40 +1306,66 @@ func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.
 	return toLabels(labels), nil
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.ScoringService, error) {
-	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
-		return nil, err
+func isPortOpen(port int) bool {
+	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return false
 	}
+	conn.Close()
+	return true
+}
 
-	// FIXME: change sequence to:
-	// 1. insert a record into the Service table with the state "starting"
-	// 2. attempt to compile and start the service
-	// 3. update the Service record state to "started" if successful, or "failed" if not.
+func (s *Service) assignPort() (int, error) {
+	randPort := rand.New(rand.NewSource(time.Now().UnixNano()))
+	portRange := s.scoringServicePortMax - (s.scoringServicePortMin + 1)
+
+	for i := s.scoringServicePortMin; i < s.scoringServicePortMax; i++ {
+		port := randPort.Intn(portRange) + s.scoringServicePortMin + 1
+		if isPortOpen(port) {
+			return port, nil
+		}
+	}
+	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
+}
+
+func (s *Service) StartService(pz az.Principal, modelId int64, packageName string) (int64, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
+		return 0, err
+	}
 
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	compilationService := compiler.NewServer(s.compilationServiceAddress)
-	if err := compilationService.Ping(); err != nil {
-		return nil, err
+	projectId, err := s.ds.ReadProjectIdForModelId(pz, modelId)
+	if err != nil {
+		return 0, err
 	}
 
-	// do not recompile if war file is already available
-	modelDir := strconv.FormatInt(modelId, 10)
-	warFilePath := fs.GetWarFilePath(s.workingDir, modelDir, model.LogicalName)
-	if _, err := os.Stat(warFilePath); os.IsNotExist(err) {
-		warFilePath, err = compilationService.CompilePojo(
-			fs.GetJavaModelPath(s.workingDir, modelDir, model.LogicalName),
-			fs.GetGenModelPath(s.workingDir, modelDir),
-			"makewar",
-		)
-		if err != nil {
-			return nil, err
-		}
+	artifact := compiler.ArtifactWar
+	if len(packageName) > 0 {
+		artifact = compiler.ArtifactPythonWar
 	}
 
+	warFilePath, err := compiler.CompileModel(
+		s.compilationServiceAddress,
+		s.workingDir,
+		projectId,
+		model.Id,
+		model.LogicalName,
+		artifact,
+		packageName,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	// Assign a port from allowed range
+	port, err := s.assignPort()
+	if err != nil {
+		return 0, err
+	}
 	pid, err := svc.Start(
 		warFilePath,
 		fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),
@@ -1309,12 +1373,12 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 		port,
 	)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	address, err := fs.GetExternalHost() // FIXME there is no need to re-scan this every time. Can be a property on *Service at init time.
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	log.Printf("Scoring service started at %s:%d\n", address, port)
@@ -1331,19 +1395,10 @@ func (s *Service) StartService(pz az.Principal, modelId int64, port int) (*web.S
 
 	serviceId, err := s.ds.CreateService(pz, service)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	service, err = s.ds.ReadService(pz, serviceId)
-	if err != nil {
-		return nil, err
-	}
-
-	// s.scoreActivity.Lock()
-	// s.scoreActivity.latest[modelName] = ss.CreatedAt
-	// s.scoreActivity.Unlock()
-
-	return toScoringService(service), nil
+	return serviceId, nil
 }
 
 func (s *Service) StopService(pz az.Principal, serviceId int64) error {
@@ -1919,6 +1974,229 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId, offset, li
 	return toEntityHistory(history), nil
 }
 
+func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
+
+	if err := fs.ValidateName(name); err != nil {
+		return fmt.Errorf("Invalid package name: %s", err)
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if fs.DirExists(packagePath) {
+		return fmt.Errorf("Failed creating package directory: %s already exists", name)
+	}
+
+	if err := fs.Mkdir(packagePath); err != nil {
+		return fmt.Errorf("Failed creating package directory: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	projectPath := fs.GetProjectPath(s.workingDir, projectId)
+	if !fs.DirExists(projectPath) {
+		return []string{}, nil
+	}
+
+	dirs, err := fs.ListDirs(projectPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing packages: %s", err)
+	}
+
+	return dirs, nil
+}
+
+func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("Package %s does not exist")
+	}
+
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+
+	dirs, err := fs.ListDirs(packageDirPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing package directories: %s", err)
+	}
+
+	return dirs, nil
+}
+
+func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("Package %s does not exist")
+	}
+
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+
+	files, err := fs.ListFiles(packageDirPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing package files: %s", err)
+	}
+
+	return files, nil
+}
+
+func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	if err := fs.Rmdir(packagePath); err != nil {
+		return fmt.Errorf("Failed deleting package: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	dirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return err
+	}
+
+	if !fs.DirExists(dirPath) {
+		return fmt.Errorf("Invalid path %s in package %s", relativePath, packageName)
+	}
+
+	if err := fs.Rmdir(dirPath); err != nil {
+		return fmt.Errorf("Failed deleting directory: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	filePath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return err
+	}
+
+	if !fs.FileExists(filePath) {
+		return fmt.Errorf("Invalid path %s in package %s", relativePath, packageName)
+	}
+
+	if err := fs.Rm(filePath); err != nil {
+		return fmt.Errorf("Failed deleting file: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
+
+	if err := fs.SetPackageAttributes(s.workingDir, projectId, packageName, []byte(attributes)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return "", err
+	}
+
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return "", err
+	}
+
+	b, err := fs.GetPackageAttributes(s.workingDir, projectId, packageName)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}
+
 // Helper function to convert from int to bytes
 func toSizeBytes(i int64) string {
 	f := float64(i)
@@ -2248,10 +2526,14 @@ func toProjects(projects []data.Project) []*web.Project {
 func toLabels(labels []data.Label) []*web.Label {
 	array := make([]*web.Label, len(labels))
 	for i, label := range labels {
+		var modelId int64 = -1
+		if label.ModelId.Valid {
+			modelId = label.ModelId.Int64
+		}
 		array[i] = &web.Label{
 			label.Id,
 			label.ProjectId,
-			label.ModelId,
+			modelId,
 			label.Name,
 			label.Description,
 			toTimestamp(label.Created),

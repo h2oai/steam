@@ -1,0 +1,29 @@
+@import '../../variables.scss';
+
+.create-edit-label-modal {
+  header {
+    text-transform:uppercase;
+    padding-top:0;
+  }
+  .table {
+    .row {
+      border-bottom:none;
+      .cell {
+        &.table-row-name {
+          flex-grow: 1;
+          text-transform: uppercase;
+        }
+        &.table-row-item {
+          font-family: $font-text;
+          flex-grow: 4;
+          p {
+            margin:0;
+          }
+          .form-group {
+            margin-top:15px;
+          }
+        }
+      }
+    }
+  }
+}

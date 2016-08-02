@@ -4,7 +4,6 @@
 
 import * as React from 'react';
 import * as classNames from 'classnames';
-import * as $ from 'jquery';
 import * as _ from 'lodash';
 import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
@@ -12,21 +11,32 @@ import GoodnessOfFit from './components/GoodnessOfFit';
 import VariableImportance from './components/VariableImportance';
 import PageHeader from '../Projects/components/PageHeader';
 import ExportModal from './components/ExportModal';
+import Deploy from '../Models/components/Deploy';
+import ModelSelectionModal from './components/ModelSelectionModal';
 import { hashHistory } from 'react-router';
 import './styles/modeldetails.scss';
 import { fetchModelOverview, downloadModel, deployModel } from './actions/model.overview.action';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { fetchLeaderboard, fetchSortCriteria } from '../Models/actions/leaderboard.actions';
+import { fetchProject } from '../Projects/actions/projects.actions';
 
 interface Props {
   params: {
-    modelid: string
+    modelid: string,
+    projectid: string
   },
-  model: any
+  model: any,
+  models: any,
+  project: any,
+  sortCriteria: string[]
 }
 
 interface DispatchProps {
   fetchModelOverview: Function,
+  fetchSortCriteria: Function,
+  fetchLeaderboard: Function,
+  fetchProject: Function,
   downloadModel: Function,
   deployModel: Function
 }
@@ -39,12 +49,23 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
       isResidualOpen: true,
       isVariableOpen: true,
       isGoodnessOpen: true,
-      isExportModalOpen: false
+      isExportModalOpen: false,
+      isModelSelectionModal: false,
+      comparisonModel: null
     };
     this.exportModel = this.exportModel.bind(this);
   }
 
   componentWillMount() {
+    if (this.props.project) {
+      this.props.fetchProject(parseInt(this.props.params.projectid, 10)).then((res) => {
+        this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), res.model_category);
+        this.props.fetchSortCriteria(res.model_category.toLowerCase());
+        this.setState({
+          modelCategory: res.model_category.toLowerCase()
+        });
+      });
+    }
     this.props.fetchModelOverview(parseInt(this.props.params.modelid, 10));
   }
 
@@ -93,10 +114,49 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   deployModel() {
-    /**
-     * TODO(justinloyola): Backend not ready - pass projectId and port being eliminated as a parameter
-     */
-    this.props.deployModel(this.props.model.id, 12345);
+    this.setState({
+      isDeployModalOpen: true
+    });
+  }
+
+  openComparisonModal() {
+    this.setState({
+      isModelSelectionModalOpen: true
+    });
+  }
+
+  closeComparisonModal() {
+    this.setState({
+      isModelSelectionModalOpen: false
+    });
+  }
+
+  onSelectModel(model) {
+    this.closeComparisonModal();
+    this.setState({
+      comparisonModel: model
+    });
+  }
+
+  onCancel() {
+    this.closeComparisonModal();
+  }
+
+  onFilter(filters, name, offset) {
+    this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc', offset);
+  }
+
+  closeDeployModal() {
+    this.setState({
+      isDeployModalOpen: false
+    });
+  }
+
+  onDeploy(model) {
+    this.setState({
+      isDeployModalOpen: false
+    });
+    this.props.deployModel(model.id, name);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -105,12 +165,24 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="model-details">
-        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()} onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
+        <ModelSelectionModal open={this.state.isModelSelectionModalOpen}
+                             onFilter={this.onFilter.bind(this)}
+                             models={this.props.models}
+                             sortCriteria={this.props.sortCriteria}
+                             onSelectModel={this.onSelectModel.bind(this)}
+                             onCancel={this.onCancel.bind(this)}/>
+        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
+                     onCancel={this.cancel.bind(this)} modelId={parseInt(this.props.params.modelid, 10)} projectId={parseInt(this.props.params.projectid, 10)} onDownload={this.downloadModel.bind(this)}/>
+        <Deploy open={this.state.isDeployModalOpen} onCancel={this.closeDeployModal.bind(this)} model={this.props.model} onDeploy={this.onDeploy.bind(this)}></Deploy>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
           <div className="buttons">
             <button className="default invert" onClick={this.exportModel.bind(this)}>Export Model</button>
             <button className="default" onClick={this.deployModel.bind(this)}>Deploy Model</button>
+          </div>
+          <div className="comparison-selection">
+            <span><span>compared to:</span><button className="model-selection-button"
+                                                   onClick={this.openComparisonModal.bind(this)}>{this.state.comparisonModel ? this.state.comparisonModel.name : 'SELECT MODEL FOR COMPARISON'}</button></span>
           </div>
         </PageHeader>
         <header className="overview-header">
@@ -127,17 +199,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
           >Goodness of Fit</span>
         </header>
         <Collapsible open={this.state.isGoodnessOpen}>
-          <GoodnessOfFit></GoodnessOfFit>
-        </Collapsible>
-        <header className="overview-header">
-          <span onClick={this.toggleOpen.bind(this, 'residual')}><i
-            className={classNames('fa', {'fa-minus-square-o': this.state.isResidualOpen, 'fa-plus-square-o': !this.state.isResidualOpen})}></i
-          >Residual Analysis</span>
-        </header>
-        <Collapsible open={this.state.isResidualOpen}>
-          <div>
-            Residual body
-          </div>
+          <GoodnessOfFit model={this.props.model} comparisonModel={this.state.comparisonModel}></GoodnessOfFit>
         </Collapsible>
         <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'variable')}><i
@@ -154,12 +216,18 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state: any): any {
   return {
-    model: state.model
+    model: state.model,
+    project: state.projects.project,
+    models: state.leaderboard.items,
+    sortCriteria: state.leaderboard.criteria
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch),
+    fetchProject: bindActionCreators(fetchProject, dispatch),
+    fetchSortCriteria: bindActionCreators(fetchSortCriteria, dispatch),
     fetchModelOverview: bindActionCreators(fetchModelOverview, dispatch),
     downloadModel: bindActionCreators(downloadModel, dispatch),
     deployModel: bindActionCreators(deployModel, dispatch)

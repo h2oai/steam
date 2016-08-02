@@ -1,6 +1,8 @@
 package fs
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -25,6 +27,7 @@ const (
 	WwwDir         = "www"
 	AssetsDir      = "assets"
 	DbDir          = "db"
+	ProjectDir     = "project"
 	ModelDir       = "model"
 	LibDir         = "lib"
 	OutDir         = "out"
@@ -34,6 +37,7 @@ const (
 	FilePerm       = 0666
 	PackExt        = ".steam"
 	KindEngine     = "engine"
+	KindFile       = "file"
 	KindExperiment = "module"
 )
 
@@ -62,7 +66,7 @@ func MkWorkingDirectory(p string) (string, error) {
 		return "", err
 	}
 
-	dirs := []string{DbDir, ModelDir, LibDir, TmpDir, LogDir}
+	dirs := []string{DbDir, ProjectDir, ModelDir, LibDir, TmpDir, LogDir}
 
 	for _, dir := range dirs {
 		if err := os.MkdirAll(path.Join(wd, dir), DirPerm); err != nil {
@@ -112,6 +116,51 @@ func DirExists(p string) bool {
 	return true
 }
 
+func Mkdir(p string) error {
+	return os.MkdirAll(p, DirPerm)
+}
+
+func Rmdir(p string) error {
+	return os.RemoveAll(p)
+}
+
+func Rm(p string) error {
+	return os.Remove(p)
+}
+
+func ListDirs(p string) ([]string, error) {
+	files, err := ioutil.ReadDir(p)
+	if err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0)
+	for _, file := range files {
+		if file.IsDir() {
+			names = append(names, file.Name())
+		}
+	}
+	return names, nil
+}
+
+func ListFiles(p string) ([]string, error) {
+	files, err := ioutil.ReadDir(p)
+	if err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0)
+	for _, file := range files {
+		if !file.IsDir() {
+			name := file.Name()
+			if name != ".steam" {
+				names = append(names, name)
+			}
+		}
+	}
+	return names, nil
+}
+
 func GetPack(wd, kind, pack string) (string, bool) {
 	p := GetPackPath(wd, kind, pack)
 
@@ -148,37 +197,98 @@ func GetPacks(wd, kind string) ([]*Package, error) {
 	return packs, nil
 }
 
-// FIXME obsolete
-func GetDbPath(wd string) string {
-	return path.Join(wd, DbDir, "steam.db")
-}
-
 func GetWwwRoot(wd string) string {
 	return path.Join(wd, WwwDir)
 }
 
-func GetModelPath(wd, modelName string) string {
-	return path.Join(wd, ModelDir, modelName)
+func GetProjectPath(wd string, projectId int64) string {
+	location := strconv.FormatInt(projectId, 10)
+	return path.Join(wd, ProjectDir, location)
 }
 
-func GetJavaModelPath(wd, modelName, logicalName string) string {
-	return path.Join(GetModelPath(wd, modelName), logicalName) + ".java"
+func GetPackagePath(wd string, projectId int64, packageName string) string {
+	return path.Join(GetProjectPath(wd, projectId), packageName)
 }
 
-func GetWarFilePath(wd, modelName, logicalName string) string {
-	return path.Join(GetModelPath(wd, modelName), logicalName) + ".war"
+func GetPackageRelativePath(wd string, projectId int64, packageName, relativePath string) (string, error) {
+	packagePath := GetPackagePath(wd, projectId, packageName)
+	absPath := path.Join(packagePath, relativePath)
+	if !strings.HasPrefix(absPath, packagePath) {
+		return "", fmt.Errorf("Relative path %s is not contained in the package %s", relativePath, packageName)
+	}
+	return absPath, nil
 }
 
-func GetGenModelPath(wd, modelName string) string {
-	return path.Join(GetModelPath(wd, modelName), "h2o-genmodel.jar")
+func MapToJson(attrs map[string]string) ([]byte, error) {
+	b, err := json.Marshal(attrs)
+	if err != nil {
+		return nil, fmt.Errorf("Failed encoding attributes: %s", err)
+	}
+	return b, nil
+}
+
+func JsonToMap(b []byte) (map[string]string, error) {
+	decoder := json.NewDecoder(bytes.NewBuffer(b))
+	var attrs map[string]string
+	for {
+		if err := decoder.Decode(&attrs); err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, fmt.Errorf("Failed decoding attributes: %s", err)
+		}
+	}
+	return attrs, nil
+}
+
+func GetPackageAttributes(wd string, projectId int64, packageName string) ([]byte, error) {
+	b, err := ioutil.ReadFile(path.Join(GetPackagePath(wd, projectId, packageName), ".steam"))
+	if err != nil {
+		return nil, fmt.Errorf("Failed reading attributes: %s", err)
+	}
+	return b, nil
+}
+
+func SetPackageAttributes(wd string, projectId int64, packageName string, b []byte) error {
+	packagePath := GetPackagePath(wd, projectId, packageName)
+	dotFilePath := path.Join(packagePath, ".steam")
+
+	if err := ioutil.WriteFile(dotFilePath, b, FilePerm); err != nil {
+		return fmt.Errorf("Failed writing attributes: %s", err)
+	}
+	return nil
+}
+
+func GetModelPath(wd string, modelId int64) string {
+	location := strconv.FormatInt(modelId, 10)
+	return path.Join(wd, ModelDir, location)
+}
+
+func GetJavaModelPath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + ".java"
+}
+
+func GetWarFilePath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + ".war"
+}
+
+func GetPythonWarFilePath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + "_py.war"
+}
+
+func GetModelJarFilePath(wd string, modelId int64, logicalName string) string {
+	return path.Join(GetModelPath(wd, modelId), logicalName) + ".jar"
+}
+
+func GetGenModelPath(wd string, modelId int64) string {
+	return path.Join(GetModelPath(wd, modelId), "h2o-genmodel.jar")
 }
 
 func GetAssetsPath(wd, asset string) string {
 	return path.Join(wd, AssetsDir, asset)
 }
 
-func GetModelDirs(wd, modelName string) ([]string, error) {
-	modelDir := path.Join(wd, ModelDir, modelName)
+func GetModelDirs(wd string, modelId int64) ([]string, error) {
+	modelDir := GetModelPath(wd, modelId)
 	files, err := ioutil.ReadDir(modelDir)
 	if err != nil {
 		return nil, fmt.Errorf("Model directory read failed: %s: %v", modelDir, err)

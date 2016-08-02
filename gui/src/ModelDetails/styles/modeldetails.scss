@@ -10,4 +10,31 @@
       margin-right: $xsmall;
     }
   }
+  .comparison-selection {
+    font-size: .5em;
+    color: $brand-dark-3;
+    text-transform: none;
+  }
+  .model-selection {
+    background: $brand-white;
+    border-radius: 0;
+    border: none;
+    border-bottom: 2px solid $brand-dark-3;
+    box-shadow: none;
+    -webkit-appearance: none;
+    font-size: .7em;
+    color: $brand-dark-3;
+    font-family: $font-body;
+    line-height: 100%;
+    margin-left: $xsmall;
+  }
+  .model-selection-button {
+    border-radius: 0;
+    font-family: $font-body;
+    border: none;
+    color: $brand-dark-3;
+    font-size: 1em;
+    border-bottom: $rule-solid-thick;
+    background: $brand-white;
+  }
 }

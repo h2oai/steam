@@ -236,98 +236,113 @@ type Workgroup struct {
 // --- API Facade ---
 
 type Service struct {
-	PingServer                  PingServer                  `help:"Ping the Steam server"`
-	RegisterCluster             RegisterCluster             `help:"Connect to a cluster"`
-	UnregisterCluster           UnregisterCluster           `help:"Disconnect from a cluster"`
-	StartClusterOnYarn          StartClusterOnYarn          `help:"Start a cluster using Yarn"`
-	StopClusterOnYarn           StopClusterOnYarn           `help:"Stop a cluster using Yarn"`
-	GetCluster                  GetCluster                  `help:"Get cluster details"`
-	GetClusterOnYarn            GetClusterOnYarn            `help:"Get cluster details (Yarn only)"`
-	GetClusters                 GetClusters                 `help:"List clusters"`
-	GetClusterStatus            GetClusterStatus            `help:"Get cluster status"`
-	DeleteCluster               DeleteCluster               `help:"Delete a cluster"`
-	GetJob                      GetJob                      `help:"Get job details"`
-	GetJobs                     GetJobs                     `help:"List jobs"`
-	CreateProject               CreateProject               `help:"Create a project"`
-	GetProjects                 GetProjects                 `help:"List projects"`
-	GetProject                  GetProject                  `help:"Get project details"`
-	DeleteProject               DeleteProject               `help:"Delete a project"`
-	CreateDatasource            CreateDatasource            `help:"Create a datasource"`
-	GetDatasources              GetDatasources              `help:"List datasources"`
-	GetDatasource               GetDatasource               `help:"Get datasource details"`
-	UpdateDatasource            UpdateDatasource            `help:"Update a datasource"`
-	DeleteDatasource            DeleteDatasource            `help:"Delete a datasource"`
-	CreateDataset               CreateDataset               `help:"Create a dataset"`
-	GetDatasets                 GetDatasets                 `help:"List datasets"`
-	GetDataset                  GetDataset                  `help:"Get dataset details"`
-	GetDatasetsFromCluster      GetDatasetsFromCluster      `help:"Get a list of datasets on a cluster"`
-	UpdateDataset               UpdateDataset               `help:"Update a dataset"`
-	SplitDataset                SplitDataset                `help:"Split a dataset"`
-	DeleteDataset               DeleteDataset               `help:"Delete a dataset"`
-	BuildModel                  BuildModel                  `help:"Build a model"`
-	BuildModelAuto              BuildModelAuto              `help:"Build an AutoML model"`
-	GetModel                    GetModel                    `help:"Get model details"`
-	GetModels                   GetModels                   `help:"List models"`
-	GetModelsFromCluster        GetModelsFromCluster        `help:"List models from a cluster"`
-	FindModelsBinomial          FindModelsBinomial          `help:"List binomial models"`
-	FindModelsMultinomial       FindModelsMultinomial       `help:"List multinomial models"`
-	FindModelsRegression        FindModelsRegression        `help:"List regression models"`
-	ImportModelFromCluster      ImportModelFromCluster      `help:"Import models from a cluster"`
-	DeleteModel                 DeleteModel                 `help:"Delete a model"`
-	CreateLabel                 CreateLabel                 `help:"Create a label"`
-	UpdateLabel                 UpdateLabel                 `help:"Update a label"`
-	DeleteLabel                 DeleteLabel                 `help:"Delete a label"`
-	LinkLabelWithModel          LinkLabelWithModel          `help:"Label a model"`
-	UnlinkLabelFromModel        UnlinkLabelFromModel        `help:"Remove a label from a model"`
-	GetLabelsForProject         GetLabelsForProject         `help:"List labels for a project, with corresponding models, if any"`
-	StartService                StartService                `help:"Start a service"`
-	StopService                 StopService                 `help:"Stop a service"`
-	GetService                  GetService                  `help:"Get service details"`
-	GetServices                 GetServices                 `help:"List services"`
-	GetServicesForModel         GetServicesForModel         `help:"List services for a model"`
-	DeleteService               DeleteService               `help:"Delete a service"`
-	AddEngine                   AddEngine                   `help:"Add an engine"`
-	GetEngine                   GetEngine                   `help:"Get engine details"`
-	GetEngines                  GetEngines                  `help:"List engines"`
-	DeleteEngine                DeleteEngine                `help:"Delete an engine"`
-	GetAllEntityTypes           GetAllEntityTypes           `help:"List all entity types"`
-	GetAllPermissions           GetAllPermissions           `help:"List all permissions"`
-	GetAllClusterTypes          GetAllClusterTypes          `help:"List all cluster types"`
-	GetPermissionsForRole       GetPermissionsForRole       `help:"List permissions for a role"`
-	GetPermissionsForIdentity   GetPermissionsForIdentity   `help:"List permissions for an identity"`
-	CreateRole                  CreateRole                  `help:"Create a role"`
-	GetRoles                    GetRoles                    `help:"List roles"`
-	GetRolesForIdentity         GetRolesForIdentity         `help:"List roles for an identity"`
-	GetRole                     GetRole                     `help:"Get role details"`
-	GetRoleByName               GetRoleByName               `help:"Get role details by name"`
-	UpdateRole                  UpdateRole                  `help:"Update a role"`
-	LinkRoleWithPermissions     LinkRoleWithPermissions     `help:"Link a role with permissions"`
-	LinkRoleWithPermission      LinkRoleWithPermission      `help:"Link a role with a permission"`
-	UnlinkRoleFromPermission    UnlinkRoleFromPermission    `help:"Unlink a role from a permission"`
-	DeleteRole                  DeleteRole                  `help:"Delete a role"`
-	CreateWorkgroup             CreateWorkgroup             `help:"Create a workgroup"`
-	GetWorkgroups               GetWorkgroups               `help:"List workgroups"`
-	GetWorkgroupsForIdentity    GetWorkgroupsForIdentity    `help:"List workgroups for an identity"`
-	GetWorkgroup                GetWorkgroup                `help:"Get workgroup details"`
-	GetWorkgroupByName          GetWorkgroupByName          `help:"Get workgroup details by name"`
-	UpdateWorkgroup             UpdateWorkgroup             `help:"Update a workgroup"`
-	DeleteWorkgroup             DeleteWorkgroup             `help:"Delete a workgroup"`
-	CreateIdentity              CreateIdentity              `help:"Create an identity"`
-	GetIdentities               GetIdentities               `help:"List identities"`
-	GetIdentitiesForWorkgroup   GetIdentitiesForWorkgroup   `help:"List identities for a workgroup"`
-	GetIdentitiesForRole        GetIdentitiesForRole        `help:"List identities for a role"`
-	GetIdentity                 GetIdentity                 `help:"Get identity details"`
-	GetIdentityByName           GetIdentityByName           `help:"Get identity details by name"`
-	LinkIdentityWithWorkgroup   LinkIdentityWithWorkgroup   `help:"Link an identity with a workgroup"`
-	UnlinkIdentityFromWorkgroup UnlinkIdentityFromWorkgroup `help:"Unlink an identity from a workgroup"`
-	LinkIdentityWithRole        LinkIdentityWithRole        `help:"Link an identity with a role"`
-	UnlinkIdentityFromRole      UnlinkIdentityFromRole      `help:"Unlink an identity from a role"`
-	UpdateIdentity              UpdateIdentity              `help:"Update an identity"`
-	DeactivateIdentity          DeactivateIdentity          `help:"Deactivate an identity"`
-	ShareEntity                 ShareEntity                 `help:"Share an entity with a workgroup"`
-	GetPrivileges               GetPrivileges               `help:"List privileges for an entity"`
-	UnshareEntity               UnshareEntity               `help:"Unshare an entity"`
-	GetHistory                  GetHistory                  `help:"List audit trail records for an entity"`
+	PingServer                    PingServer                    `help:"Ping the Steam server"`
+	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
+	UnregisterCluster             UnregisterCluster             `help:"Disconnect from a cluster"`
+	StartClusterOnYarn            StartClusterOnYarn            `help:"Start a cluster using Yarn"`
+	StopClusterOnYarn             StopClusterOnYarn             `help:"Stop a cluster using Yarn"`
+	GetCluster                    GetCluster                    `help:"Get cluster details"`
+	GetClusterOnYarn              GetClusterOnYarn              `help:"Get cluster details (Yarn only)"`
+	GetClusters                   GetClusters                   `help:"List clusters"`
+	GetClusterStatus              GetClusterStatus              `help:"Get cluster status"`
+	DeleteCluster                 DeleteCluster                 `help:"Delete a cluster"`
+	GetJob                        GetJob                        `help:"Get job details"`
+	GetJobs                       GetJobs                       `help:"List jobs"`
+	CreateProject                 CreateProject                 `help:"Create a project"`
+	GetProjects                   GetProjects                   `help:"List projects"`
+	GetProject                    GetProject                    `help:"Get project details"`
+	DeleteProject                 DeleteProject                 `help:"Delete a project"`
+	CreateDatasource              CreateDatasource              `help:"Create a datasource"`
+	GetDatasources                GetDatasources                `help:"List datasources"`
+	GetDatasource                 GetDatasource                 `help:"Get datasource details"`
+	UpdateDatasource              UpdateDatasource              `help:"Update a datasource"`
+	DeleteDatasource              DeleteDatasource              `help:"Delete a datasource"`
+	CreateDataset                 CreateDataset                 `help:"Create a dataset"`
+	GetDatasets                   GetDatasets                   `help:"List datasets"`
+	GetDataset                    GetDataset                    `help:"Get dataset details"`
+	GetDatasetsFromCluster        GetDatasetsFromCluster        `help:"Get a list of datasets on a cluster"`
+	UpdateDataset                 UpdateDataset                 `help:"Update a dataset"`
+	SplitDataset                  SplitDataset                  `help:"Split a dataset"`
+	DeleteDataset                 DeleteDataset                 `help:"Delete a dataset"`
+	BuildModel                    BuildModel                    `help:"Build a model"`
+	BuildModelAuto                BuildModelAuto                `help:"Build an AutoML model"`
+	GetModel                      GetModel                      `help:"Get model details"`
+	GetModels                     GetModels                     `help:"List models"`
+	GetModelsFromCluster          GetModelsFromCluster          `help:"List models from a cluster"`
+	GetAllBinomialSortCriteria    GetAllBinomialSortCriteria    `help:"List sort criteria for a binomial models"`
+	FindModelsBinomial            FindModelsBinomial            `help:"List binomial models"`
+	GetModelBinomial              GetModelBinomial              `help:"View a binomial model"`
+	GetAllMultinomialSortCriteria GetAllMultinomialSortCriteria `help:"List sort criteria for a multinomial models"`
+	FindModelsMultinomial         FindModelsMultinomial         `help:"List multinomial models"`
+	GetModelMultinomial           GetModelMultinomial           `help:"View a binomial model"`
+	GetAllRegressionSortCriteria  GetAllRegressionSortCriteria  `help:"List sort criteria for a regression models"`
+	FindModelsRegression          FindModelsRegression          `help:"List regression models"`
+	GetModelRegression            GetModelRegression            `help:"View a binomial model"`
+	ImportModelFromCluster        ImportModelFromCluster        `help:"Import models from a cluster"`
+	DeleteModel                   DeleteModel                   `help:"Delete a model"`
+	CreateLabel                   CreateLabel                   `help:"Create a label"`
+	UpdateLabel                   UpdateLabel                   `help:"Update a label"`
+	DeleteLabel                   DeleteLabel                   `help:"Delete a label"`
+	LinkLabelWithModel            LinkLabelWithModel            `help:"Label a model"`
+	UnlinkLabelFromModel          UnlinkLabelFromModel          `help:"Remove a label from a model"`
+	GetLabelsForProject           GetLabelsForProject           `help:"List labels for a project, with corresponding models, if any"`
+	StartService                  StartService                  `help:"Start a service"`
+	StopService                   StopService                   `help:"Stop a service"`
+	GetService                    GetService                    `help:"Get service details"`
+	GetServices                   GetServices                   `help:"List services"`
+	GetServicesForModel           GetServicesForModel           `help:"List services for a model"`
+	DeleteService                 DeleteService                 `help:"Delete a service"`
+	AddEngine                     AddEngine                     `help:"Add an engine"`
+	GetEngine                     GetEngine                     `help:"Get engine details"`
+	GetEngines                    GetEngines                    `help:"List engines"`
+	DeleteEngine                  DeleteEngine                  `help:"Delete an engine"`
+	GetAllEntityTypes             GetAllEntityTypes             `help:"List all entity types"`
+	GetAllPermissions             GetAllPermissions             `help:"List all permissions"`
+	GetAllClusterTypes            GetAllClusterTypes            `help:"List all cluster types"`
+	GetPermissionsForRole         GetPermissionsForRole         `help:"List permissions for a role"`
+	GetPermissionsForIdentity     GetPermissionsForIdentity     `help:"List permissions for an identity"`
+	CreateRole                    CreateRole                    `help:"Create a role"`
+	GetRoles                      GetRoles                      `help:"List roles"`
+	GetRolesForIdentity           GetRolesForIdentity           `help:"List roles for an identity"`
+	GetRole                       GetRole                       `help:"Get role details"`
+	GetRoleByName                 GetRoleByName                 `help:"Get role details by name"`
+	UpdateRole                    UpdateRole                    `help:"Update a role"`
+	LinkRoleWithPermissions       LinkRoleWithPermissions       `help:"Link a role with permissions"`
+	LinkRoleWithPermission        LinkRoleWithPermission        `help:"Link a role with a permission"`
+	UnlinkRoleFromPermission      UnlinkRoleFromPermission      `help:"Unlink a role from a permission"`
+	DeleteRole                    DeleteRole                    `help:"Delete a role"`
+	CreateWorkgroup               CreateWorkgroup               `help:"Create a workgroup"`
+	GetWorkgroups                 GetWorkgroups                 `help:"List workgroups"`
+	GetWorkgroupsForIdentity      GetWorkgroupsForIdentity      `help:"List workgroups for an identity"`
+	GetWorkgroup                  GetWorkgroup                  `help:"Get workgroup details"`
+	GetWorkgroupByName            GetWorkgroupByName            `help:"Get workgroup details by name"`
+	UpdateWorkgroup               UpdateWorkgroup               `help:"Update a workgroup"`
+	DeleteWorkgroup               DeleteWorkgroup               `help:"Delete a workgroup"`
+	CreateIdentity                CreateIdentity                `help:"Create an identity"`
+	GetIdentities                 GetIdentities                 `help:"List identities"`
+	GetIdentitiesForWorkgroup     GetIdentitiesForWorkgroup     `help:"List identities for a workgroup"`
+	GetIdentitiesForRole          GetIdentitiesForRole          `help:"List identities for a role"`
+	GetIdentity                   GetIdentity                   `help:"Get identity details"`
+	GetIdentityByName             GetIdentityByName             `help:"Get identity details by name"`
+	LinkIdentityWithWorkgroup     LinkIdentityWithWorkgroup     `help:"Link an identity with a workgroup"`
+	UnlinkIdentityFromWorkgroup   UnlinkIdentityFromWorkgroup   `help:"Unlink an identity from a workgroup"`
+	LinkIdentityWithRole          LinkIdentityWithRole          `help:"Link an identity with a role"`
+	UnlinkIdentityFromRole        UnlinkIdentityFromRole        `help:"Unlink an identity from a role"`
+	UpdateIdentity                UpdateIdentity                `help:"Update an identity"`
+	DeactivateIdentity            DeactivateIdentity            `help:"Deactivate an identity"`
+	ShareEntity                   ShareEntity                   `help:"Share an entity with a workgroup"`
+	GetPrivileges                 GetPrivileges                 `help:"List privileges for an entity"`
+	UnshareEntity                 UnshareEntity                 `help:"Unshare an entity"`
+	GetHistory                    GetHistory                    `help:"List audit trail records for an entity"`
+	CreatePackage                 CreatePackage                 `help:"Create a package for a project"`
+	GetPackages                   GetPackages                   `help:"List packages for a project "`
+	GetPackageDirectories         GetPackageDirectories         `help:"List directories in a project package"`
+	GetPackageFiles               GetPackageFiles               `help:"List files in a project package"`
+	DeletePackage                 DeletePackage                 `help:"Delete a project package"`
+	DeletePackageDirectory        DeletePackageDirectory        `help:"Delete a directory in a project package"`
+	DeletePackageFile             DeletePackageFile             `help:"Delete a file in a project package"`
+	SetAttributesForPackage       SetAttributesForPackage       `help:"Set attributes on a project package"`
+	GetAttributesForPackage       GetAttributesForPackage       `help:"List attributes for a project package"`
 }
 
 // --- API Method Definitions ---
@@ -520,6 +535,10 @@ type GetModelsFromCluster struct {
 	_         int
 	Models    []Model
 }
+type GetAllBinomialSortCriteria struct {
+	_        int
+	Criteria []string
+}
 type FindModelsBinomial struct {
 	ProjectId int64
 	NamePart  string
@@ -529,6 +548,15 @@ type FindModelsBinomial struct {
 	Limit     int64
 	_         int
 	Models    []BinomialModel
+}
+type GetModelBinomial struct {
+	ModelId int64
+	_       int
+	Model   BinomialModel
+}
+type GetAllMultinomialSortCriteria struct {
+	_        int
+	Criteria []string
 }
 type FindModelsMultinomial struct {
 	ProjectId int64
@@ -540,6 +568,15 @@ type FindModelsMultinomial struct {
 	_         int
 	Models    []MultinomialModel
 }
+type GetModelMultinomial struct {
+	ModelId int64
+	_       int
+	Model   MultinomialModel
+}
+type GetAllRegressionSortCriteria struct {
+	_        int
+	Criteria []string
+}
 type FindModelsRegression struct {
 	ProjectId int64
 	NamePart  string
@@ -549,6 +586,11 @@ type FindModelsRegression struct {
 	Limit     int64
 	_         int
 	Models    []RegressionModel
+}
+type GetModelRegression struct {
+	ModelId int64
+	_       int
+	Model   RegressionModel
 }
 type ImportModelFromCluster struct {
 	ClusterId int64
@@ -590,10 +632,10 @@ type GetLabelsForProject struct {
 	Labels    []Label
 }
 type StartService struct {
-	ModelId int64
-	Port    int
-	_       int
-	Service ScoringService
+	ModelId     int64
+	PackageName string
+	_           int
+	ServiceId   int64
 }
 type StopService struct {
 	ServiceId int64
@@ -821,4 +863,61 @@ type GetHistory struct {
 	Limit        int64
 	_            int
 	History      []EntityHistory
+}
+
+type CreatePackage struct {
+	ProjectId int64
+	Name      string
+}
+
+type GetPackages struct {
+	ProjectId int64
+	_         int
+	Packages  []string
+}
+
+type GetPackageDirectories struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+	_            int
+	Directories  []string
+}
+
+type GetPackageFiles struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+	_            int
+	Files        []string
+}
+
+type DeletePackage struct {
+	ProjectId int64
+	Name      string
+}
+
+type DeletePackageDirectory struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+}
+
+type DeletePackageFile struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+}
+
+type SetAttributesForPackage struct {
+	ProjectId   int64
+	PackageName string
+	Attributes  string
+}
+
+type GetAttributesForPackage struct {
+	ProjectId   int64
+	PackageName string
+	_           int
+	Attributes  string
 }

@@ -522,14 +522,32 @@ export interface Service {
   // List models from a cluster
   getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
   
+  // List sort criteria for a binomial models
+  getAllBinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
+  
   // List binomial models
   findModelsBinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void) => void
+  
+  // View a binomial model
+  getModelBinomial: (modelId: number, go: (error: Error, model: BinomialModel) => void) => void
+  
+  // List sort criteria for a multinomial models
+  getAllMultinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
   
   // List multinomial models
   findModelsMultinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: MultinomialModel[]) => void) => void
   
+  // View a binomial model
+  getModelMultinomial: (modelId: number, go: (error: Error, model: MultinomialModel) => void) => void
+  
+  // List sort criteria for a regression models
+  getAllRegressionSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
+  
   // List regression models
   findModelsRegression: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void) => void
+  
+  // View a binomial model
+  getModelRegression: (modelId: number, go: (error: Error, model: RegressionModel) => void) => void
   
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
@@ -556,7 +574,7 @@ export interface Service {
   getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
   
   // Start a service
-  startService: (modelId: number, port: number, go: (error: Error, service: ScoringService) => void) => void
+  startService: (modelId: number, packageName: string, go: (error: Error, serviceId: number) => void) => void
   
   // Stop a service
   stopService: (serviceId: number, go: (error: Error) => void) => void
@@ -698,6 +716,33 @@ export interface Service {
   
   // List audit trail records for an entity
   getHistory: (entityTypeId: number, entityId: number, offset: number, limit: number, go: (error: Error, history: EntityHistory[]) => void) => void
+  
+  // Create a package for a project
+  createPackage: (projectId: number, name: string, go: (error: Error) => void) => void
+  
+  // List packages for a project 
+  getPackages: (projectId: number, go: (error: Error, packages: string[]) => void) => void
+  
+  // List directories in a project package
+  getPackageDirectories: (projectId: number, packageName: string, relativePath: string, go: (error: Error, directories: string[]) => void) => void
+  
+  // List files in a project package
+  getPackageFiles: (projectId: number, packageName: string, relativePath: string, go: (error: Error, files: string[]) => void) => void
+  
+  // Delete a project package
+  deletePackage: (projectId: number, name: string, go: (error: Error) => void) => void
+  
+  // Delete a directory in a project package
+  deletePackageDirectory: (projectId: number, packageName: string, relativePath: string, go: (error: Error) => void) => void
+  
+  // Delete a file in a project package
+  deletePackageFile: (projectId: number, packageName: string, relativePath: string, go: (error: Error) => void) => void
+  
+  // Set attributes on a project package
+  setAttributesForPackage: (projectId: number, packageName: string, attributes: string, go: (error: Error) => void) => void
+  
+  // List attributes for a project package
+  getAttributesForPackage: (projectId: number, packageName: string, go: (error: Error, attributes: string) => void) => void
   
 }
 
@@ -1155,6 +1200,16 @@ interface GetModelsFromClusterOut {
   
 }
 
+interface GetAllBinomialSortCriteriaIn {
+  
+}
+
+interface GetAllBinomialSortCriteriaOut {
+  
+  criteria: string[]
+  
+}
+
 interface FindModelsBinomialIn {
   
   project_id: number
@@ -1174,6 +1229,28 @@ interface FindModelsBinomialIn {
 interface FindModelsBinomialOut {
   
   models: BinomialModel[]
+  
+}
+
+interface GetModelBinomialIn {
+  
+  model_id: number
+  
+}
+
+interface GetModelBinomialOut {
+  
+  model: BinomialModel
+  
+}
+
+interface GetAllMultinomialSortCriteriaIn {
+  
+}
+
+interface GetAllMultinomialSortCriteriaOut {
+  
+  criteria: string[]
   
 }
 
@@ -1199,6 +1276,28 @@ interface FindModelsMultinomialOut {
   
 }
 
+interface GetModelMultinomialIn {
+  
+  model_id: number
+  
+}
+
+interface GetModelMultinomialOut {
+  
+  model: MultinomialModel
+  
+}
+
+interface GetAllRegressionSortCriteriaIn {
+  
+}
+
+interface GetAllRegressionSortCriteriaOut {
+  
+  criteria: string[]
+  
+}
+
 interface FindModelsRegressionIn {
   
   project_id: number
@@ -1218,6 +1317,18 @@ interface FindModelsRegressionIn {
 interface FindModelsRegressionOut {
   
   models: RegressionModel[]
+  
+}
+
+interface GetModelRegressionIn {
+  
+  model_id: number
+  
+}
+
+interface GetModelRegressionOut {
+  
+  model: RegressionModel
   
 }
 
@@ -1329,13 +1440,13 @@ interface StartServiceIn {
   
   model_id: number
   
-  port: number
+  package_name: string
   
 }
 
 interface StartServiceOut {
   
-  service: ScoringService
+  service_id: number
   
 }
 
@@ -1923,6 +2034,130 @@ interface GetHistoryOut {
   
 }
 
+interface CreatePackageIn {
+  
+  project_id: number
+  
+  name: string
+  
+}
+
+interface CreatePackageOut {
+  
+}
+
+interface GetPackagesIn {
+  
+  project_id: number
+  
+}
+
+interface GetPackagesOut {
+  
+  packages: string[]
+  
+}
+
+interface GetPackageDirectoriesIn {
+  
+  project_id: number
+  
+  package_name: string
+  
+  relative_path: string
+  
+}
+
+interface GetPackageDirectoriesOut {
+  
+  directories: string[]
+  
+}
+
+interface GetPackageFilesIn {
+  
+  project_id: number
+  
+  package_name: string
+  
+  relative_path: string
+  
+}
+
+interface GetPackageFilesOut {
+  
+  files: string[]
+  
+}
+
+interface DeletePackageIn {
+  
+  project_id: number
+  
+  name: string
+  
+}
+
+interface DeletePackageOut {
+  
+}
+
+interface DeletePackageDirectoryIn {
+  
+  project_id: number
+  
+  package_name: string
+  
+  relative_path: string
+  
+}
+
+interface DeletePackageDirectoryOut {
+  
+}
+
+interface DeletePackageFileIn {
+  
+  project_id: number
+  
+  package_name: string
+  
+  relative_path: string
+  
+}
+
+interface DeletePackageFileOut {
+  
+}
+
+interface SetAttributesForPackageIn {
+  
+  project_id: number
+  
+  package_name: string
+  
+  attributes: string
+  
+}
+
+interface SetAttributesForPackageOut {
+  
+}
+
+interface GetAttributesForPackageIn {
+  
+  project_id: number
+  
+  package_name: string
+  
+}
+
+interface GetAttributesForPackageOut {
+  
+  attributes: string
+  
+}
+
 
 
 // --- Client Stub ---
@@ -2324,6 +2559,18 @@ export function getModelsFromCluster(clusterId: number, frameKey: string, go: (e
   });
 }
 
+export function getAllBinomialSortCriteria(go: (error: Error, criteria: string[]) => void): void {
+  const req: GetAllBinomialSortCriteriaIn = {  };
+  Proxy.Call("GetAllBinomialSortCriteria", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetAllBinomialSortCriteriaOut = <GetAllBinomialSortCriteriaOut> data;
+      return go(null, d.criteria);
+    }
+  });
+}
+
 export function findModelsBinomial(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void): void {
   const req: FindModelsBinomialIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
   Proxy.Call("FindModelsBinomial", req, function(error, data) {
@@ -2332,6 +2579,30 @@ export function findModelsBinomial(projectId: number, namePart: string, sortBy: 
     } else {
       const d: FindModelsBinomialOut = <FindModelsBinomialOut> data;
       return go(null, d.models);
+    }
+  });
+}
+
+export function getModelBinomial(modelId: number, go: (error: Error, model: BinomialModel) => void): void {
+  const req: GetModelBinomialIn = { model_id: modelId };
+  Proxy.Call("GetModelBinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetModelBinomialOut = <GetModelBinomialOut> data;
+      return go(null, d.model);
+    }
+  });
+}
+
+export function getAllMultinomialSortCriteria(go: (error: Error, criteria: string[]) => void): void {
+  const req: GetAllMultinomialSortCriteriaIn = {  };
+  Proxy.Call("GetAllMultinomialSortCriteria", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetAllMultinomialSortCriteriaOut = <GetAllMultinomialSortCriteriaOut> data;
+      return go(null, d.criteria);
     }
   });
 }
@@ -2348,6 +2619,30 @@ export function findModelsMultinomial(projectId: number, namePart: string, sortB
   });
 }
 
+export function getModelMultinomial(modelId: number, go: (error: Error, model: MultinomialModel) => void): void {
+  const req: GetModelMultinomialIn = { model_id: modelId };
+  Proxy.Call("GetModelMultinomial", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetModelMultinomialOut = <GetModelMultinomialOut> data;
+      return go(null, d.model);
+    }
+  });
+}
+
+export function getAllRegressionSortCriteria(go: (error: Error, criteria: string[]) => void): void {
+  const req: GetAllRegressionSortCriteriaIn = {  };
+  Proxy.Call("GetAllRegressionSortCriteria", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetAllRegressionSortCriteriaOut = <GetAllRegressionSortCriteriaOut> data;
+      return go(null, d.criteria);
+    }
+  });
+}
+
 export function findModelsRegression(projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void): void {
   const req: FindModelsRegressionIn = { project_id: projectId, name_part: namePart, sort_by: sortBy, ascending: ascending, offset: offset, limit: limit };
   Proxy.Call("FindModelsRegression", req, function(error, data) {
@@ -2356,6 +2651,18 @@ export function findModelsRegression(projectId: number, namePart: string, sortBy
     } else {
       const d: FindModelsRegressionOut = <FindModelsRegressionOut> data;
       return go(null, d.models);
+    }
+  });
+}
+
+export function getModelRegression(modelId: number, go: (error: Error, model: RegressionModel) => void): void {
+  const req: GetModelRegressionIn = { model_id: modelId };
+  Proxy.Call("GetModelRegression", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetModelRegressionOut = <GetModelRegressionOut> data;
+      return go(null, d.model);
     }
   });
 }
@@ -2456,14 +2763,14 @@ export function getLabelsForProject(projectId: number, go: (error: Error, labels
   });
 }
 
-export function startService(modelId: number, port: number, go: (error: Error, service: ScoringService) => void): void {
-  const req: StartServiceIn = { model_id: modelId, port: port };
+export function startService(modelId: number, packageName: string, go: (error: Error, serviceId: number) => void): void {
+  const req: StartServiceIn = { model_id: modelId, package_name: packageName };
   Proxy.Call("StartService", req, function(error, data) {
     if (error) {
       return go(error, null);
     } else {
       const d: StartServiceOut = <StartServiceOut> data;
-      return go(null, d.service);
+      return go(null, d.service_id);
     }
   });
 }
@@ -3028,6 +3335,114 @@ export function getHistory(entityTypeId: number, entityId: number, offset: numbe
     } else {
       const d: GetHistoryOut = <GetHistoryOut> data;
       return go(null, d.history);
+    }
+  });
+}
+
+export function createPackage(projectId: number, name: string, go: (error: Error) => void): void {
+  const req: CreatePackageIn = { project_id: projectId, name: name };
+  Proxy.Call("CreatePackage", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: CreatePackageOut = <CreatePackageOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function getPackages(projectId: number, go: (error: Error, packages: string[]) => void): void {
+  const req: GetPackagesIn = { project_id: projectId };
+  Proxy.Call("GetPackages", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetPackagesOut = <GetPackagesOut> data;
+      return go(null, d.packages);
+    }
+  });
+}
+
+export function getPackageDirectories(projectId: number, packageName: string, relativePath: string, go: (error: Error, directories: string[]) => void): void {
+  const req: GetPackageDirectoriesIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
+  Proxy.Call("GetPackageDirectories", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetPackageDirectoriesOut = <GetPackageDirectoriesOut> data;
+      return go(null, d.directories);
+    }
+  });
+}
+
+export function getPackageFiles(projectId: number, packageName: string, relativePath: string, go: (error: Error, files: string[]) => void): void {
+  const req: GetPackageFilesIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
+  Proxy.Call("GetPackageFiles", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetPackageFilesOut = <GetPackageFilesOut> data;
+      return go(null, d.files);
+    }
+  });
+}
+
+export function deletePackage(projectId: number, name: string, go: (error: Error) => void): void {
+  const req: DeletePackageIn = { project_id: projectId, name: name };
+  Proxy.Call("DeletePackage", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: DeletePackageOut = <DeletePackageOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function deletePackageDirectory(projectId: number, packageName: string, relativePath: string, go: (error: Error) => void): void {
+  const req: DeletePackageDirectoryIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
+  Proxy.Call("DeletePackageDirectory", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: DeletePackageDirectoryOut = <DeletePackageDirectoryOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function deletePackageFile(projectId: number, packageName: string, relativePath: string, go: (error: Error) => void): void {
+  const req: DeletePackageFileIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
+  Proxy.Call("DeletePackageFile", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: DeletePackageFileOut = <DeletePackageFileOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function setAttributesForPackage(projectId: number, packageName: string, attributes: string, go: (error: Error) => void): void {
+  const req: SetAttributesForPackageIn = { project_id: projectId, package_name: packageName, attributes: attributes };
+  Proxy.Call("SetAttributesForPackage", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: SetAttributesForPackageOut = <SetAttributesForPackageOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function getAttributesForPackage(projectId: number, packageName: string, go: (error: Error, attributes: string) => void): void {
+  const req: GetAttributesForPackageIn = { project_id: projectId, package_name: packageName };
+  Proxy.Call("GetAttributesForPackage", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetAttributesForPackageOut = <GetAttributesForPackageOut> data;
+      return go(null, d.attributes);
     }
   });
 }

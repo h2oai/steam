@@ -3,15 +3,17 @@ package cli2
 import (
 	"bufio"
 	"fmt"
+	"log"
+	"os"
+	"path"
+	"strconv"
+	"strings"
+	"syscall"
+
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
-	"log"
-	"os"
-	"path"
-	"strings"
-	"syscall"
 )
 
 var loginHelp = `
@@ -127,6 +129,7 @@ func serveMaster(c *context) *cobra.Command {
 		clusterProxyAddress       string
 		compilationServiceAddress string
 		scoringServiceHost        string
+		scoringServicePortsString string
 		enableProfiler            bool
 		yarnEnableKerberos        bool
 		yarnUserName              string
@@ -141,6 +144,25 @@ func serveMaster(c *context) *cobra.Command {
 	opts := master.DefaultOpts
 
 	cmd := newCmd(c, serveMasterHelp, func(c *context, args []string) {
+		ports := strings.Split(scoringServicePortsString, ":")
+		if len(ports) != 2 {
+			log.Fatalln("Invalid usage of scoring service ports range. See 'steam help serve master'.")
+		}
+		var scoringServicePorts [2]int
+		for i, port := range ports {
+			var err error
+			scoringServicePorts[i], err = strconv.Atoi(port)
+			if err != nil {
+				log.Fatalln("Invalid usage of scoring service ports range. See 'steam help serve master'.")
+			}
+			if scoringServicePorts[i] < 1025 || scoringServicePorts[i] > 65535 {
+				log.Fatalln("Invalid port range.")
+			}
+		}
+		if scoringServicePorts[0] > scoringServicePorts[1] {
+			log.Fatalln("Invalid port range.")
+		}
+
 		master.Run(c.version, c.buildDate, master.Opts{
 			webAddress,
 			webTLSCertPath,
@@ -150,6 +172,7 @@ func serveMaster(c *context) *cobra.Command {
 			clusterProxyAddress,
 			compilationServiceAddress,
 			scoringServiceHost,
+			scoringServicePorts,
 			enableProfiler,
 			master.YarnOpts{
 				yarnEnableKerberos,
@@ -174,6 +197,8 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
 	cmd.Flags().StringVar(&scoringServiceHost, "scoring-service-address", opts.ScoringServiceHost, "Address to start scoring services on (\"<ip>\")")
+	// TODO: this uses a hardcoded port range, not the default const
+	cmd.Flags().StringVar(&scoringServicePortsString, "scoring-service-port-range", "1025:65535", "Specified port range to create scoring services on. (\"<from>:<to>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
 	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.Yarn.Username, "Username to enable Kerberos")
@@ -207,23 +232,86 @@ engine [enginePath]
 Deploy an H2O engine to Steam.
 Examples:
 
-	$ steam deploy engine path/to/engine
+	$ steam deploy engine --file-path=path/to/engine
 `
 
 func deployEngine(c *context) *cobra.Command {
+	var (
+		filePath string
+	)
 	cmd := newCmd(c, deployEngineHelp, func(c *context, args []string) {
-		if len(args) != 1 {
-			log.Fatalln("Incorrect number of arguments. See 'steam help deploy engine'.")
+		attrs := map[string]string{
+			"type": fs.KindEngine,
 		}
 
-		enginePath := args[0]
-
-		if err := c.uploadFile(enginePath, fs.KindEngine); err != nil {
+		if err := c.transmitFile(filePath, attrs); err != nil {
 			log.Fatalln(err)
 		}
 
-		log.Println("Engine deployed:", path.Base(enginePath))
+		log.Println("Engine deployed:", path.Base(filePath))
 	})
+
+	cmd.Flags().StringVar(&filePath, "file-path", "", "Path to engine")
+
+	return cmd
+}
+
+var uploadHelp = `
+upload [resource-type]
+Upload a resource of the specified type.
+Examples:
+
+	$ steam upload file
+`
+
+func upload(c *context) *cobra.Command {
+	cmd := newCmd(c, uploadHelp, nil)
+	cmd.AddCommand(uploadFile(c))
+	return cmd
+}
+
+var uploadFileHelp = `
+file [path]
+Upload an H2O engine to Steam.
+Examples:
+
+	$ steam upload engine path/to/engine
+`
+
+func uploadFile(c *context) *cobra.Command {
+	var (
+		filePath     string
+		projectId    int64
+		packageName  string
+		relativePath string
+	)
+	cmd := newCmd(c, uploadFileHelp, func(c *context, args []string) {
+
+		if projectId <= 0 {
+			log.Fatalln("Invalid project Id")
+		}
+
+		if err := fs.ValidateName(packageName); err != nil {
+			log.Fatalln("Invalid package name:", err)
+		}
+
+		attrs := map[string]string{
+			"type":          fs.KindFile,
+			"project-id":    strconv.FormatInt(projectId, 10),
+			"package-name":  packageName,
+			"relative-path": relativePath,
+		}
+		if err := c.transmitFile(filePath, attrs); err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Println("File uploaded:", path.Base(filePath))
+	})
+
+	cmd.Flags().StringVar(&filePath, "file-path", "", "File to be uploaded")
+	cmd.Flags().Int64Var(&projectId, "project-id", 0, "Target project id")
+	cmd.Flags().StringVar(&packageName, "package-name", "", "Target package")
+	cmd.Flags().StringVar(&relativePath, "relative-path", "", "Relative path to copy file to")
 
 	return cmd
 }
