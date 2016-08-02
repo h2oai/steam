@@ -28,72 +28,75 @@ const (
 	fileTypePythonOther = "pythonextra"
 )
 
-type Service struct {
-	Address string
+func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName, artifact, packageName string) (string, error) {
+
+	genModelPath := fs.GetGenModelPath(wd, modelId)
+	javaModelPath := fs.GetJavaModelPath(wd, modelId, modelLogicalName)
+
+	var targetFile, slug string
+
+	switch artifact {
+	case ArtifactWar:
+		targetFile = fs.GetWarFilePath(wd, modelId, modelLogicalName)
+		slug = "makewar"
+	case ArtifactPythonWar:
+		targetFile = fs.GetPythonWarFilePath(wd, modelId, modelLogicalName)
+		slug = "makepythonwar"
+	case ArtifactJar:
+		targetFile = fs.GetModelJarFilePath(wd, modelId, modelLogicalName)
+		slug = "callCompiler"
+	}
+
+	if _, err := os.Stat(targetFile); os.IsNotExist(err) {
+	} else {
+		return targetFile, nil
+	}
+
+	// ping to check if service is up
+	if _, err := http.Get(toUrl(address, "ping")); err != nil {
+		return "", fmt.Errorf("Failed connecting to scoring service builder: %s", err)
+	}
+
+	packageName = strings.TrimSpace(packageName)
+
+	var pythonMainFilePath string
+	var pythonOtherFilePaths []string
+
+	if artifact == ArtifactPythonWar && len(packageName) > 0 {
+		var err error
+		pythonMainFilePath, pythonOtherFilePaths, err = getPythonFilePaths(wd, projectId, packageName)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if err := callCompiler(toUrl(address, slug), targetFile, javaModelPath, genModelPath, pythonMainFilePath, pythonOtherFilePaths); err != nil {
+		return "", err
+	}
+
+	return targetFile, nil
 }
 
-func NewService(address string) *Service {
-	return &Service{
-		address,
-	}
-}
-
-func (s *Service) urlFor(slug string) string {
-	return (&url.URL{Scheme: "http", Host: s.Address, Path: slug}).String()
-}
-
-func (s *Service) Ping() error {
-	if _, err := http.Get(s.urlFor("ping")); err != nil {
-		return fmt.Errorf("Failed connecting to scoring service builder: %s", err)
-	}
-	return nil
-}
-
-func attachFile(w *multipart.Writer, filePath, fileType string) error {
-	dst, err := w.CreateFormFile(fileType, path.Base(filePath))
-	if err != nil {
-		return fmt.Errorf("Failed writing to buffer: %v", err)
-	}
-	src, err := os.Open(filePath)
-	if err != nil {
-		return fmt.Errorf("Failed opening file: %v", err)
-	}
-	if _, err := io.Copy(dst, src); err != nil {
-		return fmt.Errorf("Failed copying file: %v", err)
-	}
-
-	return nil
-}
-
-func compile(url, javaFilePath, javaDepPath, pythonMainFilePath string, pythonOtherFilePaths []string) (*http.Response, error) {
-	javaFilePath, err := fs.ResolvePath(javaFilePath)
-	if err != nil {
-		return nil, err
-	}
-	javaDepPath, err = fs.ResolvePath(javaDepPath)
-	if err != nil {
-		return nil, err
-	}
-
+func callCompiler(url, targetFile, javaFilePath, javaDepPath, pythonMainFilePath string, pythonOtherFilePaths []string) error {
 	b := &bytes.Buffer{}
 	writer := multipart.NewWriter(b)
 
 	if err := attachFile(writer, javaFilePath, fileTypeJava); err != nil {
-		return nil, fmt.Errorf("Failed attaching Java file to compilation request: %s", err)
+		return fmt.Errorf("Failed attaching Java file to compilation request: %s", err)
 	}
 
 	if err := attachFile(writer, javaDepPath, fileTypeJavaDep); err != nil {
-		return nil, fmt.Errorf("Failed attaching Java dependency to compilation request: %s", err)
+		return fmt.Errorf("Failed attaching Java dependency to compilation request: %s", err)
 	}
 
 	if len(pythonMainFilePath) > 0 {
 		if err := attachFile(writer, pythonMainFilePath, fileTypePythonMain); err != nil {
-			return nil, fmt.Errorf("Failed attaching Python main file to compilation request: %s", err)
+			return fmt.Errorf("Failed attaching Python main file to compilation request: %s", err)
 		}
 		if pythonOtherFilePaths != nil && len(pythonOtherFilePaths) > 0 {
 			for _, p := range pythonOtherFilePaths {
 				if err := attachFile(writer, p, fileTypePythonOther); err != nil {
-					return nil, fmt.Errorf("Failed attaching Python file to compilation request: %s", err)
+					return fmt.Errorf("Failed attaching Python file to compilation request: %s", err)
 				}
 			}
 		}
@@ -104,21 +107,32 @@ func compile(url, javaFilePath, javaDepPath, pythonMainFilePath string, pythonOt
 
 	res, err := http.Post(url, ct, b)
 	if err != nil {
-		return nil, fmt.Errorf("Failed making compilation request: %v", err)
+		return fmt.Errorf("Failed making compilation request: %v", err)
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return nil, fmt.Errorf("Failed reading compilation response: %v", err)
+			return fmt.Errorf("Failed reading compilation response: %v", err)
 		}
-		return nil, fmt.Errorf("Failed compiling scoring service: %s / %s", res.Status, string(body))
+		return fmt.Errorf("Failed compiling scoring service: %s / %s", res.Status, string(body))
 	}
 
-	return res, nil
+	dst, err := os.OpenFile(targetFile, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return fmt.Errorf("Failed creating compiled artifact %s: %v", targetFile, err)
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, res.Body); err != nil {
+		return fmt.Errorf("Failed writing compiled artifact %s: %v", targetFile, err)
+	}
+
+	return nil
 }
 
-func (s *Service) GetPythonFilePaths(wd string, projectId int64, packageName string) (string, []string, error) {
+func getPythonFilePaths(wd string, projectId int64, packageName string) (string, []string, error) {
 	var pythonMainFilePath string
 	var pythonOtherFilePaths []string
 
@@ -168,61 +182,22 @@ func (s *Service) GetPythonFilePaths(wd string, projectId int64, packageName str
 	return pythonMainFilePath, pythonOtherFilePaths, nil
 }
 
-func (s *Service) CompileModel(wd string, projectId, modelId int64, modelLogicalName, artifact, packageName string) (string, error) {
+func toUrl(address, slug string) string {
+	return (&url.URL{Scheme: "http", Host: address, Path: slug}).String()
+}
 
-	genModelPath := fs.GetGenModelPath(wd, modelId)
-	javaModelPath := fs.GetJavaModelPath(wd, modelId, modelLogicalName)
-
-	var targetFile, slug string
-
-	switch artifact {
-	case ArtifactWar:
-		targetFile = fs.GetWarFilePath(wd, modelId, modelLogicalName)
-		slug = "makewar"
-	case ArtifactPythonWar:
-		targetFile = fs.GetPythonWarFilePath(wd, modelId, modelLogicalName)
-		slug = "makepythonwar"
-	case ArtifactJar:
-		targetFile = fs.GetModelJarFilePath(wd, modelId, modelLogicalName)
-		slug = "compile"
-	}
-
-	if _, err := os.Stat(targetFile); os.IsNotExist(err) {
-	} else {
-		return targetFile, nil
-	}
-
-	if err := s.Ping(); err != nil {
-		return "", err
-	}
-
-	packageName = strings.TrimSpace(packageName)
-
-	var pythonMainFilePath string
-	var pythonOtherFilePaths []string
-
-	if artifact == ArtifactPythonWar && len(packageName) > 0 {
-		var err error
-		pythonMainFilePath, pythonOtherFilePaths, err = s.GetPythonFilePaths(wd, projectId, packageName)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	res, err := compile(s.urlFor(slug), javaModelPath, genModelPath, pythonMainFilePath, pythonOtherFilePaths)
+func attachFile(w *multipart.Writer, filePath, fileType string) error {
+	dst, err := w.CreateFormFile(fileType, path.Base(filePath))
 	if err != nil {
-		return "", err
+		return fmt.Errorf("Failed creating form attachment: %s", err)
 	}
-	defer res.Body.Close()
-
-	dst, err := os.OpenFile(targetFile, os.O_WRONLY|os.O_CREATE, 0666)
+	src, err := os.Open(filePath)
 	if err != nil {
-		return "", fmt.Errorf("Download file createion failed: %s: %v", targetFile, err)
+		return fmt.Errorf("Failed opening file for attachment: %s", err)
 	}
-	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		return fmt.Errorf("Failed attaching file: %s", err)
+	}
 
-	if _, err := io.Copy(dst, res.Body); err != nil {
-		return "", fmt.Errorf("Download file copy failed: Service to %s: %v", targetFile, err)
-	}
-	return targetFile, nil
+	return nil
 }
