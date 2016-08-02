@@ -49,7 +49,7 @@ export class Models extends React.Component<Props & DispatchProps, any> {
   onFilter(filters, name, offset) {
     this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc', offset);
   }
-  
+
   render(): React.ReactElement<HTMLDivElement> {
     if (!this.props.leaderboard) {
       return <div></div>;
@@ -57,7 +57,7 @@ export class Models extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="projects">
         <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)}
-                     modelCategory={this.state.modelCategory} sortCriteria={this.props.sortCriteria} onFilter={this.onFilter.bind(this)}></Leaderboard>
+                     modelCategory={this.state.modelCategory} sortCriteria={this.props.sortCriteria} onFilter={this.onFilter.bind(this)} deployModel={this.props.deployModel}></Leaderboard>
       </div>
     );
   }
@@ -74,7 +74,7 @@ function mapStateToProps(state: any): any {
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch),
-    deployModel: bindActionCreators(deployModel, dispatch)
+    deployModel: bindActionCreators(deployModel, dispatch),
     fetchSortCriteria: bindActionCreators(fetchSortCriteria, dispatch),
     fetchProject: bindActionCreators(fetchProject, dispatch)
   };
