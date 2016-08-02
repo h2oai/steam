@@ -149,10 +149,12 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="model-details">
-        <ModelSelectionModal open={this.state.isModelSelectionModalOpen} onFilter={this.onFilter.bind(this)}
+        <ModelSelectionModal open={this.state.isModelSelectionModalOpen}
+                             onFilter={this.onFilter.bind(this)}
                              models={this.props.models}
                              sortCriteria={this.props.sortCriteria}
-                             onSelectModel={this.onSelectModel.bind(this)} onCancel={this.onCancel.bind(this)}/>
+                             onSelectModel={this.onSelectModel.bind(this)}
+                             onCancel={this.onCancel.bind(this)}/>
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
                      onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
         <PageHeader>

@@ -10,20 +10,13 @@ import PageHeader from '../../Projects/components/PageHeader';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { Model, RegressionModel, MultinomialModel, BinomialModel } from '../../Proxy/Proxy';
-import { fetchModelsFromProject } from '../../Projects/actions/projects.actions';
 import '../styles/modelselectionmodal.scss';
-import { fetchLeaderboard } from '../../Models/actions/leaderboard.actions';
 
 interface Props {
   open: boolean,
   models: any,
-  projectId: string,
   onSelectModel: Function,
   onCancel: Function,
-  project: any,
   onFilter: Function,
   sortCriteria: string[]
 }
