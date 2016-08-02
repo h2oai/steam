@@ -1991,20 +1991,34 @@ func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageNam
 
 	return nil
 }
-func (s *Service) SetAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string, value string) error {
+
+func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	if err := fs.SetPackageAttributes(s.workingDir, projectId, packageName, []byte(attributes)); err != nil {
+		return err
+	}
 
 	return nil
 }
-func (s *Service) GetAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string) (string, error) {
-	return "", nil
-}
+
 func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return "", err
+	}
 
-	return "", nil
-}
-func (s *Service) DeleteAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string) error {
+	// XXX check project access
 
-	return nil
+	b, err := fs.GetPackageAttributes(s.workingDir, projectId, packageName)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }
 
 // Helper function to convert from int to bytes

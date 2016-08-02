@@ -152,6 +152,46 @@ func GetWwwRoot(wd string) string {
 	return path.Join(wd, WwwDir)
 }
 
+
+func MapToJson(attrs map[string]string) ([]byte, error) {
+	b, err := json.Marshal(attrs)
+	if err != nil {
+		return nil, fmt.Errorf("Failed encoding attributes: %s", err)
+	}
+	return b, nil
+}
+
+func JsonToMap(b []byte) (map[string]string, error) {
+	decoder := json.NewDecoder(bytes.NewBuffer(b))
+	var attrs map[string]string
+	for {
+		if err := decoder.Decode(&attrs); err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, fmt.Errorf("Failed decoding attributes: %s", err)
+		}
+	}
+	return attrs, nil
+}
+
+func GetPackageAttributes(wd string, projectId int64, packageName string) ([]byte, error) {
+	b, err := ioutil.ReadFile(path.Join(GetPackagePath(wd, projectId, packageName), ".steam"))
+	if err != nil {
+		return nil, fmt.Errorf("Failed reading attributes: %s", err)
+	}
+	return b, nil
+}
+
+func SetPackageAttributes(wd string, projectId int64, packageName string, b []byte) error {
+	packagePath := GetPackagePath(wd, projectId, packageName)
+	dotFilePath := path.Join(packagePath, ".steam")
+
+	if err := ioutil.WriteFile(dotFilePath, b, FilePerm); err != nil {
+		return fmt.Errorf("Failed writing attributes: %s", err)
+	}
+	return nil
+}
+
 func GetModelPath(wd string, modelId int64) string {
 	location := strconv.FormatInt(modelId, 10)
 	return path.Join(wd, ModelDir, location)
