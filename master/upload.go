@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steamY/master/data"
 	srvweb "github.com/h2oai/steamY/srv/web"
 )
 
@@ -17,10 +19,11 @@ type UploadHandler struct {
 	az               az.Az
 	workingDirectory string
 	webService       srvweb.Service
+	ds               *data.Datastore
 }
 
-func newUploadHandler(az az.Az, wd string, webService srvweb.Service) *UploadHandler {
-	return &UploadHandler{az, wd, webService}
+func newUploadHandler(az az.Az, wd string, webService srvweb.Service, ds *data.Datastore) *UploadHandler {
+	return &UploadHandler{az, wd, webService, ds}
 }
 
 func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -29,12 +32,65 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pz, azerr := s.az.Identify(r)
 	if azerr != nil {
 		log.Println(azerr)
-		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusForbidden)
+		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusUnauthorized)
+		return
 	}
 
 	r.ParseMultipartForm(0)
 
-	kind := r.FormValue("kind")
+	typ := r.FormValue("type")
+
+	var dstDir string
+
+	switch typ {
+	case fs.KindEngine:
+		if err := pz.CheckPermission(s.ds.Permissions.ManageEngine); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		dstDir = path.Join(s.workingDirectory, fs.LibDir, typ)
+
+	case fs.KindFile:
+		if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		projectIdValue := r.FormValue("project-id")
+		projectId, err := strconv.ParseInt(projectIdValue, 10, 64)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Invalid project id: %s", projectIdValue), http.StatusBadRequest)
+			return
+		}
+
+		if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		packageName := r.FormValue("package-name")
+		if err := fs.ValidateName(packageName); err != nil {
+			http.Error(w, fmt.Sprintf("Invalid package name: %s", err), http.StatusBadRequest)
+			return
+		}
+
+		packagePath := fs.GetPackagePath(s.workingDirectory, projectId, packageName)
+		if !fs.DirExists(packagePath) {
+			http.Error(w, fmt.Sprintf("Package %s does not exist", packageName), http.StatusBadRequest)
+			return
+		}
+
+		relativePath := r.FormValue("relative-path")
+		dstDir, err = fs.GetPackageRelativePath(s.workingDirectory, projectId, packageName, relativePath)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Invalid relative path: %s", err), http.StatusBadRequest)
+		}
+
+	default:
+		http.Error(w, fmt.Sprintf("Invalid upload type: %s", typ), http.StatusBadRequest)
+		return
+	}
 
 	src, handler, err := r.FormFile("file")
 	if err != nil {
@@ -47,8 +103,8 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("Remote file: ", handler.Filename)
 
 	fileBaseName := path.Base(handler.Filename)
+	dstPath := path.Join(dstDir, fileBaseName)
 
-	dstPath := path.Join(s.workingDirectory, fs.LibDir, kind, fileBaseName)
 	if err := os.MkdirAll(path.Dir(dstPath), fs.DirPerm); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
@@ -64,12 +120,12 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer dst.Close()
 	io.Copy(dst, src)
 
-	if _, err := s.webService.AddEngine(pz, fileBaseName, dstPath); err != nil {
-		log.Println("Failed saving engine to datastore", err)
-		http.Error(w, fmt.Sprintf("Error saving engine to datastore: %v", err), http.StatusInternalServerError)
-		return
+	switch typ {
+	case fs.KindEngine:
+		if _, err := s.webService.AddEngine(pz, fileBaseName, dstPath); err != nil {
+			log.Println("Failed saving engine to datastore", err)
+			http.Error(w, fmt.Sprintf("Error saving engine to datastore: %v", err), http.StatusInternalServerError)
+			return
+		}
 	}
-
-	log.Println("Engine uploaded:", dstPath)
-
 }

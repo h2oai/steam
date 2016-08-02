@@ -37,9 +37,21 @@ export function fetchModelOverview(modelId: number): Function {
   return (dispatch) => {
     dispatch(requestModelOverview());
     Remote.getModel(modelId, (error, model) => {
-      dispatch(receiveModelOverview(model));
+      getModelStrategy(model.model_category.toLowerCase())(modelId, (error, res) => {
+        dispatch(receiveModelOverview(res));
+      });
     });
   };
+}
+
+function getModelStrategy(modelCategory): Function {
+  if (modelCategory === 'binomial') {
+    return Remote.getModelBinomial;
+  } else if (modelCategory === 'multinomial') {
+    return Remote.getModelMultinomial;
+  } else if (modelCategory === 'regression') {
+    return Remote.getModelRegression;
+  }
 }
 
 export function downloadModel(): Function {
@@ -53,9 +65,14 @@ export function downloadModel(): Function {
   };
 }
 
-export function deployModel(modelId: number): Function {
+export function deployModel(modelId: number, name: string): Function {
   return (dispatch) => {
-    Remote.startService(modelId, (error, res) => {
+    /**
+     *   if arg2 is "", deploys a vanilla war file as a service
+     *   if arg2 is a valid package name, the python scripts from the package are
+     *     bundled into the war file. 
+     */
+    Remote.startService(modelId, "", (error, res) => {
       console.log(res);
     });
   };

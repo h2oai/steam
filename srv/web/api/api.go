@@ -334,6 +334,15 @@ type Service struct {
 	GetPrivileges                 GetPrivileges                 `help:"List privileges for an entity"`
 	UnshareEntity                 UnshareEntity                 `help:"Unshare an entity"`
 	GetHistory                    GetHistory                    `help:"List audit trail records for an entity"`
+	CreatePackage                 CreatePackage                 `help:"Create a package for a project"`
+	GetPackages                   GetPackages                   `help:"List packages for a project "`
+	GetPackageDirectories         GetPackageDirectories         `help:"List directories in a project package"`
+	GetPackageFiles               GetPackageFiles               `help:"List files in a project package"`
+	DeletePackage                 DeletePackage                 `help:"Delete a project package"`
+	DeletePackageDirectory        DeletePackageDirectory        `help:"Delete a directory in a project package"`
+	DeletePackageFile             DeletePackageFile             `help:"Delete a file in a project package"`
+	SetAttributesForPackage       SetAttributesForPackage       `help:"Set attributes on a project package"`
+	GetAttributesForPackage       GetAttributesForPackage       `help:"List attributes for a project package"`
 }
 
 // --- API Method Definitions ---
@@ -623,9 +632,10 @@ type GetLabelsForProject struct {
 	Labels    []Label
 }
 type StartService struct {
-	ModelId   int64
-	_         int
-	ServiceId int64
+	ModelId     int64
+	PackageName string
+	_           int
+	ServiceId   int64
 }
 type StopService struct {
 	ServiceId int64
@@ -853,4 +863,61 @@ type GetHistory struct {
 	Limit        int64
 	_            int
 	History      []EntityHistory
+}
+
+type CreatePackage struct {
+	ProjectId int64
+	Name      string
+}
+
+type GetPackages struct {
+	ProjectId int64
+	_         int
+	Packages  []string
+}
+
+type GetPackageDirectories struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+	_            int
+	Directories  []string
+}
+
+type GetPackageFiles struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+	_            int
+	Files        []string
+}
+
+type DeletePackage struct {
+	ProjectId int64
+	Name      string
+}
+
+type DeletePackageDirectory struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+}
+
+type DeletePackageFile struct {
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+}
+
+type SetAttributesForPackage struct {
+	ProjectId   int64
+	PackageName string
+	Attributes  string
+}
+
+type GetAttributesForPackage struct {
+	ProjectId   int64
+	PackageName string
+	_           int
+	Attributes  string
 }

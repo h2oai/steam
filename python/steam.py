@@ -985,18 +985,20 @@ class RPCClient:
 		response = self.connection.call("GetLabelsForProject", request)
 		return response['labels']
 	
-	def start_service(self, model_id):
+	def start_service(self, model_id, package_name):
 		"""
 		Start a service
 
 		Parameters:
 		model_id: No description available (int64)
+		package_name: No description available (string)
 
 		Returns:
 		service_id: No description available (int64)
 		"""
 		request = {
 			'model_id': model_id
+			'package_name': package_name
 		}
 		response = self.connection.call("StartService", request)
 		return response['service_id']
@@ -1790,6 +1792,171 @@ class RPCClient:
 		}
 		response = self.connection.call("GetHistory", request)
 		return response['history']
+	
+	def create_package(self, project_id, name):
+		"""
+		Create a package for a project
+
+		Parameters:
+		project_id: No description available (int64)
+		name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'name': name
+		}
+		response = self.connection.call("CreatePackage", request)
+		return 
+	
+	def get_packages(self, project_id):
+		"""
+		List packages for a project 
+
+		Parameters:
+		project_id: No description available (int64)
+
+		Returns:
+		packages: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+		}
+		response = self.connection.call("GetPackages", request)
+		return response['packages']
+	
+	def get_package_directories(self, project_id, package_name, relative_path):
+		"""
+		List directories in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:
+		directories: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("GetPackageDirectories", request)
+		return response['directories']
+	
+	def get_package_files(self, project_id, package_name, relative_path):
+		"""
+		List files in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:
+		files: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("GetPackageFiles", request)
+		return response['files']
+	
+	def delete_package(self, project_id, name):
+		"""
+		Delete a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		name: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'name': name
+		}
+		response = self.connection.call("DeletePackage", request)
+		return 
+	
+	def delete_package_directory(self, project_id, package_name, relative_path):
+		"""
+		Delete a directory in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("DeletePackageDirectory", request)
+		return 
+	
+	def delete_package_file(self, project_id, package_name, relative_path):
+		"""
+		Delete a file in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'relative_path': relative_path
+		}
+		response = self.connection.call("DeletePackageFile", request)
+		return 
+	
+	def set_attributes_for_package(self, project_id, package_name, attributes):
+		"""
+		Set attributes on a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		attributes: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+			'attributes': attributes
+		}
+		response = self.connection.call("SetAttributesForPackage", request)
+		return 
+	
+	def get_attributes_for_package(self, project_id, package_name):
+		"""
+		List attributes for a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+
+		Returns:
+		attributes: No description available (string)
+		"""
+		request = {
+			'project_id': project_id
+			'package_name': package_name
+		}
+		response = self.connection.call("GetAttributesForPackage", request)
+		return response['attributes']
 	
 	
 

@@ -74,7 +74,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', help = 'More detailed output', dest='verbose', action='store_true')
     cfg = parser.parse_args()
     scorer = Scorer('{}/vectorizer.pickle'.format(cfg.models_dir))
-    
+
     print >> sys.stderr, "python ready"
 
     main_loop(scorer.score)

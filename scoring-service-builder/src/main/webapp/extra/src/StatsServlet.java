@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StatsServlet extends HttpServlet {
-  private static final Logger logger = LoggerFactory.getLogger("StatsServlet");
+  private final Logger logger = Logging.getLogger(this.getClass());
 
   public static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
@@ -49,6 +49,8 @@ public class StatsServlet extends HttpServlet {
           put("post", ServletUtil.postTimes.toMap());
           put("pythonget", ServletUtil.getPythonTimes.toMap());
           put("pythonpost", ServletUtil.postPythonTimes.toMap());
+
+          put("outputLabels", ServletUtil.outputLabels);
         }
       };
       String json = gson.toJson(js, ServletUtil.MAP_TYPE);

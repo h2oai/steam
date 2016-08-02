@@ -13,8 +13,7 @@ import hex.genmodel.*;
 import com.google.gson.Gson;
 
 public class InfoServlet extends HttpServlet {
-
-  private static final Logger logger = LoggerFactory.getLogger("InfoServlet");
+  private final Logger logger = Logging.getLogger(this.getClass());
 
   static EasyPredictModelWrapper model = ServletUtil.model;
 
