@@ -66,7 +66,6 @@ lint:
 	$(foreach file,$(SRCS),golint $(file) || exit;)
 
 vet:
-	@-go get -v golang.org/x/tools/cmd/vet
 	go vet
 
 fmt:
@@ -78,7 +77,7 @@ fmtcheck:
 pretest: lint vet fmtcheck
 
 test: pretest
-	go test
+	cd tests && ./goh2orunner.sh
 
 guitest:
 	cd $(GUI) && npm test
