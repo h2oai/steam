@@ -45,7 +45,6 @@ export class Models extends React.Component<Props & DispatchProps, any> {
   }
 
   onFilter(filters, name, offset) {
-    console.log(filters, name, offset)
     this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc', offset);
   }
   
