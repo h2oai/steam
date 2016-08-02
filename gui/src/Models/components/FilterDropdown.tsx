@@ -20,7 +20,9 @@ const FILTER_MAP = {
   mean_residual_deviance: 'MRD',
   r_squared: <span>R<sup>2</sup></span>,
   mse: 'MSE',
-  logloss: 'LogLoss'
+  logloss: 'LogLoss',
+  auc: 'AUC',
+  gini: 'Gini'
 };
 
 export default class FilterDropdown extends React.Component<Props, any> {

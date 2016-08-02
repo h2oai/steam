@@ -27,6 +27,7 @@ import { glmTrain } from '../data/glmTrain';
 import { glmValidation } from '../data/glmValidation';
 import { naivebayesTrain } from '../data/naivebayesTrain';
 import { naivebayesValidation } from '../data/naivebayesValidation';
+import { MAX_ITEMS } from '../actions/leaderboard.actions';
 
 interface Props {
   items: any[],
@@ -49,7 +50,12 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   constructor() {
     super();
     this.state = {
-      isDeployOpen: false
+      isDeployOpen: false,
+      currentPage: 0,
+      filters: {
+        sortBy: '',
+        orderBy: 'asc'
+      }
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
@@ -80,7 +86,26 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   onFilter(filters) {
+    this.setState({
+      filters: filters
+    });
     this.props.onFilter(filters, this.refs.filterModels.value);
+  }
+
+  onPageForward() {
+    this.setState({
+      currentPage: ++this.state.currentPage
+    });
+    this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+  }
+
+  onPageBack() {
+    if (this.state.currentPage >= 0) {
+      this.setState({
+        currentPage: --this.state.currentPage
+      });
+      this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+    }
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -161,7 +186,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
             );
           })}
         </Table>
-        <Pagination items={this.props.items}></Pagination>
+        <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)} onPageForward={this.onPageForward.bind(this)}></Pagination>
       </div>
     );
   }

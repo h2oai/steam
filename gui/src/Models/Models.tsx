@@ -5,9 +5,8 @@
 import * as React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as _ from 'lodash';
 import Leaderboard from './components/Leaderboard';
-import { fetchModelsFromProject, fetchProject } from '../Projects/actions/projects.actions';
+import { fetchProject } from '../Projects/actions/projects.actions';
 import { fetchLeaderboard, fetchSortCriteria } from './actions/leaderboard.actions';
 
 interface Props {
@@ -45,10 +44,11 @@ export class Models extends React.Component<Props & DispatchProps, any> {
     }
   }
 
-  onFilter(filters, name) {
-    this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc');
+  onFilter(filters, name, offset) {
+    console.log(filters, name, offset)
+    this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc', offset);
   }
-
+  
   render(): React.ReactElement<HTMLDivElement> {
     if (!this.props.leaderboard) {
       return <div></div>;

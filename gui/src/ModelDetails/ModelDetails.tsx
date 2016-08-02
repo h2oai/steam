@@ -139,8 +139,8 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     this.closeComparisonModal();
   }
 
-  onFilter(filters, name) {
-    this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc');
+  onFilter(filters, name, offset) {
+    this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc', offset);
   }
 
   render(): React.ReactElement<HTMLDivElement> {

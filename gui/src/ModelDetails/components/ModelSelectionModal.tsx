@@ -7,10 +7,12 @@ import * as moment from 'moment';
 import FilterDropdown from '../../Models/components/FilterDropdown';
 import DefaultModal from '../../App/components/DefaultModal';
 import PageHeader from '../../Projects/components/PageHeader';
+import Pagination from '../../Models/components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import '../styles/modelselectionmodal.scss';
+import { MAX_ITEMS } from '../../Models/actions/leaderboard.actions';
 
 interface Props {
   open: boolean,
@@ -26,8 +28,36 @@ export default class ModelSelectionModal extends React.Component<Props, any> {
     [key: string]: Element
     filterModels: HTMLInputElement
   };
+
+  constructor() {
+    super();
+    this.state = {
+      currentPage: 0,
+      filters: {
+        sortBy: '',
+        orderBy: 'asc'
+      }
+    };
+  }
+
   onFilter(filters) {
     this.props.onFilter(filters, this.refs.filterModels.value);
+  }
+
+  onPageForward() {
+    this.setState({
+      currentPage: ++this.state.currentPage
+    });
+    this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+  }
+
+  onPageBack() {
+    if (this.state.currentPage >= 0) {
+      this.setState({
+        currentPage: --this.state.currentPage
+      });
+      this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+    }
   }
 
   render(): React.ReactElement<DefaultModal> {
@@ -89,6 +119,8 @@ export default class ModelSelectionModal extends React.Component<Props, any> {
           </Table>
         </div>
         <footer>
+          <Pagination items={this.props.models} onPageForward={this.onPageForward.bind(this)}
+                      onPageBack={this.onPageBack.bind(this)}/>
           <button className="default" onClick={this.props.onCancel.bind(this)}>Cancel</button>
         </footer>
       </DefaultModal>

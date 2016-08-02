@@ -17,6 +17,8 @@ interface Leaderboard {
   metadata: any
 }
 
+export const MAX_ITEMS = 5;
+
 export const requestLeaderboard = () => {
   return {
     type: FETCH_LEADERBOARD
@@ -30,10 +32,10 @@ export function receiveLeaderboard(leaderboard) {
   };
 }
 
-export function fetchLeaderboard(projectId: number, modelCategory: string, name: string, sortBy: string, ascending: boolean) {
+export function fetchLeaderboard(projectId: number, modelCategory: string, name: string, sortBy: string, ascending: boolean, offset: number) {
   return (dispatch) => {
     dispatch(requestLeaderboard());
-    findModelStrategy(modelCategory.toLowerCase())(projectId, name, sortBy || '', ascending || false, 0, 5, (error, models) => {
+    findModelStrategy(modelCategory.toLowerCase())(projectId, name, sortBy || '', ascending || false, offset, MAX_ITEMS, (error, models) => {
       dispatch(receiveLeaderboard(models as BinomialModel[] | MultinomialModel[] | RegressionModel[]));
     });
   };
@@ -67,7 +69,7 @@ export function fetchSortCriteria(modelCategory: string) {
 
 function getSortStrategy(modelCategory): Function {
   if (modelCategory === 'binomial') {
-    return Remote.getAllMultinomialSortCriteria;
+    return Remote.getAllBinomialSortCriteria;
   } else if (modelCategory === 'multinomial') {
     return Remote.getAllMultinomialSortCriteria;
   } else if (modelCategory === 'regression') {
