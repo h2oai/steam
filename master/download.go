@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
@@ -13,18 +14,20 @@ import (
 )
 
 const (
-	paramType      = "type"
-	paramTypeModel = "model"
-	paramArtifact  = "artifact"
-	paramProjectId = "project-id"
-	paramLabelName = "label-name"
-	paramModelId   = "model-id"
+	paramType        = "type"
+	paramTypeModel   = "model"
+	paramArtifact    = "artifact"
+	paramProjectId   = "project-id"
+	paramLabelName   = "label-name"
+	paramModelId     = "model-id"
+	paramPackageName = "package-name"
 
 	// model artifact types
 	javaClass    = "java-class"     // foo.java
 	javaClassDep = "java-class-dep" // gen-model.jar
 	javaJar      = "java-jar"       // foo.jar
 	javaWar      = "java-war"       // foo.war
+	javaPyWar    = "java-py-war"    // foo_py.war
 )
 
 type DownloadHandler struct {
@@ -70,6 +73,25 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		packageName := values.Get(paramPackageName)
+
+		projectIdValue := values.Get(paramProjectId)
+		if len(projectIdValue) == 0 {
+			http.Error(w, fmt.Sprintf("Missing %s", paramProjectId), http.StatusBadRequest)
+			return
+		}
+
+		projectId, err := strconv.ParseInt(projectIdValue, 10, 64)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Not a serial number %s=%s: %s", paramProjectId, projectIdValue, err), http.StatusBadRequest)
+			return
+		}
+
+		if projectId <= 0 {
+			http.Error(w, fmt.Sprintf("Invalid %s: %s", paramProjectId, projectId), http.StatusBadRequest)
+			return
+		}
+
 		modelIdValue := values.Get(paramModelId)
 		if len(modelIdValue) != 0 {
 			modelId, err := strconv.ParseInt(modelIdValue, 10, 64)
@@ -78,29 +100,17 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			s.serveModel(w, r, pz, modelId, artifact)
+			if modelId <= 0 {
+				http.Error(w, fmt.Sprintf("Invalid %s: %s", paramModelId, modelId), http.StatusBadRequest)
+				return
+			}
+
+			s.serveModel(w, r, pz, projectId, modelId, artifact, packageName)
 			return
 		}
 
 		labelName := values.Get(paramLabelName)
 		if len(labelName) != 0 {
-			projectIdValue := values.Get(paramProjectId)
-			if len(projectIdValue) == 0 {
-				http.Error(w, fmt.Sprintf("Missing %s", paramProjectId), http.StatusBadRequest)
-				return
-			}
-
-			projectId, err := strconv.ParseInt(projectIdValue, 10, 64)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("Not a serial number %s=%s: %s", paramProjectId, projectIdValue, err), http.StatusBadRequest)
-				return
-			}
-
-			if projectId <= 0 {
-				http.Error(w, fmt.Sprintf("Invalid %s: %s", paramProjectId, projectId), http.StatusBadRequest)
-				return
-			}
-
 			labels, err := s.webService.GetLabelsForProject(pz, projectId)
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Failed reading labels for project %d: %s", projectId, err), http.StatusInternalServerError)
@@ -110,7 +120,7 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			for _, label := range labels {
 				if label.Name == labelName {
 					if label.ModelId > 0 {
-						s.serveModel(w, r, pz, label.ModelId, artifact)
+						s.serveModel(w, r, pz, label.ProjectId, label.ModelId, artifact, packageName)
 						return
 					}
 					http.Error(w, fmt.Sprintf("No model associated with label: %s", labelName), http.StatusNotFound)
@@ -131,9 +141,9 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Not Found", http.StatusNotFound)
 }
 
-func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz az.Principal, modelId int64, artifact string) {
+func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz az.Principal, projectId, modelId int64, artifact string, packageName string) {
 	switch artifact {
-	case javaClass, javaClassDep, javaJar, javaWar:
+	case javaClass, javaClassDep, javaJar, javaWar, javaPyWar:
 		// Call the API to get the model details.
 		// We assume that if the GetModel() call succeeds, the principal has
 		//   permissions and privileges to read this model, and consequently
@@ -156,13 +166,37 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 
 		case javaClassDep:
 			filePath = fs.GetGenModelPath(s.workingDirectory, modelId)
+
 		case javaWar:
 			compilerService := compiler.NewService(s.compilerServiceAddress)
 			warFilePath, err := compilerService.CompileModel(
 				s.workingDirectory,
+				projectId,
 				modelId,
 				model.LogicalName,
-				"war",
+				compiler.ArtifactWar,
+				"",
+			)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			filePath = warFilePath
+
+		case javaPyWar:
+			packageName = strings.TrimSpace(packageName)
+			if len(packageName) == 0 {
+				http.Error(w, "No package-name specified", http.StatusBadRequest)
+				return
+			}
+			compilerService := compiler.NewService(s.compilerServiceAddress)
+			warFilePath, err := compilerService.CompileModel(
+				s.workingDirectory,
+				projectId,
+				modelId,
+				model.LogicalName,
+				compiler.ArtifactPythonWar,
+				packageName,
 			)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -174,9 +208,11 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 			compilerService := compiler.NewService(s.compilerServiceAddress)
 			jarFilePath, err := compilerService.CompileModel(
 				s.workingDirectory,
+				projectId,
 				modelId,
 				model.LogicalName,
-				"jar",
+				compiler.ArtifactJar,
+				"",
 			)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
