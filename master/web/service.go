@@ -1328,7 +1328,7 @@ func (s *Service) assignPort() (int, error) {
 	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64) (int64, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, packageName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return 0, err
 	}

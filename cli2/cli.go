@@ -3762,18 +3762,21 @@ Examples:
 
     Start a service
     $ steam start service \
-        --model-id=?
+        --model-id=? \
+        --package-name=?
 
 `
 
 func startService(c *context) *cobra.Command {
-	var modelId int64 // No description available
+	var modelId int64      // No description available
+	var packageName string // No description available
 
 	cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
 
 		// Start a service
 		serviceId, err := c.remote.StartService(
-			modelId, // No description available
+			modelId,     // No description available
+			packageName, // No description available
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -3783,6 +3786,7 @@ func startService(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
+	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
 	return cmd
 }
 
