@@ -40,13 +40,14 @@ export class WelcomeSplashScreen extends React.Component<Props & DispatchProps, 
 
   onChangeHandler(event) {
     let agreed = event.target.checked;
-    this.setState({
+    // this.setState({
+    //   isEulaAgreed: agreed
+    // }, () => {
+    // });
+    this.props.setProfile({
       isEulaAgreed: agreed
-    }, () => {
-      this.props.setProfile({
-        isEulaAgreed: agreed
-      });
     });
+    this.props.fetchProfile();
   }
 
   openEula() {
@@ -56,13 +57,14 @@ export class WelcomeSplashScreen extends React.Component<Props & DispatchProps, 
   }
 
   agree() {
-    this.setState({
+    // this.setState({
+    //   isEulaAgreed: true
+    // }, () => {
+    // });
+    this.props.setProfile({
       isEulaAgreed: true
-    }, () => {
-      this.props.setProfile({
-        isEulaAgreed: true
-      });
     });
+    this.props.fetchProfile();
     this.close();
   }
 
@@ -94,7 +96,7 @@ export class WelcomeSplashScreen extends React.Component<Props & DispatchProps, 
                      className={classNames('default', 'start-project', {disabled: !this.state.isEulaAgreed})}>Start A New Project</Link>
           </div>
           <div className="eula-line">
-            <input type="checkbox" checked={this.state.isEulaAgreed} onChange={this.onChangeHandler.bind(this)}/>
+            <input type="checkbox" checked={this.props.profile.isEulaAgreed} onChange={this.onChangeHandler.bind(this)}/>
             I understand this is a preview release, and agree with all <a href="javascript:void(0);"
                                                                           onClick={this.openEula.bind(this)}>terms and conditions</a>.
           </div>
