@@ -1968,8 +1968,28 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId, offset, li
 }
 
 func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	if err := fs.ValidateName(name); err != nil {
+		return fmt.Errorf("Invalid package name: %s", err)
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if fs.DirExists(packagePath) {
+		return fmt.Errorf("Failed creating package directory: %s already exists", name)
+	}
+
+	if err := fs.Mkdir(packagePath); err != nil {
+		return fmt.Errorf("Failed creating package directory: %s", err)
+	}
+
 	return nil
 }
+
 func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
 	return nil, nil
 }
@@ -1987,7 +2007,31 @@ func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packa
 
 	return nil
 }
-func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, path string) error {
+
+func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	filePath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return err
+	}
+
+	if !fs.FileExists(filePath) {
+		return fmt.Errorf("Invalid path %s in package %s", relativePath, packageName)
+	}
+
+	if err := fs.Rm(filePath); err != nil {
+		return fmt.Errorf("Failed deleting file: %s", err)
+	}
 
 	return nil
 }
