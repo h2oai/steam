@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 
@@ -223,6 +224,7 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 
 		// Delegate to builtin.
 		// Can result in 200, 404, 403 or 500 based on file availability and permissions.
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+path.Base(filePath)+"\"")
 		http.ServeFile(w, r, filePath)
 		return
 
