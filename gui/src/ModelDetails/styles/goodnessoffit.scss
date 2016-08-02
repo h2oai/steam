@@ -1,7 +1,13 @@
 @import '../../variables.scss';
 
-.metrics {
+.goodness-of-fit {
   display: flex;
+  .roc-container {
+    margin: $medium;
+    svg {
+      height: 300px;
+    }
+  }
   .compare {
     .details--value {
       span:first-of-type {

@@ -43,8 +43,21 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
         fpr: fpr[i]
       });
     });
+    let config = {
+      margin: { top: 2, right: 2, bottom: 2, left: 2 },
+      interpolationMode: 'basis',
+      smooth: true,
+      fpr: 'fpr',
+      tprVariables: [{
+        name: 'tpr',
+        label: 'tpr'
+      }],
+      animate: false,
+      hideAxes: true,
+      hideAUCText: true
+    };
     return (
-      <div className="metrics">
+      <div className="metrics goodness-of-fit">
         <div className="metrics-summary">
           <div className="metrics-summary--title">Metrics</div>
           {Object.keys(metrics).map((key) => {
@@ -56,7 +69,7 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
           })}
         </div>
         <div className="roc-chart">
-          <RocGraph data={data}/>
+          <RocGraph data={data} config={config}/>
         </div>
       </div>
     );
