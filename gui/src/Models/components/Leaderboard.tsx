@@ -80,12 +80,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   onFilter(filters) {
-    console.log(this.refs.filterModels.value);
     this.props.onFilter(filters, this.refs.filterModels.value);
-  }
-
-  onFilterByName(event) {
-    console.log(event.target.value);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
