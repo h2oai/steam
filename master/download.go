@@ -160,12 +160,18 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 		}
 
 		var filePath string
+		var extension string
+		filename := model.Name
+
 		switch artifact {
 		case javaClass:
 			filePath = fs.GetJavaModelPath(s.workingDirectory, modelId, model.LogicalName)
+			extension = "java"
 
 		case javaClassDep:
 			filePath = fs.GetGenModelPath(s.workingDirectory, modelId)
+			filename = "h2o-genmodel"
+			extension = "jar"
 
 		case javaWar:
 			compilerService := compiler.NewService(s.compilerServiceAddress)
@@ -182,6 +188,7 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				return
 			}
 			filePath = warFilePath
+			extension = "war"
 
 		case javaPyWar:
 			packageName = strings.TrimSpace(packageName)
@@ -203,6 +210,7 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				return
 			}
 			filePath = warFilePath
+			extension = "war"
 
 		case javaJar:
 			compilerService := compiler.NewService(s.compilerServiceAddress)
@@ -219,10 +227,12 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				return
 			}
 			filePath = jarFilePath
+			extension = "jar"
 		}
 
 		// Delegate to builtin.
 		// Can result in 200, 404, 403 or 500 based on file availability and permissions.
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", filename, extension))
 		http.ServeFile(w, r, filePath)
 		return
 
