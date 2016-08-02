@@ -3,20 +3,21 @@
  */
 import * as React from 'react';
 import '../styles/pagination.scss';
+import { MAX_ITEMS } from '../actions/leaderboard.actions';
 
 interface Props {
-  items: any
+  items: any,
+  onPageBack: Function,
+  onPageForward: Function
 }
-
-export const MAX_ITEMS = 5;
 
 export default class Pagination extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="pagination-container">
-        <span><i className="fa fa-caret-left"></i></span>
+        <span onClick={this.props.onPageBack.bind(this)}><i className="fa fa-caret-left"></i></span>
         <span className="page-info">1 - {this.props.items.length < MAX_ITEMS ? this.props.items.length : MAX_ITEMS} of {this.props.items.length} models</span>
-        <span><i className="fa fa-caret-right"></i></span>
+        <span onClick={this.props.onPageForward.bind(this)}><i className="fa fa-caret-right"></i></span>
       </div>
     );
   }
