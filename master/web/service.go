@@ -2009,8 +2009,34 @@ func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error
 
 	return dirs, nil
 }
-func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, path string) ([]string, error) {
-	return nil, nil
+
+func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("Package %s does not exist")
+	}
+
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+
+	dirs, err := fs.ListDirs(packageDirPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing package directories: %s", err)
+	}
+
+	return dirs, nil
 }
 func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, path string) ([]string, error) {
 	return nil, nil
@@ -2019,7 +2045,31 @@ func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) e
 
 	return nil
 }
-func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, path string) error {
+
+func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	dirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return err
+	}
+
+	if !fs.DirExists(dirPath) {
+		return fmt.Errorf("Invalid path %s in package %s", relativePath, packageName)
+	}
+
+	if err := fs.Rmdir(dirPath); err != nil {
+		return fmt.Errorf("Failed deleting directory: %s", err)
+	}
 
 	return nil
 }
