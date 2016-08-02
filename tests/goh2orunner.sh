@@ -14,11 +14,12 @@ ADDRESS=$(sed -n '/Cloud of size/s/.* \[\/\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*:[0-9]
 
 # Start model generating script
 echo "Preparing models in cluster"
+source bin/activate
 python h2o-setup.py $ADDRESS
 
 # Setup scoring service builder
 java -jar ../var/master/assets/jetty-runner.jar ../var/master/assets/ROOT.war > compile.log 2>&1 &
-SSBPID=$?
+SSBPID=$!
 echo "Started scoring service builder with pid ${SSBPID}"
 
 # Run GO tests here
