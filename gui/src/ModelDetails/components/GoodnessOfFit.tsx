@@ -5,6 +5,7 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import * as classNames from 'classnames';
 import DetailLine from './DetailLine';
+import RocGraph from '../../Models/components/RocGraph';
 import '../styles/goodnessoffit.scss';
 
 interface Props {
@@ -30,8 +31,18 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
         value: _.get(this.props.model, 'r_squared', null),
         comparisonValue: _.get(this.props.comparisonModel, 'r_squared', null)
       },
-      
+
     };
+    let modelMetrics = JSON.parse(this.props.model.metrics);
+    let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
+    let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
+    let data = [];
+    tpr.map((val, i) => {
+      data.push({
+        tpr: val,
+        fpr: fpr[i]
+      });
+    });
     return (
       <div className="metrics">
         <div className="metrics-summary">
@@ -43,6 +54,9 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
             }
             return null;
           })}
+        </div>
+        <div className="roc-chart">
+          <RocGraph data={data}/>
         </div>
       </div>
     );

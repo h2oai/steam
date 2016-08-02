@@ -112,6 +112,7 @@ export function fetchProject(projectId: number) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
       Remote.getProject(projectId, (error, res) => {
+        dispatch(receiveProject(res));
         resolve(res);
       });
     });
