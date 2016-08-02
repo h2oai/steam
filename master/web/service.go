@@ -1418,7 +1418,7 @@ func (s *Service) StopService(pz az.Principal, serviceId int64) error {
 		return err
 	}
 
-	if err := s.ds.UpdateServiceState(pz, serviceId, data.StoppedState); err != nil {
+	if err := s.ds.DeleteService(pz, serviceId); err != nil {
 		return err
 	}
 
