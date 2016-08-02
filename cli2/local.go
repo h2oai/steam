@@ -232,22 +232,32 @@ engine [enginePath]
 Deploy an H2O engine to Steam.
 Examples:
 
-	$ steam deploy engine path/to/engine
+	$ steam deploy engine --file-path=path/to/engine
 `
 
 func deployEngine(c *context) *cobra.Command {
+	var (
+		filePath string
+	)
 	cmd := newCmd(c, deployEngineHelp, func(c *context, args []string) {
-		if len(args) != 1 {
-			log.Fatalln("Incorrect number of arguments. See 'steam help deploy engine'.")
+		attrs := map[string]string{
+			"type": fs.KindEngine,
 		}
 
-		enginePath := args[0]
-
-		if err := c.uploadFile(enginePath, fs.KindEngine); err != nil {
+		if err := c.transmitFile(filePath, attrs); err != nil {
 			log.Fatalln(err)
 		}
 
-		log.Println("Engine deployed:", path.Base(enginePath))
+		log.Println("Engine deployed:", path.Base(filePath))
+	})
+
+	cmd.Flags().StringVar(&filePath, "file-path", "", "Path to engine")
+
+	return cmd
+}
+			log.Fatalln(err)
+		}
+
 	})
 
 	return cmd
