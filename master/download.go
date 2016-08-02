@@ -49,7 +49,7 @@ func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pz, azerr := s.az.Identify(r)
 	if azerr != nil {
 		log.Println(azerr)
-		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusForbidden)
+		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusUnauthorized)
 	}
 
 	values := r.URL.Query()
@@ -140,7 +140,7 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 		//   allowed to download it.
 		model, err := s.webService.GetModel(pz, modelId)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Failed reading model %d: %s", modelId, err), http.StatusUnauthorized)
+			http.Error(w, fmt.Sprintf("Failed reading model %d: %s", modelId, err), http.StatusForbidden)
 			return
 		}
 		modelLocation := model.Location
