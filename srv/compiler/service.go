@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/h2oai/steamY/lib/fs"
 )
@@ -17,7 +18,7 @@ import (
 const (
 	ArtifactWar       = "war"
 	ArtifactJar       = "jar"
-	ArtifactPythonWar = "python_war"
+	ArtifactPythonWar = "pywar"
 )
 
 const (
@@ -89,7 +90,7 @@ func compile(url, javaFilePath, javaDepPath, pythonMainFilePath string, pythonOt
 		if err := attachFile(writer, pythonMainFilePath, fileTypePythonMain); err != nil {
 			return nil, fmt.Errorf("Failed attaching Python main file to compilation request: %s", err)
 		}
-		if len(pythonOtherFilePaths) > 0 {
+		if pythonOtherFilePaths != nil && len(pythonOtherFilePaths) > 0 {
 			for _, p := range pythonOtherFilePaths {
 				if err := attachFile(writer, p, fileTypePythonOther); err != nil {
 					return nil, fmt.Errorf("Failed attaching Python file to compilation request: %s", err)
@@ -167,7 +168,7 @@ func (s *Service) GetPythonFilePaths(wd string, projectId int64, packageName str
 	return pythonMainFilePath, pythonOtherFilePaths, nil
 }
 
-func (s *Service) CompileModel(wd string, modelId int64, modelLogicalName, artifact string) (string, error) {
+func (s *Service) CompileModel(wd string, projectId, modelId int64, modelLogicalName, artifact, packageName string) (string, error) {
 
 	genModelPath := fs.GetGenModelPath(wd, modelId)
 	javaModelPath := fs.GetJavaModelPath(wd, modelId, modelLogicalName)
@@ -195,8 +196,20 @@ func (s *Service) CompileModel(wd string, modelId int64, modelLogicalName, artif
 		return "", err
 	}
 
-	// XXX
-	res, err := compile(s.urlFor(slug), javaModelPath, genModelPath, "", nil)
+	packageName = strings.TrimSpace(packageName)
+
+	var pythonMainFilePath string
+	var pythonOtherFilePaths []string
+
+	if artifact == ArtifactPythonWar && len(packageName) > 0 {
+		var err error
+		pythonMainFilePath, pythonOtherFilePaths, err = s.GetPythonFilePaths(wd, projectId, packageName)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	res, err := compile(s.urlFor(slug), javaModelPath, genModelPath, pythonMainFilePath, pythonOtherFilePaths)
 	if err != nil {
 		return "", err
 	}

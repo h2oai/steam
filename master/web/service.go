@@ -439,12 +439,12 @@ func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 
 // --- Datasource ---
 
-func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, path string) (int64, error) {
+func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, filePath string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return 0, err
 	}
 
-	mapPath := map[string]string{"path": path}
+	mapPath := map[string]string{"path": filePath}
 	jsonPath, err := json.Marshal(mapPath)
 	if err != nil {
 		return 0, err
@@ -494,12 +494,12 @@ func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datas
 	return toDatasource(datasource), nil
 }
 
-func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, path string) error {
+func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, filePath string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return err
 	}
 
-	mapPath := map[string]string{"path": path}
+	mapPath := map[string]string{"path": filePath}
 	jsonPath, err := json.Marshal(mapPath)
 	if err != nil {
 		return err
@@ -553,12 +553,12 @@ func (s *Service) importDataset(name, configuration, address string) ([]byte, st
 	if err := json.Unmarshal([]byte(configuration), &rawJson); err != nil {
 		return nil, "", err
 	}
-	path, ok := rawJson["path"]
+	filePath, ok := rawJson["path"]
 	if !ok {
 		return nil, "", fmt.Errorf("Cannot locate path: Empty datasource configuration")
 	}
 
-	importBody, err := h2o.PostImportFilesImportfiles(path)
+	importBody, err := h2o.PostImportFilesImportfiles(filePath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -1333,22 +1333,29 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 		return 0, err
 	}
 
-	// FIXME: change sequence to:
-	// 1. insert a record into the Service table with the state "starting"
-	// 2. attempt to compile and start the service
-	// 3. update the Service record state to "started" if successful, or "failed" if not.
-
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return 0, err
 	}
 
+	projectId, err := s.ds.ReadProjectIdForModelId(pz, modelId)
+	if err != nil {
+		return 0, err
+	}
+
+	artifact := compiler.ArtifactWar
+	if len(packageName) > 0 {
+		artifact = compiler.ArtifactPythonWar
+	}
+
 	compilerService := compiler.NewService(s.compilationServiceAddress)
 	warFilePath, err := compilerService.CompileModel(
 		s.workingDir,
+		projectId,
 		model.Id,
 		model.LogicalName,
-		"war",
+		artifact,
+		packageName,
 	)
 	if err != nil {
 		return 0, err
