@@ -19,7 +19,7 @@ export default class ExportModal extends React.Component<Props, any> {
     super();
     this.state = {
       artifact: 'java-class'
-    }
+    };
   }
 
   selectArtifact(event) {

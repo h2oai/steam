@@ -7,37 +7,57 @@ import * as moment from 'moment';
 import FilterDropdown from '../../Models/components/FilterDropdown';
 import DefaultModal from '../../App/components/DefaultModal';
 import PageHeader from '../../Projects/components/PageHeader';
+import Pagination from '../../Models/components/Pagination';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { fetchLeaderboard } from '../../Models/actions/leaderboard.actions';
-import { Model } from '../../Proxy/Proxy';
 import '../styles/modelselectionmodal.scss';
+import { MAX_ITEMS } from '../../Models/actions/leaderboard.actions';
 
 interface Props {
   open: boolean,
-  models: Model[]
-  projectId: string,
+  models: any,
   onSelectModel: Function,
-  onCancel: Function
-  
+  onCancel: Function,
+  onFilter: Function,
+  sortCriteria: string[]
 }
 
-interface DispatchProps {
-  fetchLeaderboard: Function
-}
+export default class ModelSelectionModal extends React.Component<Props, any> {
+  refs: {
+    [key: string]: Element
+    filterModels: HTMLInputElement
+  };
 
-export class ModelSelectionModal extends React.Component<Props & DispatchProps, any> {
-  componentWillMount() {
-    this.props.fetchLeaderboard(parseInt(this.props.projectId, 10));
+  constructor() {
+    super();
+    this.state = {
+      currentPage: 0,
+      filters: {
+        sortBy: '',
+        orderBy: 'asc'
+      }
+    };
   }
 
   onFilter(filters) {
-    /**
-     * TODO(justinloyola): AJAX call to filter models
-     */
+    this.props.onFilter(filters, this.refs.filterModels.value);
+  }
+
+  onPageForward() {
+    this.setState({
+      currentPage: ++this.state.currentPage
+    });
+    this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+  }
+
+  onPageBack() {
+    if (this.state.currentPage >= 0) {
+      this.setState({
+        currentPage: --this.state.currentPage
+      });
+      this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+    }
   }
 
   render(): React.ReactElement<DefaultModal> {
@@ -48,11 +68,11 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
         </PageHeader>
         <div>
           <div>Filter models by name</div>
-          <input type="text" placeholder="filter models"/>
+          <input ref="filterModels" type="text" placeholder="filter models" onChange={this.onFilter.bind(this)}/>
           <Table>
             <Row header={true}>
               <Cell>
-                <FilterDropdown onFilter={this.onFilter.bind(this)}/>
+                <FilterDropdown onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}/>
               </Cell>
               <Cell>
                 MODEL
@@ -71,7 +91,7 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
               </Cell>
               <Cell/>
             </Row>
-            {this.props.models.map((model, i) => {
+            {this.props.models.map((model, i: number) => {
               return (
                 <Row key={i}>
                   <Cell/>
@@ -82,13 +102,13 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
                     {moment.unix(model.created_at).format('YYYY-MM-DD HH:mm')}
                   </Cell>
                   <Cell>
-                    1
+                    {model.mse.toFixed(6)}
                   </Cell>
                   <Cell>
-                    1
+                    {model.r_squared.toFixed(6)}
                   </Cell>
                   <Cell>
-                    1
+                    {model.mean_residual_deviance}
                   </Cell>
                   <Cell>
                     <button className="default" onClick={this.props.onSelectModel.bind(this, model)}>Select</button>
@@ -99,23 +119,11 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
           </Table>
         </div>
         <footer>
+          <Pagination items={this.props.models} onPageForward={this.onPageForward.bind(this)}
+                      onPageBack={this.onPageBack.bind(this)}/>
           <button className="default" onClick={this.props.onCancel.bind(this)}>Cancel</button>
         </footer>
       </DefaultModal>
     );
   }
 }
-
-function mapStateToProps(state: any): any {
-  return {
-    models: state.leaderboard.items
-  };
-}
-
-function mapDispatchToProps(dispatch): DispatchProps {
-  return {
-    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch)
-  };
-}
-
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ModelSelectionModal);

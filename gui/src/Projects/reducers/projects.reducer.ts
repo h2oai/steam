@@ -4,7 +4,7 @@
 import * as _ from 'lodash';
 import {
   RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED,
-  RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER
+  RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER, RECEIVE_MODELS_FROM_PROJECT, RECEIVE_PROJECT
 } from '../actions/projects.actions';
 
 let initialState = {
@@ -21,6 +21,14 @@ export const projectsReducer = (state = initialState, action: any) => {
         clusters: action.clusters
       });
     case RECEIVE_MODELS:
+      return _.assign({}, state, {
+        models: action.models
+      });
+    case RECEIVE_PROJECT:
+      return _.assign({}, state, {
+        project: action.project
+      });
+    case RECEIVE_MODELS_FROM_PROJECT:
       return _.assign({}, state, {
         models: action.models
       });

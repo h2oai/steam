@@ -1,8 +1,12 @@
 @import '../../variables.scss';
 
 .model-comparison-modal {
+  .default-modal-container  {
+    height: 100%;
+  }
   .content {
     position: relative;
+    height: 100%;
   }
   .row {
     .cell:first-of-type {

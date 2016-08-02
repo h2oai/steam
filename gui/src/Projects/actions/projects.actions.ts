@@ -14,6 +14,8 @@ export const IMPORT_MODEL_FROM_CLUSTER_COMPLETED = 'IMPORT_MODEL_FROM_CLUSTER_CO
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
 export const REQUEST_DATASETS_FROM_CLUSTER = 'REQUEST_DATASETS_FROM_CLUSTER';
 export const RECEIVE_DATASETS_FROM_CLUSTER = 'RECEIVE_DATASETS_FROM_CLUSTER';
+export const RECEIVE_MODELS_FROM_PROJECT = 'RECEIVE_MODELS_FROM_PROJECT';
+export const RECEIVE_PROJECT = 'RECEIVE_PROJECT';
 
 export const requestClusters = () => {
   return {
@@ -57,6 +59,13 @@ export function createProjectCompleted(project) {
   };
 }
 
+export function receiveProject(project) {
+  return {
+    type: RECEIVE_PROJECT,
+    project
+  };
+}
+
 export function importModelFromClusterCompleted(model) {
   return {
     type: IMPORT_MODEL_FROM_CLUSTER_COMPLETED,
@@ -84,6 +93,31 @@ export function receiveDatasetsFromCluster(datasets) {
   };
 }
 
+export function receiveModelsFromProject(models) {
+  return {
+    type: RECEIVE_MODELS_FROM_PROJECT,
+    models
+  };
+}
+
+export function fetchModelsFromProject(projectId: number) {
+  return (dispatch) => {
+    Remote.getModels(projectId, 0, 5, (error, res) => {
+      dispatch(receiveModelsFromProject(res));
+    });
+  };
+}
+
+export function fetchProject(projectId: number) {
+  return (dispatch) => {
+    return new Promise((resolve, reject) => {
+      Remote.getProject(projectId, (error, res) => {
+        resolve(res);
+      });
+    });
+  };
+}
+
 export function fetchModelsFromCluster(clusterId: number, frameKey: string) {
   return (dispatch) => {
     dispatch(requestModels());
@@ -97,7 +131,7 @@ export function fetchDatasetsFromCluster(clusterId: number) {
   return (dispatch) => {
     dispatch(requestDatasetsFromCluster());
     Remote.getDatasetsFromCluster(clusterId, (error, res) => {
-      dispatch(receiveDatasetsFromCluster(res));    
+      dispatch(receiveDatasetsFromCluster(res));
     });
   };
 }
