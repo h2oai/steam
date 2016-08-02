@@ -132,7 +132,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
         <ModelSelectionModal open={this.state.isModelSelectionModalOpen} projectId={this.props.params.projectid}
                              onSelectModel={this.onSelectModel.bind(this)} onCancel={this.onCancel.bind(this)}/>
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
-                     onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
+                     onCancel={this.cancel.bind(this)} modelId={parseInt(this.props.params.modelid, 10)} projectId={parseInt(this.props.params.projectid, 10)} onDownload={this.downloadModel.bind(this)}/>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
           <div className="buttons">
