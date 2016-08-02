@@ -27,23 +27,35 @@ import { glmTrain } from '../data/glmTrain';
 import { glmValidation } from '../data/glmValidation';
 import { naivebayesTrain } from '../data/naivebayesTrain';
 import { naivebayesValidation } from '../data/naivebayesValidation';
+import { MAX_ITEMS } from '../actions/leaderboard.actions';
 
 interface Props {
   items: any[],
-  projectId: number
+  projectId: number,
+  modelCategory: string,
+  onFilter: Function,
+  sortCriteria: string[]
 }
 
 interface DispatchProps {
 }
 
 export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
-
+  refs: {
+    [key: string]: Element
+    filterModels: HTMLInputElement
+  };
   sampleData = {};
 
   constructor() {
     super();
     this.state = {
-      isDeployOpen: false
+      isDeployOpen: false,
+      currentPage: 0,
+      filters: {
+        sortBy: '',
+        orderBy: 'asc'
+      }
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
@@ -74,9 +86,26 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   onFilter(filters) {
-    /**
-     * TODO(justinloyola): AJAX call to filter models
-     */
+    this.setState({
+      filters: filters
+    });
+    this.props.onFilter(filters, this.refs.filterModels.value);
+  }
+
+  onPageForward() {
+    this.setState({
+      currentPage: ++this.state.currentPage
+    });
+    this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+  }
+
+  onPageBack() {
+    if (this.state.currentPage >= 0) {
+      this.setState({
+        currentPage: --this.state.currentPage
+      });
+      this.props.onFilter(this.state.filters, this.refs.filterModels.value, this.state.currentPage * MAX_ITEMS);
+    }
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -90,12 +119,12 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
           </div>
         </PageHeader>
         <div className="filter">
-          <input type="text" placeholder="filter models"/>
+          <input ref="filterModels" type="text" placeholder="filter models" onChange={this.onFilter.bind(this)}/>
         </div>
         <Table>
           <Row header={true}>
             <Cell>
-              <FilterDropdown onFilter={this.onFilter.bind(this)}/>
+              <FilterDropdown onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}/>
             </Cell>
             <Cell>
               MODEL
@@ -157,7 +186,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
             );
           })}
         </Table>
-        <Pagination items={this.props.items}></Pagination>
+        <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)} onPageForward={this.onPageForward.bind(this)}></Pagination>
       </div>
     );
   }

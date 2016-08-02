@@ -1,0 +1,13 @@
+@import '../../variables.scss';
+
+.compare {
+  .details--value {
+    span:first-of-type {
+      color: $brand-blue;
+      margin-right: $small;
+    }
+    span:last-of-type {
+      color: $brand-orange;
+    }
+  }
+}
