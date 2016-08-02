@@ -15,7 +15,7 @@ export function fetchLabels(projectId: number) {
   return (dispatch) => {
     dispatch(requestLabels());
     Remote.getLabelsForProject(projectId, (error, res) => {
-      dispatch(receiveLeaderboard(res));
+      dispatch(receiveLabels(res, projectId));
     });
   };
 }
@@ -26,9 +26,10 @@ export function requestLabels() {
   };
 };
 
-export function receiveLabels(labels) {
+export function receiveLabels(labels, projectId) {
   return {
     type: RECEIVE_LABELS,
+    projectId,
     labels
   };
 };

@@ -6,19 +6,35 @@ import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import CreateNewLabelModal from './CreateNewLabelModal';
+import { fetchLabels } from '../actions/configuration.labels.action';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import '../styles/labels.scss';
 
 interface Props {
-  labels: any
+  labels?: any
+  projectid: string
+  fetchLabels: Function
 }
 
-export default class Labels extends React.Component<Props, any> {
+class Labels extends React.Component<Props, any> {
 
     constructor() {
         super();
         this.state = {
             modalOpen: false
         };
+    }
+
+    componentWillMount() {
+      console.log("mounting Labels...");
+        if (!this.props.labels || !this.props.projectid || !this.props.labels[this.props.projectid]) {
+          this.props.fetchLabels(this.props.projectid);
+        }
+    }
+
+    componentWillReceiveProps() {
+
     }
 
     openModal() {
@@ -95,3 +111,17 @@ export default class Labels extends React.Component<Props, any> {
         );
     }
 }
+
+function mapStateToProps(state: any): any {
+  return {
+    labels: state.labels
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchLabels: bindActionCreators(fetchLabels, dispatch)
+  };
+}
+
+export default connect<Props, any, any>(mapStateToProps, mapDispatchToProps)(Labels);
