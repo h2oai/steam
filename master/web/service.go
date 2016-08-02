@@ -1972,7 +1972,9 @@ func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) e
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	if err := fs.ValidateName(name); err != nil {
 		return fmt.Errorf("Invalid package name: %s", err)
@@ -1995,7 +1997,9 @@ func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error
 		return nil, err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
 
 	projectPath := fs.GetProjectPath(s.workingDir, projectId)
 	if !fs.DirExists(projectPath) {
@@ -2015,7 +2019,9 @@ func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packag
 		return nil, err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2044,7 +2050,9 @@ func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName 
 		return nil, err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2073,7 +2081,9 @@ func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) e
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
 	if !fs.DirExists(packagePath) {
@@ -2092,7 +2102,9 @@ func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packa
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2120,7 +2132,9 @@ func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageNam
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2148,7 +2162,9 @@ func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, pack
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	if err := fs.SetPackageAttributes(s.workingDir, projectId, packageName, []byte(attributes)); err != nil {
 		return err
@@ -2162,7 +2178,9 @@ func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, pack
 		return "", err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return "", err
+	}
 
 	b, err := fs.GetPackageAttributes(s.workingDir, projectId, packageName)
 	if err != nil {
