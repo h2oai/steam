@@ -76,7 +76,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   openDeploy(model): void {
-    console.log(model);
     this.setState({
       isDeployOpen: true,
       openDeployModel: model
@@ -120,7 +119,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    console.log(this.state);
     return (
       <div ref="leaderboard" className="leaderboard">
         <Deploy open={this.state.isDeployOpen} onCancel={this.closeHandler} model={this.state.openDeployModel} onDeploy={this.onDeploy.bind(this)}></Deploy>
