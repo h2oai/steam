@@ -1824,14 +1824,14 @@ class RPCClient:
 		response = self.connection.call("GetPackages", request)
 		return response['packages']
 	
-	def get_package_directories(self, project_id, package_name, path):
+	def get_package_directories(self, project_id, package_name, relative_path):
 		"""
 		List directories in a project package
 
 		Parameters:
 		project_id: No description available (int64)
 		package_name: No description available (string)
-		path: No description available (string)
+		relative_path: No description available (string)
 
 		Returns:
 		directories: No description available (string)
@@ -1839,19 +1839,19 @@ class RPCClient:
 		request = {
 			'project_id': project_id
 			'package_name': package_name
-			'path': path
+			'relative_path': relative_path
 		}
 		response = self.connection.call("GetPackageDirectories", request)
 		return response['directories']
 	
-	def get_package_files(self, project_id, package_name, path):
+	def get_package_files(self, project_id, package_name, relative_path):
 		"""
 		List files in a project package
 
 		Parameters:
 		project_id: No description available (int64)
 		package_name: No description available (string)
-		path: No description available (string)
+		relative_path: No description available (string)
 
 		Returns:
 		files: No description available (string)
@@ -1859,7 +1859,7 @@ class RPCClient:
 		request = {
 			'project_id': project_id
 			'package_name': package_name
-			'path': path
+			'relative_path': relative_path
 		}
 		response = self.connection.call("GetPackageFiles", request)
 		return response['files']
@@ -1881,84 +1881,62 @@ class RPCClient:
 		response = self.connection.call("DeletePackage", request)
 		return 
 	
-	def delete_package_directory(self, project_id, package_name, path):
+	def delete_package_directory(self, project_id, package_name, relative_path):
 		"""
 		Delete a directory in a project package
 
 		Parameters:
 		project_id: No description available (int64)
 		package_name: No description available (string)
-		path: No description available (string)
+		relative_path: No description available (string)
 
 		Returns:None
 		"""
 		request = {
 			'project_id': project_id
 			'package_name': package_name
-			'path': path
+			'relative_path': relative_path
 		}
 		response = self.connection.call("DeletePackageDirectory", request)
 		return 
 	
-	def delete_package_file(self, project_id, package_name, path):
+	def delete_package_file(self, project_id, package_name, relative_path):
 		"""
 		Delete a file in a project package
 
 		Parameters:
 		project_id: No description available (int64)
 		package_name: No description available (string)
-		path: No description available (string)
+		relative_path: No description available (string)
 
 		Returns:None
 		"""
 		request = {
 			'project_id': project_id
 			'package_name': package_name
-			'path': path
+			'relative_path': relative_path
 		}
 		response = self.connection.call("DeletePackageFile", request)
 		return 
 	
-	def set_attribute_for_package(self, project_id, package_name, key, value):
+	def set_attributes_for_package(self, project_id, package_name, attributes):
 		"""
 		Set attributes on a project package
 
 		Parameters:
 		project_id: No description available (int64)
 		package_name: No description available (string)
-		key: No description available (string)
-		value: No description available (string)
+		attributes: No description available (string)
 
 		Returns:None
 		"""
 		request = {
 			'project_id': project_id
 			'package_name': package_name
-			'key': key
-			'value': value
+			'attributes': attributes
 		}
-		response = self.connection.call("SetAttributeForPackage", request)
+		response = self.connection.call("SetAttributesForPackage", request)
 		return 
-	
-	def get_attribute_for_package(self, project_id, package_name, key):
-		"""
-		Get an attribute of a project package
-
-		Parameters:
-		project_id: No description available (int64)
-		package_name: No description available (string)
-		key: No description available (string)
-
-		Returns:
-		value: No description available (string)
-		"""
-		request = {
-			'project_id': project_id
-			'package_name': package_name
-			'key': key
-		}
-		response = self.connection.call("GetAttributeForPackage", request)
-		return response['value']
 	
 	def get_attributes_for_package(self, project_id, package_name):
 		"""
@@ -1969,33 +1947,14 @@ class RPCClient:
 		package_name: No description available (string)
 
 		Returns:
-		keys: No description available (string)
+		attributes: No description available (string)
 		"""
 		request = {
 			'project_id': project_id
 			'package_name': package_name
 		}
 		response = self.connection.call("GetAttributesForPackage", request)
-		return response['keys']
-	
-	def delete_attribute_for_package(self, project_id, package_name, key):
-		"""
-		Delete an attribute on a project package
-
-		Parameters:
-		project_id: No description available (int64)
-		package_name: No description available (string)
-		key: No description available (string)
-
-		Returns:None
-		"""
-		request = {
-			'project_id': project_id
-			'package_name': package_name
-			'key': key
-		}
-		response = self.connection.call("DeleteAttributeForPackage", request)
-		return 
+		return response['attributes']
 	
 	
 

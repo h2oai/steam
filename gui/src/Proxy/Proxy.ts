@@ -724,31 +724,25 @@ export interface Service {
   getPackages: (projectId: number, go: (error: Error, packages: string[]) => void) => void
   
   // List directories in a project package
-  getPackageDirectories: (projectId: number, packageName: string, path: string, go: (error: Error, directories: string[]) => void) => void
+  getPackageDirectories: (projectId: number, packageName: string, relativePath: string, go: (error: Error, directories: string[]) => void) => void
   
   // List files in a project package
-  getPackageFiles: (projectId: number, packageName: string, path: string, go: (error: Error, files: string[]) => void) => void
+  getPackageFiles: (projectId: number, packageName: string, relativePath: string, go: (error: Error, files: string[]) => void) => void
   
   // Delete a project package
   deletePackage: (projectId: number, name: string, go: (error: Error) => void) => void
   
   // Delete a directory in a project package
-  deletePackageDirectory: (projectId: number, packageName: string, path: string, go: (error: Error) => void) => void
+  deletePackageDirectory: (projectId: number, packageName: string, relativePath: string, go: (error: Error) => void) => void
   
   // Delete a file in a project package
-  deletePackageFile: (projectId: number, packageName: string, path: string, go: (error: Error) => void) => void
+  deletePackageFile: (projectId: number, packageName: string, relativePath: string, go: (error: Error) => void) => void
   
   // Set attributes on a project package
-  setAttributeForPackage: (projectId: number, packageName: string, key: string, value: string, go: (error: Error) => void) => void
-  
-  // Get an attribute of a project package
-  getAttributeForPackage: (projectId: number, packageName: string, key: string, go: (error: Error, value: string) => void) => void
+  setAttributesForPackage: (projectId: number, packageName: string, attributes: string, go: (error: Error) => void) => void
   
   // List attributes for a project package
-  getAttributesForPackage: (projectId: number, packageName: string, go: (error: Error, keys: string) => void) => void
-  
-  // Delete an attribute on a project package
-  deleteAttributeForPackage: (projectId: number, packageName: string, key: string, go: (error: Error) => void) => void
+  getAttributesForPackage: (projectId: number, packageName: string, go: (error: Error, attributes: string) => void) => void
   
 }
 
@@ -2068,7 +2062,7 @@ interface GetPackageDirectoriesIn {
   
   package_name: string
   
-  path: string
+  relative_path: string
   
 }
 
@@ -2084,7 +2078,7 @@ interface GetPackageFilesIn {
   
   package_name: string
   
-  path: string
+  relative_path: string
   
 }
 
@@ -2112,7 +2106,7 @@ interface DeletePackageDirectoryIn {
   
   package_name: string
   
-  path: string
+  relative_path: string
   
 }
 
@@ -2126,7 +2120,7 @@ interface DeletePackageFileIn {
   
   package_name: string
   
-  path: string
+  relative_path: string
   
 }
 
@@ -2134,35 +2128,17 @@ interface DeletePackageFileOut {
   
 }
 
-interface SetAttributeForPackageIn {
+interface SetAttributesForPackageIn {
   
   project_id: number
   
   package_name: string
   
-  key: string
-  
-  value: string
+  attributes: string
   
 }
 
-interface SetAttributeForPackageOut {
-  
-}
-
-interface GetAttributeForPackageIn {
-  
-  project_id: number
-  
-  package_name: string
-  
-  key: string
-  
-}
-
-interface GetAttributeForPackageOut {
-  
-  value: string
+interface SetAttributesForPackageOut {
   
 }
 
@@ -2176,21 +2152,7 @@ interface GetAttributesForPackageIn {
 
 interface GetAttributesForPackageOut {
   
-  keys: string
-  
-}
-
-interface DeleteAttributeForPackageIn {
-  
-  project_id: number
-  
-  package_name: string
-  
-  key: string
-  
-}
-
-interface DeleteAttributeForPackageOut {
+  attributes: string
   
 }
 
@@ -3399,8 +3361,8 @@ export function getPackages(projectId: number, go: (error: Error, packages: stri
   });
 }
 
-export function getPackageDirectories(projectId: number, packageName: string, path: string, go: (error: Error, directories: string[]) => void): void {
-  const req: GetPackageDirectoriesIn = { project_id: projectId, package_name: packageName, path: path };
+export function getPackageDirectories(projectId: number, packageName: string, relativePath: string, go: (error: Error, directories: string[]) => void): void {
+  const req: GetPackageDirectoriesIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
   Proxy.Call("GetPackageDirectories", req, function(error, data) {
     if (error) {
       return go(error, null);
@@ -3411,8 +3373,8 @@ export function getPackageDirectories(projectId: number, packageName: string, pa
   });
 }
 
-export function getPackageFiles(projectId: number, packageName: string, path: string, go: (error: Error, files: string[]) => void): void {
-  const req: GetPackageFilesIn = { project_id: projectId, package_name: packageName, path: path };
+export function getPackageFiles(projectId: number, packageName: string, relativePath: string, go: (error: Error, files: string[]) => void): void {
+  const req: GetPackageFilesIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
   Proxy.Call("GetPackageFiles", req, function(error, data) {
     if (error) {
       return go(error, null);
@@ -3435,8 +3397,8 @@ export function deletePackage(projectId: number, name: string, go: (error: Error
   });
 }
 
-export function deletePackageDirectory(projectId: number, packageName: string, path: string, go: (error: Error) => void): void {
-  const req: DeletePackageDirectoryIn = { project_id: projectId, package_name: packageName, path: path };
+export function deletePackageDirectory(projectId: number, packageName: string, relativePath: string, go: (error: Error) => void): void {
+  const req: DeletePackageDirectoryIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
   Proxy.Call("DeletePackageDirectory", req, function(error, data) {
     if (error) {
       return go(error);
@@ -3447,8 +3409,8 @@ export function deletePackageDirectory(projectId: number, packageName: string, p
   });
 }
 
-export function deletePackageFile(projectId: number, packageName: string, path: string, go: (error: Error) => void): void {
-  const req: DeletePackageFileIn = { project_id: projectId, package_name: packageName, path: path };
+export function deletePackageFile(projectId: number, packageName: string, relativePath: string, go: (error: Error) => void): void {
+  const req: DeletePackageFileIn = { project_id: projectId, package_name: packageName, relative_path: relativePath };
   Proxy.Call("DeletePackageFile", req, function(error, data) {
     if (error) {
       return go(error);
@@ -3459,50 +3421,26 @@ export function deletePackageFile(projectId: number, packageName: string, path: 
   });
 }
 
-export function setAttributeForPackage(projectId: number, packageName: string, key: string, value: string, go: (error: Error) => void): void {
-  const req: SetAttributeForPackageIn = { project_id: projectId, package_name: packageName, key: key, value: value };
-  Proxy.Call("SetAttributeForPackage", req, function(error, data) {
+export function setAttributesForPackage(projectId: number, packageName: string, attributes: string, go: (error: Error) => void): void {
+  const req: SetAttributesForPackageIn = { project_id: projectId, package_name: packageName, attributes: attributes };
+  Proxy.Call("SetAttributesForPackage", req, function(error, data) {
     if (error) {
       return go(error);
     } else {
-      const d: SetAttributeForPackageOut = <SetAttributeForPackageOut> data;
+      const d: SetAttributesForPackageOut = <SetAttributesForPackageOut> data;
       return go(null);
     }
   });
 }
 
-export function getAttributeForPackage(projectId: number, packageName: string, key: string, go: (error: Error, value: string) => void): void {
-  const req: GetAttributeForPackageIn = { project_id: projectId, package_name: packageName, key: key };
-  Proxy.Call("GetAttributeForPackage", req, function(error, data) {
-    if (error) {
-      return go(error, null);
-    } else {
-      const d: GetAttributeForPackageOut = <GetAttributeForPackageOut> data;
-      return go(null, d.value);
-    }
-  });
-}
-
-export function getAttributesForPackage(projectId: number, packageName: string, go: (error: Error, keys: string) => void): void {
+export function getAttributesForPackage(projectId: number, packageName: string, go: (error: Error, attributes: string) => void): void {
   const req: GetAttributesForPackageIn = { project_id: projectId, package_name: packageName };
   Proxy.Call("GetAttributesForPackage", req, function(error, data) {
     if (error) {
       return go(error, null);
     } else {
       const d: GetAttributesForPackageOut = <GetAttributesForPackageOut> data;
-      return go(null, d.keys);
-    }
-  });
-}
-
-export function deleteAttributeForPackage(projectId: number, packageName: string, key: string, go: (error: Error) => void): void {
-  const req: DeleteAttributeForPackageIn = { project_id: projectId, package_name: packageName, key: key };
-  Proxy.Call("DeleteAttributeForPackage", req, function(error, data) {
-    if (error) {
-      return go(error);
-    } else {
-      const d: DeleteAttributeForPackageOut = <DeleteAttributeForPackageOut> data;
-      return go(null);
+      return go(null, d.attributes);
     }
   });
 }

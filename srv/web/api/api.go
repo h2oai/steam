@@ -341,10 +341,8 @@ type Service struct {
 	DeletePackage                 DeletePackage                 `help:"Delete a project package"`
 	DeletePackageDirectory        DeletePackageDirectory        `help:"Delete a directory in a project package"`
 	DeletePackageFile             DeletePackageFile             `help:"Delete a file in a project package"`
-	SetAttributeForPackage        SetAttributeForPackage        `help:"Set attributes on a project package"`
-	GetAttributeForPackage        GetAttributeForPackage        `help:"Get an attribute of a project package"`
+	SetAttributesForPackage       SetAttributesForPackage       `help:"Set attributes on a project package"`
 	GetAttributesForPackage       GetAttributesForPackage       `help:"List attributes for a project package"`
-	DeleteAttributeForPackage     DeleteAttributeForPackage     `help:"Delete an attribute on a project package"`
 }
 
 // --- API Method Definitions ---
@@ -878,19 +876,19 @@ type GetPackages struct {
 }
 
 type GetPackageDirectories struct {
-	ProjectId   int64
-	PackageName string
-	Path        string
-	_           int
-	Directories []string
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+	_            int
+	Directories  []string
 }
 
 type GetPackageFiles struct {
-	ProjectId   int64
-	PackageName string
-	Path        string
-	_           int
-	Files       []string
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
+	_            int
+	Files        []string
 }
 
 type DeletePackage struct {
@@ -899,41 +897,26 @@ type DeletePackage struct {
 }
 
 type DeletePackageDirectory struct {
-	ProjectId   int64
-	PackageName string
-	Path        string
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
 }
 
 type DeletePackageFile struct {
-	ProjectId   int64
-	PackageName string
-	Path        string
+	ProjectId    int64
+	PackageName  string
+	RelativePath string
 }
 
-type SetAttributeForPackage struct {
+type SetAttributesForPackage struct {
 	ProjectId   int64
 	PackageName string
-	Key         string
-	Value       string
-}
-
-type GetAttributeForPackage struct {
-	ProjectId   int64
-	PackageName string
-	Key         string
-	_           int
-	Value       string
+	Attributes  string
 }
 
 type GetAttributesForPackage struct {
 	ProjectId   int64
 	PackageName string
 	_           int
-	Keys        string
-}
-
-type DeleteAttributeForPackage struct {
-	ProjectId   int64
-	PackageName string
-	Key         string
+	Attributes  string
 }

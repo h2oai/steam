@@ -346,15 +346,13 @@ type Service interface {
 	GetHistory(pz az.Principal, entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error)
 	CreatePackage(pz az.Principal, projectId int64, name string) error
 	GetPackages(pz az.Principal, projectId int64) ([]string, error)
-	GetPackageDirectories(pz az.Principal, projectId int64, packageName string, path string) ([]string, error)
-	GetPackageFiles(pz az.Principal, projectId int64, packageName string, path string) ([]string, error)
+	GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error)
+	GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error)
 	DeletePackage(pz az.Principal, projectId int64, name string) error
-	DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, path string) error
-	DeletePackageFile(pz az.Principal, projectId int64, packageName string, path string) error
-	SetAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string, value string) error
-	GetAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string) (string, error)
+	DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error
+	DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error
+	SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error
 	GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error)
-	DeleteAttributeForPackage(pz az.Principal, projectId int64, packageName string, key string) error
 }
 
 // --- Messages ---
@@ -1213,9 +1211,9 @@ type GetPackagesOut struct {
 }
 
 type GetPackageDirectoriesIn struct {
-	ProjectId   int64  `json:"project_id"`
-	PackageName string `json:"package_name"`
-	Path        string `json:"path"`
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
 }
 
 type GetPackageDirectoriesOut struct {
@@ -1223,9 +1221,9 @@ type GetPackageDirectoriesOut struct {
 }
 
 type GetPackageFilesIn struct {
-	ProjectId   int64  `json:"project_id"`
-	PackageName string `json:"package_name"`
-	Path        string `json:"path"`
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
 }
 
 type GetPackageFilesOut struct {
@@ -1241,41 +1239,30 @@ type DeletePackageOut struct {
 }
 
 type DeletePackageDirectoryIn struct {
-	ProjectId   int64  `json:"project_id"`
-	PackageName string `json:"package_name"`
-	Path        string `json:"path"`
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
 }
 
 type DeletePackageDirectoryOut struct {
 }
 
 type DeletePackageFileIn struct {
-	ProjectId   int64  `json:"project_id"`
-	PackageName string `json:"package_name"`
-	Path        string `json:"path"`
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
 }
 
 type DeletePackageFileOut struct {
 }
 
-type SetAttributeForPackageIn struct {
+type SetAttributesForPackageIn struct {
 	ProjectId   int64  `json:"project_id"`
 	PackageName string `json:"package_name"`
-	Key         string `json:"key"`
-	Value       string `json:"value"`
+	Attributes  string `json:"attributes"`
 }
 
-type SetAttributeForPackageOut struct {
-}
-
-type GetAttributeForPackageIn struct {
-	ProjectId   int64  `json:"project_id"`
-	PackageName string `json:"package_name"`
-	Key         string `json:"key"`
-}
-
-type GetAttributeForPackageOut struct {
-	Value string `json:"value"`
+type SetAttributesForPackageOut struct {
 }
 
 type GetAttributesForPackageIn struct {
@@ -1284,16 +1271,7 @@ type GetAttributesForPackageIn struct {
 }
 
 type GetAttributesForPackageOut struct {
-	Keys string `json:"keys"`
-}
-
-type DeleteAttributeForPackageIn struct {
-	ProjectId   int64  `json:"project_id"`
-	PackageName string `json:"package_name"`
-	Key         string `json:"key"`
-}
-
-type DeleteAttributeForPackageOut struct {
+	Attributes string `json:"attributes"`
 }
 
 // --- Client Stub ---
@@ -2306,8 +2284,8 @@ func (this *Remote) GetPackages(projectId int64) ([]string, error) {
 	return out.Packages, nil
 }
 
-func (this *Remote) GetPackageDirectories(projectId int64, packageName string, path string) ([]string, error) {
-	in := GetPackageDirectoriesIn{projectId, packageName, path}
+func (this *Remote) GetPackageDirectories(projectId int64, packageName string, relativePath string) ([]string, error) {
+	in := GetPackageDirectoriesIn{projectId, packageName, relativePath}
 	var out GetPackageDirectoriesOut
 	err := this.Proc.Call("GetPackageDirectories", &in, &out)
 	if err != nil {
@@ -2316,8 +2294,8 @@ func (this *Remote) GetPackageDirectories(projectId int64, packageName string, p
 	return out.Directories, nil
 }
 
-func (this *Remote) GetPackageFiles(projectId int64, packageName string, path string) ([]string, error) {
-	in := GetPackageFilesIn{projectId, packageName, path}
+func (this *Remote) GetPackageFiles(projectId int64, packageName string, relativePath string) ([]string, error) {
+	in := GetPackageFilesIn{projectId, packageName, relativePath}
 	var out GetPackageFilesOut
 	err := this.Proc.Call("GetPackageFiles", &in, &out)
 	if err != nil {
@@ -2336,8 +2314,8 @@ func (this *Remote) DeletePackage(projectId int64, name string) error {
 	return nil
 }
 
-func (this *Remote) DeletePackageDirectory(projectId int64, packageName string, path string) error {
-	in := DeletePackageDirectoryIn{projectId, packageName, path}
+func (this *Remote) DeletePackageDirectory(projectId int64, packageName string, relativePath string) error {
+	in := DeletePackageDirectoryIn{projectId, packageName, relativePath}
 	var out DeletePackageDirectoryOut
 	err := this.Proc.Call("DeletePackageDirectory", &in, &out)
 	if err != nil {
@@ -2346,8 +2324,8 @@ func (this *Remote) DeletePackageDirectory(projectId int64, packageName string, 
 	return nil
 }
 
-func (this *Remote) DeletePackageFile(projectId int64, packageName string, path string) error {
-	in := DeletePackageFileIn{projectId, packageName, path}
+func (this *Remote) DeletePackageFile(projectId int64, packageName string, relativePath string) error {
+	in := DeletePackageFileIn{projectId, packageName, relativePath}
 	var out DeletePackageFileOut
 	err := this.Proc.Call("DeletePackageFile", &in, &out)
 	if err != nil {
@@ -2356,24 +2334,14 @@ func (this *Remote) DeletePackageFile(projectId int64, packageName string, path 
 	return nil
 }
 
-func (this *Remote) SetAttributeForPackage(projectId int64, packageName string, key string, value string) error {
-	in := SetAttributeForPackageIn{projectId, packageName, key, value}
-	var out SetAttributeForPackageOut
-	err := this.Proc.Call("SetAttributeForPackage", &in, &out)
+func (this *Remote) SetAttributesForPackage(projectId int64, packageName string, attributes string) error {
+	in := SetAttributesForPackageIn{projectId, packageName, attributes}
+	var out SetAttributesForPackageOut
+	err := this.Proc.Call("SetAttributesForPackage", &in, &out)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func (this *Remote) GetAttributeForPackage(projectId int64, packageName string, key string) (string, error) {
-	in := GetAttributeForPackageIn{projectId, packageName, key}
-	var out GetAttributeForPackageOut
-	err := this.Proc.Call("GetAttributeForPackage", &in, &out)
-	if err != nil {
-		return "", err
-	}
-	return out.Value, nil
 }
 
 func (this *Remote) GetAttributesForPackage(projectId int64, packageName string) (string, error) {
@@ -2383,17 +2351,7 @@ func (this *Remote) GetAttributesForPackage(projectId int64, packageName string)
 	if err != nil {
 		return "", err
 	}
-	return out.Keys, nil
-}
-
-func (this *Remote) DeleteAttributeForPackage(projectId int64, packageName string, key string) error {
-	in := DeleteAttributeForPackageIn{projectId, packageName, key}
-	var out DeleteAttributeForPackageOut
-	err := this.Proc.Call("DeleteAttributeForPackage", &in, &out)
-	if err != nil {
-		return err
-	}
-	return nil
+	return out.Attributes, nil
 }
 
 // --- Server Stub ---
@@ -5856,7 +5814,7 @@ func (this *Impl) GetPackageDirectories(r *http.Request, in *GetPackageDirectori
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.GetPackageDirectories(pz, in.ProjectId, in.PackageName, in.Path)
+	val0, err := this.Service.GetPackageDirectories(pz, in.ProjectId, in.PackageName, in.RelativePath)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
@@ -5891,7 +5849,7 @@ func (this *Impl) GetPackageFiles(r *http.Request, in *GetPackageFilesIn, out *G
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.GetPackageFiles(pz, in.ProjectId, in.PackageName, in.Path)
+	val0, err := this.Service.GetPackageFiles(pz, in.ProjectId, in.PackageName, in.RelativePath)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
@@ -5959,7 +5917,7 @@ func (this *Impl) DeletePackageDirectory(r *http.Request, in *DeletePackageDirec
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	err := this.Service.DeletePackageDirectory(pz, in.ProjectId, in.PackageName, in.Path)
+	err := this.Service.DeletePackageDirectory(pz, in.ProjectId, in.PackageName, in.RelativePath)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
@@ -5992,7 +5950,7 @@ func (this *Impl) DeletePackageFile(r *http.Request, in *DeletePackageFileIn, ou
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	err := this.Service.DeletePackageFile(pz, in.ProjectId, in.PackageName, in.Path)
+	err := this.Service.DeletePackageFile(pz, in.ProjectId, in.PackageName, in.RelativePath)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
@@ -6008,8 +5966,8 @@ func (this *Impl) DeletePackageFile(r *http.Request, in *DeletePackageFileIn, ou
 	return nil
 }
 
-func (this *Impl) SetAttributeForPackage(r *http.Request, in *SetAttributeForPackageIn, out *SetAttributeForPackageOut) error {
-	const name = "SetAttributeForPackage"
+func (this *Impl) SetAttributesForPackage(r *http.Request, in *SetAttributesForPackageIn, out *SetAttributesForPackageOut) error {
+	const name = "SetAttributesForPackage"
 
 	guid := xid.New().String()
 
@@ -6025,46 +5983,11 @@ func (this *Impl) SetAttributeForPackage(r *http.Request, in *SetAttributeForPac
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	err := this.Service.SetAttributeForPackage(pz, in.ProjectId, in.PackageName, in.Key, in.Value)
+	err := this.Service.SetAttributesForPackage(pz, in.ProjectId, in.PackageName, in.Attributes)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
-
-	res, merr := json.Marshal(out)
-	if merr != nil {
-		log.Println(guid, "RES", pz, name, merr)
-	} else {
-		log.Println(guid, "RES", pz, name, string(res))
-	}
-
-	return nil
-}
-
-func (this *Impl) GetAttributeForPackage(r *http.Request, in *GetAttributeForPackageIn, out *GetAttributeForPackageOut) error {
-	const name = "GetAttributeForPackage"
-
-	guid := xid.New().String()
-
-	pz, azerr := this.Az.Identify(r)
-	if azerr != nil {
-		return azerr
-	}
-
-	req, merr := json.Marshal(in)
-	if merr != nil {
-		log.Println(guid, "REQ", pz, name, merr)
-	} else {
-		log.Println(guid, "REQ", pz, name, string(req))
-	}
-
-	val0, err := this.Service.GetAttributeForPackage(pz, in.ProjectId, in.PackageName, in.Key)
-	if err != nil {
-		log.Println(guid, "ERR", pz, name, err)
-		return err
-	}
-
-	out.Value = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {
@@ -6099,40 +6022,7 @@ func (this *Impl) GetAttributesForPackage(r *http.Request, in *GetAttributesForP
 		return err
 	}
 
-	out.Keys = val0
-
-	res, merr := json.Marshal(out)
-	if merr != nil {
-		log.Println(guid, "RES", pz, name, merr)
-	} else {
-		log.Println(guid, "RES", pz, name, string(res))
-	}
-
-	return nil
-}
-
-func (this *Impl) DeleteAttributeForPackage(r *http.Request, in *DeleteAttributeForPackageIn, out *DeleteAttributeForPackageOut) error {
-	const name = "DeleteAttributeForPackage"
-
-	guid := xid.New().String()
-
-	pz, azerr := this.Az.Identify(r)
-	if azerr != nil {
-		return azerr
-	}
-
-	req, merr := json.Marshal(in)
-	if merr != nil {
-		log.Println(guid, "REQ", pz, name, merr)
-	} else {
-		log.Println(guid, "REQ", pz, name, string(req))
-	}
-
-	err := this.Service.DeleteAttributeForPackage(pz, in.ProjectId, in.PackageName, in.Key)
-	if err != nil {
-		log.Println(guid, "ERR", pz, name, err)
-		return err
-	}
+	out.Attributes = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

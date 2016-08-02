@@ -576,7 +576,6 @@ delete [?]
 Delete entities
 Commands:
 
-    $ steam delete attribute ...
     $ steam delete cluster ...
     $ steam delete dataset ...
     $ steam delete datasource ...
@@ -593,7 +592,6 @@ Commands:
 func delete_(c *context) *cobra.Command {
 	cmd := newCmd(c, deleteHelp, nil)
 
-	cmd.AddCommand(deleteAttribute(c))
 	cmd.AddCommand(deleteCluster(c))
 	cmd.AddCommand(deleteDataset(c))
 	cmd.AddCommand(deleteDatasource(c))
@@ -605,48 +603,6 @@ func delete_(c *context) *cobra.Command {
 	cmd.AddCommand(deleteRole(c))
 	cmd.AddCommand(deleteService(c))
 	cmd.AddCommand(deleteWorkgroup(c))
-	return cmd
-}
-
-var deleteAttributeHelp = `
-attribute [?]
-Delete Attribute
-Examples:
-
-    Delete an attribute on a project package
-    $ steam delete attribute --for-package \
-        --project-id=? \
-        --package-name=? \
-        --key=?
-
-`
-
-func deleteAttribute(c *context) *cobra.Command {
-	var forPackage bool    // Switch for DeleteAttributeForPackage()
-	var key string         // No description available
-	var packageName string // No description available
-	var projectId int64    // No description available
-
-	cmd := newCmd(c, deleteAttributeHelp, func(c *context, args []string) {
-		if forPackage { // DeleteAttributeForPackage
-
-			// Delete an attribute on a project package
-			err := c.remote.DeleteAttributeForPackage(
-				projectId,   // No description available
-				packageName, // No description available
-				key,         // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "Delete an attribute on a project package")
-
-	cmd.Flags().StringVar(&key, "key", key, "No description available")
-	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
-	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
 }
 
@@ -844,32 +800,32 @@ Examples:
     $ steam delete package --directory \
         --project-id=? \
         --package-name=? \
-        --path=?
+        --relative-path=?
 
     Delete a file in a project package
     $ steam delete package --file \
         --project-id=? \
         --package-name=? \
-        --path=?
+        --relative-path=?
 
 `
 
 func deletePackage(c *context) *cobra.Command {
-	var directory bool     // Switch for DeletePackageDirectory()
-	var file bool          // Switch for DeletePackageFile()
-	var name string        // No description available
-	var packageName string // No description available
-	var path string        // No description available
-	var projectId int64    // No description available
+	var directory bool      // Switch for DeletePackageDirectory()
+	var file bool           // Switch for DeletePackageFile()
+	var name string         // No description available
+	var packageName string  // No description available
+	var projectId int64     // No description available
+	var relativePath string // No description available
 
 	cmd := newCmd(c, deletePackageHelp, func(c *context, args []string) {
 		if directory { // DeletePackageDirectory
 
 			// Delete a directory in a project package
 			err := c.remote.DeletePackageDirectory(
-				projectId,   // No description available
-				packageName, // No description available
-				path,        // No description available
+				projectId,    // No description available
+				packageName,  // No description available
+				relativePath, // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -880,9 +836,9 @@ func deletePackage(c *context) *cobra.Command {
 
 			// Delete a file in a project package
 			err := c.remote.DeletePackageFile(
-				projectId,   // No description available
-				packageName, // No description available
-				path,        // No description available
+				projectId,    // No description available
+				packageName,  // No description available
+				relativePath, // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -907,8 +863,8 @@ func deletePackage(c *context) *cobra.Command {
 
 	cmd.Flags().StringVar(&name, "name", name, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
-	cmd.Flags().StringVar(&path, "path", path, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+	cmd.Flags().StringVar(&relativePath, "relative-path", relativePath, "No description available")
 	return cmd
 }
 
@@ -1238,7 +1194,6 @@ Get entities
 Commands:
 
     $ steam get all ...
-    $ steam get attribute ...
     $ steam get attributes ...
     $ steam get cluster ...
     $ steam get clusters ...
@@ -1274,7 +1229,6 @@ func get(c *context) *cobra.Command {
 	cmd := newCmd(c, getHelp, nil)
 
 	cmd.AddCommand(getAll(c))
-	cmd.AddCommand(getAttribute(c))
 	cmd.AddCommand(getAttributes(c))
 	cmd.AddCommand(getCluster(c))
 	cmd.AddCommand(getClusters(c))
@@ -1437,49 +1391,6 @@ func getAll(c *context) *cobra.Command {
 	return cmd
 }
 
-var getAttributeHelp = `
-attribute [?]
-Get Attribute
-Examples:
-
-    Get an attribute of a project package
-    $ steam get attribute --for-package \
-        --project-id=? \
-        --package-name=? \
-        --key=?
-
-`
-
-func getAttribute(c *context) *cobra.Command {
-	var forPackage bool    // Switch for GetAttributeForPackage()
-	var key string         // No description available
-	var packageName string // No description available
-	var projectId int64    // No description available
-
-	cmd := newCmd(c, getAttributeHelp, func(c *context, args []string) {
-		if forPackage { // GetAttributeForPackage
-
-			// Get an attribute of a project package
-			value, err := c.remote.GetAttributeForPackage(
-				projectId,   // No description available
-				packageName, // No description available
-				key,         // No description available
-			)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Printf("Value:\t%v\n", value)
-			return
-		}
-	})
-	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "Get an attribute of a project package")
-
-	cmd.Flags().StringVar(&key, "key", key, "No description available")
-	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
-	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-	return cmd
-}
-
 var getAttributesHelp = `
 attributes [?]
 Get Attributes
@@ -1501,14 +1412,14 @@ func getAttributes(c *context) *cobra.Command {
 		if forPackage { // GetAttributesForPackage
 
 			// List attributes for a project package
-			keys, err := c.remote.GetAttributesForPackage(
+			attributes, err := c.remote.GetAttributesForPackage(
 				projectId,   // No description available
 				packageName, // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
 			}
-			fmt.Printf("Keys:\t%v\n", keys)
+			fmt.Printf("Attributes:\t%v\n", attributes)
 			return
 		}
 	})
@@ -2600,31 +2511,31 @@ Examples:
     $ steam get package --directories \
         --project-id=? \
         --package-name=? \
-        --path=?
+        --relative-path=?
 
     List files in a project package
     $ steam get package --files \
         --project-id=? \
         --package-name=? \
-        --path=?
+        --relative-path=?
 
 `
 
 func getPackage(c *context) *cobra.Command {
-	var directories bool   // Switch for GetPackageDirectories()
-	var files bool         // Switch for GetPackageFiles()
-	var packageName string // No description available
-	var path string        // No description available
-	var projectId int64    // No description available
+	var directories bool    // Switch for GetPackageDirectories()
+	var files bool          // Switch for GetPackageFiles()
+	var packageName string  // No description available
+	var projectId int64     // No description available
+	var relativePath string // No description available
 
 	cmd := newCmd(c, getPackageHelp, func(c *context, args []string) {
 		if directories { // GetPackageDirectories
 
 			// List directories in a project package
 			directories, err := c.remote.GetPackageDirectories(
-				projectId,   // No description available
-				packageName, // No description available
-				path,        // No description available
+				projectId,    // No description available
+				packageName,  // No description available
+				relativePath, // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2636,9 +2547,9 @@ func getPackage(c *context) *cobra.Command {
 
 			// List files in a project package
 			files, err := c.remote.GetPackageFiles(
-				projectId,   // No description available
-				packageName, // No description available
-				path,        // No description available
+				projectId,    // No description available
+				packageName,  // No description available
+				relativePath, // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2651,8 +2562,8 @@ func getPackage(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&files, "files", files, "List files in a project package")
 
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
-	cmd.Flags().StringVar(&path, "path", path, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+	cmd.Flags().StringVar(&relativePath, "relative-path", relativePath, "No description available")
 	return cmd
 }
 
@@ -3613,46 +3524,43 @@ set [?]
 Set entities
 Commands:
 
-    $ steam set attribute ...
+    $ steam set attributes ...
 `
 
 func set(c *context) *cobra.Command {
 	cmd := newCmd(c, setHelp, nil)
 
-	cmd.AddCommand(setAttribute(c))
+	cmd.AddCommand(setAttributes(c))
 	return cmd
 }
 
-var setAttributeHelp = `
-attribute [?]
-Set Attribute
+var setAttributesHelp = `
+attributes [?]
+Set Attributes
 Examples:
 
     Set attributes on a project package
-    $ steam set attribute --for-package \
+    $ steam set attributes --for-package \
         --project-id=? \
         --package-name=? \
-        --key=? \
-        --value=?
+        --attributes=?
 
 `
 
-func setAttribute(c *context) *cobra.Command {
-	var forPackage bool    // Switch for SetAttributeForPackage()
-	var key string         // No description available
+func setAttributes(c *context) *cobra.Command {
+	var forPackage bool    // Switch for SetAttributesForPackage()
+	var attributes string  // No description available
 	var packageName string // No description available
 	var projectId int64    // No description available
-	var value string       // No description available
 
-	cmd := newCmd(c, setAttributeHelp, func(c *context, args []string) {
-		if forPackage { // SetAttributeForPackage
+	cmd := newCmd(c, setAttributesHelp, func(c *context, args []string) {
+		if forPackage { // SetAttributesForPackage
 
 			// Set attributes on a project package
-			err := c.remote.SetAttributeForPackage(
+			err := c.remote.SetAttributesForPackage(
 				projectId,   // No description available
 				packageName, // No description available
-				key,         // No description available
-				value,       // No description available
+				attributes,  // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3662,10 +3570,9 @@ func setAttribute(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&forPackage, "for-package", forPackage, "Set attributes on a project package")
 
-	cmd.Flags().StringVar(&key, "key", key, "No description available")
+	cmd.Flags().StringVar(&attributes, "attributes", attributes, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
-	cmd.Flags().StringVar(&value, "value", value, "No description available")
 	return cmd
 }
 
