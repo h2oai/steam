@@ -9,10 +9,14 @@ interface Props {
   name: string,
   open: boolean,
   onDownload: Function,
-  onCancel: Function
+  onCancel: Function,
+  modelId: number,
+  projectId: number
 }
 
 export default class ExportModal extends React.Component<Props, any> {
+  
+  
   render(): React.ReactElement<DefaultModal> {
     return (
       <DefaultModal className="export-modal" open={this.props.open}>
