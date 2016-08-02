@@ -1991,7 +1991,23 @@ func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) e
 }
 
 func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
-	return nil, nil
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// XXX check project access
+
+	projectPath := fs.GetProjectPath(s.workingDir, projectId)
+	if !fs.DirExists(projectPath) {
+		return []string{}, nil
+	}
+
+	dirs, err := fs.ListDirs(projectPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing packages: %s", err)
+	}
+
+	return dirs, nil
 }
 func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, path string) ([]string, error) {
 	return nil, nil
