@@ -2038,10 +2038,51 @@ func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packag
 
 	return dirs, nil
 }
-func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, path string) ([]string, error) {
-	return nil, nil
+
+func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("Package %s does not exist")
+	}
+
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+
+	files, err := fs.ListFiles(packageDirPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing package files: %s", err)
+	}
+
+	return files, nil
 }
+
 func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	if err := fs.Rmdir(packagePath); err != nil {
+		return fmt.Errorf("Failed deleting package: %s", err)
+	}
 
 	return nil
 }
