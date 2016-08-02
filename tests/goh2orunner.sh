@@ -2,8 +2,8 @@
 
 # Start H2O and create a start log + store pid
 java -jar ../var/temp/h2o-$H2OVERSION/h2o.jar > start.log 2>&1 &
-PID=$!
-echo "Started h2o with pid ${PID}"
+H2OPID=$!
+echo "Started h2o with pid ${H2OPID}"
 
 # Wait for cluster to start
 sleep 5
@@ -16,10 +16,16 @@ ADDRESS=$(sed -n '/Cloud of size/s/.* \[\/\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*:[0-9]
 echo "Preparing models in cluster"
 python h2o-setup.py $ADDRESS
 
+# Setup scoring service builder
+java -jar ../var/master/assets/jetty-runner.jar ../var/master/assets/ROOT.war > compile.log 2>&1 &
+SSBPID=$?
+echo "Started scoring service builder with pid ${SSBPID}"
+
 # Run GO tests here
-go test ../master/web -v -coverprofile=masterweb.cov
+go test ../master/web --working-directory="../../" --cluster-address="${ADDRESS}" -v -coverprofile=masterweb.cov
 t1=$?
 
-kill -9 $PID
+kill -9 $H2OPID
+kill -9 $SSBPID
 
 exit $t1
