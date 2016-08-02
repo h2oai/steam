@@ -1348,8 +1348,8 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 		artifact = compiler.ArtifactPythonWar
 	}
 
-	compilerService := compiler.NewService(s.compilationServiceAddress)
-	warFilePath, err := compilerService.CompileModel(
+	warFilePath, err := compiler.CompileModel(
+		s.compilationServiceAddress,
 		s.workingDir,
 		projectId,
 		model.Id,
