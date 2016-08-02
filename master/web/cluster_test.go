@@ -21,7 +21,7 @@ func TestGetClusterModels(tt *testing.T) {
 	id, err := t.svc.RegisterCluster(t.su, ClusterAddress)
 	t.nil(err)
 
-	models, err := t.svc.GetModelsFromCluster(t.su, id, h2oFrameKey)
+	models, err := t.svc.GetModelsFromCluster(t.su, id, h2oFrames[0].name)
 	t.nil(err)
 
 	// VERIFY INFORMATION HERE
