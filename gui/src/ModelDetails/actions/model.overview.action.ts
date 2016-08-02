@@ -55,7 +55,13 @@ export function downloadModel(): Function {
 
 export function deployModel(modelId: number): Function {
   return (dispatch) => {
-    Remote.startService(modelId, (error, res) => {
+    /**
+     * TODO(justinloyola):
+     *   if arg2 is "", deploys a vanilla war file as a service
+     *   if arg2 is a valid package name, the python scripts from the package are
+     *     bundled into the war file. 
+     */
+    Remote.startService(modelId, "", (error, res) => {
       console.log(res);
     });
   };
