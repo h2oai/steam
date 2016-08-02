@@ -2624,6 +2624,23 @@ func (ds *Datastore) ReadProject(pz az.Principal, projectId int64) (Project, err
 	return ScanProject(row)
 }
 
+func (ds *Datastore) ReadProjectIdForModelId(pz az.Principal, modelId int64) (int64, error) {
+	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
+		return 0, err
+	}
+
+	row := ds.db.QueryRow(`
+		SELECT
+			project_id
+		FROM
+			project_model
+		WHERE
+			model_id = $1
+		`, modelId)
+
+	return scanInt(row)
+}
+
 func (ds *Datastore) DeleteProject(pz az.Principal, projectId int64) error {
 	if err := pz.CheckOwns(ds.EntityTypes.Project, projectId); err != nil {
 		return err

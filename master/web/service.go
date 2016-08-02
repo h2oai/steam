@@ -439,12 +439,12 @@ func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 
 // --- Datasource ---
 
-func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, path string) (int64, error) {
+func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, filePath string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return 0, err
 	}
 
-	mapPath := map[string]string{"path": path}
+	mapPath := map[string]string{"path": filePath}
 	jsonPath, err := json.Marshal(mapPath)
 	if err != nil {
 		return 0, err
@@ -494,12 +494,12 @@ func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datas
 	return toDatasource(datasource), nil
 }
 
-func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, path string) error {
+func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, filePath string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageDatasource); err != nil {
 		return err
 	}
 
-	mapPath := map[string]string{"path": path}
+	mapPath := map[string]string{"path": filePath}
 	jsonPath, err := json.Marshal(mapPath)
 	if err != nil {
 		return err
@@ -553,12 +553,12 @@ func (s *Service) importDataset(name, configuration, address string) ([]byte, st
 	if err := json.Unmarshal([]byte(configuration), &rawJson); err != nil {
 		return nil, "", err
 	}
-	path, ok := rawJson["path"]
+	filePath, ok := rawJson["path"]
 	if !ok {
 		return nil, "", fmt.Errorf("Cannot locate path: Empty datasource configuration")
 	}
 
-	importBody, err := h2o.PostImportFilesImportfiles(path)
+	importBody, err := h2o.PostImportFilesImportfiles(filePath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -1328,27 +1328,34 @@ func (s *Service) assignPort() (int, error) {
 	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64) (int64, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, packageName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return 0, err
 	}
-
-	// FIXME: change sequence to:
-	// 1. insert a record into the Service table with the state "starting"
-	// 2. attempt to compile and start the service
-	// 3. update the Service record state to "started" if successful, or "failed" if not.
 
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return 0, err
 	}
 
+	projectId, err := s.ds.ReadProjectIdForModelId(pz, modelId)
+	if err != nil {
+		return 0, err
+	}
+
+	artifact := compiler.ArtifactWar
+	if len(packageName) > 0 {
+		artifact = compiler.ArtifactPythonWar
+	}
+
 	compilerService := compiler.NewService(s.compilationServiceAddress)
 	warFilePath, err := compilerService.CompileModel(
 		s.workingDir,
+		projectId,
 		model.Id,
 		model.LogicalName,
-		"war",
+		artifact,
+		packageName,
 	)
 	if err != nil {
 		return 0, err
@@ -1972,7 +1979,9 @@ func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) e
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	if err := fs.ValidateName(name); err != nil {
 		return fmt.Errorf("Invalid package name: %s", err)
@@ -1995,7 +2004,9 @@ func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error
 		return nil, err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
 
 	projectPath := fs.GetProjectPath(s.workingDir, projectId)
 	if !fs.DirExists(projectPath) {
@@ -2015,7 +2026,9 @@ func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packag
 		return nil, err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2044,7 +2057,9 @@ func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName 
 		return nil, err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return nil, err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2073,7 +2088,9 @@ func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) e
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
 	if !fs.DirExists(packagePath) {
@@ -2092,7 +2109,9 @@ func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packa
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2120,7 +2139,9 @@ func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageNam
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
 	if !fs.DirExists(packagePath) {
@@ -2148,7 +2169,9 @@ func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, pack
 		return err
 	}
 
-	// XXX check project access
+	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		return err
+	}
 
 	if err := fs.SetPackageAttributes(s.workingDir, projectId, packageName, []byte(attributes)); err != nil {
 		return err
@@ -2162,7 +2185,9 @@ func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, pack
 		return "", err
 	}
 
-	// XXX check project access
+	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
+		return "", err
+	}
 
 	b, err := fs.GetPackageAttributes(s.workingDir, projectId, packageName)
 	if err != nil {

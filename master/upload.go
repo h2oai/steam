@@ -11,6 +11,7 @@ import (
 
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steamY/master/data"
 	srvweb "github.com/h2oai/steamY/srv/web"
 )
 
@@ -18,10 +19,11 @@ type UploadHandler struct {
 	az               az.Az
 	workingDirectory string
 	webService       srvweb.Service
+	ds               *data.Datastore
 }
 
-func newUploadHandler(az az.Az, wd string, webService srvweb.Service) *UploadHandler {
-	return &UploadHandler{az, wd, webService}
+func newUploadHandler(az az.Az, wd string, webService srvweb.Service, ds *data.Datastore) *UploadHandler {
+	return &UploadHandler{az, wd, webService, ds}
 }
 
 func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +32,7 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pz, azerr := s.az.Identify(r)
 	if azerr != nil {
 		log.Println(azerr)
-		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusForbidden)
+		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusUnauthorized)
 		return
 	}
 
@@ -42,17 +44,31 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch typ {
 	case fs.KindEngine:
+		if err := pz.CheckPermission(s.ds.Permissions.ManageEngine); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
 		dstDir = path.Join(s.workingDirectory, fs.LibDir, typ)
 
-		// XXX check manage engine perms
-
 	case fs.KindFile:
+		if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
 		projectIdValue := r.FormValue("project-id")
 		projectId, err := strconv.ParseInt(projectIdValue, 10, 64)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Invalid project id: %s", projectIdValue), http.StatusBadRequest)
 			return
 		}
+
+		if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
 		packageName := r.FormValue("package-name")
 		if err := fs.ValidateName(packageName); err != nil {
 			http.Error(w, fmt.Sprintf("Invalid package name: %s", err), http.StatusBadRequest)
@@ -70,9 +86,6 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Invalid relative path: %s", err), http.StatusBadRequest)
 		}
-
-		// XXX check project manage perms
-		// XXX check project access
 
 	default:
 		http.Error(w, fmt.Sprintf("Invalid upload type: %s", typ), http.StatusBadRequest)
