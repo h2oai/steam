@@ -6,7 +6,8 @@ import { RECEIVE_LEADERBOARD, RECEIVE_SORT_CRITERIA } from '../actions/leaderboa
 
 let initialState = {
   items: [],
-  modelCategory: null
+  modelCategory: null,
+  criteria: null
 };
 
 export const leaderboardReducer = (state = initialState, action: any) => {

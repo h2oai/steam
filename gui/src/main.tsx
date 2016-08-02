@@ -19,8 +19,7 @@ const initialState = {};
 const store: any = createStore(
   rootReducer,
   initialState,
-  compose(applyMiddleware(thunk),
-  window.devToolsExtension ? window.devToolsExtension() : f => f)
+  applyMiddleware(thunk)
 );
 
 let history: any = syncHistoryWithStore(hashHistory, store);

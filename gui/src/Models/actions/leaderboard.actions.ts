@@ -30,13 +30,11 @@ export function receiveLeaderboard(leaderboard) {
   };
 }
 
-export function fetchLeaderboard(projectId: number, modelCategory: string, sortBy: string, ascending: boolean) {
+export function fetchLeaderboard(projectId: number, modelCategory: string, name: string, sortBy: string, ascending: boolean) {
   return (dispatch) => {
     dispatch(requestLeaderboard());
-    Remote.getModels(projectId, 0, 5, (error, res) => {
-      findModelStrategy(modelCategory.toLowerCase())(projectId, '', sortBy || '', ascending || false, 0, 5, (error, models) => {
-        dispatch(receiveLeaderboard(models as BinomialModel[] | MultinomialModel[] | RegressionModel[]));
-      });
+    findModelStrategy(modelCategory.toLowerCase())(projectId, name, sortBy || '', ascending || false, 0, 5, (error, models) => {
+      dispatch(receiveLeaderboard(models as BinomialModel[] | MultinomialModel[] | RegressionModel[]));
     });
   };
 }

@@ -110,9 +110,11 @@ export function fetchModelsFromProject(projectId: number) {
 
 export function fetchProject(projectId: number) {
   return (dispatch) => {
-    Remote.getProject(projectId, (error, res) => {
-      dispatch(receiveProject(res));  
-    });  
+    return new Promise((resolve, reject) => {
+      Remote.getProject(projectId, (error, res) => {
+        resolve(res);
+      });
+    });
   };
 }
 

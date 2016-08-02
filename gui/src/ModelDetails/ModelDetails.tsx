@@ -17,17 +17,25 @@ import './styles/modeldetails.scss';
 import { fetchModelOverview, downloadModel, deployModel } from './actions/model.overview.action';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { fetchLeaderboard, fetchSortCriteria } from '../Models/actions/leaderboard.actions';
+import { fetchProject } from '../Projects/actions/projects.actions';
 
 interface Props {
   params: {
     modelid: string,
     projectid: string
   },
-  model: any
+  model: any,
+  models: any,
+  project: any,
+  sortCriteria: string[]
 }
 
 interface DispatchProps {
   fetchModelOverview: Function,
+  fetchSortCriteria: Function,
+  fetchLeaderboard: Function,
+  fetchProject: Function,
   downloadModel: Function,
   deployModel: Function
 }
@@ -48,6 +56,15 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   componentWillMount() {
+    if (this.props.project) {
+      this.props.fetchProject(parseInt(this.props.params.projectid, 10)).then((res) => {
+        this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), res.model_category);
+        this.props.fetchSortCriteria(res.model_category.toLowerCase());
+        this.setState({
+          modelCategory: res.model_category.toLowerCase()
+        });
+      });
+    }
     this.props.fetchModelOverview(parseInt(this.props.params.modelid, 10));
   }
 
@@ -122,6 +139,9 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     this.closeComparisonModal();
   }
 
+  onFilter(filters, name) {
+    this.props.fetchLeaderboard(parseInt(this.props.params.projectid, 10), this.state.modelCategory, name, filters.sortBy, filters.orderBy === 'asc');
+  }
 
   render(): React.ReactElement<HTMLDivElement> {
     if (_.isEmpty(this.props.model)) {
@@ -129,7 +149,9 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="model-details">
-        <ModelSelectionModal open={this.state.isModelSelectionModalOpen} projectId={this.props.params.projectid}
+        <ModelSelectionModal open={this.state.isModelSelectionModalOpen} onFilter={this.onFilter.bind(this)}
+                             models={this.props.models}
+                             sortCriteria={this.props.sortCriteria}
                              onSelectModel={this.onSelectModel.bind(this)} onCancel={this.onCancel.bind(this)}/>
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
                      onCancel={this.cancel.bind(this)} onDownload={this.downloadModel.bind(this)}/>
@@ -161,16 +183,6 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
           <GoodnessOfFit model={this.props.model} comparisonModel={this.state.comparisonModel}></GoodnessOfFit>
         </Collapsible>
         <header className="overview-header">
-          <span onClick={this.toggleOpen.bind(this, 'residual')}><i
-            className={classNames('fa', {'fa-minus-square-o': this.state.isResidualOpen, 'fa-plus-square-o': !this.state.isResidualOpen})}></i
-          >Residual Analysis</span>
-        </header>
-        <Collapsible open={this.state.isResidualOpen}>
-          <div>
-            Residual body
-          </div>
-        </Collapsible>
-        <header className="overview-header">
           <span onClick={this.toggleOpen.bind(this, 'variable')}><i
             className={classNames('fa', {'fa-minus-square-o': this.state.isVariableOpen, 'fa-plus-square-o': !this.state.isVariableOpen})}></i
           >Variable Importance</span>
@@ -185,12 +197,18 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state: any): any {
   return {
-    model: state.model
+    model: state.model,
+    project: state.projects.project,
+    models: state.leaderboard.items,
+    sortCriteria: state.leaderboard.criteria
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch),
+    fetchProject: bindActionCreators(fetchProject, dispatch),
+    fetchSortCriteria: bindActionCreators(fetchSortCriteria, dispatch),
     fetchModelOverview: bindActionCreators(fetchModelOverview, dispatch),
     downloadModel: bindActionCreators(downloadModel, dispatch),
     deployModel: bindActionCreators(deployModel, dispatch)

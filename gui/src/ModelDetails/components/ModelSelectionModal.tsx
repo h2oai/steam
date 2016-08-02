@@ -23,20 +23,18 @@ interface Props {
   projectId: string,
   onSelectModel: Function,
   onCancel: Function,
-  project: any
+  project: any,
+  onFilter: Function,
+  sortCriteria: string[]
 }
 
-interface DispatchProps {
-  fetchLeaderboard: Function
-}
-
-export class ModelSelectionModal extends React.Component<Props & DispatchProps, any> {
-  componentWillMount() {
-    this.props.fetchLeaderboard(parseInt(this.props.projectId, 10));
-  }
-
+export default class ModelSelectionModal extends React.Component<Props, any> {
+  refs: {
+    [key: string]: Element
+    filterModels: HTMLInputElement
+  };
   onFilter(filters) {
-    this.props.fetchLeaderboard(parseInt(this.props.projectId, 10), this.props.project.model_category, filters.sortBy, filters.orderBy === 'asc');
+    this.props.onFilter(filters, this.refs.filterModels.value);
   }
 
   render(): React.ReactElement<DefaultModal> {
@@ -47,11 +45,11 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
         </PageHeader>
         <div>
           <div>Filter models by name</div>
-          <input type="text" placeholder="filter models"/>
+          <input ref="filterModels" type="text" placeholder="filter models" onChange={this.onFilter.bind(this)}/>
           <Table>
             <Row header={true}>
               <Cell>
-                <FilterDropdown onFilter={this.onFilter.bind(this)}/>
+                <FilterDropdown onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}/>
               </Cell>
               <Cell>
                 MODEL
@@ -104,18 +102,3 @@ export class ModelSelectionModal extends React.Component<Props & DispatchProps, 
     );
   }
 }
-
-function mapStateToProps(state: any): any {
-  return {
-    models: state.leaderboard.items,
-    project: state.projects.project
-  };
-}
-
-function mapDispatchToProps(dispatch): DispatchProps {
-  return {
-    fetchLeaderboard: bindActionCreators(fetchLeaderboard, dispatch)
-  };
-}
-
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ModelSelectionModal);

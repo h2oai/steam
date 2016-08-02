@@ -13,20 +13,17 @@ import '../styles/filterdropdown.scss';
 interface Props {
   target?: Element,
   onFilter: Function,
-  criteria: string[]
-}
-
-interface DispatchProps {
-  fetchSortCriteria: Function
+  sortCriteria: string[]
 }
 
 const FILTER_MAP = {
   mean_residual_deviance: 'MRD',
   r_squared: <span>R<sup>2</sup></span>,
-  mse: 'MSE'
+  mse: 'MSE',
+  logloss: 'LogLoss'
 };
 
-export class FilterDropdown extends React.Component<Props & DispatchProps, any> {
+export default class FilterDropdown extends React.Component<Props, any> {
   refs: {
     [key: string]: Element
     filterDropdown: Element
@@ -38,7 +35,7 @@ export class FilterDropdown extends React.Component<Props & DispatchProps, any> 
     this.state = {
       open: false,
       sortBy: null,
-      orderBy: null
+      orderBy: 'asc'
     };
     this.bodyClickHandler = this.bodyClickHandler.bind(this);
   }
@@ -49,12 +46,6 @@ export class FilterDropdown extends React.Component<Props & DispatchProps, any> 
 
   componentWillUnmount() {
     document.body.removeEventListener('click', this.bodyClickHandler);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.category && !this.props.criteria) {
-      this.props.fetchSortCriteria(nextProps.category.toLowerCase());
-    }
   }
 
   bodyClickHandler(event) {
@@ -92,7 +83,7 @@ export class FilterDropdown extends React.Component<Props & DispatchProps, any> 
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    if (!this.props.criteria) {
+    if (this.props.sortCriteria === null) {
       return <div></div>;
     }
     return (
@@ -103,7 +94,7 @@ export class FilterDropdown extends React.Component<Props & DispatchProps, any> 
           <div className="filter-option">
             <div className="filter-labels">SORT BY</div>
             <ul>
-              {this.props.criteria.map((criteria, i) => {
+              {this.props.sortCriteria.map((criteria, i) => {
                 return <li key={i} onClick={this.selectSort.bind(this, criteria)}
                     className={classNames({selected:this.state.sortBy === criteria})}>{FILTER_MAP[criteria]} {this.state.sortBy === criteria ?
                   <i className="fa fa-check"/> : null}</li>;
@@ -125,19 +116,4 @@ export class FilterDropdown extends React.Component<Props & DispatchProps, any> 
       </div>
     );
   }
-
 }
-
-function mapStateToProps(state) {
-  return {
-    criteria: state.leaderboard.criteria
-  };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    fetchSortCriteria: bindActionCreators(fetchSortCriteria, dispatch)
-  };
-}
-
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(FilterDropdown);

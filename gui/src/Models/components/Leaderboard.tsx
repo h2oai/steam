@@ -32,14 +32,18 @@ interface Props {
   items: any[],
   projectId: number,
   modelCategory: string,
-  onFilter: Function
+  onFilter: Function,
+  sortCriteria: string[]
 }
 
 interface DispatchProps {
 }
 
 export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
-
+  refs: {
+    [key: string]: Element
+    filterModels: HTMLInputElement
+  };
   sampleData = {};
 
   constructor() {
@@ -76,7 +80,12 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
   }
 
   onFilter(filters) {
-    this.props.onFilter(filters);
+    console.log(this.refs.filterModels.value);
+    this.props.onFilter(filters, this.refs.filterModels.value);
+  }
+
+  onFilterByName(event) {
+    console.log(event.target.value);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -90,12 +99,12 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
           </div>
         </PageHeader>
         <div className="filter">
-          <input type="text" placeholder="filter models"/>
+          <input ref="filterModels" type="text" placeholder="filter models" onChange={this.onFilter.bind(this)}/>
         </div>
         <Table>
           <Row header={true}>
             <Cell>
-              <FilterDropdown onFilter={this.onFilter.bind(this)} category={this.props.modelCategory}/>
+              <FilterDropdown onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}/>
             </Cell>
             <Cell>
               MODEL

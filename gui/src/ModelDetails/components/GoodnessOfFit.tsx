@@ -14,13 +14,23 @@ interface Props {
 
 export default class GoodnessOfFit extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
-    console.log(this.props.comparisonModel);
     let metrics = {
       mse: {
         label: 'Mean Squared Error',
         value: _.get(this.props.model, 'mse', null),
         comparisonValue: _.get(this.props.comparisonModel, 'mse', null)
-      }
+      },
+      logloss: {
+        label: 'LogLoss',
+        value: _.get(this.props.model, 'logloss', null),
+        comparisonValue: _.get(this.props.comparisonModel, 'logloss', null)
+      },
+      r_squared: {
+        label: <span>R<sup>2</sup></span>,
+        value: _.get(this.props.model, 'r_squared', null),
+        comparisonValue: _.get(this.props.comparisonModel, 'r_squared', null)
+      },
+      
     };
     return (
       <div className="metrics">

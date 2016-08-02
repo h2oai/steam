@@ -16,7 +16,6 @@ interface Props {
 
 export default class DetailLine extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
-    console.log(this.props);
     return (
       <div className={classNames('details', this.props.className)}>
         <div className="details--label">
