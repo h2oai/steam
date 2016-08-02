@@ -12,7 +12,7 @@ import (
 	"github.com/h2oai/steamY/lib/fs"
 )
 
-func uploadFile(url, filename, kind string) error {
+func transmitFile(url, username, password, filename string, attrs map[string]string) error {
 	filename, err := fs.ResolvePath(filename)
 	if err != nil {
 		return err
@@ -21,13 +21,15 @@ func uploadFile(url, filename, kind string) error {
 	buf := &bytes.Buffer{}
 	writer := multipart.NewWriter(buf)
 
-	tw, err := writer.CreateFormField("kind")
-	if err != nil {
-		return fmt.Errorf("Failed creating form field: %v", err)
-	}
+	for key, value := range attrs {
+		formField, err := writer.CreateFormField(key)
+		if err != nil {
+			return fmt.Errorf("Failed creating form field %s: %v", key, err)
+		}
 
-	if _, err := tw.Write([]byte(kind)); err != nil {
-		return fmt.Errorf("Failed writing form field: %v", err)
+		if _, err := formField.Write([]byte(value)); err != nil {
+			return fmt.Errorf("Failed writing form field %s: %v", key, err)
+		}
 	}
 
 	dst, err := writer.CreateFormFile("file", filename)
@@ -51,7 +53,8 @@ func uploadFile(url, filename, kind string) error {
 	if err != nil {
 		return fmt.Errorf("Error creating request: %v", err)
 	}
-	req.Header.Add("Content-type", ct)
+	req.Header.Set("Content-type", ct)
+	req.SetBasicAuth(username, password)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

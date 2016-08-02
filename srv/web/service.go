@@ -344,6 +344,15 @@ type Service interface {
 	GetPrivileges(pz az.Principal, entityTypeId int64, entityId int64) ([]*EntityPrivilege, error)
 	UnshareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) error
 	GetHistory(pz az.Principal, entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error)
+	CreatePackage(pz az.Principal, projectId int64, name string) error
+	GetPackages(pz az.Principal, projectId int64) ([]string, error)
+	GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error)
+	GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error)
+	DeletePackage(pz az.Principal, projectId int64, name string) error
+	DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error
+	DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error
+	SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error
+	GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error)
 }
 
 // --- Messages ---
@@ -1183,6 +1192,86 @@ type GetHistoryIn struct {
 
 type GetHistoryOut struct {
 	History []*EntityHistory `json:"history"`
+}
+
+type CreatePackageIn struct {
+	ProjectId int64  `json:"project_id"`
+	Name      string `json:"name"`
+}
+
+type CreatePackageOut struct {
+}
+
+type GetPackagesIn struct {
+	ProjectId int64 `json:"project_id"`
+}
+
+type GetPackagesOut struct {
+	Packages []string `json:"packages"`
+}
+
+type GetPackageDirectoriesIn struct {
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
+}
+
+type GetPackageDirectoriesOut struct {
+	Directories []string `json:"directories"`
+}
+
+type GetPackageFilesIn struct {
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
+}
+
+type GetPackageFilesOut struct {
+	Files []string `json:"files"`
+}
+
+type DeletePackageIn struct {
+	ProjectId int64  `json:"project_id"`
+	Name      string `json:"name"`
+}
+
+type DeletePackageOut struct {
+}
+
+type DeletePackageDirectoryIn struct {
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
+}
+
+type DeletePackageDirectoryOut struct {
+}
+
+type DeletePackageFileIn struct {
+	ProjectId    int64  `json:"project_id"`
+	PackageName  string `json:"package_name"`
+	RelativePath string `json:"relative_path"`
+}
+
+type DeletePackageFileOut struct {
+}
+
+type SetAttributesForPackageIn struct {
+	ProjectId   int64  `json:"project_id"`
+	PackageName string `json:"package_name"`
+	Attributes  string `json:"attributes"`
+}
+
+type SetAttributesForPackageOut struct {
+}
+
+type GetAttributesForPackageIn struct {
+	ProjectId   int64  `json:"project_id"`
+	PackageName string `json:"package_name"`
+}
+
+type GetAttributesForPackageOut struct {
+	Attributes string `json:"attributes"`
 }
 
 // --- Client Stub ---
@@ -2173,6 +2262,96 @@ func (this *Remote) GetHistory(entityTypeId int64, entityId int64, offset int64,
 		return nil, err
 	}
 	return out.History, nil
+}
+
+func (this *Remote) CreatePackage(projectId int64, name string) error {
+	in := CreatePackageIn{projectId, name}
+	var out CreatePackageOut
+	err := this.Proc.Call("CreatePackage", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) GetPackages(projectId int64) ([]string, error) {
+	in := GetPackagesIn{projectId}
+	var out GetPackagesOut
+	err := this.Proc.Call("GetPackages", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Packages, nil
+}
+
+func (this *Remote) GetPackageDirectories(projectId int64, packageName string, relativePath string) ([]string, error) {
+	in := GetPackageDirectoriesIn{projectId, packageName, relativePath}
+	var out GetPackageDirectoriesOut
+	err := this.Proc.Call("GetPackageDirectories", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Directories, nil
+}
+
+func (this *Remote) GetPackageFiles(projectId int64, packageName string, relativePath string) ([]string, error) {
+	in := GetPackageFilesIn{projectId, packageName, relativePath}
+	var out GetPackageFilesOut
+	err := this.Proc.Call("GetPackageFiles", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Files, nil
+}
+
+func (this *Remote) DeletePackage(projectId int64, name string) error {
+	in := DeletePackageIn{projectId, name}
+	var out DeletePackageOut
+	err := this.Proc.Call("DeletePackage", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) DeletePackageDirectory(projectId int64, packageName string, relativePath string) error {
+	in := DeletePackageDirectoryIn{projectId, packageName, relativePath}
+	var out DeletePackageDirectoryOut
+	err := this.Proc.Call("DeletePackageDirectory", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) DeletePackageFile(projectId int64, packageName string, relativePath string) error {
+	in := DeletePackageFileIn{projectId, packageName, relativePath}
+	var out DeletePackageFileOut
+	err := this.Proc.Call("DeletePackageFile", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) SetAttributesForPackage(projectId int64, packageName string, attributes string) error {
+	in := SetAttributesForPackageIn{projectId, packageName, attributes}
+	var out SetAttributesForPackageOut
+	err := this.Proc.Call("SetAttributesForPackage", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) GetAttributesForPackage(projectId int64, packageName string) (string, error) {
+	in := GetAttributesForPackageIn{projectId, packageName}
+	var out GetAttributesForPackageOut
+	err := this.Proc.Call("GetAttributesForPackage", &in, &out)
+	if err != nil {
+		return "", err
+	}
+	return out.Attributes, nil
 }
 
 // --- Server Stub ---
@@ -5539,6 +5718,311 @@ func (this *Impl) GetHistory(r *http.Request, in *GetHistoryIn, out *GetHistoryO
 	}
 
 	out.History = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) CreatePackage(r *http.Request, in *CreatePackageIn, out *CreatePackageOut) error {
+	const name = "CreatePackage"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.CreatePackage(pz, in.ProjectId, in.Name)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetPackages(r *http.Request, in *GetPackagesIn, out *GetPackagesOut) error {
+	const name = "GetPackages"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetPackages(pz, in.ProjectId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Packages = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetPackageDirectories(r *http.Request, in *GetPackageDirectoriesIn, out *GetPackageDirectoriesOut) error {
+	const name = "GetPackageDirectories"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetPackageDirectories(pz, in.ProjectId, in.PackageName, in.RelativePath)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Directories = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetPackageFiles(r *http.Request, in *GetPackageFilesIn, out *GetPackageFilesOut) error {
+	const name = "GetPackageFiles"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetPackageFiles(pz, in.ProjectId, in.PackageName, in.RelativePath)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Files = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) DeletePackage(r *http.Request, in *DeletePackageIn, out *DeletePackageOut) error {
+	const name = "DeletePackage"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.DeletePackage(pz, in.ProjectId, in.Name)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) DeletePackageDirectory(r *http.Request, in *DeletePackageDirectoryIn, out *DeletePackageDirectoryOut) error {
+	const name = "DeletePackageDirectory"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.DeletePackageDirectory(pz, in.ProjectId, in.PackageName, in.RelativePath)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) DeletePackageFile(r *http.Request, in *DeletePackageFileIn, out *DeletePackageFileOut) error {
+	const name = "DeletePackageFile"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.DeletePackageFile(pz, in.ProjectId, in.PackageName, in.RelativePath)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) SetAttributesForPackage(r *http.Request, in *SetAttributesForPackageIn, out *SetAttributesForPackageOut) error {
+	const name = "SetAttributesForPackage"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.SetAttributesForPackage(pz, in.ProjectId, in.PackageName, in.Attributes)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetAttributesForPackage(r *http.Request, in *GetAttributesForPackageIn, out *GetAttributesForPackageOut) error {
+	const name = "GetAttributesForPackage"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetAttributesForPackage(pz, in.ProjectId, in.PackageName)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Attributes = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

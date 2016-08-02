@@ -24,6 +24,8 @@ type context struct {
 	uploadURL string
 	remote    *web.Remote
 	trace     *log.Logger
+	username  string
+	password  string
 }
 
 func (c *context) getConfigPath() string {
@@ -67,7 +69,8 @@ func (c *context) configure(verbose, requiresAuth bool) {
 	}
 	c.remote = &web.Remote{rpc.NewProc(httpScheme, "/web", "web", addr, host.Username, host.Password)}
 	c.uploadURL = (&url.URL{Scheme: httpScheme, Host: addr, Path: "/upload"}).String()
-
+	c.username = host.Username
+	c.password = host.Password
 }
 
 func (c *context) loadConfig(confPath string) *Config {
@@ -105,8 +108,8 @@ func (c *context) resetConfig() error {
 	return nil
 }
 
-func (c *context) uploadFile(filepath, kind string) error {
-	return uploadFile(c.uploadURL, filepath, kind)
+func (c *context) transmitFile(filepath string, attrs map[string]string) error {
+	return transmitFile(c.uploadURL, c.username, c.password, filepath, attrs)
 }
 
 func (c *context) traceln(v ...interface{}) {

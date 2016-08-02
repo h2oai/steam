@@ -750,12 +750,7 @@ func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
 // --- Model ---
 
 func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (string, string, error) {
-
-	// Use modelId because it'll provide a unique directory name every time with
-	// a persistend db; no need to purge/overwrite any files on disk
-	location := strconv.FormatInt(modelId, 10)
-
-	modelPath := fs.GetModelPath(s.workingDir, location)
+	modelPath := fs.GetModelPath(s.workingDir, modelId)
 	javaModelPath, err := h2o.ExportJavaModel(modelName, modelPath)
 	if err != nil {
 		return "", "", err
@@ -766,7 +761,7 @@ func (s *Service) exportModel(h2o *h2ov3.H2O, modelName string, modelId int64) (
 		return "", "", err
 	}
 
-	return location, logicalName, err
+	return strconv.FormatInt(modelId, 10), logicalName, err
 }
 
 func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
@@ -1351,7 +1346,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64) (int64, error) {
 	compilerService := compiler.NewService(s.compilationServiceAddress)
 	warFilePath, err := compilerService.CompileModel(
 		s.workingDir,
-		model.Location,
+		model.Id,
 		model.LogicalName,
 		"war",
 	)
@@ -1970,6 +1965,211 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId, offset, li
 		return nil, err
 	}
 	return toEntityHistory(history), nil
+}
+
+func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	if err := fs.ValidateName(name); err != nil {
+		return fmt.Errorf("Invalid package name: %s", err)
+	}
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if fs.DirExists(packagePath) {
+		return fmt.Errorf("Failed creating package directory: %s already exists", name)
+	}
+
+	if err := fs.Mkdir(packagePath); err != nil {
+		return fmt.Errorf("Failed creating package directory: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// XXX check project access
+
+	projectPath := fs.GetProjectPath(s.workingDir, projectId)
+	if !fs.DirExists(projectPath) {
+		return []string{}, nil
+	}
+
+	dirs, err := fs.ListDirs(projectPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing packages: %s", err)
+	}
+
+	return dirs, nil
+}
+
+func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("Package %s does not exist")
+	}
+
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+
+	dirs, err := fs.ListDirs(packageDirPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing package directories: %s", err)
+	}
+
+	return dirs, nil
+}
+
+func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return nil, err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("Package %s does not exist")
+	}
+
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+
+	files, err := fs.ListFiles(packageDirPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed listing package files: %s", err)
+	}
+
+	return files, nil
+}
+
+func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	if err := fs.Rmdir(packagePath); err != nil {
+		return fmt.Errorf("Failed deleting package: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	dirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return err
+	}
+
+	if !fs.DirExists(dirPath) {
+		return fmt.Errorf("Invalid path %s in package %s", relativePath, packageName)
+	}
+
+	if err := fs.Rmdir(dirPath); err != nil {
+		return fmt.Errorf("Failed deleting directory: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("Package %s does not exist")
+	}
+
+	filePath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return err
+	}
+
+	if !fs.FileExists(filePath) {
+		return fmt.Errorf("Invalid path %s in package %s", relativePath, packageName)
+	}
+
+	if err := fs.Rm(filePath); err != nil {
+		return fmt.Errorf("Failed deleting file: %s", err)
+	}
+
+	return nil
+}
+
+func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		return err
+	}
+
+	// XXX check project access
+
+	if err := fs.SetPackageAttributes(s.workingDir, projectId, packageName, []byte(attributes)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return "", err
+	}
+
+	// XXX check project access
+
+	b, err := fs.GetPackageAttributes(s.workingDir, projectId, packageName)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }
 
 // Helper function to convert from int to bytes

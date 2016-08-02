@@ -232,23 +232,86 @@ engine [enginePath]
 Deploy an H2O engine to Steam.
 Examples:
 
-	$ steam deploy engine path/to/engine
+	$ steam deploy engine --file-path=path/to/engine
 `
 
 func deployEngine(c *context) *cobra.Command {
+	var (
+		filePath string
+	)
 	cmd := newCmd(c, deployEngineHelp, func(c *context, args []string) {
-		if len(args) != 1 {
-			log.Fatalln("Incorrect number of arguments. See 'steam help deploy engine'.")
+		attrs := map[string]string{
+			"type": fs.KindEngine,
 		}
 
-		enginePath := args[0]
-
-		if err := c.uploadFile(enginePath, fs.KindEngine); err != nil {
+		if err := c.transmitFile(filePath, attrs); err != nil {
 			log.Fatalln(err)
 		}
 
-		log.Println("Engine deployed:", path.Base(enginePath))
+		log.Println("Engine deployed:", path.Base(filePath))
 	})
+
+	cmd.Flags().StringVar(&filePath, "file-path", "", "Path to engine")
+
+	return cmd
+}
+
+var uploadHelp = `
+upload [resource-type]
+Upload a resource of the specified type.
+Examples:
+
+	$ steam upload file
+`
+
+func upload(c *context) *cobra.Command {
+	cmd := newCmd(c, uploadHelp, nil)
+	cmd.AddCommand(uploadFile(c))
+	return cmd
+}
+
+var uploadFileHelp = `
+file [path]
+Upload an H2O engine to Steam.
+Examples:
+
+	$ steam upload engine path/to/engine
+`
+
+func uploadFile(c *context) *cobra.Command {
+	var (
+		filePath     string
+		projectId    int64
+		packageName  string
+		relativePath string
+	)
+	cmd := newCmd(c, uploadFileHelp, func(c *context, args []string) {
+
+		if projectId <= 0 {
+			log.Fatalln("Invalid project Id")
+		}
+
+		if err := fs.ValidateName(packageName); err != nil {
+			log.Fatalln("Invalid package name:", err)
+		}
+
+		attrs := map[string]string{
+			"type":          fs.KindFile,
+			"project-id":    strconv.FormatInt(projectId, 10),
+			"package-name":  packageName,
+			"relative-path": relativePath,
+		}
+		if err := c.transmitFile(filePath, attrs); err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Println("File uploaded:", path.Base(filePath))
+	})
+
+	cmd.Flags().StringVar(&filePath, "file-path", "", "File to be uploaded")
+	cmd.Flags().Int64Var(&projectId, "project-id", 0, "Target project id")
+	cmd.Flags().StringVar(&packageName, "package-name", "", "Target package")
+	cmd.Flags().StringVar(&relativePath, "relative-path", "", "Relative path to copy file to")
 
 	return cmd
 }

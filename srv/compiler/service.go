@@ -14,6 +14,19 @@ import (
 	"github.com/h2oai/steamY/lib/fs"
 )
 
+const (
+	ArtifactWar       = "war"
+	ArtifactJar       = "jar"
+	ArtifactPythonWar = "python_war"
+)
+
+const (
+	fileTypeJava        = "pojo"
+	fileTypeJavaDep     = "jar"
+	fileTypePythonMain  = "python"
+	fileTypePythonOther = "pythonextra"
+)
+
 type Service struct {
 	Address string
 }
@@ -29,14 +42,14 @@ func (s *Service) urlFor(slug string) string {
 }
 
 func (s *Service) Ping() error {
-	if _, err := http.Get(s.urlFor("Ping")); err != nil {
-		return err
+	if _, err := http.Get(s.urlFor("ping")); err != nil {
+		return fmt.Errorf("Failed connecting to scoring service builder: %s", err)
 	}
 	return nil
 }
 
-func uploadFile(filePath, kind string, w *multipart.Writer) error {
-	dst, err := w.CreateFormFile(kind, path.Base(filePath))
+func attachFile(w *multipart.Writer, filePath, fileType string) error {
+	dst, err := w.CreateFormFile(fileType, path.Base(filePath))
 	if err != nil {
 		return fmt.Errorf("Failed writing to buffer: %v", err)
 	}
@@ -51,12 +64,12 @@ func uploadFile(filePath, kind string, w *multipart.Writer) error {
 	return nil
 }
 
-func compile(url, pojoPath, jarPath string) (*http.Response, error) {
-	pojoPath, err := fs.ResolvePath(pojoPath)
+func compile(url, javaFilePath, javaDepPath, pythonMainFilePath string, pythonOtherFilePaths []string) (*http.Response, error) {
+	javaFilePath, err := fs.ResolvePath(javaFilePath)
 	if err != nil {
 		return nil, err
 	}
-	jarPath, err = fs.ResolvePath(jarPath)
+	javaDepPath, err = fs.ResolvePath(javaDepPath)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +77,25 @@ func compile(url, pojoPath, jarPath string) (*http.Response, error) {
 	b := &bytes.Buffer{}
 	writer := multipart.NewWriter(b)
 
-	if err := uploadFile(pojoPath, "pojo", writer); err != nil {
-		return nil, err
+	if err := attachFile(writer, javaFilePath, fileTypeJava); err != nil {
+		return nil, fmt.Errorf("Failed attaching Java file to compilation request: %s", err)
 	}
-	if err := uploadFile(jarPath, "jar", writer); err != nil {
-		return nil, err
+
+	if err := attachFile(writer, javaDepPath, fileTypeJavaDep); err != nil {
+		return nil, fmt.Errorf("Failed attaching Java dependency to compilation request: %s", err)
+	}
+
+	if len(pythonMainFilePath) > 0 {
+		if err := attachFile(writer, pythonMainFilePath, fileTypePythonMain); err != nil {
+			return nil, fmt.Errorf("Failed attaching Python main file to compilation request: %s", err)
+		}
+		if len(pythonOtherFilePaths) > 0 {
+			for _, p := range pythonOtherFilePaths {
+				if err := attachFile(writer, p, fileTypePythonOther); err != nil {
+					return nil, fmt.Errorf("Failed attaching Python file to compilation request: %s", err)
+				}
+			}
+		}
 	}
 
 	ct := writer.FormDataContentType()
@@ -76,32 +103,37 @@ func compile(url, pojoPath, jarPath string) (*http.Response, error) {
 
 	res, err := http.Post(url, ct, b)
 	if err != nil {
-		return nil, fmt.Errorf("Failed uploading file: %v", err)
+		return nil, fmt.Errorf("Failed making compilation request: %v", err)
 	}
 
 	if res.StatusCode != 200 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return nil, fmt.Errorf("Failed reading upload response: %v", err)
+			return nil, fmt.Errorf("Failed reading compilation response: %v", err)
 		}
-		return nil, fmt.Errorf("Failed uploading file: %s / %s", res.Status, string(body))
+		return nil, fmt.Errorf("Failed compiling scoring service: %s / %s", res.Status, string(body))
 	}
 
 	return res, nil
 }
 
-func (s *Service) CompileModel(wd, modelLocation, modelLogicalName, artifact string) (string, error) {
+func (s *Service) CompileModel(wd string, modelId int64, modelLogicalName, artifact string) (string, error) {
 
-	genModelPath := fs.GetGenModelPath(wd, modelLocation)
-	javaModelPath := fs.GetJavaModelPath(wd, modelLocation, modelLogicalName)
+	genModelPath := fs.GetGenModelPath(wd, modelId)
+	javaModelPath := fs.GetJavaModelPath(wd, modelId, modelLogicalName)
 
-	var targetFile string
+	var targetFile, slug string
 
 	switch artifact {
-	case "war":
-		targetFile = fs.GetWarFilePath(wd, modelLocation, modelLogicalName)
-	case "jar":
-		targetFile = fs.GetModelJarFilePath(wd, modelLocation, modelLogicalName)
+	case ArtifactWar:
+		targetFile = fs.GetWarFilePath(wd, modelId, modelLogicalName)
+		slug = "makewar"
+	case ArtifactPythonWar:
+		targetFile = fs.GetPythonWarFilePath(wd, modelId, modelLogicalName)
+		slug = "makepythonwar"
+	case ArtifactJar:
+		targetFile = fs.GetModelJarFilePath(wd, modelId, modelLogicalName)
+		slug = "compile"
 	}
 
 	if _, err := os.Stat(targetFile); os.IsNotExist(err) {
@@ -113,12 +145,8 @@ func (s *Service) CompileModel(wd, modelLocation, modelLogicalName, artifact str
 		return "", err
 	}
 
-	slug := "makewar"
-	if artifact == "jar" {
-		slug = "compile"
-	}
-
-	res, err := compile(s.urlFor(slug), javaModelPath, genModelPath)
+	// XXX
+	res, err := compile(s.urlFor(slug), javaModelPath, genModelPath, "", nil)
 	if err != nil {
 		return "", err
 	}
