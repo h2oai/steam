@@ -117,6 +117,56 @@ func compile(url, javaFilePath, javaDepPath, pythonMainFilePath string, pythonOt
 	return res, nil
 }
 
+func (s *Service) GetPythonFilePaths(wd string, projectId int64, packageName string) (string, []string, error) {
+	var pythonMainFilePath string
+	var pythonOtherFilePaths []string
+
+	packagePath := fs.GetPackagePath(wd, projectId, packageName)
+
+	if !fs.DirExists(packagePath) {
+		return "", nil, fmt.Errorf("Package %s does not exist")
+	}
+
+	packageAttrsBytes, err := fs.GetPackageAttributes(wd, projectId, packageName)
+	if err != nil {
+		return "", nil, fmt.Errorf("Failed reading package attributes: %s", err)
+	}
+
+	packageAttrs, err := fs.JsonToMap(packageAttrsBytes)
+	if err != nil {
+		return "", nil, fmt.Errorf("Failed parsing package attributes: %s", err)
+	}
+
+	pythonMain, ok := packageAttrs["main"]
+	if !ok {
+		return "", nil, fmt.Errorf("Failed determining Python main file from package attributes")
+	}
+
+	packageFileList, err := fs.ListFiles(packagePath)
+	if err != nil {
+		return "", nil, fmt.Errorf("Failed reading package file list: %s", err)
+	}
+
+	// Filter .py files; separate ancillary files from the main one.
+	pythonOtherFilePaths = make([]string, 0)
+	for _, f := range packageFileList {
+		if strings.ToLower(path.Ext(f)) == ".py" {
+			p := path.Join(packagePath, f)
+			if f == pythonMain {
+				pythonMainFilePath = p
+			} else {
+				pythonOtherFilePaths = append(pythonOtherFilePaths, p)
+			}
+		}
+	}
+
+	if len(pythonMainFilePath) == 0 {
+		return "", nil, fmt.Errorf("Failed locating Python main file in package file listing")
+	}
+
+	return pythonMainFilePath, pythonOtherFilePaths, nil
+}
+
 func (s *Service) CompileModel(wd string, modelId int64, modelLogicalName, artifact string) (string, error) {
 
 	genModelPath := fs.GetGenModelPath(wd, modelId)
