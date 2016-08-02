@@ -26,7 +26,7 @@ echo "Started scoring service builder with pid ${SSBPID}"
 go test ../master/web --working-directory="../../" --cluster-address="${ADDRESS}" -v -coverprofile=masterweb.cov
 t1=$?
 
-kill -9 $H2OPID
-kill -9 $SSBPID
+kill $H2OPID
+kill $SSBPID
 
 exit $t1
