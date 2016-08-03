@@ -6,6 +6,7 @@ DIR=/home/ubuntu
 
 # Kill server
 pkill steam
+pkill jetty-runner
 
 set -e
 
@@ -34,11 +35,15 @@ cd $DIR/steam/var/master/scripts && sudo -u postgres ./create-database.sh
 
 # Start server
 cd $DIR/steam
+nohup java -jar \
+		./var/master/assets/jetty-runner.jar \
+		./var/master/assets/ROOT.war \
+		>> comp.log 2>&1 &
+
 nohup ./steam serve master \
         --superuser-name=steamer \
         --superuser-password=terrabella \
         --web-tls-cert-path=/etc/ssl/star_h2o_ai.pem \
         --web-tls-key-path=/etc/ssl/star_h2o_ai.key \
         >> steam.log 2>&1 &
-
 

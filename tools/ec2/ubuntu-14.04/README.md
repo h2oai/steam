@@ -26,6 +26,10 @@ createuser --interactive -P steam
 # Shall the new role be a superuser? (y/n) n
 # Shall the new role be allowed to create databases? (y/n) y
 # Shall the new role be allowed to create more new roles? (y/n) n
+createdb steam steam
+cd path/to/steam/var/master/scripts
+./create-database.sh
+exit
 ```
 
 Set up `.pgpass` for postgres:

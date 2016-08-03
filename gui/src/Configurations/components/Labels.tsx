@@ -6,15 +6,41 @@ import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import CreateNewLabelModal from './CreateNewLabelModal';
+import { fetchLabels, createLabel, deleteLabel, updateLabel } from '../actions/configuration.labels.action';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import '../styles/labels.scss';
 
-export default class Labels extends React.Component<any, any> {
+import * as _ from 'lodash';
+
+interface Props {
+    labels?: any
+    projectid: string
+    fetchLabels: Function
+    createLabel: Function
+    deleteLabel: Function
+    updateLabel: Function
+}
+
+interface State {
+  modalOpen: boolean
+  label: any
+}
+
+class Labels extends React.Component<Props, any> {
 
     constructor() {
         super();
         this.state = {
-            modalOpen: false
+            modalOpen: false,
+            label: {}
         };
+    }
+
+    componentWillMount() {
+        if (!this.props.labels || !this.props.labels[this.props.projectid]) {
+            this.props.fetchLabels(this.props.projectid);
+        }
     }
 
     openModal() {
@@ -25,12 +51,90 @@ export default class Labels extends React.Component<any, any> {
 
     closeModal() {
         this.setState({
-            modalOpen: false
+            modalOpen: false,
+            label: {}
         });
     }
 
-    newLabel(label) {
-        this.closeModal();
+    saveUpdateLabel(label) {
+      if (!label.id) {
+        let newLabel = {
+          name: label.name,
+          description: label.description
+        };
+        this.saveLabel(label);
+      } else {
+        this.updateLabel(label);
+      }
+    }
+
+    updateLabel(label) {
+      this.props.updateLabel(parseInt(label.id, 10), this.props.projectid, label.name, label.description).then((response) => {
+          this.props.fetchLabels(this.props.projectid);
+          this.closeModal();
+      }, (error) => {
+          alert(error);
+      });
+    }
+
+    saveLabel(label) {
+        this.props.createLabel(parseInt(this.props.projectid, 10), label.name, label.description).then((response) => {
+            this.props.fetchLabels(this.props.projectid);
+            this.closeModal();
+        }, (error) => {
+            alert(error);
+        });
+    }
+
+    deleteLabel(labelId) {
+      this.props.deleteLabel(labelId).then((response) => {
+          this.props.fetchLabels(this.props.projectid);
+      }, (error) => {
+          alert(error);
+      });
+    }
+
+    renderLabels() {
+        if (!this.props.labels || !this.props.projectid || !this.props.labels[this.props.projectid]) {
+            return null;
+        }
+        return this.props.labels[this.props.projectid].map((label) => {
+            let deleteLabel = () => {
+              this.deleteLabel(label.id);
+            };
+            let updateLabel = (event) => {
+              this.setState({
+                label: {
+                  id: label.id,
+                  name: label.name,
+                  description: label.description
+                },
+                modalOpen: true
+              });
+            };
+            return (
+                <Row key={label.id}>
+                    <Cell className="label-bullets">
+                        <span className="label-bullet"></span>
+                    </Cell>
+                    <Cell className="label-names">
+                        <div className="label-name">{label.name}</div>
+                        <div className="label-description muted">{label.description}</div>
+                    </Cell>
+                    <Cell className="label-model">
+                        <span className="model-icon"></span>
+                        <span className="model-name"><span className="fa fa-cube"></span>{label.model_id}</span>
+                    </Cell>
+                    <Cell className="label-permissions">
+
+                    </Cell>
+                    <Cell>
+                        <span className="fa fa-pencil" onClick={updateLabel}></span>
+                        <span className="fa fa-trash" onClick={deleteLabel}></span>
+                    </Cell>
+                </Row>
+            );
+        });
     }
 
     render(): React.ReactElement<HTMLDivElement> {
@@ -52,42 +156,37 @@ export default class Labels extends React.Component<any, any> {
                         Create New Label
                     </button>
                 </span>
-                <CreateNewLabelModal open={this.state.modalOpen} cancel={this.closeModal.bind(this) } save={this.newLabel.bind(this) }/>
+                <CreateNewLabelModal label={this.state.label} open={this.state.modalOpen} cancel={this.closeModal.bind(this) } save={this.saveUpdateLabel.bind(this)} />
                 <div className="label-table">
-                  <Table>
-                    <Row className="head">
-                      <Cell/>
-                      <Cell>Label</Cell>
-                      <Cell>Model</Cell>
-                      <Cell>Permissions</Cell>
-                      <Cell/>
-                    </Row>
-                    <Row>
-                      <Cell className="label-bullets">
-                        <span className="label-bullet"></span>
-                      </Cell>
-                      <Cell className="label-names">
-                        <div className="label-name">test</div>
-                        <div className="label-description muted">Label description</div>
-                      </Cell>
-                      <Cell className="label-model">
-                        <span className="model-icon"></span>
-                        <span className="model-name"><span className="fa fa-cube"></span> DRF-1568963</span>
-                      </Cell>
-                      <Cell className="label-permissions">
-                        <ul>
-                          <li>Anyone on ISRM team can edit.</li>
-                          <li>Anyone on the project can view.</li>
-                        </ul>
-                      </Cell>
-                      <Cell>
-                        <span className="fa fa-pencil"></span>
-                        <span className="fa fa-trash"></span>
-                      </Cell>
-                    </Row>
-                  </Table>
+                    <Table>
+                        <Row className="head">
+                            <Cell/>
+                            <Cell>Label</Cell>
+                            <Cell>Model</Cell>
+                            <Cell>Permissions</Cell>
+                            <Cell/>
+                        </Row>
+                        {this.renderLabels() }
+                    </Table>
                 </div>
             </div>
         );
     }
 }
+
+function mapStateToProps(state: any): any {
+    return {
+        labels: state.labels
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        fetchLabels: bindActionCreators(fetchLabels, dispatch),
+        createLabel: bindActionCreators(createLabel, dispatch),
+        deleteLabel: bindActionCreators(deleteLabel, dispatch),
+        updateLabel: bindActionCreators(updateLabel, dispatch)
+    };
+}
+
+export default connect<Props, any, any>(mapStateToProps, mapDispatchToProps)(Labels);

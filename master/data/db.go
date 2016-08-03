@@ -2968,7 +2968,7 @@ func (ds *Datastore) ReadDatasetByDatasource(pz az.Principal, datasourceId int64
 		SELECT
 			id, datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created
 		FROM
-			datasource
+			dataset
 		WHERE
 			datasource_id = $1
 		`, datasourceId)
