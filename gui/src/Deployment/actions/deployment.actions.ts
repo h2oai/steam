@@ -2,7 +2,7 @@
  * Created by justin on 8/2/16.
  */
 import * as Remote from '../../Proxy/Proxy';
-
+import * as _ from 'lodash';
 
 export const UPLOADING_PACKAGE = 'UPLOADING_PACKAGE';
 export const FINISH_UPLOADING_PACKAGE = 'FINISH_UPLOADING_PACKAGE';
@@ -53,7 +53,7 @@ export function uploadPackage(projectId: number, packageName: string, form) {
 export function fetchPackages(projectId: number) {
   return (dispatch) => {
     Remote.getPackages(projectId, (error, res) => {
-      dispatch(receivePackages(res));
+      dispatch(receivePackages(_.get(res, 'packages')));
     });
   };
 }

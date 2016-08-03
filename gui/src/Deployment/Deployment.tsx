@@ -16,6 +16,9 @@ import './styles/deployment.scss';
 interface Props {
   params: {
     projectid: string
+  },
+  packages: {
+    packages: string[]
   }
 }
 
@@ -43,12 +46,16 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
         }
       },
       isSelected: 'deployedServices',
-      uploadOpen: false
+      uploadOpen: false,
+      packages: [],
+      projectId: null
     };
   }
 
   componentWillMount() {
-    this.props.fetchPackages(parseInt(this.props.params.projectid, 10));
+    this.setState({
+      projectId: this.props.params.projectid
+    });
   }
 
   clickHandler(tab) {
@@ -76,7 +83,6 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
 
   upload(event, uploadedPackage, formData) {
     event.preventDefault();
-    console.log(event, uploadedPackage);
     this.props.uploadPackage(parseInt(this.props.params.projectid, 10), uploadedPackage.name, formData);
     this.closeUpload();
   }
@@ -107,7 +113,6 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    fetchPackages: bindActionCreators(fetchPackages, dispatch),
     uploadPackage: bindActionCreators(uploadPackage, dispatch)
   };
 }
