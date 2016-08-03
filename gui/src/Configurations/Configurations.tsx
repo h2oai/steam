@@ -33,7 +33,7 @@ export default class Configurations extends React.Component<Props, any> {
           label: 'Labels',
           isSelected: true,
           onClick: this.clickHandler.bind(this),
-          component: <Labels projectid={+this.props.params.projectid}/>
+          component: <Labels projectid={parseInt(this.props.params.projectid,10)}/>
         }
       },
       isSelected: 'labels'

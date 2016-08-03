@@ -26,7 +26,7 @@ export function requestLabels() {
   };
 };
 
-export function receiveLabels(labels, projectId) {
+export function receiveLabels(labels: any[], projectId: number) {
   return {
     type: RECEIVE_LABELS,
     projectId,
@@ -34,39 +34,78 @@ export function receiveLabels(labels, projectId) {
   };
 };
 
-export function createLabel(label) {
+export function createLabel(projectId: number, name: string, description: string) {
+  return (dispatch) => {
+    return new Promise((resolve, reject) => {
+      Remote.createLabel(projectId, name, description, (error, res) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        dispatch(receiveCreateLabel(res, projectId, name, description));
+        resolve(res);
+      });
+    });
+  };
+}
+
+export function receiveCreateLabel(id: number, projectId: number, name: string, description: string) {
   return {
-    type: CREATE_LABEL,
-    label
+    type: RECEIVE_CREATE_LABEL,
+    projectId,
+    label: {
+      id,
+      name,
+      description
+    }
   };
 };
 
-export function receiveCreateLabel(label) {
+export function updateLabel(labelId: number, projectId: number, name: string, description: string) {
+  return (dispatch) => {
+    return new Promise((resolve, reject) => {
+      Remote.updateLabel(labelId, name, description, (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        dispatch(receiveUpdateLabel(labelId, projectId, name, description));
+        resolve();
+      });
+    });
+  };
+}
+
+export function receiveUpdateLabel(id: number, projectId: number, name: string, description: string) {
   return {
-    type: RECEIVE_UPDATE_LABEL
+    type: RECEIVE_UPDATE_LABEL,
+    projectId,
+    label: {
+      id,
+      name,
+      description
+    }
   };
 };
 
-export function updateLabel(label) {
-  return {
-    type: UPDATE_LABEL
+export function deleteLabel(labelId: number) {
+  return (dispatch) => {
+    return new Promise((resolve, reject) => {
+      Remote.deleteLabel(labelId, (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        //dispatch(receiveDeleteLabel(labelId));
+        resolve();
+      });
+    });
   };
-};
+}
 
-export function receiveUpdateLabel(label) {
+export function receiveDeleteLabel(labelId) {
   return {
-    type: RECEIVE_UPDATE_LABEL
-  };
-};
+    type: RECEIVE_DELETE_LABEL,
 
-export function deleteLabel(labelId) {
-  return {
-    type: DELETE_LABEL
-  };
-};
-
-export function receiveDeleteLabel(response) {
-  return {
-    type: RECEIVE_DELETE_LABEL
   };
 };
