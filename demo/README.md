@@ -67,7 +67,7 @@ This section describes how to set up and start Steam and start the Steam CLI for
 		
 	>***Note***: The Jetty server defaults to port 8080. You can optionally provide a `--port` value for **jetty-runner.jar**.
 		
-6. Open a fourth terminal window. From within the **steam-maseter-darwin-amd64** folder, start the Steam compilation and scoring service using the password that you provided in Step 2. This starts Steam on localhost:9000.
+6. Open a fourth terminal window. From within the **steam-master-darwin-amd64** folder, start the Steam compilation and scoring service using the password that you provided in Step 2. This starts Steam on localhost:9000.
 
 		./steam serve master --superuser-name=superuser --superuser-password=superuser
 
