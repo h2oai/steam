@@ -50,7 +50,7 @@ public class StatsServlet extends HttpServlet {
           put("pythonget", ServletUtil.getPythonTimes.toMap());
           put("pythonpost", ServletUtil.postPythonTimes.toMap());
 
-          put("outputLabels", ServletUtil.outputLabels);
+//          put("outputLabels", ServletUtil.outputLabels);
         }
       };
       String json = gson.toJson(js, ServletUtil.MAP_TYPE);
