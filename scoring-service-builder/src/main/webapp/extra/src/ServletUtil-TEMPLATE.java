@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
+//import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 import hex.genmodel.easy.*;
@@ -98,28 +98,28 @@ class ServletUtil {
     ServletUtil.lastTime = System.currentTimeMillis();
     ServletUtil.predictionTimes.add(start, done);
 
-    String label = null;
-    if (pr instanceof BinomialModelPrediction) {
-      label = ((BinomialModelPrediction) pr).label;
-    } else if (pr instanceof MultinomialModelPrediction) {
-      label = ((MultinomialModelPrediction) pr).label;
-    }
-    if (label != null) {
-      ServletUtil.incrementOutputLabel(label);
-    }
+//    String label = null;
+//    if (pr instanceof BinomialModelPrediction) {
+//      label = ((BinomialModelPrediction) pr).label;
+//    } else if (pr instanceof MultinomialModelPrediction) {
+//      label = ((MultinomialModelPrediction) pr).label;
+//    }
+//    if (label != null) {
+//      ServletUtil.incrementOutputLabel(label);
+//    }
 
     logger.debug("Prediction time {}", ServletUtil.predictionTimes);
     return pr;
   }
 
 
-  public static Map<String, Integer> outputLabels = new ConcurrentHashMap<String, Integer>();
-
-  public static synchronized void incrementOutputLabel(String key) {
-    Integer value = outputLabels.putIfAbsent(key, 1);
-    if (value != null)
-      outputLabels.replace(key, value + 1);
-  }
+//  public static Map<String, Integer> outputLabels = new ConcurrentHashMap<String, Integer>();
+//
+//  public static synchronized void incrementOutputLabel(String key) {
+//    Integer value = outputLabels.putIfAbsent(key, 1);
+//    if (value != null)
+//      outputLabels.replace(key, value + 1);
+//  }
 
   public static long startTime = System.currentTimeMillis();
   public static long lastTime = 0;
