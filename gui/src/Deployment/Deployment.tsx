@@ -8,9 +8,23 @@ import TabNavigation from '../Projects/components/TabNavigation';
 import DeployedServices from '../Projects/components/DeployedServices';
 import Packaging from './components/Packaging';
 import UploadPreProcessingModal from './components/UploadPreProcessingModal';
+import { connect } from 'react-redux';
+import { fetchPackages, uploadPackage } from './actions/deployment.actions';
+import { bindActionCreators } from 'redux';
 import './styles/deployment.scss';
 
-export default class Deployment extends React.Component<any, any> {
+interface Props {
+  params: {
+    projectid: string
+  }
+}
+
+interface DispatchProps {
+  fetchPackages: Function,
+  uploadPackage: Function
+}
+
+export class Deployment extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
@@ -31,6 +45,10 @@ export default class Deployment extends React.Component<any, any> {
       isSelected: 'deployedServices',
       uploadOpen: false
     };
+  }
+
+  componentWillMount() {
+    this.props.fetchPackages(parseInt(this.props.params.projectid, 10));
   }
 
   clickHandler(tab) {
@@ -56,14 +74,18 @@ export default class Deployment extends React.Component<any, any> {
     });
   }
 
-  upload(uploadedPackage) {
+  upload(event, uploadedPackage, formData) {
+    event.preventDefault();
+    console.log(event, uploadedPackage);
+    this.props.uploadPackage(parseInt(this.props.params.projectid, 10), uploadedPackage.name, formData);
     this.closeUpload();
   }
 
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="services">
-        <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)} upload={this.upload.bind(this)}/>
+        <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)}
+                                  upload={this.upload.bind(this)} projectId={this.props.params.projectid}/>
         <PageHeader>
           <span>Deployment</span>
           <span><button className="default" onClick={this.openUpload.bind(this)}>Upload New Package</button></span>
@@ -76,3 +98,18 @@ export default class Deployment extends React.Component<any, any> {
     );
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    packages: state.packages
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchPackages: bindActionCreators(fetchPackages, dispatch),
+    uploadPackage: bindActionCreators(uploadPackage, dispatch)
+  };
+}
+
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Deployment);
