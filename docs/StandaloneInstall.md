@@ -19,8 +19,9 @@ Finally, these steps were created using H2O version 3.8.2.8, and that version re
 	- available from <a href="https://www.postgresql.org/" target="_blank">PostgreSQL.org</a>
 - Steam tar for Linux or OS X 
 	- available from <a href="http://www.h2o.ai/steam/">h2o.ai/steam/</a>
-- H2O jar file
+- H2O jar file for version 3.10.0.3 or greater
 	- available from the <a href="http://www.h2o.ai/download/h2o/choose" target="_blank">H2O Download</a> page
+	- If necessary, follow the instructions on the <a href="http://www.h2o.ai/download/h2o/python">http://www.h2o.ai/download/h2o/python</a> or <a href="http://www.h2o.ai/download/h2o/r">http://www.h2o.ai/download/h2o/r</a> page to upgrade H2O for Python or R.
 
 ###Optional
 

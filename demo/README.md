@@ -23,6 +23,7 @@ Finally, these steps were created using H2O version 3.10.0.3, and that version r
 	- available from <a href="http://www.h2o.ai/steam" target="_blank">www.h2o.ai/steam</a>
 - H2O jar file for version 3.10.0.3 or greater
 	- available from the <a href="http://www.h2o.ai/download/h2o/choose" target="_blank">H2O Download</a> page
+	- If necessary, follow the instructions on the <a href="http://www.h2o.ai/download/h2o/python">http://www.h2o.ai/download/h2o/python</a> or <a href="http://www.h2o.ai/download/h2o/r">http://www.h2o.ai/download/h2o/r</a> page to upgrade H2O for Python or R.
 
 ### Optional
 
@@ -163,6 +164,9 @@ The following steps show how to build model using the Iris dataset and the GBM a
 		H2O Connection proxy:
 		Python Version:                 2.7.9
 		------------------------------  -------------------------------------
+
+ >**Note**: After initializing, verify that the H2O cluster version is 3.10.0.3 or greater. Steam will not run on earlier versions. If necessary, follow the instructions on the <a href="http://www.h2o.ai/download/h2o/python">http://www.h2o.ai/download/h2o/python</a> or <a href="http://www.h2o.ai/download/h2o/r">http://www.h2o.ai/download/h2o/r</a> page to upgrade H2O for Python or R.
+
 
 3. Upload the Iris dataset. Note that in this example, Python is running from the Downloads folder, and the Iris dataset is on the Desktop:
 
