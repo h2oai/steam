@@ -2987,8 +2987,14 @@ services [?]
 Get Services
 Examples:
 
-    List services
+    List all services
     $ steam get services \
+        --offset=? \
+        --limit=?
+
+    List services for a project
+    $ steam get services --for-project \
+        --project-id=? \
         --offset=? \
         --limit=?
 
@@ -3001,12 +3007,41 @@ Examples:
 `
 
 func getServices(c *context) *cobra.Command {
-	var forModel bool // Switch for GetServicesForModel()
-	var limit int64   // No description available
-	var modelId int64 // No description available
-	var offset int64  // No description available
+	var forProject bool // Switch for GetServicesForProject()
+	var forModel bool   // Switch for GetServicesForModel()
+	var limit int64     // No description available
+	var modelId int64   // No description available
+	var offset int64    // No description available
+	var projectId int64 // No description available
 
 	cmd := newCmd(c, getServicesHelp, func(c *context, args []string) {
+		if forProject { // GetServicesForProject
+
+			// List services for a project
+			services, err := c.remote.GetServicesForProject(
+				projectId, // No description available
+				offset,    // No description available
+				limit,     // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := make([]string, len(services))
+			for i, e := range services {
+				lines[i] = fmt.Sprintf(
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					e.Id,        // No description available
+					e.ModelId,   // No description available
+					e.Address,   // No description available
+					e.Port,      // No description available
+					e.ProcessId, // No description available
+					e.State,     // No description available
+					e.CreatedAt, // No description available
+				)
+			}
+			c.printt("Id\tModelId\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
+			return
+		}
 		if forModel { // GetServicesForModel
 
 			// List services for a model
@@ -3036,7 +3071,7 @@ func getServices(c *context) *cobra.Command {
 		}
 		if true { // default
 
-			// List services
+			// List all services
 			services, err := c.remote.GetServices(
 				offset, // No description available
 				limit,  // No description available
@@ -3061,11 +3096,13 @@ func getServices(c *context) *cobra.Command {
 			return
 		}
 	})
+	cmd.Flags().BoolVar(&forProject, "for-project", forProject, "List services for a project")
 	cmd.Flags().BoolVar(&forModel, "for-model", forModel, "List services for a model")
 
 	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
 }
 

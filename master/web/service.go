@@ -1379,6 +1379,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 
 	service := data.Service{
 		0,
+		model.ProjectId,
 		model.Id,
 		address,
 		int64(port), // FIXME change to int
@@ -1437,6 +1438,23 @@ func (s *Service) GetServices(pz az.Principal, offset, limit int64) ([]*web.Scor
 	}
 
 	services, err := s.ds.ReadServices(pz, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	ss := make([]*web.ScoringService, len(services))
+	for i, service := range services {
+		ss[i] = toScoringService(service)
+	}
+
+	return ss, nil
+}
+
+func (s *Service) GetServicesForProject(pz az.Principal, projectId, offset, limit int64) ([]*web.ScoringService, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
+		return nil, err
+	}
+
+	services, err := s.ds.ReadServicesForProjectId(pz, projectId, offset, limit)
 	if err != nil {
 		return nil, err
 	}

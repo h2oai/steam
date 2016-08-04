@@ -582,8 +582,11 @@ export interface Service {
   // Get service details
   getService: (serviceId: number, go: (error: Error, service: ScoringService) => void) => void
   
-  // List services
+  // List all services
   getServices: (offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
+  
+  // List services for a project
+  getServicesForProject: (projectId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
   
   // List services for a model
   getServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
@@ -1481,6 +1484,22 @@ interface GetServicesIn {
 }
 
 interface GetServicesOut {
+  
+  services: ScoringService[]
+  
+}
+
+interface GetServicesForProjectIn {
+  
+  project_id: number
+  
+  offset: number
+  
+  limit: number
+  
+}
+
+interface GetServicesForProjectOut {
   
   services: ScoringService[]
   
@@ -2806,6 +2825,18 @@ export function getServices(offset: number, limit: number, go: (error: Error, se
       return go(error, null);
     } else {
       const d: GetServicesOut = <GetServicesOut> data;
+      return go(null, d.services);
+    }
+  });
+}
+
+export function getServicesForProject(projectId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void): void {
+  const req: GetServicesForProjectIn = { project_id: projectId, offset: offset, limit: limit };
+  Proxy.Call("GetServicesForProject", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetServicesForProjectOut = <GetServicesForProjectOut> data;
       return go(null, d.services);
     }
   });

@@ -914,6 +914,7 @@ func ScanService(r *sql.Row) (Service, error) {
 	var s Service
 	if err := r.Scan(
 		&s.Id,
+		&s.ProjectId,
 		&s.ModelId,
 		&s.Address,
 		&s.Port,
@@ -933,6 +934,7 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 		var s Service
 		if err = rs.Scan(
 			&s.Id,
+			&s.ProjectId,
 			&s.ModelId,
 			&s.Address,
 			&s.Port,
@@ -949,4 +951,3 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 	}
 	return structs, nil
 }
-

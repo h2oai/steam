@@ -1036,7 +1036,7 @@ class RPCClient:
 	
 	def get_services(self, offset, limit):
 		"""
-		List services
+		List all services
 
 		Parameters:
 		offset: No description available (int64)
@@ -1050,6 +1050,26 @@ class RPCClient:
 			'limit': limit
 		}
 		response = self.connection.call("GetServices", request)
+		return response['services']
+	
+	def get_services_for_project(self, project_id, offset, limit):
+		"""
+		List services for a project
+
+		Parameters:
+		project_id: No description available (int64)
+		offset: No description available (int64)
+		limit: No description available (int64)
+
+		Returns:
+		services: No description available (ScoringService)
+		"""
+		request = {
+			'project_id': project_id
+			'offset': offset
+			'limit': limit
+		}
+		response = self.connection.call("GetServicesForProject", request)
 		return response['services']
 	
 	def get_services_for_model(self, model_id, offset, limit):

@@ -3733,11 +3733,12 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 		row := tx.QueryRow(`
 			INSERT INTO
 				service
-				(model_id, address, port, process_id, state, created)
+				(project_id, model_id, address, port, process_id, state, created)
 			VALUES
-				($1,       $2,      $3,   $4,         $5,    now())
+				($1,       $2,      $3,   $4,         $5,         $6,    now())
 			RETURNING id
 			`,
+			service.ProjectId,
 			service.ModelId,
 			service.Address,
 			service.Port,
@@ -3771,7 +3772,7 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Service, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3797,6 +3798,36 @@ func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Servi
 	return ScanServices(rows)
 }
 
+func (ds *Datastore) ReadServicesForProjectId(pz az.Principal, projectId, offset, limit int64) ([]Service, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, model_id, address, port, process_id, state, created
+		FROM
+			service
+		WHERE
+			project_id = $6 AND
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					$5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
+			)
+		ORDER BY
+			address, port
+		OFFSET $3
+		LIMIT $4
+		`, pz.Id(), ds.EntityTypes.Service, offset, limit, pz.IsSuperuser(), projectId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanServices(rows)
+}
+
 func (ds *Datastore) ReadServicesForModelId(pz az.Principal, modelId int64) ([]Service, error) {
 	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
 		return nil, err
@@ -3804,7 +3835,7 @@ func (ds *Datastore) ReadServicesForModelId(pz az.Principal, modelId int64) ([]S
 
 	rows, err := ds.db.Query(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3826,7 +3857,7 @@ func (ds *Datastore) ReadService(pz az.Principal, serviceId int64) (Service, err
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, address, port, process_id, state, created
 		FROM
 			service
 		WHERE

@@ -243,6 +243,7 @@ type Label struct {
 
 type Service struct {
 	Id        int64
+	ProjectId int64
 	ModelId   int64
 	Address   string
 	Port      int64

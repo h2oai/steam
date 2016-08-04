@@ -888,6 +888,7 @@ ALTER TABLE role_permission OWNER TO steam;
 
 CREATE TABLE service (
     id integer NOT NULL,
+    project_id integer NOT NULL,
     model_id integer NOT NULL,
     address text NOT NULL,
     port integer NOT NULL,
