@@ -31,18 +31,18 @@ export function uploadPackage(projectId: number, packageName: string, form) {
   return (dispatch) => {
     dispatch(uploadingPackage());
     let formFiles: NodeListOf<HTMLInputElement> = form.querySelectorAll('input[type="file"');
-    console.log(formFiles);
     for (let i = 0; i < formFiles.length; i++) {
       let data = new FormData();
       for (let j = 0; j < formFiles[i].files.length; j++) {
         data.append('file', formFiles[i].files[j]);
-        Remote.createPackage(projectId, packageName, (error) => {
+        Remote.createPackage(projectId, packageName, () => {
           fetch(`/upload?type=file&project-id=${projectId}&package-name=${packageName}&relative-path=`, {
             credentials: 'include',
             method: 'post',
             body: data
           }).then(() => {
             dispatch(finishUploadingPackage());
+            dispatch(fetchPackages(projectId));
           });
         });
       }
@@ -53,7 +53,7 @@ export function uploadPackage(projectId: number, packageName: string, form) {
 export function fetchPackages(projectId: number) {
   return (dispatch) => {
     Remote.getPackages(projectId, (error, res) => {
-      dispatch(receivePackages(_.get(res, 'packages')));
+      dispatch(receivePackages(res));
     });
   };
 }

@@ -19,6 +19,6 @@ export const rootReducer = combineReducers({
   projects: projectsReducer,
   services: servicesReducer,
   profile: profileReducer,
-  packages: deploymentReducer,
+  deployments: deploymentReducer,
   routing: routerReducer
 });

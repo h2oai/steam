@@ -9,7 +9,7 @@ import DeployedServices from '../Projects/components/DeployedServices';
 import Packaging from './components/Packaging';
 import UploadPreProcessingModal from './components/UploadPreProcessingModal';
 import { connect } from 'react-redux';
-import { fetchPackages, uploadPackage } from './actions/deployment.actions';
+import { uploadPackage } from './actions/deployment.actions';
 import { bindActionCreators } from 'redux';
 import './styles/deployment.scss';
 
@@ -23,7 +23,6 @@ interface Props {
 }
 
 interface DispatchProps {
-  fetchPackages: Function,
   uploadPackage: Function
 }
 
@@ -54,7 +53,20 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
 
   componentWillMount() {
     this.setState({
-      projectId: this.props.params.projectid
+      tabs: {
+        deployedServices: {
+          label: 'DEPLOYED SERVICES',
+          isSelected: true,
+          onClick: this.clickHandler.bind(this),
+          component: <DeployedServices/>
+        },
+        packaging: {
+          label: 'PACKAGING',
+          isSelected: false,
+          onClick: this.clickHandler.bind(this),
+          component: <Packaging projectId={this.props.params.projectid}/>
+        }
+      }
     });
   }
 
@@ -91,7 +103,7 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="services">
         <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)}
-                                  upload={this.upload.bind(this)} projectId={this.props.params.projectid}/>
+                                  upload={this.upload.bind(this)}/>
         <PageHeader>
           <span>Deployment</span>
           <span><button className="default" onClick={this.openUpload.bind(this)}>Upload New Package</button></span>

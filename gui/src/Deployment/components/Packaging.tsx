@@ -5,30 +5,28 @@ import * as React from 'react';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
-import '../styles/packaging.scss';
 import { fetchPackages } from '../actions/deployment.actions';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import '../styles/packaging.scss';
 
 interface Props {
   projectId: string,
-  packages: string[]
+  deployments: {
+    packages: string[]
+  }
 }
 
 interface DispatchProps {
   fetchPackages: Function
 }
 
-export default class Packaging extends React.Component<Props, any> {
+export class Packaging extends React.Component<Props & DispatchProps, any> {
   componentWillMount() {
-    console.log(this.props);
-    this.props.fetchPackages();
+    this.props.fetchPackages(parseInt(this.props.projectId, 10));
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    if (_.isEmpty(this.props.packages)) {
-      return <div></div>;
-    }
     return (
       <div className="packaging">
         <h1>PREPROCESSING PACKAGES</h1>
@@ -37,17 +35,13 @@ export default class Packaging extends React.Component<Props, any> {
         </div>
         <Table>
           <Row header={true}/>
-          {this.props.packages.map((packageName) => {
+          {this.props.deployments.packages.map((packageName, i) => {
             return (
-              <Row>
+              <Row key={i}>
                 <Cell className="folder-icon">
                   <i className="fa fa-folder"/>
                 </Cell>
                 <Cell>{packageName}</Cell>
-                <Cell>Mark Landry</Cell>
-                <Cell>6 files</Cell>
-                <Cell>280KB</Cell>
-                <Cell>3 months ago</Cell>
               </Row>
             );
           })}
@@ -58,9 +52,8 @@ export default class Packaging extends React.Component<Props, any> {
 }
 
 function mapStateToProps(state) {
-  console.log(state);
   return {
-    packages: state.packages,
+    deployments: state.deployments,
     projects: state.projects.project
   };
 }
