@@ -45,6 +45,7 @@
   "scripts": {
     "postinstall": "typings prune && typings install",
     "start": "webpack --watch",
+    "webpack": "webpack",
     "test": "jest"
   },
   "jest": {

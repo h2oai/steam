@@ -7,6 +7,8 @@
 	pretest \
 	test \
 	gui \
+	guitest \
+	js \
 	ssb \
 	doc \
 	cov \
@@ -39,7 +41,13 @@ build:
 	go build
 
 gui:
-	cd $(GUI) && npm install && ./node_modules/.bin/webpack
+	cd $(GUI) && npm install && npm run webpack
+
+guitest:
+	cd $(GUI) && npm test
+
+js:
+	cd $(GUI) && npm run webpack
 
 ssb:
 	cd $(SSB) && ./gradlew build
@@ -78,9 +86,6 @@ pretest: lint vet fmtcheck
 
 test: pretest
 	cd tests && ./goh2orunner.sh
-
-guitest:
-	cd $(GUI) && npm test
 
 cov:
 	@ go get -v github.com/axw/gocov/gocov
