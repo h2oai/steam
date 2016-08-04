@@ -84,7 +84,7 @@ fmtcheck:
 
 pretest: lint vet fmtcheck
 
-test: pretest
+test:
 	cd tests && ./goh2orunner.sh
 
 cov:

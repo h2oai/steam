@@ -47,11 +47,12 @@ type test struct {
 	su  az.Principal
 }
 
-var clusterAddress, workingDirectory string
+var clusterAddress, workingDirectory, compilationServiceAddress string
 
 func init() {
 	flag.StringVar(&clusterAddress, "cluster-address", "localhost:54321", "Where the h2o cluster can be reached.")
-	flag.StringVar(&workingDirectory, "working-directory", "", "Where the var folder will be located")
+	flag.StringVar(&workingDirectory, "working-directory", "", "Where the var folder will be located.")
+	flag.StringVar(&compilationServiceAddress, "compilation-service-address", ":8080", "Where to find the compilation service.")
 }
 
 func newTest(t *testing.T) *test {
@@ -87,7 +88,7 @@ func newTest(t *testing.T) *test {
 	opts := driverOpts{
 		path.Join(wd, fs.VarDir, "master"),
 		":9001",
-		":8080",
+		compilationServiceAddress,
 		"",
 		[2]int{1025, 65535},
 		driverYarnOpts{false, "", ""},

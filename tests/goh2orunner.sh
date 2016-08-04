@@ -18,12 +18,12 @@ source bin/activate
 python h2o-setup.py $ADDRESS
 
 # Setup scoring service builder
-java -jar ../var/master/assets/jetty-runner.jar ../var/master/assets/ROOT.war > compile.log 2>&1 &
+java -jar ../var/master/assets/jetty-runner.jar --port 8181 ../var/master/assets/ROOT.war > compile.log 2>&1 &
 SSBPID=$!
 echo "Started scoring service builder with pid ${SSBPID}"
 
 # Run GO tests here
-go test ../master/web --working-directory="../../" --cluster-address="${ADDRESS}" -v -coverprofile=masterweb.cov
+go test ../master/web --working-directory="../../" --cluster-address="${ADDRESS}" --compilation-service-address=":8181" -v -coverprofile=masterweb.cov
 t1=$?
 
 kill $H2OPID
