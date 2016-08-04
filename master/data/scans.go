@@ -614,6 +614,7 @@ func ScanModel(r *sql.Row) (Model, error) {
 	var s Model
 	if err := r.Scan(
 		&s.Id,
+		&s.ProjectId,
 		&s.TrainingDatasetId,
 		&s.ValidationDatasetId,
 		&s.Name,
@@ -642,6 +643,7 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 		var s Model
 		if err = rs.Scan(
 			&s.Id,
+			&s.ProjectId,
 			&s.TrainingDatasetId,
 			&s.ValidationDatasetId,
 			&s.Name,
@@ -672,6 +674,7 @@ func ScanBinomialModel(r *sql.Row) (BinomialModel, error) {
 	var s BinomialModel
 	if err := r.Scan(
 		&s.Id,
+		&s.ProjectId,
 		&s.TrainingDatasetId,
 		&s.ValidationDatasetId,
 		&s.Name,
@@ -705,6 +708,7 @@ func ScanBinomialModels(rs *sql.Rows) ([]BinomialModel, error) {
 		var s BinomialModel
 		if err = rs.Scan(
 			&s.Id,
+			&s.ProjectId,
 			&s.TrainingDatasetId,
 			&s.ValidationDatasetId,
 			&s.Name,
@@ -740,6 +744,7 @@ func ScanMultinomialModel(r *sql.Row) (MultinomialModel, error) {
 	var s MultinomialModel
 	if err := r.Scan(
 		&s.Id,
+		&s.ProjectId,
 		&s.TrainingDatasetId,
 		&s.ValidationDatasetId,
 		&s.Name,
@@ -771,6 +776,7 @@ func ScanMultinomialModels(rs *sql.Rows) ([]MultinomialModel, error) {
 		var s MultinomialModel
 		if err = rs.Scan(
 			&s.Id,
+			&s.ProjectId,
 			&s.TrainingDatasetId,
 			&s.ValidationDatasetId,
 			&s.Name,
@@ -804,6 +810,7 @@ func ScanRegressionModel(r *sql.Row) (RegressionModel, error) {
 	var s RegressionModel
 	if err := r.Scan(
 		&s.Id,
+		&s.ProjectId,
 		&s.TrainingDatasetId,
 		&s.ValidationDatasetId,
 		&s.Name,
@@ -835,6 +842,7 @@ func ScanRegressionModels(rs *sql.Rows) ([]RegressionModel, error) {
 		var s RegressionModel
 		if err = rs.Scan(
 			&s.Id,
+			&s.ProjectId,
 			&s.TrainingDatasetId,
 			&s.ValidationDatasetId,
 			&s.Name,
@@ -941,3 +949,4 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 	}
 	return structs, nil
 }
+
