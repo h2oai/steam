@@ -35,7 +35,11 @@ export class DeployedServices extends React.Component<Props & DispatchProps, any
 
   render(): React.ReactElement<HTMLDivElement> {
     if (_.isEmpty(this.props.services.runningServices)) {
-      return <div></div>;
+      return (
+        <div>
+          <h3>There are no services currently deployed from this project.</h3>
+        </div>
+      );
     }
     return (
       <div className="deployed-services">
