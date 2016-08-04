@@ -7,7 +7,9 @@ For more information on Steam User Management, refer to the following sections.
 - [Terms](#terms)
 - [Privileges/Access Control](#privileges)
 - [Authorization](#authorization)
-- [User Management Workflow](#user management workflow)
+- [User Management Workflow](#usermgmtworkflow)
+- [User Management Example](#usermgmtexample)
+- [Next Steps](#nextsteps)
 
 ## <a name="terms"></a>Terms
 
@@ -100,7 +102,7 @@ For example:
 A **Workgroup** is a named set of identities. Workgroups allow you to form collections of identities for access control purposes. For example, a *Demand Forecasting* workgroup can be composed of all the users working on demand forecasting, regardless of their role. This workgroup can be then used to control access to all the clusters, projects, models and services that are used for demand forecasting. 
 
 
-## <a name="user management workflow"></a>User Management Workflow
+## <a name="usermgmtworkflow"></a>User Management Workflow
 
 The steps below provide a common workflow to follow when creating users. This workflow is followed in the example that follows.
 
@@ -112,7 +114,51 @@ The steps below provide a common workflow to follow when creating users. This wo
  - Associate the user with one or more roles.
  - Optionally, associate the user with one or more workgroups. 
 
-## Next Steps
+## <a name="usermgmtexample"></a>User Management Example
 
-Now that you understand User Management, you can begin building and then setting up the H2O Scoring Service and Steam.
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference Appendix](../CLIAppendix.md) for information about all of the commands available in the CLI. 
+
+1. Log in as the Steam superuser on the machine that is running Steam.
+
+ ```./steam login <yarn_edge_node>:<port> --username=superuser --password=superuser ```
+
+1. Create an engineer role, and link that role to permissions. Note that you can run ``./steam get permissions`` to view a list of available permissions.
+
+ ```./steam create role engineer --desc="a default engineer role"```
+ 
+ ```./steam link role engineer ViewModel ViewProject ViewWorkgroup```
+		
+1. Create a data scientist role, and link that role to permissions.
+
+ ```./steam create role datascience --desc="a default data scientist role"```
+ 
+ ```./steam link role datascience ManageProject ManageModel ViewCluster```
+		
+1. Create preparation and production workgroups.
+
+ ```./steam create workgroup preparation --desc="data prep group"```
+ 
+ ```./steam create workgroup production --desc="production group"```
+		
+1. Create two users - Bob and Jim.
+
+ ```./steam create identity bob bobSpassword```
+ 
+ ```./steam create identity jim j1mSpassword```
+		
+1. Link Bob to engineer role; link Jim to datascience role.
+
+ ```./steam link identity bob role engineer```
+ 
+ ```./steam link identity jim role datascience```
+		
+1. Link Bob to preparation workgroup; link Jim to production workgroup.
+
+ ```./steam link identity bob workgroup preparation```
+ 
+ ```./steam link identity jim workgroup production```
+
+## <a name="nextsteps"></a>Next Steps
+
+Now that you understand User Management, you can create your own roles, workgroups, and users. Once created, be sure to provide your users with their Steam login credentials.  
 

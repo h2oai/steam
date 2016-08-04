@@ -63,7 +63,7 @@ Creates a new user.
 
 **Example**
 
-The following example creates a new user with a username of "minky" and a password of "m1n5kypassword". 
+The following example creates a new user with a username of "minsky" and a password of "m1n5kypassword". 
  
 	./steam create identity minsky m1n5kypassword
 	Created user minsky ID: 2
@@ -114,7 +114,8 @@ Creates a new workgroup.
 
 The following example creates a data preparation workgroup. 
  
-	./steam create workgroup preparation --desc="data prep group"	Created workgroup preparation ID: 1
+	./steam create workgroup preparation --desc="data prep group"	
+	Created workgroup preparation ID: 1
 		
 ------
 
@@ -156,14 +157,11 @@ Deletes the specified YARN cluster from the database. Note that this command can
 
 **Example**
 
-The following example deletes cluster 2.
+The following example deletes cluster 1.
 
-	./steam get engines
-	NAME			ID	AGE
-	automl-hdp2.2.jar	1	2016-07-14 11:48:42 -0700 PDT
-	h2o-genmodel.jar	2	2016-07-14 11:49:47 -0700 PDT
-	./steam delete engine 1
-	Engine deleted: 1
+	./steam get clusters
+	NAME		ID	ADDRESS			STATE	TYPE		AGE
+	user     	1	localhost:54321	started	external	2016-07-01 11:45:58 -0700 PDT	Cluster deleted: 1
 
 ------
 
@@ -210,7 +208,7 @@ Deletes a model from the database based on the model's ID.
 
 **Example**
 
-The following example deletes model 3 from the database. Note that you can use [`get models`]'(#get models) to retrieve a list of models.
+The following example deletes model 3 from the database. Note that you can use [`get models`](#getmodels) to retrieve a list of models.
 
 	./steam delete model 3
 
@@ -278,7 +276,7 @@ Deletes a workgroup from the database based on its ID.
 
 **Example**
 
-The following example deletes workgroup 3 from the database. Note that you can use [`get workgroups`]'(#get workgroups) to retrieve a list of workgroups.  
+The following example deletes workgroup 3 from the database. Note that you can use [`get workgroups`](#get workgroups) to retrieve a list of workgroups.  
 
 	./steam delete workgroup 3
 

@@ -1,7 +1,10 @@
 # Summary
 
-* [User Management Overview](UserManagementOverview.md)
-* [Installing, Starting, and Using H2O Steam on a YARN Cluster](YARNInstall.md)
-* [Steam Standalone Installation](StandaloneInstall.md)
-* [H2O Scoring Service Builder](ScoringServiceBuilder.md)
+* [Using Steam](StartingSteam.md)
+	*  [Creating a Project](StartingSteam.md#createproject)
+	*  [Deploying a Model in Steam](StartingSteam.md#deploymodel)
+	*  [Making Predictions](StartingSteam.md#makepredictions)
+* [Using Steam with H2O Flow](StartingSteam.md#usesteamwithflow)
+* [Stopping Steam](StartingSteam.md#stopsteam)
+* [Starting the Steam CLI](StartingSteam.md#startcli)
 * [CLI Command Reference Appendix](CLIAppendix.md)

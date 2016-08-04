@@ -7,8 +7,9 @@
 
 build:
 	gitbook build
-	gitbook pdf ./ ./H2OSteamUserGuide.pdf
+	gitbook pdf ./ ./H2OSteamInstall.pdf
 
 clean:
 	rm -rf _book
-	rm -f H2OSteamUserGuide.pdf
+	rm -f H2OSteamInstall.pdf
+
