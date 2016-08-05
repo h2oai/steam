@@ -14,6 +14,10 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import FilterDropdown from './FilterDropdown';
 import { getOrdinal } from '../../App/utils/getOrdinal';
+import ModelLabelSelect from './ModelLabelSelect';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
 import '../styles/leaderboard.scss';
 
 // sample data
@@ -35,13 +39,15 @@ interface Props {
   deployModel: Function,
   modelCategory: string,
   onFilter: Function,
-  sortCriteria: string[]
+  sortCriteria: string[],
+  labels: any[],
+  fetchLabels: Function
 }
 
 interface DispatchProps {
 }
 
-export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
+class Leaderboard extends React.Component<Props & DispatchProps, any> {
   refs: {
     [key: string]: Element
     filterModels: HTMLInputElement
@@ -73,6 +79,12 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
       naivebayesTrain,
       naivebayesValidation
     };
+  }
+
+  componentWillMount() {
+      if (!this.props.labels || !this.props.labels[this.props.projectId]) {
+          this.props.fetchLabels(this.props.projectId);
+      }
   }
 
   openDeploy(model): void {
@@ -182,11 +194,7 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
                     <li><Link to={'/projects/' + this.props.projectId + '/models/' + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                     <li className="labels"><span><i className="fa fa-tags"></i></span> label as
                         <span className="label-selector">
-                          <select name="labelSelect">
-                            <option value="prod">test</option>
-                            <option value="test">stage</option>
-                            <option value="prod">prod</option>
-                          </select>
+                          <ModelLabelSelect projectId={this.props.projectId} modelId={item.id} labels={this.props.labels}/>
                         </span>
                     </li>
                     <li onClick={this.openDeploy.bind(this, item)}><span><i className="fa fa-arrow-up"></i></span> <span>deploy model</span></li>
@@ -201,3 +209,17 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     );
   }
 }
+
+function mapStateToProps(state: any): any {
+    return {
+        labels: state.labels
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        fetchLabels: bindActionCreators(fetchLabels, dispatch),
+    };
+}
+
+export default connect<Props, any, any>(mapStateToProps, mapDispatchToProps)(Leaderboard);
