@@ -109,6 +109,8 @@ public class CompilePojoServlet extends HttpServlet {
       // send jar back
       ServletOutputStream sout = response.getOutputStream();
       response.setContentType("application/octet-stream");
+      String outputFilename = pojofiles.get(0).replace(".java", "");
+      response.setHeader("Content-disposition", "attachment; filename=" + outputFilename + ".jar");
       response.setContentLength(resjar.length);
       sout.write(resjar);
       sout.close();

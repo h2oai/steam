@@ -13,24 +13,59 @@ import '../styles/createnewlabelmodal.scss';
 interface Props {
     open: boolean,
     save: Function,
-    cancel: Function
+    cancel: Function,
+    label?: any
 }
 
+interface State {
+  id: number|boolean
+  name: string
+  description: string
+}
+
+const initialState: State = {
+    id: false,
+    name: '',
+    description: ''
+};
+
+
 export default class CreateNewLabelModal extends React.Component<Props, any> {
-    refs: {
-        [key: string]: Element
-    };
 
     constructor() {
         super();
-        this.state = {
+        this.state = initialState;
+    }
 
-        };
+    componentWillReceiveProps(nextProps) {
+      if (nextProps.label.id) {
+        this.setState({
+          id: nextProps.label.id,
+          name: nextProps.label.name,
+          description: nextProps.label.description
+        });
+      }
+    }
+
+    updateState(event) {
+      let newState = {};
+      newState[event.currentTarget.name] = event.currentTarget.value;
+      this.setState(newState);
+    }
+
+    cancel() {
+      this.setState(initialState);
+      this.props.cancel();
+    }
+
+    save() {
+      this.props.save(this.state);
+      this.setState(initialState);
     }
 
     render(): React.ReactElement<DefaultModal> {
         return (
-            <DefaultModal open={this.props.open}>
+            <DefaultModal open={this.props.open} closeHandler={this.props.cancel}>
                 <div className="create-edit-label-modal">
                     <header>
                         Create / Edit Label
@@ -46,12 +81,12 @@ export default class CreateNewLabelModal extends React.Component<Props, any> {
                                     <p className="muted">You can use this label in the project for exactly 1 model.</p>
                                     <div className="form-group">
                                       <div className="form-item">
-                                          <label className="muted" htmlFor="labelName">Label name</label>
-                                          <input name="labelName" type="text" />
+                                          <label className="muted" htmlFor="name">Label name</label>
+                                          <input type="text" name="name" value={this.state.name} onChange={this.updateState.bind(this)} />
                                       </div>
                                       <div className="form-item">
-                                          <label className="muted" htmlFor="labelDescription">Label description</label>
-                                          <textarea name="labelDescription" rows="4" cols="50"></textarea>
+                                          <label className="muted" htmlFor="description">Label description</label>
+                                          <textarea name="description" value={this.state.description} rows="4" cols="50" onChange={this.updateState.bind(this)}></textarea>
                                       </div>
                                     </div>
                                 </Cell>
@@ -59,10 +94,10 @@ export default class CreateNewLabelModal extends React.Component<Props, any> {
                             <Row className="button-row">
                                 <Cell className="table-row-name"></Cell>
                                 <Cell className="table-row-item">
-                                    <button className="default" onClick={this.props.save.bind(this) }>
+                                    <button className="default" onClick={this.save.bind(this) }>
                                         Save
                                     </button>
-                                    <button className="default invert" onClick={this.props.cancel.bind(this) }>
+                                    <button className="default invert" onClick={this.cancel.bind(this) }>
                                         Cancel
                                     </button>
                                 </Cell>

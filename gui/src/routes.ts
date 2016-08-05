@@ -90,14 +90,6 @@ export const routes: IRoute[] = [
                 showInBreadcrumb: true,
                 showInNavigation: false
             },
-            // /projects/:id/data
-            {
-                path: 'projects/:projectid/data',
-                component: Dummy,
-                name: 'Data',
-                showInBreadcrumb: true,
-                showInNavigation: true
-            },
             // /projects/:id/deployment
             {
                 path: 'projects/:projectid/deployment',

@@ -8,7 +8,11 @@ import TabNavigation from '../Projects/components/TabNavigation';
 import Labels from './components/Labels';
 import './styles/configurations.scss';
 
-export default class Configurations extends React.Component<any, any> {
+interface Props {
+  params?: any
+}
+
+export default class Configurations extends React.Component<Props, any> {
 
   /**
    * TODO(jefffohl): Make the tab container a generalized container, like <TabContainer>, to keep things DRY.
@@ -17,16 +21,23 @@ export default class Configurations extends React.Component<any, any> {
   constructor() {
     super();
     this.state = {
+      tabs: {},
+      isSelected: null
+    };
+  }
+
+  componentWillMount() {
+    this.setState({
       tabs: {
         labels: {
           label: 'Labels',
           isSelected: true,
           onClick: this.clickHandler.bind(this),
-          component: <Labels/>
+          component: <Labels projectid={parseInt(this.props.params.projectid,10)}/>
         }
       },
       isSelected: 'labels'
-    };
+    });
   }
 
   clickHandler(tab) {

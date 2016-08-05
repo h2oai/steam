@@ -143,6 +143,7 @@ type Dataset struct {
 
 type Model struct {
 	Id                  int64
+	ProjectId           int64
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
 	Name                string
@@ -162,6 +163,7 @@ type Model struct {
 
 type BinomialModel struct {
 	Id                  int64
+	ProjectId           int64
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
 	Name                string
@@ -186,6 +188,7 @@ type BinomialModel struct {
 
 type MultinomialModel struct {
 	Id                  int64
+	ProjectId           int64
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
 	Name                string
@@ -208,6 +211,7 @@ type MultinomialModel struct {
 
 type RegressionModel struct {
 	Id                   int64
+	ProjectId            int64
 	TrainingDatasetId    int64
 	ValidationDatasetId  int64
 	Name                 string
@@ -239,6 +243,7 @@ type Label struct {
 
 type Service struct {
 	Id        int64
+	ProjectId int64
 	ModelId   int64
 	Address   string
 	Port      int64

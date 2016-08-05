@@ -36,8 +36,10 @@
           <p>Start building your prediction service!</p>
         </section>
  -->
-        <section id="python" class="col-md-4 col-sm-12">
-          <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Python preprocessing<span class="subtitle">*optional</span></header>
+          <section id="preprocess" class="col-md-4 col-sm-12">
+
+        <section id="python">
+          <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Python Preprocessing<span class="subtitle">*optional</span></header>
 
           <form autocomplete="off" method="POST" action="makepythonwar" enctype="multipart/form-data">
               <div class="input-inline-row">
@@ -51,7 +53,7 @@
               <div class="input-inline-row">
                     <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
                     <div class="file-input-div">
-                        <input class="form-control file-input" type="text" id="python1" placeholder="Select extra Python library file(s)"/>
+                        <input class="form-control file-input" type="text" id="python2" placeholder="Select extra Python library file(s)"/>
                         <input type="file" name="pythonextra" multiple />
                     </div>
               </div>
@@ -61,11 +63,37 @@
           </form>
 
         </section>
+              <section id="jar">
+              <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Jar Preprocessing<span class="subtitle">*optional</span></header>
+
+              <form autocomplete="off" method="POST" action="makewar" enctype="multipart/form-data">
+                  <div class="input-inline-row">
+                      <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
+                      <div class="file-input-div">
+                          <input class="form-control file-input" type="text" id="jar1" placeholder="Select a Jar Pre-Processing File"/>
+                          <input type="file" name="prejar" />
+                      </div>
+                  </div>
+
+                  <div class="input-inline-row">
+                      <label class="form-control-label"></label>
+                      <div class="file-input-div">
+                          <input class="form-control file-input" type="text" name="preclass" id="jar2" placeholder="Class Name for Pre-Processor"/>
+                      </div>
+                  </div>
+
+                  <input type="file" name="pojo"/>
+                  <input type="file" name="jar"/>
+              </form>
+
+            </section>
+
+          </section>
 
         <section class="col-md-1">
 
-
         </section>
+
         <section id="java" class="col-md-4 col-sm-12" >
           <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Java Prediction Files<span class="subtitle">*required</span></header>
 
@@ -89,9 +117,16 @@
         </section>
 
         <div class="btnContainer col-md-12">
-          <input id="upload" class="btn btn-primary" type="submit" value="Upload"></input>
-          <input id="reset" class="btn btn-default" type="reset"></input>
+          <input id="upload" class="btn btn-primary" type="submit" value="Build"></input>
+          <input id="reset" class="btn btn-default" type="Reset"></input>
         </div>
+
+          <section class="col-md-12">
+
+          </section>
+          <section class="col-md-12">
+              <b> Compilation Service that compiles POJOs into a Jar file available at <a href="compile.html">compile.html</a> </b>
+          </section>
 
       </main>
 
@@ -118,7 +153,7 @@
 
             // IF POJO/JAR, gives error
             if ( !$('#java form input[name="pojo"]').val() || !$('#java form input[name="jar"]').val()){
-               alert('You must select at least a POJO file, and a JAR to make a WAR service. Python files are optional though.');
+               alert('You must select at least a POJO file, and a JAR to make a WAR service. Python or Jar files are optional though.');
             }
             // ELSE IF there are some python files, do a python make war
             else if ( $('input[name="python"]').val() || $('input[name="pythonextra"]').val() ){
@@ -128,6 +163,15 @@
                 $('#python form input[name="jar"]').get(0).files = $('#java form input[name="jar"]').get(0).files;
 
                 $('#python form').submit();
+            }
+            // ELSE IF there are some Jar files, do a Jar make war
+            else if ( $('input[name="prejar"]').val() || $('input[name="preclass"]').val() ){
+                console.log($('#java form input[name="pojo"]').get(0).files);
+                console.log($('#java form input[name="jar"]').get(0).files);
+                $('#jar form input[name="pojo"]').get(0).files = $('#java form input[name="pojo"]').get(0).files;
+                $('#jar form input[name="jar"]').get(0).files = $('#java form input[name="jar"]').get(0).files;
+
+                $('#jar form').submit();
             }
             // ELSE must be only POJO/JAR
             else {

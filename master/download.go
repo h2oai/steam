@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 
@@ -168,8 +169,8 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 			filePath = fs.GetGenModelPath(s.workingDirectory, modelId)
 
 		case javaWar:
-			compilerService := compiler.NewService(s.compilerServiceAddress)
-			warFilePath, err := compilerService.CompileModel(
+			warFilePath, err := compiler.CompileModel(
+				s.compilerServiceAddress,
 				s.workingDirectory,
 				projectId,
 				modelId,
@@ -189,8 +190,8 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				http.Error(w, "No package-name specified", http.StatusBadRequest)
 				return
 			}
-			compilerService := compiler.NewService(s.compilerServiceAddress)
-			warFilePath, err := compilerService.CompileModel(
+			warFilePath, err := compiler.CompileModel(
+				s.compilerServiceAddress,
 				s.workingDirectory,
 				projectId,
 				modelId,
@@ -205,8 +206,8 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 			filePath = warFilePath
 
 		case javaJar:
-			compilerService := compiler.NewService(s.compilerServiceAddress)
-			jarFilePath, err := compilerService.CompileModel(
+			jarFilePath, err := compiler.CompileModel(
+				s.compilerServiceAddress,
 				s.workingDirectory,
 				projectId,
 				modelId,
@@ -223,6 +224,7 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 
 		// Delegate to builtin.
 		// Can result in 200, 404, 403 or 500 based on file availability and permissions.
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+path.Base(filePath)+"\"")
 		http.ServeFile(w, r, filePath)
 		return
 

@@ -8,10 +8,12 @@ import { Link, withRouter } from 'react-router';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { buildPath } from '../../../App/utils/buildPath';
 import { getRoute } from '../../../App/utils/getRoute';
-import './navigation.scss';
 import { routes } from '../../../routes';
 import * as _ from 'lodash';
 import { connect } from 'react-redux';
+import { fetchProfile } from '../../../Profile/actions/profile.actions';
+import { bindActionCreators } from 'redux';
+import './navigation.scss';
 const logo = require('../../../../assets/h2o-home.png');
 
 interface Props {
@@ -24,6 +26,7 @@ interface Props {
 }
 
 interface DispatchProps {
+  fetchProfile: Function
 }
 
 
@@ -46,6 +49,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
 
   componentWillMount(): void {
     this.setMenuState(this.props.routes);
+    this.props.fetchProfile();
   }
 
   componentWillReceiveProps(nextProps: Props): void {
@@ -182,4 +186,10 @@ function mapStateToProps(state): any {
   };
 }
 
-export default connect<any, DispatchProps, any>(mapStateToProps, {})(withRouter(Navigation));
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchProfile: bindActionCreators(fetchProfile, dispatch)
+  };
+}
+
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(withRouter(Navigation));
