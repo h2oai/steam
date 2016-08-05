@@ -93,7 +93,7 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                   SELECT PYTHON LIBRARIES
                 </Cell>
                 <Cell>
-                  <div>Select a main Python file for pre-processing.</div>
+                  <div>Select a one or more Python files for your library.</div>
                   <span className="muted">Any non-standard libraries called here should be installed into your deployment environment prior to launching services.</span>
                   <div className="upload">
                     <div className="upload-info" onClick={this.selectLibraries.bind(this)}>
