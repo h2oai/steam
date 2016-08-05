@@ -55,14 +55,9 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
       let newEntry = {};
       newEntry.tpr = val;
       newEntry.fpr = fpr[i];
-      if (this.props.comparisonModel) {
-        newEntry.comparisonTpr = comparisonTpr[i];
-      } else {
-        newEntry.comparisonTpr = 0;
-      }
+      newEntry.comparisonTpr = comparisonTpr[i] || 0;
       data.push(newEntry);
     });
-    console.log(data);
     let config = {
       margin: {top: 2, right: 2, bottom: 2, left: 2},
       interpolationMode: 'basis',
@@ -82,12 +77,6 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
       hideAxes: true,
       hideAUCText: true
     };
-    // if (this.props.comparisonModel) {
-    //   config.tprVariables.push({
-    //     name: 'comparisonTpr',
-    //     label: 'comparisonTpr'
-    //   });
-    // }
     return (
       <div className="metrics goodness-of-fit">
         <div className="metrics-summary">
