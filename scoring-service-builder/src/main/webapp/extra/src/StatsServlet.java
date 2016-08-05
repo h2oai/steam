@@ -33,27 +33,31 @@ public class StatsServlet extends HttpServlet {
       final String lastPredictionUTC = ServletUtil.lastTime > 0 ? sdf.format(new Date(ServletUtil.lastTime)) : "";
       final long warmUpCount = ServletUtil.warmUpCount;
 
-      Map<String, Object> js = new HashMap<String, Object>() {
-        {
-          put("startTime", ServletUtil.startTime);
-          put("lastTime", ServletUtil.lastTime);
-          put("lastTimeUTC", lastPredictionUTC);
-          put("startTimeUTC", startUTC);
-          put("upTimeMs", upTimeMs);
-          put("lastTimeAgoMs", lastTimeAgoMs);
-          put("lastTimeAgoMs", lastTimeAgoMs);
-          put("warmUpCount", warmUpCount);
+      String json = null;
 
-          put("prediction", ServletUtil.predictionTimes.toMap());
-          put("get", ServletUtil.getTimes.toMap());
-          put("post", ServletUtil.postTimes.toMap());
-          put("pythonget", ServletUtil.getPythonTimes.toMap());
-          put("pythonpost", ServletUtil.postPythonTimes.toMap());
+      synchronized (this) {
+        Map<String, Object> js = new HashMap<String, Object>() {
+          {
+            put("startTime", ServletUtil.startTime);
+            put("lastTime", ServletUtil.lastTime);
+            put("lastTimeUTC", lastPredictionUTC);
+            put("startTimeUTC", startUTC);
+            put("upTimeMs", upTimeMs);
+            put("lastTimeAgoMs", lastTimeAgoMs);
+            put("lastTimeAgoMs", lastTimeAgoMs);
+            put("warmUpCount", warmUpCount);
 
-          put("outputLabels", ServletUtil.outputLabels);
-        }
-      };
-      String json = gson.toJson(js, ServletUtil.MAP_TYPE);
+            put("prediction", ServletUtil.predictionTimes.toMap());
+            put("get", ServletUtil.getTimes.toMap());
+            put("post", ServletUtil.postTimes.toMap());
+            put("pythonget", ServletUtil.getPythonTimes.toMap());
+            put("pythonpost", ServletUtil.postPythonTimes.toMap());
+
+            put("outputLabels", ServletUtil.outputLabels);
+          }
+        };
+        json = gson.toJson(js, ServletUtil.MAP_TYPE);
+      }
 
       response.getWriter().write(json);
       response.setStatus(HttpServletResponse.SC_OK);

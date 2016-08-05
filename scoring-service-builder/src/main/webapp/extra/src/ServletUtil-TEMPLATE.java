@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
+//import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 import hex.genmodel.easy.*;
@@ -113,12 +113,17 @@ class ServletUtil {
   }
 
 
-  public static Map<String, Integer> outputLabels = new ConcurrentHashMap<String, Integer>();
+  public static Map<String, Integer> outputLabels = new HashMap<String, Integer>();
 
   public static synchronized void incrementOutputLabel(String key) {
-    Integer value = outputLabels.putIfAbsent(key, 1);
-    if (value != null)
-      outputLabels.replace(key, value + 1);
+//    Integer value = outputLabels.putIfAbsent(key, 1);
+//    if (value != null)
+//      outputLabels.replace(key, value + 1);
+    Integer value = outputLabels.get(key);
+    if (value == null)
+      outputLabels.put(key, 1);
+    else
+      outputLabels.put(key, value + 1);
   }
 
   public static long startTime = System.currentTimeMillis();
