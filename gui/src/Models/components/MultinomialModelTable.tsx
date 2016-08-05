@@ -1,5 +1,5 @@
 /**
- * Created by justin on 8/4/16.
+ * Created by justin on 8/5/16.
  */
 import * as React from 'react';
 import * as moment from 'moment';
@@ -19,7 +19,7 @@ interface Props {
   openDeploy: Function
 }
 
-export default class BinomialModelTable extends React.Component<Props, any> {
+export default class MultinomialModelTable extends React.Component<Props, any> {
   render() {
     return (
       <Table>
@@ -31,19 +31,13 @@ export default class BinomialModelTable extends React.Component<Props, any> {
             MODEL
           </Cell>
           <Cell>
-            AUC
-          </Cell>
-          <Cell>
-            Gini
-          </Cell>
-          <Cell>
             MSE
           </Cell>
           <Cell>
             Logloss
           </Cell>
-          <Cell className="graph">
-            ROC
+          <Cell>
+            R<sup>2</sup>
           </Cell>
           <Cell>
             <div className="actions">
@@ -53,7 +47,6 @@ export default class BinomialModelTable extends React.Component<Props, any> {
         </Row>
         {this.props.items.map((model, i) => {
           let modelMetrics = JSON.parse(model.metrics);
-          console.log(modelMetrics);
           let trainingMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {});
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
@@ -64,6 +57,7 @@ export default class BinomialModelTable extends React.Component<Props, any> {
               fpr: fpr[i]
             });
           });
+          console.log(trainingMetrics);
           return (
             <Row key={i}>
               <Cell></Cell>
@@ -84,19 +78,13 @@ export default class BinomialModelTable extends React.Component<Props, any> {
                 </div>
               </Cell>
               <Cell>
-                {trainingMetrics.AUC.toFixed(6)}
+                {trainingMetrics.MSE ? trainingMetrics.MSE.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.Gini.toFixed(6)}
+                {trainingMetrics.logloss ? trainingMetrics.logloss.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.MSE.toFixed(6)}
-              </Cell>
-              <Cell>
-                {trainingMetrics.logloss.toFixed(6)}
-              </Cell>
-              <Cell className="graph">
-                <RocGraph data={data}/>
+                {trainingMetrics.r2.toFixed(6)}
               </Cell>
               <Cell>
                 <ul className="actions">
@@ -119,6 +107,6 @@ export default class BinomialModelTable extends React.Component<Props, any> {
           );
         })}
       </Table>
-    );
+    )
   }
 }

@@ -1,14 +1,12 @@
 /**
- * Created by justin on 8/4/16.
+ * Created by justin on 8/5/16.
  */
 import * as React from 'react';
 import * as moment from 'moment';
-import * as _ from 'lodash';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import FilterDropdown from './FilterDropdown';
-import RocGraph from './RocGraph';
 import { Link } from 'react-router';
 
 interface Props {
@@ -19,7 +17,7 @@ interface Props {
   openDeploy: Function
 }
 
-export default class BinomialModelTable extends React.Component<Props, any> {
+export default class RegressionModelTable extends React.Component<Props, any> {
   render() {
     return (
       <Table>
@@ -31,19 +29,13 @@ export default class BinomialModelTable extends React.Component<Props, any> {
             MODEL
           </Cell>
           <Cell>
-            AUC
-          </Cell>
-          <Cell>
-            Gini
+            MRD
           </Cell>
           <Cell>
             MSE
           </Cell>
           <Cell>
-            Logloss
-          </Cell>
-          <Cell className="graph">
-            ROC
+            R<sup>2</sup>
           </Cell>
           <Cell>
             <div className="actions">
@@ -55,6 +47,7 @@ export default class BinomialModelTable extends React.Component<Props, any> {
           let modelMetrics = JSON.parse(model.metrics);
           console.log(modelMetrics);
           let trainingMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {});
+          console.log(model.created_at);
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
           let data = [];
@@ -84,19 +77,13 @@ export default class BinomialModelTable extends React.Component<Props, any> {
                 </div>
               </Cell>
               <Cell>
-                {trainingMetrics.AUC.toFixed(6)}
-              </Cell>
-              <Cell>
-                {trainingMetrics.Gini.toFixed(6)}
+                {trainingMetrics.mean_residual_deviance.toFixed(6)}
               </Cell>
               <Cell>
                 {trainingMetrics.MSE.toFixed(6)}
               </Cell>
               <Cell>
-                {trainingMetrics.logloss.toFixed(6)}
-              </Cell>
-              <Cell className="graph">
-                <RocGraph data={data}/>
+                {trainingMetrics.r2.toFixed(6)}
               </Cell>
               <Cell>
                 <ul className="actions">

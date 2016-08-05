@@ -7,6 +7,8 @@ import Deploy from '../components/Deploy';
 import PageHeader from '../../Projects/components/PageHeader';
 import Pagination from '../components/Pagination';
 import BinomialModelTable from './BinomialModelTable';
+import MultinomialModelTable from './MultinomialModelTable';
+import RegressionModelTable from './RegressionModelTable';
 import '../styles/leaderboard.scss';
 
 // sample data
@@ -124,7 +126,9 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
         <div className="filter">
           <input ref="filterModels" type="text" placeholder="filter models" onChange={this.onFilter.bind(this)}/>
         </div>
-        <BinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria} items={this.props.items} projectId={this.props.projectId} openDeploy={this.openDeploy.bind(this)}/>
+        {this.props.modelCategory === 'binomial' ? <BinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria} items={this.props.items} projectId={this.props.projectId} openDeploy={this.openDeploy.bind(this)}/> : null}
+        {this.props.modelCategory === 'multinomial' ? <MultinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria} items={this.props.items} projectId={this.props.projectId} openDeploy={this.openDeploy.bind(this)}/> : null}
+        {this.props.modelCategory === 'regression' ? <RegressionModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria} items={this.props.items} projectId={this.props.projectId} openDeploy={this.openDeploy.bind(this)}/> : null}
         <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)} onPageForward={this.onPageForward.bind(this)}></Pagination>
       </div>
     );
