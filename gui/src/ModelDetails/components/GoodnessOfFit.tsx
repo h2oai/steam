@@ -90,7 +90,7 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
             return null;
           })}
         </div>
-        {this.props.modelCategory.toLowerCase() === 'regression' ? null :
+        {this.props.modelCategory === 'regression' ? null :
           <div className="roc-chart"><RocGraph data={data} config={config}/></div>}
       </div>
     );
