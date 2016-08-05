@@ -201,14 +201,6 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
         <Collapsible open={this.state.isGoodnessOpen}>
           <GoodnessOfFit model={this.props.model} comparisonModel={this.state.comparisonModel} modelCategory={this.state.modelCategory}></GoodnessOfFit>
         </Collapsible>
-        <header className="overview-header">
-          <span onClick={this.toggleOpen.bind(this, 'variable')}><i
-            className={classNames('fa', {'fa-minus-square-o': this.state.isVariableOpen, 'fa-plus-square-o': !this.state.isVariableOpen})}></i
-          >Variable Importance</span>
-        </header>
-        <Collapsible open={this.state.isVariableOpen}>
-          <VariableImportance></VariableImportance>
-        </Collapsible>
       </div>
     );
   }
