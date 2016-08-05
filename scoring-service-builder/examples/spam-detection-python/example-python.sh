@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+rm -f example-python.war
+
 curl -X POST \
 --form pojo=@GBM_model_python_1463864606917_1.java \
 --form jar=@h2o-genmodel.jar \
@@ -7,5 +11,12 @@ curl -X POST \
 --form pythonextra=@lib/__init__.py \
 localhost:55000/makepythonwar > example-python.war
 
-echo "Created example-python.war"
-echo "Run with run-example-pyhton.sh"
+if [ -s example-python.war ]
+then
+  echo "Created example-python.war"
+  echo "Run with run-example-python.sh"
+else
+  echo "Failed to build example.war"
+  exit 1
+fi
+
