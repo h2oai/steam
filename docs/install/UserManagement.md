@@ -1,6 +1,6 @@
 # User Management Overview
 
-Before using Steam, it is important to understand User Management within your YARN environment. In Steam, User Management is supported in a PostgreSQL database. The User Management functions in Steam determine the level of access that users have for Steam features. The Steam database supports setup via CLI commands. Refer to the [CLI Command Reference Appendix](CLIAppendix.md) for a list of all available CLI commands. 
+Before using Steam, it is important to understand User Management within your YARN environment. In Steam, User Management is supported in a PostgreSQL database. The User Management functions in Steam determine the level of access that users have for Steam features. The Steam database supports setup via CLI commands. Refer to the ***CLI Command Reference Appendix*** in the Steam User Guide for a list of all available CLI commands. 
 
 For more information on Steam User Management, refer to the following sections. 
 
@@ -116,7 +116,7 @@ The steps below provide a common workflow to follow when creating users. This wo
 
 ## <a name="usermgmtexample"></a>User Management Example
 
-The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference Appendix](../CLIAppendix.md) for information about all of the commands available in the CLI. 
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the **CLI Command Reference Appendix** in the *Steam User Guide* for information about all of the commands available in the CLI. 
 
 1. Log in as the Steam superuser on the machine that is running Steam.
 

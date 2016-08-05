@@ -12,7 +12,7 @@ The first time you log in to Steam, an empty Steam page will display, prompting 
 
 1. Accept the terms of this preview release, then click **Start a New Project**. This opens a page allowing you to start a new project from scratch or to begin importing models into your Steam environment. 
 
- ![Create a Project](images/new_project.png)
+ ![NewProject](images/new_project.png)
 
 2. To start a new project from scratch, click **Create New Project**. This opens a page showing you the available H2O clusters. When you first log in to Steam, the list of clusters will be empty. Enter your cluster IP address, then click **Connect**. Once connected, this will immediately populate the current list of clusters.
 3. Select the H2O frame from the Datasets dropdown, then select the Category.
@@ -47,7 +47,6 @@ Following is an example of the Model Details page.
 
  ![Deployment page](images/deployment_page.png)
 
-
 ### <a name="makepredictions"></a>Making Predictions
 
 1. To reach the scoring service, click the IP address link listed under the Deployed Services. This opens Steam Prediction Service tool. The fields that display on the Prediction Service tool are automatically populated with field information from the deployed model.
@@ -60,42 +59,5 @@ Following is an example of the Model Details page.
 
 >**Note**: Use the **Clear** button to clear all entries and begin a new prediction. Use the **More Stats** button to view additional statistics about the scoring service results.
 
-## <a name="usesteamwithflow"></a>Using Steam with H2O Flow
 
-As with other H2O products, Flow can be used alongside Steam when performing machine learning tasks.
 
-Navigate to the Clusters page in Steam and click the link for the H2O cluster that you want to open. 
-
-   ![Steam Clusters page](images/cluster_page.png)
-
-This opens H2O Flow in a new tab.
-
-   ![H2O Flow UI](images/h2o_flow.png)
-
-***Note***: Refer to the H2O Flow documentation for information on how to use Flow. 
-
-## <a name="stopsteam"></a>Stopping Steam
-
-When you are finished using Steam, press Ctrl+C in each of the Steam, Compilation Service, and postgres terminal windows to stop the services end your session. 
-
-## <a name="startcli"></a>Starting the Steam CLI
-
-The CLI is an optional utility that can be used to maintain a Steam environment and to create new roles, workgroups, and users. The CLI will primarily be used by admins and/or Steam superusers. The steps below describe how to start the Steam CLI. 
-
-Perform the following steps to start the Steam CLI.
-
-1. Open a terminal window and ssh to the machine running Steam. Be sure to provide the correct password for the node when prompted. 
-
- ```ssh <user>@<yarn_edge_node>```
-
-1. Change directories to the Steam folder. From within this folder, log in to the machine running Steam. Use the password that you provided when you created superuser. The exmaple below logs in a user named **Bob**.
-
- ```cd steam-0```
- 
- ```./steam login 192.168.2.182:8080 --username=bob --password=bobSpassword```
-
-1. Run the following to verify that the CLI is working correctly.
-
-		./steam help
-		
-Refer to the [CLI Appendix](CLIAppendix.md) for information on the commands available in the CLI.
