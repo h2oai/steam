@@ -630,6 +630,7 @@ func ScanModel(r *sql.Row) (Model, error) {
 		&s.Metrics,
 		&s.MetricsVersion,
 		&s.Created,
+		&s.LabelId,
 	); err != nil {
 		return Model{}, err
 	}
@@ -659,6 +660,7 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.Metrics,
 			&s.MetricsVersion,
 			&s.Created,
+			&s.LabelId,
 		); err != nil {
 			return nil, err
 		}
@@ -690,6 +692,7 @@ func ScanBinomialModel(r *sql.Row) (BinomialModel, error) {
 		&s.Metrics,
 		&s.MetricsVersion,
 		&s.Created,
+		&s.LabelId,
 		&s.Mse,
 		&s.RSquared,
 		&s.Logloss,
@@ -724,6 +727,7 @@ func ScanBinomialModels(rs *sql.Rows) ([]BinomialModel, error) {
 			&s.Metrics,
 			&s.MetricsVersion,
 			&s.Created,
+			&s.LabelId,
 			&s.Mse,
 			&s.RSquared,
 			&s.Logloss,
@@ -760,6 +764,7 @@ func ScanMultinomialModel(r *sql.Row) (MultinomialModel, error) {
 		&s.Metrics,
 		&s.MetricsVersion,
 		&s.Created,
+		&s.LabelId,
 		&s.Mse,
 		&s.RSquared,
 		&s.Logloss,
@@ -792,6 +797,7 @@ func ScanMultinomialModels(rs *sql.Rows) ([]MultinomialModel, error) {
 			&s.Metrics,
 			&s.MetricsVersion,
 			&s.Created,
+			&s.LabelId,
 			&s.Mse,
 			&s.RSquared,
 			&s.Logloss,
@@ -826,6 +832,7 @@ func ScanRegressionModel(r *sql.Row) (RegressionModel, error) {
 		&s.Metrics,
 		&s.MetricsVersion,
 		&s.Created,
+		&s.LabelId,
 		&s.Mse,
 		&s.RSquared,
 		&s.MeanResidualDeviance,
@@ -858,6 +865,7 @@ func ScanRegressionModels(rs *sql.Rows) ([]RegressionModel, error) {
 			&s.Metrics,
 			&s.MetricsVersion,
 			&s.Created,
+			&s.LabelId,
 			&s.Mse,
 			&s.RSquared,
 			&s.MeanResidualDeviance,

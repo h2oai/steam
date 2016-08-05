@@ -30,6 +30,7 @@ type BinomialModel struct {
 	MaxRuntime          int     `json:"max_runtime"`
 	Metrics             string  `json:"metrics"`
 	CreatedAt           int64   `json:"created_at"`
+	LabelId             int64   `json:"label_id"`
 	Mse                 float64 `json:"mse"`
 	RSquared            float64 `json:"r_squared"`
 	Logloss             float64 `json:"logloss"`
@@ -149,6 +150,7 @@ type Model struct {
 	MaxRuntime          int    `json:"max_runtime"`
 	Metrics             string `json:"metrics"`
 	CreatedAt           int64  `json:"created_at"`
+	LabelId             int64  `json:"label_id"`
 }
 
 type MultinomialModel struct {
@@ -167,6 +169,7 @@ type MultinomialModel struct {
 	MaxRuntime          int     `json:"max_runtime"`
 	Metrics             string  `json:"metrics"`
 	CreatedAt           int64   `json:"created_at"`
+	LabelId             int64   `json:"label_id"`
 	Mse                 float64 `json:"mse"`
 	RSquared            float64 `json:"r_squared"`
 	Logloss             float64 `json:"logloss"`
@@ -202,6 +205,7 @@ type RegressionModel struct {
 	MaxRuntime           int     `json:"max_runtime"`
 	Metrics              string  `json:"metrics"`
 	CreatedAt            int64   `json:"created_at"`
+	LabelId              int64   `json:"label_id"`
 	Mse                  float64 `json:"mse"`
 	RSquared             float64 `json:"r_squared"`
 	MeanResidualDeviance float64 `json:"mean_residual_deviance"`

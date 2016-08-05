@@ -13,13 +13,15 @@ import { routes } from './routes';
 import { rootReducer } from './App/reducers/rootReducer';
 import './variables.scss';
 import 'font-awesome/css/font-awesome.css';
+import { compose } from 'redux';
 
 const initialState = {};
 
 const store: any = createStore(
   rootReducer,
   initialState,
-  applyMiddleware(thunk)
+  compose(
+    applyMiddleware(thunk), window.devToolsExtension ? window.devToolsExtension() : f => f)
 );
 
 let history: any = syncHistoryWithStore(hashHistory, store);

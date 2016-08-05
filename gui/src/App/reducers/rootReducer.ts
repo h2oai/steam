@@ -10,6 +10,7 @@ import { labelsReducer } from '../../Configurations/reducers/labels.reducer';
 import { projectsReducer } from '../../Projects/reducers/projects.reducer';
 import { servicesReducer } from '../../Projects/reducers/services.reducer';
 import { profileReducer } from '../../Profile/reducers/profile.reducers';
+import { deploymentReducer } from '../../Deployment/reducers/deployment.reducer';
 
 export const rootReducer = combineReducers({
   model: modelOverviewReducer,
@@ -18,5 +19,6 @@ export const rootReducer = combineReducers({
   projects: projectsReducer,
   services: servicesReducer,
   profile: profileReducer,
+  deployments: deploymentReducer,
   routing: routerReducer
 });
