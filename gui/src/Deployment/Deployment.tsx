@@ -8,9 +8,25 @@ import TabNavigation from '../Projects/components/TabNavigation';
 import DeployedServices from '../Projects/components/DeployedServices';
 import Packaging from './components/Packaging';
 import UploadPreProcessingModal from './components/UploadPreProcessingModal';
+import { connect } from 'react-redux';
+import { uploadPackage } from './actions/deployment.actions';
+import { bindActionCreators } from 'redux';
 import './styles/deployment.scss';
 
-export default class Deployment extends React.Component<any, any> {
+interface Props {
+  params: {
+    projectid: string
+  },
+  packages: {
+    packages: string[]
+  }
+}
+
+interface DispatchProps {
+  uploadPackage: Function
+}
+
+export class Deployment extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
@@ -29,8 +45,29 @@ export default class Deployment extends React.Component<any, any> {
         }
       },
       isSelected: 'deployedServices',
-      uploadOpen: false
+      uploadOpen: false,
+      packages: [],
+      projectId: null
     };
+  }
+
+  componentWillMount() {
+    this.setState({
+      tabs: {
+        deployedServices: {
+          label: 'DEPLOYED SERVICES',
+          isSelected: true,
+          onClick: this.clickHandler.bind(this),
+          component: <DeployedServices/>
+        },
+        packaging: {
+          label: 'PACKAGING',
+          isSelected: false,
+          onClick: this.clickHandler.bind(this),
+          component: <Packaging projectId={this.props.params.projectid}/>
+        }
+      }
+    });
   }
 
   clickHandler(tab) {
@@ -56,14 +93,17 @@ export default class Deployment extends React.Component<any, any> {
     });
   }
 
-  upload(uploadedPackage) {
+  upload(event, uploadedPackage, formData) {
+    event.preventDefault();
+    this.props.uploadPackage(parseInt(this.props.params.projectid, 10), uploadedPackage.name, formData);
     this.closeUpload();
   }
 
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="services">
-        <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)} upload={this.upload.bind(this)}/>
+        <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)}
+                                  upload={this.upload.bind(this)}/>
         <PageHeader>
           <span>Deployment</span>
           <span><button className="default" onClick={this.openUpload.bind(this)}>Upload New Package</button></span>
@@ -76,3 +116,17 @@ export default class Deployment extends React.Component<any, any> {
     );
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    packages: state.packages
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    uploadPackage: bindActionCreators(uploadPackage, dispatch)
+  };
+}
+
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Deployment);
