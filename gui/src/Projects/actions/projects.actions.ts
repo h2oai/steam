@@ -33,7 +33,7 @@ export function receiveClusters(clusters) {
 export function fetchClusters() {
   return (dispatch) => {
     dispatch(requestClusters());
-    Remote.getClusters(0, 5, (error, res) => {
+    Remote.getClusters(0, 1000, (error, res) => {
       dispatch(receiveClusters(res));
     });
   };
@@ -185,7 +185,7 @@ export function registerCluster(address: string) {
 
 export function fetchProjects() {
   return (dispatch) => {
-    Remote.getProjects(0, 5, (error, res) => {
+    Remote.getProjects(0, 1000, (error, res) => {
       dispatch(receiveProjects(<Project[]> res));
     });
   };
