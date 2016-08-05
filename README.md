@@ -1,6 +1,6 @@
 # Installing, Starting, and Using Steam and the H2O Scoring Service
 
-This document is meant for H2O developers and describes how to install, start, and use Steam on an in-house YARN cluster. External users should review the [README.md](docs/README.md) file within the **/docs** folder.
+This document is meant for H2O developers and describes how to install, start, and use Steam on an in-house YARN cluster using the steamY repository rather than the Steam binary. External users, or users who want to test the Steam binary should review the files within the **/docs** (YARN cluster) and **/demo** (standalone/local cluster) folders.
 
 
 ## Requirements
@@ -12,7 +12,7 @@ This document is meant for H2O developers and describes how to install, start, a
 - Typescript
 - Node.js
 - JDK 1.7 or greater
-- H2O AutoML for Apache HDP2.2 or CDH 5.5.3 (internal only)
+- H2O version 3.10.0.3 or greater
 - PostgreSQL 9.1 or greater
 	- available from <a href="https://www.postgresql.org/" target="_blank">PostgreSQL.org</a>
 
@@ -25,8 +25,8 @@ This section describes the user management features available in H2O Steam. This
 - [Terms](#terms)
 - [Privileges/Access Control](#privileges)
 - [Authorization](#authorization)
-- [User Management Setup](#user management setup)
-- [User Management Workflow](#user management workflow)
+- [User Management Workflow](#user_management_workflow)
+- [Next Steps](#nextsteps)
 
 In addition to the above sections, a [CLI Command Reference Appendix](#CLI Command Reference) is available at the end of this document. 
 
@@ -121,9 +121,9 @@ For example:
 A **Workgroup** is a named set of identities. Workgroups allow you to form collections of identities for access control purposes. For example, a *Demand Forecasting* workgroup can be composed of all the users working on demand forecasting, regardless of their role. This workgroup can be then used to control access to all the clusters, projects, models and services that are used for demand forecasting. 
 
 
-## <a name="user management workflow"></a>User Management Workflow
+## <a name="user_management_workflow"></a>User Management Workflow
 
-The steps below provide a common workflow to follow when creating users. This workflow is followed in the example that follows.
+The steps below provide a common workflow to follow when creating users. An example of this workflow is available in the [User Management](docs/install/UserManagement.md#usermgmtexample) file.
 
 1. Define roles based on operational needs.
 2. Define workgroups based on data / access control needs.
@@ -133,7 +133,7 @@ The steps below provide a common workflow to follow when creating users. This wo
  - Associate the user with one or more roles.
  - Optionally, associate the user with one or more workgroups. 
 
-## Next Steps
+## <a name="nextsteps"></a>Next Steps
 
 Now that you understand User Management, you can begin building and then setting up the H2O Scoring Service and Steam.
 
