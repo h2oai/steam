@@ -159,6 +159,7 @@ type Model struct {
 	Metrics             string
 	MetricsVersion      string
 	Created             time.Time
+	LabelId             sql.NullInt64
 }
 
 type BinomialModel struct {
@@ -179,6 +180,7 @@ type BinomialModel struct {
 	Metrics             string
 	MetricsVersion      string
 	Created             time.Time
+	LabelId             sql.NullInt64
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -204,6 +206,7 @@ type MultinomialModel struct {
 	Metrics             string
 	MetricsVersion      string
 	Created             time.Time
+	LabelId             sql.NullInt64
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -227,6 +230,7 @@ type RegressionModel struct {
 	Metrics              string
 	MetricsVersion       string
 	Created              time.Time
+	LabelId              sql.NullInt64
 	Mse                  float64
 	RSquared             float64
 	MeanResidualDeviance float64

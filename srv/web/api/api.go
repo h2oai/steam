@@ -83,6 +83,7 @@ type Model struct {
 	MaxRuntime          int
 	Metrics             string
 	CreatedAt           int64
+	LabelId             int64
 }
 
 type BinomialModel struct {
@@ -101,6 +102,7 @@ type BinomialModel struct {
 	MaxRuntime          int
 	Metrics             string
 	CreatedAt           int64
+	LabelId             int64
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -124,6 +126,7 @@ type MultinomialModel struct {
 	MaxRuntime          int
 	Metrics             string
 	CreatedAt           int64
+	LabelId             int64
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -145,6 +148,7 @@ type RegressionModel struct {
 	MaxRuntime           int
 	Metrics              string
 	CreatedAt            int64
+	LabelId              int64
 	Mse                  float64
 	RSquared             float64
 	MeanResidualDeviance float64
