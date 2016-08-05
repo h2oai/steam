@@ -64,7 +64,7 @@ func newTest(t *testing.T) *test {
 
 	// Truncate database tables
 
-	if err := data.Destroy(dbOpts.Name, dbOpts.Username, dbOpts.SSLMode); err != nil {
+	if err := data.Destroy(dbOpts.Connection); err != nil {
 		t.Fatalf("Failed truncating database: %s", err)
 	}
 
