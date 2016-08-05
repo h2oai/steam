@@ -72,14 +72,14 @@ func newTest(t *testing.T) *test {
 
 	// Determine current directory
 
-	wd, err := filepath.Abs(filepath.Dir(workingDirectory))
+	wd, err := filepath.Abs(filepath.Dir(workingDirectory + "/"))
 	if err != nil {
 		t.Fatalf("Failed determining current directory: %s", err)
 	}
 
 	// Delete any remnant models in models directory
 
-	if err := os.RemoveAll(path.Join(wd, "model")); err != nil {
+	if err := os.RemoveAll(path.Join(wd, "var/master/model")); err != nil {
 		t.Fatalf("Failed removing old model directory: %v", err)
 	}
 
