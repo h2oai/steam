@@ -19,6 +19,15 @@ interface Props {
   openDeploy: Function
 }
 
+interface BinomialMetrics {
+  nobs: number,
+  MSE: number,
+  r2: number,
+  logloss: number,
+  Gini: number,
+  AUC: number
+}
+
 export default class BinomialModelTable extends React.Component<Props, any> {
   render() {
     return (
@@ -54,7 +63,7 @@ export default class BinomialModelTable extends React.Component<Props, any> {
         {this.props.items.map((model, i) => {
           let modelMetrics = JSON.parse(model.metrics);
           console.log(modelMetrics);
-          let trainingMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {});
+          let trainingMetrics: BinomialMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {}) as BinomialMetrics;
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
           let data = [];

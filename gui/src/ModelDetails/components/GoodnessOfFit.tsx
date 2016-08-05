@@ -52,7 +52,7 @@ export default class GoodnessOfFit extends React.Component<Props, any> {
     let comparisonTpr = _.get(comparisonModelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
     let data = [];
     tpr.map((val, i) => {
-      let newEntry = {};
+      let newEntry: {tpr?: number, fpr?: number, comparisonTpr?: number} = {};
       newEntry.tpr = val;
       newEntry.fpr = fpr[i];
       newEntry.comparisonTpr = comparisonTpr[i] || 0;

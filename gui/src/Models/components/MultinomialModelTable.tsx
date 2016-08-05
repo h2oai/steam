@@ -19,6 +19,13 @@ interface Props {
   openDeploy: Function
 }
 
+interface MultinomialMetrics {
+  nobs: number,
+  MSE: number,
+  r2: number,
+  logloss: number
+}
+
 export default class MultinomialModelTable extends React.Component<Props, any> {
   render() {
     return (
@@ -47,7 +54,7 @@ export default class MultinomialModelTable extends React.Component<Props, any> {
         </Row>
         {this.props.items.map((model, i) => {
           let modelMetrics = JSON.parse(model.metrics);
-          let trainingMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {});
+          let trainingMetrics: MultinomialMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {}) as MultinomialMetrics;
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
           let data = [];
@@ -107,6 +114,6 @@ export default class MultinomialModelTable extends React.Component<Props, any> {
           );
         })}
       </Table>
-    )
+    );
   }
 }

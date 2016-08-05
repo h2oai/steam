@@ -3,6 +3,7 @@
  */
 import * as React from 'react';
 import * as moment from 'moment';
+import * as _ from 'lodash';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
@@ -15,6 +16,13 @@ interface Props {
   items: any,
   projectId: number,
   openDeploy: Function
+}
+
+interface RegressionMetrics {
+  nobs: number,
+  mean_residual_deviance: number,
+  MSE: number,
+  r2: number
 }
 
 export default class RegressionModelTable extends React.Component<Props, any> {
@@ -46,7 +54,7 @@ export default class RegressionModelTable extends React.Component<Props, any> {
         {this.props.items.map((model, i) => {
           let modelMetrics = JSON.parse(model.metrics);
           console.log(modelMetrics);
-          let trainingMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {});
+          let trainingMetrics: RegressionMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {}) as RegressionMetrics;
           console.log(model.created_at);
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
