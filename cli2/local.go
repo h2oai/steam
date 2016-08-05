@@ -12,6 +12,7 @@ import (
 
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master"
+	"github.com/h2oai/steamY/master/data"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -136,7 +137,14 @@ func serveMaster(c *context) *cobra.Command {
 		yarnKeytab                string
 		dbName                    string
 		dbUserName                string
+		dbPassword                string
+		dbHost                    string
+		dbPort                    string
+		dbConnectionTimeout       string
 		dbSSLMode                 string
+		dbSSLCertPath             string
+		dbSSLKeyPath              string
+		dbSSLRootCertPath         string
 		superuserName             string
 		superuserPassword         string
 	)
@@ -180,9 +188,18 @@ func serveMaster(c *context) *cobra.Command {
 				yarnKeytab,
 			},
 			master.DBOpts{
-				dbName,
-				dbUserName,
-				dbSSLMode,
+				data.Connection{
+					dbName,
+					dbUserName,
+					dbPassword,
+					dbHost,
+					dbPort,
+					dbConnectionTimeout,
+					dbSSLMode,
+					dbSSLCertPath,
+					dbSSLKeyPath,
+					dbSSLRootCertPath,
+				},
 				superuserName,
 				superuserPassword,
 			},
@@ -203,9 +220,16 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
 	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.Yarn.Username, "Username to enable Kerberos")
 	cmd.Flags().StringVar(&yarnKeytab, "yarn-keytab", opts.Yarn.Keytab, "Keytab file to be used with Kerberos authentication")
-	cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Name, "Database name to use for application data storage")
-	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Username, "Database username to connect as")
-	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Connection.DbName, "Database name to use for application data storage (required)")
+	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Connection.User, "Database username (required)")
+	cmd.Flags().StringVar(&dbPassword, "db-password", opts.DB.Connection.Password, "Database password (optional)")
+	cmd.Flags().StringVar(&dbHost, "db-host", opts.DB.Connection.Host, "Database host (optional, defaults to localhost")
+	cmd.Flags().StringVar(&dbPort, "db-port", opts.DB.Connection.Port, "Database port (optional, defaults to 5432)")
+	cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DB.Connection.ConnectionTimeout, "Database connection timeout (optional)")
+	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.Connection.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DB.Connection.SSLCert, "Database connection SSL certificate path (optional)")
+	cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DB.Connection.SSLKey, "Database connection SSL key path (optional)")
+	cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DB.Connection.SSLRootCert, "Database connection SSL root certificate path (optional)")
 	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DB.SuperuserName, "Set superuser username (required for first-time-use only)")
 	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DB.SuperuserPassword, "Set superuser password (required for first-time-use only)")
 

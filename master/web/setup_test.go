@@ -57,9 +57,7 @@ func init() {
 
 func newTest(t *testing.T) *test {
 	dbOpts := driverDBOpts{
-		"steam",
-		"steam",
-		"disable",
+		data.Connection {DbName:"steam", User:"steam", SSLMode:"disable"}
 		superuser,
 		superuser,
 	}

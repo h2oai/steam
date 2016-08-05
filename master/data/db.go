@@ -315,10 +315,11 @@ type Datastore struct {
 	ManagePermissions map[int64]int64
 }
 
-func Create(name, username, sslmode, suname, supass string) (*Datastore, error) {
-	db, err := connect(username, name, sslmode)
+func Create(connection Connection, suname, supass string) (*Datastore, error) {
+	connectionString := createConnectionString(connection)
+	db, err := connect(connectionString)
 	if err != nil {
-		return nil, fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
+		return nil, fmt.Errorf("Failed connecting to database using %s: %s", connectionString, err)
 	}
 
 	primed, err := isPrimed(db)
@@ -368,21 +369,59 @@ func Create(name, username, sslmode, suname, supass string) (*Datastore, error) 
 	return ds, nil
 }
 
-func Destroy(name, username, sslmode string) error {
-	db, err := connect(username, name, sslmode)
+func Destroy(connection Connection) error {
+	connectionString := createConnectionString(connection)
+	db, err := connect(connectionString)
 	if err != nil {
-		return fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
+		return fmt.Errorf("Failed connecting to database using %s: %s", connectionString, err)
 	}
 	return truncate(db)
 }
 
-func connect(username, dbname, sslmode string) (*sql.DB, error) {
+type Connection struct {
+	DbName            string
+	User              string
+	Password          string
+	Host              string
+	Port              string
+	ConnectionTimeout string
+	SSLMode           string
+	SSLCert           string
+	SSLKey            string
+	SSLRootCert       string
+}
+
+func createConnectionString(c Connection) string {
+	s := fmt.Sprintf("dbname=%s", c.DbName)
+
+	m := map[string]string{
+		"user":            c.User,
+		"password":        c.Password,
+		"host":            c.Host,
+		"port":            c.Port,
+		"connect_timeout": c.ConnectionTimeout,
+		"sslmode":         c.SSLMode,
+		"sslcert":         c.SSLCert,
+		"sslkey":          c.SSLKey,
+		"sslrootcert":     c.SSLRootCert,
+	}
+
+	for k, v := range m {
+		if len(v) > 0 {
+			s = s + " " + k + "=" + v
+		}
+	}
+
+	return s
+}
+
+func connect(connection string) (*sql.DB, error) {
 
 	// FIXME logging need to be handled for testing
 	// log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
 
 	// Open connection
-	db, err := sql.Open("postgres", fmt.Sprintf("user=%s dbname=%s sslmode=%s", username, dbname, sslmode))
+	db, err := sql.Open("postgres", connection)
 	if err != nil {
 		return nil, fmt.Errorf("Database connection failed: %s", err)
 	}
