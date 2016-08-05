@@ -2,7 +2,7 @@
 
 echo "Building and testing pojo-server"
 (cd pojo-server && bash example.sh) || exit 1
-(cd pojo-server && sh test_suite.sh) || exit 1
+(cd pojo-server && bash test_suite.sh) || exit 1
 
 echo "Building and testing spam-detection-python"
 (cd spam-detection-python && bash example-python.sh) || exit 1
