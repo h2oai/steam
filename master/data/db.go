@@ -3161,7 +3161,7 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 			label on label.model_id = model.id
 		WHERE
 			model.project_id = $1 AND
-			id IN
+			model.id IN
 			(
 				SELECT DISTINCT
 					entity_id
@@ -3191,7 +3191,7 @@ func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model
 		FROM
 			model
 		LEFT OUTER JOIN
-			label on label.model_id = model.id
+			label ON label.model_id = model.id
 		WHERE
 			model.training_dataset_id = $1
 			OR
@@ -3477,11 +3477,14 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 
 	row := ds.db.QueryRow(`
 		SELECT
-			*
+			model.*,
+			label.id
 		FROM
 			model
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			id = $1
+			model.id = $1
 		`, modelId)
 	return ScanModel(row)
 }
