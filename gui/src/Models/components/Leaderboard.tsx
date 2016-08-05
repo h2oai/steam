@@ -14,6 +14,7 @@ import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import FilterDropdown from './FilterDropdown';
 import { getOrdinal } from '../../App/utils/getOrdinal';
+import ModelLabelSelect from './ModelLabelSelect';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
@@ -129,14 +130,6 @@ class Leaderboard extends React.Component<Props & DispatchProps, any> {
     this.props.deployModel(model.id, name);
   }
 
-  renderLabelOptions() {
-    return this.props.labels[this.props.projectId].map((label) => {
-      return (
-        <option key={label.id} value={label.id}>{label.name}</option>
-      );
-    });
-  }
-
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div ref="leaderboard" className="leaderboard">
@@ -201,9 +194,7 @@ class Leaderboard extends React.Component<Props & DispatchProps, any> {
                     <li><Link to={'/projects/' + this.props.projectId + '/models/' + item.id}><span><i className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                     <li className="labels"><span><i className="fa fa-tags"></i></span> label as
                         <span className="label-selector">
-                          <select name="labelSelect">
-                            {this.renderLabelOptions()}
-                          </select>
+                          <ModelLabelSelect projectId={this.props.projectId} modelId={item.id} labels={this.props.labels}/>
                         </span>
                     </li>
                     <li onClick={this.openDeploy.bind(this, item)}><span><i className="fa fa-arrow-up"></i></span> <span>deploy model</span></li>

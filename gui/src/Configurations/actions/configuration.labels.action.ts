@@ -105,7 +105,6 @@ export function deleteLabel(labelId: number) {
 
 export function receiveDeleteLabel(labelId) {
   return {
-    type: RECEIVE_DELETE_LABEL,
-
+    type: RECEIVE_DELETE_LABEL
   };
 };
