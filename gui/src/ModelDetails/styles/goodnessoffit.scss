@@ -1,13 +1,22 @@
 @import '../../variables.scss';
 
-.compare {
-  .details--value {
-    span:first-of-type {
-      color: $brand-blue;
-      margin-right: $small;
+.goodness-of-fit {
+  display: flex;
+  .roc-container {
+    margin: $medium;
+    svg {
+      height: 300px;
     }
-    span:last-of-type {
-      color: $brand-orange;
+  }
+  .compare {
+    .details--value {
+      span:first-of-type {
+        color: $brand-blue;
+        margin-right: $small;
+      }
+      span:last-of-type {
+        color: $brand-orange;
+      }
     }
   }
 }

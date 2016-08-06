@@ -182,8 +182,8 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state): any {
   return {
-    profile: state.profile,
-    project: state.projects.project
+    project: state.projects.project,
+    profile: state.profile
   };
 }
 
