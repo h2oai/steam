@@ -57,16 +57,14 @@ func init() {
 
 func newTest(t *testing.T) *test {
 	dbOpts := driverDBOpts{
-		"steam",
-		"steam",
-		"disable",
+		data.Connection{DbName: "steam", User: "steam", SSLMode: "disable"},
 		superuser,
 		superuser,
 	}
 
 	// Truncate database tables
 
-	if err := data.Destroy(dbOpts.Name, dbOpts.Username, dbOpts.SSLMode); err != nil {
+	if err := data.Destroy(dbOpts.Connection); err != nil {
 		t.Fatalf("Failed truncating database: %s", err)
 	}
 

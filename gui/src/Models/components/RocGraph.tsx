@@ -1,8 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+const rocChart: any = require('roc-chart');
+
 import '../styles/rocgraph.scss';
-const visComponents: any = require('vis-components');
-const rocChart = visComponents.rocChart;
+import { BRAND_ORANGE, BRAND_BLUE } from '../../App/utils/colors';
 
 interface Props {
   data: any[],
@@ -26,23 +27,34 @@ export default class RocGraph extends React.Component<Props, any> {
     }
   }
 
+  componentWillUpdate(nextProps) {
+    let cfg = {
+      margin: {top: 2, right: 2, bottom: 2, left: 2},
+      width: '100%',
+      height: '100%',
+      interpolationMode: 'basis',
+      smooth: true,
+      animate: false,
+      hideAxes: true,
+      hideAUCText: true,
+      curveColors: [BRAND_BLUE, BRAND_ORANGE]
+    };
+    this._mountNode.innerHTML = '';
+    rocChart.plot(this._mountNode, nextProps.data, this.props.config || cfg);
+  }
+
   renderGraph() {
     let cfg = {
-        margin: { top: 2, right: 2, bottom: 2, left: 2 },
-        width: 60,
-        height: 60,
-        interpolationMode: 'basis',
-        smooth: true,
-        fpr: 'fpr',
-        tprVariables: [{
-          name: 'tpr',
-          label: 'tpr'
-        }],
-        animate: false,
-        hideAxes: true,
-        hideAUCText: true
+      margin: {top: 2, right: 2, bottom: 2, left: 2},
+      width: '100%',
+      height: '100%',
+      interpolationMode: 'basis',
+      smooth: true,
+      animate: false,
+      hideAxes: true,
+      hideAUCText: true,
+      curveColors: [BRAND_BLUE]
     };
-
     rocChart.plot(this._mountNode, this.props.data, this.props.config || cfg);
   }
 

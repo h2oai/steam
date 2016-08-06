@@ -43,6 +43,8 @@ export interface BinomialModel {
   
   label_id: number
   
+  label_name: string
+  
   mse: number
   
   r_squared: number
@@ -257,6 +259,8 @@ export interface Model {
   
   label_id: number
   
+  label_name: string
+  
 }
 
 export interface MultinomialModel {
@@ -292,6 +296,8 @@ export interface MultinomialModel {
   created_at: number
   
   label_id: number
+  
+  label_name: string
   
   mse: number
   
@@ -358,6 +364,8 @@ export interface RegressionModel {
   created_at: number
   
   label_id: number
+  
+  label_name: string
   
   mse: number
   

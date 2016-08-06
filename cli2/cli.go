@@ -161,6 +161,7 @@ func buildModel(c *context) *cobra.Command {
 				fmt.Sprintf("Metrics:\t%v\t", model.Metrics),                         // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
 				fmt.Sprintf("LabelId:\t%v\t", model.LabelId),                         // No description available
+				fmt.Sprintf("LabelName:\t%v\t", model.LabelName),                     // No description available
 			}
 			c.printt("Attribute\tValue\t", lines)
 			return
@@ -1067,7 +1068,7 @@ func findModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -1084,6 +1085,7 @@ func findModels(c *context) *cobra.Command {
 					e.Metrics,             // No description available
 					e.CreatedAt,           // No description available
 					e.LabelId,             // No description available
+					e.LabelName,           // No description available
 					e.Mse,                 // No description available
 					e.RSquared,            // No description available
 					e.Logloss,             // No description available
@@ -1091,7 +1093,7 @@ func findModels(c *context) *cobra.Command {
 					e.Gini,                // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tMse\tRSquared\tLogloss\tAuc\tGini\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tLogloss\tAuc\tGini\t", lines)
 			return
 		}
 		if multinomial { // FindModelsMultinomial
@@ -1111,7 +1113,7 @@ func findModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -1128,12 +1130,13 @@ func findModels(c *context) *cobra.Command {
 					e.Metrics,             // No description available
 					e.CreatedAt,           // No description available
 					e.LabelId,             // No description available
+					e.LabelName,           // No description available
 					e.Mse,                 // No description available
 					e.RSquared,            // No description available
 					e.Logloss,             // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tMse\tRSquared\tLogloss\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tLogloss\t", lines)
 			return
 		}
 		if regression { // FindModelsRegression
@@ -1153,7 +1156,7 @@ func findModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                   // No description available
 					e.TrainingDatasetId,    // No description available
 					e.ValidationDatasetId,  // No description available
@@ -1170,12 +1173,13 @@ func findModels(c *context) *cobra.Command {
 					e.Metrics,              // No description available
 					e.CreatedAt,            // No description available
 					e.LabelId,              // No description available
+					e.LabelName,            // No description available
 					e.Mse,                  // No description available
 					e.RSquared,             // No description available
 					e.MeanResidualDeviance, // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tMse\tRSquared\tMeanResidualDeviance\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tMeanResidualDeviance\t", lines)
 			return
 		}
 	})
@@ -2289,6 +2293,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("Metrics:\t%v\t", model.Metrics),                         // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
 				fmt.Sprintf("LabelId:\t%v\t", model.LabelId),                         // No description available
+				fmt.Sprintf("LabelName:\t%v\t", model.LabelName),                     // No description available
 				fmt.Sprintf("Mse:\t%v\t", model.Mse),                                 // No description available
 				fmt.Sprintf("RSquared:\t%v\t", model.RSquared),                       // No description available
 				fmt.Sprintf("Logloss:\t%v\t", model.Logloss),                         // No description available
@@ -2324,6 +2329,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("Metrics:\t%v\t", model.Metrics),                         // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
 				fmt.Sprintf("LabelId:\t%v\t", model.LabelId),                         // No description available
+				fmt.Sprintf("LabelName:\t%v\t", model.LabelName),                     // No description available
 				fmt.Sprintf("Mse:\t%v\t", model.Mse),                                 // No description available
 				fmt.Sprintf("RSquared:\t%v\t", model.RSquared),                       // No description available
 				fmt.Sprintf("Logloss:\t%v\t", model.Logloss),                         // No description available
@@ -2357,6 +2363,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("Metrics:\t%v\t", model.Metrics),                           // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                       // No description available
 				fmt.Sprintf("LabelId:\t%v\t", model.LabelId),                           // No description available
+				fmt.Sprintf("LabelName:\t%v\t", model.LabelName),                       // No description available
 				fmt.Sprintf("Mse:\t%v\t", model.Mse),                                   // No description available
 				fmt.Sprintf("RSquared:\t%v\t", model.RSquared),                         // No description available
 				fmt.Sprintf("MeanResidualDeviance:\t%v\t", model.MeanResidualDeviance), // No description available
@@ -2390,6 +2397,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("Metrics:\t%v\t", model.Metrics),                         // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
 				fmt.Sprintf("LabelId:\t%v\t", model.LabelId),                         // No description available
+				fmt.Sprintf("LabelName:\t%v\t", model.LabelName),                     // No description available
 			}
 			c.printt("Attribute\tValue\t", lines)
 			return
@@ -2443,7 +2451,7 @@ func getModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -2460,9 +2468,10 @@ func getModels(c *context) *cobra.Command {
 					e.Metrics,             // No description available
 					e.CreatedAt,           // No description available
 					e.LabelId,             // No description available
+					e.LabelName,           // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tLabelName\t", lines)
 			return
 		}
 		if true { // default
@@ -2479,7 +2488,7 @@ func getModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -2496,9 +2505,10 @@ func getModels(c *context) *cobra.Command {
 					e.Metrics,             // No description available
 					e.CreatedAt,           // No description available
 					e.LabelId,             // No description available
+					e.LabelName,           // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tMetrics\tCreatedAt\tLabelId\tLabelName\t", lines)
 			return
 		}
 	})

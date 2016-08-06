@@ -84,6 +84,7 @@ type Model struct {
 	Metrics             string
 	CreatedAt           int64
 	LabelId             int64
+	LabelName           string
 }
 
 type BinomialModel struct {
@@ -103,6 +104,7 @@ type BinomialModel struct {
 	Metrics             string
 	CreatedAt           int64
 	LabelId             int64
+	LabelName           string
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -127,6 +129,7 @@ type MultinomialModel struct {
 	Metrics             string
 	CreatedAt           int64
 	LabelId             int64
+	LabelName           string
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -149,6 +152,7 @@ type RegressionModel struct {
 	Metrics              string
 	CreatedAt            int64
 	LabelId              int64
+	LabelName            string
 	Mse                  float64
 	RSquared             float64
 	MeanResidualDeviance float64

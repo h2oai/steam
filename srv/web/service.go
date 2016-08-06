@@ -31,6 +31,7 @@ type BinomialModel struct {
 	Metrics             string  `json:"metrics"`
 	CreatedAt           int64   `json:"created_at"`
 	LabelId             int64   `json:"label_id"`
+	LabelName           string  `json:"label_name"`
 	Mse                 float64 `json:"mse"`
 	RSquared            float64 `json:"r_squared"`
 	Logloss             float64 `json:"logloss"`
@@ -151,6 +152,7 @@ type Model struct {
 	Metrics             string `json:"metrics"`
 	CreatedAt           int64  `json:"created_at"`
 	LabelId             int64  `json:"label_id"`
+	LabelName           string `json:"label_name"`
 }
 
 type MultinomialModel struct {
@@ -170,6 +172,7 @@ type MultinomialModel struct {
 	Metrics             string  `json:"metrics"`
 	CreatedAt           int64   `json:"created_at"`
 	LabelId             int64   `json:"label_id"`
+	LabelName           string  `json:"label_name"`
 	Mse                 float64 `json:"mse"`
 	RSquared            float64 `json:"r_squared"`
 	Logloss             float64 `json:"logloss"`
@@ -206,6 +209,7 @@ type RegressionModel struct {
 	Metrics              string  `json:"metrics"`
 	CreatedAt            int64   `json:"created_at"`
 	LabelId              int64   `json:"label_id"`
+	LabelName            string  `json:"label_name"`
 	Mse                  float64 `json:"mse"`
 	RSquared             float64 `json:"r_squared"`
 	MeanResidualDeviance float64 `json:"mean_residual_deviance"`
