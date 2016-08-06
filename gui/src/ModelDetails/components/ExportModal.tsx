@@ -53,7 +53,6 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
   }
 
   render(): React.ReactElement<DefaultModal> {
-    console.log(this.state);
     return (
       <DefaultModal className="export-modal" open={this.props.open}>
         <header>
