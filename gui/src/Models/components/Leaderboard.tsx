@@ -9,6 +9,7 @@ import Pagination from '../components/Pagination';
 import BinomialModelTable from './BinomialModelTable';
 import MultinomialModelTable from './MultinomialModelTable';
 import RegressionModelTable from './RegressionModelTable';
+import ImportModelsModal from './ImportModelsModal';
 import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel } from '../actions/leaderboard.actions';
 import '../styles/leaderboard.scss';
 import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
@@ -22,7 +23,8 @@ interface Props {
   modelCategory: string,
   onFilter: Function,
   sortCriteria: string[],
-  labels: any[]
+  labels: any[],
+  fetchLeaderboard: Function
 }
 
 interface DispatchProps {
@@ -42,6 +44,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
     super(props);
     this.state = {
       isDeployOpen: false,
+      isImportModelsOpen: false,
       openDeployModel: null,
       currentPage: 0,
       filters: {
@@ -64,6 +67,18 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
     this.setState({
       isDeployOpen: true,
       openDeployModel: model
+    });
+  }
+
+  openImportModels() {
+    this.setState({
+      isImportModelsOpen: true
+    });
+  }
+
+  closeImportModels() {
+    this.setState({
+      isImportModelsOpen: false
     });
   }
 
@@ -118,12 +133,13 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div ref="leaderboard" className="leaderboard">
+        <ImportModelsModal projectId={this.props.projectId} open={this.state.isImportModelsOpen} onCancel={this.closeImportModels.bind(this)} fetchLeaderboard={this.props.fetchLeaderboard} modelCategory={this.props.modelCategory}/>
         <Deploy open={this.state.isDeployOpen} onCancel={this.closeHandler} model={this.state.openDeployModel}
                 onDeploy={this.onDeploy.bind(this)}></Deploy>
         <PageHeader>
           <span>Models</span>
           <div className="buttons">
-            <button className="default">Import Model</button>
+            <button className="default" onClick={this.openImportModels.bind(this)}>Import Models</button>
           </div>
         </PageHeader>
         <div className="filter">

@@ -159,15 +159,25 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   };
 }
 
+export function importModelsFromCluster(clusterId: number, projectId: number, models: string[]) {
+  return (dispatch) => {
+    let promises = [];
+    return new Promise((resolve, reject) => {
+      models.map((modelName) => {
+        promises.push(dispatch(importModelFromCluster(clusterId, projectId, modelName)));
+      });
+      Promise.all(promises).then(() => {
+        resolve(projectId);
+      });
+    });
+  };
+}
+
 export function createProjectAndImportModelsFromCluster(projectName: string, clusterId: number, modelCategory: string, models: string[]) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
-      let promises = [];
       dispatch(createProject(projectName, modelCategory)).then((projectId) => {
-        models.map((modelName) => {
-          promises.push(dispatch(importModelFromCluster(clusterId, projectId, modelName)));
-        });
-        Promise.all(promises).then(() => {
+        dispatch(importModelsFromCluster(clusterId, projectId, models)).then(() => {
           resolve(projectId);
         });
       });
