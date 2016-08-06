@@ -36,8 +36,14 @@
     }
     .actions {
       a.default {
-        margin-right: $small;
+        margin-right: $xsmall;
       }
+      a {
+        margin-top: $xsmall;
+      }
+    }
+    .package-select {
+      margin: $small 0;
     }
   }
 }

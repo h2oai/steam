@@ -92,7 +92,7 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
               </div>
               <div>
                 <div>Choose a preprocessing script package</div>
-                <div>
+                <div className="package-select">
                   <select ref="packageSelect">
                     <option value="">None (Default)</option>
                     {this.props.packages.map((script, i) => {
