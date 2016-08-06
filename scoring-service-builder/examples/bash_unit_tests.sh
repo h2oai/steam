@@ -7,10 +7,7 @@ function assert_equals_string  { # assert_equals_string("echo hej", "hej")
   cmd="$2"
   expected="$3"
   reference="$4"
-#  echo ">>> cmd $cmd"
-#  res=`$cmd`
   res=`bash -c "$cmd"`
-#  echo ">>> res $res"
   if [ "$res" != "$expected" ] 
   then
     echo
@@ -19,19 +16,25 @@ function assert_equals_string  { # assert_equals_string("echo hej", "hej")
     echo "expected: $expected"
     echo "found: $res"
     echo "in file $reference"
-#    exit 1
     echo
     have_failed=1
   else 
     echo "Test OK: $testname"
   fi
-#  echo ""
+}
+
+function pre_tests { # run this before test are done with "$0" as argument
+  filename="$0"
+  have_failed=0
+  echo
+  echo "Test suite starting: $filename" at `date`
+  echo
 }
 
 function post_tests { # run this after tests are done with "$0" as argument
   filename="$0"
   echo
-  echo "Test suite done: $filename"
+  echo "Test suite done: $filename" at `date`
   if [ $have_failed == 1 ]
   then
     echo "There was at least one failure"

@@ -2,9 +2,11 @@
 
 source ../bash_unit_tests.sh
 
-have_failed=0
+pre_tests $0
 
 # start server
+nc -z localhost 55001 && echo "Something already running on port 55001" && exit 1
+
 echo "Starting server"
 java -jar ../jetty-runner-8.1.14.v20131031.jar --port 55001 example.war & 
 PID=$!
