@@ -7,14 +7,16 @@
     align-items: stretch;
     flex: 1;
     section {
-      display: flex;
-      div:first-of-type {
-        flex-basis: $base-grid-unit * 3;
-      }
       form {
         display: flex;
         flex-direction: column;
         font-family: $font-text;
+        .form-option {
+          div:first-of-type {
+            flex-basis: $base-grid-unit * 3;
+          }
+          display: flex;
+        }
         fieldset {
           padding: $xsmall;
           border-radius: 5px;
