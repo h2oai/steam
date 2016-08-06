@@ -57,7 +57,9 @@ export class Models extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="projects">
         <Leaderboard items={this.props.leaderboard} projectId={parseInt(this.props.params.projectid, 10)}
-                     modelCategory={this.state.modelCategory} sortCriteria={this.props.sortCriteria} onFilter={this.onFilter.bind(this)} deployModel={this.props.deployModel}></Leaderboard>
+                     modelCategory={this.state.modelCategory} sortCriteria={this.props.sortCriteria}
+                     onFilter={this.onFilter.bind(this)} deployModel={this.props.deployModel}
+                     fetchLeaderboard={this.props.fetchLeaderboard}></Leaderboard>
       </div>
     );
   }
