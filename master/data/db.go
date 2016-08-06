@@ -3156,7 +3156,8 @@ func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, 
 	rows, err := ds.db.Query(`
 		SELECT
 			model.*,
-			label.id
+			label.id,
+			label.name
 		FROM
 			model
 		LEFT OUTER JOIN
@@ -3193,7 +3194,8 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 	rows, err := ds.db.Query(`
 		SELECT
 			model.*,
-			label.id
+			label.id,
+			label.name
 		FROM
 			model
 		LEFT OUTER JOIN
@@ -3226,7 +3228,8 @@ func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model
 	rows, err := ds.db.Query(`
 		SELECT
 			model.*,
-			label.id
+			label.id,
+			label.name
 		FROM
 			model
 		LEFT OUTER JOIN
@@ -3266,6 +3269,7 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 		SELECT
 			model.*,
 			label.id,
+			label.name,
 			bm.mse, bm.r_squared, bm.logloss, bm.auc, bm.gini
 		FROM
 			model
@@ -3315,6 +3319,7 @@ func (ds *Datastore) ReadBinomialModel(pz az.Principal, modelId int64) (Binomial
 		SELECT
 			model.*, 
 			label.id,
+			label.name,
 			bm.mse, bm.r_squared, bm.logloss, bm.auc, bm.gini
 		FROM
 			model
@@ -3350,6 +3355,7 @@ func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, nam
 		SELECT
 			model.*,
 			label.id,
+			label.name,
 			mm.mse, mm.r_squared, mm.logloss
 		FROM
 			model
@@ -3399,6 +3405,7 @@ func (ds *Datastore) ReadMultinomialModel(pz az.Principal, modelId int64) (Multi
 		SELECT
 			model.*, 
 			label.id,
+			label.name,
 			mm.mse, mm.r_squared, mm.logloss
 		FROM
 			model
@@ -3434,6 +3441,7 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 		SELECT
 			model.*,
 			label.id,
+			label.name,
 			rm.mse, rm.r_squared, rm.mean_residual_deviance
 		FROM
 			model
@@ -3483,6 +3491,7 @@ func (ds *Datastore) ReadRegressionModel(pz az.Principal, modelId int64) (Regres
 		SELECT
 			model.*, 
 			label.id,
+			label.name,
 			rm.mse, rm.r_squared, rm.mean_residual_deviance
 		FROM
 			model
@@ -3517,7 +3526,8 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 	row := ds.db.QueryRow(`
 		SELECT
 			model.*,
-			label.id
+			label.id,
+			label.name
 		FROM
 			model
 		LEFT OUTER JOIN

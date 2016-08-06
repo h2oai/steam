@@ -810,6 +810,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 		sql.NullInt64{0, false},
+		sql.NullString{"", false},
 	})
 	if err != nil {
 		return nil, err
@@ -895,6 +896,7 @@ func h2oToModel(model *bindings.ModelSchema) data.Model {
 		"",
 		time.Now(),
 		sql.NullInt64{0, false},
+		sql.NullString{"", false},
 	}
 }
 
@@ -1118,6 +1120,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
 		sql.NullInt64{0, false},
+		sql.NullString{"", false},
 	})
 	if err != nil {
 		return 0, err
@@ -2269,11 +2272,18 @@ func toYarnCluster(c data.YarnCluster) *web.YarnCluster {
 	}
 }
 
-func toLabelId(maybeId sql.NullInt64) int64 {
+func fromNullInt64(maybeId sql.NullInt64) int64 {
 	if maybeId.Valid {
 		return maybeId.Int64
 	}
 	return -1
+}
+
+func fromNullString(maybeId sql.NullString) string {
+	if maybeId.Valid {
+		return maybeId.String
+	}
+	return ""
 }
 
 func toModel(m data.Model) *web.Model {
@@ -2293,7 +2303,8 @@ func toModel(m data.Model) *web.Model {
 		int(m.MaxRunTime), // FIXME change db field to int
 		m.Metrics,
 		toTimestamp(m.Created),
-		toLabelId(m.LabelId),
+		fromNullInt64(m.LabelId),
+		fromNullString(m.LabelName),
 	}
 }
 
@@ -2314,7 +2325,8 @@ func toBinomialModel(model data.BinomialModel) *web.BinomialModel {
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
-		toLabelId(model.LabelId),
+		fromNullInt64(model.LabelId),
+		fromNullString(model.LabelName),
 		model.Mse,
 		model.RSquared,
 		model.Logloss,
@@ -2348,7 +2360,8 @@ func toMultinomialModel(model data.MultinomialModel) *web.MultinomialModel {
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
-		toLabelId(model.LabelId),
+		fromNullInt64(model.LabelId),
+		fromNullString(model.LabelName),
 		model.Mse,
 		model.RSquared,
 		model.Logloss,
@@ -2380,7 +2393,8 @@ func toRegressionModel(model data.RegressionModel) *web.RegressionModel {
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
-		toLabelId(model.LabelId),
+		fromNullInt64(model.LabelId),
+		fromNullString(model.LabelName),
 		model.Mse,
 		model.RSquared,
 		model.MeanResidualDeviance,
