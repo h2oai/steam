@@ -64,7 +64,6 @@ export default class MultinomialModelTable extends React.Component<Props, any> {
               fpr: fpr[i]
             });
           });
-          console.log(trainingMetrics);
           return (
             <Row key={i}>
               <Cell></Cell>

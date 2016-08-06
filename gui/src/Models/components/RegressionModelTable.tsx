@@ -53,9 +53,7 @@ export default class RegressionModelTable extends React.Component<Props, any> {
         </Row>
         {this.props.items.map((model, i) => {
           let modelMetrics = JSON.parse(model.metrics);
-          console.log(modelMetrics);
           let trainingMetrics: RegressionMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {}) as RegressionMetrics;
-          console.log(model.created_at);
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
           let data = [];
