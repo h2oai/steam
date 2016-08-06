@@ -23,6 +23,9 @@ export default class ModelLabelSelect extends React.Component<Props, any> {
     }
   }
   render(): React.ReactElement<HTMLSelectElement> {
+    if (this.props.labels[this.props.projectId]) {
+      return <select name="labelSelect"><option value={-1}></option></select>;
+    }
     return (
       <select name="labelSelect" onChange={this.onChangeHandler.bind(this)} value={_.find(this.props.labels[this.props.projectId], {model_id: this.props.modelId}) ? _.find(this.props.labels[this.props.projectId], {model_id: this.props.modelId}).id : -1}>
         <option value={-1}></option>
