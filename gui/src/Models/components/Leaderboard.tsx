@@ -9,7 +9,7 @@ import Pagination from '../components/Pagination';
 import BinomialModelTable from './BinomialModelTable';
 import MultinomialModelTable from './MultinomialModelTable';
 import RegressionModelTable from './RegressionModelTable';
-import { MAX_ITEMS } from '../actions/leaderboard.actions';
+import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel } from '../actions/leaderboard.actions';
 import '../styles/leaderboard.scss';
 import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
 import { bindActionCreators } from 'redux';
@@ -22,22 +22,24 @@ interface Props {
   modelCategory: string,
   onFilter: Function,
   sortCriteria: string[],
-  labels: any[],
-  fetchLabels: Function
+  labels: any[]
 }
 
 interface DispatchProps {
+  fetchLabels: Function,
+  linkLabelWithModel: Function,
+  unlinkLabelFromModel: Function
 }
 
-class Leaderboard extends React.Component<Props & DispatchProps, any> {
+export class Leaderboard extends React.Component<Props & DispatchProps, any> {
   refs: {
     [key: string]: Element
     filterModels: HTMLInputElement
   };
   sampleData = {};
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       isDeployOpen: false,
       openDeployModel: null,
@@ -49,6 +51,7 @@ class Leaderboard extends React.Component<Props & DispatchProps, any> {
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
+    this.onChangeHandler = this.onChangeHandler.bind(this);
   }
 
   componentWillMount() {
@@ -100,6 +103,18 @@ class Leaderboard extends React.Component<Props & DispatchProps, any> {
     this.props.deployModel(model.id, name);
   }
 
+  onChangeHandler(labelId, modelId, isUnlink) {
+    if (isUnlink === true) {
+      this.props.unlinkLabelFromModel(labelId, modelId).then(() => {
+        this.props.fetchLabels(this.props.projectId);
+      });
+    } else {
+      this.props.linkLabelWithModel(labelId, modelId).then(() => {
+        this.props.fetchLabels(this.props.projectId);
+      });
+    }
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div ref="leaderboard" className="leaderboard">
@@ -117,15 +132,15 @@ class Leaderboard extends React.Component<Props & DispatchProps, any> {
         {this.props.modelCategory === 'binomial' ?
           <BinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                               items={this.props.items} projectId={this.props.projectId}
-                              openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}/> : null}
+                              openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
         {this.props.modelCategory === 'multinomial' ?
           <MultinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                                  items={this.props.items} projectId={this.props.projectId}
-                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}/> : null}
+                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
         {this.props.modelCategory === 'regression' ?
           <RegressionModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                                 items={this.props.items} projectId={this.props.projectId}
-                                openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}/> : null}
+                                openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
         <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)}
                     onPageForward={this.onPageForward.bind(this)}></Pagination>
       </div>
@@ -142,6 +157,8 @@ function mapStateToProps(state: any): any {
 function mapDispatchToProps(dispatch) {
   return {
     fetchLabels: bindActionCreators(fetchLabels, dispatch),
+    linkLabelWithModel: bindActionCreators(linkLabelWithModel, dispatch),
+    unlinkLabelFromModel: bindActionCreators(unlinkLabelFromModel, dispatch)
   };
 }
 

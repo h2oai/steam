@@ -34,7 +34,7 @@ export default class RocGraph extends React.Component<Props, any> {
       height: '100%',
       interpolationMode: 'basis',
       smooth: true,
-      animate: false,
+      animate: undefined,
       hideAxes: true,
       hideAUCText: true,
       curveColors: [BRAND_BLUE, BRAND_ORANGE]

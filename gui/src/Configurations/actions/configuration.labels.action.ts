@@ -32,7 +32,7 @@ export function receiveLabels(labels: any[], projectId: number) {
     projectId,
     labels
   };
-};
+}
 
 export function createLabel(projectId: number, name: string, description: string) {
   return (dispatch) => {
@@ -59,7 +59,7 @@ export function receiveCreateLabel(id: number, projectId: number, name: string, 
       description
     }
   };
-};
+}
 
 export function updateLabel(labelId: number, projectId: number, name: string, description: string) {
   return (dispatch) => {
@@ -86,7 +86,7 @@ export function receiveUpdateLabel(id: number, projectId: number, name: string, 
       description
     }
   };
-};
+}
 
 export function deleteLabel(labelId: number) {
   return (dispatch) => {
@@ -107,4 +107,4 @@ export function receiveDeleteLabel(labelId) {
   return {
     type: RECEIVE_DELETE_LABEL
   };
-};
+}

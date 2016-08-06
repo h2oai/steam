@@ -11,13 +11,18 @@ import FilterDropdown from './FilterDropdown';
 import RocGraph from './RocGraph';
 import ModelLabelSelect from './ModelLabelSelect';
 import { Link } from 'react-router';
+import { Label } from '../../Proxy/Proxy';
 
 interface Props {
   onFilter: Function,
   sortCriteria: string[],
   items: any,
   projectId: number,
-  openDeploy: Function
+  openDeploy: Function,
+  onChangeHandler: Function,
+  labels: {
+    [projectId: number]: Label[]
+  }
 }
 
 interface BinomialMetrics {
@@ -118,8 +123,7 @@ export default class BinomialModelTable extends React.Component<Props, any> {
                     className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                   <li className="labels"><span><i className="fa fa-tags"></i></span> label as
                     <span className="label-selector">
-                      <ModelLabelSelect projectId={this.props.projectId} modelId={model.id}
-                                        labels={this.props.labels}/>
+                        <ModelLabelSelect projectId={this.props.projectId} modelId={model.id} labels={this.props.labels} onChangeHandler={this.props.onChangeHandler}/>
                     </span>
                   </li>
                   <li onClick={this.props.openDeploy.bind(this, model)}><span><i className="fa fa-arrow-up"></i></span>
@@ -128,7 +132,7 @@ export default class BinomialModelTable extends React.Component<Props, any> {
               </Cell>
             </Row>
           );
-        })}
+        }, this)}
       </Table>
     );
   }
