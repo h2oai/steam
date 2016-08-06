@@ -1,0 +1,15 @@
+# Summary
+
+* [Steam Standalone Installation and Setup](Installation_and_Setup.md)
+	* [Requirements](Installation_and_Setup.md#requirements)
+		* [Optional](Installation_and_Setup.md#optional)
+	* [Starting Steam](Installation_and_Setup.md#startingsteam)
+		* [Adding Roles, Workgroups, and Users](Installation_and_Setup.md#adding)
+	* [Starting H2O and Running a Model](Installation_and_Setup.md#startingh2o)
+		* [Start H2O](Installation_and_Setup.md#starth2o)
+		* [Build a Model](Installation_and_Setup.md#buildmodel)
+	* [Creating a Steam Project](Installation_and_Setup.md#createsteamproject)
+	* [Deploying a Model in Steam](Installation_and_Setup.md#deploymodel)
+	* [Making Predictions](Installation_and_Setup.md#makepredictions)
+	* [Stopping Steam](Installation_and_Setup.md#stopsteam)
+	* [What's Next?](Installation_and_Setup.md#next)
