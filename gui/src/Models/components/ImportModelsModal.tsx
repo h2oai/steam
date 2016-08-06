@@ -55,7 +55,6 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   importModelsFromCluster(event) {
     event.preventDefault();
     let inputs = event.target.querySelectorAll('input:checked');
-    console.log(inputs);
     let models = [];
     for (var i = 0; i < inputs.length; i++) {
       models.push(inputs[i].value);
@@ -67,7 +66,6 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   }
 
   render() {
-    console.log(this.props.models);
     return (
       <DefaultModal className="import-modal" open={this.props.open}>
         <PageHeader>IMPORT MODELS</PageHeader>
