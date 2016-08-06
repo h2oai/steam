@@ -170,6 +170,9 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                 })
                 }
               </ul>
+              <div className="logout">
+                <i className="fa fa-logout"/>
+              </div>
             </div>
           </nav>
         </Sidebar>
