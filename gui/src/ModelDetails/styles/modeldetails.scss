@@ -36,5 +36,9 @@
     font-size: 1em;
     border-bottom: $rule-solid-thick;
     background: $brand-white;
+    &.selected {
+      color: $brand-orange;
+      border-color: $brand-orange;
+    }
   }
 }

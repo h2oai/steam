@@ -8,7 +8,6 @@ import * as _ from 'lodash';
 import Collapsible from './components/Collapsible';
 import ModelOverview from './components/ModelOverview';
 import GoodnessOfFit from './components/GoodnessOfFit';
-import VariableImportance from './components/VariableImportance';
 import PageHeader from '../Projects/components/PageHeader';
 import ExportModal from './components/ExportModal';
 import Deploy from '../Models/components/Deploy';
@@ -181,7 +180,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
             <button className="default" onClick={this.deployModel.bind(this)}>Deploy Model</button>
           </div>
           <div className="comparison-selection">
-            <span><span>compared to:</span><button className="model-selection-button"
+            <span><span>compared to:</span><button className={classNames('model-selection-button', {selected: this.state.comparisonModel})}
                                                    onClick={this.openComparisonModal.bind(this)}>{this.state.comparisonModel ? this.state.comparisonModel.name : 'SELECT MODEL FOR COMPARISON'}</button></span>
           </div>
         </PageHeader>

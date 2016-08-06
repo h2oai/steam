@@ -9,20 +9,8 @@ import Pagination from '../components/Pagination';
 import BinomialModelTable from './BinomialModelTable';
 import MultinomialModelTable from './MultinomialModelTable';
 import RegressionModelTable from './RegressionModelTable';
-import '../styles/leaderboard.scss';
-
-// sample data
-import { deeplearningTrain } from '../data/deeplearningTrain';
-import { deeplearningValidation } from '../data/deeplearningValidation';
-import { drfTrain } from '../data/drfTrain';
-import { drfValidation } from '../data/drfValidation';
-import { gbmTrain } from '../data/gbmTrain';
-import { gbmValidation } from '../data/gbmValidation';
-import { glmTrain } from '../data/glmTrain';
-import { glmValidation } from '../data/glmValidation';
-import { naivebayesTrain } from '../data/naivebayesTrain';
-import { naivebayesValidation } from '../data/naivebayesValidation';
 import { MAX_ITEMS } from '../actions/leaderboard.actions';
+import '../styles/leaderboard.scss';
 
 interface Props {
   items: any[],
@@ -56,18 +44,6 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
-    this.sampleData = {
-      deeplearningTrain,
-      deeplearningValidation,
-      drfTrain,
-      drfValidation,
-      gbmTrain,
-      gbmValidation,
-      glmTrain,
-      glmValidation,
-      naivebayesTrain,
-      naivebayesValidation
-    };
   }
 
   openDeploy(model): void {
