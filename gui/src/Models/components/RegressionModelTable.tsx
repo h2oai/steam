@@ -8,14 +8,20 @@ import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import FilterDropdown from './FilterDropdown';
+import ModelLabelSelect from './ModelLabelSelect';
 import { Link } from 'react-router';
+import { Label } from '../../Proxy/Proxy';
 
 interface Props {
   onFilter: Function,
   sortCriteria: string[],
   items: any,
   projectId: number,
-  openDeploy: Function
+  openDeploy: Function,
+  onChangeHandler: Function,
+  labels: {
+    [projectId: number]: Label[]
+  }
 }
 
 interface RegressionMetrics {
@@ -97,11 +103,8 @@ export default class RegressionModelTable extends React.Component<Props, any> {
                     className="fa fa-eye"></i></span><span>view model details</span></Link></li>
                   <li className="labels"><span><i className="fa fa-tags"></i></span> label as
                         <span className="label-selector">
-                          <select name="labelSelect">
-                            <option value="prod">test</option>
-                            <option value="test">stage</option>
-                            <option value="prod">prod</option>
-                          </select>
+                          <ModelLabelSelect projectId={this.props.projectId} modelId={model.id}
+                                            labels={this.props.labels} onChangeHandler={this.props.onChangeHandler}/>
                         </span>
                   </li>
                   <li onClick={this.props.openDeploy.bind(this, model)}><span><i className="fa fa-arrow-up"></i></span>

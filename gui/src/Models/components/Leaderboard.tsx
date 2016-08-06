@@ -9,8 +9,11 @@ import Pagination from '../components/Pagination';
 import BinomialModelTable from './BinomialModelTable';
 import MultinomialModelTable from './MultinomialModelTable';
 import RegressionModelTable from './RegressionModelTable';
-import { MAX_ITEMS } from '../actions/leaderboard.actions';
+import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel } from '../actions/leaderboard.actions';
 import '../styles/leaderboard.scss';
+import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 
 interface Props {
   items: any[],
@@ -18,21 +21,25 @@ interface Props {
   deployModel: Function,
   modelCategory: string,
   onFilter: Function,
-  sortCriteria: string[]
+  sortCriteria: string[],
+  labels: any[]
 }
 
 interface DispatchProps {
+  fetchLabels: Function,
+  linkLabelWithModel: Function,
+  unlinkLabelFromModel: Function
 }
 
-export default class Leaderboard extends React.Component<Props & DispatchProps, any> {
+export class Leaderboard extends React.Component<Props & DispatchProps, any> {
   refs: {
     [key: string]: Element
     filterModels: HTMLInputElement
   };
   sampleData = {};
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       isDeployOpen: false,
       openDeployModel: null,
@@ -44,6 +51,13 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     };
     this.openDeploy = this.openDeploy.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
+    this.onChangeHandler = this.onChangeHandler.bind(this);
+  }
+
+  componentWillMount() {
+    if (!this.props.labels || !this.props.labels[this.props.projectId]) {
+      this.props.fetchLabels(this.props.projectId);
+    }
   }
 
   openDeploy(model): void {
@@ -89,10 +103,23 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
     this.props.deployModel(model.id, name);
   }
 
+  onChangeHandler(labelId, modelId, isUnlink) {
+    if (isUnlink === true) {
+      this.props.unlinkLabelFromModel(labelId, modelId).then(() => {
+        this.props.fetchLabels(this.props.projectId);
+      });
+    } else {
+      this.props.linkLabelWithModel(labelId, modelId).then(() => {
+        this.props.fetchLabels(this.props.projectId);
+      });
+    }
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div ref="leaderboard" className="leaderboard">
-        <Deploy open={this.state.isDeployOpen} onCancel={this.closeHandler} model={this.state.openDeployModel} onDeploy={this.onDeploy.bind(this)}></Deploy>
+        <Deploy open={this.state.isDeployOpen} onCancel={this.closeHandler} model={this.state.openDeployModel}
+                onDeploy={this.onDeploy.bind(this)}></Deploy>
         <PageHeader>
           <span>Models</span>
           <div className="buttons">
@@ -102,11 +129,37 @@ export default class Leaderboard extends React.Component<Props & DispatchProps, 
         <div className="filter">
           <input ref="filterModels" type="text" placeholder="filter models" onChange={this.onFilter.bind(this)}/>
         </div>
-        {this.props.modelCategory === 'binomial' ? <BinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria} items={this.props.items} projectId={this.props.projectId} openDeploy={this.openDeploy.bind(this)}/> : null}
-        {this.props.modelCategory === 'multinomial' ? <MultinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria} items={this.props.items} projectId={this.props.projectId} openDeploy={this.openDeploy.bind(this)}/> : null}
-        {this.props.modelCategory === 'regression' ? <RegressionModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria} items={this.props.items} projectId={this.props.projectId} openDeploy={this.openDeploy.bind(this)}/> : null}
-        <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)} onPageForward={this.onPageForward.bind(this)}></Pagination>
+        {this.props.modelCategory === 'binomial' ?
+          <BinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
+                              items={this.props.items} projectId={this.props.projectId}
+                              openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
+        {this.props.modelCategory === 'multinomial' ?
+          <MultinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
+                                 items={this.props.items} projectId={this.props.projectId}
+                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
+        {this.props.modelCategory === 'regression' ?
+          <RegressionModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
+                                items={this.props.items} projectId={this.props.projectId}
+                                openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
+        <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)}
+                    onPageForward={this.onPageForward.bind(this)}></Pagination>
       </div>
     );
   }
 }
+
+function mapStateToProps(state: any): any {
+  return {
+    labels: state.labels
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchLabels: bindActionCreators(fetchLabels, dispatch),
+    linkLabelWithModel: bindActionCreators(linkLabelWithModel, dispatch),
+    unlinkLabelFromModel: bindActionCreators(unlinkLabelFromModel, dispatch)
+  };
+}
+
+export default connect<Props, any, any>(mapStateToProps, mapDispatchToProps)(Leaderboard);

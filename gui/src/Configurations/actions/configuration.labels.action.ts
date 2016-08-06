@@ -11,6 +11,12 @@ export const RECEIVE_UPDATE_LABEL = 'RECEIVE_UPDATE_LABEL';
 export const DELETE_LABEL = 'DELETE_LABEL';
 export const RECEIVE_DELETE_LABEL = 'RECEIVE_DELETE_LABEL';
 
+export const requestLabels = () => {
+  return {
+    type: FETCH_LABELS
+  };
+};
+
 export function fetchLabels(projectId: number) {
   return (dispatch) => {
     dispatch(requestLabels());
@@ -20,19 +26,13 @@ export function fetchLabels(projectId: number) {
   };
 }
 
-export function requestLabels() {
-  return {
-    type: FETCH_LABELS
-  };
-};
-
 export function receiveLabels(labels: any[], projectId: number) {
   return {
     type: RECEIVE_LABELS,
     projectId,
     labels
   };
-};
+}
 
 export function createLabel(projectId: number, name: string, description: string) {
   return (dispatch) => {
@@ -59,7 +59,7 @@ export function receiveCreateLabel(id: number, projectId: number, name: string, 
       description
     }
   };
-};
+}
 
 export function updateLabel(labelId: number, projectId: number, name: string, description: string) {
   return (dispatch) => {
@@ -86,7 +86,7 @@ export function receiveUpdateLabel(id: number, projectId: number, name: string, 
       description
     }
   };
-};
+}
 
 export function deleteLabel(labelId: number) {
   return (dispatch) => {
@@ -105,7 +105,6 @@ export function deleteLabel(labelId: number) {
 
 export function receiveDeleteLabel(labelId) {
   return {
-    type: RECEIVE_DELETE_LABEL,
-
+    type: RECEIVE_DELETE_LABEL
   };
-};
+}

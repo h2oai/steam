@@ -123,7 +123,7 @@ class Labels extends React.Component<Props, any> {
                     </Cell>
                     <Cell className="label-model">
                         <span className="model-icon"></span>
-                        <span className="model-name"><span className="fa fa-cube"></span>{label.model_id}</span>
+                        <span className="model-name">{(label.model_id >= 0) ? (<span className="fa fa-cube"></span>) : null} {(label.model_id >= 0) ? label.model_id : "Not currently applied to a model"}</span>
                     </Cell>
                     <Cell className="label-permissions">
 

@@ -76,3 +76,23 @@ function getSortStrategy(modelCategory): Function {
     return Remote.getAllRegressionSortCriteria;
   }
 }
+
+export function linkLabelWithModel(labelId: number, modelId: number) {
+  return () => {
+    return new Promise((resolve, reject) => {
+      Remote.linkLabelWithModel(labelId, modelId, (error) => {
+        resolve();
+      });
+    });
+  };
+}
+
+export function unlinkLabelFromModel(labelId: number, modelId: number) {
+  return () => {
+    return new Promise((resolve, reject) => {
+      Remote.unlinkLabelFromModel(labelId, modelId, (error) => {
+        resolve();
+      });
+    });
+  };
+}
