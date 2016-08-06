@@ -169,10 +169,13 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                   );
                 })
                 }
+                <li className="logout nav-list--item">
+                  <a href={window.location.protocol + '//log:out@' + window.location.host + window.location.pathname + window.location.hash + window.location.search}>
+                    <i className="fa fa-sign-out"/>
+                    <div className="nav-list--label">Logout</div>
+                  </a>
+                </li>
               </ul>
-              <div className="logout">
-                <i className="fa fa-logout"/>
-              </div>
             </div>
           </nav>
         </Sidebar>
