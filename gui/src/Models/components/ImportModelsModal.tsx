@@ -23,7 +23,8 @@ interface Props {
   clusters: Cluster[],
   models: Model[],
   fetchLeaderboard: Function,
-  modelCategory: string
+  modelCategory: string,
+  datasetName: string
 }
 
 interface DispatchProps {
@@ -49,7 +50,7 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
     this.setState({
       clusterId: event.target.value
     });
-    this.props.fetchModelsFromCluster(parseInt(event.target.value, 10), 'Key_Frame__DGA3.hex');
+    this.props.fetchModelsFromCluster(parseInt(event.target.value, 10), this.props.datasetName);
   }
 
   importModelsFromCluster(event) {

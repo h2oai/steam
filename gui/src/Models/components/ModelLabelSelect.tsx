@@ -29,11 +29,11 @@ export default class ModelLabelSelect extends React.Component<Props, any> {
     return (
       <select name="labelSelect" onChange={this.onChangeHandler.bind(this)} value={_.find(this.props.labels[this.props.projectId], {model_id: this.props.modelId}) ? _.find(this.props.labels[this.props.projectId], {model_id: this.props.modelId}).id : -1}>
         <option value={-1}></option>
-        {this.props.labels[this.props.projectId].map((label: Label) => {
+        {this.props.labels[this.props.projectId] ? this.props.labels[this.props.projectId].map((label: Label) => {
           return (
             <option key={label.id} value={label.id}>{label.name}</option>
           );
-        })}
+        }) : <select><option></option></select>}
       </select>
     );
   }
