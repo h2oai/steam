@@ -182,7 +182,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                 })
                 }
                 <li className="logout nav-list--item">
-                  <a href="mailto:support-steam@h2o.ai">
+                  <a href="mailto:steam@h2o.ai?subject=STEAM: ">
                     <i className="fa fa-question-circle-o"/>
                     <div className="nav-list--label">
                       Support
