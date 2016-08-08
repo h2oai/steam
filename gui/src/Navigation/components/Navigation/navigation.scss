@@ -79,9 +79,6 @@ $navigation-width: $base-grid-unit * 5;
   perspective: 10000px;
   transition: transform .3s;
   transform: translate3d(100%, 0, 0);
-  .logout {
-    color: $brand-dark-3;
-  }
   .project-sidebar {
     height: 100%;
     width: 100%;
@@ -209,6 +206,11 @@ $navigation-width: $base-grid-unit * 5;
       display: flex;
     }
     li {
+      &.logout {
+        position: absolute;
+        bottom: 0;
+        color: $brand-white;
+      }
       display: flex;
       justify-content: center;
       align-items: center;
