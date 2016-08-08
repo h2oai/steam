@@ -151,7 +151,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
               <header>
                 <div className="logo-container">
                   <Link to="/">
-                    <div className="logo"><img src={logo}></img></div>
+                    <div className="logo">STEAM</div>
                   </Link>
                 </div>
               </header>
