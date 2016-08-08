@@ -213,9 +213,6 @@ $navigation-width: $base-grid-unit * 5;
         bottom: 0;
         height: initial;
         color: $brand-white;
-        a {
-          min-height: $base-grid-unit;
-        }
       }
       display: flex;
       justify-content: center;
