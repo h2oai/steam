@@ -119,7 +119,8 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
           <div className="navigation">
             <header>
               <div className="header-navigation">
-                <Link to={this.getParentRouteName(activeRoute.path)}><i className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span></Link>
+                <Link to={this.getParentRouteName(activeRoute.path)}><i
+                  className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span></Link>
               </div>
             </header>
             <div className="header-content">{this.props.project.name}</div>
@@ -181,6 +182,12 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                 })
                 }
                 <li className="logout nav-list--item">
+                  <a href="mailto:support-steam@h2o.ai">
+                    <i className="fa fa-question-circle-o"/>
+                    <div className="nav-list--label">
+                      Support
+                    </div>
+                  </a>
                   <a onClick={this.logout.bind(this)}>
                     <i className="fa fa-sign-out"/>
                     <div className="nav-list--label">Logout</div>
