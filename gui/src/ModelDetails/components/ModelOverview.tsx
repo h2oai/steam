@@ -26,10 +26,6 @@ export default class ModelOverview extends React.Component<Props, any> {
         value: moment.unix(this.props.model.created_at).format('YYYY-MM-DD HH:mm')
       },
       {
-        label: 'Training Time',
-        value: this.props.model.max_runtime
-      },
-      {
         label: 'Model Type',
         value: this.props.model.algorithm
       }
