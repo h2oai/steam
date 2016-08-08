@@ -50,7 +50,6 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
     this.setState({
       clusterId: event.target.value
     });
-    console.log(this.props.datasetName);
     this.props.fetchModelsFromCluster(parseInt(event.target.value, 10), this.props.datasetName);
   }
 
@@ -68,7 +67,6 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   }
 
   render() {
-    console.log(this.props.datasetName);
     return (
       <DefaultModal className="import-modal" open={this.props.open}>
         <PageHeader>IMPORT MODELS</PageHeader>
