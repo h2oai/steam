@@ -14,6 +14,7 @@ import { connect } from 'react-redux';
 import { fetchProfile } from '../../../Profile/actions/profile.actions';
 import { bindActionCreators } from 'redux';
 import './navigation.scss';
+import { Project } from '../../../Proxy/Proxy';
 const logo = require('../../../../assets/h2o-home.png');
 
 interface Props {
@@ -21,7 +22,8 @@ interface Props {
   params: any
   profile: {
     isEulaAgreed: boolean
-  }
+  },
+  project: Project
 }
 
 interface DispatchProps {
@@ -106,10 +108,10 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
           <div className="navigation">
             <header>
               <div className="header-navigation">
-                <i className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span>
+                <Link to={this.getParentRouteName(activeRoute.path)}><i className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span></Link>
               </div>
             </header>
-            <div className="header-content">{activeRoute.name}</div>
+            <div className="header-content">{this.props.project.name}</div>
             <ul className="nav-list">
               {_.map(childRoutes, (menuItem: any) => {
                 let path = buildPath(menuItem.path, this.props.params);
@@ -168,6 +170,9 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                 })
                 }
               </ul>
+              <div className="logout">
+                <i className="fa fa-logout"/>
+              </div>
             </div>
           </nav>
         </Sidebar>
@@ -180,6 +185,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state): any {
   return {
+    project: state.projects.project,
     profile: state.profile
   };
 }

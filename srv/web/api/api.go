@@ -83,6 +83,8 @@ type Model struct {
 	MaxRuntime          int
 	Metrics             string
 	CreatedAt           int64
+	LabelId             int64
+	LabelName           string
 }
 
 type BinomialModel struct {
@@ -101,6 +103,8 @@ type BinomialModel struct {
 	MaxRuntime          int
 	Metrics             string
 	CreatedAt           int64
+	LabelId             int64
+	LabelName           string
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -124,6 +128,8 @@ type MultinomialModel struct {
 	MaxRuntime          int
 	Metrics             string
 	CreatedAt           int64
+	LabelId             int64
+	LabelName           string
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -145,6 +151,8 @@ type RegressionModel struct {
 	MaxRuntime           int
 	Metrics              string
 	CreatedAt            int64
+	LabelId              int64
+	LabelName            string
 	Mse                  float64
 	RSquared             float64
 	MeanResidualDeviance float64
@@ -289,7 +297,8 @@ type Service struct {
 	StartService                  StartService                  `help:"Start a service"`
 	StopService                   StopService                   `help:"Stop a service"`
 	GetService                    GetService                    `help:"Get service details"`
-	GetServices                   GetServices                   `help:"List services"`
+	GetServices                   GetServices                   `help:"List all services"`
+	GetServicesForProject         GetServicesForProject         `help:"List services for a project"`
 	GetServicesForModel           GetServicesForModel           `help:"List services for a model"`
 	DeleteService                 DeleteService                 `help:"Delete a service"`
 	AddEngine                     AddEngine                     `help:"Add an engine"`
@@ -650,6 +659,13 @@ type GetServices struct {
 	Limit    int64
 	_        int
 	Services []ScoringService
+}
+type GetServicesForProject struct {
+	ProjectId int64
+	Offset    int64
+	Limit     int64
+	_         int
+	Services  []ScoringService
 }
 type GetServicesForModel struct {
 	ModelId  int64

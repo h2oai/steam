@@ -10,15 +10,15 @@
     .connect-cluster {
       margin-left: $medium;
       flex: 1;
+      form > input + input {
+        margin: $xsmall;
+      }
     }
   }
   .name-project {
     margin-bottom: $medium;
   }
-  .select-dataset {
-    display: flex;
-    > div {
-      margin: 0 $small;
-    }
+  .import-models {
+    font-family: $font-text;
   }
 }

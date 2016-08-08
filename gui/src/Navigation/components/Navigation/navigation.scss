@@ -79,6 +79,9 @@ $navigation-width: $base-grid-unit * 5;
   perspective: 10000px;
   transition: transform .3s;
   transform: translate3d(100%, 0, 0);
+  .logout {
+    color: $brand-dark-3;
+  }
   .project-sidebar {
     height: 100%;
     width: 100%;
@@ -134,7 +137,12 @@ $navigation-width: $base-grid-unit * 5;
 
 .header-content {
   font-size: $text-large;
+  max-width: $base-grid-unit * 4;
   min-height: 3.5em;
+  max-height: 3.5em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   color: $brand-dark-3;
   padding: $small $small 0 $small;
 }
@@ -159,6 +167,10 @@ $navigation-width: $base-grid-unit * 5;
       padding: 0 $small;
       i {
         margin-right: 5px;
+      }
+      a {
+        color: $brand-dark-3;
+        text-decoration: none;
       }
     }
     .logo-container {

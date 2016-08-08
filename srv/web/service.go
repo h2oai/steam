@@ -30,6 +30,8 @@ type BinomialModel struct {
 	MaxRuntime          int     `json:"max_runtime"`
 	Metrics             string  `json:"metrics"`
 	CreatedAt           int64   `json:"created_at"`
+	LabelId             int64   `json:"label_id"`
+	LabelName           string  `json:"label_name"`
 	Mse                 float64 `json:"mse"`
 	RSquared            float64 `json:"r_squared"`
 	Logloss             float64 `json:"logloss"`
@@ -149,6 +151,8 @@ type Model struct {
 	MaxRuntime          int    `json:"max_runtime"`
 	Metrics             string `json:"metrics"`
 	CreatedAt           int64  `json:"created_at"`
+	LabelId             int64  `json:"label_id"`
+	LabelName           string `json:"label_name"`
 }
 
 type MultinomialModel struct {
@@ -167,6 +171,8 @@ type MultinomialModel struct {
 	MaxRuntime          int     `json:"max_runtime"`
 	Metrics             string  `json:"metrics"`
 	CreatedAt           int64   `json:"created_at"`
+	LabelId             int64   `json:"label_id"`
+	LabelName           string  `json:"label_name"`
 	Mse                 float64 `json:"mse"`
 	RSquared            float64 `json:"r_squared"`
 	Logloss             float64 `json:"logloss"`
@@ -202,6 +208,8 @@ type RegressionModel struct {
 	MaxRuntime           int     `json:"max_runtime"`
 	Metrics              string  `json:"metrics"`
 	CreatedAt            int64   `json:"created_at"`
+	LabelId              int64   `json:"label_id"`
+	LabelName            string  `json:"label_name"`
 	Mse                  float64 `json:"mse"`
 	RSquared             float64 `json:"r_squared"`
 	MeanResidualDeviance float64 `json:"mean_residual_deviance"`
@@ -300,6 +308,7 @@ type Service interface {
 	StopService(pz az.Principal, serviceId int64) error
 	GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
 	GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
+	GetServicesForProject(pz az.Principal, projectId int64, offset int64, limit int64) ([]*ScoringService, error)
 	GetServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
 	DeleteService(pz az.Principal, serviceId int64) error
 	AddEngine(pz az.Principal, engineName string, enginePath string) (int64, error)
@@ -830,6 +839,16 @@ type GetServicesIn struct {
 }
 
 type GetServicesOut struct {
+	Services []*ScoringService `json:"services"`
+}
+
+type GetServicesForProjectIn struct {
+	ProjectId int64 `json:"project_id"`
+	Offset    int64 `json:"offset"`
+	Limit     int64 `json:"limit"`
+}
+
+type GetServicesForProjectOut struct {
 	Services []*ScoringService `json:"services"`
 }
 
@@ -1819,6 +1838,16 @@ func (this *Remote) GetServices(offset int64, limit int64) ([]*ScoringService, e
 	in := GetServicesIn{offset, limit}
 	var out GetServicesOut
 	err := this.Proc.Call("GetServices", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Services, nil
+}
+
+func (this *Remote) GetServicesForProject(projectId int64, offset int64, limit int64) ([]*ScoringService, error) {
+	in := GetServicesForProjectIn{projectId, offset, limit}
+	var out GetServicesForProjectOut
+	err := this.Proc.Call("GetServicesForProject", &in, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -4207,6 +4236,41 @@ func (this *Impl) GetServices(r *http.Request, in *GetServicesIn, out *GetServic
 	}
 
 	val0, err := this.Service.GetServices(pz, in.Offset, in.Limit)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Services = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetServicesForProject(r *http.Request, in *GetServicesForProjectIn, out *GetServicesForProjectOut) error {
+	const name = "GetServicesForProject"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetServicesForProject(pz, in.ProjectId, in.Offset, in.Limit)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err

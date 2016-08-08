@@ -157,19 +157,20 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           </div>
         </div>
         {this.state.clusterId ? <div>
-          <h1>2. Select Dataset</h1>
-          <div className="select-dataset">
+          <h1>2. Select Dataframe</h1>
+          <div>
+            <select onChange={this.selectDataset.bind(this)}>
+              <option></option>
+              {this.props.datasets ? this.props.datasets.map((dataset, i) => {
+                return <option key={i} value={dataset.frame_name}>{dataset.name}</option>;
+              }) : null}
+            </select>
+          </div>
+        </div> : null}
+        {this.state.datasetId ?
+          <div>
+            <h1>3. Select Model Category</h1>
             <div>
-              <div>Frame</div>
-              <select onChange={this.selectDataset.bind(this)}>
-                <option></option>
-                {this.props.datasets ? this.props.datasets.map((dataset, i) => {
-                  return <option key={i} value={dataset.frame_name}>{dataset.name}</option>;
-                }) : null}
-              </select>
-            </div>
-            <div>
-              <div>Category</div>
               <select onChange={this.selectCategory.bind(this)}>
                 <option></option>
                 {this.props.models ? _.uniqBy(this.props.models, 'model_category').map((model, i) => {
@@ -177,12 +178,9 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                 }) : null}
               </select>
             </div>
-          </div>
-          <div>
-          </div>
-        </div> : null}
+          </div> : null}
         {!_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
-          <h1>3. Pick Models to Import</h1>
+          <h1>4. Pick Models to Import</h1>
           <div>
             Models in a project must share the same feature set and response column to enable comparison.
           </div>
@@ -208,7 +206,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           </Table>
         </div> : null}
         {!_.isEmpty(this.props.models && this.state.modelCategory) ? <div className="name-project">
-          <h1>4. Name Project</h1>
+          <h1>5. Name Project</h1>
           <div>
             <input ref="projectName" type="text"/>
           </div>

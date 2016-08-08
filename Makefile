@@ -7,6 +7,8 @@
 	pretest \
 	test \
 	gui \
+	guitest \
+	js \
 	ssb \
 	doc \
 	cov \
@@ -39,7 +41,13 @@ build:
 	go build
 
 gui:
-	cd $(GUI) && npm install && ./node_modules/.bin/webpack
+	cd $(GUI) && npm install && npm run webpack
+
+guitest:
+	cd $(GUI) && npm test
+
+js:
+	cd $(GUI) && npm run webpack
 
 ssb:
 	cd $(SSB) && ./gradlew build
@@ -66,7 +74,6 @@ lint:
 	$(foreach file,$(SRCS),golint $(file) || exit;)
 
 vet:
-	@-go get -v golang.org/x/tools/cmd/vet
 	go vet
 
 fmt:
@@ -77,11 +84,8 @@ fmtcheck:
 
 pretest: lint vet fmtcheck
 
-test: pretest
-	go test
-
-guitest:
-	cd $(GUI) && npm test
+test:
+	cd tests && ./goh2orunner.sh
 
 cov:
 	@ go get -v github.com/axw/gocov/gocov

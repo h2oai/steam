@@ -91,7 +91,6 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Invalid upload type: %s", typ), http.StatusBadRequest)
 		return
 	}
-
 	src, handler, err := r.FormFile("file")
 	if err != nil {
 		log.Println("Upload form parse failed:", err)

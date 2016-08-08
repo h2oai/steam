@@ -315,10 +315,11 @@ type Datastore struct {
 	ManagePermissions map[int64]int64
 }
 
-func Create(name, username, sslmode, suname, supass string) (*Datastore, error) {
-	db, err := connect(username, name, sslmode)
+func Create(connection Connection, suname, supass string) (*Datastore, error) {
+	connectionString := createConnectionString(connection)
+	db, err := connect(connectionString)
 	if err != nil {
-		return nil, fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
+		return nil, fmt.Errorf("Failed connecting to database using %s: %s", connectionString, err)
 	}
 
 	primed, err := isPrimed(db)
@@ -368,21 +369,59 @@ func Create(name, username, sslmode, suname, supass string) (*Datastore, error) 
 	return ds, nil
 }
 
-func Destroy(name, username, sslmode string) error {
-	db, err := connect(username, name, sslmode)
+func Destroy(connection Connection) error {
+	connectionString := createConnectionString(connection)
+	db, err := connect(connectionString)
 	if err != nil {
-		return fmt.Errorf("Failed connecting to database %s as user %s (SSL=%s): %s\n", name, username, sslmode, err)
+		return fmt.Errorf("Failed connecting to database using %s: %s", connectionString, err)
 	}
 	return truncate(db)
 }
 
-func connect(username, dbname, sslmode string) (*sql.DB, error) {
+type Connection struct {
+	DbName            string
+	User              string
+	Password          string
+	Host              string
+	Port              string
+	ConnectionTimeout string
+	SSLMode           string
+	SSLCert           string
+	SSLKey            string
+	SSLRootCert       string
+}
+
+func createConnectionString(c Connection) string {
+	s := fmt.Sprintf("dbname=%s", c.DbName)
+
+	m := map[string]string{
+		"user":            c.User,
+		"password":        c.Password,
+		"host":            c.Host,
+		"port":            c.Port,
+		"connect_timeout": c.ConnectionTimeout,
+		"sslmode":         c.SSLMode,
+		"sslcert":         c.SSLCert,
+		"sslkey":          c.SSLKey,
+		"sslrootcert":     c.SSLRootCert,
+	}
+
+	for k, v := range m {
+		if len(v) > 0 {
+			s = s + " " + k + "=" + v
+		}
+	}
+
+	return s
+}
+
+func connect(connection string) (*sql.DB, error) {
 
 	// FIXME logging need to be handled for testing
 	// log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
 
 	// Open connection
-	db, err := sql.Open("postgres", fmt.Sprintf("user=%s dbname=%s sslmode=%s", username, dbname, sslmode))
+	db, err := sql.Open("postgres", connection)
 	if err != nil {
 		return nil, fmt.Errorf("Database connection failed: %s", err)
 	}
@@ -645,7 +684,6 @@ func truncate(db *sql.DB) error {
 			"binomial_model",
 			"multinomial_model",
 			"regression_model",
-			"project_model",
 			"model",
 			"dataset",
 			"datasource",
@@ -2529,56 +2567,6 @@ func (ds *Datastore) CreateProject(pz az.Principal, name, description, modelCate
 	return id, err
 }
 
-func (ds *Datastore) LinkProjectAndModel(pz az.Principal, projectId, modelId int64) error {
-	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
-		return err
-	}
-	if err := pz.CheckEdit(ds.EntityTypes.Project, projectId); err != nil {
-		return err
-	}
-
-	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
-			INSERT INTO
-				project_model
-			VALUES
-				($1, $2)
-			`, projectId, modelId); err != nil {
-			return err
-		}
-		return ds.audit(pz, tx, LinkOp, ds.EntityTypes.Project, projectId, metadata{
-			"id": strconv.FormatInt(modelId, 10),
-		})
-	})
-}
-
-func (ds *Datastore) UnlinkProjectAndModel(pz az.Principal, projectId, modelId int64) error {
-	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
-		return err
-	}
-	if err := pz.CheckEdit(ds.EntityTypes.Project, projectId); err != nil {
-		return err
-	}
-
-	return ds.exec(func(tx *sql.Tx) error {
-		var id int64
-		row := tx.QueryRow(`
-			DELETE FROM
-				project_model
-			WHERE
-				project_id = $1 AND
-				model_id = $2
-			RETURNING model_id
-			`, projectId, modelId)
-		if err := row.Scan(&id); err != nil {
-			return err
-		}
-		return ds.audit(pz, tx, UnlinkOp, ds.EntityTypes.Project, projectId, metadata{
-			"id": strconv.FormatInt(modelId, 10),
-		})
-	})
-}
-
 func (ds *Datastore) ReadProjects(pz az.Principal, offset, limit int64) ([]Project, error) {
 	rows, err := ds.db.Query(`
 		SELECT
@@ -2622,23 +2610,6 @@ func (ds *Datastore) ReadProject(pz az.Principal, projectId int64) (Project, err
 			id = $1
 		`, projectId)
 	return ScanProject(row)
-}
-
-func (ds *Datastore) ReadProjectIdForModelId(pz az.Principal, modelId int64) (int64, error) {
-	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
-		return 0, err
-	}
-
-	row := ds.db.QueryRow(`
-		SELECT
-			project_id
-		FROM
-			project_model
-		WHERE
-			model_id = $1
-		`, modelId)
-
-	return scanInt(row)
 }
 
 func (ds *Datastore) DeleteProject(pz az.Principal, projectId int64) error {
@@ -2968,7 +2939,7 @@ func (ds *Datastore) ReadDatasetByDatasource(pz az.Principal, datasourceId int64
 		SELECT
 			id, datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created
 		FROM
-			datasource
+			dataset
 		WHERE
 			datasource_id = $1
 		`, datasourceId)
@@ -3057,11 +3028,12 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		row := tx.QueryRow(`
 			INSERT INTO
 				model
-				(training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(project_id, training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,                  $2,                    $3,    $4,           $5,        $6,        $7,             $8,           $9,                   $10,          $11,      $12,          $13,     $14,             now())
+				($1,         $2,                  $3,                    $4,    $5,           $6,        $7,        $8,             $9,           $10,                  $11,          $12,      $13,          $14,     $15,             now())
 			RETURNING id
 			`,
+			model.ProjectId,
 			model.TrainingDatasetId,
 			model.ValidationDatasetId,
 			model.Name,
@@ -3183,11 +3155,15 @@ func (ds *Datastore) CreateRegressionModel(pz az.Principal, modelId int64, mse, 
 func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			model.*,
+			label.id,
+			label.name
 		FROM
 			model
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			id IN
+			model.id IN
 			(
 				SELECT DISTINCT
 					entity_id
@@ -3198,7 +3174,7 @@ func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, 
 					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
 			)
 		ORDER BY
-			name
+			model.name
 		OFFSET $3
 		LIMIT $4
 		`, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
@@ -3217,14 +3193,16 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 
 	rows, err := ds.db.Query(`
 		SELECT
-			m.id, m.training_dataset_id, m.validation_dataset_id, m.name, m.cluster_name, m.model_key, m.algorithm, m.model_category, m.dataset_name, m.response_column_name, m.logical_name, m.location, m.max_run_time, m.metrics, m.metrics_version, m.created
+			model.*,
+			label.id,
+			label.name
 		FROM
-			model m,
-			project_model pm
+			model
+		LEFT OUTER JOIN
+			label on label.model_id = model.id
 		WHERE
-			pm.project_id = $1 AND
-			pm.model_id = m.id AND
-			m.id IN
+			model.project_id = $1 AND
+			model.id IN
 			(
 				SELECT DISTINCT
 					entity_id
@@ -3235,7 +3213,7 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2) AND entity_type_id = $3)
 			)
 		ORDER BY
-			m.name
+			model.name
 		OFFSET $4
 		LIMIT $5
 		`, projectId, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
@@ -3244,6 +3222,29 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 	}
 	defer rows.Close()
 	return ScanModels(rows)
+}
+
+func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			model.*,
+			label.id,
+			label.name
+		FROM
+			model
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
+		WHERE
+			model.training_dataset_id = $1
+			OR
+			model.validation_dataset_id = $1
+		`, datasetId)
+	if err != nil {
+		return Model{}, false, err
+	}
+	defer rows.Close()
+
+	return scanModels(rows)
 }
 
 func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]BinomialModel, error) {
@@ -3259,7 +3260,7 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 	var filter string
 	switch sortBy {
 	case "mse", "r_squared", "logloss", "auc", "gini":
-		filter = "mm." + sortBy + " " + dir
+		filter = "bm." + sortBy + " " + dir
 	default:
 		filter = "model.name " + dir
 	}
@@ -3267,15 +3268,17 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 	rows, err := ds.db.Query(`
 		SELECT
 			model.*,
-			mm.mse, mm.r_squared, mm.logloss, mm.auc, mm.gini
+			label.id,
+			label.name,
+			bm.mse, bm.r_squared, bm.logloss, bm.auc, bm.gini
 		FROM
-			model,
-			binomial_model mm,
-			project_model pm
+			model
+		INNER JOIN 
+			binomial_model bm ON bm.model_id = model.id
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			pm.project_id = $1 AND
-			pm.model_id = model.id AND
-			mm.model_id = model.id AND
+			model.project_id = $1 AND
 			model.id IN
 			( 
 				SELECT DISTINCT
@@ -3315,13 +3318,17 @@ func (ds *Datastore) ReadBinomialModel(pz az.Principal, modelId int64) (Binomial
 	row := ds.db.QueryRow(`
 		SELECT
 			model.*, 
-			mm.mse, mm.r_squared, mm.logloss, mm.auc, mm.gini
+			label.id,
+			label.name,
+			bm.mse, bm.r_squared, bm.logloss, bm.auc, bm.gini
 		FROM
-			model,
-			binomial_model mm
+			model
+		INNER JOIN
+			binomial_model bm ON bm.model_id = model.id
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			model.id = $1 AND
-			mm.model_id = $1
+			model.id = $1
 		`, modelId)
 	return ScanBinomialModel(row)
 }
@@ -3347,15 +3354,17 @@ func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, nam
 	rows, err := ds.db.Query(`
 		SELECT
 			model.*,
+			label.id,
+			label.name,
 			mm.mse, mm.r_squared, mm.logloss
 		FROM
-			model,
-			multinomial_model mm,
-			project_model pm
+			model
+		INNER JOIN
+			multinomial_model mm on mm.model_id = model.id
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			pm.project_id = $1 AND
-			pm.model_id = model.id AND
-			mm.model_id = model.id AND
+			model.project_id = $1 AND
 			model.id IN
 			( 
 				SELECT DISTINCT
@@ -3395,13 +3404,17 @@ func (ds *Datastore) ReadMultinomialModel(pz az.Principal, modelId int64) (Multi
 	row := ds.db.QueryRow(`
 		SELECT
 			model.*, 
+			label.id,
+			label.name,
 			mm.mse, mm.r_squared, mm.logloss
 		FROM
-			model,
-			multinomial_model mm
+			model
+		INNER JOIN 
+			multinomial_model mm on mm.model_id = model.id
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			model.id = $1 AND
-			mm.model_id = $1
+			model.id = $1
 		`, modelId)
 	return ScanMultinomialModel(row)
 }
@@ -3419,7 +3432,7 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 	var filter string
 	switch sortBy {
 	case "mse", "r_squared", "mean_residual_deviance":
-		filter = "mm." + sortBy + " " + dir
+		filter = "rm." + sortBy + " " + dir
 	default:
 		filter = "model.name " + dir
 	}
@@ -3427,15 +3440,17 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 	rows, err := ds.db.Query(`
 		SELECT
 			model.*,
-			mm.mse, mm.r_squared, mm.mean_residual_deviance
+			label.id,
+			label.name,
+			rm.mse, rm.r_squared, rm.mean_residual_deviance
 		FROM
-			model,
-			regression_model mm,
-			project_model pm
+			model
+		INNER JOIN 
+			regression_model rm ON rm.model_id = model.id
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			pm.project_id = $1 AND
-			pm.model_id = model.id AND
-			mm.model_id = model.id AND
+			model.project_id = $1 AND
 			model.id IN
 			( 
 				SELECT DISTINCT
@@ -3475,35 +3490,19 @@ func (ds *Datastore) ReadRegressionModel(pz az.Principal, modelId int64) (Regres
 	row := ds.db.QueryRow(`
 		SELECT
 			model.*, 
-			mm.mse, mm.r_squared, mm.mean_residual_deviance
-		FROM
-			model,
-			regression_model mm
-		WHERE
-			model.id = $1 AND
-			mm.model_id = $1
-		`, modelId)
-	return ScanRegressionModel(row)
-}
-
-func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {
-	var Model Model
-	rows, err := ds.db.Query(`
-		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			label.id,
+			label.name,
+			rm.mse, rm.r_squared, rm.mean_residual_deviance
 		FROM
 			model
+		INNER JOIN
+			regression_model rm ON rm.model_id = model.id
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			training_dataset_id = $1
-			OR
-			validation_dataset_id = $1
-		`, datasetId)
-	if err != nil {
-		return Model, false, err
-	}
-	defer rows.Close()
-
-	return scanModels(rows)
+			model.id = $1
+		`, modelId)
+	return ScanRegressionModel(row)
 }
 
 func scanModels(rows *sql.Rows) (Model, bool, error) {
@@ -3526,11 +3525,15 @@ func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, training_dataset_id, validation_dataset_id, name, cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created
+			model.*,
+			label.id,
+			label.name
 		FROM
 			model
+		LEFT OUTER JOIN
+			label ON label.model_id = model.id
 		WHERE
-			id = $1
+			model.id = $1
 		`, modelId)
 	return ScanModel(row)
 }
@@ -3808,11 +3811,12 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 		row := tx.QueryRow(`
 			INSERT INTO
 				service
-				(model_id, address, port, process_id, state, created)
+				(project_id, model_id, address, port, process_id, state, created)
 			VALUES
-				($1,       $2,      $3,   $4,         $5,    now())
+				($1,       $2,      $3,   $4,         $5,         $6,    now())
 			RETURNING id
 			`,
+			service.ProjectId,
 			service.ModelId,
 			service.Address,
 			service.Port,
@@ -3846,7 +3850,7 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Service, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3872,6 +3876,36 @@ func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Servi
 	return ScanServices(rows)
 }
 
+func (ds *Datastore) ReadServicesForProjectId(pz az.Principal, projectId, offset, limit int64) ([]Service, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, project_id, model_id, address, port, process_id, state, created
+		FROM
+			service
+		WHERE
+			project_id = $6 AND
+			id IN
+			(
+				SELECT DISTINCT
+					entity_id
+				FROM 
+					privilege
+				WHERE
+					$5 OR
+					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
+			)
+		ORDER BY
+			address, port
+		OFFSET $3
+		LIMIT $4
+		`, pz.Id(), ds.EntityTypes.Service, offset, limit, pz.IsSuperuser(), projectId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return ScanServices(rows)
+}
+
 func (ds *Datastore) ReadServicesForModelId(pz az.Principal, modelId int64) ([]Service, error) {
 	if err := pz.CheckView(ds.EntityTypes.Model, modelId); err != nil {
 		return nil, err
@@ -3879,7 +3913,7 @@ func (ds *Datastore) ReadServicesForModelId(pz az.Principal, modelId int64) ([]S
 
 	rows, err := ds.db.Query(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3901,7 +3935,7 @@ func (ds *Datastore) ReadService(pz az.Principal, serviceId int64) (Service, err
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, address, port, process_id, state, created
 		FROM
 			service
 		WHERE

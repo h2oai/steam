@@ -1,6 +1,7 @@
 package web
 
 import (
+	"flag"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,11 +15,30 @@ import (
 )
 
 const (
-	superuser      = "superuser"
-	clusterAddress = "localhost:54321"
-	h2oModelKey    = "test_gbm"
-	h2oFrameKey    = "test.hex"
+	superuser = "superuser"
 )
+
+var h2oFrames = []struct {
+	name string
+}{
+	{"bin_hex"},
+	{"mul_hex"},
+	{"reg_hex"},
+}
+
+var h2oModels = []struct {
+	name     string
+	category string
+}{
+	{"bin_gbm", "Binomial"},
+	{"bin_glm", "Binomial"},
+	{"bin_dpl", "Binomial"},
+	{"mul_gbm", "Multinomial"},
+	{"mul_dpl", "Multinomial"},
+	{"reg_gbm", "Regression"},
+	{"reg_glm", "Regression"},
+	{"reg_dpl", "Regression"},
+}
 
 type test struct {
 	t   *testing.T
@@ -27,26 +47,38 @@ type test struct {
 	su  az.Principal
 }
 
+var clusterAddress, workingDirectory, compilationServiceAddress string
+
+func init() {
+	flag.StringVar(&clusterAddress, "cluster-address", "localhost:54321", "Where the h2o cluster can be reached.")
+	flag.StringVar(&workingDirectory, "working-directory", "", "Where the var folder will be located.")
+	flag.StringVar(&compilationServiceAddress, "compilation-service-address", ":8080", "Where to find the compilation service.")
+}
+
 func newTest(t *testing.T) *test {
 	dbOpts := driverDBOpts{
-		"steam",
-		"steam",
-		"disable",
+		data.Connection{DbName: "steam", User: "steam", SSLMode: "disable"},
 		superuser,
 		superuser,
 	}
 
 	// Truncate database tables
 
-	if err := data.Destroy(dbOpts.Name, dbOpts.Username, dbOpts.SSLMode); err != nil {
+	if err := data.Destroy(dbOpts.Connection); err != nil {
 		t.Fatalf("Failed truncating database: %s", err)
 	}
 
 	// Determine current directory
 
-	wd, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	wd, err := filepath.Abs(filepath.Dir(workingDirectory + "/"))
 	if err != nil {
 		t.Fatalf("Failed determining current directory: %s", err)
+	}
+
+	// Delete any remnant models in models directory
+
+	if err := os.RemoveAll(path.Join(wd, "var/master/model")); err != nil {
+		t.Fatalf("Failed removing old model directory: %v", err)
 	}
 
 	// Create service instance
@@ -54,8 +86,9 @@ func newTest(t *testing.T) *test {
 	opts := driverOpts{
 		path.Join(wd, fs.VarDir, "master"),
 		":9001",
-		":8080",
+		compilationServiceAddress,
 		"",
+		[2]int{1025, 65535},
 		driverYarnOpts{false, "", ""},
 		dbOpts,
 	}

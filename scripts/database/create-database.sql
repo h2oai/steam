@@ -595,6 +595,7 @@ ALTER SEQUENCE meta_id_seq OWNED BY meta.id;
 
 CREATE TABLE model (
     id integer NOT NULL,
+    project_id integer NOT NULL,
     training_dataset_id integer NOT NULL,
     validation_dataset_id integer NOT NULL,
     name text NOT NULL,
@@ -799,18 +800,6 @@ ALTER SEQUENCE project_id_seq OWNED BY project.id;
 
 
 --
--- Name: project_model; Type: TABLE; Schema: public; Owner: steam
---
-
-CREATE TABLE project_model (
-    project_id integer NOT NULL,
-    model_id integer NOT NULL
-);
-
-
-ALTER TABLE project_model OWNER TO steam;
-
---
 -- Name: regression_model; Type: TABLE; Schema: public; Owner: steam
 --
 
@@ -899,6 +888,7 @@ ALTER TABLE role_permission OWNER TO steam;
 
 CREATE TABLE service (
     id integer NOT NULL,
+    project_id integer NOT NULL,
     model_id integer NOT NULL,
     address text NOT NULL,
     port integer NOT NULL,
@@ -1260,14 +1250,6 @@ ALTER TABLE ONLY project
 
 
 --
--- Name: pk_project_model; Type: CONSTRAINT; Schema: public; Owner: steam
---
-
-ALTER TABLE ONLY project_model
-    ADD CONSTRAINT pk_project_model PRIMARY KEY (project_id, model_id);
-
-
---
 -- Name: pk_regression_model; Type: CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -1441,6 +1423,13 @@ CREATE INDEX fki_label__project_id ON label USING btree (project_id);
 
 
 --
+-- Name: fki_model__project_id; Type: INDEX; Schema: public; Owner: steam
+--
+
+CREATE INDEX fki_model__project_id ON model USING btree (project_id);
+
+
+--
 -- Name: fki_model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
@@ -1480,13 +1469,6 @@ CREATE INDEX fki_privilege__entity_type_id ON privilege USING btree (entity_type
 --
 
 CREATE INDEX fki_privilege__workgroup_id ON privilege USING btree (workgroup_id);
-
-
---
--- Name: fki_project_model__model_id; Type: INDEX; Schema: public; Owner: steam
---
-
-CREATE INDEX fki_project_model__model_id ON project_model USING btree (model_id);
 
 
 --
@@ -1606,6 +1588,14 @@ ALTER TABLE ONLY label
 
 
 --
+-- Name: fk_model__project_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
+--
+
+ALTER TABLE ONLY model
+    ADD CONSTRAINT fk_model__project_id FOREIGN KEY (project_id) REFERENCES project(id);
+
+
+--
 -- Name: fk_model_training__dataset_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
 --
 
@@ -1643,22 +1633,6 @@ ALTER TABLE ONLY privilege
 
 ALTER TABLE ONLY privilege
     ADD CONSTRAINT fk_privilege__workgroup_id FOREIGN KEY (workgroup_id) REFERENCES workgroup(id);
-
-
---
--- Name: fk_project_model__model_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
---
-
-ALTER TABLE ONLY project_model
-    ADD CONSTRAINT fk_project_model__model_id FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE;
-
-
---
--- Name: fk_project_model__project_id; Type: FK CONSTRAINT; Schema: public; Owner: steam
---
-
-ALTER TABLE ONLY project_model
-    ADD CONSTRAINT fk_project_model__project_id FOREIGN KEY (project_id) REFERENCES project(id);
 
 
 --

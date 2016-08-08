@@ -1,6 +1,7 @@
 package web
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -792,6 +793,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		0,        //FIXME -- should be a valid project ID to prevent a FK violation.
 		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
 		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
 		modelKey, // TODO this should be a modelName
@@ -807,6 +809,8 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
+		sql.NullInt64{0, false},
+		sql.NullString{"", false},
 	})
 	if err != nil {
 		return nil, err
@@ -877,6 +881,7 @@ func h2oToModel(model *bindings.ModelSchema) data.Model {
 		0,
 		0,
 		0,
+		0,
 		model.ModelId.Name,
 		"",
 		model.ModelId.Name,
@@ -890,6 +895,8 @@ func h2oToModel(model *bindings.ModelSchema) data.Model {
 		"",
 		"",
 		time.Now(),
+		sql.NullInt64{0, false},
+		sql.NullString{"", false},
 	}
 }
 
@@ -1062,7 +1069,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	m := r.Models[0]
 
 	// fetch raw frame json from H2O
-	rawFrame, _, err := h2o.GetFramesFetch(m.DataFrame.Name, false)
+	rawFrame, _, err := h2o.GetFramesFetch(dataFrameName(m), false)
 	if err != nil {
 		return 0, err
 	}
@@ -1096,6 +1103,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
+		projectId,
 		trainingDatasetId,
 		trainingDatasetId,
 		modelName,
@@ -1111,6 +1119,8 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		string(rawModel),
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
 		time.Now(),
+		sql.NullInt64{0, false},
+		sql.NullString{"", false},
 	})
 	if err != nil {
 		return 0, err
@@ -1122,10 +1132,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	}
 
 	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
-		return 0, err
-	}
-
-	if err := s.ds.LinkProjectAndModel(pz, projectId, modelId); err != nil {
 		return 0, err
 	}
 
@@ -1338,11 +1344,6 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 		return 0, err
 	}
 
-	projectId, err := s.ds.ReadProjectIdForModelId(pz, modelId)
-	if err != nil {
-		return 0, err
-	}
-
 	artifact := compiler.ArtifactWar
 	if len(packageName) > 0 {
 		artifact = compiler.ArtifactPythonWar
@@ -1351,7 +1352,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 	warFilePath, err := compiler.CompileModel(
 		s.compilationServiceAddress,
 		s.workingDir,
-		projectId,
+		model.ProjectId,
 		model.Id,
 		model.LogicalName,
 		artifact,
@@ -1385,6 +1386,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 
 	service := data.Service{
 		0,
+		model.ProjectId,
 		model.Id,
 		address,
 		int64(port), // FIXME change to int
@@ -1418,7 +1420,7 @@ func (s *Service) StopService(pz az.Principal, serviceId int64) error {
 		return err
 	}
 
-	if err := s.ds.UpdateServiceState(pz, serviceId, data.StoppedState); err != nil {
+	if err := s.ds.DeleteService(pz, serviceId); err != nil {
 		return err
 	}
 
@@ -1443,6 +1445,23 @@ func (s *Service) GetServices(pz az.Principal, offset, limit int64) ([]*web.Scor
 	}
 
 	services, err := s.ds.ReadServices(pz, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	ss := make([]*web.ScoringService, len(services))
+	for i, service := range services {
+		ss[i] = toScoringService(service)
+	}
+
+	return ss, nil
+}
+
+func (s *Service) GetServicesForProject(pz az.Principal, projectId, offset, limit int64) ([]*web.ScoringService, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewService); err != nil {
+		return nil, err
+	}
+
+	services, err := s.ds.ReadServicesForProjectId(pz, projectId, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -2253,6 +2272,20 @@ func toYarnCluster(c data.YarnCluster) *web.YarnCluster {
 	}
 }
 
+func fromNullInt64(maybeId sql.NullInt64) int64 {
+	if maybeId.Valid {
+		return maybeId.Int64
+	}
+	return -1
+}
+
+func fromNullString(maybeId sql.NullString) string {
+	if maybeId.Valid {
+		return maybeId.String
+	}
+	return ""
+}
+
 func toModel(m data.Model) *web.Model {
 	return &web.Model{
 		m.Id,
@@ -2270,6 +2303,8 @@ func toModel(m data.Model) *web.Model {
 		int(m.MaxRunTime), // FIXME change db field to int
 		m.Metrics,
 		toTimestamp(m.Created),
+		fromNullInt64(m.LabelId),
+		fromNullString(m.LabelName),
 	}
 }
 
@@ -2290,6 +2325,8 @@ func toBinomialModel(model data.BinomialModel) *web.BinomialModel {
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
+		fromNullInt64(model.LabelId),
+		fromNullString(model.LabelName),
 		model.Mse,
 		model.RSquared,
 		model.Logloss,
@@ -2323,6 +2360,8 @@ func toMultinomialModel(model data.MultinomialModel) *web.MultinomialModel {
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
+		fromNullInt64(model.LabelId),
+		fromNullString(model.LabelName),
 		model.Mse,
 		model.RSquared,
 		model.Logloss,
@@ -2354,6 +2393,8 @@ func toRegressionModel(model data.RegressionModel) *web.RegressionModel {
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
+		fromNullInt64(model.LabelId),
+		fromNullString(model.LabelName),
 		model.Mse,
 		model.RSquared,
 		model.MeanResidualDeviance,

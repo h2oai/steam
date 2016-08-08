@@ -30,9 +30,7 @@ const (
 var defaultScoringServicePorts = [...]int{1025, 65535}
 
 type DBOpts struct {
-	Name              string
-	Username          string
-	SSLMode           string
+	Connection        data.Connection
 	SuperuserName     string
 	SuperuserPassword string
 }
@@ -58,6 +56,19 @@ type Opts struct {
 	DB                        DBOpts
 }
 
+var DefaultConnection = data.Connection{
+	"steam",
+	"steam",
+	"",
+	"",
+	"",
+	"",
+	"disable",
+	"",
+	"",
+	"",
+}
+
 var DefaultOpts = &Opts{
 	defaultWebAddress,
 	"",
@@ -70,7 +81,7 @@ var DefaultOpts = &Opts{
 	defaultScoringServicePorts,
 	false,
 	YarnOpts{false, "", ""},
-	DBOpts{"steam", "steam", "disable", "", ""},
+	DBOpts{DefaultConnection, "", ""},
 }
 
 type AuthProvider interface {
@@ -102,9 +113,7 @@ func Run(version, buildDate string, opts Opts) {
 	// --- init storage ---
 
 	ds, err := data.Create(
-		opts.DB.Name,
-		opts.DB.Username,
-		opts.DB.SSLMode,
+		opts.DB.Connection,
 		opts.DB.SuperuserName,
 		opts.DB.SuperuserPassword,
 	)

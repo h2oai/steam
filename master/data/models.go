@@ -143,6 +143,7 @@ type Dataset struct {
 
 type Model struct {
 	Id                  int64
+	ProjectId           int64
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
 	Name                string
@@ -158,10 +159,13 @@ type Model struct {
 	Metrics             string
 	MetricsVersion      string
 	Created             time.Time
+	LabelId             sql.NullInt64
+	LabelName           sql.NullString
 }
 
 type BinomialModel struct {
 	Id                  int64
+	ProjectId           int64
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
 	Name                string
@@ -177,6 +181,8 @@ type BinomialModel struct {
 	Metrics             string
 	MetricsVersion      string
 	Created             time.Time
+	LabelId             sql.NullInt64
+	LabelName           sql.NullString
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -186,6 +192,7 @@ type BinomialModel struct {
 
 type MultinomialModel struct {
 	Id                  int64
+	ProjectId           int64
 	TrainingDatasetId   int64
 	ValidationDatasetId int64
 	Name                string
@@ -201,6 +208,8 @@ type MultinomialModel struct {
 	Metrics             string
 	MetricsVersion      string
 	Created             time.Time
+	LabelId             sql.NullInt64
+	LabelName           sql.NullString
 	Mse                 float64
 	RSquared            float64
 	Logloss             float64
@@ -208,6 +217,7 @@ type MultinomialModel struct {
 
 type RegressionModel struct {
 	Id                   int64
+	ProjectId            int64
 	TrainingDatasetId    int64
 	ValidationDatasetId  int64
 	Name                 string
@@ -223,6 +233,8 @@ type RegressionModel struct {
 	Metrics              string
 	MetricsVersion       string
 	Created              time.Time
+	LabelId              sql.NullInt64
+	LabelName            sql.NullString
 	Mse                  float64
 	RSquared             float64
 	MeanResidualDeviance float64
@@ -239,6 +251,7 @@ type Label struct {
 
 type Service struct {
 	Id        int64
+	ProjectId int64
 	ModelId   int64
 	Address   string
 	Port      int64

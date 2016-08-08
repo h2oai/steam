@@ -33,7 +33,7 @@ export function receiveClusters(clusters) {
 export function fetchClusters() {
   return (dispatch) => {
     dispatch(requestClusters());
-    Remote.getClusters(0, 5, (error, res) => {
+    Remote.getClusters(0, 1000, (error, res) => {
       dispatch(receiveClusters(res));
     });
   };
@@ -112,6 +112,7 @@ export function fetchProject(projectId: number) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
       Remote.getProject(projectId, (error, res) => {
+        dispatch(receiveProject(res));
         resolve(res);
       });
     });
@@ -158,15 +159,25 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   };
 }
 
+export function importModelsFromCluster(clusterId: number, projectId: number, models: string[]) {
+  return (dispatch) => {
+    let promises = [];
+    return new Promise((resolve, reject) => {
+      models.map((modelName) => {
+        promises.push(dispatch(importModelFromCluster(clusterId, projectId, modelName)));
+      });
+      Promise.all(promises).then(() => {
+        resolve(projectId);
+      });
+    });
+  };
+}
+
 export function createProjectAndImportModelsFromCluster(projectName: string, clusterId: number, modelCategory: string, models: string[]) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
-      let promises = [];
       dispatch(createProject(projectName, modelCategory)).then((projectId) => {
-        models.map((modelName) => {
-          promises.push(dispatch(importModelFromCluster(clusterId, projectId, modelName)));
-        });
-        Promise.all(promises).then(() => {
+        dispatch(importModelsFromCluster(clusterId, projectId, models)).then(() => {
           resolve(projectId);
         });
       });
@@ -184,7 +195,7 @@ export function registerCluster(address: string) {
 
 export function fetchProjects() {
   return (dispatch) => {
-    Remote.getProjects(0, 5, (error, res) => {
+    Remote.getProjects(0, 1000, (error, res) => {
       dispatch(receiveProjects(<Project[]> res));
     });
   };

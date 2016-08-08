@@ -33,6 +33,7 @@ coverage.out
 # ignore list
 /steamY
 /dist/
+/var/
 /var/master/www/
 /var/master/db/steam.db
 /scoring-service-builder/.gradle
@@ -41,6 +42,15 @@ coverage.out
 /var/master/assets/*.jar
 /var/master/model
 /var/master/scripts
+
+# ignore list for testing
+/tests/bin
+/tests/h2o_jar
+/tests/lib
+/tests/include
+/tests/*.cov
+/tests/.Python
+/tests/*.log
 
 # ignore list for generated docs
 docs/_book

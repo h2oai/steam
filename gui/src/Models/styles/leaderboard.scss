@@ -20,7 +20,6 @@
       padding-top:1px;
     }
     .cell:nth-of-type(2) {
-      flex-basis: 50%;
       flex-grow: 2;
       .metadata {
         .model-name {
@@ -60,10 +59,12 @@
           color: $brand-dark-1;
         }
         &.labels {
+          cursor: default;
           .label-selector {
             display: inline-block;
             margin-left: 7px;
             select {
+              cursor: pointer;
               border: solid 1px $brand-orange;
               width: auto;
               height: auto;

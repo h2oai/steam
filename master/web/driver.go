@@ -20,9 +20,7 @@ type driverOpts struct {
 }
 
 type driverDBOpts struct {
-	Name              string
-	Username          string
-	SSLMode           string
+	Connection        data.Connection
 	SuperuserName     string
 	SuperuserPassword string
 }
@@ -40,9 +38,7 @@ func newService(opts driverOpts) (web.Service, az.Directory, error) {
 	}
 
 	ds, err := data.Create(
-		opts.DB.Name,
-		opts.DB.Username,
-		opts.DB.SSLMode,
+		opts.DB.Connection,
 		opts.DB.SuperuserName,
 		opts.DB.SuperuserPassword,
 	)

@@ -1,0 +1,20 @@
+@import '../../variables.scss';
+
+.import-modal {
+  .outer-table > .row {
+    &:last-of-type, &:nth-last-of-type(2) {
+      border-bottom: none;
+    }
+    > .cell:first-of-type {
+      flex-basis: $xlarge * 3;
+    }
+    > .cell {
+      flex-basis: 100%;
+    }
+  }
+  .button-container {
+    button.default {
+      margin-right: $small;
+    }
+  }
+}
