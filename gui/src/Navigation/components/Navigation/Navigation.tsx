@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import * as $ from 'jquery';
 import * as classNames from 'classnames';
 import { Link, withRouter } from 'react-router';
 import { Sidebar } from '../Sidebar/Sidebar';
@@ -98,6 +99,16 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     return parentRoute.name;
   }
 
+  logout() {
+    $.ajax({
+      url: 'http://' + window.location.host,
+      beforeSend: function (xhr) {
+        xhr.withCredentials = true;
+        xhr.setRequestHeader('Authorization', 'Basic ' + btoa('fjkdshfhkjsdfjkhsdkfjhsdf:hfkjdshfdhff'))
+      }
+    });
+  }
+
   renderSubmenu(activeRoute: any): JSX.Element {
     let childRoutes = routes[0].childRoutes.filter((route) => {
       return (route.path.indexOf(activeRoute.path) !== -1 && route.path !== activeRoute.path);
@@ -170,7 +181,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                 })
                 }
                 <li className="logout nav-list--item">
-                  <a href={window.location.protocol + '//log:out@' + window.location.host + window.location.pathname + window.location.hash + window.location.search}>
+                  <a onClick={this.logout.bind(this)}>
                     <i className="fa fa-sign-out"/>
                     <div className="nav-list--label">Logout</div>
                   </a>
