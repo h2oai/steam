@@ -207,8 +207,11 @@ $navigation-width: $base-grid-unit * 5;
     }
     li {
       &.logout {
+        display: flex;
+        flex-direction: column;
         position: absolute;
         bottom: 0;
+        height: initial;
         color: $brand-white;
       }
       display: flex;
