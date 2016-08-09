@@ -80,7 +80,6 @@ export function deployModel(modelId: number, name: string, projectId: string): F
         return;
       }
       dispatch(closeNotification());
-      debugger;
       hashHistory.push('/projects/' + projectId + '/deployment');
     });
   };
