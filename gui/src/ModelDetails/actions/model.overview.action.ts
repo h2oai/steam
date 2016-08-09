@@ -2,6 +2,7 @@
  * Created by justin on 6/28/16.
  */
 import * as Remote from '../../Proxy/Proxy';
+import { openNotification } from '../../App/actions/notification.actions';
 export const FETCH_MODEL_OVERVIEW = 'FETCH_MODEL_OVERVIEW';
 export const RECEIVE_MODEL_OVERVIEW = 'RECEIVE_MODEL_OVERVIEW';
 export const FETCH_DOWNLOAD_MODEL = 'FETCH_DOWNLOAD_MODEL';
@@ -37,6 +38,10 @@ export function fetchModelOverview(modelId: number): Function {
   return (dispatch) => {
     dispatch(requestModelOverview());
     Remote.getModel(modelId, (error, model) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
       getModelStrategy(model.model_category.toLowerCase())(modelId, (error, res) => {
         dispatch(receiveModelOverview(res));
       });
@@ -70,9 +75,13 @@ export function deployModel(modelId: number, name: string): Function {
     /**
      *   if arg2 is "", deploys a vanilla war file as a service
      *   if arg2 is a valid package name, the python scripts from the package are
-     *     bundled into the war file. 
+     *     bundled into the war file.
      */
     Remote.startService(modelId, "", (error, res) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
       console.log(res);
     });
   };
