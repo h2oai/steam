@@ -1177,7 +1177,7 @@ class RPCClient:
 		Parameters:
 
 		Returns:
-		entity_types: No description available (EntityType)
+		entity_types: A list of Steam entity types. (EntityType)
 		"""
 		request = {
 		}
@@ -1191,7 +1191,7 @@ class RPCClient:
 		Parameters:
 
 		Returns:
-		permissions: No description available (Permission)
+		permissions: A list of Steam permissions. (Permission)
 		"""
 		request = {
 		}
@@ -1217,10 +1217,10 @@ class RPCClient:
 		List permissions for a role
 
 		Parameters:
-		role_id: No description available (int64)
+		role_id: Integer ID of a role in Steam. (int64)
 
 		Returns:
-		permissions: No description available (Permission)
+		permissions: A list of Steam permissions. (Permission)
 		"""
 		request = {
 			'role_id': role_id
@@ -1233,10 +1233,10 @@ class RPCClient:
 		List permissions for an identity
 
 		Parameters:
-		identity_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
 
 		Returns:
-		permissions: No description available (Permission)
+		permissions: A list of Steam permissions. (Permission)
 		"""
 		request = {
 			'identity_id': identity_id
@@ -1249,11 +1249,11 @@ class RPCClient:
 		Create a role
 
 		Parameters:
-		name: No description available (string)
-		description: No description available (string)
+		name: A string name. (string)
+		description: A string description (string)
 
 		Returns:
-		role_id: No description available (int64)
+		role_id: Integer ID of the role in Steam. (int64)
 		"""
 		request = {
 			'name': name
@@ -1267,11 +1267,11 @@ class RPCClient:
 		List roles
 
 		Parameters:
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: An offset to start the search on. (int64)
+		limit: The maximum returned objects. (int64)
 
 		Returns:
-		roles: No description available (Role)
+		roles: A list of Steam roles. (Role)
 		"""
 		request = {
 			'offset': offset
@@ -1285,10 +1285,10 @@ class RPCClient:
 		List roles for an identity
 
 		Parameters:
-		identity_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
 
 		Returns:
-		roles: No description available (Role)
+		roles: A list of Steam roles. (Role)
 		"""
 		request = {
 			'identity_id': identity_id
@@ -1301,10 +1301,10 @@ class RPCClient:
 		Get role details
 
 		Parameters:
-		role_id: No description available (int64)
+		role_id: Integer ID of a role in Steam. (int64)
 
 		Returns:
-		role: No description available (Role)
+		role: A Steam role. (Role)
 		"""
 		request = {
 			'role_id': role_id
@@ -1317,10 +1317,10 @@ class RPCClient:
 		Get role details by name
 
 		Parameters:
-		name: No description available (string)
+		name: A role name. (string)
 
 		Returns:
-		role: No description available (Role)
+		role: A Steam role. (Role)
 		"""
 		request = {
 			'name': name
@@ -1333,9 +1333,9 @@ class RPCClient:
 		Update a role
 
 		Parameters:
-		role_id: No description available (int64)
-		name: No description available (string)
-		description: No description available (string)
+		role_id: Integer ID of a role in Steam. (int64)
+		name: A string name. (string)
+		description: A string description (string)
 
 		Returns:None
 		"""
@@ -1352,8 +1352,8 @@ class RPCClient:
 		Link a role with permissions
 
 		Parameters:
-		role_id: No description available (int64)
-		permission_ids: No description available (int64)
+		role_id: Integer ID of a role in Steam. (int64)
+		permission_ids: A list of Integer IDs for permissions in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1369,8 +1369,8 @@ class RPCClient:
 		Link a role with a permission
 
 		Parameters:
-		role_id: No description available (int64)
-		permission_id: No description available (int64)
+		role_id: Integer ID of a role in Steam. (int64)
+		permission_id: Integer ID of a permission in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1386,8 +1386,8 @@ class RPCClient:
 		Unlink a role from a permission
 
 		Parameters:
-		role_id: No description available (int64)
-		permission_id: No description available (int64)
+		role_id: Integer ID of a role in Steam. (int64)
+		permission_id: Integer ID of a permission in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1403,7 +1403,7 @@ class RPCClient:
 		Delete a role
 
 		Parameters:
-		role_id: No description available (int64)
+		role_id: Integer ID of a role in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1418,11 +1418,11 @@ class RPCClient:
 		Create a workgroup
 
 		Parameters:
-		name: No description available (string)
-		description: No description available (string)
+		name: A string name. (string)
+		description: A string description (string)
 
 		Returns:
-		workgroup_id: No description available (int64)
+		workgroup_id: Integer ID of the workgroup in Steam. (int64)
 		"""
 		request = {
 			'name': name
@@ -1436,11 +1436,11 @@ class RPCClient:
 		List workgroups
 
 		Parameters:
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: An offset to start the search on. (int64)
+		limit: The maximum returned objects. (int64)
 
 		Returns:
-		workgroups: No description available (Workgroup)
+		workgroups: A list of workgroups in Steam. (Workgroup)
 		"""
 		request = {
 			'offset': offset
@@ -1454,10 +1454,10 @@ class RPCClient:
 		List workgroups for an identity
 
 		Parameters:
-		identity_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
 
 		Returns:
-		workgroups: No description available (Workgroup)
+		workgroups: A list of workgroups in Steam. (Workgroup)
 		"""
 		request = {
 			'identity_id': identity_id
@@ -1470,10 +1470,10 @@ class RPCClient:
 		Get workgroup details
 
 		Parameters:
-		workgroup_id: No description available (int64)
+		workgroup_id: Integer ID of a workgroup in Steam. (int64)
 
 		Returns:
-		workgroup: No description available (Workgroup)
+		workgroup: A workgroup in Steam. (Workgroup)
 		"""
 		request = {
 			'workgroup_id': workgroup_id
@@ -1486,10 +1486,10 @@ class RPCClient:
 		Get workgroup details by name
 
 		Parameters:
-		name: No description available (string)
+		name: A string name. (string)
 
 		Returns:
-		workgroup: No description available (Workgroup)
+		workgroup: A workgroup in Steam. (Workgroup)
 		"""
 		request = {
 			'name': name
@@ -1502,9 +1502,9 @@ class RPCClient:
 		Update a workgroup
 
 		Parameters:
-		workgroup_id: No description available (int64)
-		name: No description available (string)
-		description: No description available (string)
+		workgroup_id: Integer ID of a workgrou in Steam. (int64)
+		name: A string name. (string)
+		description: A string description (string)
 
 		Returns:None
 		"""
@@ -1521,7 +1521,7 @@ class RPCClient:
 		Delete a workgroup
 
 		Parameters:
-		workgroup_id: No description available (int64)
+		workgroup_id: Integer ID of a workgroup in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1536,11 +1536,11 @@ class RPCClient:
 		Create an identity
 
 		Parameters:
-		name: No description available (string)
-		password: No description available (string)
+		name: A string name. (string)
+		password: A string password (string)
 
 		Returns:
-		identity_id: No description available (int64)
+		identity_id: Integer ID of the identity in Steam. (int64)
 		"""
 		request = {
 			'name': name
@@ -1554,11 +1554,11 @@ class RPCClient:
 		List identities
 
 		Parameters:
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: An offset to start the search on. (int64)
+		limit: The maximum returned objects. (int64)
 
 		Returns:
-		identities: No description available (Identity)
+		identities: A list of identities in Steam. (Identity)
 		"""
 		request = {
 			'offset': offset
@@ -1572,10 +1572,10 @@ class RPCClient:
 		List identities for a workgroup
 
 		Parameters:
-		workgroup_id: No description available (int64)
+		workgroup_id: Integer ID of a workgroup in Steam. (int64)
 
 		Returns:
-		identities: No description available (Identity)
+		identities: A list of identities in Steam. (Identity)
 		"""
 		request = {
 			'workgroup_id': workgroup_id
@@ -1588,10 +1588,10 @@ class RPCClient:
 		List identities for a role
 
 		Parameters:
-		role_id: No description available (int64)
+		role_id: Integer ID of a role in Steam. (int64)
 
 		Returns:
-		identities: No description available (Identity)
+		identities: A list of identities in Steam. (Identity)
 		"""
 		request = {
 			'role_id': role_id
@@ -1604,10 +1604,10 @@ class RPCClient:
 		Get identity details
 
 		Parameters:
-		identity_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
 
 		Returns:
-		identity: No description available (Identity)
+		identity: An identity in Steam. (Identity)
 		"""
 		request = {
 			'identity_id': identity_id
@@ -1620,10 +1620,10 @@ class RPCClient:
 		Get identity details by name
 
 		Parameters:
-		name: No description available (string)
+		name: An identity name. (string)
 
 		Returns:
-		identity: No description available (Identity)
+		identity: An identity in Steam. (Identity)
 		"""
 		request = {
 			'name': name
@@ -1636,8 +1636,8 @@ class RPCClient:
 		Link an identity with a workgroup
 
 		Parameters:
-		identity_id: No description available (int64)
-		workgroup_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
+		workgroup_id: Integer ID of a workgroup in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1653,8 +1653,8 @@ class RPCClient:
 		Unlink an identity from a workgroup
 
 		Parameters:
-		identity_id: No description available (int64)
-		workgroup_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
+		workgroup_id: Integer ID of a workgroup in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1670,8 +1670,8 @@ class RPCClient:
 		Link an identity with a role
 
 		Parameters:
-		identity_id: No description available (int64)
-		role_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
+		role_id: Integer ID of a role in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1687,8 +1687,8 @@ class RPCClient:
 		Unlink an identity from a role
 
 		Parameters:
-		identity_id: No description available (int64)
-		role_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
+		role_id: Integer ID of a role in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1704,8 +1704,8 @@ class RPCClient:
 		Update an identity
 
 		Parameters:
-		identity_id: No description available (int64)
-		password: No description available (string)
+		identity_id: Integer ID of an identity in Steam. (int64)
+		password: Password for identity (string)
 
 		Returns:None
 		"""
@@ -1721,7 +1721,7 @@ class RPCClient:
 		Deactivate an identity
 
 		Parameters:
-		identity_id: No description available (int64)
+		identity_id: Integer ID of an identity in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1736,10 +1736,10 @@ class RPCClient:
 		Share an entity with a workgroup
 
 		Parameters:
-		kind: No description available (string)
-		workgroup_id: No description available (int64)
-		entity_type_id: No description available (int64)
-		entity_id: No description available (int64)
+		kind: Type of permission. Can be view, edit, or own. (string)
+		workgroup_id: Integer ID of a workgroup in Steam. (int64)
+		entity_type_id: Integer ID for the type of entity. (int64)
+		entity_id: Integer ID for an entity in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1757,11 +1757,11 @@ class RPCClient:
 		List privileges for an entity
 
 		Parameters:
-		entity_type_id: No description available (int64)
-		entity_id: No description available (int64)
+		entity_type_id: Integer ID for the type of entity. (int64)
+		entity_id: Integer ID for an entity in Steam. (int64)
 
 		Returns:
-		privileges: No description available (EntityPrivilege)
+		privileges: A list of entity privileges (EntityPrivilege)
 		"""
 		request = {
 			'entity_type_id': entity_type_id
@@ -1775,10 +1775,10 @@ class RPCClient:
 		Unshare an entity
 
 		Parameters:
-		kind: No description available (string)
-		workgroup_id: No description available (int64)
-		entity_type_id: No description available (int64)
-		entity_id: No description available (int64)
+		kind: Type of permission. Can be view, edit, or own. (string)
+		workgroup_id: Integer ID of a workgroup in Steam. (int64)
+		entity_type_id: Integer ID for the type of entity. (int64)
+		entity_id: Integer ID for an entity in Steam. (int64)
 
 		Returns:None
 		"""
@@ -1796,13 +1796,13 @@ class RPCClient:
 		List audit trail records for an entity
 
 		Parameters:
-		entity_type_id: No description available (int64)
-		entity_id: No description available (int64)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		entity_type_id: Integer ID for the type of entity. (int64)
+		entity_id: Integer ID for an entity in Steam. (int64)
+		offset: An offset to start the search on. (int64)
+		limit: The maximum returned objects. (int64)
 
 		Returns:
-		history: No description available (EntityHistory)
+		history: A list of actions performed on the entity. (EntityHistory)
 		"""
 		request = {
 			'entity_type_id': entity_type_id

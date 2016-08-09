@@ -4,6 +4,7 @@
 
 import * as Remote from '../../Proxy/Proxy';
 import { Project } from '../../Proxy/Proxy';
+import { openNotification } from '../../App/actions/notification.actions';
 
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
@@ -34,6 +35,9 @@ export function fetchClusters() {
   return (dispatch) => {
     dispatch(requestClusters());
     Remote.getClusters(0, 1000, (error, res) => {
+      if (error) {
+        openNotification('error', 'There was an error retrieving your list of clusters', null);
+      }
       dispatch(receiveClusters(res));
     });
   };
@@ -103,6 +107,10 @@ export function receiveModelsFromProject(models) {
 export function fetchModelsFromProject(projectId: number) {
   return (dispatch) => {
     Remote.getModels(projectId, 0, 5, (error, res) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
       dispatch(receiveModelsFromProject(res));
     });
   };
@@ -112,6 +120,11 @@ export function fetchProject(projectId: number) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
       Remote.getProject(projectId, (error, res) => {
+        if (error) {
+          dispatch(openNotification('error', error.toString(), null));
+          reject(error);
+          return;
+        }
         dispatch(receiveProject(res));
         resolve(res);
       });
@@ -123,6 +136,9 @@ export function fetchModelsFromCluster(clusterId: number, frameKey: string) {
   return (dispatch) => {
     dispatch(requestModels());
     Remote.getModelsFromCluster(clusterId, frameKey, (error, res) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+      }
       dispatch(receiveModelsFromCluster(res));
     });
   };
@@ -132,6 +148,10 @@ export function fetchDatasetsFromCluster(clusterId: number) {
   return (dispatch) => {
     dispatch(requestDatasetsFromCluster());
     Remote.getDatasetsFromCluster(clusterId, (error, res) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
       dispatch(receiveDatasetsFromCluster(res));
     });
   };
@@ -141,6 +161,11 @@ export function createProject(name: string, modelCategory: string) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
       Remote.createProject(name, '', modelCategory, (error, res) => {
+        if (error) {
+          dispatch(openNotification('error', error.toString(), null));
+          reject(error);
+          return;
+        }
         dispatch(createProjectCompleted(res));
         resolve(res);
       });
@@ -152,6 +177,11 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   return (dispatch) => {
     return new Promise((resolve, reject) => {
       Remote.importModelFromCluster(clusterId, projectId, modelName, modelName, (error, res) => {
+        if (error) {
+          dispatch(openNotification('error', error.toString(), null));
+          reject(error);
+          return;
+        }
         dispatch(importModelFromClusterCompleted(res));
         resolve(res);
       });
@@ -188,6 +218,22 @@ export function createProjectAndImportModelsFromCluster(projectName: string, clu
 export function registerCluster(address: string) {
   return (dispatch) => {
     Remote.registerCluster(address, (error, res) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+      dispatch(fetchClusters());
+    });
+  };
+}
+
+export function unregisterCluster(clusterId: number) {
+  return (dispatch) => {
+    Remote.unregisterCluster(clusterId, (error) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
       dispatch(fetchClusters());
     });
   };
@@ -196,6 +242,10 @@ export function registerCluster(address: string) {
 export function fetchProjects() {
   return (dispatch) => {
     Remote.getProjects(0, 1000, (error, res) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
       dispatch(receiveProjects(<Project[]> res));
     });
   };

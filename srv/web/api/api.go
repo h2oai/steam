@@ -697,188 +697,188 @@ type DeleteEngine struct {
 }
 type GetAllEntityTypes struct {
 	_           int
-	EntityTypes []EntityType
+	EntityTypes []EntityType `help:"A list of Steam entity types."`
 }
 type GetAllPermissions struct {
 	_           int
-	Permissions []Permission
+	Permissions []Permission `help:"A list of Steam permissions."`
 }
 type GetAllClusterTypes struct {
 	_            int
 	ClusterTypes []ClusterType
 }
 type GetPermissionsForRole struct {
-	RoleId      int64
+	RoleId      int64 `help:"Integer ID of a role in Steam."`
 	_           int
-	Permissions []Permission
+	Permissions []Permission `help:"A list of Steam permissions."`
 }
 type GetPermissionsForIdentity struct {
-	IdentityId  int64
+	IdentityId  int64 `help:"Integer ID of an identity in Steam."`
 	_           int
-	Permissions []Permission
+	Permissions []Permission `help:"A list of Steam permissions."`
 }
 type CreateRole struct {
-	Name        string
-	Description string
+	Name        string `help:"A string name."`
+	Description string `help:"A string description"`
 	_           int
-	RoleId      int64
+	RoleId      int64 `help:"Integer ID of the role in Steam."`
 }
 type GetRoles struct {
-	Offset int64
-	Limit  int64
+	Offset int64 `help:"An offset to start the search on."`
+	Limit  int64 `help:"The maximum returned objects."`
 	_      int
-	Roles  []Role
+	Roles  []Role `help:"A list of Steam roles."`
 }
 type GetRolesForIdentity struct {
-	IdentityId int64
+	IdentityId int64 `help:"Integer ID of an identity in Steam."`
 	_          int
-	Roles      []Role
+	Roles      []Role `help:"A list of Steam roles."`
 }
 type GetRole struct {
-	RoleId int64
+	RoleId int64 `help:"Integer ID of a role in Steam."`
 	_      int
-	Role   Role
+	Role   Role `help:"A Steam role."`
 }
 type GetRoleByName struct {
-	Name string
+	Name string `help:"A role name."`
 	_    int
-	Role Role
+	Role Role `help:"A Steam role."`
 }
 type UpdateRole struct {
-	RoleId      int64
-	Name        string
-	Description string
+	RoleId      int64  `help:"Integer ID of a role in Steam."`
+	Name        string `help:"A string name."`
+	Description string `help:"A string description"`
 }
 type LinkRoleWithPermissions struct {
-	RoleId        int64
-	PermissionIds []int64
+	RoleId        int64   `help:"Integer ID of a role in Steam."`
+	PermissionIds []int64 `help:"A list of Integer IDs for permissions in Steam."`
 }
 type LinkRoleWithPermission struct {
-	RoleId       int64
-	PermissionId int64
+	RoleId       int64 `help:"Integer ID of a role in Steam."`
+	PermissionId int64 `help:"Integer ID of a permission in Steam."`
 }
 type UnlinkRoleFromPermission struct {
-	RoleId       int64
-	PermissionId int64
+	RoleId       int64 `help:"Integer ID of a role in Steam."`
+	PermissionId int64 `help:"Integer ID of a permission in Steam."`
 }
 type DeleteRole struct {
-	RoleId int64
+	RoleId int64 `help:"Integer ID of a role in Steam."`
 }
 type CreateWorkgroup struct {
-	Name        string
-	Description string
+	Name        string `help:"A string name."`
+	Description string `help:"A string description"`
 	_           int
-	WorkgroupId int64
+	WorkgroupId int64 `help:"Integer ID of the workgroup in Steam."`
 }
 type GetWorkgroups struct {
-	Offset     int64
-	Limit      int64
+	Offset     int64 `help:"An offset to start the search on."`
+	Limit      int64 `help:"The maximum returned objects."`
 	_          int
-	Workgroups []Workgroup
+	Workgroups []Workgroup `help:"A list of workgroups in Steam."`
 }
 type GetWorkgroupsForIdentity struct {
-	IdentityId int64
+	IdentityId int64 `help:"Integer ID of an identity in Steam."`
 	_          int
-	Workgroups []Workgroup
+	Workgroups []Workgroup `help:"A list of workgroups in Steam."`
 }
 type GetWorkgroup struct {
-	WorkgroupId int64
+	WorkgroupId int64 `help:"Integer ID of a workgroup in Steam."`
 	_           int
-	Workgroup   Workgroup
+	Workgroup   Workgroup `help:"A workgroup in Steam."`
 }
 type GetWorkgroupByName struct {
-	Name      string
+	Name      string `help:"A string name."`
 	_         int
-	Workgroup Workgroup
+	Workgroup Workgroup `help:"A workgroup in Steam."`
 }
 type UpdateWorkgroup struct {
-	WorkgroupId int64
-	Name        string
-	Description string
+	WorkgroupId int64  `help:"Integer ID of a workgrou in Steam."`
+	Name        string `help:"A string name."`
+	Description string `help:"A string description"`
 }
 type DeleteWorkgroup struct {
-	WorkgroupId int64
+	WorkgroupId int64 `help:"Integer ID of a workgroup in Steam."`
 }
 type CreateIdentity struct {
-	Name       string
-	Password   string
+	Name       string `help:"A string name."`
+	Password   string `help:"A string password"`
 	_          int
-	IdentityId int64
+	IdentityId int64 `help:"Integer ID of the identity in Steam."`
 }
 type GetIdentities struct {
-	Offset     int64
-	Limit      int64
+	Offset     int64 `help:"An offset to start the search on."`
+	Limit      int64 `help:"The maximum returned objects."`
 	_          int
-	Identities []Identity
+	Identities []Identity `help:"A list of identities in Steam."`
 }
 type GetIdentitiesForWorkgroup struct {
-	WorkgroupId int64
+	WorkgroupId int64 `help:"Integer ID of a workgroup in Steam."`
 	_           int
-	Identities  []Identity
+	Identities  []Identity `help:"A list of identities in Steam."`
 }
 type GetIdentitiesForRole struct {
-	RoleId     int64
+	RoleId     int64 `help:"Integer ID of a role in Steam."`
 	_          int
-	Identities []Identity
+	Identities []Identity `help:"A list of identities in Steam."`
 }
 type GetIdentity struct {
-	IdentityId int64
+	IdentityId int64 `help:"Integer ID of an identity in Steam."`
 	_          int
-	Identity   Identity
+	Identity   Identity `help:"An identity in Steam."`
 }
 type GetIdentityByName struct {
-	Name     string
+	Name     string `help:"An identity name."`
 	_        int
-	Identity Identity
+	Identity Identity `help:"An identity in Steam."`
 }
 type LinkIdentityWithWorkgroup struct {
-	IdentityId  int64
-	WorkgroupId int64
+	IdentityId  int64 `help:"Integer ID of an identity in Steam."`
+	WorkgroupId int64 `help:"Integer ID of a workgroup in Steam."`
 }
 type UnlinkIdentityFromWorkgroup struct {
-	IdentityId  int64
-	WorkgroupId int64
+	IdentityId  int64 `help:"Integer ID of an identity in Steam."`
+	WorkgroupId int64 `help:"Integer ID of a workgroup in Steam."`
 }
 type LinkIdentityWithRole struct {
-	IdentityId int64
-	RoleId     int64
+	IdentityId int64 `help:"Integer ID of an identity in Steam."`
+	RoleId     int64 `help:"Integer ID of a role in Steam."`
 }
 type UnlinkIdentityFromRole struct {
-	IdentityId int64
-	RoleId     int64
+	IdentityId int64 `help:"Integer ID of an identity in Steam."`
+	RoleId     int64 `help:"Integer ID of a role in Steam."`
 }
 type UpdateIdentity struct {
-	IdentityId int64
-	Password   string
+	IdentityId int64  `help:"Integer ID of an identity in Steam."`
+	Password   string `help:"Password for identity"`
 }
 type DeactivateIdentity struct {
-	IdentityId int64
+	IdentityId int64 `help:"Integer ID of an identity in Steam."`
 }
 type ShareEntity struct {
-	Kind         string
-	WorkgroupId  int64
-	EntityTypeId int64
-	EntityId     int64
+	Kind         string `help:"Type of permission. Can be view, edit, or own."`
+	WorkgroupId  int64  `help:"Integer ID of a workgroup in Steam."`
+	EntityTypeId int64  `help:"Integer ID for the type of entity."`
+	EntityId     int64  `help:"Integer ID for an entity in Steam."`
 }
 type GetPrivileges struct {
-	EntityTypeId int64
-	EntityId     int64
+	EntityTypeId int64 `help:"Integer ID for the type of entity."`
+	EntityId     int64 `help:"Integer ID for an entity in Steam."`
 	_            int
-	Privileges   []EntityPrivilege
+	Privileges   []EntityPrivilege `help:"A list of entity privileges"`
 }
 type UnshareEntity struct {
-	Kind         string
-	WorkgroupId  int64
-	EntityTypeId int64
-	EntityId     int64
+	Kind         string `help:"Type of permission. Can be view, edit, or own."`
+	WorkgroupId  int64  `help:"Integer ID of a workgroup in Steam."`
+	EntityTypeId int64  `help:"Integer ID for the type of entity."`
+	EntityId     int64  `help:"Integer ID for an entity in Steam."`
 }
 type GetHistory struct {
-	EntityTypeId int64
-	EntityId     int64
-	Offset       int64
-	Limit        int64
+	EntityTypeId int64 `help:"Integer ID for the type of entity."`
+	EntityId     int64 `help:"Integer ID for an entity in Steam."`
+	Offset       int64 `help:"An offset to start the search on."`
+	Limit        int64 `help:"The maximum returned objects."`
 	_            int
-	History      []EntityHistory
+	History      []EntityHistory `help:"A list of actions performed on the entity."`
 }
 
 type CreatePackage struct {

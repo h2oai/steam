@@ -324,15 +324,15 @@ Examples:
 `
 
 func createIdentity(c *context) *cobra.Command {
-	var name string     // No description available
-	var password string // No description available
+	var name string     // A string name.
+	var password string // A string password
 
 	cmd := newCmd(c, createIdentityHelp, func(c *context, args []string) {
 
 		// Create an identity
 		identityId, err := c.remote.CreateIdentity(
-			name,     // No description available
-			password, // No description available
+			name,     // A string name.
+			password, // A string password
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -341,8 +341,8 @@ func createIdentity(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().StringVar(&password, "password", password, "No description available")
+	cmd.Flags().StringVar(&name, "name", name, "A string name.")
+	cmd.Flags().StringVar(&password, "password", password, "A string password")
 	return cmd
 }
 
@@ -471,15 +471,15 @@ Examples:
 `
 
 func createRole(c *context) *cobra.Command {
-	var description string // No description available
-	var name string        // No description available
+	var description string // A string description
+	var name string        // A string name.
 
 	cmd := newCmd(c, createRoleHelp, func(c *context, args []string) {
 
 		// Create a role
 		roleId, err := c.remote.CreateRole(
-			name,        // No description available
-			description, // No description available
+			name,        // A string name.
+			description, // A string description
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -488,8 +488,8 @@ func createRole(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
+	cmd.Flags().StringVar(&description, "description", description, "A string description")
+	cmd.Flags().StringVar(&name, "name", name, "A string name.")
 	return cmd
 }
 
@@ -506,15 +506,15 @@ Examples:
 `
 
 func createWorkgroup(c *context) *cobra.Command {
-	var description string // No description available
-	var name string        // No description available
+	var description string // A string description
+	var name string        // A string name.
 
 	cmd := newCmd(c, createWorkgroupHelp, func(c *context, args []string) {
 
 		// Create a workgroup
 		workgroupId, err := c.remote.CreateWorkgroup(
-			name,        // No description available
-			description, // No description available
+			name,        // A string name.
+			description, // A string description
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -523,8 +523,8 @@ func createWorkgroup(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
+	cmd.Flags().StringVar(&description, "description", description, "A string description")
+	cmd.Flags().StringVar(&name, "name", name, "A string name.")
 	return cmd
 }
 
@@ -555,13 +555,13 @@ Examples:
 `
 
 func deactivateIdentity(c *context) *cobra.Command {
-	var identityId int64 // No description available
+	var identityId int64 // Integer ID of an identity in Steam.
 
 	cmd := newCmd(c, deactivateIdentityHelp, func(c *context, args []string) {
 
 		// Deactivate an identity
 		err := c.remote.DeactivateIdentity(
-			identityId, // No description available
+			identityId, // Integer ID of an identity in Steam.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -569,7 +569,7 @@ func deactivateIdentity(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
 	return cmd
 }
 
@@ -912,13 +912,13 @@ Examples:
 `
 
 func deleteRole(c *context) *cobra.Command {
-	var roleId int64 // No description available
+	var roleId int64 // Integer ID of a role in Steam.
 
 	cmd := newCmd(c, deleteRoleHelp, func(c *context, args []string) {
 
 		// Delete a role
 		err := c.remote.DeleteRole(
-			roleId, // No description available
+			roleId, // Integer ID of a role in Steam.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -926,7 +926,7 @@ func deleteRole(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	return cmd
 }
 
@@ -972,13 +972,13 @@ Examples:
 `
 
 func deleteWorkgroup(c *context) *cobra.Command {
-	var workgroupId int64 // No description available
+	var workgroupId int64 // Integer ID of a workgroup in Steam.
 
 	cmd := newCmd(c, deleteWorkgroupHelp, func(c *context, args []string) {
 
 		// Delete a workgroup
 		err := c.remote.DeleteWorkgroup(
-			workgroupId, // No description available
+			workgroupId, // Integer ID of a workgroup in Steam.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -986,7 +986,7 @@ func deleteWorkgroup(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
 }
 
@@ -1889,19 +1889,19 @@ Examples:
 `
 
 func getHistory(c *context) *cobra.Command {
-	var entityId int64     // No description available
-	var entityTypeId int64 // No description available
-	var limit int64        // No description available
-	var offset int64       // No description available
+	var entityId int64     // Integer ID for an entity in Steam.
+	var entityTypeId int64 // Integer ID for the type of entity.
+	var limit int64        // The maximum returned objects.
+	var offset int64       // An offset to start the search on.
 
 	cmd := newCmd(c, getHistoryHelp, func(c *context, args []string) {
 
 		// List audit trail records for an entity
 		history, err := c.remote.GetHistory(
-			entityTypeId, // No description available
-			entityId,     // No description available
-			offset,       // No description available
-			limit,        // No description available
+			entityTypeId, // Integer ID for the type of entity.
+			entityId,     // Integer ID for an entity in Steam.
+			offset,       // An offset to start the search on.
+			limit,        // The maximum returned objects.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -1920,10 +1920,10 @@ func getHistory(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
-	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "Integer ID for an entity in Steam.")
+	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "Integer ID for the type of entity.")
+	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
 
@@ -1950,17 +1950,17 @@ Examples:
 func getIdentities(c *context) *cobra.Command {
 	var forWorkgroup bool // Switch for GetIdentitiesForWorkgroup()
 	var forRole bool      // Switch for GetIdentitiesForRole()
-	var limit int64       // No description available
-	var offset int64      // No description available
-	var roleId int64      // No description available
-	var workgroupId int64 // No description available
+	var limit int64       // The maximum returned objects.
+	var offset int64      // An offset to start the search on.
+	var roleId int64      // Integer ID of a role in Steam.
+	var workgroupId int64 // Integer ID of a workgroup in Steam.
 
 	cmd := newCmd(c, getIdentitiesHelp, func(c *context, args []string) {
 		if forWorkgroup { // GetIdentitiesForWorkgroup
 
 			// List identities for a workgroup
 			identities, err := c.remote.GetIdentitiesForWorkgroup(
-				workgroupId, // No description available
+				workgroupId, // Integer ID of a workgroup in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -1983,7 +1983,7 @@ func getIdentities(c *context) *cobra.Command {
 
 			// List identities for a role
 			identities, err := c.remote.GetIdentitiesForRole(
-				roleId, // No description available
+				roleId, // Integer ID of a role in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2006,8 +2006,8 @@ func getIdentities(c *context) *cobra.Command {
 
 			// List identities
 			identities, err := c.remote.GetIdentities(
-				offset, // No description available
-				limit,  // No description available
+				offset, // An offset to start the search on.
+				limit,  // The maximum returned objects.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2030,10 +2030,10 @@ func getIdentities(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forWorkgroup, "for-workgroup", forWorkgroup, "List identities for a workgroup")
 	cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List identities for a role")
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
 }
 
@@ -2054,15 +2054,15 @@ Examples:
 
 func getIdentity(c *context) *cobra.Command {
 	var byName bool      // Switch for GetIdentityByName()
-	var identityId int64 // No description available
-	var name string      // No description available
+	var identityId int64 // Integer ID of an identity in Steam.
+	var name string      // An identity name.
 
 	cmd := newCmd(c, getIdentityHelp, func(c *context, args []string) {
 		if byName { // GetIdentityByName
 
 			// Get identity details by name
 			identity, err := c.remote.GetIdentityByName(
-				name, // No description available
+				name, // An identity name.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2081,7 +2081,7 @@ func getIdentity(c *context) *cobra.Command {
 
 			// Get identity details
 			identity, err := c.remote.GetIdentity(
-				identityId, // No description available
+				identityId, // Integer ID of an identity in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2099,8 +2099,8 @@ func getIdentity(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&byName, "by-name", byName, "Get identity details by name")
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	cmd.Flags().StringVar(&name, "name", name, "An identity name.")
 	return cmd
 }
 
@@ -2636,15 +2636,15 @@ Examples:
 func getPermissions(c *context) *cobra.Command {
 	var forRole bool     // Switch for GetPermissionsForRole()
 	var forIdentity bool // Switch for GetPermissionsForIdentity()
-	var identityId int64 // No description available
-	var roleId int64     // No description available
+	var identityId int64 // Integer ID of an identity in Steam.
+	var roleId int64     // Integer ID of a role in Steam.
 
 	cmd := newCmd(c, getPermissionsHelp, func(c *context, args []string) {
 		if forRole { // GetPermissionsForRole
 
 			// List permissions for a role
 			permissions, err := c.remote.GetPermissionsForRole(
-				roleId, // No description available
+				roleId, // Integer ID of a role in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2665,7 +2665,7 @@ func getPermissions(c *context) *cobra.Command {
 
 			// List permissions for an identity
 			permissions, err := c.remote.GetPermissionsForIdentity(
-				identityId, // No description available
+				identityId, // Integer ID of an identity in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2686,8 +2686,8 @@ func getPermissions(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List permissions for a role")
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List permissions for an identity")
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	return cmd
 }
 
@@ -2704,15 +2704,15 @@ Examples:
 `
 
 func getPrivileges(c *context) *cobra.Command {
-	var entityId int64     // No description available
-	var entityTypeId int64 // No description available
+	var entityId int64     // Integer ID for an entity in Steam.
+	var entityTypeId int64 // Integer ID for the type of entity.
 
 	cmd := newCmd(c, getPrivilegesHelp, func(c *context, args []string) {
 
 		// List privileges for an entity
 		privileges, err := c.remote.GetPrivileges(
-			entityTypeId, // No description available
-			entityId,     // No description available
+			entityTypeId, // Integer ID for the type of entity.
+			entityId,     // Integer ID for an entity in Steam.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -2731,8 +2731,8 @@ func getPrivileges(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
-	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
+	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "Integer ID for an entity in Steam.")
+	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "Integer ID for the type of entity.")
 	return cmd
 }
 
@@ -2837,15 +2837,15 @@ Examples:
 
 func getRole(c *context) *cobra.Command {
 	var byName bool  // Switch for GetRoleByName()
-	var name string  // No description available
-	var roleId int64 // No description available
+	var name string  // A role name.
+	var roleId int64 // Integer ID of a role in Steam.
 
 	cmd := newCmd(c, getRoleHelp, func(c *context, args []string) {
 		if byName { // GetRoleByName
 
 			// Get role details by name
 			role, err := c.remote.GetRoleByName(
-				name, // No description available
+				name, // A role name.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2863,7 +2863,7 @@ func getRole(c *context) *cobra.Command {
 
 			// Get role details
 			role, err := c.remote.GetRole(
-				roleId, // No description available
+				roleId, // Integer ID of a role in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2880,8 +2880,8 @@ func getRole(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&byName, "by-name", byName, "Get role details by name")
 
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+	cmd.Flags().StringVar(&name, "name", name, "A role name.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	return cmd
 }
 
@@ -2903,16 +2903,16 @@ Examples:
 
 func getRoles(c *context) *cobra.Command {
 	var forIdentity bool // Switch for GetRolesForIdentity()
-	var identityId int64 // No description available
-	var limit int64      // No description available
-	var offset int64     // No description available
+	var identityId int64 // Integer ID of an identity in Steam.
+	var limit int64      // The maximum returned objects.
+	var offset int64     // An offset to start the search on.
 
 	cmd := newCmd(c, getRolesHelp, func(c *context, args []string) {
 		if forIdentity { // GetRolesForIdentity
 
 			// List roles for an identity
 			roles, err := c.remote.GetRolesForIdentity(
-				identityId, // No description available
+				identityId, // Integer ID of an identity in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2934,8 +2934,8 @@ func getRoles(c *context) *cobra.Command {
 
 			// List roles
 			roles, err := c.remote.GetRoles(
-				offset, // No description available
-				limit,  // No description available
+				offset, // An offset to start the search on.
+				limit,  // The maximum returned objects.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2956,9 +2956,9 @@ func getRoles(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
 
@@ -3143,15 +3143,15 @@ Examples:
 
 func getWorkgroup(c *context) *cobra.Command {
 	var byName bool       // Switch for GetWorkgroupByName()
-	var name string       // No description available
-	var workgroupId int64 // No description available
+	var name string       // A string name.
+	var workgroupId int64 // Integer ID of a workgroup in Steam.
 
 	cmd := newCmd(c, getWorkgroupHelp, func(c *context, args []string) {
 		if byName { // GetWorkgroupByName
 
 			// Get workgroup details by name
 			workgroup, err := c.remote.GetWorkgroupByName(
-				name, // No description available
+				name, // A string name.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3169,7 +3169,7 @@ func getWorkgroup(c *context) *cobra.Command {
 
 			// Get workgroup details
 			workgroup, err := c.remote.GetWorkgroup(
-				workgroupId, // No description available
+				workgroupId, // Integer ID of a workgroup in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3186,8 +3186,8 @@ func getWorkgroup(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&byName, "by-name", byName, "Get workgroup details by name")
 
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().StringVar(&name, "name", name, "A string name.")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
 }
 
@@ -3209,16 +3209,16 @@ Examples:
 
 func getWorkgroups(c *context) *cobra.Command {
 	var forIdentity bool // Switch for GetWorkgroupsForIdentity()
-	var identityId int64 // No description available
-	var limit int64      // No description available
-	var offset int64     // No description available
+	var identityId int64 // Integer ID of an identity in Steam.
+	var limit int64      // The maximum returned objects.
+	var offset int64     // An offset to start the search on.
 
 	cmd := newCmd(c, getWorkgroupsHelp, func(c *context, args []string) {
 		if forIdentity { // GetWorkgroupsForIdentity
 
 			// List workgroups for an identity
 			workgroups, err := c.remote.GetWorkgroupsForIdentity(
-				identityId, // No description available
+				identityId, // Integer ID of an identity in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3240,8 +3240,8 @@ func getWorkgroups(c *context) *cobra.Command {
 
 			// List workgroups
 			workgroups, err := c.remote.GetWorkgroups(
-				offset, // No description available
-				limit,  // No description available
+				offset, // An offset to start the search on.
+				limit,  // The maximum returned objects.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3262,9 +3262,9 @@ func getWorkgroups(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List workgroups for an identity")
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
 
@@ -3369,17 +3369,17 @@ Examples:
 func linkIdentity(c *context) *cobra.Command {
 	var withWorkgroup bool // Switch for LinkIdentityWithWorkgroup()
 	var withRole bool      // Switch for LinkIdentityWithRole()
-	var identityId int64   // No description available
-	var roleId int64       // No description available
-	var workgroupId int64  // No description available
+	var identityId int64   // Integer ID of an identity in Steam.
+	var roleId int64       // Integer ID of a role in Steam.
+	var workgroupId int64  // Integer ID of a workgroup in Steam.
 
 	cmd := newCmd(c, linkIdentityHelp, func(c *context, args []string) {
 		if withWorkgroup { // LinkIdentityWithWorkgroup
 
 			// Link an identity with a workgroup
 			err := c.remote.LinkIdentityWithWorkgroup(
-				identityId,  // No description available
-				workgroupId, // No description available
+				identityId,  // Integer ID of an identity in Steam.
+				workgroupId, // Integer ID of a workgroup in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3390,8 +3390,8 @@ func linkIdentity(c *context) *cobra.Command {
 
 			// Link an identity with a role
 			err := c.remote.LinkIdentityWithRole(
-				identityId, // No description available
-				roleId,     // No description available
+				identityId, // Integer ID of an identity in Steam.
+				roleId,     // Integer ID of a role in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3402,9 +3402,9 @@ func linkIdentity(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&withWorkgroup, "with-workgroup", withWorkgroup, "Link an identity with a workgroup")
 	cmd.Flags().BoolVar(&withRole, "with-role", withRole, "Link an identity with a role")
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
 }
 
@@ -3460,16 +3460,16 @@ Examples:
 
 func linkRole(c *context) *cobra.Command {
 	var withPermission bool // Switch for LinkRoleWithPermission()
-	var permissionId int64  // No description available
-	var roleId int64        // No description available
+	var permissionId int64  // Integer ID of a permission in Steam.
+	var roleId int64        // Integer ID of a role in Steam.
 
 	cmd := newCmd(c, linkRoleHelp, func(c *context, args []string) {
 		if withPermission { // LinkRoleWithPermission
 
 			// Link a role with a permission
 			err := c.remote.LinkRoleWithPermission(
-				roleId,       // No description available
-				permissionId, // No description available
+				roleId,       // Integer ID of a role in Steam.
+				permissionId, // Integer ID of a permission in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3479,8 +3479,8 @@ func linkRole(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&withPermission, "with-permission", withPermission, "Link a role with a permission")
 
-	cmd.Flags().Int64Var(&permissionId, "permission-id", permissionId, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+	cmd.Flags().Int64Var(&permissionId, "permission-id", permissionId, "Integer ID of a permission in Steam.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	return cmd
 }
 
@@ -3663,19 +3663,19 @@ Examples:
 `
 
 func shareEntity(c *context) *cobra.Command {
-	var entityId int64     // No description available
-	var entityTypeId int64 // No description available
-	var kind string        // No description available
-	var workgroupId int64  // No description available
+	var entityId int64     // Integer ID for an entity in Steam.
+	var entityTypeId int64 // Integer ID for the type of entity.
+	var kind string        // Type of permission. Can be view, edit, or own.
+	var workgroupId int64  // Integer ID of a workgroup in Steam.
 
 	cmd := newCmd(c, shareEntityHelp, func(c *context, args []string) {
 
 		// Share an entity with a workgroup
 		err := c.remote.ShareEntity(
-			kind,         // No description available
-			workgroupId,  // No description available
-			entityTypeId, // No description available
-			entityId,     // No description available
+			kind,         // Type of permission. Can be view, edit, or own.
+			workgroupId,  // Integer ID of a workgroup in Steam.
+			entityTypeId, // Integer ID for the type of entity.
+			entityId,     // Integer ID for an entity in Steam.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -3683,10 +3683,10 @@ func shareEntity(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
-	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
-	cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "Integer ID for an entity in Steam.")
+	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "Integer ID for the type of entity.")
+	cmd.Flags().StringVar(&kind, "kind", kind, "Type of permission. Can be view, edit, or own.")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
 }
 
@@ -3967,17 +3967,17 @@ Examples:
 func unlinkIdentity(c *context) *cobra.Command {
 	var fromWorkgroup bool // Switch for UnlinkIdentityFromWorkgroup()
 	var fromRole bool      // Switch for UnlinkIdentityFromRole()
-	var identityId int64   // No description available
-	var roleId int64       // No description available
-	var workgroupId int64  // No description available
+	var identityId int64   // Integer ID of an identity in Steam.
+	var roleId int64       // Integer ID of a role in Steam.
+	var workgroupId int64  // Integer ID of a workgroup in Steam.
 
 	cmd := newCmd(c, unlinkIdentityHelp, func(c *context, args []string) {
 		if fromWorkgroup { // UnlinkIdentityFromWorkgroup
 
 			// Unlink an identity from a workgroup
 			err := c.remote.UnlinkIdentityFromWorkgroup(
-				identityId,  // No description available
-				workgroupId, // No description available
+				identityId,  // Integer ID of an identity in Steam.
+				workgroupId, // Integer ID of a workgroup in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3988,8 +3988,8 @@ func unlinkIdentity(c *context) *cobra.Command {
 
 			// Unlink an identity from a role
 			err := c.remote.UnlinkIdentityFromRole(
-				identityId, // No description available
-				roleId,     // No description available
+				identityId, // Integer ID of an identity in Steam.
+				roleId,     // Integer ID of a role in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -4000,9 +4000,9 @@ func unlinkIdentity(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&fromWorkgroup, "from-workgroup", fromWorkgroup, "Unlink an identity from a workgroup")
 	cmd.Flags().BoolVar(&fromRole, "from-role", fromRole, "Unlink an identity from a role")
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
 }
 
@@ -4058,16 +4058,16 @@ Examples:
 
 func unlinkRole(c *context) *cobra.Command {
 	var fromPermission bool // Switch for UnlinkRoleFromPermission()
-	var permissionId int64  // No description available
-	var roleId int64        // No description available
+	var permissionId int64  // Integer ID of a permission in Steam.
+	var roleId int64        // Integer ID of a role in Steam.
 
 	cmd := newCmd(c, unlinkRoleHelp, func(c *context, args []string) {
 		if fromPermission { // UnlinkRoleFromPermission
 
 			// Unlink a role from a permission
 			err := c.remote.UnlinkRoleFromPermission(
-				roleId,       // No description available
-				permissionId, // No description available
+				roleId,       // Integer ID of a role in Steam.
+				permissionId, // Integer ID of a permission in Steam.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -4077,8 +4077,8 @@ func unlinkRole(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&fromPermission, "from-permission", fromPermission, "Unlink a role from a permission")
 
-	cmd.Flags().Int64Var(&permissionId, "permission-id", permissionId, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+	cmd.Flags().Int64Var(&permissionId, "permission-id", permissionId, "Integer ID of a permission in Steam.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	return cmd
 }
 
@@ -4157,19 +4157,19 @@ Examples:
 `
 
 func unshareEntity(c *context) *cobra.Command {
-	var entityId int64     // No description available
-	var entityTypeId int64 // No description available
-	var kind string        // No description available
-	var workgroupId int64  // No description available
+	var entityId int64     // Integer ID for an entity in Steam.
+	var entityTypeId int64 // Integer ID for the type of entity.
+	var kind string        // Type of permission. Can be view, edit, or own.
+	var workgroupId int64  // Integer ID of a workgroup in Steam.
 
 	cmd := newCmd(c, unshareEntityHelp, func(c *context, args []string) {
 
 		// Unshare an entity
 		err := c.remote.UnshareEntity(
-			kind,         // No description available
-			workgroupId,  // No description available
-			entityTypeId, // No description available
-			entityId,     // No description available
+			kind,         // Type of permission. Can be view, edit, or own.
+			workgroupId,  // Integer ID of a workgroup in Steam.
+			entityTypeId, // Integer ID for the type of entity.
+			entityId,     // Integer ID for an entity in Steam.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -4177,10 +4177,10 @@ func unshareEntity(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "No description available")
-	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "No description available")
-	cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "Integer ID for an entity in Steam.")
+	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "Integer ID for the type of entity.")
+	cmd.Flags().StringVar(&kind, "kind", kind, "Type of permission. Can be view, edit, or own.")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
 }
 
@@ -4306,15 +4306,15 @@ Examples:
 `
 
 func updateIdentity(c *context) *cobra.Command {
-	var identityId int64 // No description available
-	var password string  // No description available
+	var identityId int64 // Integer ID of an identity in Steam.
+	var password string  // Password for identity
 
 	cmd := newCmd(c, updateIdentityHelp, func(c *context, args []string) {
 
 		// Update an identity
 		err := c.remote.UpdateIdentity(
-			identityId, // No description available
-			password,   // No description available
+			identityId, // Integer ID of an identity in Steam.
+			password,   // Password for identity
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -4322,8 +4322,8 @@ func updateIdentity(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "No description available")
-	cmd.Flags().StringVar(&password, "password", password, "No description available")
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	cmd.Flags().StringVar(&password, "password", password, "Password for identity")
 	return cmd
 }
 
@@ -4379,17 +4379,17 @@ Examples:
 `
 
 func updateRole(c *context) *cobra.Command {
-	var description string // No description available
-	var name string        // No description available
-	var roleId int64       // No description available
+	var description string // A string description
+	var name string        // A string name.
+	var roleId int64       // Integer ID of a role in Steam.
 
 	cmd := newCmd(c, updateRoleHelp, func(c *context, args []string) {
 
 		// Update a role
 		err := c.remote.UpdateRole(
-			roleId,      // No description available
-			name,        // No description available
-			description, // No description available
+			roleId,      // Integer ID of a role in Steam.
+			name,        // A string name.
+			description, // A string description
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -4397,9 +4397,9 @@ func updateRole(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "No description available")
+	cmd.Flags().StringVar(&description, "description", description, "A string description")
+	cmd.Flags().StringVar(&name, "name", name, "A string name.")
+	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	return cmd
 }
 
@@ -4417,17 +4417,17 @@ Examples:
 `
 
 func updateWorkgroup(c *context) *cobra.Command {
-	var description string // No description available
-	var name string        // No description available
-	var workgroupId int64  // No description available
+	var description string // A string description
+	var name string        // A string name.
+	var workgroupId int64  // Integer ID of a workgrou in Steam.
 
 	cmd := newCmd(c, updateWorkgroupHelp, func(c *context, args []string) {
 
 		// Update a workgroup
 		err := c.remote.UpdateWorkgroup(
-			workgroupId, // No description available
-			name,        // No description available
-			description, // No description available
+			workgroupId, // Integer ID of a workgrou in Steam.
+			name,        // A string name.
+			description, // A string description
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -4435,8 +4435,8 @@ func updateWorkgroup(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().StringVar(&description, "description", description, "No description available")
-	cmd.Flags().StringVar(&name, "name", name, "No description available")
-	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "No description available")
+	cmd.Flags().StringVar(&description, "description", description, "A string description")
+	cmd.Flags().StringVar(&name, "name", name, "A string name.")
+	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgrou in Steam.")
 	return cmd
 }

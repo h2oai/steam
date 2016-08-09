@@ -12,6 +12,7 @@ import (
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/srv/compiler"
 	srvweb "github.com/h2oai/steamY/srv/web"
+	"github.com/rs/xid"
 )
 
 const (
@@ -48,17 +49,19 @@ func newDownloadHandler(az az.Az, workingDirectory string, webService srvweb.Ser
 }
 
 func (s *DownloadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Println("File download request received.")
+	guid := xid.New().String()
 
 	pz, azerr := s.az.Identify(r)
 	if azerr != nil {
-		log.Println(azerr)
+		log.Println(guid, "ERR", "?", "Download", azerr)
 		http.Error(w, fmt.Sprintf("Authentication failed: %s", azerr), http.StatusUnauthorized)
 	}
 
 	values := r.URL.Query()
 
 	typ := values.Get(paramType)
+
+	log.Println(guid, "REQ", pz, "Download", values)
 
 	if len(typ) == 0 {
 		http.Error(w, fmt.Sprintf("Missing %s", paramType), http.StatusBadRequest)

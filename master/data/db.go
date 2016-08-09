@@ -3185,10 +3185,9 @@ func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, 
 	return ScanModels(rows)
 }
 
-func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, limit int64) ([]Model, error) {
-
+func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, limit int64) ([]Model, bool, error) {
 	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	rows, err := ds.db.Query(`
@@ -3218,10 +3217,36 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 		LIMIT $5
 		`, projectId, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer rows.Close()
-	return ScanModels(rows)
+	return scanModels(rows)
+}
+
+func scanModels(rows *sql.Rows) ([]Model, bool, error) {
+	models, err := ScanModels(rows)
+	if err != nil {
+		return nil, false, err
+	}
+
+	if len(models) == 0 {
+		return nil, false, nil
+	}
+
+	return models, true, nil
+}
+
+func scanModel(rows *sql.Rows) (Model, bool, error) {
+	models, err := ScanModels(rows)
+	if err != nil {
+		return Model{}, false, err
+	}
+
+	if len(models) == 0 {
+		return Model{}, false, nil
+	}
+
+	return models[0], true, nil
 }
 
 func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model, bool, error) {
@@ -3244,7 +3269,7 @@ func (ds *Datastore) ReadModelByDataset(pz az.Principal, datasetId int64) (Model
 	}
 	defer rows.Close()
 
-	return scanModels(rows)
+	return scanModel(rows)
 }
 
 func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit int64) ([]BinomialModel, error) {
@@ -3503,19 +3528,6 @@ func (ds *Datastore) ReadRegressionModel(pz az.Principal, modelId int64) (Regres
 			model.id = $1
 		`, modelId)
 	return ScanRegressionModel(row)
-}
-
-func scanModels(rows *sql.Rows) (Model, bool, error) {
-	var model Model
-	models, err := ScanModels(rows)
-	if err != nil {
-		return model, false, err
-	}
-
-	if len(models) == 0 {
-		return model, false, nil
-	}
-	return models[0], true, nil
 }
 
 func (ds *Datastore) ReadModel(pz az.Principal, modelId int64) (Model, error) {

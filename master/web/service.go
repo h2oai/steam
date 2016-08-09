@@ -422,13 +422,16 @@ func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 		return err
 	}
 
-	_, ok, err := s.ds.ReadDatasourceByProject(pz, projectId)
-	if err != nil {
+	if _, ok, err := s.ds.ReadDatasourceByProject(pz, projectId); err != nil {
 		return err
+	} else if ok {
+		return fmt.Errorf("This project still contains at least one datasource.")
 	}
 
-	if ok {
-		return fmt.Errorf("This project still contains at least one datasource.")
+	if _, ok, err := s.ds.ReadModelsForProject(pz, projectId, 0, 1); err != nil {
+		return err
+	} else if ok {
+		return fmt.Errorf("This project still contains at least one model.")
 	}
 
 	if err := s.ds.DeleteProject(pz, projectId); err != nil {
@@ -854,7 +857,7 @@ func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit int6
 		return nil, err
 	}
 
-	ms, err := s.ds.ReadModelsForProject(pz, projectId, offset, limit)
+	ms, _, err := s.ds.ReadModelsForProject(pz, projectId, offset, limit)
 	if err != nil {
 		return nil, err
 	}

@@ -20,5 +20,10 @@
   }
   .import-models {
     font-family: $font-text;
+    max-height: $base-grid-unit * 6;
+    overflow: auto;
+    .row {
+      flex: 0 0 auto;
+    }
   }
 }

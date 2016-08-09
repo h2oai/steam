@@ -176,16 +176,9 @@ $navigation-width: $base-grid-unit * 5;
       display: flex;
       justify-content: center;
       align-items: center;
-      .logo {
-        height: 26.5px;
-        width: 26.5px;
-        border-radius: 50%;
-        background: $brand-dark-1;
-        margin-right: 5px;
-        img {
-          margin-left: 2px;
-          width: 36.5px;
-        }
+      a {
+        text-decoration: none;
+        color: $brand-orange;
       }
     }
   }
@@ -207,8 +200,11 @@ $navigation-width: $base-grid-unit * 5;
     }
     li {
       &.logout {
+        display: flex;
+        flex-direction: column;
         position: absolute;
         bottom: 0;
+        height: initial;
         color: $brand-white;
       }
       display: flex;

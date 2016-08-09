@@ -33,7 +33,7 @@ export default class ModelLabelSelect extends React.Component<Props, any> {
           return (
             <option key={label.id} value={label.id}>{label.name}</option>
           );
-        }) : <select><option></option></select>}
+        }) : <option></option>}
       </select>
     );
   }

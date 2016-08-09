@@ -5,10 +5,14 @@
   display: flex;
   padding: 10px 0;
   font-size: 1.2em;
-  color: $brand-dark-3;
+  color: $brand-dark-2;
   font-family: "Open Sans", sans-serif;
   i {
     font-size: 1.5em;
+    &.disabled {
+      color: $brand-dark-4;
+      cursor: not-allowed;
+    }
   }
   .page-info {
     padding: 0 $xsmall;

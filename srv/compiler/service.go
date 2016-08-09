@@ -44,7 +44,7 @@ func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName
 		slug = "makepythonwar"
 	case ArtifactJar:
 		targetFile = fs.GetModelJarFilePath(wd, modelId, modelLogicalName)
-		slug = "callCompiler"
+		slug = "compile"
 	}
 
 	if _, err := os.Stat(targetFile); os.IsNotExist(err) {
