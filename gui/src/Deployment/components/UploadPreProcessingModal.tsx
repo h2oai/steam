@@ -4,6 +4,7 @@
 import * as React from 'react';
 import * as $ from 'jquery';
 import * as classNames from 'classnames';
+import * as _ from 'lodash';
 import DefaultModal from '../../App/components/DefaultModal';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
