@@ -227,6 +227,18 @@ export function registerCluster(address: string) {
   };
 }
 
+export function unregisterCluster(clusterId: number) {
+  return (dispatch) => {
+    Remote.unregisterCluster(clusterId, (error) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+      dispatch(fetchClusters());
+    });
+  };
+}
+
 export function fetchProjects() {
   return (dispatch) => {
     Remote.getProjects(0, 1000, (error, res) => {
