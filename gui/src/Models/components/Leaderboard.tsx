@@ -16,6 +16,7 @@ import '../styles/leaderboard.scss';
 import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { fetchPackages } from '../../Deployment/actions/deployment.actions';
 
 interface Props {
   items: any[],
@@ -25,10 +26,12 @@ interface Props {
   onFilter: Function,
   sortCriteria: string[],
   labels: any[],
+  packages: string[],
   fetchLeaderboard: Function
 }
 
 interface DispatchProps {
+  fetchPackages: Function,
   fetchLabels: Function,
   linkLabelWithModel: Function,
   unlinkLabelFromModel: Function
@@ -62,6 +65,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
     if (!this.props.labels || !this.props.labels[this.props.projectId]) {
       this.props.fetchLabels(this.props.projectId);
     }
+    this.props.fetchPackages(this.props.projectId);
   }
 
   openDeploy(model): void {
@@ -112,11 +116,11 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
     }
   }
 
-  onDeploy(model, name) {
+  onDeploy(model, serviceName, packageName) {
     this.setState({
       isDeployOpen: false
     });
-    this.props.deployModel(model.id, name, this.props.projectId);
+    this.props.deployModel(model.id, serviceName, this.props.projectId, packageName);
   }
 
   onChangeHandler(labelId, modelId, isUnlink) {
@@ -143,7 +147,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
                            modelCategory={this.props.modelCategory}
                            datasetName={this.getDataset()}/>
         <Deploy open={this.state.isDeployOpen} onCancel={this.closeHandler} model={this.state.openDeployModel}
-                onDeploy={this.onDeploy.bind(this)}></Deploy>
+                onDeploy={this.onDeploy.bind(this)} packages={this.props.packages || []}></Deploy>
         <PageHeader>
           <span>Models</span>
           <div className="buttons">
@@ -177,7 +181,8 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state: any): any {
   return {
-    labels: state.labels
+    labels: state.labels,
+    packages: state.deployments.packages
   };
 }
 
@@ -185,7 +190,8 @@ function mapDispatchToProps(dispatch) {
   return {
     fetchLabels: bindActionCreators(fetchLabels, dispatch),
     linkLabelWithModel: bindActionCreators(linkLabelWithModel, dispatch),
-    unlinkLabelFromModel: bindActionCreators(unlinkLabelFromModel, dispatch)
+    unlinkLabelFromModel: bindActionCreators(unlinkLabelFromModel, dispatch),
+    fetchPackages: bindActionCreators(fetchPackages, dispatch)
   };
 }
 

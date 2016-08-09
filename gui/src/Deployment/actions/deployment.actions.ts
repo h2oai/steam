@@ -73,6 +73,10 @@ export function uploadPackage(projectId: number, packageName: string, form) {
 export function fetchPackages(projectId: number) {
   return (dispatch) => {
     Remote.getPackages(projectId, (error, res) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
       dispatch(receivePackages(res));
     });
   };
