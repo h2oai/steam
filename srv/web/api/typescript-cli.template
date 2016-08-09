@@ -1,0 +1,29 @@
+// ------------------------------
+// --- This is generated code ---
+// ---      DO NOT EDIT       ---
+// ------------------------------
+
+{{define "typeOf"}}{{js_type .Type}}{{if .IsArray}}[]{{end}}{{end}}
+{{define "signature"}}({{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{lower .Name}}: {{template "typeOf" .}}{{end}}){{end}}
+
+// --- CLI Stub ---
+
+import * as Proxy from './xhr';
+
+function print(error: Error, data: any): void {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log(data);
+  }
+}
+{{with .Facade}}
+{{range .Methods}}
+export function {{lower .Name}}{{template "signature" .}}: void {
+  const req: any = { {{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{snake .Name}}: {{lower .Name}}{{end}} };
+  Proxy.Call("{{.Name}}", req, print);
+}
+{{end}}
+{{end}}
+
+
