@@ -26,4 +26,7 @@
     margin: 0 $medium;
     flex-basis: 30%;
   }
+  .package-name.error {
+    border: 1px solid $brand-danger;
+  }
 }
