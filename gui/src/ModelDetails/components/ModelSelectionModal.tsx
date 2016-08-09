@@ -114,7 +114,7 @@ export default class ModelSelectionModal extends React.Component<Props, any> {
         </div>
         <footer>
           <Pagination items={this.props.models} onPageForward={this.onPageForward.bind(this)}
-                      onPageBack={this.onPageBack.bind(this)}/>
+                      onPageBack={this.onPageBack.bind(this)} currentPage={this.state.currentPage}/>
           <button className="default" onClick={this.props.onCancel.bind(this)}>Cancel</button>
         </footer>
       </DefaultModal>
