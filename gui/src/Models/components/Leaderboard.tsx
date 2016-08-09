@@ -104,7 +104,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
   }
 
   onPageBack() {
-    if (this.state.currentPage >= 0) {
+    if (this.state.currentPage > 0) {
       this.setState({
         currentPage: --this.state.currentPage
       });
