@@ -17,4 +17,12 @@
       margin-right: $small;
     }
   }
+  .inner-table {
+    font-family: $font-text;
+    max-height: $base-grid-unit * 3;
+    overflow: auto;
+    .row {
+      flex: 0 0 auto;
+    }
+  }
 }

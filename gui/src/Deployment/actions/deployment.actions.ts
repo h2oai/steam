@@ -3,6 +3,7 @@
  */
 import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
+import { openNotification } from '../../App/actions/notification.actions';
 
 export const UPLOADING_PACKAGE = 'UPLOADING_PACKAGE';
 export const FINISH_UPLOADING_PACKAGE = 'FINISH_UPLOADING_PACKAGE';
@@ -35,7 +36,11 @@ export function uploadPackage(projectId: number, packageName: string, form) {
       let data = new FormData();
       for (let j = 0; j < formFiles[i].files.length; j++) {
         data.append('file', formFiles[i].files[j]);
-        Remote.createPackage(projectId, packageName, () => {
+        Remote.createPackage(projectId, packageName, (error) => {
+          if (error) {
+            dispatch(openNotification('error', error.toString(), null));
+            return;
+          }
           fetch(`/upload?type=file&project-id=${projectId}&package-name=${packageName}&relative-path=`, {
             credentials: 'include',
             method: 'post',

@@ -3,6 +3,8 @@
  */
 import * as React from 'react';
 import * as $ from 'jquery';
+import * as classNames from 'classnames';
+import * as _ from 'lodash';
 import DefaultModal from '../../App/components/DefaultModal';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
@@ -27,7 +29,8 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     super();
     this.state = {
       mainFiles: '',
-      libraryFiles: []
+      libraryFiles: [],
+      missingPackageNameError: false
     };
   }
 
@@ -52,6 +55,13 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
   }
 
   uploadPackage(event) {
+    if (_.isEmpty(this.refs.packageName.value)) {
+      this.setState({
+        missingPackageNameError: true
+      });
+      event.preventDefault();
+      return false;
+    }
     let uploadedPackage = {
       name: this.refs.packageName.value
     };
@@ -118,7 +128,7 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <Cell>
                   <div>Pick a name for this pre-processing package. You will use it as a reference when deploying models.</div>
                   <div className="package-name-label muted">Package name</div>
-                  <input ref="packageName" type="text"/>
+                  <input ref="packageName" type="text" className={classNames('package-name', {error: this.state.missingPackageNameError})}/>
                 </Cell>
               </Row>
               <Row className="button-row">

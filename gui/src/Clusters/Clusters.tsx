@@ -5,7 +5,10 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import Panel from '../Projects/components/Panel';
 import PageHeader from '../Projects/components/PageHeader';
-import { fetchModelsFromCluster, fetchClusters, registerCluster } from '../Projects/actions/projects.actions';
+import {
+  fetchModelsFromCluster, fetchClusters, registerCluster,
+  unregisterCluster
+} from '../Projects/actions/projects.actions';
 import { bindActionCreators } from 'redux';
 import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
@@ -14,7 +17,8 @@ import './styles/clusters.scss';
 interface DispatchProps {
   fetchClusters: Function
   fetchModelsFromCluster: Function
-  registerCluster: Function
+  registerCluster: Function,
+  unregisterCluster: Function
 }
 
 interface Props {
@@ -26,6 +30,10 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     if (_.isEmpty(this.props.clusters)) {
       this.props.fetchClusters();
     }
+  }
+
+  removeCluster(clusterId) {
+    this.props.unregisterCluster(clusterId);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -40,7 +48,9 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank" rel="noopener">{cluster.name} @ {cluster.address}</a></span>
+                  <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank"
+                                                        rel="noopener">{cluster.name}
+                    @ {cluster.address}</a></span><button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster.id)}><i className="fa fa-trash"/></button>
                 </header>
                 <article>
                   <h3>
@@ -69,7 +79,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchClusters: bindActionCreators(fetchClusters, dispatch),
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
-    registerCluster: bindActionCreators(registerCluster, dispatch)
+    registerCluster: bindActionCreators(registerCluster, dispatch),
+    unregisterCluster: bindActionCreators(unregisterCluster, dispatch)
   };
 }
 

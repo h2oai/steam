@@ -155,7 +155,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     this.setState({
       isDeployModalOpen: false
     });
-    this.props.deployModel(model.id, name);
+    this.props.deployModel(model.id, name, this.props.params.projectid);
   }
 
   render(): React.ReactElement<HTMLDivElement> {

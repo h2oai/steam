@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import * as $ from 'jquery';
 import * as classNames from 'classnames';
 import { Link, withRouter } from 'react-router';
 import { Sidebar } from '../Sidebar/Sidebar';
@@ -98,6 +99,16 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     return parentRoute.name;
   }
 
+  logout() {
+    $.ajax({
+      url: 'http://' + window.location.host,
+      beforeSend: function (xhr) {
+        xhr.withCredentials = true;
+        xhr.setRequestHeader('Authorization', 'Basic ' + btoa('fjkdshfhkjsdfjkhsdkfjhsdf:hfkjdshfdhff'));
+      }
+    });
+  }
+
   renderSubmenu(activeRoute: any): JSX.Element {
     let childRoutes = routes[0].childRoutes.filter((route) => {
       return (route.path.indexOf(activeRoute.path) !== -1 && route.path !== activeRoute.path);
@@ -108,7 +119,8 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
           <div className="navigation">
             <header>
               <div className="header-navigation">
-                <Link to={this.getParentRouteName(activeRoute.path)}><i className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span></Link>
+                <Link to={this.getParentRouteName(activeRoute.path)}><i
+                  className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span></Link>
               </div>
             </header>
             <div className="header-content">{this.props.project.name}</div>
@@ -139,7 +151,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
               <header>
                 <div className="logo-container">
                   <Link to="/">
-                    <div className="logo"><img src={logo}></img></div>
+                    <div className="logo">STEAM</div>
                   </Link>
                 </div>
               </header>
@@ -169,10 +181,19 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                   );
                 })
                 }
+                <li className="logout nav-list--item">
+                  <a href="mailto:steam@h2o.ai?subject=STEAM: ">
+                    <i className="fa fa-question-circle-o"/>
+                    <div className="nav-list--label">
+                      Support
+                    </div>
+                  </a>
+                  <a onClick={this.logout.bind(this)}>
+                    <i className="fa fa-sign-out"/>
+                    <div className="nav-list--label">Logout</div>
+                  </a>
+                </li>
               </ul>
-              <div className="logout">
-                <i className="fa fa-logout"/>
-              </div>
             </div>
           </nav>
         </Sidebar>

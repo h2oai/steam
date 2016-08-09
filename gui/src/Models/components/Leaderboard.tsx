@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import * as _ from 'lodash';
 import Deploy from '../components/Deploy';
 import PageHeader from '../../Projects/components/PageHeader';
 import Pagination from '../components/Pagination';
@@ -103,7 +104,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
   }
 
   onPageBack() {
-    if (this.state.currentPage >= 0) {
+    if (this.state.currentPage > 0) {
       this.setState({
         currentPage: --this.state.currentPage
       });
@@ -115,7 +116,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
     this.setState({
       isDeployOpen: false
     });
-    this.props.deployModel(model.id, name);
+    this.props.deployModel(model.id, name, this.props.projectId);
   }
 
   onChangeHandler(labelId, modelId, isUnlink) {
@@ -130,10 +131,17 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
     }
   }
 
+  getDataset() {
+    return _.get(this.props, 'items[0].dataset_name');
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div ref="leaderboard" className="leaderboard">
-        <ImportModelsModal projectId={this.props.projectId} open={this.state.isImportModelsOpen} onCancel={this.closeImportModels.bind(this)} fetchLeaderboard={this.props.fetchLeaderboard} modelCategory={this.props.modelCategory}/>
+        <ImportModelsModal projectId={this.props.projectId} open={this.state.isImportModelsOpen}
+                           onCancel={this.closeImportModels.bind(this)} fetchLeaderboard={this.props.fetchLeaderboard}
+                           modelCategory={this.props.modelCategory}
+                           datasetName={this.getDataset()}/>
         <Deploy open={this.state.isDeployOpen} onCancel={this.closeHandler} model={this.state.openDeployModel}
                 onDeploy={this.onDeploy.bind(this)}></Deploy>
         <PageHeader>
@@ -148,17 +156,20 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
         {this.props.modelCategory === 'binomial' ?
           <BinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                               items={this.props.items} projectId={this.props.projectId}
-                              openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
+                              openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
+                              onChangeHandler={this.onChangeHandler}/> : null}
         {this.props.modelCategory === 'multinomial' ?
           <MultinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                                  items={this.props.items} projectId={this.props.projectId}
-                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
+                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
+                                 onChangeHandler={this.onChangeHandler}/> : null}
         {this.props.modelCategory === 'regression' ?
           <RegressionModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                                 items={this.props.items} projectId={this.props.projectId}
-                                openDeploy={this.openDeploy.bind(this)} labels={this.props.labels} onChangeHandler={this.onChangeHandler}/> : null}
+                                openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
+                                onChangeHandler={this.onChangeHandler}/> : null}
         <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)}
-                    onPageForward={this.onPageForward.bind(this)}></Pagination>
+                    onPageForward={this.onPageForward.bind(this)} currentPage={this.state.currentPage}></Pagination>
       </div>
     );
   }
