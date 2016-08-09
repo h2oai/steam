@@ -86,12 +86,10 @@ export default class ModelSelectionModal extends React.Component<Props, any> {
               <Cell>
                 AUC
               </Cell>
-              <Cell>
-                F1
-              </Cell>
               <Cell/>
             </Row>
             {this.props.models.map((model, i: number) => {
+              console.log(model);
               return (
                 <Row key={i}>
                   <Cell/>
@@ -102,13 +100,10 @@ export default class ModelSelectionModal extends React.Component<Props, any> {
                     {moment.unix(model.created_at).format('YYYY-MM-DD HH:mm')}
                   </Cell>
                   <Cell>
-                    {model.mse.toFixed(6)}
+                    {model.mse ? model.mse.toFixed(6) : 'N/A'}
                   </Cell>
                   <Cell>
-                    {model.r_squared.toFixed(6)}
-                  </Cell>
-                  <Cell>
-                    {model.mean_residual_deviance}
+                    {model.auc ? model.auc.toFixed(6) : 'N/A'}
                   </Cell>
                   <Cell>
                     <button className="default" onClick={this.props.onSelectModel.bind(this, model)}>Select</button>

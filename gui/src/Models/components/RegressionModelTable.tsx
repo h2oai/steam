@@ -89,13 +89,13 @@ export default class RegressionModelTable extends React.Component<Props, any> {
                 </div>
               </Cell>
               <Cell>
-                {trainingMetrics.mean_residual_deviance.toFixed(6)}
+                {trainingMetrics.mean_residual_deviance ? trainingMetrics.mean_residual_deviance.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.MSE.toFixed(6)}
+                {trainingMetrics.MSE ? trainingMetrics.MSE.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.r2.toFixed(6)}
+                {trainingMetrics.r2 ? trainingMetrics.r2.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
                 <ul className="actions">
