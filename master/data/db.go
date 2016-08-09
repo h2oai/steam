@@ -3223,6 +3223,28 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 	return scanModels(rows)
 }
 
+func (ds *Datastore) CountModelsForProject(pz az.Principal, projectId int64) (int64, error) {
+	if err := pz.CheckView(ds.EntityTypes.Project, projectId); err != nil {
+		return 0, err
+	}
+
+	var ct int64
+	err := ds.exec(func(tx *sql.Tx) error {
+		row := tx.QueryRow(`
+			SELECT
+				count(id)
+			FROM
+				model
+			WHERE
+				project_id = $1	
+			`, projectId)
+
+		return row.Scan(&ct)
+	})
+
+	return ct, err
+}
+
 func scanModels(rows *sql.Rows) ([]Model, bool, error) {
 	models, err := ScanModels(rows)
 	if err != nil {

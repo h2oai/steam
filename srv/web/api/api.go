@@ -278,6 +278,7 @@ type Service struct {
 	GetModel                      GetModel                      `help:"Get model details"`
 	GetModels                     GetModels                     `help:"List models"`
 	GetModelsFromCluster          GetModelsFromCluster          `help:"List models from a cluster"`
+	FindModelsCount               FindModelsCount               `help:"Get a count models in a project"`
 	GetAllBinomialSortCriteria    GetAllBinomialSortCriteria    `help:"List sort criteria for a binomial models"`
 	FindModelsBinomial            FindModelsBinomial            `help:"List binomial models"`
 	GetModelBinomial              GetModelBinomial              `help:"View a binomial model"`
@@ -544,6 +545,11 @@ type GetModelsFromCluster struct {
 	FrameKey  string
 	_         int
 	Models    []Model
+}
+type FindModelsCount struct {
+	ProjectId int64
+	_         int
+	Count     int64
 }
 type GetAllBinomialSortCriteria struct {
 	_        int
