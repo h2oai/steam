@@ -156,7 +156,6 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   onDeploy(model, serviceName, packageName) {
-    console.log(packageName);
     this.setState({
       isDeployModalOpen: false
     });
