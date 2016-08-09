@@ -2,4 +2,5 @@
 
 psql -U $USER postgres -a -f database/drop-database.sql
 psql -U $USER postgres -a -f database/create-database.sql
+psql -U $USER postgres -a -f database/create-schema.sql
 
