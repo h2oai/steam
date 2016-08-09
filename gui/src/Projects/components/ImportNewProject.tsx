@@ -59,7 +59,13 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
     this.setState({
       datasetId: event.target.value
     });
-    this.props.fetchModelsFromCluster(this.state.clusterId, event.target.value);
+    if (event.target.value) {
+      this.props.fetchModelsFromCluster(this.state.clusterId, event.target.value);
+    } else {
+      this.setState({
+        modelCategory: null
+      });
+    }
   }
 
   createProject(): void {
@@ -179,7 +185,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               </select>
             </div>
           </div> : null}
-        {!_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
+        {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <h1>4. Pick Models to Import</h1>
           <div>
             Models in a project must share the same feature set and response column to enable comparison.
@@ -205,13 +211,13 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
             })}
           </Table>
         </div> : null}
-        {!_.isEmpty(this.props.models && this.state.modelCategory) ? <div className="name-project">
+        {this.state.datasetId && !_.isEmpty(this.props.models && this.state.modelCategory) ? <div className="name-project">
           <h1>5. Name Project</h1>
           <div>
             <input ref="projectName" type="text"/>
           </div>
         </div> : null}
-        {!_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
+        {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <button className={classNames('default', {disabled: !this.state.isModelSelected})}
                   onClick={this.createProject.bind(this)}>Create Project
           </button>
