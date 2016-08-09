@@ -2,7 +2,8 @@
  * Created by justin on 6/28/16.
  */
 import * as Remote from '../../Proxy/Proxy';
-import { openNotification } from '../../App/actions/notification.actions';
+import { openNotification, closeNotification } from '../../App/actions/notification.actions';
+import { hashHistory } from 'react-router';
 export const FETCH_MODEL_OVERVIEW = 'FETCH_MODEL_OVERVIEW';
 export const RECEIVE_MODEL_OVERVIEW = 'RECEIVE_MODEL_OVERVIEW';
 export const FETCH_DOWNLOAD_MODEL = 'FETCH_DOWNLOAD_MODEL';
@@ -70,19 +71,17 @@ export function downloadModel(): Function {
   };
 }
 
-export function deployModel(modelId: number, name: string): Function {
+export function deployModel(modelId: number, name: string, projectId: string): Function {
   return (dispatch) => {
-    /**
-     *   if arg2 is "", deploys a vanilla war file as a service
-     *   if arg2 is a valid package name, the python scripts from the package are
-     *     bundled into the war file.
-     */
+    dispatch(openNotification('info', 'Deploying model', null));
     Remote.startService(modelId, "", (error, res) => {
       if (error) {
         dispatch(openNotification('error', error.toString(), null));
         return;
       }
-      console.log(res);
+      dispatch(closeNotification());
+      debugger;
+      hashHistory.push('/projects/' + projectId + '/deployment');
     });
   };
 }

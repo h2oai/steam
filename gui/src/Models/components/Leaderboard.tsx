@@ -116,7 +116,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
     this.setState({
       isDeployOpen: false
     });
-    this.props.deployModel(model.id, name);
+    this.props.deployModel(model.id, name, this.props.projectId);
   }
 
   onChangeHandler(labelId, modelId, isUnlink) {
