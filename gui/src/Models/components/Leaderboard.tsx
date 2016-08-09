@@ -169,7 +169,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
                                 onChangeHandler={this.onChangeHandler}/> : null}
         <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)}
-                    onPageForward={this.onPageForward.bind(this)}></Pagination>
+                    onPageForward={this.onPageForward.bind(this)} currentPage={this.state.currentPage}></Pagination>
       </div>
     );
   }
