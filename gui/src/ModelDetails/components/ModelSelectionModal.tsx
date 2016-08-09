@@ -89,7 +89,6 @@ export default class ModelSelectionModal extends React.Component<Props, any> {
               <Cell/>
             </Row>
             {this.props.models.map((model, i: number) => {
-              console.log(model);
               return (
                 <Row key={i}>
                   <Cell/>
