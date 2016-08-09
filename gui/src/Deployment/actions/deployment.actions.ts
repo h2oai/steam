@@ -50,7 +50,6 @@ export function uploadPackage(projectId: number, packageName: string, form) {
             method: 'post',
             body: data
           }).then(() => {
-            console.log(formFiles[i].files[j].name, i, j);
             if (isMain) {
               Remote.setAttributesForPackage(projectId, packageName, JSON.stringify({main: formFiles[i].files[j].name}), (error) => {
                 if (error) {
