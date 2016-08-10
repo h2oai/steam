@@ -10,7 +10,8 @@ interface Props {
   items: any,
   onPageBack: Function,
   onPageForward: Function,
-  currentPage: number
+  currentPage: number,
+  count: number
 }
 
 export default class Pagination extends React.Component<Props, any> {
@@ -18,7 +19,7 @@ export default class Pagination extends React.Component<Props, any> {
     return (
       <div className="pagination-container">
         <span onClick={this.props.onPageBack.bind(this)}><i className={classNames('fa fa-caret-left', {disabled: this.props.currentPage === 0})}></i></span>
-        <span className="page-info">1 - {this.props.items.length < MAX_ITEMS ? this.props.items.length : MAX_ITEMS} of {this.props.items.length} models</span>
+        <span className="page-info">1 - {this.props.items.length < MAX_ITEMS ? this.props.items.length : MAX_ITEMS} of {this.props.count} models</span>
         <span onClick={this.props.onPageForward.bind(this)}><i className="fa fa-caret-right"></i></span>
       </div>
     );
