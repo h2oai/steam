@@ -103,16 +103,16 @@ export default class BinomialModelTable extends React.Component<Props, any> {
                 </div>
               </Cell>
               <Cell>
-                {trainingMetrics.AUC.toFixed(6)}
+                {trainingMetrics.AUC ? trainingMetrics.AUC.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.Gini.toFixed(6)}
+                {trainingMetrics.Gini ? trainingMetrics.Gini.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.MSE.toFixed(6)}
+                {trainingMetrics.MSE ? trainingMetrics.MSE.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.logloss.toFixed(6)}
+                {trainingMetrics.logloss ? trainingMetrics.logloss.toFixed(6) : 'N/A'}
               </Cell>
               <Cell className="graph">
                 <RocGraph data={data}/>

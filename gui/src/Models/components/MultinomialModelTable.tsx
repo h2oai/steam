@@ -95,7 +95,7 @@ export default class MultinomialModelTable extends React.Component<Props, any> {
                 {trainingMetrics.logloss ? trainingMetrics.logloss.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
-                {trainingMetrics.r2.toFixed(6)}
+                {trainingMetrics.r2 ? trainingMetrics.r2.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>
                 <ul className="actions">
