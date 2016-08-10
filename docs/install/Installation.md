@@ -121,6 +121,6 @@ After Steam is installed on the YARN edge node and a superuser is created, the n
 
  ```./steam serve master --compilation-service-address=<yarn_edge_node>:<port> --scoring-service-address=<ip_address> --superuser-name=superuser --superuser-password=superuser```
 
->**Note**: This starts the Steam web service on **<yarn_edge_node>:<port>** and the scoring service on **<ip_address>**. Use ``./steam help serve master`` or ``./steam serve master -h`` to view additional help information.
+>**Note**: This starts the Steam web service on ``<yarn_edge_node>:<port>`` and the scoring service on ``<ip_address>``. Use ``./steam help serve master`` or ``./steam serve master -h`` to view additional help information.
 
 Now that Steam is up and running, you can log in to the machine that is running Steam and use the CLI to create additional roles, workgroups, and users. Refer to the [User Management](UserManagement.md) section.

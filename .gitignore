@@ -55,15 +55,11 @@ coverage.out
 # ignore list for generated docs
 docs/_book
 docs/node_modules
-docs/user
-
 docs/user_guide/_book
-
 docs/install/_book
 docs/install/node_modules
-docs/install/user
 
+# ignore list of generated demo docs
 demo/_book
 demo/node_modules
-demo/user
 
