@@ -183,21 +183,23 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               </div>
             }
           </div>
-          <div className="connect-cluster">
-            <h1>&hellip; or connect to a new H2O cluster</h1>
-            <div>
-              Connect to a H2O cluster where your existing models and data sets are located.
+          { !this.state.clusterId ?
+            <div className="connect-cluster">
+              <h1>&hellip; or connect to a new H2O cluster</h1>
+              <div>
+                Connect to a H2O cluster where your existing models and data sets are located.
+              </div>
+              <form onSubmit={this.registerCluster.bind(this)}>
+                <input type="text" name="ip-address" placeholder="IP Address"/>
+                <input type="text" name="port" placeholder="Port"/>
+                <button type="submit" className="default">Connect</button>
+              </form>
+              { this.props.isClusterFetchInProcess ?
+                  <ProgressMessage showSpinner={true} message="Connecting"/>
+                 : null }
             </div>
-            <form onSubmit={this.registerCluster.bind(this)}>
-              <input type="text" name="ip-address" placeholder="IP Address"/>
-              <input type="text" name="port" placeholder="Port"/>
-              <button type="submit" className="default">Connect</button>
-            </form>
-                { this.props.isClusterFetchInProcess ?
-                    <ProgressMessage showSpinner={true} message="Connecting"/>
-                   : null }
-            </div>
-          </div>
+          : null }
+        </div>
         {this.state.clusterId ? <div>
           <h1>2. Select Dataframe</h1>
           <div>
