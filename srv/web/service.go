@@ -288,6 +288,7 @@ type Service interface {
 	GetModel(pz az.Principal, modelId int64) (*Model, error)
 	GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
 	GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*Model, error)
+	FindModelsCount(pz az.Principal, projectId int64) (int64, error)
 	GetAllBinomialSortCriteria(pz az.Principal) ([]string, error)
 	FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error)
 	GetModelBinomial(pz az.Principal, modelId int64) (*BinomialModel, error)
@@ -656,6 +657,14 @@ type GetModelsFromClusterIn struct {
 
 type GetModelsFromClusterOut struct {
 	Models []*Model `json:"models"`
+}
+
+type FindModelsCountIn struct {
+	ProjectId int64 `json:"project_id"`
+}
+
+type FindModelsCountOut struct {
+	Count int64 `json:"count"`
 }
 
 type GetAllBinomialSortCriteriaIn struct {
@@ -1634,6 +1643,16 @@ func (this *Remote) GetModelsFromCluster(clusterId int64, frameKey string) ([]*M
 		return nil, err
 	}
 	return out.Models, nil
+}
+
+func (this *Remote) FindModelsCount(projectId int64) (int64, error) {
+	in := FindModelsCountIn{projectId}
+	var out FindModelsCountOut
+	err := this.Proc.Call("FindModelsCount", &in, &out)
+	if err != nil {
+		return 0, err
+	}
+	return out.Count, nil
 }
 
 func (this *Remote) GetAllBinomialSortCriteria() ([]string, error) {
@@ -3521,6 +3540,41 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
 	}
 
 	out.Models = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) FindModelsCount(r *http.Request, in *FindModelsCountIn, out *FindModelsCountOut) error {
+	const name = "FindModelsCount"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.FindModelsCount(pz, in.ProjectId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Count = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

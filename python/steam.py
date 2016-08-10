@@ -676,6 +676,22 @@ class RPCClient:
 		response = self.connection.call("GetModelsFromCluster", request)
 		return response['models']
 	
+	def find_models_count(self, project_id):
+		"""
+		Get a count models in a project
+
+		Parameters:
+		project_id: No description available (int64)
+
+		Returns:
+		count: No description available (int64)
+		"""
+		request = {
+			'project_id': project_id
+		}
+		response = self.connection.call("FindModelsCount", request)
+		return response['count']
+	
 	def get_all_binomial_sort_criteria(self):
 		"""
 		List sort criteria for a binomial models

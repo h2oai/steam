@@ -1010,6 +1010,10 @@ models [?]
 Find Models
 Examples:
 
+    Get a count models in a project
+    $ steam find models --count \
+        --project-id=?
+
     List binomial models
     $ steam find models --binomial \
         --project-id=? \
@@ -1040,6 +1044,7 @@ Examples:
 `
 
 func findModels(c *context) *cobra.Command {
+	var count bool       // Switch for FindModelsCount()
 	var binomial bool    // Switch for FindModelsBinomial()
 	var multinomial bool // Switch for FindModelsMultinomial()
 	var regression bool  // Switch for FindModelsRegression()
@@ -1051,6 +1056,18 @@ func findModels(c *context) *cobra.Command {
 	var sortBy string    // No description available
 
 	cmd := newCmd(c, findModelsHelp, func(c *context, args []string) {
+		if count { // FindModelsCount
+
+			// Get a count models in a project
+			count, err := c.remote.FindModelsCount(
+				projectId, // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			fmt.Printf("Count:\t%v\n", count)
+			return
+		}
 		if binomial { // FindModelsBinomial
 
 			// List binomial models
@@ -1183,6 +1200,7 @@ func findModels(c *context) *cobra.Command {
 			return
 		}
 	})
+	cmd.Flags().BoolVar(&count, "count", count, "Get a count models in a project")
 	cmd.Flags().BoolVar(&binomial, "binomial", binomial, "List binomial models")
 	cmd.Flags().BoolVar(&multinomial, "multinomial", multinomial, "List multinomial models")
 	cmd.Flags().BoolVar(&regression, "regression", regression, "List regression models")
