@@ -269,8 +269,8 @@ export function getLabelsForProject(projectId: number): void {
   Proxy.Call("GetLabelsForProject", req, print);
 }
 
-export function startService(modelId: number, packageName: string): void {
-  const req: any = { model_id: modelId, package_name: packageName };
+export function startService(modelId: number, name: string, packageName: string): void {
+  const req: any = { model_id: modelId, name: name, package_name: packageName };
   Proxy.Call("StartService", req, print);
 }
 
