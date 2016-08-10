@@ -3573,6 +3573,25 @@ func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, locatio
 	})
 }
 
+func (ds *Datastore) UpdateModelName(pz az.Principal, modelId int64, name string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
+		return err
+	}
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+ 			UPDATE
+ 				model
+ 			SET
+ 				name = $1
+ 			WHERE
+ 				id = $2
+ 			`, name, modelId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{"name": name})
+	})
+}
+
 func (ds *Datastore) DeleteModel(pz az.Principal, modelId int64) error {
 	if err := pz.CheckOwns(ds.EntityTypes.Model, modelId); err != nil {
 		return err
@@ -3823,13 +3842,14 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 		row := tx.QueryRow(`
 			INSERT INTO
 				service
-				(project_id, model_id, address, port, process_id, state, created)
+				(project_id, model_id, name, address, port, process_id, state, created)
 			VALUES
-				($1,       $2,      $3,   $4,         $5,         $6,    now())
+				($1,       $2,        $3,   $4,      $5,   $6,         $7,   now())
 			RETURNING id
 			`,
 			service.ProjectId,
 			service.ModelId,
+			service.Name,
 			service.Address,
 			service.Port,
 			service.ProcessId,
@@ -3862,7 +3882,7 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Service, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, project_id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, name, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3891,7 +3911,7 @@ func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Servi
 func (ds *Datastore) ReadServicesForProjectId(pz az.Principal, projectId, offset, limit int64) ([]Service, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, project_id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, name, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3925,7 +3945,7 @@ func (ds *Datastore) ReadServicesForModelId(pz az.Principal, modelId int64) ([]S
 
 	rows, err := ds.db.Query(`
 		SELECT
-			id, project_id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, name, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3947,7 +3967,7 @@ func (ds *Datastore) ReadService(pz az.Principal, serviceId int64) (Service, err
 
 	row := ds.db.QueryRow(`
 		SELECT
-			id, project_id, model_id, address, port, process_id, state, created
+			id, project_id, model_id, name, address, port, process_id, state, created
 		FROM
 			service
 		WHERE
@@ -3973,6 +3993,26 @@ func (ds *Datastore) UpdateServiceState(pz az.Principal, serviceId int64, state 
 			return err
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Service, serviceId, metadata{"state": state})
+	})
+}
+
+func (ds *Datastore) UpdateServiceName(pz az.Principal, serviceId int64, name string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Service, serviceId); err != nil {
+		return err
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+ 			UPDATE
+ 				service
+ 			SET
+ 				name = $1
+ 			WHERE
+ 				id = $2
+ 			`, name, serviceId); err != nil {
+			return err
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Service, serviceId, metadata{"name": name})
 	})
 }
 

@@ -863,6 +863,7 @@ CREATE TABLE service (
     id integer NOT NULL,
     project_id integer NOT NULL,
     model_id integer NOT NULL,
+    name text NOT NULL,
     address text NOT NULL,
     port integer NOT NULL,
     process_id integer NOT NULL,
