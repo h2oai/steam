@@ -4219,7 +4219,9 @@ Commands:
     $ steam update datasource ...
     $ steam update identity ...
     $ steam update label ...
+    $ steam update model ...
     $ steam update role ...
+    $ steam update service ...
     $ steam update workgroup ...
 `
 
@@ -4230,7 +4232,9 @@ func update(c *context) *cobra.Command {
 	cmd.AddCommand(updateDatasource(c))
 	cmd.AddCommand(updateIdentity(c))
 	cmd.AddCommand(updateLabel(c))
+	cmd.AddCommand(updateModel(c))
 	cmd.AddCommand(updateRole(c))
+	cmd.AddCommand(updateService(c))
 	cmd.AddCommand(updateWorkgroup(c))
 	return cmd
 }
@@ -4391,6 +4395,40 @@ func updateLabel(c *context) *cobra.Command {
 	return cmd
 }
 
+var updateModelHelp = `
+model [?]
+Update Model
+Examples:
+
+    Update a model
+    $ steam update model \
+        --model-id=? \
+        --model-name=?
+
+`
+
+func updateModel(c *context) *cobra.Command {
+	var modelId int64    // No description available
+	var modelName string // No description available
+
+	cmd := newCmd(c, updateModelHelp, func(c *context, args []string) {
+
+		// Update a model
+		err := c.remote.UpdateModel(
+			modelId,   // No description available
+			modelName, // No description available
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return
+	})
+
+	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
+	cmd.Flags().StringVar(&modelName, "model-name", modelName, "No description available")
+	return cmd
+}
+
 var updateRoleHelp = `
 role [?]
 Update Role
@@ -4426,6 +4464,40 @@ func updateRole(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&description, "description", description, "A string description")
 	cmd.Flags().StringVar(&name, "name", name, "A string name.")
 	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
+	return cmd
+}
+
+var updateServiceHelp = `
+service [?]
+Update Service
+Examples:
+
+    Update a service
+    $ steam update service \
+        --service-id=? \
+        --service-name=?
+
+`
+
+func updateService(c *context) *cobra.Command {
+	var serviceId int64    // No description available
+	var serviceName string // No description available
+
+	cmd := newCmd(c, updateServiceHelp, func(c *context, args []string) {
+
+		// Update a service
+		err := c.remote.UpdateService(
+			serviceId,   // No description available
+			serviceName, // No description available
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return
+	})
+
+	cmd.Flags().Int64Var(&serviceId, "service-id", serviceId, "No description available")
+	cmd.Flags().StringVar(&serviceName, "service-name", serviceName, "No description available")
 	return cmd
 }
 

@@ -239,6 +239,11 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   Proxy.Call("ImportModelFromCluster", req, print);
 }
 
+export function updateModel(modelId: number, modelName: string): void {
+  const req: any = { model_id: modelId, model_name: modelName };
+  Proxy.Call("UpdateModel", req, print);
+}
+
 export function deleteModel(modelId: number): void {
   const req: any = { model_id: modelId };
   Proxy.Call("DeleteModel", req, print);
@@ -302,6 +307,11 @@ export function getServicesForProject(projectId: number, offset: number, limit: 
 export function getServicesForModel(modelId: number, offset: number, limit: number): void {
   const req: any = { model_id: modelId, offset: offset, limit: limit };
   Proxy.Call("GetServicesForModel", req, print);
+}
+
+export function updateService(serviceId: number, serviceName: string): void {
+  const req: any = { service_id: serviceId, service_name: serviceName };
+  Proxy.Call("UpdateService", req, print);
 }
 
 export function deleteService(serviceId: number): void {

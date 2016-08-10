@@ -573,6 +573,9 @@ export interface Service {
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
   
+  // Update a model
+  updateModel: (modelId: number, modelName: string, go: (error: Error) => void) => void
+  
   // Delete a model
   deleteModel: (modelId: number, go: (error: Error) => void) => void
   
@@ -611,6 +614,9 @@ export interface Service {
   
   // List services for a model
   getServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
+  
+  // Update a service
+  updateService: (serviceId: number, serviceName: string, go: (error: Error) => void) => void
   
   // Delete a service
   deleteService: (serviceId: number, go: (error: Error) => void) => void
@@ -1386,6 +1392,18 @@ interface ImportModelFromClusterOut {
   
 }
 
+interface UpdateModelIn {
+  
+  model_id: number
+  
+  model_name: string
+  
+}
+
+interface UpdateModelOut {
+  
+}
+
 interface DeleteModelIn {
   
   model_id: number
@@ -1553,6 +1571,18 @@ interface GetServicesForModelIn {
 interface GetServicesForModelOut {
   
   services: ScoringService[]
+  
+}
+
+interface UpdateServiceIn {
+  
+  service_id: number
+  
+  service_name: string
+  
+}
+
+interface UpdateServiceOut {
   
 }
 
@@ -2745,6 +2775,18 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   });
 }
 
+export function updateModel(modelId: number, modelName: string, go: (error: Error) => void): void {
+  const req: UpdateModelIn = { model_id: modelId, model_name: modelName };
+  Proxy.Call("UpdateModel", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: UpdateModelOut = <UpdateModelOut> data;
+      return go(null);
+    }
+  });
+}
+
 export function deleteModel(modelId: number, go: (error: Error) => void): void {
   const req: DeleteModelIn = { model_id: modelId };
   Proxy.Call("DeleteModel", req, function(error, data) {
@@ -2897,6 +2939,18 @@ export function getServicesForModel(modelId: number, offset: number, limit: numb
     } else {
       const d: GetServicesForModelOut = <GetServicesForModelOut> data;
       return go(null, d.services);
+    }
+  });
+}
+
+export function updateService(serviceId: number, serviceName: string, go: (error: Error) => void): void {
+  const req: UpdateServiceIn = { service_id: serviceId, service_name: serviceName };
+  Proxy.Call("UpdateService", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: UpdateServiceOut = <UpdateServiceOut> data;
+      return go(null);
     }
   });
 }
