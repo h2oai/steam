@@ -23,6 +23,11 @@ func main() {
 		"snake":   snaker.CamelToSnake,
 		"js_type": jsTypeOf,
 	})
+	generate(ix, "srv/web/api/typescript-cli.template", "gui/src/Proxy/CLI.ts", map[string]interface{}{
+		"lower":   lower,
+		"snake":   snaker.CamelToSnake,
+		"js_type": jsTypeOf,
+	})
 	generate(ix, "srv/web/api/python.template", "python/steam.py", map[string]interface{}{
 		"lower": lower,
 		"snake": snaker.CamelToSnake,

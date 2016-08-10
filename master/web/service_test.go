@@ -21,7 +21,7 @@ func TestServiceCRUD(tt *testing.T) {
 	serviceId := make([]int64, 5)
 	for i := 0; i < 5; i++ {
 		var err error
-		serviceId[i], err = t.svc.StartService(t.su, modelId, "")
+		serviceId[i], err = t.svc.StartService(t.su, modelId, "", "")
 		if err != nil {
 			t.nil(err)
 		}

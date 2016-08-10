@@ -4,8 +4,9 @@ package data
 
 import (
 	"database/sql"
-	"github.com/lib/pq"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type Meta struct {
@@ -253,6 +254,7 @@ type Service struct {
 	Id        int64
 	ProjectId int64
 	ModelId   int64
+	Name      string
 	Address   string
 	Port      int64
 	ProcessId int64

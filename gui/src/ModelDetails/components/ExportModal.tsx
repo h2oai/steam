@@ -27,7 +27,7 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
     [key: string]: Element
     packageSelect: Element
   };
-  
+
   constructor() {
     super();
     this.state = {
@@ -106,7 +106,7 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
               <div className="actions">
                 <div>Steam defaults to your browser default Downloads Folders</div>
                 <a
-                  href={`/download?type=model&artifact=${this.state.artifact}&model-id=${this.props.modelId}&project-id=${this.props.projectId}&package-name=${this.state.packageName}`}
+                  href={`/download?type=model&artifact=${this.state.packageName && this.state.artifact === 'java-war' ? 'java-py-war' : this.state.artifact}&model-id=${this.props.modelId}&project-id=${this.props.projectId}&package-name=${this.state.packageName}`}
                   className="default" target="_blank" rel="noopener">Download</a>
                 <button type="button" className="default invert" onClick={this.props.onCancel}>Cancel</button>
               </div>

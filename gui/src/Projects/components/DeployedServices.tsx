@@ -49,7 +49,7 @@ export class DeployedServices extends React.Component<Props & DispatchProps, any
               <Panel key={i} className="services-panel">
                 <div className="panel-body">
                   <div className="panel-title">
-                    <span>N/A @ <a href={'http://' + service.address + ':' + service.port} target="_blank" rel="noopener">{service.address + ':' + service.port}</a></span>
+                    <span>{service.name} @ <a href={'http://' + service.address + ':' + service.port} target="_blank" rel="noopener">{service.address + ':' + service.port}</a></span>
                     <div style={{color: service.state === 'stopped' ? 'red' : 'green'}}>{service.state}</div>
                   </div>
                   <div className="panel-info">

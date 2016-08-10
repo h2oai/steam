@@ -939,6 +939,18 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKe
 	return ms, nil
 }
 
+func (s *Service) FindModelsCount(pz az.Principal, projectId int64) (int64, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
+		return 0, err
+	}
+
+	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
+		return 0, err
+	}
+
+	return s.ds.CountModelsForProject(pz, projectId)
+}
+
 // TODO: hardcoded; should be determined by h2o metrics
 func (s *Service) GetAllBinomialSortCriteria(pz az.Principal) ([]string, error) {
 	return []string{"mse", "r_squared", "logloss", "auc", "gini"}, nil
@@ -1288,6 +1300,11 @@ func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) er
 		return err
 	}
 
+	err := s.ds.UnlinkLabelFromModel(pz, labelId, modelId)
+	if err != nil {
+		return err
+	}
+
 	return s.ds.LinkLabelWithModel(pz, labelId, modelId)
 }
 
@@ -1337,7 +1354,7 @@ func (s *Service) assignPort() (int, error) {
 	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, packageName string) (int64, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return 0, err
 	}
@@ -1391,6 +1408,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 		0,
 		model.ProjectId,
 		model.Id,
+		name,
 		address,
 		int64(port), // FIXME change to int
 		int64(pid),  // FIXME change to int
@@ -2416,6 +2434,7 @@ func toScoringService(s data.Service) *web.ScoringService {
 	return &web.ScoringService{
 		s.Id,
 		s.ModelId,
+		s.Name,
 		s.Address,
 		int(s.Port),      // FIXME change db field to int
 		int(s.ProcessId), // FIXME change db field to int

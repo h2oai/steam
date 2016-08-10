@@ -17,8 +17,9 @@ import './styles/modeldetails.scss';
 import { fetchModelOverview, downloadModel, deployModel } from './actions/model.overview.action';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { fetchLeaderboard, fetchSortCriteria } from '../Models/actions/leaderboard.actions';
+import { fetchLeaderboard, fetchSortCriteria, findModelsCount } from '../Models/actions/leaderboard.actions';
 import { fetchProject } from '../Projects/actions/projects.actions';
+import { fetchPackages } from '../Deployment/actions/deployment.actions';
 
 interface Props {
   params: {
@@ -28,7 +29,9 @@ interface Props {
   model: any,
   models: any,
   project: any,
-  sortCriteria: string[]
+  sortCriteria: string[],
+  packages: string[],
+  count: number
 }
 
 interface DispatchProps {
@@ -37,7 +40,9 @@ interface DispatchProps {
   fetchLeaderboard: Function,
   fetchProject: Function,
   downloadModel: Function,
-  deployModel: Function
+  deployModel: Function,
+  fetchPackages: Function,
+  findModelsCount: Function
 }
 
 export class ModelDetails extends React.Component<Props & DispatchProps, any> {
@@ -65,6 +70,8 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
         });
       });
     }
+    this.props.findModelsCount(parseInt(this.props.params.projectid, 10));
+    this.props.fetchPackages(parseInt(this.props.params.projectid, 10));
     this.props.fetchModelOverview(parseInt(this.props.params.modelid, 10));
   }
 
@@ -151,11 +158,11 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
     });
   }
 
-  onDeploy(model) {
+  onDeploy(model, serviceName, packageName) {
     this.setState({
       isDeployModalOpen: false
     });
-    this.props.deployModel(model.id, name, this.props.params.projectid);
+    this.props.deployModel(model.id, serviceName, this.props.params.projectid, packageName);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -169,10 +176,13 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
                              models={this.props.models}
                              sortCriteria={this.props.sortCriteria}
                              onSelectModel={this.onSelectModel.bind(this)}
-                             onCancel={this.onCancel.bind(this)}/>
+                             onCancel={this.onCancel.bind(this)}
+                             count={this.props.count}/>
         <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
-                     onCancel={this.cancel.bind(this)} modelId={parseInt(this.props.params.modelid, 10)} projectId={parseInt(this.props.params.projectid, 10)} onDownload={this.downloadModel.bind(this)}/>
-        <Deploy open={this.state.isDeployModalOpen} onCancel={this.closeDeployModal.bind(this)} model={this.props.model} onDeploy={this.onDeploy.bind(this)}></Deploy>
+                     onCancel={this.cancel.bind(this)} modelId={parseInt(this.props.params.modelid, 10)}
+                     projectId={parseInt(this.props.params.projectid, 10)} onDownload={this.downloadModel.bind(this)}/>
+        <Deploy open={this.state.isDeployModalOpen} onCancel={this.closeDeployModal.bind(this)} model={this.props.model}
+                onDeploy={this.onDeploy.bind(this)} packages={this.props.packages}></Deploy>
         <PageHeader>
           <span>{this.props.model.name.toUpperCase()}</span>
           <div className="buttons">
@@ -180,8 +190,9 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
             <button className="default" onClick={this.deployModel.bind(this)}>Deploy Model</button>
           </div>
           <div className="comparison-selection">
-            <span><span>compared to:</span><button className={classNames('model-selection-button', {selected: this.state.comparisonModel})}
-                                                   onClick={this.openComparisonModal.bind(this)}>{this.state.comparisonModel ? this.state.comparisonModel.name : 'SELECT MODEL FOR COMPARISON'}</button></span>
+            <span><span>compared to:</span><button
+              className={classNames('model-selection-button', {selected: this.state.comparisonModel})}
+              onClick={this.openComparisonModal.bind(this)}>{this.state.comparisonModel ? this.state.comparisonModel.name : 'SELECT MODEL FOR COMPARISON'}</button></span>
           </div>
         </PageHeader>
         <header className="overview-header">
@@ -198,7 +209,8 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
           >Goodness of Fit</span>
         </header>
         <Collapsible open={this.state.isGoodnessOpen}>
-          <GoodnessOfFit model={this.props.model} comparisonModel={this.state.comparisonModel} modelCategory={this.state.modelCategory}></GoodnessOfFit>
+          <GoodnessOfFit model={this.props.model} comparisonModel={this.state.comparisonModel}
+                         modelCategory={this.state.modelCategory}></GoodnessOfFit>
         </Collapsible>
       </div>
     );
@@ -208,6 +220,8 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state: any): any {
   return {
     model: state.model,
+    count: state.leaderboard.count,
+    packages: state.deployments.packages,
     project: state.projects.project,
     models: state.leaderboard.items,
     sortCriteria: state.leaderboard.criteria
@@ -221,7 +235,9 @@ function mapDispatchToProps(dispatch) {
     fetchSortCriteria: bindActionCreators(fetchSortCriteria, dispatch),
     fetchModelOverview: bindActionCreators(fetchModelOverview, dispatch),
     downloadModel: bindActionCreators(downloadModel, dispatch),
-    deployModel: bindActionCreators(deployModel, dispatch)
+    deployModel: bindActionCreators(deployModel, dispatch),
+    fetchPackages: bindActionCreators(fetchPackages, dispatch),
+    findModelsCount: bindActionCreators(findModelsCount, dispatch)
   };
 }
 

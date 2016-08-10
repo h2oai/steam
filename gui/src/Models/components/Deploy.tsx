@@ -15,14 +15,19 @@ interface Props {
   open: boolean,
   model: Model,
   onCancel: Function,
-  onDeploy: Function
+  onDeploy: Function,
+  packages: string[]
 }
 
 export default class Deploy extends React.Component<Props, any> {
   refs: {
     [key: string]: Element
-    serviceName: HTMLInputElement
+    serviceName: HTMLInputElement,
+    packageName: HTMLSelectElement
   };
+  deploy() {
+    this.props.onDeploy(this.props.model, _.get(this.refs.serviceName, 'value', ''), _.get(this.refs.packageName, 'value', ''));
+  }
   render(): React.ReactElement<DefaultModal> {
     return (
       <DefaultModal className="deploy-modal" open={this.props.open}>
@@ -43,7 +48,19 @@ export default class Deploy extends React.Component<Props, any> {
               <Row>
                 <Cell/>
                 <Cell>
-                  <button type="button" className="default deploy-button" onClick={this.props.onDeploy.bind(this, this.props.model, _.get(this.refs.serviceName, 'value', ''))}>
+                  <label className="muted">Preprocessing Script</label>
+                  <select ref="packageName">
+                    <option value="">None (Default)</option>
+                    {this.props.packages.map((packageName, i) => {
+                      return <option key={i} value={packageName}>{packageName}</option>;
+                    })}
+                  </select>
+                </Cell>
+              </Row>
+              <Row>
+                <Cell/>
+                <Cell>
+                  <button type="button" className="default deploy-button" onClick={this.deploy.bind(this)}>
                     Deploy
                   </button>
                   <button type="button" className="default invert" onClick={this.props.onCancel.bind(this)}>Cancel
