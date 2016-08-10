@@ -133,5 +133,5 @@ export function findModelsCount(projectId: number) {
       }
       dispatch(receiveModelCount(count));
     });
-  }
+  };
 }

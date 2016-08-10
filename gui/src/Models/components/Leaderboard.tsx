@@ -27,14 +27,16 @@ interface Props {
   sortCriteria: string[],
   labels: any[],
   packages: string[],
-  fetchLeaderboard: Function
+  fetchLeaderboard: Function,
+  count: number
 }
 
 interface DispatchProps {
   fetchPackages: Function,
   fetchLabels: Function,
   linkLabelWithModel: Function,
-  unlinkLabelFromModel: Function
+  unlinkLabelFromModel: Function,
+  findModelsCount: Function
 }
 
 export class Leaderboard extends React.Component<Props & DispatchProps, any> {
@@ -182,6 +184,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state: any): any {
   return {
+    count: state.leaderboard.count,
     labels: state.labels,
     packages: state.deployments.packages
   };

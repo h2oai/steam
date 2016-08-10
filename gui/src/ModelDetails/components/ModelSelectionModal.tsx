@@ -20,7 +20,8 @@ interface Props {
   onSelectModel: Function,
   onCancel: Function,
   onFilter: Function,
-  sortCriteria: string[]
+  sortCriteria: string[],
+  count: number
 }
 
 export default class ModelSelectionModal extends React.Component<Props, any> {
@@ -114,7 +115,7 @@ export default class ModelSelectionModal extends React.Component<Props, any> {
         </div>
         <footer>
           <Pagination items={this.props.models} onPageForward={this.onPageForward.bind(this)}
-                      onPageBack={this.onPageBack.bind(this)} currentPage={this.state.currentPage}/>
+                      onPageBack={this.onPageBack.bind(this)} currentPage={this.state.currentPage} count={this.props.count}/>
           <button className="default" onClick={this.props.onCancel.bind(this)}>Cancel</button>
         </footer>
       </DefaultModal>
