@@ -8,6 +8,7 @@ import { openNotification } from '../../App/actions/notification.actions';
 
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
+export const RESET_CLUSTER_SELECTION = 'RESET_CLUSTER_SELECTION';
 export const REQUEST_MODELS = 'REQUEST_MODELS';
 export const RECEIVE_MODELS = 'RECEIVE_MODELS';
 export const CREATE_PROJECT_COMPLETED = 'CREATE_PROJECT_COMPLETED';
@@ -30,6 +31,12 @@ export function receiveClusters(clusters) {
     clusters
   };
 }
+
+export function resetClusterSelection()  {
+  return {
+    type: RESET_CLUSTER_SELECTION
+  };
+};
 
 export function fetchClusters() {
   return (dispatch) => {

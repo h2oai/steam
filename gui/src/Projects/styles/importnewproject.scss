@@ -26,4 +26,21 @@
       flex: 0 0 auto;
     }
   }
+  .model-fetch-progress {
+    margin-top: 4px;
+  }
+  .cluster-info {
+    display: flex;
+    flex-direction: row;
+  }
+  .cluster-details {
+    margin-left: 5px;
+  }
+  .cluster-image {
+    max-width: 60px;
+    max-height: 60px;
+  }
+  .select-new-cluster {
+    border-bottom: 1px dotted #000;
+  }
 }
