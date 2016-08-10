@@ -1337,7 +1337,7 @@ func (s *Service) assignPort() (int, error) {
 	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, packageName string) (int64, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return 0, err
 	}
@@ -1391,6 +1391,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, packageName strin
 		0,
 		model.ProjectId,
 		model.Id,
+		name,
 		address,
 		int64(port), // FIXME change to int
 		int64(pid),  // FIXME change to int
@@ -2416,6 +2417,7 @@ func toScoringService(s data.Service) *web.ScoringService {
 	return &web.ScoringService{
 		s.Id,
 		s.ModelId,
+		s.Name,
 		s.Address,
 		int(s.Port),      // FIXME change db field to int
 		int(s.ProcessId), // FIXME change db field to int

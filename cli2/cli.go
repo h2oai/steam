@@ -2988,6 +2988,7 @@ func getService(c *context) *cobra.Command {
 		lines := []string{
 			fmt.Sprintf("Id:\t%v\t", service.Id),               // No description available
 			fmt.Sprintf("ModelId:\t%v\t", service.ModelId),     // No description available
+			fmt.Sprintf("Name:\t%v\t", service.Name),           // No description available
 			fmt.Sprintf("Address:\t%v\t", service.Address),     // No description available
 			fmt.Sprintf("Port:\t%v\t", service.Port),           // No description available
 			fmt.Sprintf("ProcessId:\t%v\t", service.ProcessId), // No description available
@@ -3049,9 +3050,10 @@ func getServices(c *context) *cobra.Command {
 			lines := make([]string, len(services))
 			for i, e := range services {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,        // No description available
 					e.ModelId,   // No description available
+					e.Name,      // No description available
 					e.Address,   // No description available
 					e.Port,      // No description available
 					e.ProcessId, // No description available
@@ -3059,7 +3061,7 @@ func getServices(c *context) *cobra.Command {
 					e.CreatedAt, // No description available
 				)
 			}
-			c.printt("Id\tModelId\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
+			c.printt("Id\tModelId\tName\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
 			return
 		}
 		if forModel { // GetServicesForModel
@@ -3076,9 +3078,10 @@ func getServices(c *context) *cobra.Command {
 			lines := make([]string, len(services))
 			for i, e := range services {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,        // No description available
 					e.ModelId,   // No description available
+					e.Name,      // No description available
 					e.Address,   // No description available
 					e.Port,      // No description available
 					e.ProcessId, // No description available
@@ -3086,7 +3089,7 @@ func getServices(c *context) *cobra.Command {
 					e.CreatedAt, // No description available
 				)
 			}
-			c.printt("Id\tModelId\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
+			c.printt("Id\tModelId\tName\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
 			return
 		}
 		if true { // default
@@ -3102,9 +3105,10 @@ func getServices(c *context) *cobra.Command {
 			lines := make([]string, len(services))
 			for i, e := range services {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,        // No description available
 					e.ModelId,   // No description available
+					e.Name,      // No description available
 					e.Address,   // No description available
 					e.Port,      // No description available
 					e.ProcessId, // No description available
@@ -3112,7 +3116,7 @@ func getServices(c *context) *cobra.Command {
 					e.CreatedAt, // No description available
 				)
 			}
-			c.printt("Id\tModelId\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
+			c.printt("Id\tModelId\tName\tAddress\tPort\tProcessId\tState\tCreatedAt\t", lines)
 			return
 		}
 	})
@@ -3820,12 +3824,14 @@ Examples:
     Start a service
     $ steam start service \
         --model-id=? \
+        --name=? \
         --package-name=?
 
 `
 
 func startService(c *context) *cobra.Command {
 	var modelId int64      // No description available
+	var name string        // No description available
 	var packageName string // No description available
 
 	cmd := newCmd(c, startServiceHelp, func(c *context, args []string) {
@@ -3833,6 +3839,7 @@ func startService(c *context) *cobra.Command {
 		// Start a service
 		serviceId, err := c.remote.StartService(
 			modelId,     // No description available
+			name,        // No description available
 			packageName, // No description available
 		)
 		if err != nil {
@@ -3843,6 +3850,7 @@ func startService(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
+	cmd.Flags().StringVar(&name, "name", name, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
 	return cmd
 }

@@ -170,6 +170,7 @@ type Label struct {
 type ScoringService struct {
 	Id        int64
 	ModelId   int64
+	Name      string
 	Address   string
 	Port      int
 	ProcessId int
@@ -642,6 +643,7 @@ type GetLabelsForProject struct {
 }
 type StartService struct {
 	ModelId     int64
+	Name        string
 	PackageName string
 	_           int
 	ServiceId   int64
