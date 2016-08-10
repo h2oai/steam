@@ -57,6 +57,8 @@ docs/_book
 docs/node_modules
 docs/user
 
+docs/user_guide/_book
+
 docs/install/_book
 docs/install/node_modules
 docs/install/user
@@ -64,3 +66,4 @@ docs/install/user
 demo/_book
 demo/node_modules
 demo/user
+

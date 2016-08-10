@@ -16,7 +16,7 @@ The first time you log in to Steam, an empty Steam page will display, prompting 
 
 2. To start a new project from scratch, click **Create New Project**. This opens a page showing you the available H2O clusters. When you first log in to Steam, the list of clusters will be empty. Enter your cluster IP address, then click **Connect**. Once connected, this will immediately populate the current list of clusters.
 3. Select the H2O frame from the Datasets dropdown, then select the Category.
-4. Select the checkbox beside the model(s) to import into the Steam project.
+4. Select the checkbox beside the model(s) to import into the Steam project. In this example, two models are available on the H2O cluster: one model built using GBM and one model built using GLM. Both models were built using the "DGA" dataset. 
 5. Specify a name for the project.
 
  ![Create a Project](images/create_project.png)
@@ -30,11 +30,23 @@ You can perform the following actions directly from the models page:
 - Import a new model
 - View model details and export the model as a java, jar, or war file 
 - Label a model as a test, staging, or production model
-- Deploy the model (See next section.)
+- Deploy the model
 
-Following is an example of the Model Details page.
+### <a name="comparemodels"></a>Comparing Models
+
+Following is an example of the Model Details page for the "GLM-CB2BCC40-9564-4547-8958-5D10CD04EBE6" model.
 
 ![Model Details page](images/model_details.png)
+
+As indicated in the previous section, two models were added to this project. From this page, you can compare the GLM and GBM models that were built. 
+
+1. Click the **Compared To** field. This opens a popup showing all models available in the current project.  
+
+ ![Select model to compare](images/select_model.png)
+
+2. Select to compare the current GLM model with the GBM model. Once a model is selected, the Model Details page immediately populates with the comparison information. 
+
+ ![Model Comparison](images/model_compare.png)
 
 ### <a name="deploymodel"></a>Deploying a Model in Steam
 
@@ -48,6 +60,8 @@ Following is an example of the Model Details page.
  ![Deployment page](images/deployment_page.png)
 
 ### <a name="makepredictions"></a>Making Predictions
+
+The Deployment page lists all available deployed servie. 
 
 1. To reach the scoring service, click the IP address link listed under the Deployed Services. This opens Steam Prediction Service tool. The fields that display on the Prediction Service tool are automatically populated with field information from the deployed model.
 
