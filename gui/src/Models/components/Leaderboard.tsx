@@ -11,7 +11,7 @@ import BinomialModelTable from './BinomialModelTable';
 import MultinomialModelTable from './MultinomialModelTable';
 import RegressionModelTable from './RegressionModelTable';
 import ImportModelsModal from './ImportModelsModal';
-import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel } from '../actions/leaderboard.actions';
+import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel, findModelsCount } from '../actions/leaderboard.actions';
 import '../styles/leaderboard.scss';
 import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
 import { bindActionCreators } from 'redux';
@@ -66,6 +66,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
       this.props.fetchLabels(this.props.projectId);
     }
     this.props.fetchPackages(this.props.projectId);
+    this.props.findModelsCount(this.props.projectId);
   }
 
   openDeploy(model): void {
@@ -173,7 +174,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
                                 onChangeHandler={this.onChangeHandler}/> : null}
         <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)}
-                    onPageForward={this.onPageForward.bind(this)} currentPage={this.state.currentPage}></Pagination>
+                    onPageForward={this.onPageForward.bind(this)} currentPage={this.state.currentPage} count={this.props.count}></Pagination>
       </div>
     );
   }
@@ -191,7 +192,8 @@ function mapDispatchToProps(dispatch) {
     fetchLabels: bindActionCreators(fetchLabels, dispatch),
     linkLabelWithModel: bindActionCreators(linkLabelWithModel, dispatch),
     unlinkLabelFromModel: bindActionCreators(unlinkLabelFromModel, dispatch),
-    fetchPackages: bindActionCreators(fetchPackages, dispatch)
+    fetchPackages: bindActionCreators(fetchPackages, dispatch),
+    findModelsCount: bindActionCreators(findModelsCount, dispatch)
   };
 }
 
