@@ -14,7 +14,9 @@ func TestModelCRUD(tt *testing.T) {
 	clusterId, err := t.svc.RegisterCluster(t.su, ClusterAddress)
 	t.nil(err)
 
+	//
 	// -- C --
+	//
 
 	modelId := make([]int64, len(h2oModels))
 	for i, model := range h2oModels {
@@ -24,7 +26,9 @@ func TestModelCRUD(tt *testing.T) {
 		t.nil(err)
 	}
 
+	//
 	// -- R --
+	//
 
 	// model, err := t.svc.GetModel(t.su, modelId)
 	// t.nil(err)
@@ -47,29 +51,31 @@ func TestModelCRUD(tt *testing.T) {
 	t.nil(err)
 	t.log(binModels)
 
-	// binModel, err := t.svc.GetModelBinomial(t.su, binModelId)
-	// t.nil(err)
-	// t.log(binModel)
-
 	mulModels, err := t.svc.FindModelsMultinomial(t.su, projectId, "", "", true, 0, 1000)
 	t.nil(err)
 	t.log(mulModels)
-
-	// mulModel, err := t.svc.GetModelMultinomial(t.su, mulModelId)
-	// t.nil(err)
-	// t.log(mulModel)
 
 	regModels, err := t.svc.FindModelsRegression(t.su, projectId, "", "", true, 0, 1000)
 	t.nil(err)
 	t.log(regModels)
 
-	// regModel, err := t.svc.GetModelRegression(t.su, regModelId)
-	// t.nil(err)
-	// t.log(regModel)
-
+	//
 	// -- U --
+	//
 
+	updatedName := "NewName"
+
+	err = t.svc.UpdateModel(t.su, models[0].Id, updatedName)
+	t.nil(err)
+	model, err := t.svc.GetModel(t.su, models[0].Id)
+	t.nil(err)
+
+	t.ok(model.Name == updatedName, "Updated model name")
+
+	//
 	// -- D --
+	//
+
 	for _, id := range modelId {
 		err := t.svc.DeleteModel(t.su, id)
 		t.nil(err)
