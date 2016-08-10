@@ -540,6 +540,9 @@ export interface Service {
   // List models from a cluster
   getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
   
+  // Get a count models in a project
+  findModelsCount: (projectId: number, go: (error: Error, count: number) => void) => void
+  
   // List sort criteria for a binomial models
   getAllBinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
   
@@ -1218,6 +1221,18 @@ interface GetModelsFromClusterIn {
 interface GetModelsFromClusterOut {
   
   models: Model[]
+  
+}
+
+interface FindModelsCountIn {
+  
+  project_id: number
+  
+}
+
+interface FindModelsCountOut {
+  
+  count: number
   
 }
 
@@ -2594,6 +2609,18 @@ export function getModelsFromCluster(clusterId: number, frameKey: string, go: (e
     } else {
       const d: GetModelsFromClusterOut = <GetModelsFromClusterOut> data;
       return go(null, d.models);
+    }
+  });
+}
+
+export function findModelsCount(projectId: number, go: (error: Error, count: number) => void): void {
+  const req: FindModelsCountIn = { project_id: projectId };
+  Proxy.Call("FindModelsCount", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsCountOut = <FindModelsCountOut> data;
+      return go(null, d.count);
     }
   });
 }
