@@ -28,6 +28,29 @@ const (
 	fileTypePythonOther = "pythonextra"
 )
 
+func pingService(address string) error {
+	resp, err := http.Get(toUrl(address, "ping"))
+	if err != nil {
+		return fmt.Errorf("could not reach scoring service builder at %q: %s", address, err)
+	}
+	defer resp.Body.Close()
+
+	serv := resp.Header.Get("Server")
+	if serv != "Jetty(9.2.12.v20150709)" {
+		return fmt.Errorf("there is another service being hosted at %q", address)
+	}
+
+	if resp.StatusCode != 200 {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed reading response: %v", err)
+		}
+		return fmt.Errorf("failed scoring service ping: %v / %v", err, string(body))
+	}
+
+	return nil
+}
+
 func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName, artifact, packageName string) (string, error) {
 
 	genModelPath := fs.GetGenModelPath(wd, modelId)
@@ -53,7 +76,7 @@ func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName
 	}
 
 	// ping to check if service is up
-	if _, err := http.Get(toUrl(address, "ping")); err != nil {
+	if err := pingService(address); err != nil {
 		return "", fmt.Errorf("Failed connecting to scoring service builder: %s", err)
 	}
 
