@@ -133,9 +133,9 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
     var selectedClusterAddress;
 
     for (let cluster of this.props.clusters) {
-      if (cluster["id"] === this.state.clusterId) {
-        selectedClusterName = cluster["name"];
-        selectedClusterAddress = cluster["address"];
+      if (cluster.id === this.state.clusterId) {
+        selectedClusterName = cluster.name;
+        selectedClusterAddress = cluster.address;
       }
     }
 
