@@ -53,13 +53,14 @@ coverage.out
 /tests/*.log
 
 # ignore list for generated docs
-docs/_book
-docs/node_modules
-docs/user_guide/_book
-docs/install/_book
-docs/install/node_modules
+/docs/_book
+/docs/node_modules
+/docs/user_guide/_book
+/docs/user_guide/node_modules
+/docs/install/_book
+/docs/install/node_modules
 
 # ignore list of generated demo docs
-demo/_book
-demo/node_modules
+/demo/_book
+/demo/node_modules
 

@@ -1,4 +1,4 @@
-## <a name="startcli"></a>Starting the Steam CLI
+## <a name="usecli"></a>Using the Steam CLI
 
 The CLI is an optional utility that can be used to maintain a Steam environment and to create new roles, workgroups, and users. The CLI will primarily be used by admins and/or Steam superusers. The steps below describe how to start the Steam CLI. 
 

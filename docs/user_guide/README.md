@@ -8,5 +8,14 @@ This document describes how to start and use Steam and the Steam Scoring Service
 
 Refer to the following sections:
 
-* [Starting Steam](StartingSteam.md)
+* [Logging in to Steam](StartingSteam.md)
+* [Projects](Projects.md)
+  * [Creating a Project](Projects.md#createproject)
+  * [Models](Models.md)
+  * [Deployment](Deployment.md)
+  * [Configurations](Configurations.md)
+* [Clusters](Clusters.md)
+* [Using Steam with H2O Flow](UseSteamWithFlow.md)
+* [Stopping Steam](StopSteam.md)
+* [Using the Steam CLI](UsingCLI.md)
 * [CLI Command Reference Appendix](CLIAppendix.md)
