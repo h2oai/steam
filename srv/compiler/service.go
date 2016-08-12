@@ -31,21 +31,21 @@ const (
 func pingService(address string) error {
 	resp, err := http.Get(toUrl(address, "ping"))
 	if err != nil {
-		return fmt.Errorf("could not reach scoring service builder at %q: %s", address, err)
+		return fmt.Errorf("Could not reach scoring service builder at %q: %s", address, err)
 	}
 	defer resp.Body.Close()
 
 	serv := resp.Header.Get("Server")
 	if serv != "Jetty(9.2.12.v20150709)" {
-		return fmt.Errorf("there is another service being hosted at %q", address)
+		return fmt.Errorf("Service at %q is not a scoring service builder", address)
 	}
 
 	if resp.StatusCode != 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("failed reading response: %v", err)
+			return fmt.Errorf("Failed reading response: %v", err)
 		}
-		return fmt.Errorf("failed scoring service ping: %v / %v", err, string(body))
+		return fmt.Errorf("Failed scoring service ping: %v / %v", err, string(body))
 	}
 
 	return nil
