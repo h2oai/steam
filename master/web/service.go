@@ -1210,7 +1210,7 @@ func (s *Service) UpdateModel(pz az.Principal, modelId int64, modelName string) 
 		}
 	}
 
-	return nil
+	return fmt.Errorf("No update specified")
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
@@ -1539,7 +1539,7 @@ func (s *Service) UpdateService(pz az.Principal, serviceId int64, serviceName st
 		}
 	}
 
-	return nil
+	return fmt.Errorf("No update specified")
 }
 
 func (s *Service) DeleteService(pz az.Principal, serviceId int64) error {
