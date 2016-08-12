@@ -110,7 +110,8 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
         </PageHeader>
         <TabNavigation tabs={this.state.tabs}/>
         <main>
-          {this.state.tabs[this.state.isSelected].component}
+          {this.state.tabs.deployedServices.isSelected === true ? <DeployedServices projectId={this.props.params.projectid}/> : null}
+          {this.state.tabs.packaging.isSelected === true ? <Packaging projectId={this.props.params.projectid}/> : null}
         </main>
       </div>
     );

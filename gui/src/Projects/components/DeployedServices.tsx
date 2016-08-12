@@ -4,7 +4,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import Panel from './Panel';
-import { fetchServices, killService } from '../actions/services.actions';
+import { fetchServices, killService, fetchServicesForProject } from '../actions/services.actions';
 import { ScoringService } from '../../Proxy/Proxy';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -13,19 +13,27 @@ import '../styles/deployedservices.scss';
 interface Props {
   services: {
     runningServices: ScoringService[]
-  }
+  },
+  projectId: string
 }
 
 interface DispatchProps {
   fetchServices: Function,
-  killService: Function
+  killService: Function,
+  fetchServicesForProject: Function
 }
 
 
 export class DeployedServices extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
-    if (_.isEmpty(this.props.services.runningServices)) {
-      this.props.fetchServices();
+    this.fetchServicesStrategy(this.props.projectId);
+  }
+
+  fetchServicesStrategy(projectId: string) {
+    if (projectId) {
+      return this.props.fetchServicesForProject(parseInt(projectId, 10));
+    } else {
+      return this.props.fetchServices();
     }
   }
 
@@ -37,7 +45,7 @@ export class DeployedServices extends React.Component<Props & DispatchProps, any
     if (_.isEmpty(this.props.services.runningServices)) {
       return (
         <div>
-          <h3>There are no services currently deployed from this project.</h3>
+          <h3>There are no services currently deployed.</h3>
         </div>
       );
     }
@@ -87,6 +95,7 @@ function mapStateToProps(state): any {
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchServices: bindActionCreators(fetchServices, dispatch),
+    fetchServicesForProject: bindActionCreators(fetchServicesForProject, dispatch),
     killService: bindActionCreators(killService, dispatch)
   };
 }
