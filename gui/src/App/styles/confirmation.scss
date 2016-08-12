@@ -1,0 +1,10 @@
+@import '../../variables.scss';
+
+.confirmation-modal {
+  .confirmation-buttons {
+    float: right;
+    button:first-of-type {
+      margin-right: $xsmall;
+    }
+  }
+}

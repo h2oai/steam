@@ -250,3 +250,14 @@ export function fetchProjects() {
     });
   };
 }
+
+export function deleteProject(projectId: number) {
+  return (dispatch) => {
+    Remote.deleteProject(projectId, (error) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+    });  
+  };
+}

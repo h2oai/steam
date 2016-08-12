@@ -21,10 +21,19 @@
       header {
         font-size: 18px;
         font-family: $font-text;
+        .delete-project {
+          float: right;
+          cursor: pointer;
+          &:hover {
+            color: $brand-dark-3;
+          }
+        }
       }
       article {
         display: flex;
+        width: 100%;
         .project-metadata {
+          width: 100%;
           border-left: $rule-solid-thin;
           padding: $small;
         }
