@@ -100,7 +100,6 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    console.log(this.props.params.projectid);
     return (
       <div className="services">
         <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)}
