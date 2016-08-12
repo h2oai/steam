@@ -28,7 +28,16 @@ export const stoppedService = () => {
 export function fetchServices() {
   return (dispatch) => {
     dispatch(requestServices());
-    Remote.getServices(0, 5, (error, res) => {
+    Remote.getServices(0, 1000, (error, res) => {
+      dispatch(receiveServices(res));
+    });
+  };
+}
+
+export function fetchServicesForProject(projectId: number) {
+  return (dispatch) => {
+    dispatch(requestServices());
+    Remote.getServicesForProject(projectId, 0, 1000, (error, res) => {
       dispatch(receiveServices(res));
     });
   };
