@@ -33,7 +33,7 @@ export default class ProgressBar extends React.Component<Props, any> {
   start() {
     let maxIncrements = Math.floor(Math.random() * (100 - 40 + 1)) + 40;
     let i = 0;
-    this.interval = setInterval(() => {
+    this.interval = window.setInterval(() => {
       i++;
       let remaining = 100 - this.state.progress;
       this.setState({
@@ -42,7 +42,7 @@ export default class ProgressBar extends React.Component<Props, any> {
       if (i >= maxIncrements) {
         this.end();
       }
-    }, 50);
+    }, 50, null);
   }
 
   end() {

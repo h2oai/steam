@@ -6,14 +6,19 @@ var path = require('path');
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 
 module.exports = {
-  entry: [
-    './src/main.tsx',
-    './src/index.html'
-  ],
+  entry: {
+    app: [
+      './src/main.tsx',
+      './src/index.html'
+    ],
+    electron: [
+      './src/bootstrap.ts'
+    ]
+  },
   output: {
     path: path.join(__dirname, '../var/master/www'),
     publicPath: '/',
-    filename: 'bundle.js'
+    filename: '[name].bundle.js'
   },
   resolve: {
     extensions: ['', '.ts', '.tsx', '.js', '.css']
@@ -55,6 +60,7 @@ module.exports = {
   sassResources: [
 
   ],
+  target: 'electron',
   plugins: [
     new BrowserSyncPlugin({
       host: 'localhost',
