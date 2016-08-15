@@ -23,7 +23,7 @@ export default class ModelLabelSelect extends React.Component<Props, any> {
     }
   }
   render(): React.ReactElement<HTMLSelectElement> {
-    if (this.props.labels[this.props.projectId]) {
+    if (_.isUndefined(this.props.labels[this.props.projectId])) {
       return <select name="labelSelect"><option value={-1}></option></select>;
     }
     return (

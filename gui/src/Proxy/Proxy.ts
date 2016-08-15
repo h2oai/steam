@@ -393,6 +393,8 @@ export interface ScoringService {
   
   model_id: number
   
+  name: string
+  
   address: string
   
   port: number
@@ -538,6 +540,9 @@ export interface Service {
   // List models from a cluster
   getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
   
+  // Get a count models in a project
+  findModelsCount: (projectId: number, go: (error: Error, count: number) => void) => void
+  
   // List sort criteria for a binomial models
   getAllBinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
   
@@ -590,7 +595,7 @@ export interface Service {
   getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
   
   // Start a service
-  startService: (modelId: number, packageName: string, go: (error: Error, serviceId: number) => void) => void
+  startService: (modelId: number, name: string, packageName: string, go: (error: Error, serviceId: number) => void) => void
   
   // Stop a service
   stopService: (serviceId: number, go: (error: Error) => void) => void
@@ -1219,6 +1224,18 @@ interface GetModelsFromClusterOut {
   
 }
 
+interface FindModelsCountIn {
+  
+  project_id: number
+  
+}
+
+interface FindModelsCountOut {
+  
+  count: number
+  
+}
+
 interface GetAllBinomialSortCriteriaIn {
   
 }
@@ -1458,6 +1475,8 @@ interface GetLabelsForProjectOut {
 interface StartServiceIn {
   
   model_id: number
+  
+  name: string
   
   package_name: string
   
@@ -2594,6 +2613,18 @@ export function getModelsFromCluster(clusterId: number, frameKey: string, go: (e
   });
 }
 
+export function findModelsCount(projectId: number, go: (error: Error, count: number) => void): void {
+  const req: FindModelsCountIn = { project_id: projectId };
+  Proxy.Call("FindModelsCount", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: FindModelsCountOut = <FindModelsCountOut> data;
+      return go(null, d.count);
+    }
+  });
+}
+
 export function getAllBinomialSortCriteria(go: (error: Error, criteria: string[]) => void): void {
   const req: GetAllBinomialSortCriteriaIn = {  };
   Proxy.Call("GetAllBinomialSortCriteria", req, function(error, data) {
@@ -2798,8 +2829,8 @@ export function getLabelsForProject(projectId: number, go: (error: Error, labels
   });
 }
 
-export function startService(modelId: number, packageName: string, go: (error: Error, serviceId: number) => void): void {
-  const req: StartServiceIn = { model_id: modelId, package_name: packageName };
+export function startService(modelId: number, name: string, packageName: string, go: (error: Error, serviceId: number) => void): void {
+  const req: StartServiceIn = { model_id: modelId, name: name, package_name: packageName };
   Proxy.Call("StartService", req, function(error, data) {
     if (error) {
       return go(error, null);

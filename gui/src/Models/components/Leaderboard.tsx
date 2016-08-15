@@ -11,7 +11,7 @@ import BinomialModelTable from './BinomialModelTable';
 import MultinomialModelTable from './MultinomialModelTable';
 import RegressionModelTable from './RegressionModelTable';
 import ImportModelsModal from './ImportModelsModal';
-import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel } from '../actions/leaderboard.actions';
+import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel, findModelsCount } from '../actions/leaderboard.actions';
 import '../styles/leaderboard.scss';
 import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
 import { bindActionCreators } from 'redux';
@@ -27,14 +27,16 @@ interface Props {
   sortCriteria: string[],
   labels: any[],
   packages: string[],
-  fetchLeaderboard: Function
+  fetchLeaderboard: Function,
+  count: number
 }
 
 interface DispatchProps {
   fetchPackages: Function,
   fetchLabels: Function,
   linkLabelWithModel: Function,
-  unlinkLabelFromModel: Function
+  unlinkLabelFromModel: Function,
+  findModelsCount: Function
 }
 
 export class Leaderboard extends React.Component<Props & DispatchProps, any> {
@@ -66,6 +68,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
       this.props.fetchLabels(this.props.projectId);
     }
     this.props.fetchPackages(this.props.projectId);
+    this.props.findModelsCount(this.props.projectId);
   }
 
   openDeploy(model): void {
@@ -173,7 +176,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
                                 onChangeHandler={this.onChangeHandler}/> : null}
         <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)}
-                    onPageForward={this.onPageForward.bind(this)} currentPage={this.state.currentPage}></Pagination>
+                    onPageForward={this.onPageForward.bind(this)} currentPage={this.state.currentPage} count={this.props.count}></Pagination>
       </div>
     );
   }
@@ -181,6 +184,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state: any): any {
   return {
+    count: state.leaderboard.count,
     labels: state.labels,
     packages: state.deployments.packages
   };
@@ -191,7 +195,8 @@ function mapDispatchToProps(dispatch) {
     fetchLabels: bindActionCreators(fetchLabels, dispatch),
     linkLabelWithModel: bindActionCreators(linkLabelWithModel, dispatch),
     unlinkLabelFromModel: bindActionCreators(unlinkLabelFromModel, dispatch),
-    fetchPackages: bindActionCreators(fetchPackages, dispatch)
+    fetchPackages: bindActionCreators(fetchPackages, dispatch),
+    findModelsCount: bindActionCreators(findModelsCount, dispatch)
   };
 }
 

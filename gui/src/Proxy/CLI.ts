@@ -184,6 +184,11 @@ export function getModelsFromCluster(clusterId: number, frameKey: string): void 
   Proxy.Call("GetModelsFromCluster", req, print);
 }
 
+export function findModelsCount(projectId: number): void {
+  const req: any = { project_id: projectId };
+  Proxy.Call("FindModelsCount", req, print);
+}
+
 export function getAllBinomialSortCriteria(): void {
   const req: any = {  };
   Proxy.Call("GetAllBinomialSortCriteria", req, print);
@@ -269,8 +274,8 @@ export function getLabelsForProject(projectId: number): void {
   Proxy.Call("GetLabelsForProject", req, print);
 }
 
-export function startService(modelId: number, packageName: string): void {
-  const req: any = { model_id: modelId, package_name: packageName };
+export function startService(modelId: number, name: string, packageName: string): void {
+  const req: any = { model_id: modelId, name: name, package_name: packageName };
   Proxy.Call("StartService", req, print);
 }
 

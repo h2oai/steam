@@ -676,6 +676,22 @@ class RPCClient:
 		response = self.connection.call("GetModelsFromCluster", request)
 		return response['models']
 	
+	def find_models_count(self, project_id):
+		"""
+		Get a count models in a project
+
+		Parameters:
+		project_id: No description available (int64)
+
+		Returns:
+		count: No description available (int64)
+		"""
+		request = {
+			'project_id': project_id
+		}
+		response = self.connection.call("FindModelsCount", request)
+		return response['count']
+	
 	def get_all_binomial_sort_criteria(self):
 		"""
 		List sort criteria for a binomial models
@@ -985,12 +1001,13 @@ class RPCClient:
 		response = self.connection.call("GetLabelsForProject", request)
 		return response['labels']
 	
-	def start_service(self, model_id, package_name):
+	def start_service(self, model_id, name, package_name):
 		"""
 		Start a service
 
 		Parameters:
 		model_id: No description available (int64)
+		name: No description available (string)
 		package_name: No description available (string)
 
 		Returns:
@@ -998,6 +1015,7 @@ class RPCClient:
 		"""
 		request = {
 			'model_id': model_id
+			'name': name
 			'package_name': package_name
 		}
 		response = self.connection.call("StartService", request)

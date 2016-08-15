@@ -170,6 +170,7 @@ type Label struct {
 type ScoringService struct {
 	Id        int64
 	ModelId   int64
+	Name      string
 	Address   string
 	Port      int
 	ProcessId int
@@ -277,6 +278,7 @@ type Service struct {
 	GetModel                      GetModel                      `help:"Get model details"`
 	GetModels                     GetModels                     `help:"List models"`
 	GetModelsFromCluster          GetModelsFromCluster          `help:"List models from a cluster"`
+	FindModelsCount               FindModelsCount               `help:"Get a count models in a project"`
 	GetAllBinomialSortCriteria    GetAllBinomialSortCriteria    `help:"List sort criteria for a binomial models"`
 	FindModelsBinomial            FindModelsBinomial            `help:"List binomial models"`
 	GetModelBinomial              GetModelBinomial              `help:"View a binomial model"`
@@ -544,6 +546,11 @@ type GetModelsFromCluster struct {
 	_         int
 	Models    []Model
 }
+type FindModelsCount struct {
+	ProjectId int64
+	_         int
+	Count     int64
+}
 type GetAllBinomialSortCriteria struct {
 	_        int
 	Criteria []string
@@ -642,6 +649,7 @@ type GetLabelsForProject struct {
 }
 type StartService struct {
 	ModelId     int64
+	Name        string
 	PackageName string
 	_           int
 	ServiceId   int64

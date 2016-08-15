@@ -225,6 +225,7 @@ type Role struct {
 type ScoringService struct {
 	Id        int64  `json:"id"`
 	ModelId   int64  `json:"model_id"`
+	Name      string `json:"name"`
 	Address   string `json:"address"`
 	Port      int    `json:"port"`
 	ProcessId int    `json:"process_id"`
@@ -287,6 +288,7 @@ type Service interface {
 	GetModel(pz az.Principal, modelId int64) (*Model, error)
 	GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
 	GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*Model, error)
+	FindModelsCount(pz az.Principal, projectId int64) (int64, error)
 	GetAllBinomialSortCriteria(pz az.Principal) ([]string, error)
 	FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error)
 	GetModelBinomial(pz az.Principal, modelId int64) (*BinomialModel, error)
@@ -304,7 +306,7 @@ type Service interface {
 	LinkLabelWithModel(pz az.Principal, labelId int64, modelId int64) error
 	UnlinkLabelFromModel(pz az.Principal, labelId int64, modelId int64) error
 	GetLabelsForProject(pz az.Principal, projectId int64) ([]*Label, error)
-	StartService(pz az.Principal, modelId int64, packageName string) (int64, error)
+	StartService(pz az.Principal, modelId int64, name string, packageName string) (int64, error)
 	StopService(pz az.Principal, serviceId int64) error
 	GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
 	GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
@@ -657,6 +659,14 @@ type GetModelsFromClusterOut struct {
 	Models []*Model `json:"models"`
 }
 
+type FindModelsCountIn struct {
+	ProjectId int64 `json:"project_id"`
+}
+
+type FindModelsCountOut struct {
+	Count int64 `json:"count"`
+}
+
 type GetAllBinomialSortCriteriaIn struct {
 }
 
@@ -811,6 +821,7 @@ type GetLabelsForProjectOut struct {
 
 type StartServiceIn struct {
 	ModelId     int64  `json:"model_id"`
+	Name        string `json:"name"`
 	PackageName string `json:"package_name"`
 }
 
@@ -1634,6 +1645,16 @@ func (this *Remote) GetModelsFromCluster(clusterId int64, frameKey string) ([]*M
 	return out.Models, nil
 }
 
+func (this *Remote) FindModelsCount(projectId int64) (int64, error) {
+	in := FindModelsCountIn{projectId}
+	var out FindModelsCountOut
+	err := this.Proc.Call("FindModelsCount", &in, &out)
+	if err != nil {
+		return 0, err
+	}
+	return out.Count, nil
+}
+
 func (this *Remote) GetAllBinomialSortCriteria() ([]string, error) {
 	in := GetAllBinomialSortCriteriaIn{}
 	var out GetAllBinomialSortCriteriaOut
@@ -1804,8 +1825,8 @@ func (this *Remote) GetLabelsForProject(projectId int64) ([]*Label, error) {
 	return out.Labels, nil
 }
 
-func (this *Remote) StartService(modelId int64, packageName string) (int64, error) {
-	in := StartServiceIn{modelId, packageName}
+func (this *Remote) StartService(modelId int64, name string, packageName string) (int64, error) {
+	in := StartServiceIn{modelId, name, packageName}
 	var out StartServiceOut
 	err := this.Proc.Call("StartService", &in, &out)
 	if err != nil {
@@ -3530,6 +3551,41 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
 	return nil
 }
 
+func (this *Impl) FindModelsCount(r *http.Request, in *FindModelsCountIn, out *FindModelsCountOut) error {
+	const name = "FindModelsCount"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.FindModelsCount(pz, in.ProjectId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Count = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
 func (this *Impl) GetAllBinomialSortCriteria(r *http.Request, in *GetAllBinomialSortCriteriaIn, out *GetAllBinomialSortCriteriaOut) error {
 	const name = "GetAllBinomialSortCriteria"
 
@@ -4132,7 +4188,7 @@ func (this *Impl) StartService(r *http.Request, in *StartServiceIn, out *StartSe
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.StartService(pz, in.ModelId, in.PackageName)
+	val0, err := this.Service.StartService(pz, in.ModelId, in.Name, in.PackageName)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err

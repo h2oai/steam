@@ -7,7 +7,6 @@
 import App from './App/App';
 import Clusters from './Clusters/Clusters';
 import Models from './Models/Models';
-import * as CLI from './Proxy/CLI';
 import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ModelDetails from './ModelDetails/ModelDetails';
 import NewProjectStep1 from './Projects/components/NewProjectStep1';
@@ -19,9 +18,6 @@ import Deployment from './Deployment/Deployment';
 import Configurations from './Configurations/Configurations';
 import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
-
-// Export Steam API to browser console.
-(<any> window).steam = CLI;
 
 interface IIndexRoute {
   component: any

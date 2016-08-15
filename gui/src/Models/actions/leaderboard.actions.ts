@@ -11,6 +11,7 @@ import { openNotification } from '../../App/actions/notification.actions';
 export const FETCH_LEADERBOARD = 'FETCH_LEADERBOARD';
 export const RECEIVE_LEADERBOARD = 'RECEIVE_LEADERBOARD';
 export const RECEIVE_SORT_CRITERIA = 'RECEIVE_SORT_CRITERIA';
+export const RECEIVE_MODEL_COUNT = 'RECEIVE_MODEL_COUNT';
 
 interface Leaderboard {
   id: number,
@@ -112,6 +113,25 @@ export function unlinkLabelFromModel(labelId: number, modelId: number) {
         }
         resolve();
       });
+    });
+  };
+}
+
+export function receiveModelCount(count: number) {
+  return {
+    type: RECEIVE_MODEL_COUNT,
+    count
+  };
+}
+
+export function findModelsCount(projectId: number) {
+  return (dispatch) => {
+    return Remote.findModelsCount(projectId, (error, count) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+      dispatch(receiveModelCount(count));
     });
   };
 }

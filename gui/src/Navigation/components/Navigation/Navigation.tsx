@@ -101,7 +101,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
 
   logout() {
     $.ajax({
-      url: 'http://' + window.location.host,
+      url: window.location.protocol + '://' + window.location.host,
       beforeSend: function (xhr) {
         xhr.withCredentials = true;
         xhr.setRequestHeader('Authorization', 'Basic ' + btoa('fjkdshfhkjsdfjkhsdkfjhsdf:hfkjdshfdhff'));
