@@ -18,7 +18,7 @@ interface State {
   isOpen: boolean
 }
 
-export class Sidebar extends React.Component<Props & DispatchProps, State> {
+export default class Sidebar extends React.Component<Props & DispatchProps, State> {
   render(): React.ReactElement<HTMLElement> {
     return (
       <aside className={classNames('sidebar', this.props.className)}>

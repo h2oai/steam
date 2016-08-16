@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import Panel from '../Projects/components/Panel';
 import PageHeader from '../Projects/components/PageHeader';
 import {
-  fetchModelsFromCluster, fetchClusters, registerCluster,
+  fetchClusters,
   unregisterCluster
 } from '../Projects/actions/projects.actions';
 import { bindActionCreators } from 'redux';
@@ -16,8 +16,6 @@ import './styles/clusters.scss';
 
 interface DispatchProps {
   fetchClusters: Function
-  fetchModelsFromCluster: Function
-  registerCluster: Function,
   unregisterCluster: Function
 }
 
@@ -78,8 +76,6 @@ function mapStateToProps(state): any {
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchClusters: bindActionCreators(fetchClusters, dispatch),
-    fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
-    registerCluster: bindActionCreators(registerCluster, dispatch),
     unregisterCluster: bindActionCreators(unregisterCluster, dispatch)
   };
 }

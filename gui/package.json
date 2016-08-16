@@ -23,15 +23,16 @@
     "vis-components": "^0.2.0"
   },
   "devDependencies": {
-    "webpack-fail-plugin": "^1.0.5",
     "browser-sync": "^2.13.0",
     "browser-sync-webpack-plugin": "^1.0.3",
     "css-loader": "^0.23.1",
+    "enzyme": "^2.4.1",
     "file-loader": "^0.8.5",
     "jest-cli": "^13.2.3",
     "node-sass": "^3.8.0",
     "raw-loader": "^0.5.1",
     "react-addons-test-utils": "^15.2.0",
+    "redux-mock-store": "^1.1.2",
     "sass-loader": "^3.2.1",
     "sass-resources-loader": "^1.0.2",
     "style-loader": "^0.13.1",
@@ -41,7 +42,8 @@
     "typescript": "^1.8.10",
     "typings": "^1.3.0",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.1",
+    "webpack-fail-plugin": "^1.0.5"
   },
   "scripts": {
     "postinstall": "typings prune && typings install",
@@ -75,9 +77,12 @@
     "moduleFileExtensions": [
       "ts",
       "tsx",
-      "js"
+      "js",
+      "json"
     ],
     "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/enzyme/",
+      "<rootDir>/node_modules/lodash/",
       "<rootDir>/node_modules/react/",
       "<rootDir>/node_modules/react-redux/",
       "<rootDir>/node_modules/react-dom/",

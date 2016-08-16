@@ -6,7 +6,7 @@ import * as React from 'react';
 import * as $ from 'jquery';
 import * as classNames from 'classnames';
 import { Link, withRouter } from 'react-router';
-import { Sidebar } from '../Sidebar/Sidebar';
+import Sidebar from '../Sidebar/Sidebar';
 import { buildPath } from '../../../App/utils/buildPath';
 import { getRoute } from '../../../App/utils/getRoute';
 import { routes } from '../../../routes';
@@ -16,7 +16,6 @@ import { fetchProfile } from '../../../Profile/actions/profile.actions';
 import { bindActionCreators } from 'redux';
 import './navigation.scss';
 import { Project } from '../../../Proxy/Proxy';
-const logo = require('../../../../assets/h2o-home.png');
 
 interface Props {
   routes: any
