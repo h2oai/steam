@@ -9,7 +9,9 @@ import Labels from './components/Labels';
 import './styles/configurations.scss';
 
 interface Props {
-  params?: any
+  params: {
+    projectid: string
+  }
 }
 
 export default class Configurations extends React.Component<Props, any> {
