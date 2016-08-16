@@ -11,10 +11,10 @@ import '../styles/createnewlabelmodal.scss';
 
 
 interface Props {
-    open: boolean,
-    save: Function,
-    cancel: Function,
-    label?: any
+  open: boolean,
+  save: Function,
+  cancel: Function,
+  label?: any
 }
 
 interface State {
@@ -24,88 +24,89 @@ interface State {
 }
 
 const initialState: State = {
-    id: false,
-    name: '',
-    description: ''
+  id: false,
+  name: '',
+  description: ''
 };
 
 
 export default class CreateNewLabelModal extends React.Component<Props, any> {
 
-    constructor() {
-        super();
-        this.state = initialState;
-    }
+  constructor() {
+    super();
+    this.state = initialState;
+  }
 
-    componentWillReceiveProps(nextProps) {
-      if (nextProps.label.id) {
-        this.setState({
-          id: nextProps.label.id,
-          name: nextProps.label.name,
-          description: nextProps.label.description
-        });
-      }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.label.id) {
+      this.setState({
+        id: nextProps.label.id,
+        name: nextProps.label.name,
+        description: nextProps.label.description
+      });
     }
+  }
 
-    updateState(event) {
-      let newState = {};
-      newState[event.currentTarget.name] = event.currentTarget.value;
-      this.setState(newState);
-    }
+  updateState(event) {
+    let newState = {};
+    newState[event.currentTarget.name] = event.currentTarget.value;
+    this.setState(newState);
+  }
 
-    cancel() {
-      this.setState(initialState);
-      this.props.cancel();
-    }
+  cancel() {
+    this.setState(initialState);
+    this.props.cancel();
+  }
 
-    save() {
-      this.props.save(this.state);
-      this.setState(initialState);
-    }
+  save() {
+    this.props.save(this.state);
+    this.setState(initialState);
+  }
 
-    render(): React.ReactElement<DefaultModal> {
-        return (
-            <DefaultModal open={this.props.open} closeHandler={this.props.cancel}>
-                <div className="create-edit-label-modal">
-                    <header>
-                        Create / Edit Label
-                    </header>
-                    <section>
-                        <Table>
-                            <Row>
-                                <Cell className="table-row-name">
-                                    Label Info
-                                </Cell>
-                                <Cell className="table-row-item">
-                                    <p>Enter a name and description of your label.</p>
-                                    <p className="muted">You can use this label in the project for exactly 1 model.</p>
-                                    <div className="form-group">
-                                      <div className="form-item">
-                                          <label className="muted" htmlFor="name">Label name</label>
-                                          <input type="text" name="name" value={this.state.name} onChange={this.updateState.bind(this)} />
-                                      </div>
-                                      <div className="form-item">
-                                          <label className="muted" htmlFor="description">Label description</label>
-                                          <textarea name="description" value={this.state.description} rows="4" cols="50" onChange={this.updateState.bind(this)}></textarea>
-                                      </div>
-                                    </div>
-                                </Cell>
-                            </Row>
-                            <Row className="button-row">
-                                <Cell className="table-row-name"></Cell>
-                                <Cell className="table-row-item">
-                                    <button className="default" onClick={this.save.bind(this) }>
-                                        Save
-                                    </button>
-                                    <button className="default invert" onClick={this.cancel.bind(this) }>
-                                        Cancel
-                                    </button>
-                                </Cell>
-                            </Row>
-                        </Table>
-                    </section>
-                </div>
-            </DefaultModal>
-        );
-    }
+  render(): React.ReactElement<DefaultModal> {
+    return (
+      <DefaultModal open={this.props.open} closeHandler={this.props.cancel}>
+        <div className="create-edit-label-modal">
+          <header>
+            Create / Edit Label
+          </header>
+          <section>
+            <Table>
+              <Row>
+                <Cell className="table-row-name">
+                  Label Info
+                </Cell>
+                <Cell className="table-row-item">
+                  <p>Enter a name and description of your label.</p>
+                  <p className="muted">You can use this label in the project for exactly 1 model.</p>
+                  <div className="form-group">
+                    <div className="form-item">
+                      <label className="muted" htmlFor="name">Label name</label>
+                      <input type="text" name="name" value={this.state.name} onChange={this.updateState.bind(this)}/>
+                    </div>
+                    <div className="form-item">
+                      <label className="muted" htmlFor="description">Label description</label>
+                      <textarea name="description" value={this.state.description} rows="4" cols="50"
+                                onChange={this.updateState.bind(this)}></textarea>
+                    </div>
+                  </div>
+                </Cell>
+              </Row>
+              <Row className="button-row">
+                <Cell className="table-row-name"></Cell>
+                <Cell className="table-row-item">
+                  <button className="default" onClick={this.save.bind(this) }>
+                    Save
+                  </button>
+                  <button className="default invert" onClick={this.cancel.bind(this) }>
+                    Cancel
+                  </button>
+                </Cell>
+              </Row>
+            </Table>
+          </section>
+        </div>
+      </DefaultModal>
+    );
+  }
 }
