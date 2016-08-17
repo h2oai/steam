@@ -246,7 +246,7 @@ export function fetchProjects() {
         dispatch(openNotification('error', error.toString(), null));
         return;
       }
-      dispatch(receiveProjects(<Project[]> res));
+      dispatch(receiveProjects(res as Project[]));
     });
   };
 }

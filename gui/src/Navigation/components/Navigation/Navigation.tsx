@@ -113,7 +113,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
       return (route.path.indexOf(activeRoute.path) !== -1 && route.path !== activeRoute.path);
     });
     return (
-      <Sidebar className='secondary-navigation'>
+      <Sidebar className="secondary-navigation">
         <nav className="navigation--primary">
           <div className="navigation">
             <header>
@@ -156,7 +156,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
               </header>
               <div className="header-content">
               </div>
-              <ul className='nav-list'>
+              <ul className="nav-list">
                 {routes[0].childRoutes.map((route: any) => {
                   let isActive = false;
                   if (this.isActive(route.path, this.props.routes)) {

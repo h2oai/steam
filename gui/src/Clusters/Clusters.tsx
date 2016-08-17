@@ -48,7 +48,9 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                 <header>
                   <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank"
                                                         rel="noopener">{cluster.name}
-                    @ {cluster.address}</a></span><button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster.id)}><i className="fa fa-trash"/></button>
+                    @ {cluster.address}</a></span>
+                  <button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster.id)}><i
+                    className="fa fa-trash"/></button>
                 </header>
                 <article>
                   <h3>

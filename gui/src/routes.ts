@@ -69,7 +69,7 @@ export const routes: IRoute[] = [
       {
         path: 'projects/:projectid/models',
         component: Models,
-        name: "Models",
+        name: 'Models',
         showInBreadcrumb: true,
         showInNavigation: true
       },
@@ -77,7 +77,7 @@ export const routes: IRoute[] = [
       {
         path: 'projects/:projectid/models/:modelid',
         component: ModelDetails,
-        name: "Model Detail",
+        name: 'Model Detail',
         showInBreadcrumb: true,
         showInNavigation: false
       },
