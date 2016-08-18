@@ -11,6 +11,7 @@ import { projectsReducer } from '../../Projects/reducers/projects.reducer';
 import { servicesReducer } from '../../Projects/reducers/services.reducer';
 import { profileReducer } from '../../Profile/reducers/profile.reducers';
 import { deploymentReducer } from '../../Deployment/reducers/deployment.reducer';
+import { usersReducer } from '../../Users/reducers/users.reducer';
 import { notificationReducer } from './notification.reducer';
 
 export const rootReducer = combineReducers({
@@ -22,5 +23,6 @@ export const rootReducer = combineReducers({
   profile: profileReducer,
   deployments: deploymentReducer,
   notification: notificationReducer,
+  users: usersReducer,
   routing: routerReducer
 });
