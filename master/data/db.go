@@ -2046,7 +2046,7 @@ func (ds *Datastore) ReadEntityPrivileges(pz az.Principal, entityTypeId, entityI
 		WHERE
 			p.entity_id = $1 AND
 			p.entity_type_id = $2 AND
-			w.workgroup_id = p.workgroup_id
+			w.id = p.workgroup_id
 		`, entityId, entityTypeId)
 	if err != nil {
 		return nil, err
