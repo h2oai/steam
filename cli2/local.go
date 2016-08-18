@@ -132,6 +132,7 @@ func serveMaster(c *context) *cobra.Command {
 		scoringServiceHost        string
 		scoringServicePortsString string
 		enableProfiler            bool
+		enableCORS                bool
 		yarnEnableKerberos        bool
 		yarnUserName              string
 		yarnKeytab                string
@@ -182,6 +183,7 @@ func serveMaster(c *context) *cobra.Command {
 			scoringServiceHost,
 			scoringServicePorts,
 			enableProfiler,
+			enableCORS,
 			master.YarnOpts{
 				yarnEnableKerberos,
 				yarnUserName,
@@ -217,6 +219,7 @@ func serveMaster(c *context) *cobra.Command {
 	// TODO: this uses a hardcoded port range, not the default const
 	cmd.Flags().StringVar(&scoringServicePortsString, "scoring-service-port-range", "1025:65535", "Specified port range to create scoring services on. (\"<from>:<to>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
+	cmd.Flags().BoolVar(&enableCORS, "cors", opts.EnableCORS, "Enable cross-origin resource sharing")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
 	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.Yarn.Username, "Username to enable Kerberos")
 	cmd.Flags().StringVar(&yarnKeytab, "yarn-keytab", opts.Yarn.Keytab, "Keytab file to be used with Kerberos authentication")

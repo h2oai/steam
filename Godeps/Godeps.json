@@ -21,6 +21,11 @@
 			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
 		},
 		{
+			"ImportPath": "github.com/gorilla/handlers",
+			"Comment": "v1.1-11-ga577578",
+			"Rev": "a5775781a543af3c6b9f5baf10995e4d14168950"
+		},
+		{
 			"ImportPath": "github.com/gorilla/rpc",
 			"Rev": "64e20900b8aa38bb0771dec71ba3bcc2b07fc8ec"
 		},

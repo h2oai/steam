@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/gorilla/context"
+	"github.com/gorilla/handlers"
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/lib/rpc"
 	"github.com/h2oai/steamY/master/data"
@@ -52,6 +53,7 @@ type Opts struct {
 	ScoringServiceHost        string
 	ScoringServicePorts       [2]int
 	EnableProfiler            bool
+	EnableCORS                bool
 	Yarn                      YarnOpts
 	DB                        DBOpts
 }
@@ -79,6 +81,7 @@ var DefaultOpts = &Opts{
 	defaultCompilationAddress,
 	defaultScoringServiceHost,
 	defaultScoringServicePorts,
+	false,
 	false,
 	YarnOpts{false, "", ""},
 	DBOpts{DefaultConnection, "", ""},
@@ -161,6 +164,13 @@ func Run(version, buildDate string, opts Opts) {
 		webServeMux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
 	}
 
+	var handle http.Handler
+	if opts.EnableCORS {
+		handle = handlers.CORS()(context.ClearHandler(webServeMux))
+	} else {
+		handle = context.ClearHandler(webServeMux)
+	}
+
 	// --- start web server ---
 
 	serverFailChan := make(chan error)
@@ -179,12 +189,12 @@ func Run(version, buildDate string, opts Opts) {
 		}
 		if enableTLS {
 			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, handle); err != nil {
 				serverFailChan <- err
 			}
 		} else {
 			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServe(webAddress, handle); err != nil {
 				serverFailChan <- err
 			}
 		}
