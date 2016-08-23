@@ -88,13 +88,13 @@ export default class MultinomialModelTable extends React.Component<Props, any> {
                   </div>
                 </div>
               </Cell>
-              <Cell>
+              <Cell name="mse">
                 {trainingMetrics.MSE ? trainingMetrics.MSE.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell>
+              <Cell name="logloss">
                 {trainingMetrics.logloss ? trainingMetrics.logloss.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell>
+              <Cell name="r2">
                 {trainingMetrics.r2 ? trainingMetrics.r2.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>

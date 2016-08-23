@@ -203,7 +203,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         {this.state.clusterId ? <div>
           <h1>2. Select Dataframe</h1>
           <div>
-            <select onChange={this.selectDataset.bind(this)}>
+            <select name="selectDataframe" onChange={this.selectDataset.bind(this)}>
               <option></option>
               {this.props.datasets ? this.props.datasets.map((dataset, i) => {
                 return <option key={i} value={dataset.frame_name}>{dataset.name}</option>;
@@ -220,7 +220,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           <div>
             <h1>3. Select Model Category</h1>
             <div>
-              <select onChange={this.selectCategory.bind(this)}>
+              <select name="selectModelCategory" onChange={this.selectCategory.bind(this)}>
                 <option></option>
                 {this.props.models ? _.uniqBy(this.props.models, 'model_category').map((model, i) => {
                   return <option key={i} value={model.model_category}>{model.model_category}</option>;
