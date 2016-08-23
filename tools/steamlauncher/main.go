@@ -117,7 +117,7 @@ func launchSteam(killch chan bool) error {
 		"--scoring-service-address=localhost:" + strconv.Itoa(config.ScoringSerivce.Port),
 		"--scoring-service-port-range=" + config.ScoringSerivce.PortRange,
 	}
-	cmd := exec.Command("./steamY", argv...)
+	cmd := exec.Command("./steam", argv...)
 	stdErr, err := cmd.StderrPipe() // StdErr for loggingsta
 	if err != nil {
 		return err
@@ -196,7 +196,7 @@ func initSteam() error {
 func writeToLog(stream io.ReadCloser, fileName string, succ *regexp.Regexp, okCh chan bool) error {
 	in := bufio.NewScanner(stream)
 
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0755)
+	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0444)
 	if err != nil {
 		return err
 	}
