@@ -1,24 +1,70 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
-import {fetchUsersWithRolesAndProjects} from "../actions/users.actions";
+import {fetchUsersWithRolesAndProjects, changeFilterSelections} from "../actions/users.actions";
+import {Role} from "../../Proxy/Proxy";
 
 interface Props {
-  projects:Array<any>,
-  roles:Array<any>
+  projects: Array<any>,
+  roles: Array<any>,
+  users: Array<any>,
+  usersWithRolesAndProjects: Array<any>,
+  selectedRoles: any
 }
 
 interface DispatchProps {
-  fetchUsersWithRolesAndProjects:Function
+  fetchUsersWithRolesAndProjects: Function,
+  changeFilterSelections: Function
 }
 
 export class UserAccess extends React.Component<Props & DispatchProps, any> {
+
   componentWillMount() {
-    this.props.fetchUsersWithRolesAndProjects();
+    if (!this.props.usersWithRolesAndProjects) {
+      this.props.fetchUsersWithRolesAndProjects();
+    }
+  }
+
+  onRoleCheckboxClicked(e) {
+    this.props.changeFilterSelections(parseInt((e.target.dataset as any).id, 10), e.target.checked);
+  }
+
+  checkIsRoleSelected(id): boolean {
+    if (_.isEmpty(this.props.selectedRoles)) {
+      return false;
+    }
+
+    let index = _.findIndex(this.props.selectedRoles, (o) => {
+      if ((o as any).id === (id)) return true;
+      return false;
+    });
+    if (index === -1) console.log("ERROR: unable to find match");
+
+    return this.props.selectedRoles[index].selected;
+  }
+
+  shouldRowBeShown(roles: Array<Role>): boolean {
+    for (let role of roles) {
+      let index = _.findIndex(this.props.selectedRoles, (o) => {
+        if ((o as any).id === role.id) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      if (index === -1) return false;
+
+      if (this.props.selectedRoles[index].selected) {
+        return true;
+      }
+    }
+    return false;
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -33,26 +79,15 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
               </Cell>
             </Row>
             {this.props.roles ?
-              <div>{
-                this.props.roles.map((role) => {
+              <div ref="roleBoxes">{
+                this.props.roles.map((role, index) => {
                   return <Row key={role.name}>
-                    <Cell><input type="checkbox" value="on" checked=""></input> {role.name}</Cell>
-                  </Row>
+                    <Cell><input type="checkbox" name="selectedRoles" data-id={role.id} checked={this.checkIsRoleSelected(role.id)} onChange={this.onRoleCheckboxClicked.bind(this)}></input> {role.name}</Cell>
+                  </Row>;
                 })
               }</div>
               : null
             }
-          </Table>
-          <Table>
-            <Row header={true}>
-              <Cell>PROJECTS</Cell>
-            </Row>
-            {this.props.projects ? <div>
-              {this.props.projects.map((project)=> {
-                return <Row key={project.name}><Cell><input type="checkbox" value="on" checked=""></input> {project.name}</Cell></Row>
-              })}
-              </div>
-            : null}
           </Table>
         </div>
         <div className="user-access-list">
@@ -63,17 +98,26 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
               <Cell>Project</Cell>
             </Row>
 
-            <Row>
-              <Cell>My User</Cell>
-              <Cell>Admin</Cell>
-              <Cell>Churn</Cell>
-            </Row>
-
-            <Row>
-              <Cell>My User</Cell>
-              <Cell>Project Lead</Cell>
-              <Cell>Churn</Cell>
-            </Row>
+            { this.props.usersWithRolesAndProjects ?
+                this.props.usersWithRolesAndProjects.map((userWithRoleAndProject,index) => {
+                  if(this.shouldRowBeShown(userWithRoleAndProject.roles)) {
+                    return <Row key={index}>
+                      <Cell>{userWithRoleAndProject.user.name}</Cell>
+                      <Cell> {
+                        userWithRoleAndProject.roles.map((role, index) => {
+                          return <span key={index}>
+                            {role.name}
+                          </span>;
+                        })
+                      }</Cell>
+                      <Cell>&nbsp;</Cell>
+                    </Row>;
+                  } else {
+                    return null;
+                  }
+                })
+              : null
+            }
 
           </Table>
         </div>
@@ -84,14 +128,18 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state) {
   return {
-    projects:state.users.projects,
-    roles:state.users.roles
+    projects: state.users.projects,
+    roles: state.users.roles,
+    users: state.users.users,
+    usersWithRolesAndProjects: state.users.usersWithRolesAndProjects,
+    selectedRoles: state.users.selectedRoles
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    fetchUsersWithRolesAndProjects:bindActionCreators(fetchUsersWithRolesAndProjects,dispatch)
+    fetchUsersWithRolesAndProjects: bindActionCreators(fetchUsersWithRolesAndProjects, dispatch),
+    changeFilterSelections: bindActionCreators(changeFilterSelections, dispatch)
   };
 }
 
