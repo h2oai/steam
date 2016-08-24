@@ -459,6 +459,11 @@ export function getIdentitiesForRole(roleId: number): void {
   Proxy.Call("GetIdentitiesForRole", req, print);
 }
 
+export function getIdentitiesForEntity(entityType: number, entityId: number): void {
+  const req: any = { entity_type: entityType, entity_id: entityId };
+  Proxy.Call("GetIdentitiesForEntity", req, print);
+}
+
 export function getIdentity(identityId: number): void {
   const req: any = { identity_id: identityId };
   Proxy.Call("GetIdentity", req, print);
