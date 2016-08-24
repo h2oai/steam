@@ -1963,11 +1963,19 @@ Examples:
     $ steam get identities --for-role \
         --role-id=?
 
+    Get a list of identities and roles with access to an entity
+    $ steam get identities --for-entity \
+        --entity-type=? \
+        --entity-id=?
+
 `
 
 func getIdentities(c *context) *cobra.Command {
 	var forWorkgroup bool // Switch for GetIdentitiesForWorkgroup()
 	var forRole bool      // Switch for GetIdentitiesForRole()
+	var forEntity bool    // Switch for GetIdentitiesForEntity()
+	var entityId int64    // An entity ID.
+	var entityType int64  // An entity type ID.
 	var limit int64       // The maximum returned objects.
 	var offset int64      // An offset to start the search on.
 	var roleId int64      // Integer ID of a role in Steam.
@@ -2020,6 +2028,30 @@ func getIdentities(c *context) *cobra.Command {
 			c.printt("Id\tName\tIsActive\tLastLogin\tCreated\t", lines)
 			return
 		}
+		if forEntity { // GetIdentitiesForEntity
+
+			// Get a list of identities and roles with access to an entity
+			users, err := c.remote.GetIdentitiesForEntity(
+				entityType, // An entity type ID.
+				entityId,   // An entity ID.
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := make([]string, len(users))
+			for i, e := range users {
+				lines[i] = fmt.Sprintf(
+					"%v\t%v\t%v\t%v\t%v\t",
+					e.Kind,         // No description available
+					e.IdentityId,   // No description available
+					e.IdentityName, // No description available
+					e.RoleId,       // No description available
+					e.RoleName,     // No description available
+				)
+			}
+			c.printt("Kind\tIdentityId\tIdentityName\tRoleId\tRoleName\t", lines)
+			return
+		}
 		if true { // default
 
 			// List identities
@@ -2047,7 +2079,10 @@ func getIdentities(c *context) *cobra.Command {
 	})
 	cmd.Flags().BoolVar(&forWorkgroup, "for-workgroup", forWorkgroup, "List identities for a workgroup")
 	cmd.Flags().BoolVar(&forRole, "for-role", forRole, "List identities for a role")
+	cmd.Flags().BoolVar(&forEntity, "for-entity", forEntity, "Get a list of identities and roles with access to an entity")
 
+	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "An entity ID.")
+	cmd.Flags().Int64Var(&entityType, "entity-type", entityType, "An entity type ID.")
 	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")

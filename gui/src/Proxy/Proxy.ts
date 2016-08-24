@@ -407,6 +407,20 @@ export interface ScoringService {
   
 }
 
+export interface UserRole {
+  
+  kind: string
+  
+  identity_id: number
+  
+  identity_name: string
+  
+  role_id: number
+  
+  role_name: string
+  
+}
+
 export interface Workgroup {
   
   id: number
@@ -704,6 +718,9 @@ export interface Service {
   
   // List identities for a role
   getIdentitiesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
+  
+  // Get a list of identities and roles with access to an entity
+  getIdentitiesForEntity: (entityType: number, entityId: number, go: (error: Error, users: UserRole[]) => void) => void
   
   // Get identity details
   getIdentity: (identityId: number, go: (error: Error, identity: Identity) => void) => void
@@ -1927,6 +1944,20 @@ interface GetIdentitiesForRoleIn {
 interface GetIdentitiesForRoleOut {
   
   identities: Identity[]
+  
+}
+
+interface GetIdentitiesForEntityIn {
+  
+  entity_type: number
+  
+  entity_id: number
+  
+}
+
+interface GetIdentitiesForEntityOut {
+  
+  users: UserRole[]
   
 }
 
@@ -3269,6 +3300,18 @@ export function getIdentitiesForRole(roleId: number, go: (error: Error, identiti
     } else {
       const d: GetIdentitiesForRoleOut = <GetIdentitiesForRoleOut> data;
       return go(null, d.identities);
+    }
+  });
+}
+
+export function getIdentitiesForEntity(entityType: number, entityId: number, go: (error: Error, users: UserRole[]) => void): void {
+  const req: GetIdentitiesForEntityIn = { entity_type: entityType, entity_id: entityId };
+  Proxy.Call("GetIdentitiesForEntity", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetIdentitiesForEntityOut = <GetIdentitiesForEntityOut> data;
+      return go(null, d.users);
     }
   });
 }

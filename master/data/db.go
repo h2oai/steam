@@ -1834,6 +1834,35 @@ func (ds *Datastore) ReadIdentitiesForRole(pz az.Principal, roleId int64) ([]Ide
 	return ScanIdentitys(rows)
 }
 
+func (ds *Datastore) ReadUsersForEntity(pz az.Principal, entityTypeId, entityId int64) ([]IdentityAndRole, error) {
+	rows, err := ds.db.Query(`
+		SELECT 
+			privilege.privilege_type,
+			identity.id, 
+			identity.name, 
+			role.id,
+			role.name
+		FROM
+			identity, role,
+			identity_role,
+			privilege,
+			identity_workgroup
+		WHERE 
+			identity_role.identity_id = identity.id AND
+			identity_role.role_id = role.id AND
+			privilege.workgroup_id = identity_workgroup.workgroup_id AND
+  			identity_workgroup.identity_id = identity.id AND
+			privilege.entity_id = $1 AND
+			privilege.entity_type_id = $2;
+		`, entityId, entityTypeId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanIdentityAndRoles(rows)
+}
+
 func (ds *Datastore) LinkIdentityAndWorkgroup(pz az.Principal, identityId, workgroupId int64) error {
 	if err := pz.CheckView(ds.EntityTypes.Workgroup, workgroupId); err != nil {
 		return err
