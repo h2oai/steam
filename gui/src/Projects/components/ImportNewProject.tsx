@@ -18,7 +18,6 @@ import { Cluster, Model, Dataset } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
 import Progress from '../../App/components/Progress';
-const CLUSTER_IMAGE = require('../../../assets/clusters.png');
 
 interface DispatchProps {
   fetchClusters: Function,
@@ -149,11 +148,11 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
             <h1>1. Select H2O cluster</h1>
             { this.state.clusterId ?
               <div className="cluster-info">
-                <img src={CLUSTER_IMAGE} className="cluster-image" />
+                <span><i className="fa fa-cubes cluster-image"/></span>
                 <div className="cluster-details">
                   <div>{selectedClusterName}</div>
                   <div>{selectedClusterAddress}</div>
-                  <div onClick={this.resetClusterSelection.bind(this)} className="select-new-cluster">X use a different cluster</div>
+                  <div onClick={this.resetClusterSelection.bind(this)} className="select-new-cluster"><i className="fa fa-close"/> use a different cluster</div>
                 </div>
               </div> :
               <div>
