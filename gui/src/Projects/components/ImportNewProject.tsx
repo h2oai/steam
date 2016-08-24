@@ -17,7 +17,7 @@ import {
 import { Cluster, Model, Dataset } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
-import ProgressMessage from './ProgressMessage';
+import Progress from '../../App/components/Progress';
 const CLUSTER_IMAGE = require('../../../assets/clusters.png');
 
 interface DispatchProps {
@@ -195,7 +195,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                 <button type="submit" className="default">Connect</button>
               </form>
               { this.props.isClusterFetchInProcess ?
-                  <ProgressMessage showSpinner={true} message="Connecting"/>
+                  <Progress message="Connecting..." />
                  : null }
             </div>
           : null }
@@ -211,7 +211,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
             </select>
             { this.props.isModelFetchInProcess ?
               <div className="model-fetch-progress">
-                <ProgressMessage showSpinner={true} message="Connecting"/>
+                <Progress message="Connecting..." />
               </div>
               : null }
           </div>
