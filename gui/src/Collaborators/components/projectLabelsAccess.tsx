@@ -5,16 +5,20 @@ import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/collaborators.scss';
+import { fetchLabels } from '../actions/collaborators.actions';
 
 interface Props {
-  projectId: string,
+  labels: Array<any>
 }
 
 interface DispatchProps {
+  fetchLabels: Function
 }
 
 export class ProjectLabelsAccess extends React.Component<Props & DispatchProps, any> {
-  componentWillMount() {
+
+  componentWillMount(): void {
+    this.props.fetchLabels();
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -47,12 +51,13 @@ export class ProjectLabelsAccess extends React.Component<Props & DispatchProps, 
 
 function mapStateToProps(state) {
   return {
-    projects: state.projects.project
+    labels: state.collaborators.labels
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    fetchLabels: bindActionCreators(fetchLabels, dispatch)
   };
 }
 

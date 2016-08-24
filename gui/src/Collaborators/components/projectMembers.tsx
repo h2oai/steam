@@ -5,16 +5,19 @@ import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/collaborators.scss';
+import { fetchMembers } from '../actions/collaborators.actions';
 
 interface Props {
-  projectId: string,
+  members: Array<any>
 }
 
 interface DispatchProps {
+  fetchMembers: Function
 }
 
 export class ProjectMembers extends React.Component<Props & DispatchProps, any> {
-  componentWillMount() {
+  componentWillMount(): void {
+    this.props.fetchMembers();
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -47,12 +50,13 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
 
 function mapStateToProps(state) {
   return {
-    projects: state.projects.project
+    members: state.collaborators.members,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    fetchMembers: bindActionCreators(fetchMembers, dispatch)
   };
 }
 

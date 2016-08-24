@@ -1,80 +1,56 @@
 import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
-import { openNotification } from '../../App/actions/notification.actions';
 
-export const UPLOADING_PACKAGE = 'UPLOADING_PACKAGE';
-export const FINISH_UPLOADING_PACKAGE = 'FINISH_UPLOADING_PACKAGE';
-export const RECEIVE_PACKAGES = 'RECEIVE_PACKAGES';
+export const REQUEST_MEMBERS = 'REQUEST_MEMBERS';
+export const RECEIVE_MEMBERS = 'RECEIVE_MEMBERS';
+export const REQUEST_LABELS = 'REQUEST_LABELS';
+export const RECEIVE_LABELS = 'RECEIVE_LABELS';
 
-export function uploadingPackage() {
+export function requestMembers() {
   return {
-    type: UPLOADING_PACKAGE
+    type: REQUEST_MEMBERS
+  };
+}
+export function receiveMembers() {
+  return {
+    type: RECEIVE_MEMBERS
   };
 }
 
-export function finishUploadingPackage() {
+export function requestLabels() {
   return {
-    type: FINISH_UPLOADING_PACKAGE
+    type: REQUEST_LABELS
+  };
+}
+export function receiveLabels() {
+  return {
+    type: RECEIVE_LABELS
   };
 }
 
-export function receivePackages(packages) {
-  return {
-    type: RECEIVE_PACKAGES,
-    packages
-  };
-}
-
-export function uploadPackage(projectId: number, packageName: string, form) {
+export function fetchMembers() {
   return (dispatch) => {
-    dispatch(uploadingPackage());
-    let formFiles: NodeListOf<HTMLInputElement> = form.querySelectorAll('input[type="file"');
-    Remote.createPackage(projectId, packageName, (error) => {
-      for (let i = 0; i < formFiles.length; i++) {
-        let data = new FormData();
-        for (let j = 0; j < formFiles[i].files.length; j++) {
-          let isMain = false;
-          if (formFiles[i].name === 'selectMain') {
-            isMain = true;
-          }
-          data.append('file', formFiles[i].files[j]);
-          if (error) {
-            dispatch(openNotification('error', error.toString(), null));
-            return;
-          }
-          fetch(`/upload?type=file&project-id=${projectId}&package-name=${packageName}&relative-path=`, {
-            credentials: 'include',
-            method: 'post',
-            body: data
-          }).then(() => {
-            if (isMain) {
-              Remote.setAttributesForPackage(projectId, packageName, JSON.stringify({main: formFiles[i].files[j].name}), (error) => {
-                if (error) {
-                  dispatch(openNotification('error', error, null));
-                  return;
-                }
-                dispatch(finishUploadingPackage());
-                dispatch(fetchPackages(projectId));
-              });
-            } else {
-              dispatch(finishUploadingPackage());
-              dispatch(fetchPackages(projectId));
-            }
-          });
-        }
-      }
-    });
-  };
-}
-
-export function fetchPackages(projectId: number) {
-  return (dispatch) => {
-    Remote.getPackages(projectId, (error, res) => {
+    dispatch(requestMembers());
+    /*Remote.getPackages(projectId, (error, res) => {
       if (error) {
         dispatch(openNotification('error', error.toString(), null));
         return;
       }
       dispatch(receivePackages(res));
-    });
+    });*/
+    dispatch(receiveMembers());
+  };
+}
+export function fetchLabels() {
+  return (dispatch) => {
+    dispatch(requestLabels());
+    /*Remote.getPackages(projectId, (error, res) => {
+     if (error) {
+     dispatch(openNotification('error', error.toString(), null));
+     return;
+     }
+     dispatch(receivePackages(res));
+     });*/
+    dispatch(receiveLabels());
   };
 }
