@@ -1866,6 +1866,22 @@ func (s *Service) GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*web.Id
 	return toIdentities(identities), nil
 }
 
+func (s *Service) GetIdentitiesForEntity(pz az.Principal, entityTypeId, entityId int64) ([]*web.UserRole, error) {
+	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
+		return nil, err
+	}
+	if err := pz.CheckPermission(s.ds.Permissions.ViewRole); err != nil {
+		return nil, err
+	}
+
+	userRoles, err := s.ds.ReadUsersForEntity(pz, entityTypeId, entityId)
+	if err != nil {
+		return nil, err
+	}
+
+	return toUserRoles(userRoles), nil
+}
+
 func (s *Service) GetIdentity(pz az.Principal, identityId int64) (*web.Identity, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewIdentity); err != nil {
 		return nil, err
@@ -2538,6 +2554,24 @@ func toIdentities(workgroups []data.Identity) []*web.Identity {
 	array := make([]*web.Identity, len(workgroups))
 	for i, r := range workgroups {
 		array[i] = toIdentity(r)
+	}
+	return array
+}
+
+func toUserRole(u data.IdentityAndRole) *web.UserRole {
+	return &web.UserRole{
+		u.Kind,
+		u.IdentityId,
+		u.IdentityName,
+		u.RoleId,
+		u.RoleName,
+	}
+}
+
+func toUserRoles(users []data.IdentityAndRole) []*web.UserRole {
+	array := make([]*web.UserRole, len(users))
+	for i, u := range users {
+		array[i] = toUserRole(u)
 	}
 	return array
 }
