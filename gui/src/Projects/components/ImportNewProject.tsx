@@ -210,9 +210,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               }) : null}
             </select>
             { this.props.isModelFetchInProcess ?
-              <div className="model-fetch-progress">
                 <Progress message="Connecting..." />
-              </div>
               : null }
           </div>
         </div> : null}

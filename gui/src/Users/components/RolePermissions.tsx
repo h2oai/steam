@@ -30,7 +30,11 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
         return<Row key={index}>
           <Cell className="right-table-bar" key={permissionSet.description}>{permissionSet.description}</Cell>
           {permissionSet.flags.map((flag,flagIndex) => {
-            return <Cell className="center-text" key={flagIndex}><input type="checkbox" value="on" checked={flag} readOnly={true}></input></Cell>;
+            if (flagIndex === 0) {
+              return <Cell className="center-text" key={flagIndex}><input type="checkbox" value="on" checked={true} readOnly={true}></input></Cell>;
+            } else {
+              return <Cell className="center-text" key={flagIndex}><input type="checkbox" value="on" checked={flag} readOnly={true}></input></Cell>;
+            }
           })}
         </Row>;
       });
