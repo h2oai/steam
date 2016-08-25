@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
@@ -6,19 +7,28 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/collaborators.scss';
 import { fetchLabels } from '../actions/collaborators.actions';
+import { fetchEntityIds } from '../../App/actions/global.actions';
 
 interface Props {
-  labels: Array<any>
+  params: {
+    projectid: string
+  },
+  labels: Array<any>,
+  entityIds
 }
 
 interface DispatchProps {
-  fetchLabels: Function
+  fetchLabels: Function,
+  fetchEntityIds: Function
 }
 
 export class ProjectLabelsAccess extends React.Component<Props & DispatchProps, any> {
 
   componentWillMount(): void {
     this.props.fetchLabels();
+    if (_.isEmpty(this.props.entityIds)) {
+      this.props.fetchEntityIds();
+    }
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -51,13 +61,15 @@ export class ProjectLabelsAccess extends React.Component<Props & DispatchProps, 
 
 function mapStateToProps(state) {
   return {
-    labels: state.collaborators.labels
+    labels: state.collaborators.labels,
+    entityIds: state.global.entityIds
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    fetchLabels: bindActionCreators(fetchLabels, dispatch)
+    fetchLabels: bindActionCreators(fetchLabels, dispatch),
+    fetchEntityIds: bindActionCreators(fetchEntityIds, dispatch)
   };
 }
 

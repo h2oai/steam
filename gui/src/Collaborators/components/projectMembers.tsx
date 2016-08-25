@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
@@ -6,18 +7,27 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/collaborators.scss';
 import { fetchMembers } from '../actions/collaborators.actions';
+import { fetchEntityIds } from '../../App/actions/global.actions';
 
 interface Props {
-  members: Array<any>
+  params: {
+    projectid: string
+  },
+  members: Array<any>,
+  entityIds
 }
 
 interface DispatchProps {
-  fetchMembers: Function
+  fetchMembers: Function,
+  fetchEntityIds: Function
 }
 
 export class ProjectMembers extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     this.props.fetchMembers();
+    if (_.isEmpty(this.props.entityIds)) {
+      this.props.fetchEntityIds();
+    }
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -51,12 +61,14 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
 function mapStateToProps(state) {
   return {
     members: state.collaborators.members,
+    entityIds: state.global.entityIds
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    fetchMembers: bindActionCreators(fetchMembers, dispatch)
+    fetchMembers: bindActionCreators(fetchMembers, dispatch),
+    fetchEntityIds: bindActionCreators(fetchEntityIds, dispatch)
   };
 }
 
