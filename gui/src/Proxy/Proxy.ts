@@ -37,7 +37,7 @@ export interface BinomialModel {
   
   max_runtime: number
   
-  metrics: string
+  json_metrics: string
   
   created_at: number
   
@@ -111,7 +111,7 @@ export interface Dataset {
   
   response_column_name: string
   
-  properties: string
+  json_properties: string
   
   created_at: number
   
@@ -253,7 +253,7 @@ export interface Model {
   
   max_runtime: number
   
-  metrics: string
+  json_metrics: string
   
   created_at: number
   
@@ -291,7 +291,7 @@ export interface MultinomialModel {
   
   max_runtime: number
   
-  metrics: string
+  json_metrics: string
   
   created_at: number
   
@@ -359,7 +359,7 @@ export interface RegressionModel {
   
   max_runtime: number
   
-  metrics: string
+  json_metrics: string
   
   created_at: number
   

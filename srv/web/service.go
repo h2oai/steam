@@ -14,6 +14,7 @@ import (
 )
 
 // --- Types ---
+
 type BinomialModel struct {
 	Id                  int64   `json:"id"`
 	TrainingDatasetId   int64   `json:"training_dataset_id"`
@@ -28,7 +29,7 @@ type BinomialModel struct {
 	LogicalName         string  `json:"logical_name"`
 	Location            string  `json:"location"`
 	MaxRuntime          int     `json:"max_runtime"`
-	Metrics             string  `json:"metrics"`
+	JSONMetrics         string  `json:"json_metrics"`
 	CreatedAt           int64   `json:"created_at"`
 	LabelId             int64   `json:"label_id"`
 	LabelName           string  `json:"label_name"`
@@ -69,7 +70,7 @@ type Dataset struct {
 	Description        string `json:"description"`
 	FrameName          string `json:"frame_name"`
 	ResponseColumnName string `json:"response_column_name"`
-	Properties         string `json:"properties"`
+	JSONProperties     string `json:"json_properties"`
 	CreatedAt          int64  `json:"created_at"`
 }
 
@@ -149,7 +150,7 @@ type Model struct {
 	LogicalName         string `json:"logical_name"`
 	Location            string `json:"location"`
 	MaxRuntime          int    `json:"max_runtime"`
-	Metrics             string `json:"metrics"`
+	JSONMetrics         string `json:"json_metrics"`
 	CreatedAt           int64  `json:"created_at"`
 	LabelId             int64  `json:"label_id"`
 	LabelName           string `json:"label_name"`
@@ -169,7 +170,7 @@ type MultinomialModel struct {
 	LogicalName         string  `json:"logical_name"`
 	Location            string  `json:"location"`
 	MaxRuntime          int     `json:"max_runtime"`
-	Metrics             string  `json:"metrics"`
+	JSONMetrics         string  `json:"json_metrics"`
 	CreatedAt           int64   `json:"created_at"`
 	LabelId             int64   `json:"label_id"`
 	LabelName           string  `json:"label_name"`
@@ -206,7 +207,7 @@ type RegressionModel struct {
 	LogicalName          string  `json:"logical_name"`
 	Location             string  `json:"location"`
 	MaxRuntime           int     `json:"max_runtime"`
-	Metrics              string  `json:"metrics"`
+	JSONMetrics          string  `json:"json_metrics"`
 	CreatedAt            int64   `json:"created_at"`
 	LabelId              int64   `json:"label_id"`
 	LabelName            string  `json:"label_name"`
@@ -3195,7 +3196,13 @@ func (this *Impl) GetDatasets(r *http.Request, in *GetDatasetsIn, out *GetDatase
 
 	out.Datasets = val0
 
-	res, merr := json.Marshal(out)
+	aux := make([]Dataset, len(out.Datasets))
+	for i, val := range out.Datasets {
+		aux[i] = *val
+		aux[i].JSONProperties = "JSON DATA OMITTED..."
+	}
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3230,7 +3237,10 @@ func (this *Impl) GetDataset(r *http.Request, in *GetDatasetIn, out *GetDatasetO
 
 	out.Dataset = val0
 
-	res, merr := json.Marshal(out)
+	aux := *out.Dataset
+	aux.JSONProperties = "JSON DATA OMITTED..."
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3265,7 +3275,13 @@ func (this *Impl) GetDatasetsFromCluster(r *http.Request, in *GetDatasetsFromClu
 
 	out.Dataset = val0
 
-	res, merr := json.Marshal(out)
+	aux := make([]Dataset, len(out.Dataset))
+	for i, val := range out.Dataset {
+		aux[i] = *val
+		aux[i].JSONProperties = "JSON DATA OMITTED..."
+	}
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3436,7 +3452,10 @@ func (this *Impl) BuildModelAuto(r *http.Request, in *BuildModelAutoIn, out *Bui
 
 	out.Model = val0
 
-	res, merr := json.Marshal(out)
+	aux := *out.Model
+	aux.JSONMetrics = "JSON DATA OMITTED..."
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3471,7 +3490,10 @@ func (this *Impl) GetModel(r *http.Request, in *GetModelIn, out *GetModelOut) er
 
 	out.Model = val0
 
-	res, merr := json.Marshal(out)
+	aux := *out.Model
+	aux.JSONMetrics = "JSON DATA OMITTED..."
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3506,7 +3528,13 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
 
 	out.Models = val0
 
-	res, merr := json.Marshal(out)
+	aux := make([]Model, len(out.Models))
+	for i, val := range out.Models {
+		aux[i] = *val
+		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	}
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3541,7 +3569,13 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
 
 	out.Models = val0
 
-	res, merr := json.Marshal(out)
+	aux := make([]Model, len(out.Models))
+	for i, val := range out.Models {
+		aux[i] = *val
+		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	}
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3646,7 +3680,13 @@ func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, 
 
 	out.Models = val0
 
-	res, merr := json.Marshal(out)
+	aux := make([]BinomialModel, len(out.Models))
+	for i, val := range out.Models {
+		aux[i] = *val
+		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	}
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3681,7 +3721,10 @@ func (this *Impl) GetModelBinomial(r *http.Request, in *GetModelBinomialIn, out 
 
 	out.Model = val0
 
-	res, merr := json.Marshal(out)
+	aux := *out.Model
+	aux.JSONMetrics = "JSON DATA OMITTED..."
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3751,7 +3794,13 @@ func (this *Impl) FindModelsMultinomial(r *http.Request, in *FindModelsMultinomi
 
 	out.Models = val0
 
-	res, merr := json.Marshal(out)
+	aux := make([]MultinomialModel, len(out.Models))
+	for i, val := range out.Models {
+		aux[i] = *val
+		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	}
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3786,7 +3835,10 @@ func (this *Impl) GetModelMultinomial(r *http.Request, in *GetModelMultinomialIn
 
 	out.Model = val0
 
-	res, merr := json.Marshal(out)
+	aux := *out.Model
+	aux.JSONMetrics = "JSON DATA OMITTED..."
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3856,7 +3908,13 @@ func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegression
 
 	out.Models = val0
 
-	res, merr := json.Marshal(out)
+	aux := make([]RegressionModel, len(out.Models))
+	for i, val := range out.Models {
+		aux[i] = *val
+		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	}
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3891,7 +3949,10 @@ func (this *Impl) GetModelRegression(r *http.Request, in *GetModelRegressionIn, 
 
 	out.Model = val0
 
-	res, merr := json.Marshal(out)
+	aux := *out.Model
+	aux.JSONMetrics = "JSON DATA OMITTED..."
+
+	res, merr := json.Marshal(aux)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
