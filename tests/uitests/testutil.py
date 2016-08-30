@@ -213,12 +213,17 @@ def selectModel(driver, name):
 		return False
 	return True
 
-def deployModel(driver, mod):
+def deployModel(driver, mod, name):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	ind = indexOfModel(driver, mod)
 	if ind == -1:
 		raise se.ElementNotVisibleException()
 	driver.find_elements_by_xpath("//span[text()='deploy model']")[ind].click()
-	
+	print len(driver.find_elements_by_xpath("//input[@type='text']"))
+	wait.until(lambda x: len(x.find_elements_by_xpath("//input[@type='text']")) == 2)
+	driver.find_elements_by_xpath("//input[@type='text']")[1].send_keys(name)
+	driver.find_element_by_class_name("deploy-button").click()
+	wait.until(lambda x: x.find_element_by_class_name("deployed-services"))
 	
 
 def newtest():

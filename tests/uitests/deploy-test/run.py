@@ -1,6 +1,6 @@
 import sys
 import time
-import magic.testutil as tu
+import testutil as tu
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -21,9 +21,16 @@ def deployOneTest(driver):
 		print "failed to set up test"
 		return False
 	try:
-		tu.deployModel(driver, "regress")
-	except:
+		tu.deployModel(driver, "regress", "happy")
+		text = driver.find_element_by_xpath("//div[@class='panel-title']/span").text
+		if not "happy" in text:
+			print "Failed to create a named service"
+			return False
+
+	except Exception as e:
+		print "Failed to deploy a model"
 		return False
+	return True
 
 def main():
 	failcount = 0
