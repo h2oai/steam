@@ -12,7 +12,7 @@ tar xvf steamY-develop-darwin-amd64.tar.gz
 
 java -jar $H2O_PATH -port 54535 -name steamtest > h2o.log 2>&1 &
 H2O_PID=$!
-
+disown
 sleep 2
 
 python init_h2o.py
@@ -32,7 +32,7 @@ failcount=0
 
 echo > $WD/.failures
 
-for dir in `ls -d *-test/`; do
+for dir in `ls -d *-test`; do
 	cd steam-develop-darwin-amd64
 	sleep 1
 	echo "Resetting database"
@@ -40,26 +40,31 @@ for dir in `ls -d *-test/`; do
 	rm -rf var/master/model/*
 	./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
 	STEAM_PID=$!
-	cd ../$dir
+	disown
+	cd ..
+	cp testutil.py $dir/
 	sleep 1
-	python run.py > $WD/.testmp
+	python $dir/run.py > $WD/.testmp
 	pass=$?
 	if [ $pass -ne 0 ] 
 		then
+		echo $dir >> $WD/.failures
 		cat $WD/.testmp >> $WD/.failures
 		failcount=`expr $failcount + $pass`
-		echo $dir >> $WD/.failtmp
+		echo -e "\n\n" >> $WD/.failures
 		i=`expr $i + 1`
 		echo "TEST FAILED"
 	fi	
 	kill -9 $STEAM_PID > /dev/null 2>&1
-	cd ..
+	rm $dir/testutil.py*
 done
 
 
 echo "$i test(s) failed"
 cat $WD/.failures
 rm $WD/.failtmp $WD/.failures $WD/.testmp
+rm -rf $WD/steamY-develop-darwin-amd64.tar.gz $WD/steam-develop-darwin-amd64
+
 
 
 
