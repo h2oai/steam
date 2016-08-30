@@ -138,7 +138,6 @@ def multiDeployTest(driver):
 		return False	
 	return True
 
-
 def main():
 	failcount = 0
 	d = tu.newtest()
