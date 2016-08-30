@@ -61,7 +61,7 @@ export const routes: IRoute[] = [
       },
       {
         path: 'projects/:projectid',
-        component: Dummy,
+        component: Models,
         name: 'Project',
         showInBreadcrumb: true,
         showInNavigation: false,

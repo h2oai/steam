@@ -26,6 +26,7 @@ export function fetchEntityIds() {
         if (error) {
           openNotification('error', 'There was an error retrieving permissions list', null);
           reject(error);
+          return;
         }
         dispatch(receiveEntityIds(res));
         resolve(res);

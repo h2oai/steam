@@ -61,8 +61,11 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   </h2>
                 </article>
                 <h3>ACCESS</h3>
-                <div>First Last</div>
-                <div><span className="fa fa-plus"></span><span> ADD USER</span></div>
+                { (cluster as any).identities ?
+                  (cluster as any).identities.map((identity, index) => {
+                    return <div key={index}>{ identity.identity_name }</div>;
+                  })
+                  : null }
               </Panel>
             );
           })}

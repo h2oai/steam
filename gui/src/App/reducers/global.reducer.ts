@@ -12,7 +12,7 @@ export function globalReducer(state = initialState, action) {
       for (let entityType of action.response) {
         entityIds[entityType.name] = entityType.id;
       }
-      return _.assign({}, state, entityIds);
+      return _.assign({}, state, { entityIds });
     default:
       return state;
   }

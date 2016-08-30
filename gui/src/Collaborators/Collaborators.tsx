@@ -78,9 +78,9 @@ export class Collaborators extends React.Component<Props & DispatchProps, any> {
         <TabNavigation tabs={this.state.tabs}/>
 
         {this.state.tabs.projectMembers.isSelected === true ?
-          <ProjectMembers projectId={this.props.params.projectid} /> : null}
+          <ProjectMembers projectid={this.props.params.projectid} /> : null}
         {this.state.tabs.labelsAccess.isSelected === true ?
-          <ProjectLabelsAccess projectId={this.props.params.projectid} /> : null}
+          <ProjectLabelsAccess projectid={this.props.params.projectid} /> : null}
       </div>
     );
   }

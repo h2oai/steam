@@ -95,7 +95,6 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
             <Row header={true}>
               <Cell>User</Cell>
               <Cell>Role</Cell>
-              <Cell>Project</Cell>
             </Row>
 
             { this.props.usersWithRolesAndProjects ?
@@ -110,7 +109,6 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
                           </span>;
                         })
                       }</Cell>
-                      <Cell>&nbsp;</Cell>
                     </Row>;
                   } else {
                     return null;

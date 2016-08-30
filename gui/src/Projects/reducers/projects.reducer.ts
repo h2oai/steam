@@ -3,7 +3,7 @@
  */
 import * as _ from 'lodash';
 import {
-  RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED,
+  RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED, SET_CURRENT_PROJECT,
   RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER, RECEIVE_MODELS_FROM_PROJECT, RECEIVE_PROJECT, REQUEST_CLUSTERS, REQUEST_MODELS
 } from '../actions/projects.actions';
 
@@ -17,6 +17,15 @@ let initialState = {
 
 export const projectsReducer = (state = initialState, action: any) => {
   switch (action.type) {
+    case SET_CURRENT_PROJECT :
+      if (state.project.hasOwnProperty("id")) {
+        if ((state.project as any).id === action.projectId) {
+          return state;
+        }
+      }
+      let toReturn: any =  _.assign({}, state);
+      toReturn.project = { id: action.projectId };
+      return toReturn;
     case REQUEST_CLUSTERS:
       return _.assign({}, state, {
         isClusterFetchInProcess: true

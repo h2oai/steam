@@ -6,28 +6,23 @@ import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/collaborators.scss';
-import { fetchMembers } from '../actions/collaborators.actions';
-import { fetchEntityIds } from '../../App/actions/global.actions';
+import { fetchMembersForProject } from '../actions/collaborators.actions';
+import { setCurrentProject } from '../../Projects/actions/projects.actions';
 
 interface Props {
-  params: {
-    projectid: string
-  },
-  members: Array<any>,
-  entityIds
+  projectid: string,
+  members: Array<any>
 }
 
 interface DispatchProps {
-  fetchMembers: Function,
-  fetchEntityIds: Function
+  fetchMembersForProject: Function,
+  setCurrentProject: Function
 }
 
 export class ProjectMembers extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
-    this.props.fetchMembers();
-    if (_.isEmpty(this.props.entityIds)) {
-      this.props.fetchEntityIds();
-    }
+    this.props.setCurrentProject(parseInt(this.props.projectid, 10));
+    this.props.fetchMembersForProject();
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -42,16 +37,15 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
             <Cell>ROLE</Cell>
             <Cell>ACCESS</Cell>
           </Row>
-          <Row>
-            <Cell>First Last</Cell>
-            <Cell>Admin</Cell>
-            <Cell>Owner</Cell>
-          </Row>
-          <Row>
-            <Cell>First Last</Cell>
-            <Cell>Project Lead</Cell>
-            <Cell>Collaborator</Cell>
-          </Row>
+          {this.props.members ?
+          this.props.members.map((member, index) => {
+            return <Row key={index}>
+              <Cell>{member.identity_name}</Cell>
+              <Cell>{member.role_name}</Cell>
+              <Cell>{member.kind}</Cell>
+            </Row>;
+          })
+            : null }
         </Table>
       </div>
     );
@@ -60,15 +54,14 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
 
 function mapStateToProps(state) {
   return {
-    members: state.collaborators.members,
-    entityIds: state.global.entityIds
+    members: state.collaborators.members
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    fetchMembers: bindActionCreators(fetchMembers, dispatch),
-    fetchEntityIds: bindActionCreators(fetchEntityIds, dispatch)
+    fetchMembersForProject: bindActionCreators(fetchMembersForProject, dispatch),
+    setCurrentProject: bindActionCreators(setCurrentProject, dispatch)
   };
 }
 

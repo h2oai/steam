@@ -1,8 +1,8 @@
 import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
-import {Permission} from "../../Proxy/Proxy";
-import {Role} from "../../Proxy/Proxy";
+import { Permission } from "../../Proxy/Proxy";
+import { Role } from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
