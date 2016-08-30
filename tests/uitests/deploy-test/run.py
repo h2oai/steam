@@ -154,7 +154,6 @@ def main():
 	# test that stopping services from services page removes them from project deployments
 	if not cleanupTest(d):
 		failcount += 1
-
 	tu.endtest(d)
 	sys.exit(failcount)
 
