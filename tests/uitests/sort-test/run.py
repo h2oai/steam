@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
-import magic.testutil as tu
+import testutil as tu
 
 def outOfOrder(feat, order):
 	print "Models did not sort in {0} order properly for metric {1}".format(order, feat)

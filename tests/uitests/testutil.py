@@ -76,6 +76,16 @@ def goProjectConfig(driver):
 		print e
 		print "failed to enter project config"
 
+def goProjectDeployment(driver):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		driver.find_element_by_xpath("//a[text()='Deployment']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//span[text()='Deployment']"))
+	except:
+		print "Failed to navigate to deployment page"
+		return False
+	return True
+
 def sortModels(driver, feat, ascending):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	driver.find_element_by_class_name("filter-dropdown-invoker").click()
@@ -145,17 +155,21 @@ def goModels(driver):
 		print "Failed to navigate to models page"
 		return False
 
-def goProjects(driver):
+def goServices(driver):
 	try:
-		proj = driver.find_element_by_class_name("fa-folder")
-		proj.click()
+		driver.find_element_by_class_name("fa-cloud").click()
 		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='project-details']"))
-		return True
-	except Exception as e:
-		print e
-		print "Failed to navigate to projects page through navbar"
+		wait.until(lambda x: x.find_element_by_xpath("//li[text()='Services']"))
+	except:
+		print "Failed to navigate to services page"
 		return False
+	return True
+
+def goProjects(driver):
+	driver.find_element_by_class_name("fa-folder").click()
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	wait.until(lambda x: x.find_element_by_xpath("//div[@class='project-details']"))
+
 
 def clusterExists(driver, addr, port, name):
 	if not goClusters(driver):
@@ -177,6 +191,17 @@ def addCluster(driver, addr, port, name):
 		wait.until(lambda x: x.find_element_by_xpath("//div[text()='{0}']".format(name)))
 	except:
 		print "Cannot add new cluster"
+		return False
+	return True
+
+def viewProject(driver, proj):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		wait.until(lambda x: x.find_element_by_xpath("//header[text()='{0}']".format(proj)))
+		driver.find_element_by_xpath("//header[text()='{0}']".format(proj)).click()
+		wait.until(lambda x: x.find_element_by_class_name("model-name"))
+	except:
+		print "Cannot find project"
 		return False
 	return True
 
@@ -213,12 +238,16 @@ def selectModel(driver, name):
 		return False
 	return True
 
-def deployModel(driver, mod):
+def deployModel(driver, mod, name):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	ind = indexOfModel(driver, mod)
 	if ind == -1:
 		raise se.ElementNotVisibleException()
 	driver.find_elements_by_xpath("//span[text()='deploy model']")[ind].click()
-	
+	wait.until(lambda x: len(x.find_elements_by_xpath("//input[@type='text']")) == 2)
+	driver.find_elements_by_xpath("//input[@type='text']")[1].send_keys(name)
+	driver.find_element_by_class_name("deploy-button").click()
+	wait.until(lambda x: x.find_element_by_class_name("deployed-services"))
 	
 
 def newtest():
