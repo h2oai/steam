@@ -63,7 +63,7 @@ type Dataset struct {
 	Description        string
 	FrameName          string
 	ResponseColumnName string
-	Properties         string
+	JSONProperties     string
 	CreatedAt          int64
 }
 
@@ -81,7 +81,7 @@ type Model struct {
 	LogicalName         string
 	Location            string
 	MaxRuntime          int
-	Metrics             string
+	JSONMetrics         string
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -101,7 +101,7 @@ type BinomialModel struct {
 	LogicalName         string
 	Location            string
 	MaxRuntime          int
-	Metrics             string
+	JSONMetrics         string
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -126,7 +126,7 @@ type MultinomialModel struct {
 	LogicalName         string
 	Location            string
 	MaxRuntime          int
-	Metrics             string
+	JSONMetrics         string
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -149,7 +149,7 @@ type RegressionModel struct {
 	LogicalName          string
 	Location             string
 	MaxRuntime           int
-	Metrics              string
+	JSONMetrics          string
 	CreatedAt            int64
 	LabelId              int64
 	LabelName            string

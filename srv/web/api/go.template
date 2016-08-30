@@ -17,6 +17,7 @@ import (
 
 // --- Types ---
 
+{{$s := .Structs}}
 {{- range .Structs}}
 type {{.Name}} struct {
 {{- range .Fields}}
@@ -119,7 +120,61 @@ func (this *Impl) {{.Name}}(r *http.Request, in *{{.Name}}In, out *{{.Name}}Out)
 	out.{{.Name}} = val{{$i}} 
   {{end}}
 
+  {{/*  Really ugly way of removing JSON:
+        First: Check if has outputs (1 generic out)
+        Second: Check if is a struct (1 generic out)
+        Third: Handle JSON differently if is an array or not (1 generic out each)
+
+        At each step, a "resp, err..."" must be printed, a total of four with out are used
+        and two with the aux struct
+    */}}
+  {{- range .Outputs}}
+    {{- if .IsStruct}}{{- $t := .Type}}
+      {{- $n := .Name}}
+      {{- if .IsArray}}
+        {{- with index $s .Type}}
+          {{- if .HasJSON}}
+            {{- range .Fields}}
+              {{- if startswith .Name `JSON`}}
+  aux := make([]{{$t}}, len(out.{{$n}}))
+  for i, val := range out.{{$n}} {
+    aux[i] = *val
+    aux[i].{{.Name}} = "JSON DATA OMITTED..."
+    }
+              {{- end}}
+            {{- end}}
+
+  res, merr := json.Marshal(aux)
+          {{- else}}
+
   res, merr := json.Marshal(out)
+          {{- end}}
+        {{- end}}
+      {{- else}}
+        {{- with index $s .Type}}
+          {{- if .HasJSON}}
+            {{- range .Fields}}
+              {{- if startswith .Name `JSON`}}
+  aux := *out.{{$n}}
+  aux.{{.Name}} = "JSON DATA OMITTED..."
+               {{- end}}
+            {{- end}}
+
+  res, merr := json.Marshal(aux)
+          {{- else}}
+
+  res, merr := json.Marshal(out)
+          {{- end}}
+        {{- end}}
+      {{- end}}
+    {{- else}}
+
+  res, merr := json.Marshal(out)
+    {{- end}}
+  {{- else}}
+
+  res, merr := json.Marshal(out)
+  {{- end}}
   if merr != nil {
     log.Println(guid, "RES", pz, name, merr)
   } else {

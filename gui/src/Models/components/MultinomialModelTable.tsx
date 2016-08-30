@@ -58,7 +58,7 @@ export default class MultinomialModelTable extends React.Component<Props, any> {
           </Cell>
         </Row>
         {this.props.items.map((model, i) => {
-          let modelMetrics = JSON.parse(model.metrics);
+          let modelMetrics = JSON.parse(model.json_metrics);
           let trainingMetrics: MultinomialMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {}) as MultinomialMetrics;
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);

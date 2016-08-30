@@ -16,7 +16,7 @@ import (
 	"syscall"
 
 	"github.com/BurntSushi/toml"
-	"github.com/h2oai/steamY/lib/rpc"
+	"github.com/h2oai/steam/lib/rpc"
 	"github.com/h2oai/steamY/srv/web"
 )
 
@@ -95,10 +95,17 @@ func launchScoringService(killch chan bool) error {
 	go func() { <-killch; cmd.Process.Kill() }()
 
 	// Start log and issue any successful startup commands
-	okCH := make(chan bool)
+	okCh := make(chan bool)
 	success := regexp.MustCompile(`Started @\d+ms`)
-	go writeToLog(stdErr, "service.log", success, okCH)
-	go func() { <-okCH; log.Println("Scoring service is up.") }()
+	go writeToLog(stdErr, "service.log", success, okCh)
+
+	go func() {
+		ok := <-okCh
+		if !ok {
+			killch <- true
+		}
+		log.Println("Scoring service is up.")
+	}()
 
 	// Blocking: if this function returns, an error occured.
 	return fmt.Errorf("Unexpectedly quit Scoring Service. See service log file.: %v", cmd.Wait())
@@ -107,18 +114,18 @@ func launchScoringService(killch chan bool) error {
 func launchSteam(killch chan bool) error {
 	log.Println("Launching Steam...")
 
-	// Issue commands and start scoring service
+	// Issue commands and start steam
 	argv := []string{
 		"serve",
 		"master",
 		"--superuser-name=" + config.Superuser.Name,
 		"--superuser-password=" + config.Superuser.Pass,
-		"--web-address=localhost:" + strconv.Itoa(config.Steam.Port),
-		"--scoring-service-address=localhost:" + strconv.Itoa(config.ScoringSerivce.Port),
+		"--web-address=:" + strconv.Itoa(config.Steam.Port),
+		"--scoring-service-address=:" + strconv.Itoa(config.ScoringSerivce.Port),
 		"--scoring-service-port-range=" + config.ScoringSerivce.PortRange,
 	}
 	cmd := exec.Command("./steam", argv...)
-	stdErr, err := cmd.StderrPipe() // StdErr for loggingsta
+	stdErr, err := cmd.StderrPipe() // StdErr for logging
 	if err != nil {
 		return err
 	}
@@ -135,7 +142,10 @@ func launchSteam(killch chan bool) error {
 	success := regexp.MustCompile("Web server listening at")
 	go writeToLog(stdErr, "steam.log", success, okCh)
 	go func() { // On success run Initialization if -init specified
-		<-okCh
+		ok := <-okCh
+		if !ok {
+			killch <- true
+		}
 		if doInit {
 			if err := initSteam(); err != nil {
 				log.Println(err)
@@ -196,14 +206,19 @@ func initSteam() error {
 func writeToLog(stream io.ReadCloser, fileName string, succ *regexp.Regexp, okCh chan bool) error {
 	in := bufio.NewScanner(stream)
 
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0444)
+	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
+		log.Println(err)
+		okCh <- false
 		return err
 	}
 	defer f.Close()
 
 	for in.Scan() {
 		if _, err := f.WriteString(in.Text() + "\n"); err != nil {
+			return err
+		}
+		if err := f.Sync(); err != nil {
 			return err
 		}
 
