@@ -60,6 +60,7 @@ def projectDeployTest(driver):
 		tu.deployModel(driver, "gradi", "swell")
 		tu.goHome(driver)
 		tu.goProjects(driver)
+		time.sleep(1)
 		tu.viewProject(driver, "deptest")
 		tu.goProjectDeployment(driver)
 	except Exception as e:
