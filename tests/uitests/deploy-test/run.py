@@ -28,6 +28,7 @@ def deployOneTest(driver):
 			return False
 
 	except Exception as e:
+		print e
 		print "Failed to deploy a model"
 		return False
 	return True
@@ -99,30 +100,45 @@ def cleanupTest(driver):
 
 def multiDeployTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	tu.goHome(driver)
-	tu.newProject(driver)
-	driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
-	tu.selectDataframe(driver, "bank_full.hex")
-	tu.selectModelCategory(driver, "Regression")
-	tu.selectModel(driver, "linmiss")
-	driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("multidep")
-	driver.find_element_by_xpath("//button[text()='Create Project']").click()
-	wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='linmiss']"))
-	tu.deployModel(driver, "linmiss", "double")
-	tu.goHome(driver)
-	tu.goServices(driver)
 	try:
+		tu.goHome(driver)
+		tu.newProject(driver)
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='select-cluster']//button"))
+		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectDataframe(driver, "bank_full.hex")
+		tu.selectModelCategory(driver, "Regression")
+		tu.selectModel(driver, "linmiss")
+		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("multidep")
+		driver.find_element_by_xpath("//button[text()='Create Project']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='linmiss']"))
+		tu.deployModel(driver, "linmiss", "double")
+		tu.goHome(driver)
+		tu.goServices(driver)
+	except Exception as e:
+		print e
+		print "failed to setup multi deploy test"
+		return False
+	try:
+		time.sleep(3)
 		wait.until(lambda x: x.find_element_by_class_name("panel-title"))
 		deps = driver.find_elements_by_xpath("//div[@class='panel-title']/span")
-		names = ["multidep", "swell", "isallover"]
+		print len(deps)
+		names = ["double", "swell"]
 		for name in names:
+			good = False
 			for dep in deps:
-				if name in dep:
-					break
-				else if name == "isallover"
-					print "Services page does not contain all deployed services"
-					return False
-				
+				print name
+				print dep.text
+				if name in dep.text:
+					good = True
+			if not good:
+				print "Failed to locate all deployed services on services page"
+				return False
+
+	except Exception as e:
+		print e
+		print "Failed to find deployments on services page"
+		return False	
 	return True
 
 
