@@ -2,7 +2,7 @@
 
 WD=`pwd`
 touch .failtmp
-H2O_PATH=~/Documents/h2o-3.10.0.6/h2o.jar
+H2O_PATH=~/Documents/h2o/h2o.jar
 
 rm -rf ./steam*-develop-linux-amd64*
 rm -rf ./steam*-master-linux-amd64*
@@ -34,9 +34,11 @@ for dir in `ls -d *-test`; do
 	cd steam-develop-linux-amd64
 	sleep 1
 	echo "Resetting database"
-	(cd var/master/scripts && ./reset-database.sh > /dev/null 2>&1)
+	cd var/master/scripts
+	sudo runuser -l postgres -c "cd `pwd` && ./reset-database.sh > /dev/null 2>&1"
+	cd ../../..
 	rm -rf var/master/model/*
-	./steam serve master --superuser-name superuser --superuser-password superuser --db-password superuser >> ../steam.log  2>&1 &
+	./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
 	STEAM_PID=$!
 	disown
 	cd ..
