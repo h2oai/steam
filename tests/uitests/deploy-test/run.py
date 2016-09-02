@@ -122,13 +122,10 @@ def multiDeployTest(driver):
 		time.sleep(3)
 		wait.until(lambda x: x.find_element_by_class_name("panel-title"))
 		deps = driver.find_elements_by_xpath("//div[@class='panel-title']/span")
-		print len(deps)
 		names = ["double", "swell"]
 		for name in names:
 			good = False
 			for dep in deps:
-				print name
-				print dep.text
 				if name in dep.text:
 					good = True
 			if not good:
