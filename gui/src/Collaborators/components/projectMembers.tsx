@@ -11,6 +11,7 @@ import { setCurrentProject } from '../../Projects/actions/projects.actions';
 
 interface Props {
   projectid: string,
+  loadLabelsTab: Function,
   members: Array<any>
 }
 
@@ -30,7 +31,8 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
       <div className="projectMembers">
         <p></p>
         <h1>Members</h1>
-        <p>Cupcake ipsum dolor sit amet chocolate bar sesame snaps sugar plum dessert. Sugar plum sesame snaps oat cake jelly cake sugar plum cake danish pie. Jelly-o candy canes soufflé gummi bears jelly beans sweet roll bear claw.</p>
+        <p>Theses are users who have access to this project, meaning they can see data, models and services associated with the project. Additionally, owners and collaborators can create new models, and new services based on those models.</p>
+        <p>Labels associated with projects have <span className="link" onClick={ this.props.loadLabelsTab }>their own access controls, shown here</span>.</p>
         <Table>
           <Row header={true}>
             <Cell>USER</Cell>

@@ -76,7 +76,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
               <header>
                 <h3 className="new-cluster-header">New Cluster</h3>
               </header>
-              <p>&nbsp;</p>
+              <p>Connect to a H2O cluster where your existing models and data sets are located.</p>
               <div className="new-cluster-form">
                 <form onSubmit={this.registerCluster.bind(this)}>
                   <input type="text" name="ip-address" placeholder="IP Address"/>&nbsp;

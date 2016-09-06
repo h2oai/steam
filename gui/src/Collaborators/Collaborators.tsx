@@ -9,7 +9,7 @@ import './styles/collaborators.scss';
 
 interface Props {
   params: {
-    projectid: string
+    projectid: string,
   }
 }
 
@@ -25,13 +25,13 @@ export class Collaborators extends React.Component<Props & DispatchProps, any> {
         projectMembers: {
           label: 'MEMBERS',
           isSelected: true,
-          onClick: this.clickHandler.bind(this),
+          onClick: this.switchTab.bind(this),
           component: <ProjectMembers />
         },
         labelsAccess: {
           label: 'LABELS ACCESS',
           isSelected: false,
-          onClick: this.clickHandler.bind(this),
+          onClick: this.switchTab.bind(this),
           component: <ProjectLabelsAccess />
         }
       },
@@ -45,21 +45,22 @@ export class Collaborators extends React.Component<Props & DispatchProps, any> {
         projectMembers: {
           label: 'MEMBERS',
           isSelected: true,
-          onClick: this.clickHandler.bind(this),
+          onClick: this.switchTab.bind(this),
           component: <ProjectMembers />
         },
         labelsAccess: {
           label: 'LABELS ACCESS',
           isSelected: false,
-          onClick: this.clickHandler.bind(this),
+          onClick: this.switchTab.bind(this),
           component: <ProjectLabelsAccess />
         }
       }
+
     });
   }
 
-  clickHandler(tab) {
-    let key = _.findKey(this.state.tabs, tab);
+  switchTab(newTab) {
+    let key = _.findKey(this.state.tabs, newTab);
     let newState = _.cloneDeep(this.state);
     Object.keys(newState.tabs).map((tab) => {
       newState.tabs[tab].isSelected = false;
@@ -78,7 +79,7 @@ export class Collaborators extends React.Component<Props & DispatchProps, any> {
         <TabNavigation tabs={this.state.tabs}/>
 
         {this.state.tabs.projectMembers.isSelected === true ?
-          <ProjectMembers projectid={this.props.params.projectid} /> : null}
+          <ProjectMembers projectid={this.props.params.projectid} loadLabelsTab={this.switchTab.bind(this, this.state.tabs.labelsAccess)} /> : null}
         {this.state.tabs.labelsAccess.isSelected === true ?
           <ProjectLabelsAccess projectid={this.props.params.projectid} /> : null}
       </div>
