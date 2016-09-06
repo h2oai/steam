@@ -13,6 +13,7 @@ import { bindActionCreators } from 'redux';
 import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
 import './styles/clusters.scss';
+import YarnClusterModal from './components/YarnClusterModal';
 
 interface DispatchProps {
   fetchClusters: Function
@@ -26,6 +27,12 @@ interface Props {
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
+  constructor() {
+    super();
+    this.state = {
+      yarnClusterModalOpen: false
+    };
+  }
   componentWillMount(): void {
     if (_.isEmpty(this.props.clusters)) {
       this.props.fetchClusters();
@@ -36,6 +43,12 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     this.props.unregisterCluster(clusterId);
   }
 
+  openYarnClusterModal() {
+    this.setState({
+      yarnClusterModalOpen: true
+    });
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     if (!this.props.clusters) {
       return <div></div>;
@@ -43,6 +56,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="clusters">
         <PageHeader>CLUSTERS</PageHeader>
+        <YarnClusterModal open={this.state.yarnClusterModalOpen}/>
+        <button className="default" onClick={this.openYarnClusterModal.bind(this)}>Open YARN Modal</button>
         <div className="panel-container">
           {this.props.clusters.map((cluster, i) => {
             return (
