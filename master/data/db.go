@@ -8,7 +8,8 @@ import (
 
 	"github.com/h2oai/steamY/master/auth"
 	"github.com/h2oai/steamY/master/az"
-	"github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/pkg/errors"
 )
 
 //
@@ -315,11 +316,16 @@ type Datastore struct {
 	ManagePermissions map[int64]int64
 }
 
-func Create(connection Connection, suname, supass string) (*Datastore, error) {
-	connectionString := createConnectionString(connection)
-	db, err := connect(connectionString)
+func Create(dbPath, suname, supass string) (*Datastore, error) {
+	// connectionString := createConnectionString(connection)
+	// db, err := connect(connectionString)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Failed connecting to database using %s: %s", connectionString, err)
+	// }
+
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		return nil, fmt.Errorf("Failed connecting to database using %s: %s", connectionString, err)
+		return nil, errors.Wrap(err, "failed opening db")
 	}
 
 	primed, err := isPrimed(db)
@@ -565,16 +571,35 @@ func prime(db *sql.DB) error {
 		return err
 	}
 	if err := primePermissions(db, Permissions); err != nil {
-		return err
+		return errors.Wrap(err, "failed priming permissions")
 	}
 	if err := primeEntityTypes(db, EntityTypes); err != nil {
-		return err
+		return errors.Wrap(err, "failed priming entity_types")
 	}
 	if err := primeClusterTypes(db, ClusterTypes); err != nil {
-		return err
+		return errors.Wrap(err, "failed priming cluster_types")
 	}
 
 	return nil
+}
+
+func insertIn(table string, columns ...string) string {
+	stmt := "INSERT INTO '" + table + "' ("
+	for i, col := range columns {
+		if i != 0 {
+			stmt += ", "
+		}
+		stmt += "'" + col + "'"
+	}
+	stmt += ") VALUES ("
+	for i := range columns {
+		if i != 0 {
+			stmt += ", "
+		}
+		stmt += "?"
+	}
+	stmt += ")"
+	return stmt
 }
 
 func bulkInsert(db *sql.DB, table string, columns []string, f func(*sql.Stmt) error) error {
@@ -582,21 +607,15 @@ func bulkInsert(db *sql.DB, table string, columns []string, f func(*sql.Stmt) er
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
-	stmt, err := tx.Prepare(pq.CopyIn(table, columns...))
+	stmt, err := tx.Prepare(insertIn(table, columns...))
 	if err != nil {
 		return err
 	}
+	defer stmt.Close()
 
 	if err := f(stmt); err != nil { // buffer
-		return err
-	}
-
-	if _, err := stmt.Exec(); err != nil { // flush
-		return err
-	}
-
-	if err := stmt.Close(); err != nil {
 		return err
 	}
 
@@ -623,7 +642,7 @@ func primeEntityTypes(db *sql.DB, entityTypes []EntityType) error {
 		for _, entityType := range entityTypes {
 			_, err := stmt.Exec(entityType.Name)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "failed entity_types bulk insert")
 			}
 		}
 		return nil
@@ -635,7 +654,7 @@ func primeClusterTypes(db *sql.DB, clusterTypes []ClusterType) error {
 		for _, clusterType := range clusterTypes {
 			_, err := stmt.Exec(clusterType.Name)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "failed cluster_types bulk insert")
 			}
 		}
 		return nil
@@ -647,7 +666,7 @@ func primePermissions(db *sql.DB, permissions []Permission) error {
 		for _, permission := range permissions {
 			_, err := stmt.Exec(permission.Code, permission.Description)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "failed permissions bulk insert")
 			}
 		}
 		return nil
@@ -949,7 +968,7 @@ func (ds *Datastore) audit(pz az.Principal, tx *sql.Tx, action string, entityTyp
 			history
 			(identity_id, action, entity_type_id, entity_id, description, created)
 		VALUES
-			($1,          $2,     $3,             $4,        $5,          now())
+			($1,          $2,     $3,             $4,        $5,          date('now'))
 		`, pz.Id(), action, entityTypeId, entityId, string(json)); err != nil {
 		return err
 	}
@@ -1084,19 +1103,18 @@ func (ds *Datastore) ReadPermissionsForIdentity(pz az.Principal, identityId int6
 // --- Roles ---
 
 func createRole(tx *sql.Tx, name, description string) (int64, error) {
-	var id int64
-	row := tx.QueryRow(`
+	res, err := tx.Exec(`
 			INSERT INTO
 				role
 				(name, description, created)
 			VALUES
-				($1,   $2,          now())
-			RETURNING id
+				($1,   $2,          date('now'))
 			`, name, description)
-	if err := row.Scan(&id); err != nil {
-		return 0, err
+	if err != nil {
+		return 0, errors.Wrap(err, "failed creating role")
 	}
-	return id, nil
+
+	return res.LastInsertId()
 }
 
 func (ds *Datastore) CreateRole(pz az.Principal, name, description string) (int64, error) {
@@ -1391,15 +1409,18 @@ func (ds *Datastore) DeleteRole(pz az.Principal, roleId int64) error {
 func (ds *Datastore) CreateWorkgroup(pz az.Principal, name, description string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				workgroup
 				(type,          name, description, created)
 			VALUES
-				('workgroup',   $1,   $2,          now())
-			RETURNING id
+				('workgroup',   $1,   $2,          date('now'))
 			`, name, description)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return errors.Wrapf(err, "failed creating workgroup %s", name)
+		}
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 		if err := createPrivilege(tx, Privilege{
@@ -1579,31 +1600,31 @@ func (ds *Datastore) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
 // --- Identity ---
 
 func createDefaultWorkgroup(tx *sql.Tx, name string) (int64, error) {
-	var id int64
-	row := tx.QueryRow(`
+	res, err := tx.Exec(`
 			INSERT INTO
 				workgroup
 				(type,       name, description, created)
 			VALUES
-				('identity', $1,   '',          now())
-			RETURNING id
+				('identity', $1,   '',          date('now'))
 			`, "user:"+name)
-	return id, row.Scan(&id)
+	if err != nil {
+		return 0, errors.Wrap(err, "failed creating default workgroup")
+	}
+	return res.LastInsertId()
 }
 
 func createIdentity(tx *sql.Tx, name, password string, workgroupId int64) (int64, error) {
-	var id int64
-	row := tx.QueryRow(`
+	res, err := tx.Exec(`
 			INSERT INTO
 				identity
 				(name, password, workgroup_id, is_active, created)
 			VALUES
-				($1,   $2,       $3,           $4,        now())
-			RETURNING id
+				($1,   $2,       $3,           $4,        date('now'))
 			`, name, password, workgroupId, true)
-
-	return id, row.Scan(&id)
-
+	if err != nil {
+		return 0, errors.Wrap(err, "failed creating identity")
+	}
+	return res.LastInsertId()
 }
 
 func linkIdentityAndWorkgroup(tx *sql.Tx, identityId, workgroupId int64) error {
@@ -1687,8 +1708,8 @@ func (ds *Datastore) ReadIdentities(pz az.Principal, offset, limit int64) ([]Ide
 					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND entity_type_id = $4)
 			)
 		ORDER BY name
-		OFFSET $1
 		LIMIT $2
+		OFFSET $1
 		`, offset, limit, pz.Id(), ds.EntityTypes.Identity, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -2189,7 +2210,7 @@ func (ds *Datastore) CreateEngine(pz az.Principal, name, location string) (int64
 				engine
 				(name, location, created)
 			VALUES
-				($1,   $2,       now())
+				($1,   $2,       date('now'))
 			RETURNING id
 			`, name, location)
 		if err := row.Scan(&id); err != nil {
@@ -2290,7 +2311,7 @@ func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, state
 				cluster
 				(name, type_id, detail_id, address, state, created)
 			VALUES
-				($1,   $2,      0,         $3,      $4,    now())
+				($1,   $2,      0,         $3,      $4,    date('now'))
 			RETURNING id
 			`, name, ds.ClusterTypes.External, address, state)
 		if err := row.Scan(&id); err != nil {
@@ -2344,7 +2365,7 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 				cluster
 				(name, type_id, detail_id, address, state, created)
 			VALUES
-				($1,   $2,      $3,        $4,      $5,    now())
+				($1,   $2,      $3,        $4,      $5,    date('now'))
 			RETURNING id
 			`, name, ds.ClusterTypes.Yarn, yarnClusterId, address, state)
 		if err := row.Scan(&clusterId); err != nil {
@@ -2571,7 +2592,7 @@ func (ds *Datastore) CreateProject(pz az.Principal, name, description, modelCate
 				project
 				(name, description, model_category, created)
 			VALUES
-				($1,   $2,          $3,             now())
+				($1,   $2,          $3,             date('now'))
 			RETURNING id
 			`, name, description, modelCategory)
 		if err := row.Scan(&id); err != nil {
@@ -2674,7 +2695,7 @@ func (ds *Datastore) CreateDatasource(pz az.Principal, datasource Datasource) (i
 				datasource
 				(project_id, name, description, kind, configuration, created)
 			VALUES
-				($1,         $2,   $3,          $4,   $5,            now())
+				($1,         $2,   $3,          $4,   $5,            date('now'))
 			RETURNING id
 			`,
 			datasource.ProjectId,
@@ -2869,7 +2890,7 @@ func (ds *Datastore) CreateDataset(pz az.Principal, dataset Dataset) (int64, err
 				dataset
 				(datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created)
 			VALUES
-				($1,            $2,   $3,          $4,         $5,                   $6,         $7,                 now())
+				($1,            $2,   $3,          $4,         $5,                   $6,         $7,                 date('now'))
 			RETURNING id
 			`,
 			dataset.DatasourceId,
@@ -3059,7 +3080,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 				model
 				(project_id, training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,         $2,                  $3,                    $4,    $5,           $6,        $7,        $8,             $9,           $10,                  $11,          $12,      $13,          $14,     $15,             now())
+				($1,         $2,                  $3,                    $4,    $5,           $6,        $7,        $8,             $9,           $10,                  $11,          $12,      $13,          $14,     $15,             date('now'))
 			RETURNING id
 			`,
 			model.ProjectId,
@@ -3681,7 +3702,7 @@ func (ds *Datastore) CreateLabel(pz az.Principal, projectId int64, name, descrip
 				label
 				(project_id, name, description, created)
 			VALUES
-				($1,         $2,   $3,          now())
+				($1,         $2,   $3,          date('now'))
 			RETURNING id
 			`,
 			projectId,
@@ -3895,7 +3916,7 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 				service
 				(project_id, model_id, name, address, port, process_id, state, created)
 			VALUES
-				($1,       $2,        $3,   $4,      $5,   $6,         $7,   now())
+				($1,       $2,        $3,   $4,      $5,   $6,         $7,   date('now'))
 			RETURNING id
 			`,
 			service.ProjectId,
