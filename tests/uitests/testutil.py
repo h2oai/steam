@@ -102,10 +102,10 @@ def sortModels(driver, feat, ascending):
 	try:
 		if feat == "R2":
 			driver.find_element_by_xpath("//sup[text()='2']").click()
-			time.sleep(1)
+			time.sleep(3)
 		else:
 			driver.find_element_by_xpath("//li[text()='{0}']".format(feat)).click()
-			time.sleep(1)
+			time.sleep(3)
 	except Exception as e:
 		print e
 		driver.find_element_by_class_name("filter-dropdown-invoker").click()

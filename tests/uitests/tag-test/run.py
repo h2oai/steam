@@ -154,6 +154,7 @@ def deleteTagTest(driver):
 			return False
 		tu.goModels(driver)
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='regress']"))
+		time.sleep(2)
 		tag = tu.getModelTag(driver, "regress")
 		if len(tag) > 0 and tag[0].text == "delet":
 			print "Model attached to deleted tag"
