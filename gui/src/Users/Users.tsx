@@ -1,25 +1,18 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-import Panel from '../Projects/components/Panel';
 import PageHeader from '../Projects/components/PageHeader';
 import TabNavigation from '../Projects/components/TabNavigation';
-import { bindActionCreators } from 'redux';
 import { Identity, Permission } from '../Proxy/Proxy';
-import { connect } from 'react-redux';
 import UserAccess from './components/UserAccess';
 import RolePermissions from './components/RolePermissions';
 import './styles/users.scss';
-
-interface DispatchProps {
-
-}
 
 interface Props {
   identity: Identity
   permission: Permission
 }
 
-export class Users extends React.Component<Props & DispatchProps, any> {
+export default class Users extends React.Component<Props, any> {
 
   constructor() {
     super();
@@ -87,20 +80,3 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     );
   }
 }
-
-function mapStateToProps(state): any {
-  return {
-    //clusters: state.projects.clusters
-  };
-}
-
-function mapDispatchToProps(dispatch): DispatchProps {
-  return {
-    /*fetchClusters: bindActionCreators(fetchClusters, dispatch),
-    fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
-    registerCluster: bindActionCreators(registerCluster, dispatch),
-    unregisterCluster: bindActionCreators(unregisterCluster, dispatch)*/
-  };
-}
-
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Users);
