@@ -11,9 +11,13 @@ import { projectsReducer } from '../../Projects/reducers/projects.reducer';
 import { servicesReducer } from '../../Projects/reducers/services.reducer';
 import { profileReducer } from '../../Profile/reducers/profile.reducers';
 import { deploymentReducer } from '../../Deployment/reducers/deployment.reducer';
+import { usersReducer } from '../../Users/reducers/users.reducer';
 import { notificationReducer } from './notification.reducer';
+import { globalReducer } from './global.reducer';
+import { collaboratorsReducer } from "../../Collaborators/reducers/collaborators.reducer";
 
 export const rootReducer = combineReducers({
+  global: globalReducer,
   model: modelOverviewReducer,
   leaderboard: leaderboardReducer,
   labels: labelsReducer,
@@ -22,5 +26,7 @@ export const rootReducer = combineReducers({
   profile: profileReducer,
   deployments: deploymentReducer,
   notification: notificationReducer,
-  routing: routerReducer
+  users: usersReducer,
+  routing: routerReducer,
+  collaborators: collaboratorsReducer
 });

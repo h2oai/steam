@@ -6,6 +6,7 @@
 
 import App from './App/App';
 import Clusters from './Clusters/Clusters';
+import Users from './Users/Users';
 import Models from './Models/Models';
 import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ModelDetails from './ModelDetails/ModelDetails';
@@ -18,6 +19,7 @@ import Deployment from './Deployment/Deployment';
 import Configurations from './Configurations/Configurations';
 import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
+import {Collaborators} from "./Collaborators/Collaborators";
 
 interface IIndexRoute {
   component: any
@@ -59,7 +61,7 @@ export const routes: IRoute[] = [
       },
       {
         path: 'projects/:projectid',
-        component: Dummy,
+        component: Models,
         name: 'Project',
         showInBreadcrumb: true,
         showInNavigation: false,
@@ -101,6 +103,13 @@ export const routes: IRoute[] = [
         path: 'projects/:projectid/configurations',
         component: Configurations,
         name: 'Configurations',
+        showInBreadcrumb: true,
+        showInNavigation: true
+      },
+      {
+        path: 'projects/:projectid/collaborators',
+        component: Collaborators,
+        name: 'Collaborators',
         showInBreadcrumb: true,
         showInNavigation: true
       },
@@ -153,6 +162,15 @@ export const routes: IRoute[] = [
         component: Clusters,
         name: 'Clusters',
         icon: 'fa fa-cube',
+        showInBreadcrumb: true,
+        showInNavigation: true
+      },
+      //users
+      {
+        path: 'users',
+        component: Users,
+        name: 'Users',
+        icon: 'fa fa-user',
         showInBreadcrumb: true,
         showInNavigation: true
       }
