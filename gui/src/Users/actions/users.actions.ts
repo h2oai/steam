@@ -1,6 +1,7 @@
 import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 import { Permission } from "../../Proxy/Proxy";
 import { Role } from "../../Proxy/Proxy";
 
@@ -91,7 +92,7 @@ function getProjects(dispatch): Promise<Array<any>> {
       dispatch(requestProjects());
       Remote.getProjects(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification('error', 'There was an error retrieving projects', null);
+          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null);
           reject();
         }
         dispatch(receiveProjects(res));
@@ -106,7 +107,7 @@ function getUsers(dispatch): Promise<Array<Role>> {
       dispatch(requestUsers());
       Remote.getIdentities(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification('error', 'There was an error retrieving users', null);
+          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null);
           reject();
         }
         dispatch(receiveUsers(res));
@@ -124,7 +125,7 @@ function getRoles(dispatch): Promise<Array<Role>> {
       dispatch(requestRoleNames());
       Remote.getRoles(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification('error', 'There was an error retrieving roles', null);
+          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null);
           reject();
         }
         dispatch(receiveRoleNames(res));
@@ -141,7 +142,7 @@ function getPermissionDescriptions(): Promise<Array<Permission>> {
   return new Promise((resolve, reject) => {
     Remote.getAllPermissions((error, res) => {
       if (error) {
-        openNotification('error', 'There was an error retrieving permissions list', null);
+        openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
         reject(error);
       }
       resolve(res);
@@ -205,7 +206,7 @@ export function fetchPermissionsWithRoles() {
         permissionRequests.push(new Promise(
           (resolve, reject) => Remote.getPermissionsForRole(role.id, (error, res) => {
             if (error) {
-              openNotification('error', 'There was an error retrieving permissions list', null);
+              openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
               reject();
             }
             resolve({

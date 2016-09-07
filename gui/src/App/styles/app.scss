@@ -3,10 +3,10 @@
 html, body, .app-container, #app {
   height: 100%;
   min-height: 100%;
-  font-family: $font-body;
-  font-size: $text-size;
-  color: $brand-dark-1;
-  -webkit-font-smoothing: antialiased;
+  background-color: #eeeeee;
+  font-family: "Open Sans";
+  font-size: 14px;
+  color: #4a4a4a;
   overflow: hidden;
   margin: 0;
 }
@@ -33,7 +33,7 @@ article {
 }
 
 a {
-  color:$link-color;
+  color: #4A90E2;
 }
 .link {
   color:$link-color;
