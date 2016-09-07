@@ -4,6 +4,7 @@ package data
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/lib/pq"
 )
@@ -18,7 +19,7 @@ type EntityHistory struct {
 	IdentityId  int64
 	Action      string
 	Description string
-	Created     []uint8
+	Created     time.Time
 }
 
 type Privilege struct {
@@ -50,7 +51,7 @@ type Role struct {
 	Id          int64
 	Name        string
 	Description string
-	Created     []uint8
+	Created     time.Time
 }
 
 type Workgroup struct {
@@ -58,7 +59,7 @@ type Workgroup struct {
 	Type        string
 	Name        string
 	Description string
-	Created     []uint8
+	Created     time.Time
 }
 
 type Identity struct {
@@ -66,7 +67,7 @@ type Identity struct {
 	Name      string
 	IsActive  bool
 	LastLogin pq.NullTime
-	Created   []uint8
+	Created   time.Time
 }
 
 type IdentityAndPassword struct {
@@ -76,7 +77,7 @@ type IdentityAndPassword struct {
 	WorkgroupId int64
 	IsActive    bool
 	LastLogin   pq.NullTime
-	Created     []uint8
+	Created     time.Time
 }
 
 type IdentityAndRole struct {
@@ -91,7 +92,7 @@ type Engine struct {
 	Id       int64
 	Name     string
 	Location string
-	Created  []uint8
+	Created  time.Time
 }
 
 type ClusterType struct {
@@ -106,7 +107,7 @@ type Cluster struct {
 	DetailId int64
 	Address  string
 	State    string
-	Created  []uint8
+	Created  time.Time
 }
 
 type YarnCluster struct {
@@ -124,7 +125,7 @@ type Project struct {
 	Name          string
 	Description   string
 	ModelCategory string
-	Created       []uint8
+	Created       time.Time
 }
 
 type Datasource struct {
@@ -134,7 +135,7 @@ type Datasource struct {
 	Description   string
 	Kind          string
 	Configuration string
-	Created       []uint8
+	Created       time.Time
 }
 
 type Dataset struct {
@@ -146,7 +147,7 @@ type Dataset struct {
 	ResponseColumnName string
 	Properties         string
 	PropertiesVersion  string
-	Created            []uint8
+	Created            time.Time
 }
 
 type Model struct {
@@ -166,7 +167,7 @@ type Model struct {
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
-	Created             []uint8
+	Created             time.Time
 	LabelId             sql.NullInt64
 	LabelName           sql.NullString
 }
@@ -188,7 +189,7 @@ type BinomialModel struct {
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
-	Created             []uint8
+	Created             time.Time
 	LabelId             sql.NullInt64
 	LabelName           sql.NullString
 	Mse                 float64
@@ -215,7 +216,7 @@ type MultinomialModel struct {
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
-	Created             []uint8
+	Created             time.Time
 	LabelId             sql.NullInt64
 	LabelName           sql.NullString
 	Mse                 float64
@@ -240,7 +241,7 @@ type RegressionModel struct {
 	MaxRunTime           int64
 	Metrics              string
 	MetricsVersion       string
-	Created              []uint8
+	Created              time.Time
 	LabelId              sql.NullInt64
 	LabelName            sql.NullString
 	Mse                  float64
@@ -254,7 +255,7 @@ type Label struct {
 	ModelId     sql.NullInt64
 	Name        string
 	Description string
-	Created     []uint8
+	Created     time.Time
 }
 
 type Service struct {
@@ -266,5 +267,5 @@ type Service struct {
 	Port      int64
 	ProcessId int64
 	State     string
-	Created   []uint8
+	Created   time.Time
 }

@@ -143,7 +143,7 @@ CREATE TABLE cluster (
     detail_id integer NOT NULL,
     address text NOT NULL,
     state job_state NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (type_id) REFERENCES cluster_type(id)
@@ -232,7 +232,7 @@ CREATE TABLE cluster_yarn (
 -- Name: TABLE cluster_yarn; Type: COMMENT; Schema: public; Owner: steam
 --
 
-COMMENT ON TABLE cluster_yarn IS 'Launch parameters for YARN clusters.';
+-- COMMENT ON TABLE cluster_yarn IS 'Launch parameters for YARN clusters.';
 
 
 --
@@ -269,7 +269,7 @@ CREATE TABLE dataset (
     response_column_name text NOT NULL,
     properties text NOT NULL,
     properties_version text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (datasource_id) REFERENCES datasource(id) ON DELETE CASCADE
@@ -310,7 +310,7 @@ CREATE TABLE datasource (
     description text NOT NULL,
     kind text NOT NULL,
     configuration text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
@@ -348,7 +348,7 @@ CREATE TABLE engine (
     id integer NOT NULL,
     name text NOT NULL,
     location text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id)
 );
@@ -423,7 +423,7 @@ CREATE TABLE history (
     entity_type_id integer NOT NULL,
     entity_id integer NOT NULL,
     description text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (entity_type_id) REFERENCES entity_type(id),
@@ -465,8 +465,8 @@ CREATE TABLE identity (
     password text NOT NULL,
     workgroup_id integer NOT NULL,
     is_active boolean NOT NULL,
-    last_login timestamp with time zone,
-    created timestamp with time zone NOT NULL,
+    last_login integer with time zone,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id)
 );
@@ -535,7 +535,7 @@ CREATE TABLE label (
     model_id integer,
     name text NOT NULL,
     description text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (model_id) REFERENCES model(id),
@@ -623,7 +623,7 @@ CREATE TABLE model (
     max_run_time integer,
     metrics text NOT NULL,
     metrics_version text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (project_id) REFERENCES project(id),
@@ -638,42 +638,42 @@ CREATE TABLE model (
 -- Name: COLUMN model.name; Type: COMMENT; Schema: public; Owner: steam
 --
 
-COMMENT ON COLUMN model.name IS 'The physical name of this model as stored on disk.';
+-- COMMENT ON COLUMN model.name IS 'The physical name of this model as stored on disk.';
 
 
 --
 -- Name: COLUMN model.cluster_name; Type: COMMENT; Schema: public; Owner: steam
 --
 
-COMMENT ON COLUMN model.cluster_name IS 'The name of the cluster this model was sourced from.';
+-- COMMENT ON COLUMN model.cluster_name IS 'The name of the cluster this model was sourced from.';
 
 
 --
 -- Name: COLUMN model.logical_name; Type: COMMENT; Schema: public; Owner: steam
 --
 
-COMMENT ON COLUMN model.logical_name IS 'The logical name of the model (typically the Java language class name).';
+-- COMMENT ON COLUMN model.logical_name IS 'The logical name of the model (typically the Java language class name).';
 
 
 --
 -- Name: COLUMN model.location; Type: COMMENT; Schema: public; Owner: steam
 --
 
-COMMENT ON COLUMN model.location IS 'The location of this model''s saved assets (e.g. /var/master/model).';
+-- COMMENT ON COLUMN model.location IS 'The location of this model''s saved assets (e.g. /var/master/model).';
 
 
 --
 -- Name: COLUMN model.metrics; Type: COMMENT; Schema: public; Owner: steam
 --
 
-COMMENT ON COLUMN model.metrics IS 'Raw model metrics JSON obtained from H2O.';
+-- COMMENT ON COLUMN model.metrics IS 'Raw model metrics JSON obtained from H2O.';
 
 
 --
 -- Name: COLUMN model.metrics_version; Type: COMMENT; Schema: public; Owner: steam
 --
 
-COMMENT ON COLUMN model.metrics_version IS 'Version of the deserializer to use for unpacking metrics';
+-- COMMENT ON COLUMN model.metrics_version IS 'Version of the deserializer to use for unpacking metrics';
 
 
 --
@@ -799,7 +799,7 @@ CREATE TABLE project (
     name text NOT NULL,
     description text NOT NULL,
     model_category text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id)
 );
@@ -875,7 +875,7 @@ CREATE TABLE role (
     id integer NOT NULL,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id)
 );
@@ -933,7 +933,7 @@ CREATE TABLE service (
     port integer NOT NULL,
     process_id integer NOT NULL,
     state job_state NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (model_id) REFERENCES model(id)
@@ -972,7 +972,7 @@ CREATE TABLE workgroup (
     type workgroup_type NOT NULL,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
-    created timestamp with time zone NOT NULL,
+    created datetime NOT NULL,
 
     PRIMARY KEY (id)
 );
@@ -1393,154 +1393,154 @@ CREATE TABLE workgroup (
 -- Name: fki_binomial_model__model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_binomial_model__model_id ON binomial_model USING btree (model_id);
+CREATE INDEX fki_binomial_model__model_id ON binomial_model (model_id);
 
 
 --
 -- Name: fki_cluster__cluster_type_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_cluster__cluster_type_id ON cluster USING btree (type_id);
+CREATE INDEX fki_cluster__cluster_type_id ON cluster (type_id);
 
 
 --
 -- Name: fki_cluster_yarn__engine_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_cluster_yarn__engine_id ON cluster_yarn USING btree (engine_id);
+CREATE INDEX fki_cluster_yarn__engine_id ON cluster_yarn (engine_id);
 
 
 --
 -- Name: fki_dataset__datasource_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_dataset__datasource_id ON dataset USING btree (datasource_id);
+CREATE INDEX fki_dataset__datasource_id ON dataset (datasource_id);
 
 
 --
 -- Name: fki_datasource__project_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_datasource__project_id ON datasource USING btree (project_id);
+CREATE INDEX fki_datasource__project_id ON datasource (project_id);
 
 
 --
 -- Name: fki_history__entity_type_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_history__entity_type_id ON history USING btree (entity_type_id);
+CREATE INDEX fki_history__entity_type_id ON history (entity_type_id);
 
 
 --
 -- Name: fki_history__identity_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_history__identity_id ON history USING btree (identity_id);
+CREATE INDEX fki_history__identity_id ON history (identity_id);
 
 
 --
 -- Name: fki_identity_workgroup__identity_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_identity_workgroup__identity_id ON identity_workgroup USING btree (identity_id);
+CREATE INDEX fki_identity_workgroup__identity_id ON identity_workgroup (identity_id);
 
 
 --
 -- Name: fki_identity_workgroup__workgroup_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_identity_workgroup__workgroup_id ON identity_workgroup USING btree (workgroup_id);
+CREATE INDEX fki_identity_workgroup__workgroup_id ON identity_workgroup (workgroup_id);
 
 
 --
 -- Name: fki_label__model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_label__model_id ON label USING btree (model_id);
+CREATE INDEX fki_label__model_id ON label (model_id);
 
 
 --
 -- Name: fki_label__project_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_label__project_id ON label USING btree (project_id);
+CREATE INDEX fki_label__project_id ON label (project_id);
 
 
 --
 -- Name: fki_model__project_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_model__project_id ON model USING btree (project_id);
+CREATE INDEX fki_model__project_id ON model (project_id);
 
 
 --
 -- Name: fki_model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_model_id ON service USING btree (model_id);
+CREATE INDEX fki_model_id ON service (model_id);
 
 
 --
 -- Name: fki_model_training__dataset_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_model_training__dataset_id ON model USING btree (training_dataset_id);
+CREATE INDEX fki_model_training__dataset_id ON model (training_dataset_id);
 
 
 --
 -- Name: fki_model_validation__dataset_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_model_validation__dataset_id ON model USING btree (validation_dataset_id);
+CREATE INDEX fki_model_validation__dataset_id ON model (validation_dataset_id);
 
 
 --
 -- Name: fki_multinomial_model__model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_multinomial_model__model_id ON multinomial_model USING btree (model_id);
+CREATE INDEX fki_multinomial_model__model_id ON multinomial_model (model_id);
 
 
 --
 -- Name: fki_privilege__entity_type_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_privilege__entity_type_id ON privilege USING btree (entity_type_id);
+CREATE INDEX fki_privilege__entity_type_id ON privilege (entity_type_id);
 
 
 --
 -- Name: fki_privilege__workgroup_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_privilege__workgroup_id ON privilege USING btree (workgroup_id);
+CREATE INDEX fki_privilege__workgroup_id ON privilege (workgroup_id);
 
 
 --
 -- Name: fki_regression_model__model_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_regression_model__model_id ON regression_model USING btree (model_id);
+CREATE INDEX fki_regression_model__model_id ON regression_model (model_id);
 
 
 --
 -- Name: fki_role_permission__permission_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_role_permission__permission_id ON role_permission USING btree (permission_id);
+CREATE INDEX fki_role_permission__permission_id ON role_permission (permission_id);
 
 
 --
 -- Name: fki_role_permission__role_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_role_permission__role_id ON role_permission USING btree (role_id);
+CREATE INDEX fki_role_permission__role_id ON role_permission (role_id);
 
 
 --
 -- Name: fki_workgroup_id; Type: INDEX; Schema: public; Owner: steam
 --
 
-CREATE INDEX fki_workgroup_id ON identity USING btree (workgroup_id);
+CREATE INDEX fki_workgroup_id ON identity (workgroup_id);
 
 
 -- --
@@ -1723,10 +1723,10 @@ CREATE INDEX fki_workgroup_id ON identity USING btree (workgroup_id);
 -- Name: public; Type: ACL; Schema: -; Owner: steam
 --
 
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM steam;
-GRANT ALL ON SCHEMA public TO steam;
-GRANT ALL ON SCHEMA public TO PUBLIC;
+-- REVOKE ALL ON SCHEMA public FROM PUBLIC;
+-- REVOKE ALL ON SCHEMA public FROM steam;
+-- GRANT ALL ON SCHEMA public TO steam;
+-- GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --

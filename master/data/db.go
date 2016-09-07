@@ -318,14 +318,9 @@ type Datastore struct {
 
 func Create(dbPath, suname, supass string) (*Datastore, error) {
 	// connectionString := createConnectionString(connection)
-	// db, err := connect(connectionString)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("Failed connecting to database using %s: %s", connectionString, err)
-	// }
-
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := connect(dbPath)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed opening db")
+		return nil, fmt.Errorf("Failed connecting to database using %s: %s", dbPath, err)
 	}
 
 	primed, err := isPrimed(db)
@@ -421,26 +416,44 @@ func createConnectionString(c Connection) string {
 	return s
 }
 
-func connect(connection string) (*sql.DB, error) {
-
-	// FIXME logging need to be handled for testing
-	// log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
-
+func connect(dbPath string) (*sql.DB, error) {
 	// Open connection
-	db, err := sql.Open("postgres", connection)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		return nil, fmt.Errorf("Database connection failed: %s", err)
+		return nil, errors.Wrap(err, "failed opening database")
 	}
+	// Set configurations (ex. use fk constraints)
 
-	// TODO can use db.SetMaxOpenConns() and db.SetMaxIdleConns() to configure further.
-
+	if _, err := db.Exec(`
+		PRAGMA foreign_keys = ON
+		`); err != nil {
+		return nil, errors.Wrap(err, "failed configuring database")
+	}
 	// Verify connection
 	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("Database ping failed: %s", err)
+		return nil, errors.Wrap(err, "failed pinging database")
 	}
-
+	// TODO can use db.SetMaxOpenConns() and db.SetMaxIdleConns() to configure further.
 	return db, nil
 }
+
+// TODO deprecated?
+// 	// FIXME logging need to be handled for testing
+// 	// log.Println("Connecting to database: user =", username, "db =", dbname, "SSL=", sslmode, "...")
+
+// 	// Open connection
+// 	db, err := sql.Open("postgres", connection)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("Database connection failed: %s", err)
+// 	}
+
+// 	// Verify connection
+// 	if err := db.Ping(); err != nil {
+// 		return nil, fmt.Errorf("Database ping failed: %s", err)
+// 	}
+
+// 	return db, nil
+// }
 
 // newDatastore creates a new instance of a data access object.
 //
@@ -844,34 +857,23 @@ func readClusterTypes(db *sql.DB) ([]ClusterType, error) {
 	return ScanClusterTypes(rows)
 }
 
-func executeTransaction(db *sql.DB, f func(*sql.Tx) error) (err error) {
-	var (
-		tx     *sql.Tx
-		commit bool
-	)
-
-	tx, err = db.Begin()
+func executeTransaction(db *sql.DB, f func(*sql.Tx) error) error {
+	// Open transaction; Rollback in event
+	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
-	defer func() {
-		if commit {
-			err = tx.Commit()
-		} else {
-			if rberr := tx.Rollback(); rberr != nil {
-				err = fmt.Errorf("Rollback failure: %s (after %s)", rberr, err)
-			}
-		}
-	}()
-	err = f(tx)
-	if err == nil {
-		commit = true
+	// Execute transaction and return corresponding value (usually id)
+	if err := f(tx); err != nil {
+		return err
 	}
-	return err
+
+	return tx.Commit()
 }
 
-func (ds *Datastore) exec(f func(*sql.Tx) error) (err error) {
+func (ds *Datastore) exec(f func(*sql.Tx) error) error {
 	return executeTransaction(ds.db, f)
 }
 
@@ -968,7 +970,7 @@ func (ds *Datastore) audit(pz az.Principal, tx *sql.Tx, action string, entityTyp
 			history
 			(identity_id, action, entity_type_id, entity_id, description, created)
 		VALUES
-			($1,          $2,     $3,             $4,        $5,          date('now'))
+			($1,          $2,     $3,             $4,        $5,          datetime('now'))
 		`, pz.Id(), action, entityTypeId, entityId, string(json)); err != nil {
 		return err
 	}
@@ -1108,7 +1110,7 @@ func createRole(tx *sql.Tx, name, description string) (int64, error) {
 				role
 				(name, description, created)
 			VALUES
-				($1,   $2,          date('now'))
+				($1,   $2,          datetime('now'))
 			`, name, description)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed creating role")
@@ -1160,8 +1162,8 @@ func (ds *Datastore) ReadRoles(pz az.Principal, offset, limit int64) ([]Role, er
 			)
 		ORDER BY 
 			name
-		OFFSET $1
 		LIMIT $2
+		OFFSET $1
 		`, offset, limit, pz.Id(), ds.EntityTypes.Role, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -1414,7 +1416,7 @@ func (ds *Datastore) CreateWorkgroup(pz az.Principal, name, description string) 
 				workgroup
 				(type,          name, description, created)
 			VALUES
-				('workgroup',   $1,   $2,          date('now'))
+				('workgroup',   $1,   $2,          datetime('now'))
 			`, name, description)
 		if err != nil {
 			return errors.Wrapf(err, "failed creating workgroup %s", name)
@@ -1458,8 +1460,8 @@ func (ds *Datastore) ReadWorkgroups(pz az.Principal, offset, limit int64) ([]Wor
 					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3) AND entity_type_id = $4)
 			)
 		ORDER BY name
-		OFFSET $1
 		LIMIT $2
+		OFFSET $1
 		`, offset, limit, pz.Id(), ds.EntityTypes.Workgroup, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -1605,7 +1607,7 @@ func createDefaultWorkgroup(tx *sql.Tx, name string) (int64, error) {
 				workgroup
 				(type,       name, description, created)
 			VALUES
-				('identity', $1,   '',          date('now'))
+				('identity', $1,   '',          datetime('now'))
 			`, "user:"+name)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed creating default workgroup")
@@ -1619,7 +1621,7 @@ func createIdentity(tx *sql.Tx, name, password string, workgroupId int64) (int64
 				identity
 				(name, password, workgroup_id, is_active, created)
 			VALUES
-				($1,   $2,       $3,           $4,        date('now'))
+				($1,   $2,       $3,           $4,        datetime('now'))
 			`, name, password, workgroupId, true)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed creating identity")
@@ -2205,15 +2207,19 @@ func deletePrivilegesFor(tx *sql.Tx, identityType string, identityId int64) erro
 func (ds *Datastore) CreateEngine(pz az.Principal, name, location string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				engine
 				(name, location, created)
 			VALUES
-				($1,   $2,       date('now'))
-			RETURNING id
+				($1,   $2,       datetime('now'))
 			`, name, location)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -2230,6 +2236,7 @@ func (ds *Datastore) CreateEngine(pz az.Principal, name, location string) (int64
 			"name":     name,
 			"location": location,
 		})
+
 	})
 	return id, err
 }
@@ -2306,15 +2313,19 @@ func (ds *Datastore) DeleteEngine(pz az.Principal, engineId int64) error {
 func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, state string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				cluster
 				(name, type_id, detail_id, address, state, created)
 			VALUES
-				($1,   $2,      0,         $3,      $4,    date('now'))
-			RETURNING id
+				($1,   $2,      0,         $3,      $4,    datetime('now'))
 			`, name, ds.ClusterTypes.External, address, state)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -2341,13 +2352,12 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 	var clusterId int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		var yarnClusterId int64
-		row := tx.QueryRow(`
+		if _, err := tx.Exec(`
 			INSERT INTO
 				cluster_yarn
 				(engine_id, size, application_id, memory, username, output_dir)
 			VALUES
 				($1,        $2,   $3,             $4,     $5,       $6)
-			RETURNING id
 			`,
 			cluster.EngineId,
 			cluster.Size,
@@ -2355,20 +2365,24 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 			cluster.Memory,
 			cluster.Username,
 			cluster.OutputDir,
-		)
-		if err := row.Scan(&yarnClusterId); err != nil {
+		); err != nil {
 			return err
 		}
 
-		row = tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				cluster
 				(name, type_id, detail_id, address, state, created)
 			VALUES
-				($1,   $2,      $3,        $4,      $5,    date('now'))
+				($1,   $2,      $3,        $4,      $5,    datetime('now'))
 			RETURNING id
 			`, name, ds.ClusterTypes.Yarn, yarnClusterId, address, state)
-		if err := row.Scan(&clusterId); err != nil {
+		if err != nil {
+			return err
+		}
+
+		clusterId, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -2404,7 +2418,7 @@ func (ds *Datastore) ReadClusterTypes(pz az.Principal) []ClusterType {
 func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Cluster, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			*
 		FROM
 			cluster
 		WHERE
@@ -2420,13 +2434,14 @@ func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Clust
 			)
 		ORDER BY
 			name
-		OFFSET $3
 		LIMIT $4
-		`, pz.Id(), ds.EntityTypes.Cluster, offset, limit, pz.IsSuperuser())
+		OFFSET $3
+		`, pz.Id(), ds.EntityTypes.Cluster, -1, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
 	return ScanClusters(rows)
 }
 
@@ -2587,15 +2602,19 @@ func (ds *Datastore) DeleteCluster(pz az.Principal, clusterId int64) error {
 func (ds *Datastore) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				project
 				(name, description, model_category, created)
 			VALUES
-				($1,   $2,          $3,             date('now'))
-			RETURNING id
+				($1,   $2,          $3,             datetime('now'))
 			`, name, description, modelCategory)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -2636,8 +2655,8 @@ func (ds *Datastore) ReadProjects(pz az.Principal, offset, limit int64) ([]Proje
 			)
 		ORDER BY
 			name
-		OFFSET $3
 		LIMIT $4
+		OFFSET $3
 		`, pz.Id(), ds.EntityTypes.Project, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -2690,13 +2709,12 @@ func (ds *Datastore) DeleteProject(pz az.Principal, projectId int64) error {
 func (ds *Datastore) CreateDatasource(pz az.Principal, datasource Datasource) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				datasource
 				(project_id, name, description, kind, configuration, created)
 			VALUES
-				($1,         $2,   $3,          $4,   $5,            date('now'))
-			RETURNING id
+				($1,         $2,   $3,          $4,   $5,            datetime('now'))
 			`,
 			datasource.ProjectId,
 			datasource.Name,
@@ -2704,7 +2722,12 @@ func (ds *Datastore) CreateDatasource(pz az.Principal, datasource Datasource) (i
 			datasource.Kind,
 			datasource.Configuration,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -2761,10 +2784,8 @@ func (ds *Datastore) ReadDatasources(pz az.Principal, projectId, offset, limit i
 				project_id = $3
 			ORDER BY
 				name
-			OFFSET $4
 			LIMIT $5
-
-
+			OFFSET $4
 			`, pz.Id(), ds.EntityTypes.Datasource, projectId, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -2885,13 +2906,12 @@ func (ds *Datastore) DeleteDatasource(pz az.Principal, datasourceId int64) error
 func (ds *Datastore) CreateDataset(pz az.Principal, dataset Dataset) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				dataset
 				(datasource_id, name, description, frame_name, response_column_name, properties, properties_version, created)
 			VALUES
-				($1,            $2,   $3,          $4,         $5,                   $6,         $7,                 date('now'))
-			RETURNING id
+				($1,            $2,   $3,          $4,         $5,                   $6,         $7,                 datetime('now'))
 			`,
 			dataset.DatasourceId,
 			dataset.Name,
@@ -2901,7 +2921,12 @@ func (ds *Datastore) CreateDataset(pz az.Principal, dataset Dataset) (int64, err
 			dataset.Properties,
 			dataset.PropertiesVersion,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -2957,8 +2982,8 @@ func (ds *Datastore) ReadDatasets(pz az.Principal, datasourceId, offset, limit i
 				datasource_id = $3
 			ORDER BY
 				name
-			OFFSET $4
 			LIMIT $5
+			OFFSET $4
 			`, pz.Id(), ds.EntityTypes.Dataset, datasourceId, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -3075,13 +3100,12 @@ func (ds *Datastore) DeleteDataset(pz az.Principal, datasetId int64) error {
 func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				model
 				(project_id, training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
 			VALUES
-				($1,         $2,                  $3,                    $4,    $5,           $6,        $7,        $8,             $9,           $10,                  $11,          $12,      $13,          $14,     $15,             date('now'))
-			RETURNING id
+				($1,         $2,                  $3,                    $4,    $5,           $6,        $7,        $8,             $9,           $10,                  $11,          $12,      $13,          $14,     $15,             datetime('now'))
 			`,
 			model.ProjectId,
 			model.TrainingDatasetId,
@@ -3099,7 +3123,12 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 			model.Metrics,
 			model.MetricsVersion,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -3130,13 +3159,12 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 func (ds *Datastore) CreateBinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss, auc, gini float64) error {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				binomial_model
 				(model_id, mse, r_squared, logloss, auc, gini)
 			VALUES
 				($1,      $2,  $3,        $4,      $5,  $6)
-			RETURNING id
 			`,
 			modelId,
 			mse,
@@ -3145,9 +3173,15 @@ func (ds *Datastore) CreateBinomialModel(pz az.Principal, modelId int64, mse, rS
 			auc,
 			gini,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
 			return err
 		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 	return err
@@ -3156,22 +3190,27 @@ func (ds *Datastore) CreateBinomialModel(pz az.Principal, modelId int64, mse, rS
 func (ds *Datastore) CreateMultinomialModel(pz az.Principal, modelId int64, mse, rSquared, logloss float64) error {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				multinomial_model
 				(model_id, mse, r_squared, logloss)
 			VALUES
 				($1,      $2,  $3,        $4)
-			RETURNING id
 			`,
 			modelId,
 			mse,
 			rSquared,
 			logloss,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
 			return err
 		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 	return err
@@ -3180,22 +3219,27 @@ func (ds *Datastore) CreateMultinomialModel(pz az.Principal, modelId int64, mse,
 func (ds *Datastore) CreateRegressionModel(pz az.Principal, modelId int64, mse, rSquared, deviance float64) error {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				regression_model
 				(model_id, mse, r_squared, mean_residual_deviance)
 			VALUES
 				($1,      $2,  $3,        $4)
-			RETURNING id
 			`,
 			modelId,
 			mse,
 			rSquared,
 			deviance,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
 			return err
 		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 	return err
@@ -3225,8 +3269,8 @@ func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, 
 			)
 		ORDER BY
 			model.name
-		OFFSET $3
 		LIMIT $4
+		OFFSET $3
 		`, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -3263,8 +3307,8 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 			)
 		ORDER BY
 			model.name
-		OFFSET $4
 		LIMIT $5
+		OFFSET $4
 		`, projectId, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, false, err
@@ -3389,8 +3433,8 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 			model.name LIKE '%' || $4 || '%'
 		ORDER BY
 			`+filter+`
-		OFFSET $5
 		LIMIT $6
+		OFFSET $5
 		`,
 		projectId,            // $1
 		pz.Id(),              // $2
@@ -3475,8 +3519,8 @@ func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, nam
 			model.name LIKE '%' || $4 || '%'
 		ORDER BY
 			`+filter+`
-		OFFSET $5
 		LIMIT $6
+		OFFSET $5
 		`,
 		projectId,            // $1
 		pz.Id(),              // $2
@@ -3561,8 +3605,8 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 			model.name LIKE '%' || $4 || '%'
 		ORDER BY
 			`+filter+`
-		OFFSET $5
 		LIMIT $6
+		OFFSET $5
 		`,
 		projectId,            // $1
 		pz.Id(),              // $2
@@ -3697,19 +3741,23 @@ func (ds *Datastore) CreateLabel(pz az.Principal, projectId int64, name, descrip
 
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				label
 				(project_id, name, description, created)
 			VALUES
-				($1,         $2,   $3,          date('now'))
-			RETURNING id
+				($1,         $2,   $3,          datetime('now'))
 			`,
 			projectId,
 			name,
 			description,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -3911,13 +3959,12 @@ func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
 func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
-		row := tx.QueryRow(`
+		res, err := tx.Exec(`
 			INSERT INTO
 				service
 				(project_id, model_id, name, address, port, process_id, state, created)
 			VALUES
-				($1,       $2,        $3,   $4,      $5,   $6,         $7,   date('now'))
-			RETURNING id
+				($1,       $2,        $3,   $4,      $5,   $6,         $7,   datetime('now'))
 			`,
 			service.ProjectId,
 			service.ModelId,
@@ -3927,7 +3974,12 @@ func (ds *Datastore) CreateService(pz az.Principal, service Service) (int64, err
 			service.ProcessId,
 			service.State,
 		)
-		if err := row.Scan(&id); err != nil {
+		if err != nil {
+			return err
+		}
+
+		id, err = res.LastInsertId()
+		if err != nil {
 			return err
 		}
 
@@ -3970,8 +4022,8 @@ func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Servi
 			)
 		ORDER BY
 			address, port
-		OFFSET $3
 		LIMIT $4
+		OFFSET $3
 		`, pz.Id(), ds.EntityTypes.Service, offset, limit, pz.IsSuperuser())
 	if err != nil {
 		return nil, err
@@ -4100,7 +4152,6 @@ func (ds *Datastore) DeleteService(pz az.Principal, serviceId int64) error {
 				service
 			WHERE
 				id = $1
-			RETURNING id
 			`, serviceId)
 		if err := row.Scan(&id); err != nil {
 			return err
