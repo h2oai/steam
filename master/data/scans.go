@@ -346,6 +346,42 @@ func ScanIdentityAndPasswords(rs *sql.Rows) ([]IdentityAndPassword, error) {
 	return structs, nil
 }
 
+func ScanIdentityAndRole(r *sql.Row) (IdentityAndRole, error) {
+	var s IdentityAndRole
+	if err := r.Scan(
+		&s.Kind,
+		&s.IdentityId,
+		&s.IdentityName,
+		&s.RoleId,
+		&s.RoleName,
+	); err != nil {
+		return IdentityAndRole{}, err
+	}
+	return s, nil
+}
+
+func ScanIdentityAndRoles(rs *sql.Rows) ([]IdentityAndRole, error) {
+	structs := make([]IdentityAndRole, 0, 16)
+	var err error
+	for rs.Next() {
+		var s IdentityAndRole
+		if err = rs.Scan(
+			&s.Kind,
+			&s.IdentityId,
+			&s.IdentityName,
+			&s.RoleId,
+			&s.RoleName,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanEngine(r *sql.Row) (Engine, error) {
 	var s Engine
 	if err := r.Scan(

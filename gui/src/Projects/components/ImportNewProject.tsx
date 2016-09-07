@@ -11,12 +11,13 @@ import Table from './Table';
 import Row from './Row';
 import Cell from './Cell';
 import {
-  fetchClusters, fetchModelsFromCluster,
+  fetchClusters, fetchModelsFromCluster, resetClusterSelection,
   importModelFromCluster, createProjectAndImportModelsFromCluster, registerCluster, fetchDatasetsFromCluster
 } from '../actions/projects.actions';
 import { Cluster, Model, Dataset } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
+import Progress from '../../App/components/Progress';
 
 interface DispatchProps {
   fetchClusters: Function,
@@ -24,13 +25,16 @@ interface DispatchProps {
   importModelFromCluster: Function,
   createProjectAndImportModelsFromCluster: Function,
   registerCluster: Function,
-  fetchDatasetsFromCluster: Function
+  fetchDatasetsFromCluster: Function,
+  resetClusterSelection: Function
 }
 
 interface Props {
   clusters: Cluster[],
   models: Model[],
-  datasets: Dataset[]
+  datasets: Dataset[],
+  isClusterFetchInProcess: boolean,
+  isModelFetchInProcess: boolean
 }
 
 export class ImportNewProject extends React.Component<DispatchProps & Props, any> {
@@ -89,6 +93,14 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
     this.props.registerCluster(ipAddress + ':' + port);
   }
 
+  resetClusterSelection(event) {
+    event.preventDefault();
+    this.setState({
+      clusterId: null
+    });
+    this.props.resetClusterSelection();
+  }
+
   selectModel() {
     let checkedModels = $('.import-models input:checked');
     if (checkedModels) {
@@ -116,6 +128,16 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
   }
 
   render(): React.ReactElement<HTMLDivElement> {
+    var selectedClusterName;
+    var selectedClusterAddress;
+
+    for (let cluster of this.props.clusters) {
+      if (cluster.id === this.state.clusterId) {
+        selectedClusterName = cluster.name;
+        selectedClusterAddress = cluster.address;
+      }
+    }
+
     if (!this.props.clusters) {
       return <div></div>;
     }
@@ -124,43 +146,58 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         <div className="step-1">
           <div className="select-cluster">
             <h1>1. Select H2O cluster</h1>
-            <div>
-              Select an H2O cluster to import models and datasets from.
-              <Table>
-                <Row header={true}>
-                  <Cell>CLUSTER</Cell>
-                  <Cell>DATASETS</Cell>
-                  <Cell>MODELS</Cell>
-                  <Cell></Cell>
-                </Row>
-                {this.props.clusters.map((cluster, i) => {
-                  return (
-                    <Row key={i}>
-                      <Cell>{cluster.name}</Cell>
-                      <Cell>N/A</Cell>
-                      <Cell>N/A</Cell>
-                      <Cell>
-                        <button className="default" onClick={this.retrieveClusterDataframes.bind(this, cluster.id)}>
-                          Connect
-                        </button>
-                      </Cell>
-                    </Row>
-                  );
-                })}
-              </Table>
-            </div>
+            { this.state.clusterId ?
+              <div className="cluster-info">
+                <span><i className="fa fa-cubes cluster-image"/></span>
+                <div className="cluster-details">
+                  <div>{selectedClusterName}</div>
+                  <div>{selectedClusterAddress}</div>
+                  <div onClick={this.resetClusterSelection.bind(this)} className="select-new-cluster"><i className="fa fa-close"/> use a different cluster</div>
+                </div>
+              </div> :
+              <div>
+                Select an H2O cluster to import models and datasets from.
+                <Table>
+                  <Row header={true}>
+                    <Cell>CLUSTER</Cell>
+                    <Cell>DATASETS</Cell>
+                    <Cell>MODELS</Cell>
+                    <Cell></Cell>
+                  </Row>
+                  {this.props.clusters.map((cluster, i) => {
+                    return (
+                      <Row key={i}>
+                        <Cell>{cluster.name}</Cell>
+                        <Cell>N/A</Cell>
+                        <Cell>N/A</Cell>
+                        <Cell>
+                          <button className="default" onClick={this.retrieveClusterDataframes.bind(this, cluster.id)}>
+                            Connect
+                          </button>
+                        </Cell>
+                      </Row>
+                    );
+                  })}
+                </Table>
+              </div>
+            }
           </div>
-          <div className="connect-cluster">
-            <h1>&hellip; or connect to a new H2O cluster</h1>
-            <div>
-              Connect to a H2O cluster where your existing models and data sets are located.
+          { !this.state.clusterId ?
+            <div className="connect-cluster">
+              <h1>&hellip; or connect to a new H2O cluster</h1>
+              <div>
+                Connect to a H2O cluster where your existing models and data sets are located.
+              </div>
+              <form onSubmit={this.registerCluster.bind(this)}>
+                <input type="text" name="ip-address" placeholder="IP Address"/>
+                <input type="text" name="port" placeholder="Port"/>
+                <button type="submit" className="default">Connect</button>
+              </form>
+              { this.props.isClusterFetchInProcess ?
+                  <Progress message="Connecting..." />
+                 : null }
             </div>
-            <form onSubmit={this.registerCluster.bind(this)}>
-              <input type="text" name="ip-address" placeholder="IP Address"/>
-              <input type="text" name="port" placeholder="Port"/>
-              <button type="submit" className="default">Connect</button>
-            </form>
-          </div>
+          : null }
         </div>
         {this.state.clusterId ? <div>
           <h1>2. Select Dataframe</h1>
@@ -171,9 +208,12 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                 return <option key={i} value={dataset.frame_name}>{dataset.name}</option>;
               }) : null}
             </select>
+            { this.props.isModelFetchInProcess ?
+                <Progress message="Connecting..." />
+              : null }
           </div>
         </div> : null}
-        {this.state.datasetId ?
+        {(this.state.datasetId && !this.props.isModelFetchInProcess) ?
           <div>
             <h1>3. Select Model Category</h1>
             <div>
@@ -232,7 +272,9 @@ function mapStateToProps(state): any {
     clusters: state.projects.clusters,
     models: state.projects.models,
     datasets: state.projects.datasets,
-    project: state.project
+    project: state.project,
+    isClusterFetchInProcess: state.projects.isClusterFetchInProcess,
+    isModelFetchInProcess: state.projects.isModelFetchInProcess
   };
 }
 
@@ -243,7 +285,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     createProjectAndImportModelsFromCluster: bindActionCreators(createProjectAndImportModelsFromCluster, dispatch),
     importModelFromCluster: bindActionCreators(importModelFromCluster, dispatch),
     registerCluster: bindActionCreators(registerCluster, dispatch),
-    fetchDatasetsFromCluster: bindActionCreators(fetchDatasetsFromCluster, dispatch)
+    fetchDatasetsFromCluster: bindActionCreators(fetchDatasetsFromCluster, dispatch),
+    resetClusterSelection: bindActionCreators(resetClusterSelection, dispatch)
   };
 }
 
