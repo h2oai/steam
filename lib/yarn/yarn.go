@@ -146,7 +146,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 
 	// TODO should be a ticket system, not halting
 	if err := cmd.Wait(); err != nil {
-		//cleanDir(name + "_out")
+		cleanDir(name + "_out")
 		return "", "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdErr)
 	}
 	return apID, addr, out, nil
