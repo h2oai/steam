@@ -234,6 +234,14 @@ type ScoringService struct {
 	CreatedAt int64  `json:"created_at"`
 }
 
+type UserRole struct {
+	Kind         string `json:"kind"`
+	IdentityId   int64  `json:"identity_id"`
+	IdentityName string `json:"identity_name"`
+	RoleId       int64  `json:"role_id"`
+	RoleName     string `json:"role_name"`
+}
+
 type Workgroup struct {
 	Id          int64  `json:"id"`
 	Name        string `json:"name"`
@@ -344,6 +352,7 @@ type Service interface {
 	GetIdentities(pz az.Principal, offset int64, limit int64) ([]*Identity, error)
 	GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*Identity, error)
 	GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*Identity, error)
+	GetIdentitiesForEntity(pz az.Principal, entityType int64, entityId int64) ([]*UserRole, error)
 	GetIdentity(pz az.Principal, identityId int64) (*Identity, error)
 	GetIdentityByName(pz az.Principal, name string) (*Identity, error)
 	LinkIdentityWithWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error
@@ -1121,6 +1130,15 @@ type GetIdentitiesForRoleIn struct {
 
 type GetIdentitiesForRoleOut struct {
 	Identities []*Identity `json:"identities"`
+}
+
+type GetIdentitiesForEntityIn struct {
+	EntityType int64 `json:"entity_type"`
+	EntityId   int64 `json:"entity_id"`
+}
+
+type GetIdentitiesForEntityOut struct {
+	Users []*UserRole `json:"users"`
 }
 
 type GetIdentityIn struct {
@@ -2194,6 +2212,16 @@ func (this *Remote) GetIdentitiesForRole(roleId int64) ([]*Identity, error) {
 		return nil, err
 	}
 	return out.Identities, nil
+}
+
+func (this *Remote) GetIdentitiesForEntity(entityType int64, entityId int64) ([]*UserRole, error) {
+	in := GetIdentitiesForEntityIn{entityType, entityId}
+	var out GetIdentitiesForEntityOut
+	err := this.Proc.Call("GetIdentitiesForEntity", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Users, nil
 }
 
 func (this *Remote) GetIdentity(identityId int64) (*Identity, error) {
@@ -5496,6 +5524,41 @@ func (this *Impl) GetIdentitiesForRole(r *http.Request, in *GetIdentitiesForRole
 	}
 
 	out.Identities = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetIdentitiesForEntity(r *http.Request, in *GetIdentitiesForEntityIn, out *GetIdentitiesForEntityOut) error {
+	const name = "GetIdentitiesForEntity"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetIdentitiesForEntity(pz, in.EntityType, in.EntityId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Users = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

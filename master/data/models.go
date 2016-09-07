@@ -80,6 +80,14 @@ type IdentityAndPassword struct {
 	Created     time.Time
 }
 
+type IdentityAndRole struct {
+	Kind         string
+	IdentityId   int64
+	IdentityName string
+	RoleId       int64
+	RoleName     string
+}
+
 type Engine struct {
 	Id       int64
 	Name     string

@@ -35,6 +35,11 @@ article {
 a {
   color:$link-color;
 }
+.link {
+  color:$link-color;
+  text-decoration:underline;
+  cursor:pointer;
+}
 
 select {
   background: #f0f0f0; /* Old browsers */
