@@ -115,9 +115,28 @@
 
     </section>
 
-    <section class="col-md-0 col-lg-1">
+    <section class="col-md-6 col-sm-12 col-lg-6">
+        <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Batch Prediction</header>
+        <form method="post" action="predict" enctype="multipart/form-data">
+            <!--<div class="form-group">-->
+                <div class="input-group">
+                    <legend>Input File</legend><input type="file" class="form-control" id="inputFile" name="inpfile" size="40">
+                </div>
+            <!--</div>-->
 
+            <div class="btnContainer">
+                <button type="submit" id="predict-btn" class="btn btn-primary">Batch Predict</button>
+                <!--<input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="batch predict">-->
+                <button type="reset" id="reset-btn" class="btn btn-default">Clear</button>
+                <!--<input id="reset-btn" type="reset" class="btn btn-default" value="clear">-->
+            </div>
+
+        </form>
     </section>
+
+    <section class="col-md-1">
+    </section>
+
     <section id="results" class="col-lg-5 col-md-6 col-sm-12">
         <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
         <fieldset id="modelPredictions">
