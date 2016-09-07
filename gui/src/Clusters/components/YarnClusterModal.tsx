@@ -47,7 +47,7 @@ export class YarnClusterModal extends React.Component<Props & DispatchProps, any
     return (
       <DefaultModal className="yarn-cluster-modal" open={this.props.open}>
         <PageHeader>LAUNCH YARN CLUSTER</PageHeader>
-        <form ref="engineForm" enctype="text/plain">
+        <form ref="engineForm">
           <input type="file" name="engine"/>
           <button onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
         </form>

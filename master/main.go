@@ -16,6 +16,7 @@ import (
 	"github.com/h2oai/steamY/master/data"
 	"github.com/h2oai/steamY/master/proxy"
 	"github.com/h2oai/steamY/master/web"
+	"github.com/gorilla/handlers"
 	srvweb "github.com/h2oai/steamY/srv/web"
 )
 
@@ -177,14 +178,19 @@ func Run(version, buildDate string, opts Opts) {
 		if len(webAddress) > 1 && webAddress[:1] == ":" {
 			prefix = "localhost"
 		}
+		allowedOrigins := handlers.AllowedOrigins([]string{"*"})
+		allowedMethods := handlers.AllowedMethods([]string{"POST", "GET", "OPTIONS"})
+		allowedHeaders := handlers.AllowedHeaders([]string{"content-type", "www-authenticate", "authorization", "cache-control", "connection", "content-length", "host", "origin", "pragma", "referer", "user-agent", "accept", "accept-encoding", "accept-language"})
+		//allowCredentials := handlers.AllowCredentials()
+		handler := handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(context.ClearHandler(webServeMux))
 		if enableTLS {
 			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, handler); err != nil {
 				serverFailChan <- err
 			}
 		} else {
 			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServe(webAddress, handler); err != nil {
 				serverFailChan <- err
 			}
 		}

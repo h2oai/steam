@@ -9,12 +9,9 @@ export function uploadEngine(form) {
     let file = form.querySelectorAll('input[type="file"]')[0];
     let data = new FormData();
     data.append('file', file.files[0]);
-    let headers = new Headers();
-    headers.append('Content-Type', 'text/plain');
     fetch(`/upload?type=engine`, {
       credentials: 'include',
       method: 'post',
-      headers,
       body: data
     }).then((res) => {
       Remote.getEngines((error, engines) => {
