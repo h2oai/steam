@@ -2,7 +2,6 @@ package web
 
 import (
 	"log"
-	"path"
 
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
@@ -21,7 +20,7 @@ type driverOpts struct {
 }
 
 type driverDBOpts struct {
-	Connection        data.Connection
+	DBPath            string
 	SuperuserName     string
 	SuperuserPassword string
 }
@@ -39,8 +38,7 @@ func newService(opts driverOpts) (web.Service, az.Directory, error) {
 	}
 
 	ds, err := data.Create(
-		path.Join(wd, fs.DbDir, "steam.db"),
-		// opts.DB.Connection,
+		opts.DB.DBPath,
 		opts.DB.SuperuserName,
 		opts.DB.SuperuserPassword,
 	)

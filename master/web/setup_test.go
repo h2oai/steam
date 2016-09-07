@@ -56,28 +56,28 @@ func init() {
 }
 
 func newTest(t *testing.T) *test {
+	// Determine current directory
+	wd, err := filepath.Abs(filepath.Dir(workingDirectory + "/"))
+	if err != nil {
+		t.Fatalf("Failed determining current directory: %s", err)
+	}
+
 	dbOpts := driverDBOpts{
-		data.Connection{DbName: "steam", User: "steam", SSLMode: "disable"},
+		path.Join(wd, "var/master", fs.DbDir, "steam.db"),
+		// data.Connection{DbName: "steam", User: "steam", SSLMode: "disable"},
 		superuser,
 		superuser,
 	}
 
 	// Truncate database tables
 
-	if err := data.Destroy(dbOpts.Connection); err != nil {
+	if err := data.Destroy(dbOpts.DBPath); err != nil {
 		t.Fatalf("Failed truncating database: %s", err)
-	}
-
-	// Determine current directory
-
-	wd, err := filepath.Abs(filepath.Dir(workingDirectory + "/"))
-	if err != nil {
-		t.Fatalf("Failed determining current directory: %s", err)
 	}
 
 	// Delete any remnant models in models directory
 
-	if err := os.RemoveAll(path.Join(wd, "var/master/model")); err != nil {
+	if err := os.RemoveAll(path.Join(wd, "var/master", fs.ModelDir)); err != nil {
 		t.Fatalf("Failed removing old model directory: %v", err)
 	}
 
