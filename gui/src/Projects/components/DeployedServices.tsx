@@ -39,7 +39,7 @@ export class DeployedServices extends React.Component<Props & DispatchProps, any
   }
 
   killService(serviceId) {
-    this.props.killService(serviceId);
+    this.props.killService(serviceId, parseInt(this.props.projectId, 10));
   }
 
   render(): React.ReactElement<HTMLDivElement> {
