@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import * as CLI from './Proxy/CLI';
 import { Router, hashHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import { createStore, applyMiddleware } from 'redux';
@@ -14,6 +15,9 @@ import { rootReducer } from './App/reducers/rootReducer';
 import './variables.scss';
 import 'font-awesome/css/font-awesome.css';
 import { compose } from 'redux';
+
+// Export Steam API to browser console.
+(window as any).steam = CLI;
 
 const initialState = {};
 
