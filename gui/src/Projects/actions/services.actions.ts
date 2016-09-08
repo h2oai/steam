@@ -57,10 +57,14 @@ export function fetchServicesForProject(projectId: number) {
   };
 }
 
-export function killService(serviceId: number) {
+export function killService(serviceId: number, projectId: number) {
   return (dispatch) => {
     Remote.stopService(serviceId, (error) => {
-      dispatch(fetchAllServices());
+      if (projectId) {
+        dispatch(fetchServicesForProject(projectId));
+      } else {
+        dispatch(fetchAllServices());
+      }
     });
   };
 }

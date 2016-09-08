@@ -43,7 +43,7 @@ build:
 	go build
 
 gui:
-	cd $(GUI) && npm install && npm run webpack
+	cd $(GUI) && rm -rf node_modules && npm install && npm run webpack
 
 guitest:
 	cd $(GUI) && npm test
