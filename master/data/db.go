@@ -3295,14 +3295,20 @@ func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, 
 				FROM 
 					privilege
 				WHERE
-					$5 OR
-					(workgroup_id IN (SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $1) AND entity_type_id = $2)
+					$1 OR
+					(
+						workgroup_id IN 
+						(
+							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
+						) AND 
+						entity_type_id = $3
+					)
 			)
 		ORDER BY
 			model.name
 		LIMIT $4
-		OFFSET $3
-		`, pz.Id(), ds.EntityTypes.Model, offset, limit, pz.IsSuperuser())
+		OFFSET $5
+		`, pz.IsSuperuser(), pz.Id(), ds.EntityTypes.Model, limit, offset)
 	if err != nil {
 		return nil, err
 	}
