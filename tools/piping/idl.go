@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 	"text/template"
 )
 
 type Interface struct {
 	Facade  *Facade
-	Structs []*Struct
+	Structs map[string]*Struct
 }
 
 type Facade struct {
@@ -26,8 +27,9 @@ type Method struct {
 }
 
 type Struct struct {
-	Name   string
-	Fields []*Field
+	Name    string
+	HasJSON bool
+	Fields  []*Field
 }
 
 type Field struct {
@@ -90,6 +92,7 @@ func collate(dict map[string]*Struct, instance interface{}) error {
 }
 
 func toStruct(s interface{}) (*Struct, error) {
+	hasJSON := false
 	t := reflect.TypeOf(s)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -134,6 +137,10 @@ func toStruct(s interface{}) (*Struct, error) {
 			help = "No description available"
 		}
 
+		if strings.HasPrefix(f.Name, "JSON") {
+			hasJSON = true
+		}
+
 		fields[i] = &Field{
 			ft,
 			f.Name,
@@ -146,7 +153,7 @@ func toStruct(s interface{}) (*Struct, error) {
 			help,
 		}
 	}
-	return &Struct{t.Name(), fields}, nil
+	return &Struct{t.Name(), hasJSON, fields}, nil
 }
 
 func defaultValueOf(t string, isArray, isStruct bool) string {
@@ -233,9 +240,9 @@ func toInterface(facadeName string, dict map[string]*Struct) (*Interface, error)
 		ks = append(ks, k)
 	}
 	sort.Strings(ks)
-	types := make([]*Struct, len(ks))
-	for i, n := range ks {
-		types[i] = structs[n]
+	types := make(map[string]*Struct, len(ks))
+	for _, n := range ks {
+		types[structs[n].Name] = structs[n]
 	}
 
 	return &Interface{

@@ -17,8 +17,8 @@ interface Props {
 
 export default class GoodnessOfFit extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
-    let modelMetrics = JSON.parse(this.props.model.metrics);
-    let comparisonModelMetrics = this.props.comparisonModel ? JSON.parse(this.props.comparisonModel.metrics) : null;
+    let modelMetrics = JSON.parse(this.props.model.json_metrics);
+    let comparisonModelMetrics = this.props.comparisonModel ? JSON.parse(this.props.comparisonModel.json_metrics) : null;
     let trainingMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {});
     let comparisonTrainingMetrics = _.get(comparisonModelMetrics, 'models[0].output.training_metrics', {});
     let metrics = {

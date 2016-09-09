@@ -10,6 +10,7 @@
 	guitest \
 	js \
 	ssb \
+	launcher \
 	doc \
 	cov \
 	clean \
@@ -25,6 +26,7 @@
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
+SLA=./tools/steamlauncher
 SSB=./scoring-service-builder
 WWW=./var/master/www
 GUI=./gui
@@ -32,7 +34,7 @@ ASSETS = ./var/master/assets
 SCRIPTS = ./scripts
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
 
-all: build gui ssb
+all: build gui ssb launcher
 
 install: build
 	go install
@@ -41,7 +43,7 @@ build:
 	go build
 
 gui:
-	cd $(GUI) && npm install && npm run webpack
+	cd $(GUI) && rm -rf node_modules && npm install && npm run webpack
 
 guitest:
 	cd $(GUI) && npm test
@@ -54,6 +56,9 @@ ssb:
 	mkdir -p $(ASSETS)
 	cp $(SSB)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
+
+launcher:
+	cd $(SLA) && go build
 
 generate:
 	cd ./tools/piping && go build && go install
@@ -100,7 +105,10 @@ clean:
 linux:
 	rm -rf ./dist/$(DIST_LINUX)
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
+	cd $(SLA) && env GOOS=linux GOARCH=amd64 go build
 	mkdir -p ./dist/$(DIST_LINUX)/var/master && mv ./steamY ./dist/$(DIST_LINUX)/steam
+	mv $(SLA)/steamlauncher ./dist/$(DIST_LINUX)/steam-launcher
+	cp $(SLA)/config.toml ./dist/$(DIST_LINUX)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_LINUX)/var/master/
@@ -109,7 +117,10 @@ linux:
 darwin:
 	rm -rf ./dist/$(DIST_DARWIN)
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
+	cd $(SLA) && env GOOS=darwin GOARCH=amd64 go build
 	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steamY ./dist/$(DIST_DARWIN)/steam
+	mv $(SLA)/steamlauncher ./dist/$(DIST_DARWIN)/steam-launcher
+	cp $(SLA)/config.toml ./dist/$(DIST_DARWIN)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/

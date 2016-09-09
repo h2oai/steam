@@ -102,15 +102,20 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="services">
-        <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)}
-                                  upload={this.upload.bind(this)}/>
+        {!_.isUndefined(this.props.params.projectid) ?
+          <UploadPreProcessingModal open={this.state.uploadOpen} cancel={this.closeUpload.bind(this)}
+                                    upload={this.upload.bind(this)}/> : null}
         <PageHeader>
           <span>Deployment</span>
-          <span><button className="default" onClick={this.openUpload.bind(this)}>Upload New Package</button></span>
+          {!_.isUndefined(this.props.params.projectid) ? <span><button className="default"
+                                                                     onClick={this.openUpload.bind(this)}>Upload New Package</button></span> : null}
         </PageHeader>
-        <TabNavigation tabs={this.state.tabs}/>
+        {!_.isUndefined(this.props.params.projectid) ? <TabNavigation tabs={this.state.tabs}/> : null}
         <main>
-          {this.state.tabs[this.state.isSelected].component}
+          {this.state.tabs.deployedServices.isSelected === true ?
+            <DeployedServices projectId={this.props.params.projectid}/> : null}
+          {this.state.tabs.packaging.isSelected === true && !_.isUndefined(this.props.params.projectid) ?
+            <Packaging projectId={this.props.params.projectid}/> : null}
         </main>
       </div>
     );

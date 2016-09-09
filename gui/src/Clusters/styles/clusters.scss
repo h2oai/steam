@@ -1,6 +1,23 @@
 @import '../../variables.scss';
 
 .clusters {
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    div.buttons {
+      font-size: 14px;
+      align-self: center;
+      display: inline-block;
+      padding: 7.5px 30px;
+      border-radius: 3px;
+      color: white;
+      background-color: #f5a623;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid #f5a623;
+    }
+  }
   .panel-container {
     display: flex;
     flex-wrap: wrap;
@@ -20,6 +37,13 @@
         color: $brand-green-3;
       }
     }
+  }
+  .new-cluster-form {
+    display: flex;
+    flex-direction: column;
+  }
+  .new-cluster-header {
+    margin-top: 0px;
   }
   .remove-cluster {
     float: right;

@@ -4,7 +4,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import Panel from './Panel';
-import { fetchServices, killService } from '../actions/services.actions';
+import { fetchAllServices, killService, fetchServicesForProject } from '../actions/services.actions';
 import { ScoringService } from '../../Proxy/Proxy';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -12,39 +12,56 @@ import '../styles/deployedservices.scss';
 
 interface Props {
   services: {
-    runningServices: ScoringService[]
-  }
+    runningServicesForProject: ScoringService[],
+    allRunningServices: ScoringService[]
+  },
+  projectId: string
 }
 
 interface DispatchProps {
-  fetchServices: Function,
-  killService: Function
+  fetchAllServices: Function,
+  killService: Function,
+  fetchServicesForProject: Function
 }
 
 
 export class DeployedServices extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
-    if (_.isEmpty(this.props.services.runningServices)) {
-      this.props.fetchServices();
+    this.fetchServicesStrategy(this.props.projectId);
+  }
+
+  fetchServicesStrategy(projectId: string) {
+    if (projectId) {
+      return this.props.fetchServicesForProject(parseInt(projectId, 10));
+    } else {
+      return this.props.fetchAllServices();
     }
   }
 
   killService(serviceId) {
-    this.props.killService(serviceId);
+    this.props.killService(serviceId, parseInt(this.props.projectId, 10));
   }
 
   render(): React.ReactElement<HTMLDivElement> {
-    if (_.isEmpty(this.props.services.runningServices)) {
+    let runningServices;
+    if (this.props.projectId) {
+      runningServices = this.props.services.runningServicesForProject;
+    } else {
+      runningServices = this.props.services.allRunningServices;
+    }
+
+    if (_.isEmpty(runningServices)) {
       return (
         <div>
-          <h3>There are no services currently deployed from this project.</h3>
+          <h3>There are no services currently deployed.</h3>
         </div>
       );
     }
+
     return (
       <div className="deployed-services">
         <section>
-          {this.props.services.runningServices.map((service, i) => {
+          {runningServices.map((service, i) => {
             return (
               <Panel key={i} className="services-panel">
                 <div className="panel-body">
@@ -86,7 +103,8 @@ function mapStateToProps(state): any {
 
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
-    fetchServices: bindActionCreators(fetchServices, dispatch),
+    fetchAllServices: bindActionCreators(fetchAllServices, dispatch),
+    fetchServicesForProject: bindActionCreators(fetchServicesForProject, dispatch),
     killService: bindActionCreators(killService, dispatch)
   };
 }

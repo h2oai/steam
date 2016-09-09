@@ -63,7 +63,7 @@ type Dataset struct {
 	Description        string
 	FrameName          string
 	ResponseColumnName string
-	Properties         string
+	JSONProperties     string
 	CreatedAt          int64
 }
 
@@ -81,7 +81,7 @@ type Model struct {
 	LogicalName         string
 	Location            string
 	MaxRuntime          int
-	Metrics             string
+	JSONMetrics         string
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -101,7 +101,7 @@ type BinomialModel struct {
 	LogicalName         string
 	Location            string
 	MaxRuntime          int
-	Metrics             string
+	JSONMetrics         string
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -126,7 +126,7 @@ type MultinomialModel struct {
 	LogicalName         string
 	Location            string
 	MaxRuntime          int
-	Metrics             string
+	JSONMetrics         string
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -149,7 +149,7 @@ type RegressionModel struct {
 	LogicalName          string
 	Location             string
 	MaxRuntime           int
-	Metrics              string
+	JSONMetrics          string
 	CreatedAt            int64
 	LabelId              int64
 	LabelName            string
@@ -233,6 +233,14 @@ type Identity struct {
 	IsActive  bool
 	LastLogin int64
 	Created   int64
+}
+
+type UserRole struct {
+	Kind         string
+	IdentityId   int64
+	IdentityName string
+	RoleId       int64
+	RoleName     string
 }
 
 type Workgroup struct {
@@ -333,6 +341,7 @@ type Service struct {
 	GetIdentities                 GetIdentities                 `help:"List identities"`
 	GetIdentitiesForWorkgroup     GetIdentitiesForWorkgroup     `help:"List identities for a workgroup"`
 	GetIdentitiesForRole          GetIdentitiesForRole          `help:"List identities for a role"`
+	GetIdentitiesForEntity        GetIdentitiesForEntity        `help:"Get a list of identities and roles with access to an entity"`
 	GetIdentity                   GetIdentity                   `help:"Get identity details"`
 	GetIdentityByName             GetIdentityByName             `help:"Get identity details by name"`
 	LinkIdentityWithWorkgroup     LinkIdentityWithWorkgroup     `help:"Link an identity with a workgroup"`
@@ -838,6 +847,12 @@ type GetIdentityByName struct {
 	Name     string `help:"An identity name."`
 	_        int
 	Identity Identity `help:"An identity in Steam."`
+}
+type GetIdentitiesForEntity struct {
+	EntityType int64 `help:"An entity type ID."`
+	EntityId   int64 `help:"An entity ID."`
+	_          int
+	Users      []UserRole `help:"A list of identites and roles"`
 }
 type LinkIdentityWithWorkgroup struct {
 	IdentityId  int64 `help:"Integer ID of an identity in Steam."`
