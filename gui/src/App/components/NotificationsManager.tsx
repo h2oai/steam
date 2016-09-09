@@ -21,6 +21,9 @@ interface DispatchProps {
 
 export class NotificationsManager extends React.Component<Props & DispatchProps, any> {
 
+  timeoutTimerID = -1;
+  TIMEOUT_LENGTH = 5000;
+
   constructor() {
     super();
     this.state = {
@@ -47,13 +50,22 @@ export class NotificationsManager extends React.Component<Props & DispatchProps,
           defaultStyle: { top: -150, opacity: 1}
         });
       } else {
-        this.setState({
-          isActive: false,
-          style: {top: -150, opacity: spring(0)},
-          defaultStyle: {top: 22, opacity: 1}
-        });
+        this.setFadeout();
       }
     }
+
+    if (this.timeoutTimerID !== -1) {
+      clearTimeout(this.timeoutTimerID);
+      this.timeoutTimerID = setTimeout(this.onTimeout.bind(this), this.TIMEOUT_LENGTH);
+    }
+  }
+
+  setFadeout() {
+    this.setState({
+      isActive: false,
+      style: {top: -150, opacity: spring(0)},
+      defaultStyle: {top: 22, opacity: 1}
+    });
   }
 
   onAnimationComplete() {
@@ -65,10 +77,13 @@ export class NotificationsManager extends React.Component<Props & DispatchProps,
   }
 
   startTimeoutTimer() {
-    setTimeout(this.onTimeout.bind(this), 5000);
+    this.timeoutTimerID = setTimeout(this.onTimeout.bind(this), this.TIMEOUT_LENGTH);
   }
   onTimeout() {
-    console.log(this);
+    for (let notificationData of this.props.notifications.allNotifications) {
+      notificationData.isActive = false;
+    }
+    this.setFadeout();
   }
 
   dismissNotification(notificationData) {
