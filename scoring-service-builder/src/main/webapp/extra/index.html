@@ -115,36 +115,23 @@
 
     </section>
 
-    <section class="col-md-6 col-sm-12 col-lg-6" id="batch">
-        <header>
-          <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Batch Prediction
-          <span class="subtitle">*optional</span>
-        </header>
+    <section class="col-md-6 col-sm-12 col-lg-6">
+        <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Batch Prediction</header>
         <form method="post" action="predict" enctype="multipart/form-data">
             <!--<div class="form-group">-->
-<!--                 <div class="input-group">
+                <div class="input-group">
                     <legend>Input File</legend><input type="file" class="form-control" id="inputFile" name="inpfile" size="40">
                 </div>
- -->            <!--</div>-->
-              <div class="input-inline-row">
-                    <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
-                    <div class="file-input-div">
-                        <input class="form-control file-input" type="text" id="inpfile" placeholder="Select a Batch JSON file"/>
-                        <input type="file" name="inpfile" />
-                    </div>
-              </div>
+            <!--</div>-->
+
+            <div class="btnContainer">
+                <button type="submit" id="predict-btn" class="btn btn-primary">Batch Predict</button>
+                <!--<input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="batch predict">-->
+                <button type="reset" id="reset-btn" class="btn btn-default">Clear</button>
+                <!--<input id="reset-btn" type="reset" class="btn btn-default" value="clear">-->
+            </div>
 
         </form>
-
-        <div class="btnContainer">
-            <button type="submit" id="predict-btn" class="btn btn-primary">Batch Predict</button>
-            <!--<input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="batch predict">-->
-            <button type="reset" id="reset-btn" class="btn btn-default">Clear</button>
-            <!--<input id="reset-btn" type="reset" class="btn btn-default" value="clear">-->
-        </div>
-    </section>
-
-    <section class="col-md-1">
     </section>
 
     <section id="results" class="col-lg-5 col-md-6 col-sm-12">
@@ -203,17 +190,6 @@
     </section>
 
 </main>
-
-  <script>
-        $('.file-icon').click(function(){
-        $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
-        });
-
-        $('.file-input').click(function(){
-            $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
-        });
-
-  </script>
 
 </body>
 </html>
