@@ -3,11 +3,15 @@
  */
 
 import * as Remote from '../../Proxy/Proxy';
-import { Project } from '../../Proxy/Proxy';
+import * as _ from 'lodash';
+import { Project, UserRole } from '../../Proxy/Proxy';
+import { fetchEntityIds } from '../../App/actions/global.actions';
 import { openNotification } from '../../App/actions/notification.actions';
 
+export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
+export const RESET_CLUSTER_SELECTION = 'RESET_CLUSTER_SELECTION';
 export const REQUEST_MODELS = 'REQUEST_MODELS';
 export const RECEIVE_MODELS = 'RECEIVE_MODELS';
 export const CREATE_PROJECT_COMPLETED = 'CREATE_PROJECT_COMPLETED';
@@ -17,6 +21,13 @@ export const REQUEST_DATASETS_FROM_CLUSTER = 'REQUEST_DATASETS_FROM_CLUSTER';
 export const RECEIVE_DATASETS_FROM_CLUSTER = 'RECEIVE_DATASETS_FROM_CLUSTER';
 export const RECEIVE_MODELS_FROM_PROJECT = 'RECEIVE_MODELS_FROM_PROJECT';
 export const RECEIVE_PROJECT = 'RECEIVE_PROJECT';
+
+export function setCurrentProject(projectId) {
+  return {
+    type: SET_CURRENT_PROJECT,
+    projectId
+  };
+}
 
 export const requestClusters = () => {
   return {
@@ -31,16 +42,56 @@ export function receiveClusters(clusters) {
   };
 }
 
+export function resetClusterSelection()  {
+  return {
+    type: RESET_CLUSTER_SELECTION
+  };
+};
+
+
 export function fetchClusters() {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(requestClusters());
+    let state = getState();
+
+    if (_.isEmpty(state.global.entityIds)) {
+      dispatch(fetchEntityIds()).then(() => {
+        _fetchClusters(dispatch, getState);
+      });
+    } else {
+      _fetchClusters(dispatch, getState);
+    }
+
+  };
+}
+function _fetchClusters(dispatch, getState) {
     Remote.getClusters(0, 1000, (error, res) => {
       if (error) {
         openNotification('error', 'There was an error retrieving your list of clusters', null);
+        return;
       }
-      dispatch(receiveClusters(res));
+
+      let identityPromises = [];
+      let toReturn = [];
+      let state = getState();
+
+      for (let cluster of res) {
+        identityPromises.push(new Promise((resolve, reject) => {
+          Remote.getIdentitiesForEntity(state.global.entityIds.cluster, cluster.id, (identitiesError: Error, users: UserRole[]) => {
+            if (identitiesError) {
+              openNotification('error', identitiesError.toString(), null);
+              reject(identitiesError.toString());
+              return;
+            }
+            toReturn.push(_.assign({}, cluster, { identities: users }));
+            resolve();
+          });
+        }));
+      }
+      Promise.all(identityPromises).then((results) => {
+        dispatch(receiveClusters(toReturn));
+      });
     });
-  };
 }
 
 export const requestModels = () => {

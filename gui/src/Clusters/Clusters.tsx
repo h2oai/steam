@@ -3,6 +3,7 @@
  */
 import * as React from 'react';
 import * as _ from 'lodash';
+import * as $ from 'jquery';
 import Panel from '../Projects/components/Panel';
 import PageHeader from '../Projects/components/PageHeader';
 import {
@@ -26,6 +27,14 @@ interface Props {
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      newClusterRequested: false
+    };
+  }
+
   componentWillMount(): void {
     if (_.isEmpty(this.props.clusters)) {
       this.props.fetchClusters();
@@ -36,14 +45,48 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     this.props.unregisterCluster(clusterId);
   }
 
+  registerCluster(event) {
+    event.preventDefault();
+    let ipAddress = $(event.target).find('input[name="ip-address"]').val();
+    let port = $(event.target).find('input[name="port"]').val();
+    this.props.registerCluster(ipAddress + ':' + port);
+    this.setState({ newClusterRequested: false });
+  }
+
+  onCreateNewClusterClicked(e) {
+    this.setState({ newClusterRequested: true });
+  }
+
   render(): React.ReactElement<HTMLDivElement> {
     if (!this.props.clusters) {
       return <div></div>;
     }
     return (
       <div className="clusters">
-        <PageHeader>CLUSTERS</PageHeader>
+        <PageHeader>CLUSTERS
+          { !this.state.newClusterRequested ?
+          <div className="buttons default">
+            <button className="default" onClick={this.onCreateNewClusterClicked.bind(this)}>Create Cluster</button>
+          </div>
+          : null }
+        </PageHeader>
         <div className="panel-container">
+          { this.state.newClusterRequested ?
+            <Panel>
+              <header>
+                <h3 className="new-cluster-header">New Cluster</h3>
+              </header>
+              <p>Connect to a H2O cluster where your existing models and data sets are located.</p>
+              <div className="new-cluster-form">
+                <form onSubmit={this.registerCluster.bind(this)}>
+                  <input type="text" name="ip-address" placeholder="IP Address"/>&nbsp;
+                  <input type="text" name="port" placeholder="Port"/>&nbsp;<br /><br />
+                  <button type="submit" className="default">Connect</button>
+                </form>
+              </div>
+            </Panel>
+            : null
+          }
           {this.props.clusters.map((cluster, i) => {
             return (
               <Panel key={i}>
@@ -60,6 +103,12 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                     {cluster.state === 'started' ? 'OK' : cluster.state}
                   </h2>
                 </article>
+                <h3>ACCESS</h3>
+                { (cluster as any).identities ?
+                  (cluster as any).identities.map((identity, index) => {
+                    return <div key={index}>{ identity.identity_name }&nbsp;</div>;
+                  })
+                  : null }
               </Panel>
             );
           })}

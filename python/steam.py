@@ -1617,6 +1617,24 @@ class RPCClient:
 		response = self.connection.call("GetIdentitiesForRole", request)
 		return response['identities']
 	
+	def get_identities_for_entity(self, entity_type, entity_id):
+		"""
+		Get a list of identities and roles with access to an entity
+
+		Parameters:
+		entity_type: An entity type ID. (int64)
+		entity_id: An entity ID. (int64)
+
+		Returns:
+		users: A list of identites and roles (UserRole)
+		"""
+		request = {
+			'entity_type': entity_type
+			'entity_id': entity_id
+		}
+		response = self.connection.call("GetIdentitiesForEntity", request)
+		return response['users']
+	
 	def get_identity(self, identity_id):
 		"""
 		Get identity details

@@ -7,6 +7,11 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/BurntSushi/toml",
+			"Comment": "v0.2.0-9-gf0aeabc",
+			"Rev": "f0aeabca5a127c4078abb8c8d64298b147264b55"
+		},
+		{
 			"ImportPath": "github.com/abbot/go-http-auth",
 			"Comment": "v0.3-14-gcb43723",
 			"Rev": "cb4372376e1e00e9f6ab9ec142e029302c9e7140"

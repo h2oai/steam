@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/h2oai/steamY/srv/web/api"
-	"github.com/serenize/snaker"
 	"io/ioutil"
 	"strings"
+
+	"github.com/h2oai/steamY/srv/web/api"
+	"github.com/serenize/snaker"
 )
 
 func main() {
@@ -15,8 +16,9 @@ func main() {
 	}
 
 	generate(ix, "srv/web/api/go.template", "srv/web/service.go", map[string]interface{}{
-		"lower": lower,
-		"snake": snaker.CamelToSnake,
+		"lower":      lower,
+		"snake":      snaker.CamelToSnake,
+		"startswith": strings.HasPrefix,
 	})
 	generate(ix, "srv/web/api/typescript.template", "gui/src/Proxy/Proxy.ts", map[string]interface{}{
 		"lower":   lower,

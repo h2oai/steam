@@ -8,13 +8,14 @@ import '../styles/cell.scss';
 
 interface Props {
   children?: React.ReactChildren,
-  className?: any
+  className?: any,
+  name?: string
 }
 
 export default class Cell extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
-      <div className={classNames('cell', this.props.className)}>
+      <div className={classNames('cell', this.props.className)} name={this.props.name}>
         {this.props.children}
       </div>
     );
