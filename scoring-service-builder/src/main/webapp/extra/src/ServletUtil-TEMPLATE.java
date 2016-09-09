@@ -21,7 +21,18 @@ class ServletUtil {
 
   // load model
   static String modelName = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-  static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+//  static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+  static GenModel rawModel = null;
+
+  static {
+    if (REPLACE_THIS_WITH_POJO_BOOLEAN)
+      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+    else
+      rawModel = RawModel.load("REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME" + ".zip");
+    if (rawModel == null)
+      logger.error("Can't instantiate model");
+  }
+
   public static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
     // load preprocessing
   public static Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;

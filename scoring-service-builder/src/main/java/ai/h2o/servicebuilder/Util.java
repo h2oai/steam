@@ -20,6 +20,7 @@ public class Util {
 
   public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
   public static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
+  public static final String JAVA_TEMPLATE_REPLACE_WITH_POJO_BOOLEAN = "REPLACE_THIS_WITH_POJO_BOOLEAN";
 
   protected static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
   protected static final String JAVA_TARGET_VERSION = "1.6";
@@ -214,12 +215,13 @@ public class Util {
    * @param resultFileName    restult file
    * @throws IOException
    */
-  public static void InstantiateJavaTemplateFile(File tmpDir, String javaClassName, String replaceTransform, String templateFileName, String resultFileName) throws IOException {
+  public static void InstantiateJavaTemplateFile(File tmpDir, boolean isPojoNotRawfile, String javaClassName, String replaceTransform, String templateFileName, String resultFileName) throws IOException {
     byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
     String java = new String(templateJava)
         .replace(JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME, javaClassName);
     if (replaceTransform != null)
       java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT, replaceTransform);
+    java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_POJO_BOOLEAN, isPojoNotRawfile ? "true" : "false");
     FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
   }
 
