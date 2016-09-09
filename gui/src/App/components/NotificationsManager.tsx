@@ -1,9 +1,12 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import { connect } from 'react-redux';
-import { closeNotification, NotificationData } from '../actions/notification.actions';
+import {
+  closeNotificationManager, dismissNotification, NotificationData, killAllInactiveNotifications
+} from '../actions/notification.actions';
 import { bindActionCreators } from 'redux';
 import { Notification } from "./Notification";
+import { Motion, spring } from 'react-motion';
 
 
 interface Props {
@@ -11,24 +14,88 @@ interface Props {
 }
 
 interface DispatchProps {
-  closeNotification: Function
+  dismissNotification: Function,
+  closeNotificationManager: Function,
+  killAllInactiveNotifications: Function
 }
 
 export class NotificationsManager extends React.Component<Props & DispatchProps, any> {
 
   constructor() {
     super();
+    this.state = {
+      isActive: false,
+      hasViewButton: false,
+      style : { top: -150, opacity: 1},
+      defaultStyle: { top: -150, opacity: 1}
+    };
   }
 
-  componentWillMount(): void {
+  componentWillReceiveProps(nextProps): void {
+    if ( nextProps.notifications ) {
+      let isActive = false;
+      for (let notificationData of nextProps.notifications.allNotifications) {
+       if (notificationData.isActive) {
+         isActive = true;
+       }
+      }
 
+      if (isActive) {
+        this.setState({
+          isActive: true,
+          style: {top: spring(22), opacity: 1},
+          defaultStyle: { top: -150, opacity: 1}
+        });
+      } else {
+        this.setState({
+          isActive: false,
+          style: {top: -150, opacity: spring(0)},
+          defaultStyle: {top: 22, opacity: 1}
+        });
+      }
+    }
+  }
+
+  onAnimationComplete() {
+    if (this.state.isActive) {
+      this.startTimeoutTimer();
+    } else {
+      this.props.killAllInactiveNotifications();
+    }
+  }
+
+  startTimeoutTimer() {
+    setTimeout(this.onTimeout.bind(this), 5000);
+  }
+  onTimeout() {
+    console.log(this);
+  }
+
+  dismissNotification(notificationData) {
+    this.props.dismissNotification(notificationData);
   }
 
   render(): React.ReactElement<HTMLElement> {
-    //todo: switch to animating the whole NotificationsManager, then just add new static notification elements within a FlexBox and reset the fadeout timer
-    if (!_.isEmpty(this.props.notifications)) {
-      return <Notification notificationData={ this.props.notifications.allNotifications[] }
-                           closeNotification={ this.props.closeNotification }/>;
+    if ( this.props.notifications.allNotifications ) {
+      return (
+        <Motion defaultStyle={ this.state.defaultStyle } style={ this.state.style } onRest={this.onAnimationComplete.bind(this) }>
+          {animationValue => {
+            let modifiedAnimationValue: any = _.assign({},animationValue);
+            if (modifiedAnimationValue.opacity < 1) {
+              modifiedAnimationValue.top = 22;
+            }
+            return <div className="notification-manager"  style={modifiedAnimationValue}> {
+              this.props.notifications.allNotifications.map((notificationData, index, array) => {
+                if (notificationData.isAlive) {
+                  return <Notification key={index} notificationData={ notificationData } dismissNotification={this.dismissNotification.bind(this)} />;
+                }
+              })
+            }
+            </div>;
+            }
+          }
+        </Motion>
+      );
     } else {
       return null;
     }
@@ -43,7 +110,9 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    closeNotification: bindActionCreators(closeNotification, dispatch)
+    dismissNotification: bindActionCreators(dismissNotification, dispatch),
+    closeNotificationManager: bindActionCreators(closeNotificationManager, dispatch),
+    killAllInactiveNotifications: bindActionCreators(killAllInactiveNotifications, dispatch)
   };
 }
 

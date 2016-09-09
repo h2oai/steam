@@ -2,7 +2,7 @@
  * Created by justin on 6/28/16.
  */
 import * as Remote from '../../Proxy/Proxy';
-import { openNotification, closeNotification } from '../../App/actions/notification.actions';
+import { openNotification, closeNotificationManager } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
 import { hashHistory } from 'react-router';
 export const FETCH_MODEL_OVERVIEW = 'FETCH_MODEL_OVERVIEW';
@@ -80,7 +80,7 @@ export function deployModel(modelId: number, name: string, projectId: string, pa
         dispatch(openNotification(NotificationType.Error, "Deployment Error", error.toString(), null));
         return;
       }
-      dispatch(closeNotification());
+      dispatch(closeNotificationManager());
       hashHistory.push('/projects/' + projectId + '/deployment');
     });
   };

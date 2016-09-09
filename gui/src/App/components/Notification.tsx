@@ -3,59 +3,33 @@
  */
 import * as React from 'react';
 import '../styles/notification.scss';
-import { TransitionMotion, spring } from 'react-motion';
 import { NotificationData } from '../actions/notification.actions';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { dismissNotification } from '../actions/notification.actions';
 
 export enum NotificationType { Info, Confirm, Warning, Error }
 
 interface Props {
-  notificationData: NotificationData
+  notificationData: NotificationData,
+  dismissNotification: Function
 }
 
-interface DispatchProps {
-  closeNotification: Function
-}
-
-export class Notification extends React.Component<Props & DispatchProps, any> {
+export class Notification extends React.Component<Props, any> {
 
   constructor() {
     super();
     this.state = {
-      isActive: false,
       hasViewButton: false,
-      styles: [{key: 'a', style : { top: -150, opacity: 1}}],
-      defaultStyles: [{key: 'a', style : { top: -150, opacity: 1}}]
     };
   }
 
-  componentWillMount(): void {
-    if (this.props.notificationData) {
-      if ( this.props.notificationData.detail.length > 100) {
-        this.setState({
-          hasViewButton: true
-        });
-      }
-    }
-  }
-
-  componentWillReceiveProps(nextProps): void {
-    if ( nextProps.notificationData ) {
-      if ( nextProps.notificationData.isActive ) {
-        this.setState( {
-          styles: [{key: 'a', style : { top: spring(22), opacity: 1}}],
-          defaultStyles: [{key: 'a', style : { top: -150, opacity: 1}}]
-        });
-      } else {
-        this.setState( {
-          styles: [{key: 'a', style: { top: 22, opacity: spring(0) }}],
-          defaultStyles: [{key: 'a', style : { top: 22, opacity: 1}}]
-        });
-      }
-    }
+  onDismissClicked() {
+    this.props.dismissNotification(this.props.notificationData);
   }
 
   render(): React.ReactElement<HTMLElement> {
-    if ( this.props.notificationData ) {
+    if (this.props.notificationData) {
       let guideClassName = "left-type-guide ";
       switch (this.props.notificationData.notificationType) {
         case NotificationType.Info :
@@ -71,36 +45,28 @@ export class Notification extends React.Component<Props & DispatchProps, any> {
           guideClassName += "left-type-guide-confirm ";
           break;
       }
-      console.log(guideClassName);
 
-      return (
-        <TransitionMotion styles={ this.state.styles } defaultStyles={ this.state.defaultStyles }>
-          {animationValue =>
-            <div className='notification' open={this.props.notificationData.isActive} style={animationValue[0].style}>
-              { console.log(animationValue[0].style) }
-              <div className="inner-notification">
-                <div className={guideClassName}></div>
-                <div className="text-container">
-                  <div className="header">
-                    {this.props.notificationData.header}
-                  </div>
-                  <div className="detail">
-                    {this.props.notificationData.detail}
-                  </div>
-                </div>
-                <div className="actions-container">
-                  { this.state.hasViewButton ?
-                    <button onClick={this.props.closeNotification} class="view-button"> View</button> : null }
-                  <button onClick={this.props.closeNotification} className="dismiss-button"> Dismiss</button>
-                </div>
-              </div>
+      return <div className='notification'>
+        <div className="inner-notification">
+          <div className={guideClassName}></div>
+          <div className="text-container">
+            <div className="header">
+              {this.props.notificationData.header}
             </div>
-          }
-        </TransitionMotion>
-      );
+            <div className="detail">
+              {this.props.notificationData.detail}
+            </div>
+          </div>
+          <div className="actions-container">
+            { this.state.hasViewButton ?
+              <button onClick={ this.onDismissClicked.bind(this) } className="view-button"> View</button> : null }
+            <button onClick={ this.onDismissClicked.bind(this) } className="dismiss-button"> Dismiss</button>
+          </div>
+        </div>
+      </div>;
     } else {
-      console.log('returning null');
       return null;
     }
+
   }
 }

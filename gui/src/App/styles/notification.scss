@@ -1,14 +1,11 @@
 @import '../../variables.scss';
 
 .notification {
-  position: absolute;
-  right: 22px;
   margin: $xsmall auto;
   min-height: 72px;
   width: 432px;
   background: rgba(255, 255, 255, 0.5);;
   font-family: $font-text;
-  z-index: 10;
 
   /*opacity: 0.32;*/
   background: #FFFFFF;
@@ -83,4 +80,9 @@
       }
     }
   }
+}
+.notification-manager {
+  position: absolute;
+  right: 22px;
+  z-index: 10;
 }
