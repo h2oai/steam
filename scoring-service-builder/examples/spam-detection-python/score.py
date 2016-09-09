@@ -57,11 +57,9 @@ def main_loop(transformer):
     """This infinite loop reads one line, then transforms it and prints the line"""
     while True:
         input = raw_input()
-        if len(input) > 0:
-            res = transformer(input)
-            print res
-            sys.stdout.flush()
-
+        res = transformer(input)
+        print res
+        sys.stdout.flush()
 
 #
 # Main entry point. Accepts parameters
