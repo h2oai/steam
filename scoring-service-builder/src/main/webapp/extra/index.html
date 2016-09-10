@@ -137,10 +137,8 @@
         </form>
 
         <div class="btnContainer">
-            <button type="submit" id="predict-btn" class="btn btn-primary">Batch Predict</button>
-            <!--<input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="batch predict">-->
-            <button type="reset" id="reset-btn" class="btn btn-default">Clear</button>
-            <!--<input id="reset-btn" type="reset" class="btn btn-default" value="clear">-->
+            <input type="submit" id="batch-predict" class="btn btn-primary" value="Batch Predict" />
+            <input type="reset" id="batch-reset" class="btn btn-default" value="clear" />
         </div>
     </section>
 
@@ -211,6 +209,31 @@
 
         $('.file-input').click(function(){
             $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
+        });
+
+        $('input[type="file"]').change(function(){
+
+            var names = [];
+            for (var i = 0; i < $(this).get(0).files.length; ++i) {
+                names.push( $(this).get(0).files[i].name );
+            }
+
+            $(this).closest('.input-inline-row').find("input[type='text']").val(names);
+        });
+
+        $('#batch-predict').click(function(){
+            if ( !$('#batch form input[name="inpfile"]').val() ){
+               alert('You must select a files with multiple lines of JSON predictions.');
+            }
+
+            $('#batch form input[name="inpfile"]').get(0).files = $('#batch form input[name="inpfile"]').get(0).files;
+
+            $('#batch form').submit();
+        });
+
+        $('#batch-reset').click(function(){
+          $('input[type="text"]').val('');
+          $('input[type="file"]').val('');
         });
 
   </script>
