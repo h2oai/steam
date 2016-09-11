@@ -140,7 +140,7 @@
                     </div>
 
               </form>
-              
+
               <div class="btnContainer">
                   <input type="submit" id="batch-predict" class="btn btn-primary" value="Batch Predict" />
                   <input type="reset" id="batch-reset" class="btn btn-default" value="clear" />
@@ -248,6 +248,14 @@
           $('input[type="text"]').val('');
           $('input[type="file"]').val('');
         });
+
+        $('#predict-btn').click(function(){
+            $('#allparams').submit();
+        })
+
+        $('#reset-btn').click(function(){
+            $('#allparams')[0].reset();       
+        })
 
         $('.expandableHandler').click(function(){
             $(this).parent().find('.expandable').toggle();
