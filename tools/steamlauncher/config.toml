@@ -1,0 +1,87 @@
+title = "Steam Config File"
+
+[superuser]
+name = "superuser"
+password = "superuser"
+
+[steam]
+port = 9000
+
+# Configurations for default roles
+[roles]
+
+	[roles.Admin]
+	description = "Default admin role"
+	permissions = [
+		"ManageRole",
+		"ViewRole",
+		"ManageWorkgroup",
+		"ViewWorkgroup",
+		"ManageIdentity",
+		"ViewIdentity",
+		"ManageEngine",
+		"ViewEngine",
+		"ManageCluster",
+		"ViewCluster",
+		"ManageProject",
+		"ViewProject",
+		"ManageDatasource",
+		"ViewDatasource",
+		"ManageDataset",
+		"ViewDataset",
+		"ManageModel",
+		"ViewModel",
+		"ManageLabel",
+		"ViewLabel",
+		"ManageService",
+		"ViewService"
+	]
+
+	[roles.ProjectLead]
+	description = "Default project lead"
+	permissions = [
+		"ViewRole",
+		"ManageWorkgroup",
+		"ViewWorkgroup",
+		"ViewIdentity",
+		"ViewEngine",
+		"ManageCluster",
+		"ViewCluster",
+		"ManageProject",
+		"ViewProject",
+		"ManageDatasource",
+		"ViewDatasource",
+		"ManageDataset",
+		"ViewDataset",
+		"ManageModel",
+		"ViewModel",
+		"ManageLabel",
+		"ViewLabel",
+		"ManageService",
+		"ViewService"
+	]
+
+	[roles.DataScientist]
+	description = "Default data scientist"
+	permissions = [
+		"ViewRole",
+		"ViewWorkgroup",
+		"ViewIdentity",
+		"ViewEngine",
+		"ViewCluster",
+		"ViewProject",
+		"ManageDatasource",
+		"ViewDatasource",
+		"ManageDataset",
+		"ViewDataset",
+		"ManageModel",
+		"ViewModel",
+		"ViewLabel",
+		"ViewService"
+	]
+
+[scoringserivce]
+jettypath = "var/master/assets/jetty-runner.jar"
+warpath = "var/master/assets/ROOT.war"
+port = 8080
+portrange = "1025:65535"

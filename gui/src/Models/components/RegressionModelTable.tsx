@@ -58,7 +58,7 @@ export default class RegressionModelTable extends React.Component<Props, any> {
           </Cell>
         </Row>
         {this.props.items.map((model, i) => {
-          let modelMetrics = JSON.parse(model.metrics);
+          let modelMetrics = JSON.parse(model.json_metrics);
           let trainingMetrics: RegressionMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {}) as RegressionMetrics;
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
@@ -88,13 +88,13 @@ export default class RegressionModelTable extends React.Component<Props, any> {
                   </div>
                 </div>
               </Cell>
-              <Cell>
+              <Cell name="mrd">
                 {trainingMetrics.mean_residual_deviance ? trainingMetrics.mean_residual_deviance.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell>
+              <Cell name="mse">
                 {trainingMetrics.MSE ? trainingMetrics.MSE.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell>
+              <Cell name="r2">
                 {trainingMetrics.r2 ? trainingMetrics.r2.toFixed(6) : 'N/A'}
               </Cell>
               <Cell>

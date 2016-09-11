@@ -67,7 +67,7 @@ export default class BinomialModelTable extends React.Component<Props, any> {
           </Cell>
         </Row>
         {this.props.items.map((model, i) => {
-          let modelMetrics = JSON.parse(model.metrics);
+          let modelMetrics = JSON.parse(model.json_metrics);
           let trainingMetrics: BinomialMetrics = _.get(modelMetrics, 'models[0].output.training_metrics', {}) as BinomialMetrics;
           let fpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[17]', []);
           let tpr = _.get(modelMetrics, 'models[0].output.training_metrics.thresholds_and_metric_scores.data[18]', []);
@@ -102,19 +102,19 @@ export default class BinomialModelTable extends React.Component<Props, any> {
                   </div>
                 </div>
               </Cell>
-              <Cell>
+              <Cell name="auc">
                 {trainingMetrics.AUC ? trainingMetrics.AUC.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell>
+              <Cell name="gini">
                 {trainingMetrics.Gini ? trainingMetrics.Gini.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell>
+              <Cell name="mse">
                 {trainingMetrics.MSE ? trainingMetrics.MSE.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell>
+              <Cell name="logloss">
                 {trainingMetrics.logloss ? trainingMetrics.logloss.toFixed(6) : 'N/A'}
               </Cell>
-              <Cell className="graph">
+              <Cell className="graph" name="roc">
                 <RocGraph data={data}/>
               </Cell>
               <Cell>
