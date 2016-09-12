@@ -21,9 +21,9 @@ export function uploadEngine(form) {
   };
 }
 
-export function startYarnCluster(clusterName, engineId, size, memory, username) {
+export function startYarnCluster(clusterName, engineId, size, memory) {
   return (dispatch) => {
-    Remote.startClusterOnYarn(clusterName, engineId, size, memory, username, (error, res) => {
+    Remote.startClusterOnYarn(clusterName, engineId, size, memory, 'superuser', (error, res) => {
 
     });
   };

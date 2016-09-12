@@ -1,0 +1,25 @@
+@import '../../variables';
+
+.launch-cluster {
+  .row {
+    .cell:first-of-type {
+      flex-basis: 20%;
+      flex-grow: 0;
+    }
+    .cell:nth-of-type(2) {
+      input[type="text"] {
+        width: $base-grid-unit * 4;
+      }
+      input[type="number"] {
+        width: $base-grid-unit;
+        height: $base-grid-unit / 2;
+      }
+      select {
+        width: $base-grid-unit;
+      }
+    }
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+}

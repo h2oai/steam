@@ -14,7 +14,7 @@ import { bindActionCreators } from 'redux';
 import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
 import './styles/clusters.scss';
-import YarnClusterModal from './components/YarnClusterModal';
+import { Link } from 'react-router';
 
 interface DispatchProps {
   fetchClusters: Function
@@ -57,11 +57,11 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     let ipAddress = $(event.target).find('input[name="ip-address"]').val();
     let port = $(event.target).find('input[name="port"]').val();
     this.props.registerCluster(ipAddress + ':' + port);
-    this.setState({ newClusterRequested: false });
+    this.setState({newClusterRequested: false});
   }
 
   onCreateNewClusterClicked(e) {
-    this.setState({ newClusterRequested: true });
+    this.setState({newClusterRequested: true});
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -70,15 +70,15 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     }
     return (
       <div className="clusters">
-        <PageHeader>CLUSTERS</PageHeader>
-        <YarnClusterModal open={this.state.yarnClusterModalOpen}/>
         <PageHeader>CLUSTERS
           { !this.state.newClusterRequested ?
-          <div className="buttons default">
-            <button className="default" onClick={this.onCreateNewClusterClicked.bind(this)}>Create Cluster</button>
-            <button className="default" onClick={this.openYarnClusterModal.bind(this)}>Open YARN Modal</button>
-          </div>
-          : null }
+            <div className="buttons default">
+              <button className="default invert" onClick={this.onCreateNewClusterClicked.bind(this)}>
+                Connect to Cluster
+              </button>
+              <Link to="clusters/new" className="default">Launch New Cluster</Link>
+            </div>
+            : null }
         </PageHeader>
         <div className="panel-container">
           { this.state.newClusterRequested ?
@@ -103,7 +103,9 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                 <header>
                   <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank"
                                                         rel="noopener">{cluster.name}
-                    @ {cluster.address}</a></span><button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster.id)}><i className="fa fa-trash"/></button>
+                    @ {cluster.address}</a></span>
+                  <button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster.id)}><i
+                    className="fa fa-trash"/></button>
                 </header>
                 <article>
                   <h3>
