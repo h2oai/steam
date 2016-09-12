@@ -88,6 +88,7 @@ func TestRoleDeletion(tt *testing.T) {
 }
 
 func TestRolePermissionLinking(tt *testing.T) {
+	t := newTest(tt)
 
 	roleId, err := t.svc.CreateRole(t.su, "name1", "description1")
 	t.nil(err)
