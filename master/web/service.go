@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -92,7 +93,6 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 }
 
 func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
-
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
@@ -113,8 +113,7 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 	return nil
 }
 
-func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, username string) (int64, error) {
-
+func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, username, keytab string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return 0, err
 	}
@@ -128,12 +127,20 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		return 0, fmt.Errorf("A cluster with the name %s already exists.", clusterName)
 	}
 
+	identity, err := s.ds.ReadIdentity(pz, pz.Id())
+	if err != nil {
+		return 0, err
+	}
+
 	engine, err := s.ds.ReadEngine(pz, engineId)
 	if err != nil {
 		return 0, err
 	}
 
-	applicationId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
+	// FIXME check if file exists
+	keytabPath := path.Join(fs.KTDir, keytab)
+
+	appId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, identity.Name, keytabPath)
 	if err != nil {
 		return 0, err
 	}
@@ -181,8 +188,7 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64) error {
 		return err
 	}
 
-	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnCluster.ApplicationId, yarnCluster.OutputDir, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
-		log.Println(err)
+	if err := yarn.StopCloud(s.kerberosEnabled, yarnCluster.ApplicationId, yarnCluster.OutputDir, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
 		return err
 	}
 

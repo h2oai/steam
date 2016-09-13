@@ -3,57 +3,41 @@ package yarn
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"os/exec"
+	"os/user"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
+
+	"github.com/h2oai/steamY/master/data"
+	"github.com/pkg/errors"
 )
 
-// If there is a open ticket, does nothing, else kinits a new session
-func kCheck(username, keytab string) error {
-	if err := exec.Command("klist", "-s").Run(); err != nil { // returns no err if there's an open ticket
-		if err = kInit(username, keytab); err != nil {
-			return err
-		}
+func kInit(username, keytab string, uid, gid uint32) error {
+	cmd := exec.Command("kinit", username, "-k", "-t", keytab)
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+
+	if err := cmd.Run(); err != nil {
+		return errors.Wrap(err, "failed executing kinit")
 	}
 
 	return nil
 }
 
-func kInit(username, keytab string) error {
+func kDest(uid, gid uint32) {
+	cmd := exec.Command("kdestroy")
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 
-	if len(username) < 1 {
-		return fmt.Errorf("A username is required to authenticate with Kerberos.")
+	if err := cmd.Run(); err != nil {
+		panic(fmt.Sprintf("failed executing kdestroy: %v", err))
 	}
-	if len(keytab) < 0 {
-		return fmt.Errorf("A keytab is required to authenticate with Kerberos.")
-	}
-
-	cmd := exec.Command("kinit", username, "-k", "-t", keytab)
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	// Scanning for errors while cmd is running
-	go func() {
-		in := bufio.NewScanner(stderr)
-		for in.Scan() {
-			log.Printf(in.Text())
-		}
-	}()
-
-	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("Failed to authenticate: %v", err)
-	}
-
-	return nil
 }
 
 func randStr(strlen int) string {
@@ -66,144 +50,125 @@ func randStr(strlen int) string {
 	return string(r)
 }
 
-func cleanDir(dir string) error {
-	log.Printf("Removing empty directory %s", dir)
+func cleanDir(dir string) {
+	// log.Printf("Removing empty directory %s", dir)
 	cmdClean := exec.Command("hadoop", "fs", "-rmdir", dir)
 	if out, err := cmdClean.Output(); err != nil {
-		log.Printf("Failed to remove outdir.\n%s", string(out))
-		return err
+		panic(fmt.Sprintf("failed to remove outdir: %v", string(out))
 	}
-	return nil
+}
+
+func getUser(username string) (uint32, uint32, error) {
+	u, err := user.Lookup(username)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "failed to lookup user")
+	}
+	uid64, err := strconv.ParseUint(u.Uid, 10, 32)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "failed parsing uid to uint32")
+	}
+	gid64, err := strconv.ParseUint(u.Gid, 10, 32)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "failed parsing gid to unit32")
+	}
+
+	return uint32(uid64), uint32(gid64), nil
+}
+
+func yarnScan(appID, address, err *string, r io.Reader) {
+	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
+	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
+
+	in := bufio.NewScanner(r)
+	for in.Scan() {
+		if s := reNode.FindSubmatch(in.Bytes()); s != nil {
+			*address = string(s[1])
+		}
+		if s := reApID.FindSubmatch(in.Bytes()); s != nil {
+			*appID = string(s[1])
+		}
+		if strings.Contains(in.Text(), "ERROR") {
+			*err += in.Text() + "\n"
+		}
+	}
 }
 
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
 func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string) (string, string, string, error) {
-	if kerberos {
-		if err := kCheck(username, keytab); err != nil {
-			return "", "", "", err
-		}
+	// Get user information for Kerberos and Yarn reasons
+			uid, gid, err := getUser(username)
+	if err != nil {
+		return "", "", "", errors.Wrap(err, "failed getting user")
 	}
 
+	// If kerberos enabled, initialize and defer destroy
+	if kerberos {
+		if err := kInit(username, keytab, uid, gid); err != nil {
+			return "", "", "", errors.Wrap(err, "failed initializing kerberos")
+		}
+		defer kDest(uid, gid)
+	}
+
+	// Randomize outfile name
 	out := "steam/" + name + "_" + randStr(5) + "_out"
 
 	cmdArgs := []string{
-		"jar",              //
-		enginePath,         //
-		"-jobname",         //
-		"STEAM_" + name,    //
-		"-n",               //
-		strconv.Itoa(size), //
-		"-mapperXmx",       //
-		mem,                //
-		"-output",          //
-		out,                //
-		"-disown",          //
+		"jar", enginePath,
+		"-jobname", "STEAM_" + name,
+		"-n", strconv.Itoa(size),
+		"-mapperXmx", mem,
+		"-output", out,
+		"-disown",
 	}
 
-	log.Println("Attempting to start cloud...")
-
+	// Execute command as user
 	cmd := exec.Command("hadoop", cmdArgs...)
-
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+	
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
 		return "", "", "", err
 	}
-	// stdErr, err := cmd.StderrPipe()
-	// if err != nil {
-	// 	return "", "", "", err
-	// }
-
+	defer stdOut.Close()
+	
 	if err := cmd.Start(); err != nil {
 		return "", "", "", err
 	}
 
-	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
-	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
-	var cmdErr, apID, addr string
-	go func() {
-		in := bufio.NewScanner(stdOut)
-		for in.Scan() {
-			log.Printf("--YARN-- %s\n", in.Text())
-			if s := reNode.FindSubmatch([]byte(in.Text())); s != nil {
-				addr = string(s[1])
-			}
-			if s := reApID.FindSubmatch([]byte(in.Text())); s != nil {
-				apID = string(s[1])
-			}
-			if strings.Contains(in.Text(), "ERROR") {
-				cmdErr += in.Text() + "\n"
-			}
-		}
-	}()
-	// go func() {
-	// 	in := bufio.NewScanner(stdErr)
-	// 	for in.Scan() {
-	// 		cmdErr += in.Text() + "\n"
-	// 	}
-	// }()
+	var appId, address, cmdErr string
+	go yarnScan(&appId, &address, &cmdErr, stdOut)
 
-	// TODO should be a ticket system, not halting
 	if err := cmd.Wait(); err != nil {
-		cleanDir(name + "_out")
+		cleanDir(out)
 		return "", "", "", fmt.Errorf("Failed to launch hadoop.\n%s", cmdErr)
 	}
-	return apID, addr, out, nil
+	return appID, addr, out, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
 //
 // In the future this
-func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
+func StopCloud(kerberos bool, id, outdir, username, keytab string) error {
+	uid, gid, err := getUser(username)
+	if err != nil {
+		return "", "", "", errors.Wrap(err, "failed getting user")
+	}
+
 	if kerberos {
-		if err := kCheck(username, keytab); err != nil {
-			return err
+		if err := kInit(username, keytab, uid, gid); err != nil {
+			return "", "", "", errors.Wrap(err, "failed initializing kerberos")
 		}
+		defer kDest(uid, gid)
 	}
 
-	log.Println("Attempting to stop cloud...")
 	cmd := exec.Command("hadoop", "job", "-kill", "job_"+id)
-	stdOut, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	stdErr, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	e := make(chan error)
-	var cmdOut, cmdErr string
-	go func() {
-		in := bufio.NewScanner(stdOut)
-		for in.Scan() {
-			log.Printf("--YARN-- %s\n", in.Text())
-			cmdOut += in.Text() + "\n"
-		}
-	}()
-	go func() {
-		in := bufio.NewScanner(stdErr)
-		for in.Scan() {
-			cmdErr = cmdErr + in.Text() + "\n"
-			if strings.Contains(in.Text(), "Exception") {
-				e <- fmt.Errorf("Failed to shutdown hadoop.\n%s", in.Text())
-			}
-		}
-	}()
-	go func() {
-		err := cmd.Wait()
-		if err != nil {
-			log.Printf("Failed to shutdown hadoop.\n%s", cmdErr)
-			e <- fmt.Errorf("Failed to shutdown hadoop.\n%s", cmdErr)
-		}
-		e <- nil
-	}()
-	if err := <-e; err != nil {
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 
