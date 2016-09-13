@@ -2,7 +2,7 @@ import sys
 import time
 import testutil as tu
 import subprocess as sp
-
+import re
 """
 Perm id		Permission		Index
 ============================================
@@ -32,17 +32,19 @@ Perm id		Permission		Index
 
 _steampath = "./steam"
 
-def createRole(role, desc, perm, i):
-	ret = sp.Popen("{0} create role --name {1} --description {2} > /dev/null"\
+def createRole(role, desc, perm):
+	ret = sp.check_output("{0} create role --name {1} --description {2}"\
 		.format(_steampath, role, desc), shell=True)
-	print ret
+	i = int(re.search(r'\d+', ret).group())
 	for p in perm:
 		sp.Popen("{0} link role --with-permission --role-id={1} --permission-id={2} > /dev/null"\
 			.format(_steampath, i, p), shell=True).communicate()
+	return i
 
-def createIdentity(name, pw, i):
-	sp.Popen("{0} create identity --name={1} --password={2} > /dev/null"\
-		.format(_steampath, name, pw), shell=True).communicate()
+def createIdentity(name, pw):
+	ret = sp.check_output("{0} create identity --name={1} --password={2}"\
+		.format(_steampath, name, pw), shell=True)
+	return int(re.search(r'\d+', ret).group())
 
 def assignRole(iden, role):
 	sp.Popen("{0} link identity --with-role --identity-id={1} --role-id={2}"\
@@ -50,14 +52,13 @@ def assignRole(iden, role):
 
 
 def readRolesTest():
-	createRole("hello", "hey", [1, 2, 4, 5, 6, 9, 10, 17, 18], 2)
+	role = createRole("hello", "hey", [1, 2, 4, 5, 6, 9, 10, 17, 18])
 	inds = [8, 19, 21, 4, 15, 0, 11, 6, 17]
-	createIdentity("billy", "bob", 2)
-	assignRole(2, 2)
+	iden = createIdentity("billy", "bob")
+	assignRole(iden, role)
 	d = tu.newtest()
 	try:
-		tu.goUsers(d)
-	
+		tu.goUsers(d)	
 		tu.goRoles(d)
 		time.sleep(1)
 		checked = d.find_elements_by_xpath("//input[@type='checkbox' and @value='on']")
