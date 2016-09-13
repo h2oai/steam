@@ -6,6 +6,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 
+def goUsers(driver):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	driver.find_element_by_class_name("fa-user").click()
+	wait.until(lambda x: x.find_element_by_class_name("user-access"))
+
+def goRoles(driver):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	goUsers(driver)
+	driver.find_element_by_xpath("//a[@class='tab' and text()='ROLES']").click()
+	wait.until(lambda x: x.find_element_by_class_name("role-permissions"))
+
 def indexOfModel(driver, mod):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
