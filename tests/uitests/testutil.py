@@ -128,8 +128,7 @@ def newProject(driver):
 	try:
 		wait.until(lambda x: x.find_element_by_class_name("select-cluster"))
 	except Exception as e:
-		print e
-		print "what what what"
+		print "Failed to access new project page"
 		return False
 	return True
 
@@ -251,6 +250,31 @@ def deployModel(driver, mod, name):
 	driver.refresh()
 	wait.until(lambda x: x.find_element_by_class_name("deployed-services"))
 	
+def createProject(driver, cluster, name, data, kind, mods):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	goHome(driver)
+	newProject(driver)
+	#select cluster by name
+	#select the first cluster for now
+	driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectDataframe']"))
+	sel = Select(driver.find_element_by_xpath("//select[@name='selectDataframe']"))
+	sel.select_by_visible_text(data)
+	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectModelCategory']"))
+	sel = Select(driver.find_element_by_xpath("//select[@name='selectModelCategory']"))
+	sel.select_by_visible_text(kind)
+	for mod in mods:
+		selectModel(driver, mod)
+	driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys(name)
+	driver.find_element_by_xpath("//button[text()='Create Project']").click()
+	for mod in mods:
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
+
+def testAs(user, pw):
+	driver = webdriver.Chrome()
+	driver.get("http://{0}:{1}@localhost:9000".format(user, pw))
+	driver.find_element_by_css_selector("input").click()
+	return driver
 
 def newtest():
 	driver = webdriver.Chrome()
