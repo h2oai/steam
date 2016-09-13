@@ -29,13 +29,20 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     clusterForm: (HTMLFormElement)
   };
 
+  constructor() {
+    super();
+    this.state = {
+      memorySizeUnit: 'm'
+    };
+  }
+
   startCluster(event) {
     event.preventDefault();
     let clusterName = (this.refs.clusterForm.querySelector('input[name="name"]') as HTMLInputElement).value;
     let engineId = (this.refs.clusterForm.querySelector('input[name="engineId"]') as HTMLInputElement).value;
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
-    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'm');
+    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + this.state.memorySizeUnit);
   }
 
   uploadEngine(event) {
@@ -44,14 +51,16 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     this.props.uploadEngine(this.refs.engineForm);
   }
 
+  onChangeMemory(event) {
+    this.setState({
+      memorySizeUnit: event.target.value
+    });
+  }
+
   render() {
     return (
       <div className="launch-cluster">
         <PageHeader>LAUNCH NEW CLUSTER</PageHeader>
-        <form ref="engineForm">
-          <input type="file" name="engine"/>
-          <button onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
-        </form>
         <form ref="clusterForm" onSubmit={this.startCluster.bind(this)}>
           <Table>
             <Row header={true}/>
@@ -68,6 +77,10 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 ENGINE ID
               </Cell>
               <Cell>
+                <form ref="engineForm">
+                  <input type="file" name="engine"/>
+                  <button className="default" onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
+                </form>
                 <NumericInput name="engineId" min="1"/>
               </Cell>
             </Row>
@@ -85,7 +98,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
               <Cell>
                 <NumericInput name="memory" min="1"/>
-                <select>
+                <select onChange={this.onChangeMemory.bind(this)}>
                   <option value="m">MB</option>
                   <option value="g">GB</option>
                 </select>

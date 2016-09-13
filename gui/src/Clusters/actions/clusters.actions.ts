@@ -3,6 +3,7 @@
  */
 
 import * as Remote from '../../Proxy/Proxy';
+import { openNotification } from '../../App/actions/notification.actions';
 
 export function uploadEngine(form) {
   return (dispatch) => {
@@ -23,8 +24,13 @@ export function uploadEngine(form) {
 
 export function startYarnCluster(clusterName, engineId, size, memory) {
   return (dispatch) => {
+    dispatch(openNotification('info', 'Connecting to YARN...', null));
     Remote.startClusterOnYarn(clusterName, engineId, size, memory, 'superuser', (error, res) => {
-
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+      dispatch(openNotification('success', 'Cluster Launched', null));
     });
   };
 }

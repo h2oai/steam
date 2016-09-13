@@ -1,6 +1,11 @@
 @import '../../variables.scss';
 
 .clusters {
+  .page-header {
+    a {
+      font-size: 14px;
+    }
+  }
   .top-bar {
     display: flex;
     justify-content: space-between;
