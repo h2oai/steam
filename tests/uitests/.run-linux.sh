@@ -9,6 +9,8 @@ rm -rf ./steam*-master-linux-amd64*
 s3cmd get s3://steam-release/steamY-develop-linux-amd64.tar.gz -f
 
 tar xvf steamY-develop-linux-amd64.tar.gz
+cp steam-develop-linux-amd64/var/master/scripts/database/create-schema.sql steam-develop-linux-amd64/var/master/db
+
 
 java -jar $H2O_PATH -port 54535 -name steamtest > h2o.log 2>&1 &
 H2O_PID=$!
@@ -34,8 +36,9 @@ for dir in `ls -d *-test`; do
 	cd steam-develop-linux-amd64
 	sleep 1
 	echo "Resetting database"
-	cd var/master/scripts
-	sudo runuser -l postgres -c "cd `pwd` && ./reset-database.sh > /dev/null 2>&1"
+	cd var/master/db
+	rm steam.db
+	sqlite3 steam.db < create-schema.sql
 	cd ../../..
 	rm -rf var/master/model/*
 	./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
@@ -68,7 +71,6 @@ rm -rf $WD/steamY-develop-linux-amd64.tar.gz $WD/steam-develop-linux-amd64
 
 
 
-kill -9 $POSTGRES_PID > /dev/null 2>&1
 kill -9 $H2O_PID > /dev/null 2>&1
 kill -9 $JETTY_PID > /dev/null 2>&1
 

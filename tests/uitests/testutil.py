@@ -246,6 +246,8 @@ def deployModel(driver, mod, name):
 	wait.until(lambda x: len(x.find_elements_by_xpath("//input[@type='text']")) == 2)
 	driver.find_elements_by_xpath("//input[@type='text']")[1].send_keys(name)
 	driver.find_element_by_class_name("deploy-button").click()
+	time.sleep(5)
+	driver.refresh()
 	wait.until(lambda x: x.find_element_by_class_name("deployed-services"))
 	
 def createProject(driver, cluster, name, data, kind, mods):
