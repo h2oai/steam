@@ -2,6 +2,7 @@ package data
 
 import (
 	"github.com/h2oai/steamY/master/az"
+	"github.com/pkg/errors"
 )
 
 // --- Datastore-backed Directory Impl ---
@@ -9,7 +10,7 @@ import (
 func (ds *Datastore) Lookup(name string) (az.Principal, error) {
 	identity, err := ds.readIdentityAndPassword(name)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed reading identity with password")
 	}
 
 	if identity == nil {

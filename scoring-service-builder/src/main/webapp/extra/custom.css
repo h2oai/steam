@@ -92,6 +92,17 @@ header .glyphicon {
     padding-right: 2em;
 }
 
+header .subtitle {
+    vertical-align: super;
+    font-size: 0.8em;
+    padding-left: 0.4em;
+    color: rgba(23,23,23, 0.5);
+}
+
+#batch form {
+    border: 1px dashed rgba(89, 195, 200, 0.8) ;
+}
+
 section {
     margin-top: 1em;
     margin-bottom: 2em;
@@ -123,6 +134,15 @@ input[type="radio"] {
     margin-left: 1em;
     margin-right: 0.5em;
 
+}
+
+input[type='file']{
+    display: none;
+}
+
+form {
+    padding: 1em 3em;
+    margin: 1em 0em;
 }
 
 .form-group {
@@ -165,6 +185,33 @@ input[type="radio"] {
 
 .btnContainer {
     padding-left: 2em;
+}
+
+.form-control-label {
+    font-weight: 600;
+}
+
+.circle-icon {
+    border: 1px solid rgba(89, 195, 200, 0.8);
+    color: rgba(89, 195, 200, 0.8);
+    border-radius: 32px;
+    padding: 8px;
+    margin-right: 1em;
+}
+
+.input-inline-row {
+    display: flex;
+    flex-direction: row;
+    padding: 0.5em 0;
+    vertical-align: middle;
+}
+
+.input-inline-row .file-input-div{
+    flex-grow: 1;
+}
+
+.input-inline-row input[type="text"]{
+    padding-left: 0;
 }
 
 

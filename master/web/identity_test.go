@@ -67,7 +67,7 @@ func TestIdentityWorkgroupLinking(tt *testing.T) {
 	groups, err := t.svc.GetWorkgroupsForIdentity(t.su, userId)
 	t.nil(err)
 
-	t.ok(len(groups) == 1, "groups for user")
+	t.ok(len(groups) == 1, "groups for user: expected 1 got %d", len(groups))
 	t.ok(groups[0].Name == "group1", "group name")
 
 	err = t.svc.UnlinkIdentityFromWorkgroup(t.su, userId, groupId)

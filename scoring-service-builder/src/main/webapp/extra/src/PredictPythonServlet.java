@@ -50,8 +50,9 @@ public class PredictPythonServlet extends HttpServlet {
   }
 
   private void startPython() throws Exception {
+    logger.debug("startPython");
     String program = servletPath.getAbsolutePath() + "/WEB-INF/python.py";
-    logger.debug(program);
+    logger.debug("program {}", program);
     // start the python process
     try {
       // score.py
@@ -92,13 +93,17 @@ public class PredictPythonServlet extends HttpServlet {
 
     try {
       // restart if python failed
-      if (p == null)
+      if (p == null) {
         startPython();
+
+      }
       try {
+        logger.debug("send {}", queryString);
         stdin.write(queryString.getBytes());
         stdin.write(NewlineByteArray);
         stdin.flush();
         result = reader.readLine();
+        logger.debug("result {}", result);
       }
       catch (IOException e) {
         String msg = "ERROR IOException in sendPython restarting python";
@@ -243,10 +248,54 @@ public class PredictPythonServlet extends HttpServlet {
       AbstractPrediction pr;
       String prJson;
       String result;
+      String endingMultipartBoundary = null;
+      String batchFileName = null;
+      final String filenameString = "filename=";
+      final int filenameStringLength = filenameString.length();
       boolean outputResult = false;
       while (r.ready()) {
         line = r.readLine();
         logger.debug("line {}", line);
+
+        // Check if we're receving a file form the UI which has to be encoded multipart/form
+        // if not, we're just receiving lines of text, each of which is json
+        if (endingMultipartBoundary != null && endingMultipartBoundary.equals(line)) {
+          logger.debug("ending multipart form, line {}", line);
+          break;
+        }
+        else if (line.startsWith("--")) {
+          endingMultipartBoundary = line + "--";
+          logger.debug("starting multipart form, line {}", line);
+          // skip Content-disposition line
+          if (r.ready()) {
+            line = r.readLine();
+            logger.debug("skipped line {}", line);
+          }
+          // extract the file name if we can
+          if (line.contains(filenameString)) {
+            int p = line.indexOf(filenameString);
+            logger.debug("p = {}", p);
+            if (p != -1) {
+              int p1 = line.indexOf("\"", p + filenameStringLength + 1);
+              logger.debug("p1 = {}", p1);
+              if (p1 != -1) {
+                batchFileName = line.substring(p + filenameStringLength + 1,  p1);
+                logger.debug("batch file name {}", batchFileName);
+              }
+            }
+          }
+          else
+            batchFileName = "noname";
+          // skip Content-Type
+          if (r.ready()) {
+            line = r.readLine();
+            logger.debug("skipped line {}", line);
+          }
+          // Set Content-disposition to download a file and use the file name + text
+          response.setHeader("Content-disposition", "attachment; filename=" + batchFileName + "_prediction-results.txt");
+          continue;
+        }
+        logger.debug("line after batch optional code {}", line);
 
         result = sendPython(line);
         logger.debug("from python: {}", result);

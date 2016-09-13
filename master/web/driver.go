@@ -20,7 +20,7 @@ type driverOpts struct {
 }
 
 type driverDBOpts struct {
-	Connection        data.Connection
+	DBPath            string
 	SuperuserName     string
 	SuperuserPassword string
 }
@@ -38,7 +38,7 @@ func newService(opts driverOpts) (web.Service, az.Directory, error) {
 	}
 
 	ds, err := data.Create(
-		opts.DB.Connection,
+		opts.DB.DBPath,
 		opts.DB.SuperuserName,
 		opts.DB.SuperuserPassword,
 	)
