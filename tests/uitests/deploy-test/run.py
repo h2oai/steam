@@ -39,7 +39,12 @@ def deleteTest(driver):
 		driver.find_element_by_xpath("//div[text()='Stop Service']").click()
 		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) == 0)
 	except:
-		print "Failed to stop/delete a service"
+		driver.refresh()
+		time.sleep(1)
+		if len(driver.find_elements_by_class_name("services-panel")) == 0:
+			print "Deployment page must be refreshed before stopped services are removed"
+		else:
+			print "Failed to stop/delete a service"
 		return False
 	return True
 
@@ -48,6 +53,7 @@ def projectDeployTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='select-cluster']//button"))
 		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
