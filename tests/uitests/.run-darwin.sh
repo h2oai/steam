@@ -5,7 +5,7 @@ touch .failtmp
 H2O_PATH=/Users/patrickrice/Documents/h2o-3/build/h2o.jar
 
 rm -rf ./steam*-develop-darwin-amd64*
-rm -rf ./steam*-master-darwin-amd64*
+rm -rf ./steam*-develop-darwin-amd64*
 s3cmd get s3://steam-release/steamY-develop-darwin-amd64.tar.gz -f
 
 tar xvf steamY-develop-darwin-amd64.tar.gz
@@ -41,6 +41,8 @@ for dir in `ls -d *-test`; do
 	./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
 	STEAM_PID=$!
 	disown
+	sleep 1
+	./steam login localhost:9000 --username superuser --password superuser > /dev/null
 	cd ..
 	cp testutil.py $dir/
 	sleep 1
