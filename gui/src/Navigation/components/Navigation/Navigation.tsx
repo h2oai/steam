@@ -17,6 +17,7 @@ import { bindActionCreators } from 'redux';
 import './navigation.scss';
 import { Project } from '../../../Proxy/Proxy';
 const logo = require('../../../../assets/h2o-home.png');
+import {Motion, spring} from 'react-motion';
 
 interface Props {
   routes: any
@@ -109,35 +110,48 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     });
   }
 
-  renderSubmenu(activeRoute: any): JSX.Element {
+  renderSubmenu(activeRoute: any, shouldShow: boolean): JSX.Element {
     let childRoutes = routes[0].childRoutes.filter((route) => {
       return (route.path.indexOf(activeRoute.path) !== -1 && route.path !== activeRoute.path);
     });
+    let styleTo;
+    console.log(shouldShow);
+    if(shouldShow) {
+      styleTo = { left: spring(72) }
+    } else {
+      styleTo = { left: spring(300) }
+    }
     return (
-      <Sidebar className='secondary-navigation'>
-        <nav className="navigation--primary">
-          <div className="navigation">
-            <header>
-              <div className="header-navigation">
-                <Link to={this.getParentRouteName(activeRoute.path)}><i
-                  className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span></Link>
-              </div>
-            </header>
-            <div className="header-content">{this.props.project.name}</div>
-            <ul className="nav-list">
-              {_.map(childRoutes, (menuItem: any) => {
-                let path = buildPath(menuItem.path, this.props.params);
-                return (!menuItem.showInNavigation) ? null : (
-                  <li key={menuItem.path}
-                      className={classNames('nav-list--item', {active: this.isActive(menuItem.path, this.props.routes)})}>
-                    <Link to={path}>{menuItem.name}</Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </nav>
-      </Sidebar>
+    <Motion defaultStyle={{left: 300}} style={styleTo}>
+      {interpolatingStyle =>
+      <div className="left-submenu" style={interpolatingStyle}>
+        <Sidebar className='secondary-navigation'>
+          <nav className="navigation--primary">
+            <div className="navigation">
+              <header>
+                <div className="header-navigation">
+                  <Link to={this.getParentRouteName(activeRoute.path)}><i
+                    className="fa fa-angle-left"></i><span>{this.getParentRouteName(activeRoute.path)}</span></Link>
+                </div>
+              </header>
+              <div className="header-content">{this.props.project.name}</div>
+              <ul className="nav-list">
+                {_.map(childRoutes, (menuItem: any) => {
+                  let path = buildPath(menuItem.path, this.props.params);
+                  return (!menuItem.showInNavigation) ? null : (
+                    <li key={menuItem.path}
+                        className={classNames('nav-list--item', {active: this.isActive(menuItem.path, this.props.routes)})}>
+                      <Link to={path}>{menuItem.name}</Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </nav>
+        </Sidebar>
+      </div>
+      }
+    </Motion>
     );
   }
 
@@ -163,7 +177,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                   if (this.isActive(route.path, this.props.routes)) {
                     isActive = true;
                     if (route.showChildrenAsSubmenu) {
-                      submenu = this.renderSubmenu(route);
+                      submenu = this.renderSubmenu(route, isActive);
                     }
                   }
                   if (route.path.split('/').length > 1 || !route.showInNavigation) {

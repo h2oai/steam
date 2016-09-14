@@ -2,10 +2,12 @@
 
 .page-header {
   font-family: "Oswald", sans-serif;
-  font-size: $text-large;
+  font-size: 44px;
   color: $brand-orange;
-  margin-bottom: $base-grid-unit / 2;
+  line-height: 1.1;
   text-transform: uppercase;
+
+  margin-bottom: $base-grid-unit / 2;
   display: flex;
   flex-wrap:wrap;
   justify-content: space-between;

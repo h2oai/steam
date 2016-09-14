@@ -54,7 +54,6 @@ export function uploadPackage(projectId: number, packageName: string, form) {
             body: data
           }).then(() => {
             if (isMain) {
-              debugger;
               Remote.setAttributesForPackage(projectId, packageName, JSON.stringify({main: formFiles[i].files[j].name}), (error) => {
                 if (error) {
                   dispatch(openNotification(NotificationType.Error, "Load Error", error, null));

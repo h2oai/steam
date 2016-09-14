@@ -13,5 +13,9 @@
   }
   &.header {
     border-bottom: $rule-solid-thick;
+    font-family: Oswald;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: $h2o-charcoal-grey;
   }
 }
