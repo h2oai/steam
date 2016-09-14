@@ -11,7 +11,7 @@ import BinomialModelTable from './BinomialModelTable';
 import MultinomialModelTable from './MultinomialModelTable';
 import RegressionModelTable from './RegressionModelTable';
 import ImportModelsModal from './ImportModelsModal';
-import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel, findModelsCount } from '../actions/leaderboard.actions';
+import { MAX_ITEMS, linkLabelWithModel, unlinkLabelFromModel, findModelsCount, deleteModel } from '../actions/leaderboard.actions';
 import '../styles/leaderboard.scss';
 import { fetchLabels } from '../../Configurations/actions/configuration.labels.action';
 import { bindActionCreators } from 'redux';
@@ -36,7 +36,8 @@ interface DispatchProps {
   fetchLabels: Function,
   linkLabelWithModel: Function,
   unlinkLabelFromModel: Function,
-  findModelsCount: Function
+  findModelsCount: Function,
+  deleteModel: Function
 }
 
 export class Leaderboard extends React.Component<Props & DispatchProps, any> {
@@ -164,17 +165,20 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
           <BinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                               items={this.props.items} projectId={this.props.projectId}
                               openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
-                              onChangeHandler={this.onChangeHandler}/> : null}
+                              onChangeHandler={this.onChangeHandler} deleteModel={this.props.deleteModel}
+                              fetchLeaderboard={() => { return this.props.fetchLeaderboard(this.props.projectId, this.props.modelCategory); }} /> : null}
         {this.props.modelCategory === 'multinomial' ?
           <MultinomialModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                                  items={this.props.items} projectId={this.props.projectId}
                                  openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
-                                 onChangeHandler={this.onChangeHandler}/> : null}
+                                 onChangeHandler={this.onChangeHandler} deleteModel={this.props.deleteModel}
+                                 fetchLeaderboard={() => { return this.props.fetchLeaderboard(this.props.projectId, this.props.modelCategory); }} /> : null}
         {this.props.modelCategory === 'regression' ?
           <RegressionModelTable onFilter={this.onFilter.bind(this)} sortCriteria={this.props.sortCriteria}
                                 items={this.props.items} projectId={this.props.projectId}
                                 openDeploy={this.openDeploy.bind(this)} labels={this.props.labels}
-                                onChangeHandler={this.onChangeHandler}/> : null}
+                                onChangeHandler={this.onChangeHandler} deleteModel={this.props.deleteModel}
+                                fetchLeaderboard={() => { return this.props.fetchLeaderboard(this.props.projectId, this.props.modelCategory); }} /> : null}
         <Pagination items={this.props.items} onPageBack={this.onPageBack.bind(this)}
                     onPageForward={this.onPageForward.bind(this)} currentPage={this.state.currentPage} count={this.props.count}></Pagination>
       </div>
@@ -196,7 +200,8 @@ function mapDispatchToProps(dispatch) {
     linkLabelWithModel: bindActionCreators(linkLabelWithModel, dispatch),
     unlinkLabelFromModel: bindActionCreators(unlinkLabelFromModel, dispatch),
     fetchPackages: bindActionCreators(fetchPackages, dispatch),
-    findModelsCount: bindActionCreators(findModelsCount, dispatch)
+    findModelsCount: bindActionCreators(findModelsCount, dispatch),
+    deleteModel: bindActionCreators(deleteModel, dispatch)
   };
 }
 

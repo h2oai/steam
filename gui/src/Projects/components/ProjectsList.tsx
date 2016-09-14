@@ -42,13 +42,15 @@ export default class ProjectsList extends React.Component<Props, any> {
                 <Panel className="project-card" key={i}>
                   <article>
                     <div className="project-metadata" onClick={this.openProject.bind(this, project.id)}>
-                      <header>{project.name}</header>
+                      <header className="link">{project.name}</header>
                       <div>{project.model_category}</div>
                       <div>{moment.unix(project.created_at).format('YYYY-MM-DD HH:mm')}</div>
                     </div>
                   </article>
                   { project.isDeleteInProgress ?
-                    <Progress message="Deleting project" />
+                    <div className="deleting-progress">
+                      <Progress message="Deleting project" />
+                    </div>
                     : <i className="fa fa-trash" aria-hidden="true" onClick={ () => this.deleteProject(project.id) }></i>
                   }
                 </Panel>

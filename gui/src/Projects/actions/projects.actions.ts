@@ -30,9 +30,11 @@ export function requestDeleteProject(projectId: number) {
     projectId
   };
 }
-export function receiveDeleteProject() {
+export function receiveDeleteProject(projectId: number, successful: boolean) {
   return {
-    type: RECEIVE_DELETE_PROJECT
+    type: RECEIVE_DELETE_PROJECT,
+    projectId,
+    successful
   };
 }
 
@@ -325,9 +327,11 @@ export function deleteProject(projectId: number) {
     Remote.deleteProject(projectId, (error) => {
       if (error) {
         dispatch(openNotification('error', error.toString(), null));
+        dispatch(receiveDeleteProject(projectId, false));
         return;
       }
-      dispatch(receiveDeleteProject());
+      dispatch(receiveDeleteProject(projectId, true));
+      dispatch(fetchProjects());
     });
-  }
+  };
 }

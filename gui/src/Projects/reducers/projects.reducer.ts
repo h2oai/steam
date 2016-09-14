@@ -66,6 +66,7 @@ export const projectsReducer = (state = initialState, action: any) => {
       });
     case REQUEST_DELETE_PROJECT:
       var toReturn: any = _.assign({}, state);
+      toReturn.availableProjects = toReturn.availableProjects.slice();
       for (let project of toReturn.availableProjects) {
         if (project.id === action.projectId) {
           project.isDeleteInProgress = true;
@@ -73,7 +74,18 @@ export const projectsReducer = (state = initialState, action: any) => {
       }
       return toReturn;
     case RECEIVE_DELETE_PROJECT:
-      return state;
+      if (!action.successful) {
+        var toReturn: any = _.assign({}, state);
+        toReturn.availableProjects = toReturn.availableProjects.slice();
+        for (let project of toReturn.availableProjects) {
+          if (project.id === action.projectId) {
+            project.isDeleteInProgress = false;
+          }
+        }
+        return toReturn;
+      } else {
+        return state;
+      }
     default:
       return state;
   }
