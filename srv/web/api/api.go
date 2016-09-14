@@ -388,12 +388,13 @@ type StartClusterOnYarn struct {
 	EngineId    int64
 	Size        int
 	Memory      string
-	Username    string
+	Keytab      string
 	_           int
 	ClusterId   int64
 }
 type StopClusterOnYarn struct {
 	ClusterId int64
+	Keytab    string
 }
 type GetCluster struct {
 	ClusterId int64

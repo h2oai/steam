@@ -113,7 +113,7 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 	return nil
 }
 
-func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, username, keytab string) (int64, error) {
+func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, keytab string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return 0, err
 	}
@@ -149,9 +149,9 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		0,
 		engineId,
 		int64(size),
-		applicationId,
+		appId,
 		memory,
-		username,
+		identity.Name,
 		out,
 	}
 
@@ -163,7 +163,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	return clusterId, nil
 }
 
-func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64) error {
+func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
@@ -182,13 +182,19 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64) error {
 	if cluster.State == data.StoppedState {
 		return fmt.Errorf("Cluster %d is already stopped", clusterId)
 	}
-
+	// Get cluster information
 	yarnCluster, err := s.ds.ReadYarnCluster(pz, clusterId)
 	if err != nil {
 		return err
 	}
+	//	Get username
+	identity, err := s.ds.ReadIdentity(pz, pz.Id())
+	if err != nil {
+		return err
+	}
 
-	if err := yarn.StopCloud(s.kerberosEnabled, yarnCluster.ApplicationId, yarnCluster.OutputDir, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
+	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnCluster.ApplicationId,
+		yarnCluster.OutputDir, identity.Name, keytab); err != nil {
 		return err
 	}
 
