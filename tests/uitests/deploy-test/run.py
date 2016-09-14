@@ -28,13 +28,17 @@ def deployOneTest(driver):
 			return False
 
 	except Exception as e:
-		print e
 		print "Failed to deploy a model"
 		return False
 	return True
 
 def deleteTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Stop Service']"))
+	except:
+		print "no service displayed on deployment page"
+		return False
 	try:
 		driver.find_element_by_xpath("//div[text()='Stop Service']").click()
 		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) == 0)
@@ -71,7 +75,6 @@ def projectDeployTest(driver):
 		tu.viewProject(driver, "deptest")
 		tu.goProjectDeployment(driver)
 	except Exception as e:
-		print e
 		print "Failed to setup project deploy test"
 		return False
 	try:
@@ -121,7 +124,6 @@ def multiDeployTest(driver):
 		tu.goHome(driver)
 		tu.goServices(driver)
 	except Exception as e:
-		print e
 		print "failed to setup multi deploy test"
 		return False
 	try:
@@ -139,7 +141,6 @@ def multiDeployTest(driver):
 				return False
 
 	except Exception as e:
-		print e
 		print "Failed to find deployments on services page"
 		return False	
 	return True
