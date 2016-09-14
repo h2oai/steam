@@ -74,27 +74,29 @@ func getUser(username string) (uint32, uint32, error) {
 	return uint32(uid64), uint32(gid64), nil
 }
 
-func yarnScan(r io.Reader, name string, appID, address, err *string) {
+func yarnScan(r io.Reader, name, username string, appID, address, err *string) {
 	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
 	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
 
 	in := bufio.NewScanner(r)
 	for in.Scan() {
-		log.Println(fmt.Sprintf("YARN CLUSTER %s %v", name, in.Text()))
+		if in.Text() != "" {
+			log.Println("YARN", name, username, in.Text())
 
-		if appID != nil {
-			if s := reNode.FindSubmatch(in.Bytes()); s != nil {
-				*address = string(s[1])
+			if appID != nil {
+				if s := reNode.FindSubmatch(in.Bytes()); s != nil {
+					*address = string(s[1])
+				}
 			}
-		}
-		if address != nil {
-			if s := reApID.FindSubmatch(in.Bytes()); s != nil {
-				*appID = string(s[1])
+			if address != nil {
+				if s := reApID.FindSubmatch(in.Bytes()); s != nil {
+					*appID = string(s[1])
+				}
 			}
-		}
-		if err != nil {
-			if strings.Contains(in.Text(), "ERROR") {
-				*err += in.Text() + "\n"
+			if err != nil {
+				if strings.Contains(in.Text(), "ERROR") {
+					*err += in.Text() + "\n"
+				}
 			}
 		}
 	}
@@ -151,8 +153,8 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	}
 
 	var appID, address, cmdErr string
-	go yarnScan(stdOut, name, &appID, &address, &cmdErr)
-	go yarnScan(stdOut, name, nil, nil, nil)
+	go yarnScan(stdOut, name, username, &appID, &address, &cmdErr)
+	go yarnScan(stdErr, name, username, nil, nil, nil)
 
 	if err := cmd.Wait(); err != nil {
 		// cleanDir(out)
@@ -192,8 +194,8 @@ func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
 		return err
 	}
 	defer stdErr.Close()
-	go yarnScan(stdOut, name, nil, nil, nil)
-	go yarnScan(stdErr, name, nil, nil, nil)
+	go yarnScan(stdOut, name, username, nil, nil, nil)
+	go yarnScan(stdErr, name, username, nil, nil, nil)
 
 	defer cleanDir(outdir)
 	return cmd.Run()
