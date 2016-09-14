@@ -465,10 +465,10 @@ export interface Service {
   unregisterCluster: (clusterId: number, go: (error: Error) => void) => void
   
   // Start a cluster using Yarn
-  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void) => void
+  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void) => void
   
   // Stop a cluster using Yarn
-  stopClusterOnYarn: (clusterId: number, go: (error: Error) => void) => void
+  stopClusterOnYarn: (clusterId: number, keytab: string, go: (error: Error) => void) => void
   
   // Get cluster details
   getCluster: (clusterId: number, go: (error: Error, cluster: Cluster) => void) => void
@@ -833,7 +833,7 @@ interface StartClusterOnYarnIn {
   
   memory: string
   
-  username: string
+  keytab: string
   
 }
 
@@ -846,6 +846,8 @@ interface StartClusterOnYarnOut {
 interface StopClusterOnYarnIn {
   
   cluster_id: number
+  
+  keytab: string
   
 }
 
@@ -2284,8 +2286,8 @@ export function unregisterCluster(clusterId: number, go: (error: Error) => void)
   });
 }
 
-export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void): void {
-  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, username: username };
+export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void): void {
+  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, keytab: keytab };
   Proxy.Call("StartClusterOnYarn", req, function(error, data) {
     if (error) {
       return go(error, null);
@@ -2296,8 +2298,8 @@ export function startClusterOnYarn(clusterName: string, engineId: number, size: 
   });
 }
 
-export function stopClusterOnYarn(clusterId: number, go: (error: Error) => void): void {
-  const req: StopClusterOnYarnIn = { cluster_id: clusterId };
+export function stopClusterOnYarn(clusterId: number, keytab: string, go: (error: Error) => void): void {
+  const req: StopClusterOnYarnIn = { cluster_id: clusterId, keytab: keytab };
   Proxy.Call("StopClusterOnYarn", req, function(error, data) {
     if (error) {
       return go(error);
