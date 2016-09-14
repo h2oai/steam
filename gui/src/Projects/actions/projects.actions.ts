@@ -21,6 +21,20 @@ export const REQUEST_DATASETS_FROM_CLUSTER = 'REQUEST_DATASETS_FROM_CLUSTER';
 export const RECEIVE_DATASETS_FROM_CLUSTER = 'RECEIVE_DATASETS_FROM_CLUSTER';
 export const RECEIVE_MODELS_FROM_PROJECT = 'RECEIVE_MODELS_FROM_PROJECT';
 export const RECEIVE_PROJECT = 'RECEIVE_PROJECT';
+export const REQUEST_DELETE_PROJECT = 'REQUEST_DELETE_PROJECT';
+export const RECEIVE_DELETE_PROJECT = 'RECEIVE_DELETE_PROJECT';
+
+export function requestDeleteProject(projectId: number) {
+  return {
+    type: REQUEST_DELETE_PROJECT,
+    projectId
+  };
+}
+export function receiveDeleteProject() {
+  return {
+    type: RECEIVE_DELETE_PROJECT
+  };
+}
 
 export function setCurrentProject(projectId) {
   return {
@@ -129,6 +143,9 @@ export function importModelFromClusterCompleted(model) {
 }
 
 export function receiveProjects(projects) {
+  for (let project of projects) {
+    project.isDeleteInProgress = false;
+  }
   return {
     type: RECEIVE_PROJECTS,
     projects
@@ -300,4 +317,17 @@ export function fetchProjects() {
       dispatch(receiveProjects(<Project[]> res));
     });
   };
+}
+
+export function deleteProject(projectId: number) {
+  return (dispatch) => {
+    dispatch(requestDeleteProject(projectId));
+    Remote.deleteProject(projectId, (error) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+      dispatch(receiveDeleteProject());
+    });
+  }
 }

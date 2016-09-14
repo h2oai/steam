@@ -7,11 +7,12 @@ import ProjectsList from './ProjectsList';
 import WelcomeSplashScreen from './WelcomeSplashScreen';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { fetchProjects } from '../actions/projects.actions';
+import { fetchProjects, deleteProject } from '../actions/projects.actions';
 import { Project } from '../../Proxy/Proxy';
 
 interface DispatchProps {
-  fetchProjects: Function
+  fetchProjects: Function,
+  deleteProject: Function
 }
 
 interface Props {
@@ -31,7 +32,7 @@ export class ProjectScreenStrategy extends React.Component<Props & DispatchProps
       return <WelcomeSplashScreen/>;
     }
     return (
-      <ProjectsList projects={this.props.projects}></ProjectsList>
+      <ProjectsList projects={this.props.projects} deleteProject={this.props.deleteProject}></ProjectsList>
     );
   }
 }
@@ -44,7 +45,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    fetchProjects: bindActionCreators(fetchProjects, dispatch)
+    fetchProjects: bindActionCreators(fetchProjects, dispatch),
+    deleteProject: bindActionCreators(deleteProject, dispatch)
   };
 }
 

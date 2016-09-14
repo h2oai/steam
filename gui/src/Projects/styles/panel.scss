@@ -7,6 +7,13 @@
   margin-bottom: $medium;
   display: flex;
   font-family: $font-text;
+
+  flex-direction: row;
+  justify-content: space-between;
+
+  .fa-trash {
+    margin: 10px;
+  }
   .panel-title {
     font-size: 1.5em;
     border-right: $rule-solid-thin;

@@ -4,7 +4,7 @@
 import * as _ from 'lodash';
 import {
   RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED, SET_CURRENT_PROJECT,
-  RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER, RECEIVE_MODELS_FROM_PROJECT, RECEIVE_PROJECT, REQUEST_CLUSTERS, REQUEST_MODELS
+  RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER, RECEIVE_MODELS_FROM_PROJECT, RECEIVE_PROJECT, REQUEST_CLUSTERS, REQUEST_MODELS, REQUEST_DELETE_PROJECT, RECEIVE_DELETE_PROJECT
 } from '../actions/projects.actions';
 
 let initialState = {
@@ -23,7 +23,7 @@ export const projectsReducer = (state = initialState, action: any) => {
           return state;
         }
       }
-      let toReturn: any =  _.assign({}, state);
+      var toReturn: any =  _.assign({}, state);
       toReturn.project = { id: action.projectId };
       return toReturn;
     case REQUEST_CLUSTERS:
@@ -64,6 +64,16 @@ export const projectsReducer = (state = initialState, action: any) => {
       return _.assign({}, state, {
         datasets: action.datasets
       });
+    case REQUEST_DELETE_PROJECT:
+      var toReturn: any = _.assign({}, state);
+      for (let project of toReturn.availableProjects) {
+        if (project.id === action.projectId) {
+          project.isDeleteInProgress = true;
+        }
+      }
+      return toReturn;
+    case RECEIVE_DELETE_PROJECT:
+      return state;
     default:
       return state;
   }
