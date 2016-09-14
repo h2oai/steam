@@ -116,10 +116,10 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     });
     let styleTo;
     console.log(shouldShow);
-    if(shouldShow) {
-      styleTo = { left: spring(72) }
+    if (shouldShow) {
+      styleTo = { left: spring(72) };
     } else {
-      styleTo = { left: spring(300) }
+      styleTo = { left: spring(300) };
     }
     return (
     <Motion defaultStyle={{left: 300}} style={styleTo}>
@@ -176,9 +176,9 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                   let isActive = false;
                   if (this.isActive(route.path, this.props.routes)) {
                     isActive = true;
-                    if (route.showChildrenAsSubmenu) {
-                      submenu = this.renderSubmenu(route, isActive);
-                    }
+                  }
+                  if (route.showChildrenAsSubmenu) {
+                    submenu = this.renderSubmenu(route, isActive);
                   }
                   if (route.path.split('/').length > 1 || !route.showInNavigation) {
                     return null;
