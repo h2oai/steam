@@ -267,8 +267,8 @@ type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
-	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, username string) (int64, error)
-	StopClusterOnYarn(pz az.Principal, clusterId int64) error
+	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, keytab string) (int64, error)
+	StopClusterOnYarn(pz az.Principal, clusterId int64, keytab string) error
 	GetCluster(pz az.Principal, clusterId int64) (*Cluster, error)
 	GetClusterOnYarn(pz az.Principal, clusterId int64) (*YarnCluster, error)
 	GetClusters(pz az.Principal, offset int64, limit int64) ([]*Cluster, error)
@@ -405,7 +405,7 @@ type StartClusterOnYarnIn struct {
 	EngineId    int64  `json:"engine_id"`
 	Size        int    `json:"size"`
 	Memory      string `json:"memory"`
-	Username    string `json:"username"`
+	Keytab      string `json:"keytab"`
 }
 
 type StartClusterOnYarnOut struct {
@@ -413,7 +413,8 @@ type StartClusterOnYarnOut struct {
 }
 
 type StopClusterOnYarnIn struct {
-	ClusterId int64 `json:"cluster_id"`
+	ClusterId int64  `json:"cluster_id"`
+	Keytab    string `json:"keytab"`
 }
 
 type StopClusterOnYarnOut struct {
@@ -1364,8 +1365,8 @@ func (this *Remote) UnregisterCluster(clusterId int64) error {
 	return nil
 }
 
-func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size int, memory string, username string) (int64, error) {
-	in := StartClusterOnYarnIn{clusterName, engineId, size, memory, username}
+func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size int, memory string, keytab string) (int64, error) {
+	in := StartClusterOnYarnIn{clusterName, engineId, size, memory, keytab}
 	var out StartClusterOnYarnOut
 	err := this.Proc.Call("StartClusterOnYarn", &in, &out)
 	if err != nil {
@@ -1374,8 +1375,8 @@ func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size 
 	return out.ClusterId, nil
 }
 
-func (this *Remote) StopClusterOnYarn(clusterId int64) error {
-	in := StopClusterOnYarnIn{clusterId}
+func (this *Remote) StopClusterOnYarn(clusterId int64, keytab string) error {
+	in := StopClusterOnYarnIn{clusterId, keytab}
 	var out StopClusterOnYarnOut
 	err := this.Proc.Call("StopClusterOnYarn", &in, &out)
 	if err != nil {
@@ -2561,7 +2562,7 @@ func (this *Impl) StartClusterOnYarn(r *http.Request, in *StartClusterOnYarnIn, 
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.StartClusterOnYarn(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Username)
+	val0, err := this.Service.StartClusterOnYarn(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Keytab)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
@@ -2596,7 +2597,7 @@ func (this *Impl) StopClusterOnYarn(r *http.Request, in *StopClusterOnYarnIn, ou
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	err := this.Service.StopClusterOnYarn(pz, in.ClusterId)
+	err := this.Service.StopClusterOnYarn(pz, in.ClusterId, in.Keytab)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err

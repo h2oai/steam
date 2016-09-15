@@ -2387,7 +2387,7 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 	var clusterId int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		var yarnClusterId int64
-		if _, err := tx.Exec(`
+		if res, err := tx.Exec(`
 			INSERT INTO
 				cluster_yarn
 				(engine_id, size, application_id, memory, username, output_dir)
@@ -2402,6 +2402,11 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 			cluster.OutputDir,
 		); err != nil {
 			return err
+		} else {
+			yarnClusterId, err = res.LastInsertId()
+			if err != nil {
+				return err
+			}
 		}
 
 		res, err := tx.Exec(`
