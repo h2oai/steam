@@ -114,17 +114,18 @@ def superShareTest():
 		tu.endtest(d)
 	return res[0] and res[1]
 
-
 def userShareTest():
 	res = [True, True]
-	wg = tu.createWorkgroup("usertest", "testin user share")	
-	rid = tu.createRole("userole", "comfy af", [x for x in range(23) if x > 0])
 	uid = tu.createIdentity("setup", "setup")
+	rid = tu.createRole("userole", "comfy af", [x for x in range(23) if x > 0])
 	tu.assignRole(uid, rid)
-	tu.assignWorkgroup(uid, wg)
-	tu.shareEntity(5, 1, wg, 'edit')
-	tu.shareEntity(2, wg, wg, 'edit')
 	tu.cliLogin("setup", "setup")
+	wg = tu.createWorkgroup("clusterwg", "for sharing the cluster")
+	tu.assignWorkgroup(uid, wg)
+	tu.cliLogin("superuser", "superuser")
+	tu.shareEntity(5, 1, wg, 'edit')
+	tu.cliLogin("setup", "setup")
+	wg = tu.createWorkgroup("usertest", "testin user share")
 	d = tu.testAs("setup", "setup")
 	try:
 		wait = WebDriverWait(d, timeout=5, poll_frequency=0.2)
@@ -138,21 +139,22 @@ def userShareTest():
 		d.find_element_by_xpath("//button[text()='Create Project']").click()
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='gradi']"))
 	except Exception as e:
-		print e
 		print "Failed to setup user share test"
 		return False
+	finally:
+		tu.endtest(d)
+
 	tu.shareEntity(6, 2, wg, 'edit') 
 	tu.shareEntity(9, 2, wg, 'edit')
 
-	tu.cliLogin("superuser", "superuser")
 	uid = tu.createIdentity("permless", "permless")
+	tu.cliLogin("superuser", "superuser")
 	tu.assignWorkgroup(uid, wg)
 	d = tu.testAs("permless", "permless")
 	try:
 		#permissionless test
 		tu.goProjects(d)
-		time.sleep(2)
-		if tu.viewProject(d, "supertest"):
+		if tu.viewProject(d, "averagetest"):
 			res[0] = False
 			print "User with no permissions is able to view entities shared by non-superuser"
 	except:
@@ -178,8 +180,6 @@ def userShareTest():
 		tu.endtest(d)
 	
 	return res[0] and res[1]
-
-
 
 def main():
 	failcount = 0
