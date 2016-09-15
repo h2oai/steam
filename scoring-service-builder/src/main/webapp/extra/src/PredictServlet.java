@@ -63,6 +63,12 @@ public class PredictServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     long start = System.nanoTime();
     RowData row = new RowData();
+    String pathInfo = request.getPathInfo();
+    System.out.println("pathInfo = " + pathInfo);
+    String modelName = null;
+    if (pathInfo != null) {
+      modelName = pathInfo.replace("/", "");
+    }
     if (transform == null) { // no jar transformation
       fillRowDataFromHttpRequest(request, row);
     }
@@ -82,7 +88,11 @@ public class PredictServlet extends HttpServlet {
         throw new Exception("No predictor model");
 
       // we have a model loaded, do the prediction
-      AbstractPrediction pr = ServletUtil.predict(row);
+      AbstractPrediction pr = null;
+      if (modelName == null)
+        pr = ServletUtil.predict(row);
+      else
+        pr = ServletUtil.predictModel(modelName, row);
 
       // assemble json result
       String prJson = gson.toJson(pr);

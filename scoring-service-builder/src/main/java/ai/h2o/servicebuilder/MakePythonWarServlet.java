@@ -125,7 +125,7 @@ public class MakePythonWarServlet extends HttpServlet {
       FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "fonts"), tmpDir);
 
       // change the class name in the predictor template file to the predictor we have
-      InstantiateJavaTemplateFile(tmpDir, true, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+      InstantiateJavaTemplateFile(tmpDir, null, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java"); // TODO must be fixed!!!
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictPythonServlet.java", "PredictPythonServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");

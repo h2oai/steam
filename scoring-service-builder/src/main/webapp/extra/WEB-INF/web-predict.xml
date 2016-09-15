@@ -21,9 +21,15 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         <servlet-class>PingServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>default</servlet-name>
+        <servlet-class>ServletUtil</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>Predict</servlet-name>
-        <url-pattern>/predict</url-pattern>
+        <url-pattern>/predict/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Info</servlet-name>

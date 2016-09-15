@@ -1,40 +1,128 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Type;
-import java.util.HashMap;
-//import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
-
+import hex.genmodel.*;
 import hex.genmodel.easy.*;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.prediction.AbstractPrediction;
-import hex.genmodel.easy.prediction.BinomialModelPrediction;
-import hex.genmodel.easy.prediction.MultinomialModelPrediction;
-import hex.genmodel.*;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
 
-class ServletUtil {
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+//import java.util.concurrent.ConcurrentHashMap;
+
+class ServletUtil extends HttpServlet {
   private final static Logger logger = Logging.getLogger(ServletUtil.class);
 
-  // load model
-  static String modelName = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-//  static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-  static GenModel rawModel = null;
+  private File servletPath = null;
+  private String servletDir = null;
 
-  static {
-    if (REPLACE_THIS_WITH_POJO_BOOLEAN)
-      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-    else
-      rawModel = RawModel.load("REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME" + ".zip");
-    if (rawModel == null)
-      logger.error("Can't instantiate model");
+  public void init(ServletConfig servletConfig) throws ServletException {
+    super.init(servletConfig);
+    try {
+      servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
+      servletDir = servletPath.getAbsolutePath();
+      logger.debug("servletPath {}  servlerDir {}", servletPath, servletDir);
+
+    }
+    catch (MalformedURLException e) {
+      logger.error("init failed", e);
+    }
+    logger.info("ServletUtil init");
   }
 
-  public static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
-    // load preprocessing
+
+  // load model
+//  static String modelName = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
+//  static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+  static GenModel rawModel = null;
+  static String modelName = null;
+  public static EasyPredictModelWrapper model = null;
+  public static Map<String, EasyPredictModelWrapper> models = new HashMap<String, EasyPredictModelWrapper>();
+
+//  static void addModel(String modelName, GenModel rawModel) {
+//    model = new EasyPredictModelWrapper(rawModel);
+////        new EasyPredictModelWrapper(
+////            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+////        );
+//    models.put(modelName, model);
+//    logger.info("added model {}  new size {}", modelName, models.size());
+//  }
+
+  static void addPojoModel(String modelName, GenModel rawModel) {
+    model = new EasyPredictModelWrapper(rawModel);
+//        new EasyPredictModelWrapper(
+//            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+//        );
+    models.put(modelName, model);
+    logger.info("added model {}  new size {}", modelName, models.size());
+  }
+
+  static void addRawModel(String modelName, GenModel rawModel) {
+    model = new EasyPredictModelWrapper(rawModel);
+//        new EasyPredictModelWrapper(
+//            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+//        );
+    models.put(modelName, model);
+    logger.info("added model {}  new size {}", modelName, models.size());
+  }
+
+  static {
+    try {
+      List<String> models = FileUtils.readLines(new File("modelnames.txt"));
+    }
+    catch (IOException e) {
+      logger.error("IOException ", e);
+    }
+
+//    try {
+//      rawModel = REPLACE_THIS_WITH_MODEL;
+//      REPLACE_THIS_WITH_MODEL;
+//    }
+//    catch (IOException e) {
+//      logger.error("error ", e);
+//    }
+//    logger.info("instantiated model REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME  REPLACE_THIS_WITH_POJO_BOOLEAN");
+//    if (!REPLACE_THIS_WITH_POJO_BOOLEAN) {
+//      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
+//      logger.info("instantiated model REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME");
+//    }
+//    else {
+//      String zipfile = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME" + ".zip";
+//      rawModel = RawModel.load(zipfile);
+//      logger.info("loaded model from {}", zipfile);
+//    }
+//    if (rawModel == null)
+//      logger.error("Can't instantiate model");
+//    else {
+//      model =
+//          new EasyPredictModelWrapper(
+//              new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+//          );
+//      models.put(modelName, model);
+//      logger.info("added model {}  new size {}", modelName, models.size());
+//    }
+  }
+
+
+//  model = new EasyPredictModelWrapper(rawModel);
+
+//  model =
+//      new EasyPredictModelWrapper(
+//          new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+//      );
+
+  // load preprocessing
   public static Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
 
   public static final Type MAP_TYPE = new TypeToken<HashMap<String, Object>>(){}.getType();
@@ -122,6 +210,33 @@ class ServletUtil {
     logger.debug("Prediction time {}", ServletUtil.predictionTimes);
     return pr;
   }
+
+  public static synchronized AbstractPrediction predictModel(String modelName, RowData row) throws PredictException {
+    long start = System.nanoTime();
+    if (models.size() == 0)
+      throw new PredictException("no models");
+    EasyPredictModelWrapper mod = models.get(modelName);
+    if (mod == null)
+      throw new PredictException("unknown model " + modelName);
+    AbstractPrediction pr = mod.predict(row);
+    long done = System.nanoTime();
+    ServletUtil.lastTime = System.currentTimeMillis();
+    ServletUtil.predictionTimes.add(start, done);
+
+//    String label = null;
+//    if (pr instanceof BinomialModelPrediction) {
+//      label = ((BinomialModelPrediction) pr).label;
+//    } else if (pr instanceof MultinomialModelPrediction) {
+//      label = ((MultinomialModelPrediction) pr).label;
+//    }
+//    if (label != null) {
+//      ServletUtil.incrementOutputLabel(label);
+//    }
+
+    logger.debug("Prediction time {}", ServletUtil.predictionTimes);
+    return pr;
+  }
+
 
 
 //  public static Map<String, Integer> outputLabels = new ConcurrentHashMap<String, Integer>();

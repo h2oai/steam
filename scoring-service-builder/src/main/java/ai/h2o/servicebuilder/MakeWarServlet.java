@@ -13,8 +13,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -76,12 +78,15 @@ public class MakeWarServlet extends HttpServlet {
       String rawfile = null;
       String predictorClassName = null;
       String transformerClassName = null;
+      ArrayList<String> pojos = new ArrayList<String>();
+      ArrayList<String> rawfiles = new ArrayList<String>();
       for (FileItem i : items) {
         String field = i.getFieldName();
         String filename = i.getName();
         if (filename != null && filename.length() > 0) { // file fields
           if (field.equals("pojo")) {
             pojofile = filename;
+            pojos.add(pojofile);
             predictorClassName = filename.replace(".java", "");
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
           }
@@ -91,11 +96,12 @@ public class MakeWarServlet extends HttpServlet {
           }
           if (field.equals("prejar")) {
             prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
-            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(webInfDir, filename));
           }
 
           if (field.equals("raw")) { // a raw model zip file
             rawfile = filename;
+            rawfiles.add(rawfile);
             predictorClassName = filename.replace(".zip", "");
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
           }
@@ -118,8 +124,10 @@ public class MakeWarServlet extends HttpServlet {
 
       if (pojofile != null) {
         // Compile the pojo
-        runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
-            "-cp", jarfile, "-d", outDir.getPath(), pojofile), "Compilation of pojo failed");
+        runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION,
+            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile, "-d", outDir.getPath(), pojofile),
+            "Compilation of pojo failed");
+        logger.info("compiled pojo {}", pojofile);
       }
       else if (rawfile != null) {
         // load the file from the
@@ -158,7 +166,39 @@ public class MakeWarServlet extends HttpServlet {
         replaceTransform = "null";
       else
         replaceTransform = "new " + transformerClassName + "()";
-      InstantiateJavaTemplateFile(tmpDir, pojofile != null, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+//      String modelCode = null;
+
+      System.setProperty("user.dir", extraPath); //TODO....
+      String allcode = "models.clear();\n";
+//      int i = 0;
+//      if (pojofile != null) {
+//        FileUtils.writeLines(new File(servletPath, "modelnames.txt"), pojos);
+//        for (String s: pojos) {
+//          String modelName = s.replace(".java", "");
+//          String modelCode = "new " + modelName + "()";
+//          allcode += "addModel(\"" + modelName + "\", " + modelCode + ");\n";
+//          i += 1;
+//          logger.info("added pojo model {}  {}", modelName, i);
+//        }
+//      }
+//      else if (rawfile != null) {
+//        FileUtils.writeLines(new File(servletPath, "modelnames.txt"), rawfiles);
+//        String prefix =  webInfPath + File.separator;
+//        for (String s: rawfiles) {
+//          String modelName = s.replace(".zip", "");
+//          String modelCode = "RawModel.load(\"" + prefix + s + "\")";
+//          String tryCode = "try { " + modelCode + " } catch (IOException e) { logger.error(\"error {}\", e); }";
+//          allcode += "addModel(\"" + modelName + "\", " + tryCode + ");\n";
+//          i += 1;
+//          logger.info("added raw model {}  {}", modelName, i);
+//        }
+//      }
+      System.out.println(allcode);
+
+//      modelCode += "; modelName = \"" + predictorClassName + "\"";
+//      modelCode = "addModel(" + predictorClassName + ", " + modelCode + ")";
+      InstantiateJavaTemplateFile(tmpDir, allcode, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictServlet.java", "PredictServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
