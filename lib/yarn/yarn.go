@@ -2,6 +2,7 @@ package yarn
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -22,8 +23,8 @@ func kInit(username, keytab string, uid, gid uint32) error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 
-	if err := cmd.Run(); err != nil {
-		return errors.Wrap(err, "failed executing kinit")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return errors.Wrapf(err, "failed executing kinit: %v", string(out))
 	}
 
 	return nil
@@ -49,11 +50,13 @@ func randStr(strlen int) string {
 	return string(r)
 }
 
-func cleanDir(dir string) {
-	// log.Printf("Removing empty directory %s", dir)
-	cmdClean := exec.Command("hadoop", "fs", "-rmdir", dir)
-	if out, err := cmdClean.Output(); err != nil {
-		panic(fmt.Sprintf("failed to remove outdir: %v", string(out)))
+func cleanDir(dir string, uid, gid uint32) {
+	cmd := exec.Command("hadoop", "fs", "-rmdir", dir)
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+
+	if out, err := cmd.Output(); err != nil {
+		log.Printf("failed to remove outdir %s: %v", dir, string(out))
 	}
 }
 
@@ -74,7 +77,7 @@ func getUser(username string) (uint32, uint32, error) {
 	return uint32(uid64), uint32(gid64), nil
 }
 
-func yarnScan(r io.Reader, name, username string, appID, address, err *string) {
+func yarnScan(r io.Reader, name, username string, appID, address, err *string, cancel context.CancelFunc) {
 	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
 	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
 
@@ -96,6 +99,10 @@ func yarnScan(r io.Reader, name, username string, appID, address, err *string) {
 			if err != nil {
 				if strings.Contains(in.Text(), "ERROR") {
 					*err += in.Text() + "\n"
+				}
+				if strings.Contains(in.Text(), "Exception") {
+					*err += in.Text() + "\n"
+					cancel()
 				}
 			}
 		}
@@ -132,11 +139,12 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		"-disown",
 	}
 
-	// Execute command as user
-	cmd := exec.Command("hadoop", cmdArgs...)
+	// Create hadoop command with piping and user impersonation
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "hadoop", cmdArgs...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
-
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
 		return "", "", "", err
@@ -151,14 +159,13 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	if err := cmd.Start(); err != nil {
 		return "", "", "", err
 	}
-
+	// Start command, log, and wait
 	var appID, address, cmdErr string
-	go yarnScan(stdOut, name, username, &appID, &address, &cmdErr)
-	go yarnScan(stdErr, name, username, nil, nil, nil)
+	go yarnScan(stdOut, name, username, &appID, &address, &cmdErr, cancel)
+	go yarnScan(stdErr, name, username, nil, nil, &cmdErr, cancel)
 
 	if err := cmd.Wait(); err != nil {
-		// cleanDir(out)
-		// recover()
+		defer cleanDir(out, uid, gid)
 		return "", "", "", errors.Wrapf(err, "failed waiting on exec: %v", cmdErr)
 	}
 
@@ -181,7 +188,9 @@ func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
 		defer kDest(uid, gid)
 	}
 
-	cmd := exec.Command("hadoop", "job", "-kill", "job_"+id)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "hadoop", "job", "-kill", "job_"+id)
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 	stdOut, err := cmd.StdoutPipe()
@@ -194,9 +203,14 @@ func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
 		return err
 	}
 	defer stdErr.Close()
-	go yarnScan(stdOut, name, username, nil, nil, nil)
-	go yarnScan(stdErr, name, username, nil, nil, nil)
+	var cmdErr string
+	go yarnScan(stdOut, name, username, nil, nil, &cmdErr, cancel)
+	go yarnScan(stdErr, name, username, nil, nil, &cmdErr, cancel)
 
-	defer cleanDir(outdir)
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return errors.Wrapf(err, "failed running command: %v", cmdErr)
+	}
+
+	cleanDir(outdir, uid, gid)
+	return nil
 }
