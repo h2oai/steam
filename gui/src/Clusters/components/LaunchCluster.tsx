@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { startYarnCluster, uploadEngine } from '../actions/clusters.actions';
+import { startYarnCluster, uploadEngine, getEngines } from '../actions/clusters.actions';
 import { bindActionCreators } from 'redux';
 import Cell from '../../Projects/components/Cell';
 import Row from '../../Projects/components/Row';
@@ -119,7 +119,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     uploadEngine: bindActionCreators(uploadEngine, dispatch),
-    startYarnCluster: bindActionCreators(startYarnCluster, dispatch)
+    startYarnCluster: bindActionCreators(startYarnCluster, dispatch),
+    getEngines: bindActionCreators(getEngines, dispatch)
   };
 }
 

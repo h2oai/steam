@@ -5,6 +5,15 @@
 import * as Remote from '../../Proxy/Proxy';
 import { openNotification } from '../../App/actions/notification.actions';
 
+export const RECEIVE_ENGINES = 'RECEIVE_ENGINES';
+
+export function receiveEngines(engines) {
+  return {
+    type: RECEIVE_ENGINES,
+    engines
+  };
+}
+
 export function uploadEngine(form) {
   return (dispatch) => {
     let file = form.querySelectorAll('input[type="file"]')[0];
@@ -15,9 +24,7 @@ export function uploadEngine(form) {
       method: 'post',
       body: data
     }).then((res) => {
-      Remote.getEngines((error, engines) => {
-        console.log(engines);
-      });
+      dispatch(getEngines());
     });
   };
 }
@@ -31,6 +38,18 @@ export function startYarnCluster(clusterName, engineId, size, memory) {
         return;
       }
       dispatch(openNotification('success', 'Cluster Launched', null));
+    });
+  };
+}
+
+export function getEngines() {
+  return (dispatch) => {
+    Remote.getEngines((error, engines) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+      dispatch(receiveEngines(engines));
     });
   };
 }
