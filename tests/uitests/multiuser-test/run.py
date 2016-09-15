@@ -78,17 +78,23 @@ def superShareTest():
 	finally:
 		tu.endtest(d)
 	
+	tu.shareEntity(6, 1, wg, 'edit') 
+	tu.shareEntity(9, 1, wg, 'edit')
+
 	uid = tu.createIdentity("noperm", "noperm")
 	tu.assignWorkgroup(uid, wg)
 	d = tu.testAs("noperm", "noperm")
 	try:
 		#permissionless test
-		i = 1
+		tu.goProjects(d)
+		if tu.viewProject(d, "supertest"):
+			res[0] = False
+			print "User with no permissions is able to view entities shared by superuser"
 	except:
-		res[0] = False
-		print "User with no permissions is able to view entities shared by superuser"
+		res[0] = True
 	finally:
 		tu.endtest(d)
+
 	uid = tu.createIdentity("yaperm", "yaperm")
 	rid = tu.createRole("permissed", "for testing supershare", [9, 10, 11, 12, 17, 18, 19, 20])
 	tu.assignWorkgroup(uid, wg)
@@ -96,7 +102,11 @@ def superShareTest():
 	d = tu.testAs("yaperm", "yaperm")
 	try:
 		#permissable test
-		i = 1
+		tu.goProjects(d)
+		time.sleep(2)
+		if not tu.viewProject(d, "supertest"):
+			res[0] = False
+			print "User could not see project shared by superuser"
 	except:
 		res[1] = False
 		print "User with appropriate permissions is not able to view entities shared by superuser"
@@ -107,18 +117,46 @@ def superShareTest():
 
 def userShareTest():
 	res = [True, True]
-	wg = tu.createWorkgroup("usertest", "testin user share")
-	
-	
+	wg = tu.createWorkgroup("usertest", "testin user share")	
+	rid = tu.createRole("userole", "comfy af", [x for x in range(23) if x > 0])
+	uid = tu.createIdentity("setup", "setup")
+	tu.assignRole(uid, rid)
+	tu.assignWorkgroup(uid, wg)
+	tu.shareEntity(5, 1, wg, 'edit')
+	tu.shareEntity(2, wg, wg, 'edit')
+	tu.cliLogin("setup", "setup")
+	d = tu.testAs("setup", "setup")
+	try:
+		wait = WebDriverWait(d, timeout=5, poll_frequency=0.2)
+		tu.newProject(d)
+		time.sleep(2)
+		d.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectDataframe(d, "bank_full.hex")
+		tu.selectModelCategory(d, "Regression")
+		tu.selectModel(d, "gradi")
+		d.find_element_by_xpath("//div[@class='name-project']//input").send_keys("averagetest")
+		d.find_element_by_xpath("//button[text()='Create Project']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='gradi']"))
+	except Exception as e:
+		print e
+		print "Failed to setup user share test"
+		return False
+	tu.shareEntity(6, 2, wg, 'edit') 
+	tu.shareEntity(9, 2, wg, 'edit')
+
+	tu.cliLogin("superuser", "superuser")
 	uid = tu.createIdentity("permless", "permless")
 	tu.assignWorkgroup(uid, wg)
 	d = tu.testAs("permless", "permless")
 	try:
 		#permissionless test
-		i = 1
+		tu.goProjects(d)
+		time.sleep(2)
+		if tu.viewProject(d, "supertest"):
+			res[0] = False
+			print "User with no permissions is able to view entities shared by non-superuser"
 	except:
-		res[0] = False
-		print "User with no permissions is able to view entities shared by non-superuser"
+		res[0] = True
 	finally:
 		tu.endtest(d)
 
@@ -129,7 +167,10 @@ def userShareTest():
 	d = tu.testAs("useperm", "useperm")
 	try:
 		#permissable test
-		i = 1
+		tu.goProjects(d)
+		if not tu.viewProject(d, "averagetest"):
+			res[0] = False
+			print "User could not see project shared by non-superuser"
 	except:
 		res[1] = False
 		print "User with appropriate permissions is not able to view entities shared by non-superuser"
