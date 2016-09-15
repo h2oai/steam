@@ -27,6 +27,7 @@ const (
 	WwwDir         = "www"
 	AssetsDir      = "assets"
 	DbDir          = "db"
+	KTDir          = "kt"
 	ProjectDir     = "project"
 	ModelDir       = "model"
 	LibDir         = "lib"
@@ -35,6 +36,7 @@ const (
 	LogDir         = "log"
 	DirPerm        = 0766
 	FilePerm       = 0666
+	KTPerm         = 0600
 	PackExt        = ".steam"
 	KindEngine     = "engine"
 	KindFile       = "file"

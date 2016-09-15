@@ -44,6 +44,7 @@ sbin/start-yarn.sh
 /etc/init.d/iptables stop
 
 # Setup Go
+yum groupinstall -y 'Development Tools'
 wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.7.1.linux-amd64.tar.gz
 
@@ -60,5 +61,5 @@ tar -C /usr/local -xzf go1.7.1.linux-amd64.tar.gz
 # chmod 755 /home/vagrant
 # sudo -u postgres createuser steam
 
-echo export GOPATH=/home/user/Go >> /home/vagrant/.bashrc
+echo export GOPATH=/home/vagrant/Go >> /home/vagrant/.bashrc
 echo export PATH=$PATH:/usr/local/hadoop/bin:/usr/local/go/bin:$GOPATH/bin >> /home/vagrant/.bashrc

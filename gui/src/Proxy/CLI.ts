@@ -34,13 +34,13 @@ export function unregisterCluster(clusterId: number): void {
   Proxy.Call("UnregisterCluster", req, print);
 }
 
-export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, username: string): void {
-  const req: any = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, username: username };
+export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, keytab: string): void {
+  const req: any = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, keytab: keytab };
   Proxy.Call("StartClusterOnYarn", req, print);
 }
 
-export function stopClusterOnYarn(clusterId: number): void {
-  const req: any = { cluster_id: clusterId };
+export function stopClusterOnYarn(clusterId: number, keytab: string): void {
+  const req: any = { cluster_id: clusterId, keytab: keytab };
   Proxy.Call("StopClusterOnYarn", req, print);
 }
 

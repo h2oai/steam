@@ -14,32 +14,39 @@ import '../styles/launchcluster.scss';
 import { NumericInput } from 'h2oUIKit';
 
 interface Props {
-
+  engines: any
 }
 
 interface DispatchProps {
   startYarnCluster: Function,
-  uploadEngine: Function
+  uploadEngine: Function,
+  getEngines: Function
 }
 
 export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   refs: {
     [key: string]: (Element);
-    engineForm: (HTMLFormElement)
+    engine: (HTMLInputElement)
     clusterForm: (HTMLFormElement)
+    engineList: (HTMLSelectElement)
   };
 
   constructor() {
     super();
     this.state = {
-      memorySizeUnit: 'm'
+      memorySizeUnit: 'm',
+      engineId: null
     };
+  }
+
+  componentDidMount() {
+    this.props.getEngines();
   }
 
   startCluster(event) {
     event.preventDefault();
     let clusterName = (this.refs.clusterForm.querySelector('input[name="name"]') as HTMLInputElement).value;
-    let engineId = (this.refs.clusterForm.querySelector('input[name="engineId"]') as HTMLInputElement).value;
+    let engineId = this.state.engineId;
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
     this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + this.state.memorySizeUnit);
@@ -47,8 +54,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 
   uploadEngine(event) {
     event.preventDefault();
-    console.log(this.refs.engineForm);
-    this.props.uploadEngine(this.refs.engineForm);
+    this.props.uploadEngine(this.refs.engine);
   }
 
   onChangeMemory(event) {
@@ -57,7 +63,14 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     });
   }
 
+  onChangeEngine(event) {
+    this.setState({
+      engineId: event.target.value
+    });
+  }
+
   render() {
+    console.log(this.props);
     return (
       <div className="launch-cluster">
         <PageHeader>LAUNCH NEW CLUSTER</PageHeader>
@@ -77,11 +90,14 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 ENGINE ID
               </Cell>
               <Cell>
-                <form ref="engineForm">
-                  <input type="file" name="engine"/>
-                  <button className="default" onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
-                </form>
-                <NumericInput name="engineId" min="1"/>
+                <select onChange={this.onChangeEngine.bind(this)}>
+                  <option></option>
+                  {this.props.engines.map((engine, i) => {
+                    return <option key={i} value={engine.id}>{engine.name}</option>;
+                  })}
+                </select>
+                <input ref="engine" type="file" name="engine"/>
+                <button className="default" onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
               </Cell>
             </Row>
             <Row>
@@ -113,7 +129,10 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 }
 
 function mapStateToProps(state) {
-  return {};
+  console.log(state);
+  return {
+    engines: state.clusters.engines
+  };
 }
 
 function mapDispatchToProps(dispatch) {
