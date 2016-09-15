@@ -23,6 +23,7 @@ import (
 	"github.com/h2oai/steamY/srv/compiler"
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
+	"github.com/pkg/errors"
 )
 
 type Service struct {
@@ -138,7 +139,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	}
 
 	// FIXME check if file exists
-	keytabPath := path.Join(fs.KTDir, keytab)
+	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
 
 	appId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, identity.Name, keytabPath)
 	if err != nil {
@@ -171,7 +172,7 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 	// Cluster should exist
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed reading cluster")
 	}
 
 	if cluster.TypeId != s.ds.ClusterTypes.Yarn {
@@ -185,16 +186,18 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 	// Get cluster information
 	yarnCluster, err := s.ds.ReadYarnCluster(pz, clusterId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed reading yarn cluster")
 	}
 	//	Get username
 	identity, err := s.ds.ReadIdentity(pz, pz.Id())
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed reading identity")
 	}
 
+	// FIXME check if file exists
+	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
 	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnCluster.ApplicationId,
-		yarnCluster.OutputDir, identity.Name, keytab); err != nil {
+		yarnCluster.OutputDir, identity.Name, keytabPath); err != nil {
 		return err
 	}
 
