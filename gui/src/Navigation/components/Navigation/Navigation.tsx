@@ -115,7 +115,6 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
       return (route.path.indexOf(activeRoute.path) !== -1 && route.path !== activeRoute.path);
     });
     let styleTo;
-    console.log(shouldShow);
     if (shouldShow) {
       styleTo = { left: spring(72) };
     } else {

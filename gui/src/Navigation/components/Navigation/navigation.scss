@@ -71,8 +71,9 @@ $navigation-width: $base-grid-unit * 5;
 .secondary-navigation {
   background: $brand-dark-2;
   .nav-list--item {
-    position: relative;
-    padding: 0 $small;
+    margin-left: 24px;
+    /*position: relative;
+    padding: 0 $small;*/
     &.active {
       &::before {
         border-right-color: $brand-white;
@@ -151,7 +152,11 @@ $navigation-width: $base-grid-unit * 5;
   white-space: nowrap;
   text-overflow: ellipsis;
   color: $brand-dark-3;
-  padding: $small $small 0 $small;
+  padding-top: 20px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  margin-left: 24px;
 }
 .navigation {
   height: 100%;
@@ -171,7 +176,8 @@ $navigation-width: $base-grid-unit * 5;
       justify-content: flex-start;
       align-items: center;
       display: flex;
-      padding: 0 $small;
+      padding: 0px;
+      margin-left: 24px;
       i {
         margin-right: 5px;
       }

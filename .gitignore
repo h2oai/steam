@@ -64,3 +64,4 @@ coverage.out
 /demo/_book
 /demo/node_modules
 
+/npm-debug.log
