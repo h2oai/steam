@@ -60,6 +60,7 @@ ssb:
 
 db:
 	sqlite3 steam.db < $(SCRIPTS)/database/create-schema.sql
+	mkdir -p $(DB)
 	mv steam.db $(DB)
 
 launcher:
