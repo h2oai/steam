@@ -3,6 +3,7 @@ import time
 import testutil as tu
 import subprocess as sp
 import re
+from selenium.webdriver.support.wait import WebDriverWait
 """
 Perm id		Permission		Index
 ============================================
@@ -30,6 +31,8 @@ Perm id		Permission		Index
 22			V service		20
 """
 
+
+"""
 _steampath = "./steam"
 
 def createRole(role, desc, perm):
@@ -47,15 +50,33 @@ def createIdentity(name, pw):
 	return int(re.search(r'\d+', ret).group())
 
 def assignRole(iden, role):
-	sp.Popen("{0} link identity --with-role --identity-id={1} --role-id={2}"\
-		.format(_steampath, iden, role), shell=True).communicate()
+	x = sp.check_output("{0} link identity --with-role --identity-id={1} --role-id={2}"\
+		.format(_steampath, iden, role), shell=True)
+"""
 
+def readUsersTest():
+	d = tu.newtest()
+	wait = WebDriverWait(d, timeout=5, poll_frequency=0.2)	
+	iden = [("joe", "shmoe"), ("jerry", "fairy"), ("Rick", "kimmy")]
+	for i in iden:
+		num = tu.createIdentity(i[0], i[1])
+		tu.assignRole(num, 1)
+	try:
+		tu.goUsers(d)
+		for i in iden:
+			wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell' and text()='{0}']".format(i[0])))
+	except:
+		print "Users missing from users page"
+		return False
+	finally:
+		tu.endtest(d)
+	return True		
 
 def readRolesTest():
-	role = createRole("hello", "hey", [1, 2, 4, 5, 6, 9, 10, 17, 18])
+	role = tu.createRole("hello", "hey", [1, 2, 4, 5, 6, 9, 10, 17, 18])
 	inds = [8, 19, 21, 4, 15, 0, 11, 6, 17]
-	iden = createIdentity("billy", "bob")
-	assignRole(iden, role)
+	iden = tu.createIdentity("billy", "bob")
+	tu.assignRole(iden, role)
 	d = tu.newtest()
 	try:
 		tu.goUsers(d)	
@@ -78,7 +99,7 @@ def readRolesTest():
 
 def main():
 	failcount = 0
-
+	"""
 	global _steampath	
 	if sys.platform.startswith("linux"):
 		_steampath = "./steam-develop-linux-amd64/steam"
@@ -87,7 +108,9 @@ def main():
 	else:
 		print "unsupported testing platform"
 		sys.exit(1)
-
+	"""
+	if not readUsersTest():
+		failcount += 1
 	if not readRolesTest():
 		failcount += 1
 	

@@ -1,10 +1,100 @@
 import sys
 import time
+import subprocess as sp
+import re
 from selenium import webdriver
 from selenium.common import exceptions as se
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
+
+"""
+Perm id		Permission		Index
+============================================
+ 1			M Role			 8
+ 2			V Role			19
+ 3			M Workgroup		10
+ 4			V Workgroup		21
+ 5			M Identities	 4
+ 6			V Identities	15
+ 7			M engines		 3
+ 8			V engines		14
+ 9			M clusters		 0
+10			V clusters		11
+11			M Projects		 7
+12			V Projects		18
+13			M Datasrc		 2
+14			V Datasrc		13
+15			M Dataset		 1
+16			V Dataset		12
+17			M Model			 6
+18			V Model			17
+19			M label			 5
+20			V Label			16
+21			M service		 9
+22			V service		20
+"""
+
+_steampath = "./steam"
+if sys.platform.startswith("linux"):
+	_steampath = "./steam-develop-linux-amd64/steam"
+elif sys.platform == "darwin":
+	_steampath = "./steam-develop-darwin-amd64/steam"
+else:
+	print "unsupported testing platform"
+	sys.exit(1)
+	
+def cliLogin(name, pw):
+	ret = sp.check_output("{0} login localhost:9000 --username={1} --password={1}"\
+		.format(_steampath, name, pw), shell=True)
+
+def createRole(role, desc, perm):
+	ret = sp.check_output("{0} create role --name {1} --description \"{2}\""\
+		.format(_steampath, role, desc), shell=True)
+	i = int(re.search(r'\d+', ret).group())
+	for p in perm:
+		sp.Popen("{0} link role --with-permission --role-id={1} --permission-id={2} > /dev/null"\
+			.format(_steampath, i, p), shell=True).communicate()
+	return i
+
+def createIdentity(name, pw):
+	ret = sp.check_output("{0} create identity --name={1} --password={2}"\
+		.format(_steampath, name, pw), shell=True)
+	return int(re.search(r'\d+', ret).group())
+
+def createWorkgroup(wg, desc):
+	ret = sp.check_output("{0} create workgroup --name={1} --description=\"{2}\""\
+		.format(_steampath, wg, desc), shell=True)
+	return int(re.search(r'\d+', ret).group())
+
+def assignRole(iden, role):
+	x = sp.check_output("{0} link identity --with-role --identity-id={1} --role-id={2}"\
+		.format(_steampath, iden, role), shell=True)
+
+def assignWorkgroup(iden, wg):
+	x = sp.check_output("{0} link identity --with-workgroup --identity-id={1} --workgroup-id={2}"\
+		.format(_steampath, iden, wg), shell=True)
+
+"""
+EntityType
+
+ 1	Role
+ 2	Workgroup
+ 3	Identity
+ 4	Engine
+ 5	Cluster
+ 6	Project
+ 7	Datasrc
+ 8	Dataset
+ 9	model
+10	label
+11	service
+
+"""
+
+def shareEntity(kind, eid, wg, level):
+	x = sp.check_output("{0} share entity --entity-type-id={1} --entity-id={2} --workgroup-id={3} --kind={4}"\
+		.format(_steampath, kind, eid, wg, level), shell=True)
 
 def goUsers(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
