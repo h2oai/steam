@@ -1,6 +1,7 @@
 package master
 
 import (
+	"archive/zip"
 	"fmt"
 	"io"
 	"log"
@@ -8,11 +9,13 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 
 	"github.com/h2oai/steamY/lib/fs"
 	"github.com/h2oai/steamY/master/az"
 	"github.com/h2oai/steamY/master/data"
 	srvweb "github.com/h2oai/steamY/srv/web"
+	"github.com/pkg/errors"
 )
 
 type UploadHandler struct {
@@ -38,8 +41,15 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseMultipartForm(0)
 
-	typ := r.FormValue("type")
+	src, handler, err := r.FormFile("file")
+	if err != nil {
+		log.Println("Upload form parse failed:", err)
+		http.Error(w, fmt.Sprintf("Malformed request: %v", err), http.StatusBadRequest)
+		return
+	}
+	defer src.Close()
 
+	typ := r.FormValue("type")
 	var dstDir string
 
 	switch typ {
@@ -50,6 +60,10 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		dstDir = path.Join(s.workingDirectory, fs.LibDir, typ)
+
+		if path.Ext(handler.Filename) != ".zip" {
+			http.Error(w, fmt.Sprintf("Invalid file type. Accepted filetype(s): zip"), http.StatusUnsupportedMediaType)
+		}
 
 	case fs.KindFile:
 		if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
@@ -91,13 +105,6 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Invalid upload type: %s", typ), http.StatusBadRequest)
 		return
 	}
-	src, handler, err := r.FormFile("file")
-	if err != nil {
-		log.Println("Upload form parse failed:", err)
-		http.Error(w, fmt.Sprintf("Malformed request: %v", err), http.StatusBadRequest)
-		return
-	}
-	defer src.Close()
 
 	log.Println("Remote file: ", handler.Filename)
 
@@ -121,10 +128,64 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch typ {
 	case fs.KindEngine:
-		if _, err := s.webService.AddEngine(pz, fileBaseName, dstPath); err != nil {
-			log.Println("Failed saving engine to datastore", err)
-			http.Error(w, fmt.Sprintf("Error saving engine to datastore: %v", err), http.StatusInternalServerError)
+		defer os.Remove(dstPath)
+
+		if err := s.handleEngine(w, pz, fileBaseName, dstDir, dstPath); err != nil {
+			log.Println("Failed saving engine to disk:", err)
 			return
 		}
 	}
+}
+
+func (s *UploadHandler) handleEngine(w http.ResponseWriter, pz az.Principal, fileName, fileDir, filePath string) error {
+	// Open zip file and defer close
+	r, err := zip.OpenReader(filePath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error opening zip file: %v", err), http.StatusInternalServerError)
+		return errors.Wrap(err, "failed opening zip file")
+	}
+	defer r.Close()
+
+	// Search zipFile for h2o.jar or h2odriver.jar
+	var rc io.ReadCloser
+	for i, f := range r.File {
+		if path.Base(f.Name) == "h2o.jar" || path.Base(f.Name) == "h2odriver.jar" {
+			var err error
+			rc, err = f.Open()
+			if err != nil {
+				http.Error(w, fmt.Sprintf("Upload file open operation failed: %v", err), http.StatusInternalServerError)
+				return errors.Wrap(err, "failed opening engine file")
+			}
+			defer rc.Close()
+			break
+		}
+
+		if i == len(r.File)-1 {
+			http.Error(w, "Unable to locate valid engine", http.StatusBadRequest)
+			return fmt.Errorf("failed to locate engine")
+		}
+	}
+
+	// Create a .jar file with engine version name
+	dstBase := strings.Replace(fileName, path.Ext(fileName), ".jar", 1)
+	dstPath := path.Join(fileDir, dstBase)
+	dst, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE, fs.FilePerm)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Upload file create operation failed: %v", err), http.StatusInternalServerError)
+		return errors.Wrap(err, "failed creating engine file")
+	}
+
+	// Copy file from rc to dst
+	if _, err := io.Copy(dst, rc); err != nil {
+		http.Error(w, fmt.Sprintf("File copy operation failed:", err), http.StatusInternalServerError)
+		return errors.Wrap(err, "failed copying uploaded file to disk")
+	}
+
+	// Add Engine to datastore
+	if _, err := s.webService.AddEngine(pz, dstBase, dstPath); err != nil {
+		http.Error(w, fmt.Sprintf("Error saving engine to datastore: %v", err), http.StatusInternalServerError)
+		return errors.Wrap(err, "failed saving engine to datastore")
+	}
+
+	return nil
 }
