@@ -64,6 +64,10 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 	return status, nil
 }
 
+func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
+	return &web.Config{s.kerberosEnabled}, nil
+}
+
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
 
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
