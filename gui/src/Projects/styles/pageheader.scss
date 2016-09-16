@@ -10,11 +10,14 @@
   margin-bottom: 44px;
   display: flex;
   flex-wrap:wrap;
+  align-items: flex-end;
   justify-content: space-between;
   div.buttons {
     display: flex;
     align-items: flex-end;
-    margin: 11.5px 0;
+    margin-top: 0px;
+    margin-left: 11.5px;
+    margin-bottom: 0px;
     button:first-child {
       margin-right: $xsmall;
     }

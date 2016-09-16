@@ -77,9 +77,39 @@ select {
   width: $xlarge * 5;
 }
 
-button {
-  font-size:$text-size;
-  font-family:$font-text;
+.button-base {
+  font-family: "Open Sans";
+  position: relative;
+  top: -3px;
+  border-radius: 3px;
+  margin-left: 11px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  border-width: 0px;
+}
+.button-primary {
+  @extend .button-base;
+  color: white;
+  background-color: $h2o-orange-prime;
+  font-weight: 600;
+}
+.button-secondary {
+  @extend .button-base;
+  color: $h2o-orange-prime;
+  background-color: transparent;
+  border-color: $h2o-orange-prime;
+  border-style: solid;
+  border-width: 2px;
+  font-weight: 600;
+}
+.button {
+  color: $h2o-soft-grey;
+  text-decoration: underline;
 }
 
 button, a {
@@ -175,3 +205,8 @@ input[type="text"], textarea {
 .muted {
   color: $brand-dark-3;
 }
+
+.header-buttons {
+  margin-right: 44px;
+}
+

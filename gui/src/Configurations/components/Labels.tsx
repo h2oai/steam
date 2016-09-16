@@ -152,7 +152,7 @@ class Labels extends React.Component<Props, any> {
                     the power to label a model "production".
                 </p>
                 <span>
-                    <button className="default" onClick={this.openModal.bind(this) }>
+                    <button className="button-primary" onClick={this.openModal.bind(this) }>
                         Create New Label
                     </button>
                 </span>

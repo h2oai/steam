@@ -65,9 +65,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
       <div className="clusters">
         <PageHeader>CLUSTERS
           { !this.state.newClusterRequested ?
-          <div className="buttons default">
-            <button className="default" onClick={this.onCreateNewClusterClicked.bind(this)}>Create Cluster</button>
-          </div>
+            <div className="button-primary header-buttons" onClick={this.onCreateNewClusterClicked.bind(this)}>Create Cluster</div>
           : null }
         </PageHeader>
         <div className="panel-container">
@@ -81,7 +79,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                 <form onSubmit={this.registerCluster.bind(this)}>
                   <input type="text" name="ip-address" placeholder="IP Address"/>&nbsp;
                   <input type="text" name="port" placeholder="Port"/>&nbsp;<br /><br />
-                  <button type="submit" className="default">Connect</button>
+                  <button type="submit" className="button-primary">Connect</button>
                 </form>
               </div>
             </Panel>

@@ -18,6 +18,7 @@ $navigation-width: $base-grid-unit * 5;
 .nav-container {
   display: flex;
   width: 300px;
+  max-width: 300px;
   flex: 1 0 auto;
   transition: transform .3s ease-in-out;
 }

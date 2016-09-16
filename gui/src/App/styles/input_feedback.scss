@@ -2,9 +2,38 @@
   margin-bottom: 7px;
 }
 
-.progress {
-  margin-top:6px;
+.input-feedback {
+  margin-top:4px;
   display:flex;
+}
+
+.feedback-progress {
+
+}
+.feedback-icon {
+  margin-right: 3px;
+}
+.feedback-info {
+  color: #9b9b9b;
+}
+.feedback-success {
+}
+.feedback-success-icon {
+  @extend .feedback-icon;
+  color: #417505;
+}
+.feedback-warning {
+
+}
+.feedback-warning-icon {
+  @extend .feedback-icon;
+  color: #F5A623;
+}
+.feedback-error {
+  color: #D0021B;
+}
+.feedback-error-icon {
+  @extend .feedback-icon;
 }
 
 @-webkit-keyframes uil-facebook {

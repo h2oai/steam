@@ -59,8 +59,8 @@ export class Notification extends React.Component<Props, any> {
           </div>
           <div className="actions-container">
             { this.state.hasViewButton ?
-              <button onClick={ this.onDismissClicked.bind(this) } className="view-button"> View</button> : null }
-            <button onClick={ this.onDismissClicked.bind(this) } className="dismiss-button"> Dismiss</button>
+              <div onClick={ this.onDismissClicked.bind(this) } className="view-button"> View</div> : null }
+            <div onClick={ this.onDismissClicked.bind(this) } className="dismiss-button"> Dismiss</div>
           </div>
         </div>
       </div>;

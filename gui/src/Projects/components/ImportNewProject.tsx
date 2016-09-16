@@ -17,7 +17,8 @@ import {
 import { Cluster, Model, Dataset } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
-import Progress from '../../App/components/Progress';
+import InputFeedback from '../../App/components/InputFeedback';
+import { FeedbackType } from '../../App/components/InputFeedback';
 
 interface DispatchProps {
   fetchClusters: Function,
@@ -171,7 +172,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                         <Cell>N/A</Cell>
                         <Cell>N/A</Cell>
                         <Cell>
-                          <button className="default" onClick={this.retrieveClusterDataframes.bind(this, cluster.id)}>
+                          <button className="button-primary" onClick={this.retrieveClusterDataframes.bind(this, cluster.id)}>
                             Connect
                           </button>
                         </Cell>
@@ -191,10 +192,10 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               <form onSubmit={this.registerCluster.bind(this)}>
                 <input type="text" name="ip-address" placeholder="IP Address"/>
                 <input type="text" name="port" placeholder="Port"/>
-                <button type="submit" className="default">Connect</button>
+                <button type="submit" className="button-primary">Connect</button>
               </form>
               { this.props.isClusterFetchInProcess ?
-                  <Progress message="Connecting..." />
+                  <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
                  : null }
             </div>
           : null }
@@ -209,7 +210,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               }) : null}
             </select>
             { this.props.isModelFetchInProcess ?
-                <Progress message="Connecting..." />
+                <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
               : null }
           </div>
         </div> : null}
@@ -258,7 +259,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           </div>
         </div> : null}
         {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
-          <button className={classNames('default', {disabled: !this.state.isModelSelected})}
+          <button className={classNames('button-primary', {disabled: !this.state.isModelSelected})}
                   onClick={this.createProject.bind(this)}>Create Project
           </button>
         </div> : null}
