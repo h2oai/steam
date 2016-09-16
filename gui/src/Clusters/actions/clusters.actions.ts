@@ -15,6 +15,9 @@ export function receiveEngines(engines) {
 }
 
 export function uploadEngine(file) {
+  if (!file) {
+    openNotification('error', 'No engine file selected.', null);
+  }
   return (dispatch) => {
     let data = new FormData();
     data.append('file', file.files[0]);

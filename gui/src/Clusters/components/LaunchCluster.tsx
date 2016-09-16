@@ -87,21 +87,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
             </Row>
             <Row>
               <Cell>
-                ENGINE ID
-              </Cell>
-              <Cell>
-                <select onChange={this.onChangeEngine.bind(this)}>
-                  <option></option>
-                  {this.props.engines.map((engine, i) => {
-                    return <option key={i} value={engine.id}>{engine.name}</option>;
-                  })}
-                </select>
-                <input ref="engine" type="file" name="engine"/>
-                <button className="default" onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
-              </Cell>
-            </Row>
-            <Row>
-              <Cell>
                 NUMBER OF NODES
               </Cell>
               <Cell>
@@ -114,9 +99,26 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
               <Cell>
                 <NumericInput name="memory" min="1"/>
-                <select onChange={this.onChangeMemory.bind(this)}>
+                <select className="memory-selection" onChange={this.onChangeMemory.bind(this)}>
                   <option value="m">MB</option>
                   <option value="g">GB</option>
+                </select>
+              </Cell>
+            </Row>
+            <Row>
+              <Cell>
+                H2O VERSION
+              </Cell>
+              <Cell>
+                <div className="upload-engine">
+                  <input ref="engine" type="file" name="engine"/>
+                  <button className="default upload-engine-button" onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
+                </div>
+                <select onChange={this.onChangeEngine.bind(this)}>
+                  <option></option>
+                  {this.props.engines.map((engine, i) => {
+                    return <option key={i} value={engine.id}>{engine.name}</option>;
+                  })}
                 </select>
               </Cell>
             </Row>

@@ -290,6 +290,18 @@ export function unregisterCluster(clusterId: number) {
   };
 }
 
+export function stopClusterOnYarn(clusterId: number) {
+  return (dispatch) => {
+    Remote.stopClusterOnYarn(clusterId, 'vagrant.keytab', (error) => {
+      if (error) {
+        dispatch(openNotification('error', error.toString(), null));
+        return;
+      }
+      dispatch(fetchClusters());
+    });
+  };
+}
+
 export function fetchProjects() {
   return (dispatch) => {
     Remote.getProjects(0, 1000, (error, res) => {

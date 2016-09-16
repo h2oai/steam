@@ -7,20 +7,27 @@
       flex-grow: 0;
     }
     .cell:nth-of-type(2) {
-      input[type="text"] {
-        width: $base-grid-unit * 4;
-      }
       input[type="number"] {
-        width: $base-grid-unit;
-        height: $base-grid-unit / 2;
+        width: $xlarge;
+        height: $medium;
       }
-      select {
+      .memory-selection {
+        width: $large;
         margin-left: $xsmall;
-        width: $base-grid-unit;
       }
     }
     &:last-of-type {
-      border-bottom: none;
+      //border-bottom: none;
+      margin-bottom: $medium;
+    }
+    &.header {
+      padding: 0;
+    }
+    .upload-engine {
+      margin-bottom: $xsmall;
+      .upload-engine-button {
+        font-size: 10px;
+      }
     }
   }
 }
