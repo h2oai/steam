@@ -65,48 +65,90 @@ func getUser(username string) (uint32, uint32, error) {
 	if err != nil {
 		return 0, 0, errors.Wrap(err, "failed to lookup user")
 	}
+
 	uid64, err := strconv.ParseUint(u.Uid, 10, 32)
 	if err != nil {
 		return 0, 0, errors.Wrap(err, "failed parsing uid to uint32")
 	}
+
 	gid64, err := strconv.ParseUint(u.Gid, 10, 32)
 	if err != nil {
 		return 0, 0, errors.Wrap(err, "failed parsing gid to unit32")
 	}
-
 	return uint32(uid64), uint32(gid64), nil
 }
 
 func yarnScan(r io.Reader, name, username string, appID, address, err *string, cancel context.CancelFunc) {
+	// Scan for ip and app_id
 	reNode := regexp.MustCompile(`H2O node (\d+\.\d+\.\d+\.\d+:\d+)`)
 	reApID := regexp.MustCompile(`application_(\d+_\d+)`)
 
 	in := bufio.NewScanner(r)
 	for in.Scan() {
 		if in.Text() != "" {
+			// Log output
 			log.Println("YARN", name, username, in.Text())
-
+			// Find application id
 			if appID != nil {
 				if s := reNode.FindSubmatch(in.Bytes()); s != nil {
 					*address = string(s[1])
 				}
 			}
+			// Find IP address
 			if address != nil {
 				if s := reApID.FindSubmatch(in.Bytes()); s != nil {
 					*appID = string(s[1])
 				}
 			}
+			// Scan for errors
 			if err != nil {
 				if strings.Contains(in.Text(), "ERROR") {
 					*err += in.Text() + "\n"
 				}
 				if strings.Contains(in.Text(), "Exception") {
 					*err += in.Text() + "\n"
+					// Exception should kill process
 					cancel()
 				}
 			}
 		}
 	}
+}
+
+func yarnCommand(uid, gid uint32, name, username string, args ...string) (string, string, error) {
+	// Create context for killing process if exception encountered
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Set up hadoop job with user impersonation
+	cmd := exec.CommandContext(ctx, "hadoop", args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+
+	// Set stdout and stderr
+	stdOut, err := cmd.StdoutPipe()
+	if err != nil {
+		return "", "", errors.Wrap(err, "failed setting standard out")
+	}
+	defer stdOut.Close()
+	stdErr, err := cmd.StderrPipe()
+	if err != nil {
+		return "", "", errors.Wrap(err, "failed setting standard err")
+	}
+
+	defer stdErr.Close()
+
+	// Log output and scan
+	var appID, address, cmdErr string
+	go yarnScan(stdOut, name, username, &appID, &address, &cmdErr, cancel)
+	go yarnScan(stdErr, name, username, nil, nil, &cmdErr, cancel)
+
+	// Execute command
+	if err := cmd.Run(); err != nil {
+		return "", "", errors.Wrapf(err, "failed running command: %v", cmdErr)
+	}
+
+	return appID, address, nil
 }
 
 // StartCloud starts a yarn cloud by shelling out to hadoop
@@ -138,49 +180,23 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		"-output", out,
 		"-disown",
 	}
-
-	// Create hadoop command with piping and user impersonation
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	cmd := exec.CommandContext(ctx, "hadoop", cmdArgs...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
-	stdOut, err := cmd.StdoutPipe()
+	appID, address, err := yarnCommand(uid, gid, name, username, cmdArgs...)
 	if err != nil {
-		return "", "", "", err
-	}
-	defer stdOut.Close()
-	stdErr, err := cmd.StderrPipe()
-	if err != nil {
-		return "", "", "", err
-	}
-	defer stdErr.Close()
-
-	if err := cmd.Start(); err != nil {
-		return "", "", "", err
-	}
-	// Start command, log, and wait
-	var appID, address, cmdErr string
-	go yarnScan(stdOut, name, username, &appID, &address, &cmdErr, cancel)
-	go yarnScan(stdErr, name, username, nil, nil, &cmdErr, cancel)
-
-	if err := cmd.Wait(); err != nil {
-		defer cleanDir(out, uid, gid)
-		return "", "", "", errors.Wrapf(err, "failed waiting on exec: %v", cmdErr)
+		cleanDir(out, uid, gid)
+		return "", "", "", errors.Wrap(err, "failed executing command")
 	}
 
 	return appID, address, out, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
-//
-// In the future this
 func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
 	uid, gid, err := getUser(username)
 	if err != nil {
 		return errors.Wrap(err, "failed getting user")
 	}
 
+	// If kerberos enabled, initialize and defer destroy
 	if kerberos {
 		if err := kInit(username, keytab, uid, gid); err != nil {
 			return errors.Wrap(err, "failed initializing kerberos")
@@ -188,27 +204,8 @@ func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
 		defer kDest(uid, gid)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	cmd := exec.CommandContext(ctx, "hadoop", "job", "-kill", "job_"+id)
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
-	stdOut, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	defer stdOut.Close()
-	stdErr, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-	defer stdErr.Close()
-	var cmdErr string
-	go yarnScan(stdOut, name, username, nil, nil, &cmdErr, cancel)
-	go yarnScan(stdErr, name, username, nil, nil, &cmdErr, cancel)
-
-	if err := cmd.Run(); err != nil {
-		return errors.Wrapf(err, "failed running command: %v", cmdErr)
+	if _, _, err := yarnCommand(uid, gid, name, username, "job", "-kill", "job_"+id); err != nil {
+		return errors.Wrap(err, "failed executing command")
 	}
 
 	cleanDir(outdir, uid, gid)
