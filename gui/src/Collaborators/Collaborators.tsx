@@ -16,7 +16,7 @@ interface Props {
 interface DispatchProps {
 }
 
-export class Collaborators extends React.Component<Props & DispatchProps, any> {
+export default class Collaborators extends React.Component<Props & DispatchProps, any> {
 
   constructor() {
     super();

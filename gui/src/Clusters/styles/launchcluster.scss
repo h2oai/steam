@@ -1,0 +1,33 @@
+@import '../../variables';
+
+.launch-cluster {
+  .row {
+    .cell:first-of-type {
+      flex-basis: 20%;
+      flex-grow: 0;
+    }
+    .cell:nth-of-type(2) {
+      input[type="number"] {
+        width: $xlarge;
+        height: $medium;
+      }
+      .memory-selection {
+        width: $large;
+        margin-left: $xsmall;
+      }
+    }
+    &:last-of-type {
+      //border-bottom: none;
+      margin-bottom: $medium;
+    }
+    &.header {
+      padding: 0;
+    }
+    .upload-engine {
+      margin-bottom: $xsmall;
+      .upload-engine-button {
+        font-size: 10px;
+      }
+    }
+  }
+}
