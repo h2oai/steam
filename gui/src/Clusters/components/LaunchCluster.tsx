@@ -3,8 +3,9 @@
  */
 
 import * as React from 'react';
+import * as _ from 'lodash';
 import { connect } from 'react-redux';
-import { startYarnCluster, uploadEngine, getEngines } from '../actions/clusters.actions';
+import { startYarnCluster, uploadEngine, getEngines, getConfig } from '../actions/clusters.actions';
 import { bindActionCreators } from 'redux';
 import Cell from '../../Projects/components/Cell';
 import Row from '../../Projects/components/Row';
@@ -14,13 +15,15 @@ import '../styles/launchcluster.scss';
 import { NumericInput } from 'h2oUIKit';
 
 interface Props {
-  engines: any
+  engines: any,
+  config: any
 }
 
 interface DispatchProps {
   startYarnCluster: Function,
   uploadEngine: Function,
-  getEngines: Function
+  getEngines: Function,
+  getConfig: Function
 }
 
 export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
@@ -41,6 +44,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 
   componentDidMount() {
     this.props.getEngines();
+    this.props.getConfig();
   }
 
   startCluster(event) {
@@ -49,7 +53,8 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     let engineId = this.state.engineId;
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
-    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + this.state.memorySizeUnit);
+    let keytab = (this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement).value;
+    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + this.state.memorySizeUnit, keytab);
   }
 
   uploadEngine(event) {
@@ -70,7 +75,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   }
 
   render() {
-    console.log(this.props);
     return (
       <div className="launch-cluster">
         <PageHeader>LAUNCH NEW CLUSTER</PageHeader>
@@ -122,6 +126,14 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 </select>
               </Cell>
             </Row>
+            {_.get(this.props.config, 'kerberos_enabled', false) === true ? <Row>
+              <Cell>
+                Kerberos Keytab
+              </Cell>
+              <Cell>
+                <input type="text"/>
+              </Cell>
+            </Row> : null}
           </Table>
           <button type="submit" className="default">Launch New Clusters</button>
         </form>
@@ -131,9 +143,9 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 }
 
 function mapStateToProps(state) {
-  console.log(state);
   return {
-    engines: state.clusters.engines
+    engines: state.clusters.engines,
+    config: state.clusters.config
   };
 }
 
@@ -141,7 +153,8 @@ function mapDispatchToProps(dispatch) {
   return {
     uploadEngine: bindActionCreators(uploadEngine, dispatch),
     startYarnCluster: bindActionCreators(startYarnCluster, dispatch),
-    getEngines: bindActionCreators(getEngines, dispatch)
+    getEngines: bindActionCreators(getEngines, dispatch),
+    getConfig: bindActionCreators(getConfig, dispatch)
   };
 }
 
