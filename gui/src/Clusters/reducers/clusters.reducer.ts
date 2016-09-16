@@ -2,7 +2,7 @@
  * Created by justin on 9/15/16.
  */
 import * as _ from 'lodash';
-import { RECEIVE_ENGINES, RECEIVE_CONFIG } from '../actions/clusters.actions';
+import { RECEIVE_ENGINES, FETCH_CONFIG_COMPLETED } from '../actions/clusters.actions';
 
 
 let initialState = {
@@ -16,7 +16,7 @@ export const clustersReducer = (state = initialState, action) => {
       return _.assign({}, state, {
         engines: action.engines
       });
-    case RECEIVE_CONFIG:
+    case FETCH_CONFIG_COMPLETED:
       return _.assign({}, state, {
         config: action.config
       });
