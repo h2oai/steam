@@ -97,6 +97,12 @@ export interface ClusterType {
   
 }
 
+export interface Config {
+  
+  kerberos_enabled: boolean
+  
+}
+
 export interface Dataset {
   
   id: number
@@ -458,6 +464,9 @@ export interface Service {
   // Ping the Steam server
   pingServer: (input: string, go: (error: Error, output: string) => void) => void
   
+  // No description available
+  getConfig: (go: (error: Error, config: Config) => void) => void
+  
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
   
@@ -798,6 +807,16 @@ interface PingServerIn {
 interface PingServerOut {
   
   output: string
+  
+}
+
+interface GetConfigIn {
+  
+}
+
+interface GetConfigOut {
+  
+  config: Config
   
 }
 
@@ -2258,6 +2277,18 @@ export function pingServer(input: string, go: (error: Error, output: string) => 
     } else {
       const d: PingServerOut = <PingServerOut> data;
       return go(null, d.output);
+    }
+  });
+}
+
+export function getConfig(go: (error: Error, config: Config) => void): void {
+  const req: GetConfigIn = {  };
+  Proxy.Call("GetConfig", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetConfigOut = <GetConfigOut> data;
+      return go(null, d.config);
     }
   });
 }

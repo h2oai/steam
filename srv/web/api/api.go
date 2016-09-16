@@ -2,6 +2,10 @@ package api
 
 // --- Type Definitions ---
 
+type Config struct {
+	KerberosEnabled bool
+}
+
 type Cluster struct {
 	Id        int64
 	Name      string
@@ -254,6 +258,7 @@ type Workgroup struct {
 
 type Service struct {
 	PingServer                    PingServer                    `help:"Ping the Steam server"`
+	GetConfig                     GetConfig                     `help:Get Steam start up configurations`
 	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
 	UnregisterCluster             UnregisterCluster             `help:"Disconnect from a cluster"`
 	StartClusterOnYarn            StartClusterOnYarn            `help:"Start a cluster using Yarn"`
@@ -374,6 +379,10 @@ type PingServer struct {
 	Input  string `help:"Message to send"`
 	_      int
 	Output string `help:"Echoed message"`
+}
+type GetConfig struct {
+	_      int
+	Config Config `help:"An object containing Steam startup configurations"`
 }
 type RegisterCluster struct {
 	Address   string
