@@ -53,7 +53,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     let engineId = this.state.engineId;
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
-    let keytab = (this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement).value;
+    let keytab = _.get((this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement), 'value', '');
     this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + this.state.memorySizeUnit, keytab);
   }
 
