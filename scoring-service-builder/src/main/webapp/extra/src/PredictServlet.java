@@ -82,8 +82,7 @@ public class PredictServlet extends HttpServlet {
       //System.out.println(req);
       byte[] bytes = req.getBytes();
       logger.debug("req bytes {}", bytes);
-//      Map<String, Object> tr = transform.fit(new String(bytes));
-      Map<String, Object> tr = transform.fit(bytes);
+      Map<String, Object> tr = transform.fit(new String(bytes));
       for (String k : tr.keySet()) {
         logger.debug("{} = {}", k, tr.get(k));
         row.put(k, tr.get(k));

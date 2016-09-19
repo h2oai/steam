@@ -146,7 +146,7 @@ public class MakePythonWarServlet extends HttpServlet {
       }
       else if (!rawfiles.isEmpty()) {
         FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), rawfiles);
-        modelCode = "RawModel.load(fileName)";
+        modelCode = "MojoModel.load(fileName)";
       }
       InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
 //      InstantiateJavaTemplateFile(tmpDir, "new " + predictorClassName + "()", predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");

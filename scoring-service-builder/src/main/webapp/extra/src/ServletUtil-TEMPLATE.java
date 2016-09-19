@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 
-class ServletUtil extends HttpServlet {
+class ServletUtil {
   private final static Logger logger = Logging.getLogger(ServletUtil.class);
 
   private static List<String> modelNames = null;
