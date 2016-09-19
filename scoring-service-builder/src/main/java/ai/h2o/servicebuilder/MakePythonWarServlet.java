@@ -149,7 +149,6 @@ public class MakePythonWarServlet extends HttpServlet {
         modelCode = "MojoModel.load(fileName)";
       }
       InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
-//      InstantiateJavaTemplateFile(tmpDir, "new " + predictorClassName + "()", predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
 
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictPythonServlet.java", "PredictPythonServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");

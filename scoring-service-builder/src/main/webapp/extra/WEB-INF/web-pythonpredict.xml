@@ -22,7 +22,7 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
 
     <servlet-mapping>
         <servlet-name>PredictPython</servlet-name>
-        <url-pattern>/pypredict</url-pattern>
+        <url-pattern>/pypredict/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Info</servlet-name>
