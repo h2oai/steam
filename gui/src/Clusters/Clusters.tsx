@@ -114,6 +114,12 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                 </header>
                 <article>
                   <h3>
+                    ID
+                  </h3>
+                  <h2>
+                    {cluster.id}
+                  </h2>
+                  <h3>
                     STATUS
                   </h3>
                   <h2 className="cluster-status">
