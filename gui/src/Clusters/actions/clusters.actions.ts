@@ -90,7 +90,7 @@ export function uploadEngine(file) {
   };
 }
 
-export function startYarnCluster(clusterName, engineId, size, memory, keytab = '') {
+export function startYarnCluster(clusterName, engineId, size, memory, keytab) {
   if (!clusterName || !engineId || !size || !memory) {
     openNotification('error', 'All fields are required', null);
   }

@@ -131,7 +131,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 Kerberos Keytab
               </Cell>
               <Cell>
-                <input type="text"/>
+                <input type="text" name="keytab"/>
               </Cell>
             </Row> : null}
           </Table>
