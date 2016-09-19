@@ -19,108 +19,78 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import java.util.concurrent.ConcurrentHashMap;
 
 class ServletUtil extends HttpServlet {
   private final static Logger logger = Logging.getLogger(ServletUtil.class);
 
-  private File servletPath = null;
-  private String servletDir = null;
+  private static List<String> modelNames = null;
 
-  public void init(ServletConfig servletConfig) throws ServletException {
-    super.init(servletConfig);
-    try {
-      servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      servletDir = servletPath.getAbsolutePath();
-      logger.debug("servletPath {}  servlerDir {}", servletPath, servletDir);
-
+  public static void loadModels(File servletPath) {
+    if (modelNames == null) {
+      try {
+        modelNames = FileUtils.readLines(new File(servletPath, "modelnames.txt"));
+        logger.info("modelNames size {}", modelNames.size());
+        models = new HashMap<String, EasyPredictModelWrapper>();
+        EasyPredictModelWrapper mod = null;
+        for (String m : modelNames) {
+          if (m.endsWith(".java"))
+            mod = addPojoModel(m.replace(".java", ""));
+          else if (m.endsWith(".zip"))
+            mod = addMojoModel(m.replace(".zip", ""), servletPath);
+          if (model == null)
+            model = mod;
+        }
+        logger.info("added {} models", models.size());
+      }
+      catch (Exception e) {
+        logger.error("can't load model using modelnames.txt", e);
+      }
     }
-    catch (MalformedURLException e) {
-      logger.error("init failed", e);
-    }
-    logger.info("ServletUtil init");
   }
 
-
-  // load model
-//  static String modelName = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-//  static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
   static GenModel rawModel = null;
   static String modelName = null;
   public static EasyPredictModelWrapper model = null;
-  public static Map<String, EasyPredictModelWrapper> models = new HashMap<String, EasyPredictModelWrapper>();
+  public static Map<String, EasyPredictModelWrapper> models = null;
 
-//  static void addModel(String modelName, GenModel rawModel) {
-//    model = new EasyPredictModelWrapper(rawModel);
-////        new EasyPredictModelWrapper(
-////            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
-////        );
-//    models.put(modelName, model);
-//    logger.info("added model {}  new size {}", modelName, models.size());
-//  }
+  // this is how to do easy predict that doesn't error on wrong categorical levels
+  //    rawModel = new
+  //        new EasyPredictModelWrapper(
+  //            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+  //        );
 
-  static void addPojoModel(String modelName, GenModel rawModel) {
-    model = new EasyPredictModelWrapper(rawModel);
-//        new EasyPredictModelWrapper(
-//            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
-//        );
-    models.put(modelName, model);
-    logger.info("added model {}  new size {}", modelName, models.size());
-  }
-
-  static void addRawModel(String modelName, GenModel rawModel) {
-    model = new EasyPredictModelWrapper(rawModel);
-//        new EasyPredictModelWrapper(
-//            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
-//        );
-    models.put(modelName, model);
-    logger.info("added model {}  new size {}", modelName, models.size());
-  }
-
-  static {
+  static EasyPredictModelWrapper addPojoModel(String modelName) {
+    EasyPredictModelWrapper model = null;
     try {
-      List<String> models = FileUtils.readLines(new File("modelnames.txt"));
+      Class<?> clazz = Class.forName(modelName);
+      GenModel rawModel = (GenModel) clazz.newInstance();
+      model = new EasyPredictModelWrapper(rawModel);
+      models.put(modelName, model);
+      logger.debug("added model {}  new size {}", modelName, models.size());
+
     }
-    catch (IOException e) {
-      logger.error("IOException ", e);
+    catch (Exception e) {
+      logger.error("error {}", e);
     }
 
-//    try {
-//      rawModel = REPLACE_THIS_WITH_MODEL;
-//      REPLACE_THIS_WITH_MODEL;
-//    }
-//    catch (IOException e) {
-//      logger.error("error ", e);
-//    }
-//    logger.info("instantiated model REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME  REPLACE_THIS_WITH_POJO_BOOLEAN");
-//    if (!REPLACE_THIS_WITH_POJO_BOOLEAN) {
-//      rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-//      logger.info("instantiated model REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME");
-//    }
-//    else {
-//      String zipfile = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME" + ".zip";
-//      rawModel = RawModel.load(zipfile);
-//      logger.info("loaded model from {}", zipfile);
-//    }
-//    if (rawModel == null)
-//      logger.error("Can't instantiate model");
-//    else {
-//      model =
-//          new EasyPredictModelWrapper(
-//              new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
-//          );
-//      models.put(modelName, model);
-//      logger.info("added model {}  new size {}", modelName, models.size());
-//    }
+    logger.info("loaded {} models", models.size());
+    return model;
   }
 
-
-//  model = new EasyPredictModelWrapper(rawModel);
-
-//  model =
-//      new EasyPredictModelWrapper(
-//          new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
-//      );
+  static EasyPredictModelWrapper addMojoModel(String modelName, File servletPath) {
+    EasyPredictModelWrapper model = null;
+    try {
+      String fileName = servletPath + File.separator + modelName + ".zip";
+      GenModel rawModel = REPLACE_THIS_WITH_MODEL;
+      model = new EasyPredictModelWrapper(rawModel);
+      models.put(modelName, model);
+      logger.info("added model {}  new size {}", modelName, models.size());
+    }
+    catch (Exception e) {
+      logger.error("error {}", e);
+    }
+    return model;
+  }
 
   // load preprocessing
   public static Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;

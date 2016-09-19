@@ -26,8 +26,8 @@ public class PredictServlet extends HttpServlet {
 
   private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
-  private static GenModel rawModel = ServletUtil.rawModel;
-  private static EasyPredictModelWrapper model = ServletUtil.model;
+  private static GenModel rawModel = null;
+  private static EasyPredictModelWrapper model = null;
   private static Transform transform = ServletUtil.transform;
 
   private File servletPath = null;
@@ -37,7 +37,9 @@ public class PredictServlet extends HttpServlet {
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
       logger.debug("servletPath {}", servletPath);
-
+      ServletUtil.loadModels(servletPath);
+      model = ServletUtil.model;
+      logger.debug("model {}", model);
      }
     catch (MalformedURLException e) {
       logger.error("init failed", e);
@@ -64,20 +66,24 @@ public class PredictServlet extends HttpServlet {
     long start = System.nanoTime();
     RowData row = new RowData();
     String pathInfo = request.getPathInfo();
-    System.out.println("pathInfo = " + pathInfo);
+    logger.debug("pathInfo {}", pathInfo);
     String modelName = null;
     if (pathInfo != null) {
       modelName = pathInfo.replace("/", "");
     }
     if (transform == null) { // no jar transformation
+      logger.debug("no transform");
       fillRowDataFromHttpRequest(request, row);
     }
     else {
+      logger.debug("transform {}", transform);
       // transform with the jar
       String req = request.getQueryString().replaceAll("%20", " ");
       //System.out.println(req);
       byte[] bytes = req.getBytes();
-      Map<String, Object> tr = transform.fit(new String(bytes));
+      logger.debug("req bytes {}", bytes);
+//      Map<String, Object> tr = transform.fit(new String(bytes));
+      Map<String, Object> tr = transform.fit(bytes);
       for (String k : tr.keySet()) {
         logger.debug("{} = {}", k, tr.get(k));
         row.put(k, tr.get(k));

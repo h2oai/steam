@@ -224,7 +224,8 @@ public class Util {
       java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT, replaceTransform);
 //    logger.info(" is pojo " + isPojoNotRawfile);
 //    java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_POJO_BOOLEAN, isPojoNotRawfile ? "true" : "false");
-    java = java.replace(REPLACE_THIS_WITH_MODEL, modelCode);
+    if (modelCode != null)
+      java = java.replace(REPLACE_THIS_WITH_MODEL, modelCode);
     FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
   }
 

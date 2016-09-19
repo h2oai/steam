@@ -44,7 +44,7 @@ public class MakeWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      logger.debug("servletPath = {}", servletPath);
+      logger.info("servletPath = {}", servletPath);
     }
     catch (MalformedURLException e) {
       logger.error("Can't init servlet", e);
@@ -57,7 +57,7 @@ public class MakeWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      logger.debug("tmpDir {}", tmpDir);
+      logger.info("tmpDir {}", tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -89,6 +89,7 @@ public class MakeWarServlet extends HttpServlet {
             pojos.add(pojofile);
             predictorClassName = filename.replace(".java", "");
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
+            logger.info("added pojo model {}", filename);
           }
           if (field.equals("jar")) {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
@@ -96,16 +97,15 @@ public class MakeWarServlet extends HttpServlet {
           }
           if (field.equals("prejar")) {
             prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
-            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(webInfDir, filename));
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
-
-          if (field.equals("raw")) { // a raw model zip file
+          if (field.equals("mojo")) { // a raw model zip file, a mojo file
             rawfile = filename;
             rawfiles.add(rawfile);
             predictorClassName = filename.replace(".zip", "");
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
+            logger.info("added mojo model {}", filename);
           }
-
         }
         else { // form text field
           if (field.equals("preclass")) {
@@ -118,7 +118,7 @@ public class MakeWarServlet extends HttpServlet {
       if ((pojofile == null || jarfile == null) && (rawfile == null || jarfile == null))
         throw new Exception("need either pojo and genmodel jar, or raw file and genmodel jar ");
 
-      logger.debug("prejar {}  preclass {}", prejarfile, transformerClassName);
+      logger.info("prejar {}  preclass {}", prejarfile, transformerClassName);
       if (prejarfile != null && transformerClassName == null || prejarfile == null && transformerClassName != null)
         throw new Exception("need both prejar and preclass");
 
@@ -128,16 +128,6 @@ public class MakeWarServlet extends HttpServlet {
             "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile, "-d", outDir.getPath(), pojofile),
             "Compilation of pojo failed");
         logger.info("compiled pojo {}", pojofile);
-      }
-      else if (rawfile != null) {
-        // load the file from the
-
-//        ret = subprocess.call(["java", "-cp", genmodel_jar,
-//            "-ea", "-Xmx12g", "-XX:ReservedCodeCacheSize=256m",
-//            "hex.genmodel.tools.PredictCsv",
-//            "--input", inpfile, "--output", outfile, "--model", model_file, "--decimal"])
-
-
       }
 
       if (servletPath == null)
@@ -166,38 +156,17 @@ public class MakeWarServlet extends HttpServlet {
         replaceTransform = "null";
       else
         replaceTransform = "new " + transformerClassName + "()";
-//      String modelCode = null;
 
-      System.setProperty("user.dir", extraPath); //TODO....
-      String allcode = "models.clear();\n";
-//      int i = 0;
-//      if (pojofile != null) {
-//        FileUtils.writeLines(new File(servletPath, "modelnames.txt"), pojos);
-//        for (String s: pojos) {
-//          String modelName = s.replace(".java", "");
-//          String modelCode = "new " + modelName + "()";
-//          allcode += "addModel(\"" + modelName + "\", " + modelCode + ");\n";
-//          i += 1;
-//          logger.info("added pojo model {}  {}", modelName, i);
-//        }
-//      }
-//      else if (rawfile != null) {
-//        FileUtils.writeLines(new File(servletPath, "modelnames.txt"), rawfiles);
-//        String prefix =  webInfPath + File.separator;
-//        for (String s: rawfiles) {
-//          String modelName = s.replace(".zip", "");
-//          String modelCode = "RawModel.load(\"" + prefix + s + "\")";
-//          String tryCode = "try { " + modelCode + " } catch (IOException e) { logger.error(\"error {}\", e); }";
-//          allcode += "addModel(\"" + modelName + "\", " + tryCode + ");\n";
-//          i += 1;
-//          logger.info("added raw model {}  {}", modelName, i);
-//        }
-//      }
-      System.out.println(allcode);
-
-//      modelCode += "; modelName = \"" + predictorClassName + "\"";
-//      modelCode = "addModel(" + predictorClassName + ", " + modelCode + ")";
-      InstantiateJavaTemplateFile(tmpDir, allcode, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+      String modelCode = null;
+      if (!pojos.isEmpty()) {
+        FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), pojos);
+        modelCode = "null";
+      }
+      else if (!rawfiles.isEmpty()) {
+        FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), rawfiles);
+        modelCode = "RawModel.load(fileName)";
+      }
+      InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
 
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictServlet.java", "PredictServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
@@ -218,6 +187,13 @@ public class MakeWarServlet extends HttpServlet {
       filesc.add(new File(tmpDir, "jquery.js"));
       filesc.add(new File(tmpDir, "predict.js"));
       filesc.add(new File(tmpDir, "custom.css"));
+      filesc.add(new File(tmpDir, "modelnames.txt"));
+      for (String m : pojos) {
+        filesc.add(new File(tmpDir, m));
+      }
+      for (String m : rawfiles) {
+        filesc.add(new File(tmpDir, m));
+      }
       Collection<File> dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "bootstrap"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
       filesc.addAll(dirc);
       dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "fonts"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
@@ -258,14 +234,14 @@ public class MakeWarServlet extends HttpServlet {
     }
     finally {
       // if the temp directory is still there we delete it
-      if (tmpDir != null && tmpDir.exists()) {
-        try {
-          FileUtils.deleteDirectory(tmpDir);
-        }
-        catch (IOException e) {
-          logger.error("Can't delete tmp directory");
-        }
-      }
+//      if (tmpDir != null && tmpDir.exists()) {
+//        try {
+//          FileUtils.deleteDirectory(tmpDir);
+//        }
+//        catch (IOException e) {
+//          logger.error("Can't delete tmp directory");
+//        }
+//      }
     }
 
   }

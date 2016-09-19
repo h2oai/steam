@@ -6,7 +6,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -17,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -74,16 +74,21 @@ public class MakePythonWarServlet extends HttpServlet {
       List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
       String pojofile = null;
       String jarfile = null;
+      String rawfile = null;
       String pythonfile = null;
       String predictorClassName = null;
+      ArrayList<String> pojos = new ArrayList<String>();
+      ArrayList<String> rawfiles = new ArrayList<String>();
       for (FileItem i : items) {
         String field = i.getFieldName();
         String filename = i.getName();
         if (filename != null && filename.length() > 0) {
           if (field.equals("pojo")) {
             pojofile = filename;
+            pojos.add(pojofile);
             predictorClassName = filename.replace(".java", "");
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
+            logger.info("added pojo model {}", filename);
           }
           if (field.equals("jar")) {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
@@ -97,16 +102,25 @@ public class MakePythonWarServlet extends HttpServlet {
             pythonfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
-
+          if (field.equals("mojo")) { // a raw model zip file, a mojo file
+            rawfile = filename;
+            rawfiles.add(rawfile);
+            predictorClassName = filename.replace(".zip", "");
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
+            logger.info("added mojo model {}", filename);
+          }
         }
       }
       System.out.printf("jar %s  pojo %s  python %s\n", jarfile, pojofile, pythonfile);
-      if (pojofile == null || jarfile == null)
-        throw new Exception("need pojo, jar and python files");
+      if ((pojofile == null || jarfile == null) && (rawfile == null || jarfile == null))
+        throw new Exception("need either pojo and genmodel jar, or raw file and genmodel jar ");
 
-      // Compile the pojo
-      runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
-          "-cp", jarfile, "-d", outDir.getPath(), pojofile), "Compilation of pojo failed");
+      if (pojofile != null) {
+        // Compile the pojo
+        runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+            "-cp", jarfile, "-d", outDir.getPath(), pojofile), "Compilation of pojo failed");
+        logger.info("compiled pojo {}", pojofile);
+      }
 
       if (servletPath == null)
         throw new Exception("servletPath is null");
@@ -125,7 +139,18 @@ public class MakePythonWarServlet extends HttpServlet {
       FileUtils.copyDirectoryToDirectory(new File(servletPath, extraPath + "fonts"), tmpDir);
 
       // change the class name in the predictor template file to the predictor we have
-      InstantiateJavaTemplateFile(tmpDir, null, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java"); // TODO must be fixed!!!
+      String modelCode = null;
+      if (!pojos.isEmpty()) {
+        FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), pojos);
+        modelCode = "null";
+      }
+      else if (!rawfiles.isEmpty()) {
+        FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), rawfiles);
+        modelCode = "RawModel.load(fileName)";
+      }
+      InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+//      InstantiateJavaTemplateFile(tmpDir, "new " + predictorClassName + "()", predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictPythonServlet.java", "PredictPythonServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
@@ -145,7 +170,13 @@ public class MakePythonWarServlet extends HttpServlet {
       filesc.add(new File(tmpDir, "jquery.js"));
       filesc.add(new File(tmpDir, "predict.js"));
       filesc.add(new File(tmpDir, "custom.css"));
-
+      filesc.add(new File(tmpDir, "modelnames.txt"));
+      for (String m : pojos) {
+        filesc.add(new File(tmpDir, m));
+      }
+      for (String m : rawfiles) {
+        filesc.add(new File(tmpDir, m));
+      }
       Collection<File> dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "bootstrap"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
       filesc.addAll(dirc);
       dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "fonts"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);

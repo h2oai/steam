@@ -31,21 +31,35 @@ public class PredictPythonServlet extends HttpServlet {
   private static File servletPath = null;
   String[] colNames;
 
+//  public void init(ServletConfig servletConfig) throws ServletException {
+//    super.init(servletConfig);
+//    try {
+//      servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
+//      logger.debug("servletPath {}",servletPath);
+//
+//      if (rawModel == null || model == null)
+//        throw new ServletException("can't load model");
+//
+//      colNames = rawModel.getNames();
+//
+//      startPython();
+//    }
+//    catch (Exception e) {
+//      e.printStackTrace();
+//    }
+//  }
+
   public void init(ServletConfig servletConfig) throws ServletException {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      logger.debug("servletPath {}",servletPath);
-
-      if (rawModel == null || model == null)
-        throw new ServletException("can't load model");
-
-      colNames = rawModel.getNames();
-
-      startPython();
+      logger.debug("servletPath {}", servletPath);
+      ServletUtil.loadModels(servletPath);
+      model = ServletUtil.model;
+      logger.debug("model {}", model);
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (MalformedURLException e) {
+      logger.error("init failed", e);
     }
   }
 
