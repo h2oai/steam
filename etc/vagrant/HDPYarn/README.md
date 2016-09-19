@@ -18,8 +18,8 @@ This vagrant creates a CentOS 6.8 box with YARN and PostgreSQL set ready for Ste
 3. In order to utilize yarn with steam, steam needs to be started as root. (The scoring service can be run using the default, no need for root.) 
     ```
     sudo env PATH=$PATH:/usr/local/hadoop/bin \
-    ./steam serve master \
-    --superuser-name=superuser \
+    ./steamY serve master \
+    --superuser-name=vagrant \
     --superuser-password=superuser
     ```
 
