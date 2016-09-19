@@ -205,7 +205,7 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 		return err
 	}
 
-	return s.ds.UpdateClusterState(pz, clusterId, data.StoppedState)
+	return s.ds.DeleteCluster(pz, clusterId)
 }
 
 func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, error) {

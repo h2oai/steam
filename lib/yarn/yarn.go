@@ -145,7 +145,7 @@ func yarnCommand(uid, gid uint32, name, username string, args ...string) (string
 
 	// Execute command
 	if err := cmd.Run(); err != nil {
-		return "", "", errors.Wrapf(err, "failed running command: %v", cmdErr)
+		return "", "", errors.Wrapf(err, "failed running command %s: %v", cmd.Args, cmdErr)
 	}
 
 	return appID, address, nil
