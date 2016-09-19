@@ -2,11 +2,13 @@
 
 source bash_unit_tests.sh
 
+(cd .. && ./gradlew build) || exit 1
 
 # start server
 echo "Starting building server"
 
 nc -z localhost 55000 && echo "Something already running on port 55000" && exit 1
+
 
 java -jar ../jetty-runner-8.1.14.v20131031.jar --port 55000 ../build/libs/ROOT.war &
 BUILD_PID=$!
