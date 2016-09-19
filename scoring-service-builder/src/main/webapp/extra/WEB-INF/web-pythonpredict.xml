@@ -6,7 +6,6 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     <servlet>
         <servlet-name>PredictPython</servlet-name>
         <servlet-class>PredictPythonServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
         <servlet-name>Info</servlet-name>
@@ -23,7 +22,7 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
 
     <servlet-mapping>
         <servlet-name>PredictPython</servlet-name>
-        <url-pattern>/pypredict</url-pattern>
+        <url-pattern>/pypredict/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Info</servlet-name>

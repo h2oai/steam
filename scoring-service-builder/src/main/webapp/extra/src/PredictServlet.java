@@ -26,8 +26,8 @@ public class PredictServlet extends HttpServlet {
 
   private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
-  private static GenModel rawModel = ServletUtil.rawModel;
-  private static EasyPredictModelWrapper model = ServletUtil.model;
+  private static GenModel rawModel = null;
+  private static EasyPredictModelWrapper model = null;
   private static Transform transform = ServletUtil.transform;
 
   private File servletPath = null;
@@ -37,7 +37,9 @@ public class PredictServlet extends HttpServlet {
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
       logger.debug("servletPath {}", servletPath);
-
+      ServletUtil.loadModels(servletPath);
+      model = ServletUtil.model;
+      logger.debug("model {}", model);
      }
     catch (MalformedURLException e) {
       logger.error("init failed", e);
@@ -63,14 +65,23 @@ public class PredictServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     long start = System.nanoTime();
     RowData row = new RowData();
+    String pathInfo = request.getPathInfo();
+    logger.debug("pathInfo {}", pathInfo);
+    String modelName = null;
+    if (pathInfo != null) {
+      modelName = pathInfo.replace("/", "");
+    }
     if (transform == null) { // no jar transformation
+      logger.debug("no transform");
       fillRowDataFromHttpRequest(request, row);
     }
     else {
+      logger.debug("transform {}", transform);
       // transform with the jar
       String req = request.getQueryString().replaceAll("%20", " ");
       //System.out.println(req);
       byte[] bytes = req.getBytes();
+      logger.debug("req bytes {}", bytes);
       Map<String, Object> tr = transform.fit(new String(bytes));
       for (String k : tr.keySet()) {
         logger.debug("{} = {}", k, tr.get(k));
@@ -82,7 +93,11 @@ public class PredictServlet extends HttpServlet {
         throw new Exception("No predictor model");
 
       // we have a model loaded, do the prediction
-      AbstractPrediction pr = ServletUtil.predict(row);
+      AbstractPrediction pr = null;
+      if (modelName == null)
+        pr = ServletUtil.predict(row);
+      else
+        pr = ServletUtil.predictModel(modelName, row);
 
       // assemble json result
       String prJson = gson.toJson(pr);
