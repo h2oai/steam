@@ -17,7 +17,7 @@ export default class InputFeedback extends React.Component<Props, any> {
     return (
       <div className="input-feedback feedback-progress">
         { this.props.type === FeedbackType.Progress ?
-        <div>
+        <div className="feedback-inner">
           <div className='uil-facebook-css'>
             <div></div>
             <div></div>

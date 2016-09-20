@@ -22,13 +22,14 @@ export const REQUEST_DATASETS_FROM_CLUSTER = 'REQUEST_DATASETS_FROM_CLUSTER';
 export const RECEIVE_DATASETS_FROM_CLUSTER = 'RECEIVE_DATASETS_FROM_CLUSTER';
 export const RECEIVE_MODELS_FROM_PROJECT = 'RECEIVE_MODELS_FROM_PROJECT';
 export const RECEIVE_PROJECT = 'RECEIVE_PROJECT';
+export const REGISTER_CLUSTER_ERROR = 'REGISTER_CLUSTER_ERROR';
 
 export function setCurrentProject(projectId) {
   return {
     type: SET_CURRENT_PROJECT,
     projectId
   };
-}
+};
 
 export const requestClusters = () => {
   return {
@@ -41,7 +42,7 @@ export function receiveClusters(clusters) {
     type: RECEIVE_CLUSTERS,
     clusters
   };
-}
+};
 
 export function resetClusterSelection()  {
   return {
@@ -49,6 +50,12 @@ export function resetClusterSelection()  {
   };
 };
 
+export function registerClusterError(message) {
+  return {
+    type: REGISTER_CLUSTER_ERROR,
+    message
+  };
+};
 
 export function fetchClusters() {
   return (dispatch, getState) => {
@@ -68,7 +75,7 @@ export function fetchClusters() {
 function _fetchClusters(dispatch, getState) {
     Remote.getClusters(0, 1000, (error, res) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving your list of clusters', null);
+        openNotification(NotificationType.Error, "Load Error", error.toString(), null);
         return;
       }
 
@@ -271,7 +278,7 @@ export function registerCluster(address: string) {
   return (dispatch) => {
     Remote.registerCluster(address, (error, res) => {
       if (error) {
-        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        dispatch(registerClusterError(error.message));
         return;
       }
       dispatch(fetchClusters());

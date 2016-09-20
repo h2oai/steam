@@ -36,6 +36,7 @@ interface Props {
   datasets: Dataset[],
   isClusterFetchInProcess: boolean,
   isModelFetchInProcess: boolean
+  registerClusterError: string
 }
 
 export class ImportNewProject extends React.Component<DispatchProps & Props, any> {
@@ -191,6 +192,9 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               </div>
               <form onSubmit={this.registerCluster.bind(this)}>
                 <input type="text" name="ip-address" placeholder="IP Address"/>
+                { this.props.registerClusterError ?
+                  <InputFeedback message={ this.props.registerClusterError } type={FeedbackType.Error} />
+                  : null }
                 <input type="text" name="port" placeholder="Port"/>
                 <button type="submit" className="button-primary">Connect</button>
               </form>
@@ -275,7 +279,8 @@ function mapStateToProps(state): any {
     datasets: state.projects.datasets,
     project: state.project,
     isClusterFetchInProcess: state.projects.isClusterFetchInProcess,
-    isModelFetchInProcess: state.projects.isModelFetchInProcess
+    isModelFetchInProcess: state.projects.isModelFetchInProcess,
+    registerClusterError: state.projects.registerClusterError
   };
 }
 
