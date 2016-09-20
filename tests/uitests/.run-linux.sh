@@ -15,7 +15,7 @@ cp steam-develop-linux-amd64/var/master/scripts/database/create-schema.sql steam
 java -jar $H2O_PATH -port 54535 -name steamtest > h2o.log 2>&1 &
 H2O_PID=$!
 disown
-sleep 2
+sleep 5
 
 python init_h2o.py
 
