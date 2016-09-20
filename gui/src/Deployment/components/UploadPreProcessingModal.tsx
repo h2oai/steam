@@ -71,7 +71,7 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
   render(): React.ReactElement<DefaultModal> {
     return (
       <DefaultModal className="upload-preprocessing-modal" open={this.props.open}>
-        <header>
+        <header className="page-header">
           UPLOAD PRE-PROCESSING PACKAGE (PYTHON)
         </header>
         <section>
@@ -134,10 +134,10 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
               <Row className="button-row">
                 <Cell/>
                 <Cell>
-                  <button type="submit" className="default" onClick={this.uploadPackage.bind(this)}>
+                  <button type="submit" className="button-primary" onClick={this.uploadPackage.bind(this)}>
                     Upload
                   </button>
-                  <button className="default invert" onClick={this.props.cancel.bind(this)}>
+                  <button className="button-primary invert" onClick={this.props.cancel.bind(this)}>
                     Cancel
                   </button>
                 </Cell>

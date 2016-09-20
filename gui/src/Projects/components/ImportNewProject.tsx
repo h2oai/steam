@@ -148,7 +148,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           <div className="select-cluster">
             <h1>1. Select H2O cluster</h1>
             { this.state.clusterId ?
-              <div className="cluster-info">
+              <div className="cluster-info intro">
                 <span><i className="fa fa-cubes cluster-image"/></span>
                 <div className="cluster-details">
                   <div>{selectedClusterName}</div>
@@ -156,7 +156,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                   <div onClick={this.resetClusterSelection.bind(this)} className="select-new-cluster"><i className="fa fa-close"/> use a different cluster</div>
                 </div>
               </div> :
-              <div>
+              <div className="intro">
                 Select an H2O cluster to import models and datasets from.
                 <Table>
                   <Row header={true}>
@@ -186,7 +186,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           { !this.state.clusterId ?
             <div className="connect-cluster">
               <h1>&hellip; or connect to a new H2O cluster</h1>
-              <div>
+              <div className="intro">
                 Connect to a H2O cluster where your existing models and data sets are located.
               </div>
               <form onSubmit={this.registerCluster.bind(this)}>
@@ -202,7 +202,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         </div>
         {this.state.clusterId ? <div>
           <h1>2. Select Dataframe</h1>
-          <div>
+          <div className="intro">
             <select name="selectDataframe" onChange={this.selectDataset.bind(this)}>
               <option></option>
               {this.props.datasets ? this.props.datasets.map((dataset, i) => {
@@ -217,7 +217,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         {(this.state.datasetId && !this.props.isModelFetchInProcess) ?
           <div>
             <h1>3. Select Model Category</h1>
-            <div>
+            <div className="intro">
               <select name="selectModelCategory" onChange={this.selectCategory.bind(this)}>
                 <option></option>
                 {this.props.models ? _.uniqBy(this.props.models, 'model_category').map((model, i) => {
@@ -228,7 +228,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           </div> : null}
         {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <h1>4. Pick Models to Import</h1>
-          <div>
+          <div className="intro">
             Models in a project must share the same feature set and response column to enable comparison.
           </div>
           <Table className="import-models">
@@ -254,7 +254,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         </div> : null}
         {this.state.datasetId && !_.isEmpty(this.props.models && this.state.modelCategory) ? <div className="name-project">
           <h1>5. Name Project</h1>
-          <div>
+          <div className="intro">
             <input ref="projectName" type="text"/>
           </div>
         </div> : null}

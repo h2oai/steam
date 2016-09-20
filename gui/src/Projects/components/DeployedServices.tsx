@@ -53,7 +53,7 @@ export class DeployedServices extends React.Component<Props & DispatchProps, any
     if (_.isEmpty(runningServices)) {
       return (
         <div>
-          <h3>There are no services currently deployed.</h3>
+          <div className="lede intro">There are no services currently deployed.</div>
         </div>
       );
     }

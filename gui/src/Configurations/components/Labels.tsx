@@ -141,12 +141,12 @@ class Labels extends React.Component<Props, any> {
         return (
             <div className="labels">
                 <h1>Model Labels</h1>
-                <p>
+                <p className="lede">
                     You can create labels for the models. A label can only be associated
                     with one model at a time. You can give different team members various
                     permissions.
                 </p>
-                <p>
+                <p className="lede">
                     For example, you can create "test" and "production" labels. You could
                     then allow the entire team to label a model "test", but only give admins
                     the power to label a model "production".

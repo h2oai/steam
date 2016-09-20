@@ -5,7 +5,6 @@
   border-bottom-style: dotted;
   border-bottom-width: 1px;
   border-bottom-color: $h2o-soft-grey;
-  padding: 15px 0;
   @media (min-width: 500px) {
     display: flex;
     flex-direction: row;
@@ -18,6 +17,7 @@
     border-bottom-width: 1px;
     border-bottom-color: $h2o-charcoal-grey;
     font-family: Oswald;
+    font-weight: 500;
     font-size: 14px;
     text-transform: uppercase;
     color: $h2o-charcoal-grey;

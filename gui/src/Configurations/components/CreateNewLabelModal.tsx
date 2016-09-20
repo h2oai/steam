@@ -67,7 +67,7 @@ export default class CreateNewLabelModal extends React.Component<Props, any> {
         return (
             <DefaultModal open={this.props.open} closeHandler={this.props.cancel}>
                 <div className="create-edit-label-modal">
-                    <header>
+                    <header className="page-header">
                         Create / Edit Label
                     </header>
                     <section>
@@ -94,10 +94,10 @@ export default class CreateNewLabelModal extends React.Component<Props, any> {
                             <Row className="button-row">
                                 <Cell className="table-row-name"></Cell>
                                 <Cell className="table-row-item">
-                                    <button className="default" onClick={this.save.bind(this) }>
+                                    <button className="button-primary" onClick={this.save.bind(this) }>
                                         Save
                                     </button>
-                                    <button className="default invert" onClick={this.cancel.bind(this) }>
+                                    <button className="button-primary invert" onClick={this.cancel.bind(this) }>
                                         Cancel
                                     </button>
                                 </Cell>

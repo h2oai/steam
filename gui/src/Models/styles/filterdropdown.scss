@@ -58,9 +58,10 @@
         padding: 0;
         margin:0;
         li {
+          font-family: "Open Sans", sans-serif;
           cursor: pointer;
           padding: 5px 0;
-          font-weight: 800;
+          font-weight: 600;
           color: $brand-dark-3;
           &.selected {
             color: $brand-dark-1;
