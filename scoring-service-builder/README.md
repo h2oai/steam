@@ -3,11 +3,11 @@
 The H2O Prediction Service Builder is a standalone web service application that allows you to perform the following through either a web UI or from the command line:
 
 1. Compile one or more Java files (POJOs), and then build a Jar file from a POJO and a gen-model file
-2. Compile a POJO and then build a War file that is a web service from a POJO, gen-model. 
-You can then run the war file with Jetty, Tomcat, and more.
-3. Build a War file with a POJO predictor and Python pre-preprocessing
-4. Build a War file with a POJO predictor and pre-preprocessing from a Jar file.
-This enables use of languages such as Java, Scala, Clojure, Jython, JRuby, and Groovy
+2. Compile a POJO or model (MOJO) and build a War file that is a web service from a POJO/MOJO, gen-model. 
+You can then run the war file with Jetty, Tomcat, and more
+3. Build a War file with a POJO/MOJO predictor and Python pre-preprocessing
+4. Build a War file with a POJO/MOJO predictor and preprocessing from a Jar file.
+This enables use of languages such as Java, Scala, Clojure, Jython, JRuby, and Groovy for arbitrary preprocessing
 
 
 ### Notes
@@ -16,6 +16,8 @@ All code is compiled to Java 1.6 to make it useable with rJava for R.
 
 If you use an older version of Java, you will need to use an older jetty-runner. Jetty 9.3 requires Java 1.8. Jetty 9.0-9.2 requires Java 1.7. Jetty 8 requires Java 1.6.
 Testing has been done on Java 1.6-1.8. For Java 1.8, you can use all Jetty runners. For Java 1.7, you can use all except the 9.3 version. For Java 1.6, you need Jetty 8.
+
+Not all Jetty Jar files work. There's a working Jar for each Jetty version included in this distribution.
 
 ## Build and Run the Builder Service
 
