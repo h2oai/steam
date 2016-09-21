@@ -141,6 +141,7 @@ func Run(version, buildDate string, opts Opts) {
 		ds,
 		opts.CompilationServiceAddress,
 		opts.ScoringServiceHost,
+		opts.ClusterProxyAddress,
 		opts.ScoringServicePorts,
 		opts.Yarn.KerberosEnabled,
 		opts.Yarn.Username,
