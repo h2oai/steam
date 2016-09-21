@@ -66,8 +66,14 @@ func (pm *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	clusterHeader := r.Header.Get("X-Cluster")
 	if clusterHeader == "" {
-		http.Error(w, "Cluster requests via Steam requires a valid X-Cluster HTTP header", http.StatusBadRequest)
-		return
+		clusterId := r.URL.Query().Get("cluster_id")
+		if r.URL.Path == "/flow/" && clusterId != "" {
+			r.Header.Set("X-Cluster", clusterId)
+			clusterHeader = clusterId
+		} else {
+			http.Error(w, "Cluster requests via Steam requires a valid X-Cluster HTTP header", http.StatusBadRequest)
+			return
+		}
 	}
 
 	clusterId, err := strconv.ParseInt(clusterHeader, 10, 64)
