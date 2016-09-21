@@ -113,7 +113,8 @@ func Run(version, buildDate string, opts Opts) {
 	// --- init storage ---
 
 	ds, err := data.Create(
-		opts.DB.Connection,
+		path.Join(wd, fs.DbDir, "steam.db"),
+		// opts.DB.Connection,
 		opts.DB.SuperuserName,
 		opts.DB.SuperuserPassword,
 	)

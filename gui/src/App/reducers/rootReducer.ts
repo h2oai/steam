@@ -15,6 +15,7 @@ import { usersReducer } from '../../Users/reducers/users.reducer';
 import { notificationReducer } from './notification.reducer';
 import { globalReducer } from './global.reducer';
 import { collaboratorsReducer } from "../../Collaborators/reducers/collaborators.reducer";
+import { clustersReducer } from '../../Clusters/reducers/clusters.reducer';
 
 export const rootReducer = combineReducers({
   global: globalReducer,
@@ -28,5 +29,6 @@ export const rootReducer = combineReducers({
   notification: notificationReducer,
   users: usersReducer,
   routing: routerReducer,
-  collaborators: collaboratorsReducer
+  collaborators: collaboratorsReducer,
+  clusters: clustersReducer
 });

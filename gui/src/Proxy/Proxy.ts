@@ -97,6 +97,12 @@ export interface ClusterType {
   
 }
 
+export interface Config {
+  
+  kerberos_enabled: boolean
+  
+}
+
 export interface Dataset {
   
   id: number
@@ -458,6 +464,9 @@ export interface Service {
   // Ping the Steam server
   pingServer: (input: string, go: (error: Error, output: string) => void) => void
   
+  // No description available
+  getConfig: (go: (error: Error, config: Config) => void) => void
+  
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
   
@@ -465,10 +474,10 @@ export interface Service {
   unregisterCluster: (clusterId: number, go: (error: Error) => void) => void
   
   // Start a cluster using Yarn
-  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void) => void
+  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void) => void
   
   // Stop a cluster using Yarn
-  stopClusterOnYarn: (clusterId: number, go: (error: Error) => void) => void
+  stopClusterOnYarn: (clusterId: number, keytab: string, go: (error: Error) => void) => void
   
   // Get cluster details
   getCluster: (clusterId: number, go: (error: Error, cluster: Cluster) => void) => void
@@ -801,6 +810,16 @@ interface PingServerOut {
   
 }
 
+interface GetConfigIn {
+  
+}
+
+interface GetConfigOut {
+  
+  config: Config
+  
+}
+
 interface RegisterClusterIn {
   
   address: string
@@ -833,7 +852,7 @@ interface StartClusterOnYarnIn {
   
   memory: string
   
-  username: string
+  keytab: string
   
 }
 
@@ -846,6 +865,8 @@ interface StartClusterOnYarnOut {
 interface StopClusterOnYarnIn {
   
   cluster_id: number
+  
+  keytab: string
   
 }
 
@@ -2260,6 +2281,18 @@ export function pingServer(input: string, go: (error: Error, output: string) => 
   });
 }
 
+export function getConfig(go: (error: Error, config: Config) => void): void {
+  const req: GetConfigIn = {  };
+  Proxy.Call("GetConfig", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetConfigOut = <GetConfigOut> data;
+      return go(null, d.config);
+    }
+  });
+}
+
 export function registerCluster(address: string, go: (error: Error, clusterId: number) => void): void {
   const req: RegisterClusterIn = { address: address };
   Proxy.Call("RegisterCluster", req, function(error, data) {
@@ -2284,8 +2317,8 @@ export function unregisterCluster(clusterId: number, go: (error: Error) => void)
   });
 }
 
-export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, username: string, go: (error: Error, clusterId: number) => void): void {
-  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, username: username };
+export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void): void {
+  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, keytab: keytab };
   Proxy.Call("StartClusterOnYarn", req, function(error, data) {
     if (error) {
       return go(error, null);
@@ -2296,8 +2329,8 @@ export function startClusterOnYarn(clusterName: string, engineId: number, size: 
   });
 }
 
-export function stopClusterOnYarn(clusterId: number, go: (error: Error) => void): void {
-  const req: StopClusterOnYarnIn = { cluster_id: clusterId };
+export function stopClusterOnYarn(clusterId: number, keytab: string, go: (error: Error) => void): void {
+  const req: StopClusterOnYarnIn = { cluster_id: clusterId, keytab: keytab };
   Proxy.Call("StopClusterOnYarn", req, function(error, data) {
     if (error) {
       return go(error);
