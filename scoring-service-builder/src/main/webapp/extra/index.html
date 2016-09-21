@@ -120,11 +120,11 @@
         <!--class="col-md-6 col-sm-12 col-lg-6" -->
 
         <section id="batch">
-            <header class="expandableHandler">
+            <header>
               <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Batch Prediction
               <span class="subtitle">*optional</span>
             </header>
-            <div id="batch-content" class="expandable">
+            <div id="batch-content">
               <form method="post" action="predict" enctype="multipart/form-data">
                   <!--<div class="form-group">-->
       <!--                 <div class="input-group">
@@ -256,11 +256,7 @@
         $('#reset-btn').click(function(){
             $('#allparams')[0].reset();       
         })
-
-        $('.expandableHandler').click(function(){
-            $(this).parent().find('.expandable').toggle();
-        })
-
+        
   </script>
 
 </body>
