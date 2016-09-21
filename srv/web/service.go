@@ -64,7 +64,8 @@ type ClusterType struct {
 }
 
 type Config struct {
-	KerberosEnabled bool `json:"kerberos_enabled"`
+	KerberosEnabled     bool   `json:"kerberos_enabled"`
+	ClusterProxyAddress string `json:"cluster_proxy_address"`
 }
 
 type Dataset struct {
