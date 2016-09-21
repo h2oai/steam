@@ -26,7 +26,7 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Info</servlet-name>
-        <url-pattern>/info</url-pattern>
+        <url-pattern>/info/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Stats</servlet-name>
