@@ -85,42 +85,50 @@ The next section describes how to add additional users to the Steam database.
 
 ### <a name="adding"></a>Adding Roles, Workgroups, and Users
 
-The following example creates sample roles, workgroups, and users using the CLI. Refer to the [CLI Command Reference Appendix](../docs/CLIAppendix.md) for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the <a href="https://github.com/h2oai/steamY/tree/master/docs/cli">CLI Commands</a> in github for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
 
-1. Create an engineer role and link that role to permissions.
+1. Create an engineer role and link that role to permissions. Note that you can use `./steam get all --permissions` to view all available permissions and their corresponding IDs. 
 
-		./steam create role engineer --desc="a default engineer role"
-		./steam link role engineer ViewModel ViewProject ViewWorkgroup
-   <!-- -->
+		./steam create role --name="engineer" --description="a default engineer role"
+		RoleId:	2
+		./steam link role --with-permission=true --role-id=2 --permission-id=18
+		./steam link role --with-permission=true --role-id=2 --permission-id=4
+		./steam link role --with-permission=true --role-id=2 --permission-id=12
+	<!-- -->
 		
 1. Create a data scientist role and link that role to permissions.
 
-		./steam create role datascience --desc="a default data scientist role"
-		./steam link role datascience ManageProject ManageModel ViewCluster 
-   <!-- -->
+		./steam create role --name="datascience" --description="a default data scientist role"
+		RoleId:	3
+		./steam link role --with-permission=true --role-id=3 --permission-id=11
+		./steam link role --with-permission=true --role-id=3 --permission-id=17
+		./steam link role --with-permission=true --role-id=3 --permission-id=10
+	<!-- -->
 		
 1. Create preparation and production workgroups.
 
-		./steam create workgroup preparation --desc="data prep group"
-		./steam create workgroup production --desc="production group"
+		./steam create workgroup --name="preparation" --description="data prep group"
+		WorkgroupId:	2
+		./steam create workgroup --name="production" --description="production group"
+		WorkgroupId:	3
    <!-- -->
 		
 1. Create two users - Bob and Jim.
 
-		./steam create identity bob bobSpassword
-		./steam create identity jim j1mSpassword
+		./steam create identity --name="bob" --password="bobSpassword"
+		./steam create identity --name="jim" --password="j1mSpassword"
    <!-- -->
 		
 1. Link Bob to the engineer role; link Jim to the datascience role.
 
-		./steam link identity bob role engineer
-		./steam link identity jim role datascience
+		./steam link identity --with-role --identity-id=2 --role-id=2
+		./steam link identity --with-role --identity-id=3 --role-id=3
    <!-- -->
 		
 1. Link Bob to the preparation workgroup; link Jim to the production workgroup.
 
-		./steam link identity bob workgroup preparation
-		./steam link identity jim workgroup production
+		./steam link identity --with-workgroup --identity-id=2 --workgroup-id=2
+		./steam link identity --with-workgroup --identity-id=3 --workgroup-id=3
 
 ## <a name="startingh2o"></a>Starting H2O and Building a Model
 
