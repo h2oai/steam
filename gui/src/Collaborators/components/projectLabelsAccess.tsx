@@ -32,7 +32,7 @@ export class ProjectLabelsAccess extends React.Component<Props & DispatchProps, 
         <p></p>
         <h1>Labels Access</h1>
         <p className="lede">A label is applied to a particular model to designate it for particular use, e.g. a 'prod' label to make a model as fit for production. Labels have restricted access control to make sure only users with appropriate privileges can change which models have a particular label.</p>
-        <p>All labels for this project, along with users privileges for that label, are listed below.</p>
+        <p className="lede">All labels for this project, along with users privileges for that label, are listed below.</p>
         <Table>
           <Row header={true}>
             <Cell>LABEL</Cell>

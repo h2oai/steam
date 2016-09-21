@@ -14,17 +14,18 @@ html, body, .app-container, #app {
 
 h1 {
   font-family: Oswald;
-  font-weight: 500;
+  font-weight:400;
   font-size: 36px;
   text-transform: capitalize;
   color: $h2o-charcoal-grey;
   line-height: 1.1;
   margin-bottom: 0px;
+  margin-top: 22px;
 }
 
 h2 {
   font-family: Oswald;
-  font-weight: 500;
+  font-weight: 400;
   font-size: 24px;
   text-transform: capitalize;
   color: $h2o-charcoal-grey;
@@ -50,6 +51,11 @@ article {
   p {
     font-family: $font-text;
   }
+}
+
+input {
+  margin-bottom: 10px;
+  margin-right: 11px;
 }
 
 *:focus {
@@ -102,7 +108,6 @@ select {
   @extend .button-base;
   color: white;
   background-color: $h2o-orange-prime;
-  font-weight: 600;
 }
 .button-secondary {
   @extend .button-base;
@@ -111,7 +116,6 @@ select {
   border-color: $h2o-orange-prime;
   border-style: solid;
   border-width: 2px;
-  font-weight: 600;
 }
 .button {
   color: $h2o-soft-grey;

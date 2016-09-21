@@ -32,7 +32,7 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
         <p></p>
         <h1>Members</h1>
         <p className="lede">Theses are users who have access to this project, meaning they can see data, models and services associated with the project. Additionally, owners and collaborators can create new models, and new services based on those models.</p>
-        <p>Labels associated with projects have <span className="link" onClick={ this.props.loadLabelsTab }>their own access controls, shown here</span>.</p>
+        <p className="lede">Labels associated with projects have <span className="link" onClick={ this.props.loadLabelsTab }>their own access controls, shown here</span>.</p>
         <Table>
           <Row header={true}>
             <Cell>USER</Cell>

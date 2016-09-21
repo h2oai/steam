@@ -97,7 +97,7 @@ export default class CreateNewLabelModal extends React.Component<Props, any> {
                                     <button className="button-primary" onClick={this.save.bind(this) }>
                                         Save
                                     </button>
-                                    <button className="button-primary invert" onClick={this.cancel.bind(this) }>
+                                    <button className="button-secondary" onClick={this.cancel.bind(this) }>
                                         Cancel
                                     </button>
                                 </Cell>

@@ -137,7 +137,7 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                   <button type="submit" className="button-primary" onClick={this.uploadPackage.bind(this)}>
                     Upload
                   </button>
-                  <button className="button-primary invert" onClick={this.props.cancel.bind(this)}>
+                  <button className="button-secondary" onClick={this.props.cancel.bind(this)}>
                     Cancel
                   </button>
                 </Cell>
