@@ -3,7 +3,8 @@ package api
 // --- Type Definitions ---
 
 type Config struct {
-	KerberosEnabled bool
+	KerberosEnabled     bool
+	ClusterProxyAddress string
 }
 
 type Cluster struct {
