@@ -31,6 +31,7 @@ type Service struct {
 	ds                        *data.Datastore
 	compilationServiceAddress string
 	scoringServiceAddress     string
+	clusterProxyAddress       string
 	scoringServicePortMin     int
 	scoringServicePortMax     int
 	kerberosEnabled           bool
@@ -38,17 +39,21 @@ type Service struct {
 	keytab                    string
 }
 
-func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, scoringServicePortsRange [2]int, kerberos bool, username, keytab string) *Service {
+func NewService(
+	workingDir string,
+	ds *data.Datastore,
+	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
+	scoringServicePortsRange [2]int,
+	kerberos bool,
+	username, keytab string,
+) *Service {
 	return &Service{
 		workingDir,
 		ds,
-		compilationServiceAddress,
-		scoringServiceAddress,
-		scoringServicePortsRange[0],
-		scoringServicePortsRange[1],
+		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
+		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
-		username,
-		keytab,
+		username, keytab,
 	}
 }
 
@@ -65,7 +70,10 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 }
 
 func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
-	return &web.Config{s.kerberosEnabled}, nil
+	return &web.Config{
+		KerberosEnabled:     s.kerberosEnabled,
+		ClusterProxyAddress: s.clusterProxyAddress,
+	}, nil
 }
 
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
