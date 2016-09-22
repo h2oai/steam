@@ -113,6 +113,7 @@ linux:
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=linux GOARCH=amd64 go build
 	mkdir -p ./dist/$(DIST_LINUX)/var/master && mv ./steamY ./dist/$(DIST_LINUX)/steam
+	cp LICENSE ./dist/$(DIST_LINUX)/LICENSE
 	mv $(SLA)/steamlauncher ./dist/$(DIST_LINUX)/steam-launcher
 	cp $(SLA)/config.toml ./dist/$(DIST_LINUX)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
@@ -126,6 +127,7 @@ darwin:
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=darwin GOARCH=amd64 go build
 	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steamY ./dist/$(DIST_DARWIN)/steam
+	cp LICENSE ./dist/$(DIST_DARWIN)/LICENSE
 	mv $(SLA)/steamlauncher ./dist/$(DIST_DARWIN)/steam-launcher
 	cp $(SLA)/config.toml ./dist/$(DIST_DARWIN)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
