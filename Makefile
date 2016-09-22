@@ -101,6 +101,7 @@ linux:
 	rm -rf ./dist/$(DIST_LINUX)
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	mkdir -p ./dist/$(DIST_LINUX)/var/master && mv ./steamY ./dist/$(DIST_LINUX)/steam
+	cp LICENSE ./dist/$(DIST_LINUX)/LICENSE
 	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_LINUX)/var/master/
@@ -110,6 +111,7 @@ darwin:
 	rm -rf ./dist/$(DIST_DARWIN)
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steamY ./dist/$(DIST_DARWIN)/steam
+	cp LICENSE ./dist/$(DIST_DARWIN)/LICENSE
 	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
