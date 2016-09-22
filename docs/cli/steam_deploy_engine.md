@@ -9,10 +9,16 @@ Deploy an H2O engine to Steam.
 
 Examples:
 
-	$ steam deploy engine path/to/engine
+	$ steam deploy engine --file-path=path/to/engine
 
 ```
 steam deploy engine [enginePath]
+```
+
+### Options
+
+```
+      --file-path="": Path to engine
 ```
 
 ### Options inherited from parent commands

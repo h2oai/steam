@@ -25,8 +25,8 @@ steam get workgroup [?]
 
 ```
       --by-name[=false]: Get workgroup details by name
-      --name="": No description available
-      --workgroup-id=0: No description available
+      --name="": A string name.
+      --workgroup-id=0: Integer ID of a workgroup in Steam.
 ```
 
 ### Options inherited from parent commands

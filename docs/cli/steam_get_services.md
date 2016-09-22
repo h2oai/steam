@@ -9,8 +9,14 @@ Get Services
 
 Examples:
 
-    List services
+    List all services
     $ steam get services \
+        --offset=? \
+        --limit=?
+
+    List services for a project
+    $ steam get services --for-project \
+        --project-id=? \
         --offset=? \
         --limit=?
 
@@ -28,9 +34,11 @@ steam get services [?]
 
 ```
       --for-model[=false]: List services for a model
+      --for-project[=false]: List services for a project
       --limit=0: No description available
       --model-id=0: No description available
       --offset=0: No description available
+      --project-id=0: No description available
 ```
 
 ### Options inherited from parent commands

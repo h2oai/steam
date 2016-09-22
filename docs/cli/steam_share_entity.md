@@ -23,10 +23,10 @@ steam share entity [?]
 ### Options
 
 ```
-      --entity-id=0: No description available
-      --entity-type-id=0: No description available
-      --kind="": No description available
-      --workgroup-id=0: No description available
+      --entity-id=0: Integer ID for an entity in Steam.
+      --entity-type-id=0: Integer ID for the type of entity.
+      --kind="": Type of permission. Can be view, edit, or own.
+      --workgroup-id=0: Integer ID of a workgroup in Steam.
 ```
 
 ### Options inherited from parent commands

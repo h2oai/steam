@@ -12,7 +12,8 @@ Examples:
     Start a service
     $ steam start service \
         --model-id=? \
-        --port=?
+        --name=? \
+        --package-name=?
 
 ```
 steam start service [?]
@@ -22,7 +23,8 @@ steam start service [?]
 
 ```
       --model-id=0: No description available
-      --port=0: No description available
+      --name="": No description available
+      --package-name="": No description available
 ```
 
 ### Options inherited from parent commands

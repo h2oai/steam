@@ -22,9 +22,9 @@ steam update workgroup [?]
 ### Options
 
 ```
-      --description="": No description available
-      --name="": No description available
-      --workgroup-id=0: No description available
+      --description="": A string description
+      --name="": A string name.
+      --workgroup-id=0: Integer ID of a workgrou in Steam.
 ```
 
 ### Options inherited from parent commands
