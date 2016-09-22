@@ -15,17 +15,20 @@ import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
 import './styles/clusters.scss';
 import { Link } from 'react-router';
+import { getConfig } from './actions/clusters.actions';
 
 interface DispatchProps {
   fetchClusters: Function
   fetchModelsFromCluster: Function
   registerCluster: Function,
   unregisterCluster: Function,
-  stopClusterOnYarn: Function
+  stopClusterOnYarn: Function,
+  getConfig: Function
 }
 
 interface Props {
-  clusters: Cluster[]
+  clusters: Cluster[],
+  config: any
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
@@ -40,6 +43,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.clusters)) {
       this.props.fetchClusters();
+      this.props.getConfig();
     }
   }
 
@@ -109,6 +113,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + ':9001/flow/?cluster_id=' + cluster.id} target="_blank"
                                                         rel="noopener">{cluster.name}
                     @ {cluster.address}</a></span>
+                  {true === true ? <input type="text"/> : null}
                   <button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster)}><i
                     className="fa fa-trash"/></button>
                 </header>
@@ -150,7 +155,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
     registerCluster: bindActionCreators(registerCluster, dispatch),
     unregisterCluster: bindActionCreators(unregisterCluster, dispatch),
-    stopClusterOnYarn: bindActionCreators(stopClusterOnYarn, dispatch)
+    stopClusterOnYarn: bindActionCreators(stopClusterOnYarn, dispatch),
+    getConfig: bindActionCreators(getConfig, dispatch)
   };
 }
 
