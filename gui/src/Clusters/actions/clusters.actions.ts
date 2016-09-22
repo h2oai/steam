@@ -4,6 +4,7 @@
 
 import * as Remote from '../../Proxy/Proxy';
 import { openNotification } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 
 export const RECEIVE_ENGINES = 'RECEIVE_ENGINES';
 export const START_FETCH_CONFIG = 'START_FETCH_CONFIG';
@@ -68,11 +69,11 @@ export function uploadEngineCompleted(response) {
 
 export function uploadEngine(file) {
   if (!file) {
-    openNotification('error', 'No engine file selected.', null);
+    openNotification(NotificationType.Error, "File Error", 'No engine file selected.', null);
   }
   return (dispatch) => {
     dispatch(startUploadEngine());
-    dispatch(openNotification('info', 'Uploading engine...', null));
+    dispatch(openNotification(NotificationType.Info, "Update", 'Uploading engine...', null));
     let data = new FormData();
     data.append('file', file.files[0]);
     fetch(`/upload?type=engine`, {
@@ -80,31 +81,31 @@ export function uploadEngine(file) {
       method: 'post',
       body: data
     }).then(() => {
-      dispatch(openNotification('success', 'Engine uploaded', null));
+      dispatch(openNotification(NotificationType.Confirm, "Success", 'Engine uploaded', null));
       dispatch(uploadEngineCompleted(null));
       dispatch(getEngines());
     }).catch((error) => {
       dispatch(uploadEngineCompleted(error));
-      dispatch(openNotification('error', error, null));
+      dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
     });
   };
 }
 
 export function startYarnCluster(clusterName, engineId, size, memory, keytab) {
   if (!clusterName || !engineId || !size || !memory) {
-    openNotification('error', 'All fields are required', null);
+    openNotification(NotificationType.Error, "Error", 'All fields are required', null);
   }
   return (dispatch) => {
     dispatch(startCluster());
-    dispatch(openNotification('info', 'Connecting to YARN...', null));
+    dispatch(openNotification(NotificationType.Info, "Update", 'Connecting to YARN...', null));
     Remote.startClusterOnYarn(clusterName, engineId, size, memory, keytab, (error, clusterId) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
         dispatch(startClusterCompleted(error.toString()));
         return;
       }
       dispatch(startClusterCompleted(clusterId));
-      dispatch(openNotification('success', 'Cluster Launched', null));
+      dispatch(openNotification(NotificationType.Confirm, "Success", 'Cluster Launched', null));
     });
   };
 }
@@ -114,7 +115,7 @@ export function getEngines() {
     dispatch(startGetEngines());
     Remote.getEngines((error, engines) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Error', error.toString(), null));
         dispatch(receiveEngines(null));
         return;
       }
@@ -128,7 +129,7 @@ export function getConfig() {
     dispatch(fetchConfig());
     Remote.getConfig((error, config) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Error', error.toString(), null));
         dispatch(fetchConfigCompleted(null));
         return;
       }

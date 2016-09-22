@@ -302,7 +302,7 @@ export function stopClusterOnYarn(clusterId: number) {
   return (dispatch) => {
     Remote.stopClusterOnYarn(clusterId, 'vagrant.keytab', (error) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         return;
       }
       dispatch(fetchClusters());

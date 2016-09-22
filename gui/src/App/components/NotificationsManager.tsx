@@ -79,9 +79,8 @@ export class NotificationsManager extends React.Component<Props & DispatchProps,
   startTimeoutTimer() {
     this.timeoutTimerID = setTimeout(this.onTimeout.bind(this), this.TIMEOUT_LENGTH);
   }
-
-
-  Timeout() {
+  
+  onTimeout() {
     for (let notificationData of this.props.notifications.allNotifications) {
       notificationData.isActive = false;
     }
