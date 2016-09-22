@@ -64,3 +64,8 @@ coverage.out
 /demo/_book
 /demo/node_modules
 
+# ignore generated files
+
+*.doctree
+*.pickle
+/docs/_build
