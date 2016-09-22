@@ -100,6 +100,20 @@ class RPCClient:
 		response = self.connection.call("PingServer", request)
 		return response['output']
 	
+	def get_config(self):
+		"""
+		No description available
+
+		Parameters:
+
+		Returns:
+		config: An object containing Steam startup configurations (Config)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetConfig", request)
+		return response['config']
+	
 	def register_cluster(self, address):
 		"""
 		Connect to a cluster

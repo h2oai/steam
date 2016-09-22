@@ -8,18 +8,20 @@ import Panel from '../Projects/components/Panel';
 import PageHeader from '../Projects/components/PageHeader';
 import {
   fetchModelsFromCluster, fetchClusters, registerCluster,
-  unregisterCluster
+  unregisterCluster, stopClusterOnYarn
 } from '../Projects/actions/projects.actions';
 import { bindActionCreators } from 'redux';
 import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
 import './styles/clusters.scss';
+import { Link } from 'react-router';
 
 interface DispatchProps {
   fetchClusters: Function
   fetchModelsFromCluster: Function
   registerCluster: Function,
-  unregisterCluster: Function
+  unregisterCluster: Function,
+  stopClusterOnYarn: Function
 }
 
 interface Props {
@@ -27,10 +29,10 @@ interface Props {
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
-
   constructor(props) {
     super(props);
     this.state = {
+      yarnClusterModalOpen: false,
       newClusterRequested: false
     };
   }
@@ -41,8 +43,18 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     }
   }
 
-  removeCluster(clusterId) {
-    this.props.unregisterCluster(clusterId);
+  removeCluster(cluster) {
+    if (cluster.type_id === 2) {
+      this.props.stopClusterOnYarn(cluster.id);
+    } else {
+      this.props.unregisterCluster(cluster.id);
+    }
+  }
+
+  openYarnClusterModal() {
+    this.setState({
+      yarnClusterModalOpen: true
+    });
   }
 
   registerCluster(event) {
@@ -50,11 +62,11 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     let ipAddress = $(event.target).find('input[name="ip-address"]').val();
     let port = $(event.target).find('input[name="port"]').val();
     this.props.registerCluster(ipAddress + ':' + port);
-    this.setState({ newClusterRequested: false });
+    this.setState({newClusterRequested: false});
   }
 
   onCreateNewClusterClicked(e) {
-    this.setState({ newClusterRequested: true });
+    this.setState({newClusterRequested: true});
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -65,8 +77,13 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
       <div className="clusters">
         <PageHeader>CLUSTERS
           { !this.state.newClusterRequested ?
-            <div className="button-primary header-buttons" onClick={this.onCreateNewClusterClicked.bind(this)}>Create Cluster</div>
-          : null }
+            <div className="buttons header-buttons">
+              <div className="button-secondary" onClick={this.onCreateNewClusterClicked.bind(this)}>
+                Connect to Cluster
+              </div>
+              <Link to="clusters/new" className="button-primary">Launch New Cluster</Link>
+            </div>
+            : null }
         </PageHeader>
         <div className="panel-container">
           { this.state.newClusterRequested ?
@@ -91,10 +108,13 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                 <header>
                   <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank"
                                                         rel="noopener">{cluster.name}
-                    @ {cluster.address}</a></span><button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster.id)}><i className="fa fa-trash"/></button>
+                    @ {cluster.address}</a></span>
+                  <button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster)}><i
+                    className="fa fa-trash"/></button>
                 </header>
                 <article>
                   <h2>
+                    ID: {cluster.id}
                     STATUS
                   </h2>
                   <h2 className="cluster-status">
@@ -127,7 +147,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchClusters: bindActionCreators(fetchClusters, dispatch),
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
     registerCluster: bindActionCreators(registerCluster, dispatch),
-    unregisterCluster: bindActionCreators(unregisterCluster, dispatch)
+    unregisterCluster: bindActionCreators(unregisterCluster, dispatch),
+    stopClusterOnYarn: bindActionCreators(stopClusterOnYarn, dispatch)
   };
 }
 

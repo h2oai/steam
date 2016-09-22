@@ -1223,6 +1223,7 @@ Commands:
     $ steam get attributes ...
     $ steam get cluster ...
     $ steam get clusters ...
+    $ steam get config ...
     $ steam get dataset ...
     $ steam get datasets ...
     $ steam get datasource ...
@@ -1258,6 +1259,7 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getAttributes(c))
 	cmd.AddCommand(getCluster(c))
 	cmd.AddCommand(getClusters(c))
+	cmd.AddCommand(getConfig(c))
 	cmd.AddCommand(getDataset(c))
 	cmd.AddCommand(getDatasets(c))
 	cmd.AddCommand(getDatasource(c))
@@ -1594,6 +1596,35 @@ func getClusters(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	return cmd
+}
+
+var getConfigHelp = `
+config [?]
+Get Config
+Examples:
+
+    No description available
+    $ steam get config
+
+`
+
+func getConfig(c *context) *cobra.Command {
+
+	cmd := newCmd(c, getConfigHelp, func(c *context, args []string) {
+
+		// No description available
+		config, err := c.remote.GetConfig()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		lines := []string{
+			fmt.Sprintf("KerberosEnabled:\t%v\t", config.KerberosEnabled), // No description available
+		}
+		c.printt("Attribute\tValue\t", lines)
+		return
+	})
+
 	return cmd
 }
 

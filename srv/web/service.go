@@ -63,6 +63,10 @@ type ClusterType struct {
 	Name string `json:"name"`
 }
 
+type Config struct {
+	KerberosEnabled bool `json:"kerberos_enabled"`
+}
+
 type Dataset struct {
 	Id                 int64  `json:"id"`
 	DatasourceId       int64  `json:"datasource_id"`
@@ -265,6 +269,7 @@ type Az interface {
 }
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
+	GetConfig(pz az.Principal) (*Config, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, keytab string) (int64, error)
@@ -383,6 +388,13 @@ type PingServerIn struct {
 
 type PingServerOut struct {
 	Output string `json:"output"`
+}
+
+type GetConfigIn struct {
+}
+
+type GetConfigOut struct {
+	Config *Config `json:"config"`
 }
 
 type RegisterClusterIn struct {
@@ -1343,6 +1355,16 @@ func (this *Remote) PingServer(input string) (string, error) {
 		return "", err
 	}
 	return out.Output, nil
+}
+
+func (this *Remote) GetConfig() (*Config, error) {
+	in := GetConfigIn{}
+	var out GetConfigOut
+	err := this.Proc.Call("GetConfig", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Config, nil
 }
 
 func (this *Remote) RegisterCluster(address string) (int64, error) {
@@ -2466,6 +2488,41 @@ func (this *Impl) PingServer(r *http.Request, in *PingServerIn, out *PingServerO
 	}
 
 	out.Output = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut) error {
+	const name = "GetConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetConfig(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Config = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

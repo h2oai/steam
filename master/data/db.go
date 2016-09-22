@@ -4136,8 +4136,8 @@ func (ds *Datastore) ReadServicesForProjectId(pz az.Principal, projectId, offset
 			)
 		ORDER BY
 			address, port
-		OFFSET $5
-		LIMIT $6
+		LIMIT $5
+		OFFSET $6
 		`, projectId, pz.IsSuperuser(), pz.Id(), ds.EntityTypes.Service, limit, offset)
 	if err != nil {
 		return nil, err

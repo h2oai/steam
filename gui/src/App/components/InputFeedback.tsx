@@ -1,7 +1,7 @@
 import * as React from 'react';
 import '../styles/input_feedback.scss';
 
-export enum FeedbackType { Progress, Info, Success, Warning, Error }
+export enum FeedbackType { Progress, Info, Confirm, Warning, Error }
 
 interface Props {
   message: string,
@@ -33,9 +33,9 @@ export default class InputFeedback extends React.Component<Props, any> {
           </div>
         : null }
 
-        { this.props.type === FeedbackType.Success ?
-        <div className="input-feedback feedback-success">
-          <div className="feedback-success-icon">
+        { this.props.type === FeedbackType.Confirm ?
+        <div className="input-feedback feedback-confirm">
+          <div className="feedback-confirm-icon">
             <i className="fa fa-check-circle" aria-hidden="true"></i>
           </div>
           <span>{this.props.message}</span>

@@ -24,6 +24,11 @@ export function pingServer(input: string): void {
   Proxy.Call("PingServer", req, print);
 }
 
+export function getConfig(): void {
+  const req: any = {  };
+  Proxy.Call("GetConfig", req, print);
+}
+
 export function registerCluster(address: string): void {
   const req: any = { address: address };
   Proxy.Call("RegisterCluster", req, print);

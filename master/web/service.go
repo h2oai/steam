@@ -64,6 +64,10 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 	return status, nil
 }
 
+func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
+	return &web.Config{s.kerberosEnabled}, nil
+}
+
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
 
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
@@ -201,7 +205,7 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 		return err
 	}
 
-	return s.ds.UpdateClusterState(pz, clusterId, data.StoppedState)
+	return s.ds.DeleteCluster(pz, clusterId)
 }
 
 func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, error) {

@@ -13,8 +13,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +44,7 @@ public class MakeWarServlet extends HttpServlet {
     super.init(servletConfig);
     try {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
-      logger.debug("servletPath = {}", servletPath);
+      logger.info("servletPath = {}", servletPath);
     }
     catch (MalformedURLException e) {
       logger.error("Can't init servlet", e);
@@ -55,7 +57,7 @@ public class MakeWarServlet extends HttpServlet {
     try {
       //create temp directory
       tmpDir = createTempDirectory("makeWar");
-      logger.debug("tmpDir {}", tmpDir);
+      logger.info("tmpDir {}", tmpDir);
 
       //  create output directories
       File webInfDir = new File(tmpDir.getPath(), "WEB-INF");
@@ -73,16 +75,21 @@ public class MakeWarServlet extends HttpServlet {
       String pojofile = null;
       String jarfile = null;
       String prejarfile = null;
+      String rawfile = null;
       String predictorClassName = null;
       String transformerClassName = null;
+      ArrayList<String> pojos = new ArrayList<String>();
+      ArrayList<String> rawfiles = new ArrayList<String>();
       for (FileItem i : items) {
         String field = i.getFieldName();
         String filename = i.getName();
         if (filename != null && filename.length() > 0) { // file fields
           if (field.equals("pojo")) {
             pojofile = filename;
+            pojos.add(pojofile);
             predictorClassName = filename.replace(".java", "");
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
+            logger.info("added pojo model {}", filename);
           }
           if (field.equals("jar")) {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
@@ -92,6 +99,13 @@ public class MakeWarServlet extends HttpServlet {
             prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
+          if (field.equals("mojo")) { // a raw model zip file, a mojo file
+            rawfile = filename;
+            rawfiles.add(rawfile);
+            predictorClassName = filename.replace(".zip", "");
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
+            logger.info("added mojo model {}", filename);
+          }
         }
         else { // form text field
           if (field.equals("preclass")) {
@@ -99,16 +113,22 @@ public class MakeWarServlet extends HttpServlet {
           }
         }
       }
-      logger.info("jar {}  pojo {}", jarfile, pojofile);
-      if (pojofile == null || jarfile == null)
-        throw new Exception("need pojo and jar");
+      logger.debug("genmodeljar {}  pojo {}  raw {}", jarfile, pojofile, rawfile);
+//      if (pojofile == null || jarfile == null)
+      if ((pojofile == null || jarfile == null) && (rawfile == null || jarfile == null))
+        throw new Exception("need either pojo and genmodel jar, or raw file and genmodel jar ");
+
       logger.info("prejar {}  preclass {}", prejarfile, transformerClassName);
       if (prejarfile != null && transformerClassName == null || prejarfile == null && transformerClassName != null)
         throw new Exception("need both prejar and preclass");
 
-      // Compile the pojo
-      runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
-          "-cp", jarfile, "-d", outDir.getPath(), pojofile), "Compilation of pojo failed");
+      if (pojofile != null) {
+        // Compile the pojo
+        runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION,
+            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile, "-d", outDir.getPath(), pojofile),
+            "Compilation of pojo failed");
+        logger.info("compiled pojo {}", pojofile);
+      }
 
       if (servletPath == null)
         throw new Exception("servletPath is null");
@@ -136,7 +156,18 @@ public class MakeWarServlet extends HttpServlet {
         replaceTransform = "null";
       else
         replaceTransform = "new " + transformerClassName + "()";
-      InstantiateJavaTemplateFile(tmpDir, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+
+      String modelCode = null;
+      if (!pojos.isEmpty()) {
+        FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), pojos);
+        modelCode = "null";
+      }
+      else if (!rawfiles.isEmpty()) {
+        FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), rawfiles);
+        modelCode = "MojoModel.load(fileName)";
+      }
+      InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictServlet.java", "PredictServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
@@ -156,6 +187,13 @@ public class MakeWarServlet extends HttpServlet {
       filesc.add(new File(tmpDir, "jquery.js"));
       filesc.add(new File(tmpDir, "predict.js"));
       filesc.add(new File(tmpDir, "custom.css"));
+      filesc.add(new File(tmpDir, "modelnames.txt"));
+      for (String m : pojos) {
+        filesc.add(new File(tmpDir, m));
+      }
+      for (String m : rawfiles) {
+        filesc.add(new File(tmpDir, m));
+      }
       Collection<File> dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "bootstrap"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
       filesc.addAll(dirc);
       dirc = FileUtils.listFilesAndDirs(new File(tmpDir, "fonts"), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
