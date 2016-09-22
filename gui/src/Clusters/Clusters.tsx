@@ -117,8 +117,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
               <Panel key={i}>
                 <header>
                   <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + _.get(this.props.config, 'cluster_proxy_address', '') + '/flow/?cluster_id=' + cluster.id} target="_blank"
-                                                        rel="noopener">{cluster.name}
-                    @ {cluster.address}</a></span>
+                                                        rel="noopener">{cluster.name}</a></span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
                     <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
