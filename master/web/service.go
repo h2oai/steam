@@ -1327,9 +1327,15 @@ func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) er
 		return err
 	}
 
-	err := s.ds.UnlinkLabelFromModel(pz, labelId, modelId)
+	oldLabel, ok, err := s.ds.ReadLabelByModel(pz, modelId)
 	if err != nil {
 		return err
+	}
+
+	if ok {
+		if err := s.ds.UnlinkLabelFromModel(pz, oldLabel.Id, modelId); err != nil {
+			return err
+		}
 	}
 
 	return s.ds.LinkLabelWithModel(pz, labelId, modelId)
