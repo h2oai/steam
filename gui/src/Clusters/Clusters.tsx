@@ -32,6 +32,11 @@ interface Props {
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
+  refs: {
+    [key: string]: Element
+    keytabFilename: HTMLInputElement
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -49,7 +54,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
 
   removeCluster(cluster) {
     if (cluster.type_id === 2) {
-      this.props.stopClusterOnYarn(cluster.id);
+      let keytabFilename = _.get((this.refs.keytabFilename as HTMLInputElement), 'value', '');
+      this.props.stopClusterOnYarn(cluster.id, keytabFilename);
     } else {
       this.props.unregisterCluster(cluster.id);
     }
@@ -110,12 +116,14 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + ':9001/flow/?cluster_id=' + cluster.id} target="_blank"
+                  <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + _.get(this.props.config, 'cluster_proxy_address', '') + '/flow/?cluster_id=' + cluster.id} target="_blank"
                                                         rel="noopener">{cluster.name}
                     @ {cluster.address}</a></span>
-                  {true === true ? <input type="text"/> : null}
-                  <button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster)}><i
-                    className="fa fa-trash"/></button>
+                  <span className="remove-cluster">
+                    {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
+                    <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
+                      className="fa fa-trash"/></button>
+                  </span>
                 </header>
                 <article>
                   <h3>
@@ -145,7 +153,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state): any {
   return {
-    clusters: state.projects.clusters
+    clusters: state.projects.clusters,
+    config: state.clusters.config
   };
 }
 
