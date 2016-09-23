@@ -1,6 +1,6 @@
 {
-  "name": "steamy",
-  "version": "0.1.0",
+  "name": "steam",
+  "version": "1.0.0",
   "description": "",
   "main": "src/main.tsx",
   "dependencies": {
