@@ -14,5 +14,7 @@ If you're an Open Source community member, you can contact H2O using one of the 
 
 Please keep the following issues in mind when using Steam.
 
-- [STEAM-???] The cluster URL to H2O Flow does not currently work.
+- The cluster URL to H2O Flow does not currently work.
+- [STEAM-416] Projects cannot be deleted through the UI. 
+- [STEAM-507] Models cannot be deleted through the UI.
 
