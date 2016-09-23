@@ -12,7 +12,7 @@ Steam in an open source product that uses AGPL code. (See the [License file](LIC
 Refer to the following for more information:
 
  - [Contributing to Steam](CONTRIBUTING.md)
- - [Development in Steam](DEVELOPMENT.md)
+ - [Development in Steam](DEVEL.md)
  - [Steam User Guide](http://docs.h2o.ai/steam/latest-stable/steam-docs/index.html)
 
 ## Contacting Support
