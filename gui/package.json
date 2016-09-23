@@ -85,6 +85,6 @@
     ],
     "scriptPreprocessor": "<rootDir>/preprocessor.jest.js"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "H2O.ai",
+  "license": "GNU AGPL 3.0"
 }
