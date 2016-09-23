@@ -38,6 +38,7 @@ on the `H2O Download page <http://h2o.ai/download>`__ for your platform to upgra
    Login
    Projects
    Clusters
+   Users
    UseSteamWithFlow
    StopSteam
 
