@@ -1185,7 +1185,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 }
 
 func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bindings.ModelMetrics, category string) error {
-	log.Println("iama", category)
 	switch category {
 	case "Binomial":
 		if err := s.ds.CreateBinomialModel(
