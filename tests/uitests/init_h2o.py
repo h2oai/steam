@@ -3,7 +3,7 @@ from h2o.estimators.gbm import H2OGradientBoostingEstimator as gbm
 from h2o.estimators.glm import H2OGeneralizedLinearEstimator as glm
 from h2o.estimators.deeplearning import H2ODeepLearningEstimator as dlm
 
-h2o.connect(ip="localhost", port="54535", cluster_name="SteamUItest")
+h2o.connect(ip="localhost", port="54535")
 
 arr = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/flow_examples/arrhythmia.csv.gz")
 train = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/50_cattest_test.csv")

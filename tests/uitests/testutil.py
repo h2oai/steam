@@ -37,9 +37,9 @@ Perm id		Permission		Index
 
 _steampath = "./steam"
 if sys.platform.startswith("linux"):
-	_steampath = "./steam-develop-linux-amd64/steam"
+	_steampath = "./steam-master-linux-amd64/steam"
 elif sys.platform == "darwin":
-	_steampath = "./steam-develop-darwin-amd64/steam"
+	_steampath = "./steam-master-darwin-amd64/steam"
 else:
 	print "unsupported testing platform"
 	sys.exit(1)
@@ -271,11 +271,11 @@ def goProjects(driver):
 	wait.until(lambda x: x.find_element_by_xpath("//div[@class='project-details']"))
 
 
-def clusterExists(driver, addr, port, name):
+def clusterExists(driver, name):
 	if not goClusters(driver):
 		return False
 	try:
-		elm = driver.find_element_by_link_text("{0}@ {1}:{2}".format(name, addr, port))
+		elm = driver.find_element_by_link_text("{0}".format(name))
 		return True
 	except Exception as e:
 		print "New cluster did not appear on cluster page"
@@ -287,8 +287,8 @@ def addCluster(driver, addr, port, name):
 		wait.until(lambda x: x.find_element_by_name("ip-address").is_displayed())
 		driver.find_element_by_name("ip-address").send_keys(addr)
 		driver.find_element_by_name("port").send_keys(port)
-		driver.find_element_by_xpath("//div[@class='connect-cluster']//button").click()
-		wait.until(lambda x: x.find_element_by_xpath("//div[text()='{0}']".format(name)))
+		driver.find_element_by_xpath("//button[@type='submit']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//span[text()='{0}']".format(name)))
 	except:
 		print "Cannot add new cluster"
 		return False
@@ -373,13 +373,11 @@ def createProject(driver, cluster, name, data, kind, mods):
 def testAs(user, pw):
 	driver = webdriver.Chrome()
 	driver.get("http://{0}:{1}@localhost:9000".format(user, pw))
-	driver.find_element_by_css_selector("input").click()
 	return driver
 
 def newtest():
 	driver = webdriver.Chrome()
 	driver.get("http://superuser:superuser@localhost:9000")
-	driver.find_element_by_css_selector("input").click()
 	return driver
 
 def endtest(driver):
