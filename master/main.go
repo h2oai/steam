@@ -159,7 +159,7 @@ func Run(version, buildDate string, opts Opts) {
 		var err error
 		scoringServiceHost, err = fs.GetExternalHost()
 		if err != nil {
-			log.Fataln(err)
+			log.Fatalln(err)
 		}
 	}
 
