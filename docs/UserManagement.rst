@@ -189,7 +189,7 @@ CLI.
 
  ::
 
-  ./steam create role datascience --description="a default data scientist role"
+  ./steam create role --name="datascience" --description="a default data scientist role"
   RoleId: 3
   ./steam link role --with-permission --role-id=3 --permission-id=11
   ./steam link role --with-permission --role-id=3 --permission-id=17

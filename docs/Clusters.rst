@@ -6,12 +6,13 @@ The **Clusters** page shows all H2O clusters that Steam is connected to along wi
 .. figure:: images/cluster_page.png
    :alt: Steam Clusters page
 
-   Steam Clusters page
-
 Launch a New Cluster
 --------------------
 
 You can connect to additional clusters that are running H2O by clicking the **Launch New Cluster** button.
+
+.. figure:: images/launch_new_cluster.png
+   :alt: Launch new cluster
 
 1. On the Launch New Cluster form, enter the following information:
 
