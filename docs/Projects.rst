@@ -1,57 +1,38 @@
 Projects
 ========
 
-Steam makes use of project-based machine learning. Whether you are
-trying to detect fraud or predict user retention, the datasets, models,
-and test results are stored and saved in the individual projects. All
-Steam users within your environment can access these projects and the
-files within them.
+Steam makes use of project-based machine learning. Whether you are trying to detect fraud or predict user retention, the datasets, models, and test results are stored and saved in the individual projects. All Steam users within your environment can access these projects and the files within them.
+
+The Steam Projects page includes additional subnavigation items for Models, Deployment, Configuration, and Collaborators. Each of these pages is described in later sections. 
 
 Creating a Project
 ------------------
 
-1. To start a new project from scratch, click **Create New Project**.
+Before you can create a project, be sure that H2O is running on an available cluster.
 
- .. figure:: images/new_project.png
-   :alt: NewProject
+1. To start a new project, click the **Start A New Project** button on the Welcome page.
+2. When you first log in to Steam, the list of clusters will be empty. Enter the IP address of the cluster that is running H2O, then click **Connect**. 
+3. Once connected, the current list of clusters will immediately populate with the cluster's information. Click **Connect** beside this cluster to continue.
 
-   New project
+ .. figure:: images/connect_to_cluster.png
+   :alt: Connect to a cluster
 
-2. When you first log in to Steam, the list of clusters will be empty.
-   Enter the IP address of the cluster that is running H2O, then click
-   **Connect**. Once connected, the current list of clusters will
-   immediately populate with this cluster. Connect to this cluster to
-   continue.
-3. Select an available H2O frame from the Datasets dropdown, then select
-   the Category. Note that these dropdowns are automatically populated
+4. Select an available H2O frame from the Datasets dropdown, then select
+   the Model Category. Note that these dropdowns are automatically populated
    with information from datasets that are available on the selected
-   cluster. If no datasets are available, the the dataset list will be
+   cluster. If no datasets are available, then the dropdown lists will be
    empty. For clusters that contain datasets, after a dataset is
-   selected, a list of corresponding models will display.
-4. Select the checkbox beside the model(s) to import into the Steam
-   project. In this example, two models are available on the H2O
-   cluster: one model built using GBM and one model built using GLM.
-5. Specify a name for the project.
+   selected, a list of corresponding model will display.
+5. Select the checkbox beside the model(s) to import into the Steam
+   project. 
+6. Specify a name for the project.
 
  .. figure:: images/create_project.png
    :alt: Create a Project
 
    Create a project
 
-6. Click **Create Project** when you are done. Upon successful
-   completion, the Models page will be populated with the model(s) that
-   you added to your project, and the new project will be available on
-   the **Projects** page.
-
- .. figure:: images/project_created.png
-   :alt: Project created
-
-   Project created
-
-7. On the **Projects** page, click on the newly created project. This
-   opens a submenu allowing you to view the imported models, deployed
-   models, and configurations specific to that project. Information
-   about these topics is available in the sections that follow.
+7. Click **Create Project** when you are done. Upon successful completion, the **Models** page will be populated with the model(s) that you added to your project, and the new project will be available on the **Projects** page. On the **Projects** page, click on the newly created project. This opens a submenu allowing you to view the imported models, deployed models, and configurations specific to that project. Information about these topics is available in the sections that follow.
 
  .. figure:: images/models_page.png
    :alt: Models page
@@ -95,7 +76,7 @@ You can perform the following actions directly from this page:
 -  Deploy the model
 
     **Note**: The Models page lists models in alphabetical order and
-    shows five models per page. If your project includes more than five
+    shows up to five models per page. If your project includes more than five
     models, use the forward and back arrows at the bottom of the page to
     view more models.
 
@@ -161,10 +142,10 @@ Comparing Models
    comparison information. The current model values are displayed in
    blue, and the selected comparison model displays in orange.
 
-.. figure:: images/model_compare.png
-   :alt: Model Comparison
+ .. figure:: images/model_compare.png
+    :alt: Model Comparison
 
-   Model Comparison
+    Model Comparison
 
 Deploying a Model
 ^^^^^^^^^^^^^^^^^
@@ -182,17 +163,17 @@ best models. Perform the steps below to deploy a model.
    is available in the `Deployment`_ section.
 4. Click **Deploy** when you are done.
 
-.. figure:: images/deploy_model.png
-   :alt: Deploy Model
+ .. figure:: images/deploy_model.png
+    :alt: Deploy Model
 
-   Deploy Model
+    Deploy Model
 
 5. Upon successful completion, a scoring service will be created for this deployed model. Click the **Deployment** menu option on the left navigation to go to the Deployment page. Refer to the `Deployment`_ section for more information.
 
-.. figure:: images/deployment_page.png
-   :alt: Deployment page
-
-   Deployment page
+ .. figure:: images/deployment_page.png
+    :alt: Deployment page
+ 
+    Deployment page
 
 Exporting a Model
 ^^^^^^^^^^^^^^^^^
@@ -218,7 +199,7 @@ deployed service, this page shows the model name, model ID, and the
 status. You can stop a running service by clicking the **Stop Service**
 button.
 
-.. figure:: images/deployed_services.png
+.. figure:: images/deployment_page.png
    :alt: Deployed Services
 
    Deployed Services
@@ -293,7 +274,7 @@ When a label is applied to a model, the Project Configurations page will
 show all models associated with a label.
 
 Creating a New Label
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 1. On the Configurations page, click the **Create New Label** button.
 2. Enter a unique name for the label, the provide a description.
@@ -310,7 +291,17 @@ be available on the Models page in the **label as** dropdown. The
 following image shows two labels in the **label as** dropdown: deploy
 and test.
 
- .. figure:: images/label_as.png
-   :alt: Label as
+.. figure:: images/label_as.png
+  :alt: Label as
 
-   "Label as" options
+  "Label as" options
+
+
+Collaborators
+-------------
+
+The Collaborators page shows the users who have been added to the Steam database as well as the Labels Access (permissions) assigned to each user. Currently, users can only be added by the Steam superuser using the CLI.
+
+.. figure:: images/collaborators.png
+   :alt: Collaborators page
+
