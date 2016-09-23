@@ -19,7 +19,8 @@ import Deployment from './Deployment/Deployment';
 import Configurations from './Configurations/Configurations';
 import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
-import {Collaborators} from "./Collaborators/Collaborators";
+import Collaborators from './Collaborators/Collaborators';
+import LaunchCluster from './Clusters/components/LaunchCluster';
 
 interface IIndexRoute {
   component: any
@@ -163,7 +164,15 @@ export const routes: IRoute[] = [
         name: 'Clusters',
         icon: 'fa fa-cube',
         showInBreadcrumb: true,
-        showInNavigation: true
+        showInNavigation: true,
+      },
+      {
+        path: 'clusters/new',
+        component: LaunchCluster,
+        name: 'Clusters',
+        icon: 'fa fa-cube',
+        showInBreadcrumb: false,
+        showInNavigation: false
       },
       //users
       {

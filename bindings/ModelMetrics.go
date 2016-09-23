@@ -14,12 +14,12 @@ type ModelMetrics struct {
 
 func (o *ModelMetrics) UnmarshalJSON(data []byte) error {
 	aux := &struct {
-		Mse                  interface{}
-		R2                   interface{}
-		Logloss              interface{}
-		Auc                  interface{}
-		Gini                 interface{}
-		MeanResidualDeviance interface{}
+		Mse                  interface{} `json:"MSE,omitempty"`
+		R2                   interface{} `json:"r2,omitempty"`
+		Logloss              interface{} `json:"logloss,omitempty"`
+		Auc                  interface{} `json:"AUC,omitempty"`
+		Gini                 interface{} `json:"Gini,omitempty"`
+		MeanResidualDeviance interface{} `json:"mean_residual_deviance,omitempty"`
 	}{
 		o.Mse,
 		o.R2,

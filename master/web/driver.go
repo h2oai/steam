@@ -52,6 +52,7 @@ func newService(opts driverOpts) (web.Service, az.Directory, error) {
 		ds,
 		opts.CompilationServiceAddress,
 		opts.ScoringServiceHost,
+		opts.ClusterProxyAddress,
 		opts.ScoringServicePorts,
 		opts.Yarn.KerberosEnabled,
 		opts.Yarn.Username,

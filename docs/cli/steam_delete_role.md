@@ -20,7 +20,7 @@ steam delete role [?]
 ### Options
 
 ```
-      --role-id=0: No description available
+      --role-id=0: Integer ID of a role in Steam.
 ```
 
 ### Options inherited from parent commands

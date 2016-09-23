@@ -27,14 +27,14 @@ function pre_tests { # run this before test are done with "$0" as argument
   filename="$0"
   have_failed=0
   echo
-  echo "Test suite starting: $filename" at `date`
+  echo "Test suite starting: $filename" in `pwd` at `date`
   echo
 }
 
 function post_tests { # run this after tests are done with "$0" as argument
   filename="$0"
   echo
-  echo "Test suite done: $filename" at `date`
+  echo "Test suite done: $filename" in `pwd` at `date`
   if [ $have_failed == 1 ]
   then
     echo "There was at least one failure"

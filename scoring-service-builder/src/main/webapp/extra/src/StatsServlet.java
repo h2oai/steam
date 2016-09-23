@@ -21,9 +21,6 @@ public class StatsServlet extends HttpServlet {
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
-      if (ServletUtil.model == null)
-        throw new Exception("No predictor model");
-
       final long now = System.currentTimeMillis();
       final long upTimeMs = now - ServletUtil.startTime;
       final long lastTimeAgoMs = now - ServletUtil.lastTime;

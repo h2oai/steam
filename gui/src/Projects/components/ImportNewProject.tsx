@@ -167,7 +167,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                   {this.props.clusters.map((cluster, i) => {
                     return (
                       <Row key={i}>
-                        <Cell>{cluster.name}</Cell>
+                        <Cell><span className="name-cell">{cluster.name}</span></Cell>
                         <Cell>N/A</Cell>
                         <Cell>N/A</Cell>
                         <Cell>

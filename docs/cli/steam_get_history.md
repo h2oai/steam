@@ -23,10 +23,10 @@ steam get history [?]
 ### Options
 
 ```
-      --entity-id=0: No description available
-      --entity-type-id=0: No description available
-      --limit=0: No description available
-      --offset=0: No description available
+      --entity-id=0: Integer ID for an entity in Steam.
+      --entity-type-id=0: Integer ID for the type of entity.
+      --limit=0: The maximum returned objects.
+      --offset=0: An offset to start the search on.
 ```
 
 ### Options inherited from parent commands

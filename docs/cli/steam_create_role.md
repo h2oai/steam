@@ -21,8 +21,8 @@ steam create role [?]
 ### Options
 
 ```
-      --description="": No description available
-      --name="": No description available
+      --description="": A string description
+      --name="": A string name.
 ```
 
 ### Options inherited from parent commands

@@ -12,30 +12,22 @@ import { getRoute } from '../../../App/utils/getRoute';
 import { routes } from '../../../routes';
 import * as _ from 'lodash';
 import { connect } from 'react-redux';
-import { fetchProfile } from '../../../Profile/actions/profile.actions';
-import { bindActionCreators } from 'redux';
 import './navigation.scss';
 import { Project } from '../../../Proxy/Proxy';
-const logo = require('../../../../assets/h2o-home.png');
 
 interface Props {
   routes: any
   params: any
-  profile: {
-    isEulaAgreed: boolean
-  },
   project: Project
 }
 
 interface DispatchProps {
-  fetchProfile: Function
 }
 
 
 interface State {
   activeTopLevelPath: string
   isSubMenuActive: boolean
-  isEulaAgreed: boolean
 }
 
 export class Navigation extends React.Component<Props & DispatchProps, any> {
@@ -45,20 +37,15 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     this.state = {
       activeTopLevelPath: '',
       isSubMenuActive: false,
-      isEulaAgreed: false
     };
   }
 
   componentWillMount(): void {
     this.setMenuState(this.props.routes);
-    this.props.fetchProfile();
   }
 
   componentWillReceiveProps(nextProps: Props): void {
     this.setMenuState(nextProps.routes);
-    this.setState({
-      isEulaAgreed: nextProps.profile.isEulaAgreed as boolean
-    });
   }
 
   setMenuState(newRoutes: any[]): void {
@@ -144,7 +131,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLElement> {
     let submenu = <div></div>;
     return (
-      <div className={classNames('nav-container', {hidden: !this.state.isEulaAgreed})}>
+      <div className={classNames('nav-container')}>
         <Sidebar className="primary-navigation">
           <nav className="navigation--primary">
             <div className="navigation">
@@ -206,14 +193,12 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state): any {
   return {
-    project: state.projects.project,
-    profile: state.profile
+    project: state.projects.project
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps() {
   return {
-    fetchProfile: bindActionCreators(fetchProfile, dispatch)
   };
 }
 

@@ -20,7 +20,7 @@ steam delete workgroup [?]
 ### Options
 
 ```
-      --workgroup-id=0: No description available
+      --workgroup-id=0: Integer ID of a workgroup in Steam.
 ```
 
 ### Options inherited from parent commands
