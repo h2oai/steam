@@ -7,6 +7,9 @@
 (function(window) {
   'use strict';
   var outputDomain;
+
+
+
   // Sort values if not sorted properly
   // This is needed because c-1, c-2, ... are sorted alphabetically which is wrong
   function sortValues(values) {
@@ -369,5 +372,46 @@
     $('#stats-btn').click(function() {
       window.open('/stats', '_blank');
     });
+
+    $('.file-icon').click(function(){
+    $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
+    });
+
+    $('.file-input').click(function(){
+        $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
+    });
+
+    $('input[type="file"]').change(function(){
+
+        var names = [];
+        for (var i = 0; i < $(this).get(0).files.length; ++i) {
+            names.push( $(this).get(0).files[i].name );
+        }
+
+        $(this).closest('.input-inline-row').find("input[type='text']").val(names);
+    });
+
+    $('#batch-predict').click(function(){
+        if ( !$('#batch form input[name="inpfile"]').val() ){
+           alert('You must select a files with multiple lines of JSON predictions.');
+        }
+
+        $('#batch form input[name="inpfile"]').get(0).files = $('#batch form input[name="inpfile"]').get(0).files;
+
+        $('#batch form').submit();
+    });
+
+    $('#batch-reset').click(function(){
+      $('input[type="text"]').val('');
+      $('input[type="file"]').val('');
+    });
+
+    $('#predict-btn').click(function(){
+        $('#allparams').submit();
+    })
+
+    $('#reset-btn').click(function(){
+        $('#allparams')[0].reset();       
+    })
   });
 })(window);
