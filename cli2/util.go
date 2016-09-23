@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steam/lib/fs"
 )
 
 func transmitFile(url, username, password, filename string, attrs map[string]string) error {

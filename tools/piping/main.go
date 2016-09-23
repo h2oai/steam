@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/h2oai/steamY/srv/web/api"
+	"github.com/h2oai/steam/srv/web/api"
 	"github.com/serenize/snaker"
 )
 

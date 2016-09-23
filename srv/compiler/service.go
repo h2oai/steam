@@ -12,7 +12,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steam/lib/fs"
 )
 
 const (

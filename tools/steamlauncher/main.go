@@ -16,8 +16,8 @@ import (
 	"syscall"
 
 	"github.com/BurntSushi/toml"
-	"github.com/h2oai/steamY/lib/rpc"
-	"github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/lib/rpc"
+	"github.com/h2oai/steam/srv/web"
 )
 
 var (

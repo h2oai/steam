@@ -3,10 +3,10 @@ package web
 import (
 	"log"
 
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/master/az"
-	"github.com/h2oai/steamY/master/data"
-	web "github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/master/az"
+	"github.com/h2oai/steam/master/data"
+	web "github.com/h2oai/steam/srv/web"
 )
 
 type driverOpts struct {

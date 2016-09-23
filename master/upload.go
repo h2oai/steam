@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/master/az"
-	"github.com/h2oai/steamY/master/data"
-	srvweb "github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/master/az"
+	"github.com/h2oai/steam/master/data"
+	srvweb "github.com/h2oai/steam/srv/web"
 	"github.com/pkg/errors"
 )
 

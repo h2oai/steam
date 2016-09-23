@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steam/master/az"
 	"testing"
 	"time"
 )

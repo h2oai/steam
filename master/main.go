@@ -11,12 +11,12 @@ import (
 	"syscall"
 
 	"github.com/gorilla/context"
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/lib/rpc"
-	"github.com/h2oai/steamY/master/data"
-	"github.com/h2oai/steamY/master/proxy"
-	"github.com/h2oai/steamY/master/web"
-	srvweb "github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/lib/rpc"
+	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/master/proxy"
+	"github.com/h2oai/steam/master/web"
+	srvweb "github.com/h2oai/steam/srv/web"
 )
 
 const (

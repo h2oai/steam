@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/h2oai/steamY/bindings"
-	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steam/bindings"
+	"github.com/h2oai/steam/lib/fs"
 )
 
 type H2O struct {

@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/h2oai/steamY",
+	"ImportPath": "github.com/h2oai/steam",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
 	"Packages": [

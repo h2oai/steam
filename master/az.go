@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	auth "github.com/abbot/go-http-auth"
-	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steam/master/az"
 )
 
 type DefaultAz struct {

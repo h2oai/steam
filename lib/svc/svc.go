@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/srv/web"
 )
 
 // Start starts a scoring service.

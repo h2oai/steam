@@ -24,10 +24,10 @@ fi
 
 # Fetch latest package
 cd $DIR
-s3cmd get s3://steam-release/steamY-master-linux-amd64.tar.gz
-tar xvf steamY-master-linux-amd64.tar.gz
+s3cmd get s3://steam-release/steam-master-linux-amd64.tar.gz
+tar xvf steam-master-linux-amd64.tar.gz
 mv steam-master-linux-amd64 steam
-rm steamY-master-linux-amd64.tar.gz
+rm steam-master-linux-amd64.tar.gz
 
 # Reset database
 cd $DIR/steam/var/master/scripts && sudo -u postgres ./drop-database.sh

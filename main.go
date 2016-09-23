@@ -24,13 +24,12 @@
 *    delete this exception statement from your version. If you delete this
 *    exception statement from all source files in the program, then also delete
 *    it in the license file.
-*/
+ */
 
 package main
 
-
 import (
-	cli "github.com/h2oai/steamY/cli2"
+	cli "github.com/h2oai/steam/cli2"
 )
 
 var VERSION string

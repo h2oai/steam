@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/h2oai/steamY/master/data"
+	"github.com/h2oai/steam/master/data"
 	"github.com/spf13/cobra"
 )
 

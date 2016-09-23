@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/h2oai/steamY/bindings"
+	"github.com/h2oai/steam/bindings"
 )
 
 ////////////////////

@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/h2oai/steamY/master/data"
+	"github.com/h2oai/steam/master/data"
 	"testing"
 )
 

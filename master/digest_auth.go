@@ -2,7 +2,7 @@ package master
 
 import (
 	"github.com/abbot/go-http-auth"
-	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steam/master/az"
 	"net/http"
 )
 

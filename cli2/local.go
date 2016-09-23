@@ -10,9 +10,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/master"
-	"github.com/h2oai/steamY/master/data"
+	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/master"
+	"github.com/h2oai/steam/master/data"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )

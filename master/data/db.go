@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/h2oai/steamY/master/auth"
-	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steam/master/auth"
+	"github.com/h2oai/steam/master/az"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 )

@@ -36,7 +36,7 @@ This section describes how to set up and start Steam and start the Steam CLI for
 
 1. Open a terminal window and untar the Steam binary. Note that the command below untars the OS X binary. Replace `darwin` with `linux` in the steps that follow to build on Linux.
 
-        tar xvf steamY-master-darwin-amd64.tar.gz
+        tar xvf steam-master-darwin-amd64.tar.gz
     <!-- -->
 
 1. Open a second terminal window and start PostgreSQL. This should be started from the folder where PostgreSQL was installed.
@@ -85,7 +85,7 @@ The next section describes how to add additional users to the Steam database.
 
 ### <a name="adding"></a>Adding Roles, Workgroups, and Users
 
-The following example creates sample roles, workgroups, and users using the CLI. Refer to the <a href="https://github.com/h2oai/steamY/tree/master/docs/cli">CLI Commands</a> in github for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the <a href="https://github.com/h2oai/steam/tree/master/docs/cli">CLI Commands</a> in github for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
 
 1. Create an engineer role and link that role to permissions. Note that you can use `./steam get all --permissions` to view all available permissions and their corresponding IDs. 
 

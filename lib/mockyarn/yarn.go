@@ -1,7 +1,7 @@
 package yarn
 
 import (
-	"github.com/h2oai/steamY/lib/fs"
+	"github.com/h2oai/steam/lib/fs"
 	"math/rand"
 	"strconv"
 )

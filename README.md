@@ -1,13 +1,13 @@
 # Installing, Starting, and Using Steam and the H2O Scoring Service
 
-This document is meant for H2O developers and describes how to install, start, and use Steam on an in-house YARN cluster using the steamY repository rather than the Steam binary. External users, or users who want to test the Steam binary should review the files within the **/docs** (YARN cluster) and **/demo** (standalone/local cluster) folders.
+This document is meant for H2O developers and describes how to install, start, and use Steam on an in-house YARN cluster using the steam repository rather than the Steam binary. External users, or users who want to test the Steam binary should review the files within the **/docs** (YARN cluster) and **/demo** (standalone/local cluster) folders.
 
 
 ## Requirements
 - Web browser and an Internet connection
-- steamY repository
+- steam repository
 - Go (available from <a href="https://golang.org">golang.org</a>) 
-- Access to the steamY repository
+- Access to the steam repository
 - SSH access to a Jetty server running YARN
 - Typescript
 - Node.js
@@ -147,7 +147,7 @@ The H2O Scoring Service Builder is an application that allows you to perform the
 
 Perform the following steps to build the H2O Scoring Service Builder:
 
-1. In a terminal window, navigate to the **steamY/scoring-service-builder** folder.
+1. In a terminal window, navigate to the **steam/scoring-service-builder** folder.
 
 2. Run `./gradlew build` to build the service.
 
@@ -161,7 +161,7 @@ Perform the following steps to build the H2O Scoring Service Builder:
 
 When the Builder Service is running, you can make a War file using the Web UI.
 
-The following screenshot shows how to make a War file using a POJO file and a Jar file. Note that these files are included in the  **steamY/scoring-service-builder/examples/example-pojo** folder. 
+The following screenshot shows how to make a War file using a POJO file and a Jar file. Note that these files are included in the  **steam/scoring-service-builder/examples/example-pojo** folder. 
 
 ![Make War](scoring-service-builder/images/make_war.png)
 
@@ -177,11 +177,11 @@ Note that when the Builder Service is running, you can also make a war file usin
  - `gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java` is the POJO file from H2O
  - `h2o-genmodel.jar` is the corresponding Jar file from your version of H2O
 
-Both of the above files are included in the **steamY/scoring-service-builder/examples/example-pojo** folder.
+Both of the above files are included in the **steam/scoring-service-builder/examples/example-pojo** folder.
 
 #### Importing a War File
 
-When the H2O Scoring Service Builder is up and running, open another terminal window, navigate to the **steamY/scoring-service-builder** folder, and run the following command to import the war file into the H2O Prediction service. The example below uses the **example.war** file that was built using the CLI in the previous section.
+When the H2O Scoring Service Builder is up and running, open another terminal window, navigate to the **steam/scoring-service-builder** folder, and run the following command to import the war file into the H2O Prediction service. The example below uses the **example.war** file that was built using the CLI in the previous section.
 
 		java -jar jetty-runner-9.3.9.M1.jar --port 55001 example.war
 
@@ -210,11 +210,11 @@ Perform the following steps to install Steam.
 4. Change directories to the new **h2oai** folder, and clone the repository in this folder. Enter your git username and password when prompted. 
 
 		cd Desktop/src/github.com/h2oai
-		git clone https://github.com/h2oai/steamY
+		git clone https://github.com/h2oai/steam
 	
-5. Change directories to **steamY** and then run `make linux`.
+5. Change directories to **steam** and then run `make linux`.
 
-		cd steamY
+		cd steam
 		make
 		make linux
 
@@ -242,7 +242,7 @@ This step create a new user for the Steam database and then create the database.
 ## Starting Steam
 When Steam is installed, perform the following steps to start and use Steam. Note that two terminal windows will remain open: one for the Jetty server and one for Steam.
 
-1. Open a terminal window. In the **steamY** directory, copy the **automl-hdp2.2.jar** file to your local machine. This engine is required in order to run any AutoML jobs in Steam. 
+1. Open a terminal window. In the **steam** directory, copy the **automl-hdp2.2.jar** file to your local machine. This engine is required in order to run any AutoML jobs in Steam. 
 
 		scp <user>@<domain>:./automl-hdp2.2.jar .
 

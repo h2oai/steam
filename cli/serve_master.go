@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/h2oai/steamY/master"
+	"github.com/h2oai/steam/master"
 	"github.com/spf13/cobra"
 )
 

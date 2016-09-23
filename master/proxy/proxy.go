@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/h2oai/steamY/master/az"
-	"github.com/h2oai/steamY/master/data"
+	"github.com/h2oai/steam/master/az"
+	"github.com/h2oai/steam/master/data"
 )
 
 type reverseProxy struct {

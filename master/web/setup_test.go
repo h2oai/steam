@@ -8,10 +8,10 @@ import (
 	"runtime/debug"
 	"testing"
 
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/master/az"
-	"github.com/h2oai/steamY/master/data"
-	"github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/master/az"
+	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/srv/web"
 )
 
 const (
