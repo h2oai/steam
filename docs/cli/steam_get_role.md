@@ -25,8 +25,8 @@ steam get role [?]
 
 ```
       --by-name[=false]: Get role details by name
-      --name="": No description available
-      --role-id=0: No description available
+      --name="": A role name.
+      --role-id=0: Integer ID of a role in Steam.
 ```
 
 ### Options inherited from parent commands

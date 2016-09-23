@@ -33,6 +33,10 @@ echo "Building and testing pojo-server prediction service"
 (cd pojo-server && bash example.sh) || exit 1
 (cd pojo-server && bash test_suite.sh) || exit 1
 
+echo "Building and testing rawmodel prediction service"
+(cd raw-model && bash example.sh) || exit 1
+(cd raw-model && bash test_suite.sh) || exit 1
+
 echo "Building and testing spam-detection-python prediction service"
 (cd spam-detection-python && bash example-python.sh) || exit 1
 (cd spam-detection-python && bash test_suite.sh) || exit 1

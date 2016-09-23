@@ -21,8 +21,8 @@ steam get privileges [?]
 ### Options
 
 ```
-      --entity-id=0: No description available
-      --entity-type-id=0: No description available
+      --entity-id=0: Integer ID for an entity in Steam.
+      --entity-type-id=0: Integer ID for the type of entity.
 ```
 
 ### Options inherited from parent commands

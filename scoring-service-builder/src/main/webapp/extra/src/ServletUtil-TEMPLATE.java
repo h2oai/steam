@@ -1,29 +1,98 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Type;
-import java.util.HashMap;
-//import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
-
+import hex.genmodel.*;
 import hex.genmodel.easy.*;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.prediction.AbstractPrediction;
-import hex.genmodel.easy.prediction.BinomialModelPrediction;
-import hex.genmodel.easy.prediction.MultinomialModelPrediction;
-import hex.genmodel.*;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 class ServletUtil {
   private final static Logger logger = Logging.getLogger(ServletUtil.class);
 
-  // load model
-  static String modelName = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
-  static GenModel rawModel = new REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME();
-  public static EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
-    // load preprocessing
+  private static List<String> modelNames = null;
+
+  public static void loadModels(File servletPath) {
+    if (modelNames == null) {
+      try {
+        modelNames = FileUtils.readLines(new File(servletPath, "modelnames.txt"));
+        logger.info("modelNames size {}", modelNames.size());
+        models = new HashMap<String, EasyPredictModelWrapper>();
+        EasyPredictModelWrapper mod = null;
+        for (String m : modelNames) {
+          if (m.endsWith(".java"))
+            mod = addPojoModel(m.replace(".java", ""));
+          else if (m.endsWith(".zip"))
+            mod = addMojoModel(m.replace(".zip", ""), servletPath);
+          if (model == null)
+            model = mod;
+        }
+        logger.info("added {} models", models.size());
+      }
+      catch (Exception e) {
+        logger.error("can't load model using modelnames.txt", e);
+      }
+    }
+  }
+
+  static GenModel rawModel = null;
+  static String modelName = null;
+  public static EasyPredictModelWrapper model = null;
+  public static Map<String, EasyPredictModelWrapper> models = null;
+
+  // this is how to do easy predict that doesn't error on wrong categorical levels
+  //    rawModel = new
+  //        new EasyPredictModelWrapper(
+  //            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+  //        );
+
+  static EasyPredictModelWrapper addPojoModel(String modelName) {
+    EasyPredictModelWrapper model = null;
+    try {
+      Class<?> clazz = Class.forName(modelName);
+      GenModel rawModel = (GenModel) clazz.newInstance();
+      model = new EasyPredictModelWrapper(rawModel);
+      models.put(modelName, model);
+      logger.debug("added model {}  new size {}", modelName, models.size());
+
+    }
+    catch (Exception e) {
+      logger.error("error {}", e);
+    }
+
+    logger.info("loaded {} models", models.size());
+    return model;
+  }
+
+  static EasyPredictModelWrapper addMojoModel(String modelName, File servletPath) {
+    EasyPredictModelWrapper model = null;
+    try {
+      String fileName = servletPath + File.separator + modelName + ".zip";
+      GenModel rawModel = REPLACE_THIS_WITH_MODEL;
+      model = new EasyPredictModelWrapper(rawModel);
+      models.put(modelName, model);
+      logger.info("added model {}  new size {}", modelName, models.size());
+    }
+    catch (Exception e) {
+      logger.error("error {}", e);
+    }
+    return model;
+  }
+
+  // load preprocessing
   public static Transform transform = REPLACE_THIS_WITH_TRANSFORMER_OBJECT;
 
   public static final Type MAP_TYPE = new TypeToken<HashMap<String, Object>>(){}.getType();
@@ -111,6 +180,33 @@ class ServletUtil {
     logger.debug("Prediction time {}", ServletUtil.predictionTimes);
     return pr;
   }
+
+  public static synchronized AbstractPrediction predictModel(String modelName, RowData row) throws PredictException {
+    long start = System.nanoTime();
+    if (models.size() == 0)
+      throw new PredictException("no models");
+    EasyPredictModelWrapper mod = models.get(modelName);
+    if (mod == null)
+      throw new PredictException("unknown model " + modelName);
+    AbstractPrediction pr = mod.predict(row);
+    long done = System.nanoTime();
+    ServletUtil.lastTime = System.currentTimeMillis();
+    ServletUtil.predictionTimes.add(start, done);
+
+//    String label = null;
+//    if (pr instanceof BinomialModelPrediction) {
+//      label = ((BinomialModelPrediction) pr).label;
+//    } else if (pr instanceof MultinomialModelPrediction) {
+//      label = ((MultinomialModelPrediction) pr).label;
+//    }
+//    if (label != null) {
+//      ServletUtil.incrementOutputLabel(label);
+//    }
+
+    logger.debug("Prediction time {}", ServletUtil.predictionTimes);
+    return pr;
+  }
+
 
 
 //  public static Map<String, Integer> outputLabels = new ConcurrentHashMap<String, Integer>();

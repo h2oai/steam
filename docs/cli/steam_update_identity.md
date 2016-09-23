@@ -21,8 +21,8 @@ steam update identity [?]
 ### Options
 
 ```
-      --identity-id=0: No description available
-      --password="": No description available
+      --identity-id=0: Integer ID of an identity in Steam.
+      --password="": Password for identity
 ```
 
 ### Options inherited from parent commands

@@ -39,54 +39,86 @@
 
 <main class="container-fluid">
     <section class="col-md-12 col-sm-12"></section>
-    <section id="inputParams" class="col-md-6 col-sm-12">
-        <header>
-            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
-            Model input parameters
-        </header>
-        <form name="params" action="" method="post" onsubmit="event.preventDefault(); runpredpostjar(this)">
-            <fieldset>
-                <legend>Raw Input (before Jar preprocessing)</legend>
-                <div class="form-group">
-                    <label class="sr-only"></label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="p" size="140" placeholder="Enter raw input for prediction"><br>
+
+    <div id="left" class="col-md-6 col-sm-12 col-lg-6"/>
+
+        <section id="inputParams">
+            <header>
+                <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
+                Model input parameters
+            </header>
+            <form name="allparams" action="" method="post" onsubmit="event.preventDefault(); runpredpostjar(this)">
+                <fieldset>
+                    <legend>Raw Input (before Jar preprocessing)</legend>
+                    <div class="form-group">
+                        <label class="sr-only"></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="p" size="140" placeholder="Enter raw input for prediction"><br>
+                        </div>
                     </div>
+                </fieldset>
+
+
+                <div class="btnContainer">
+                    <input id="predict-btn" class="btn btn-primary" type="submit" name="okbutton" value="PREDICT">
+                    <input id="reset-btn" class="btn btn-default" type="reset" value="CLEAR">
                 </div>
+
+
+            <fieldset>
+                    <legend>Command Line</legend>
+                    <div class="form-group">Another way to run this prediction is through command line, via POST to the REST API. 
+                    </div>
+                    <div class="form-group">
+                        <label class="sr-only"></label>
+                        <div class="curl"></div>
+                    </div>
             </fieldset>
 
+            </form>
+        </section>
 
-            <div class="btnContainer">
-                <input id="predict-btn" class="btn btn-primary" type="submit" name="okbutton" value="PREDICT">
-                <input id="reset-btn" class="btn btn-default" type="reset" value="CLEAR">
+        <section id="batch">
+            <header>
+              <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Batch Prediction
+              <span class="subtitle">*optional</span>
+            </header>
+            <div id="batch-content">
+              <form method="post" action="pypredict" enctype="multipart/form-data">
+                  <!--<div class="form-group">-->
+      <!--                 <div class="input-group">
+                          <legend>Input File</legend><input type="file" class="form-control" id="inputFile" name="inpfile" size="40">
+                      </div>
+       -->            <!--</div>-->
+                    <div class="input-inline-row">
+                          <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
+                          <div class="file-input-div">
+                              <input class="form-control file-input" type="text" id="inpfile" placeholder="Select a Batch JSON file"/>
+                              <input type="file" name="inpfile" />
+                          </div>
+                    </div>
+
+              </form>
+
+              <div class="btnContainer">
+                  <input type="submit" id="batch-predict" class="btn btn-primary" value="Batch Predict" />
+                  <input type="reset" id="batch-reset" class="btn btn-default" value="clear" />
+              </div>
             </div>
+        </section>
 
+    </div>
 
-        <fieldset>
-                <legend>Command Line</legend>
-                <div class="form-group">Another way to run this prediction is through command line, via POST to the REST API. 
-                </div>
-                <div class="form-group">
-                    <label class="sr-only"></label>
-                    <div class="curl"></div>
-                </div>
-        </fieldset>
+    <div id="right" class="col-lg-5 col-md-6 col-sm-12">
+        <section id="results" class="col-md-4 col-sm-12">
+            <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
+            <fieldset class="results">
+            </fieldset>
+            <fieldset id="modelStats">
+            </fieldset>
 
-        </form>
-
-    </section>
-
-    <section class="col-md-1">
-    </section>
-
-    <section id="results" class="col-md-4 col-sm-12">
-        <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
-        <fieldset class="results">
-        </fieldset>
-        <fieldset id="modelStats">
-        </fieldset>
-
-    </section>
+        </section>
+    </div>
 </main>
 </body>
 </html>

@@ -21,8 +21,8 @@ steam link role [?]
 ### Options
 
 ```
-      --permission-id=0: No description available
-      --role-id=0: No description available
+      --permission-id=0: Integer ID of a permission in Steam.
+      --role-id=0: Integer ID of a role in Steam.
       --with-permission[=false]: Link a role with a permission
 ```
 

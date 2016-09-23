@@ -29,6 +29,7 @@ DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 SLA=./tools/steamlauncher
 SSB=./scoring-service-builder
 WWW=./var/master/www
+DB=./var/master/db
 GUI=./gui
 ASSETS = ./var/master/assets
 SCRIPTS = ./scripts
@@ -56,6 +57,11 @@ ssb:
 	mkdir -p $(ASSETS)
 	cp $(SSB)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
+
+db:
+	sqlite3 steam.db < $(SCRIPTS)/database/create-schema.sql
+	mkdir -p $(DB)
+	mv steam.db $(DB)
 
 launcher:
 	cd $(SLA) && go build
@@ -107,10 +113,12 @@ linux:
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=linux GOARCH=amd64 go build
 	mkdir -p ./dist/$(DIST_LINUX)/var/master && mv ./steamY ./dist/$(DIST_LINUX)/steam
+	cp LICENSE ./dist/$(DIST_LINUX)/LICENSE
 	mv $(SLA)/steamlauncher ./dist/$(DIST_LINUX)/steam-launcher
 	cp $(SLA)/config.toml ./dist/$(DIST_LINUX)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/
+	cp -r $(DB) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_LINUX)/var/master/
 	tar czfC ./dist/$(DIST_LINUX).tar.gz dist $(DIST_LINUX)
 
@@ -119,14 +127,16 @@ darwin:
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=darwin GOARCH=amd64 go build
 	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steamY ./dist/$(DIST_DARWIN)/steam
+	cp LICENSE ./dist/$(DIST_DARWIN)/LICENSE
 	mv $(SLA)/steamlauncher ./dist/$(DIST_DARWIN)/steam-launcher
 	cp $(SLA)/config.toml ./dist/$(DIST_DARWIN)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
+	cp -r $(DB) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: gui ssb linux darwin
+release: gui ssb db linux 
 	rm -rf ./dist/$(DIST_LINUX)
-	rm -rf ./dist/$(DIST_DARWIN)
+	# rm -rf ./dist/$(DIST_DARWIN)
 

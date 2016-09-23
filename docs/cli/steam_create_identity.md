@@ -21,8 +21,8 @@ steam create identity [?]
 ### Options
 
 ```
-      --name="": No description available
-      --password="": No description available
+      --name="": A string name.
+      --password="": A string password
 ```
 
 ### Options inherited from parent commands

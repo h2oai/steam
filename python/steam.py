@@ -100,6 +100,20 @@ class RPCClient:
 		response = self.connection.call("PingServer", request)
 		return response['output']
 	
+	def get_config(self):
+		"""
+		No description available
+
+		Parameters:
+
+		Returns:
+		config: An object containing Steam startup configurations (Config)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetConfig", request)
+		return response['config']
+	
 	def register_cluster(self, address):
 		"""
 		Connect to a cluster
@@ -131,7 +145,7 @@ class RPCClient:
 		response = self.connection.call("UnregisterCluster", request)
 		return 
 	
-	def start_cluster_on_yarn(self, cluster_name, engine_id, size, memory, username):
+	def start_cluster_on_yarn(self, cluster_name, engine_id, size, memory, keytab):
 		"""
 		Start a cluster using Yarn
 
@@ -140,7 +154,7 @@ class RPCClient:
 		engine_id: No description available (int64)
 		size: No description available (int)
 		memory: No description available (string)
-		username: No description available (string)
+		keytab: No description available (string)
 
 		Returns:
 		cluster_id: No description available (int64)
@@ -150,22 +164,24 @@ class RPCClient:
 			'engine_id': engine_id
 			'size': size
 			'memory': memory
-			'username': username
+			'keytab': keytab
 		}
 		response = self.connection.call("StartClusterOnYarn", request)
 		return response['cluster_id']
 	
-	def stop_cluster_on_yarn(self, cluster_id):
+	def stop_cluster_on_yarn(self, cluster_id, keytab):
 		"""
 		Stop a cluster using Yarn
 
 		Parameters:
 		cluster_id: No description available (int64)
+		keytab: No description available (string)
 
 		Returns:None
 		"""
 		request = {
 			'cluster_id': cluster_id
+			'keytab': keytab
 		}
 		response = self.connection.call("StopClusterOnYarn", request)
 		return 

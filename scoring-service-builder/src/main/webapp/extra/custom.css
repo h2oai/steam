@@ -109,8 +109,7 @@ section {
 }
 
 fieldset {
-    margin-top: 2em;
-    padding-left: 3em;
+    margin-top: 1em;
     padding-right: 3em;
     font-weight: 600;
 }
@@ -185,6 +184,19 @@ form {
 
 .btnContainer {
     padding-left: 2em;
+    padding-bottom: 2em;
+}
+
+.section-ctn{
+    padding-left: 3em;
+}
+
+.expandableHandler{
+    cursor: pointer;
+}
+
+.expandable{
+    display: none;
 }
 
 .form-control-label {
@@ -293,7 +305,7 @@ select:-moz-focusring {
 }
 
 tr.stat-group td {
-    padding: 0 8px !important;
+    padding: 0 8px 0 0 !important;
 }
 
 tr.stat-pad {

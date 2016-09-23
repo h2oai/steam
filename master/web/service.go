@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -22,6 +23,7 @@ import (
 	"github.com/h2oai/steamY/srv/compiler"
 	"github.com/h2oai/steamY/srv/h2ov3"
 	"github.com/h2oai/steamY/srv/web"
+	"github.com/pkg/errors"
 )
 
 type Service struct {
@@ -29,6 +31,7 @@ type Service struct {
 	ds                        *data.Datastore
 	compilationServiceAddress string
 	scoringServiceAddress     string
+	clusterProxyAddress       string
 	scoringServicePortMin     int
 	scoringServicePortMax     int
 	kerberosEnabled           bool
@@ -36,17 +39,21 @@ type Service struct {
 	keytab                    string
 }
 
-func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, scoringServicePortsRange [2]int, kerberos bool, username, keytab string) *Service {
+func NewService(
+	workingDir string,
+	ds *data.Datastore,
+	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
+	scoringServicePortsRange [2]int,
+	kerberos bool,
+	username, keytab string,
+) *Service {
 	return &Service{
 		workingDir,
 		ds,
-		compilationServiceAddress,
-		scoringServiceAddress,
-		scoringServicePortsRange[0],
-		scoringServicePortsRange[1],
+		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
+		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
-		username,
-		keytab,
+		username, keytab,
 	}
 }
 
@@ -60,6 +67,13 @@ func now() int64 {
 
 func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 	return status, nil
+}
+
+func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
+	return &web.Config{
+		KerberosEnabled:     s.kerberosEnabled,
+		ClusterProxyAddress: s.clusterProxyAddress,
+	}, nil
 }
 
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
@@ -92,7 +106,6 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 }
 
 func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
-
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
@@ -113,8 +126,7 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 	return nil
 }
 
-func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, username string) (int64, error) {
-
+func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, keytab string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return 0, err
 	}
@@ -128,12 +140,20 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		return 0, fmt.Errorf("A cluster with the name %s already exists.", clusterName)
 	}
 
+	identity, err := s.ds.ReadIdentity(pz, pz.Id())
+	if err != nil {
+		return 0, err
+	}
+
 	engine, err := s.ds.ReadEngine(pz, engineId)
 	if err != nil {
 		return 0, err
 	}
 
-	applicationId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, s.username, s.keytab) // FIXME: THIS IS USING ADMIN TO START ALL CLOUDS
+	// FIXME check if file exists
+	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
+
+	appId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, identity.Name, keytabPath)
 	if err != nil {
 		return 0, err
 	}
@@ -142,9 +162,9 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		0,
 		engineId,
 		int64(size),
-		applicationId,
+		appId,
 		memory,
-		username,
+		identity.Name,
 		out,
 	}
 
@@ -156,7 +176,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	return clusterId, nil
 }
 
-func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64) error {
+func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab string) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return err
 	}
@@ -164,7 +184,7 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64) error {
 	// Cluster should exist
 	cluster, err := s.ds.ReadCluster(pz, clusterId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed reading cluster")
 	}
 
 	if cluster.TypeId != s.ds.ClusterTypes.Yarn {
@@ -175,18 +195,25 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64) error {
 	if cluster.State == data.StoppedState {
 		return fmt.Errorf("Cluster %d is already stopped", clusterId)
 	}
-
+	// Get cluster information
 	yarnCluster, err := s.ds.ReadYarnCluster(pz, clusterId)
 	if err != nil {
+		return errors.Wrap(err, "failed reading yarn cluster")
+	}
+	//	Get username
+	identity, err := s.ds.ReadIdentity(pz, pz.Id())
+	if err != nil {
+		return errors.Wrap(err, "failed reading identity")
+	}
+
+	// FIXME check if file exists
+	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
+	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnCluster.ApplicationId,
+		yarnCluster.OutputDir, identity.Name, keytabPath); err != nil {
 		return err
 	}
 
-	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnCluster.ApplicationId, yarnCluster.OutputDir, s.username, s.keytab); err != nil { //FIXME: this is using adming kerberos credentials
-		log.Println(err)
-		return err
-	}
-
-	return s.ds.UpdateClusterState(pz, clusterId, data.StoppedState)
+	return s.ds.DeleteCluster(pz, clusterId)
 }
 
 func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, error) {
@@ -1158,7 +1185,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 }
 
 func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bindings.ModelMetrics, category string) error {
-	log.Println("iama", category)
 	switch category {
 	case "Binomial":
 		if err := s.ds.CreateBinomialModel(
@@ -1300,9 +1326,15 @@ func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) er
 		return err
 	}
 
-	err := s.ds.UnlinkLabelFromModel(pz, labelId, modelId)
+	oldLabel, ok, err := s.ds.ReadLabelByModel(pz, modelId)
 	if err != nil {
 		return err
+	}
+
+	if ok {
+		if err := s.ds.UnlinkLabelFromModel(pz, oldLabel.Id, modelId); err != nil {
+			return err
+		}
 	}
 
 	return s.ds.LinkLabelWithModel(pz, labelId, modelId)

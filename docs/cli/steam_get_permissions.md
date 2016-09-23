@@ -26,8 +26,8 @@ steam get permissions [?]
 ```
       --for-identity[=false]: List permissions for an identity
       --for-role[=false]: List permissions for a role
-      --identity-id=0: No description available
-      --role-id=0: No description available
+      --identity-id=0: Integer ID of an identity in Steam.
+      --role-id=0: Integer ID of a role in Steam.
 ```
 
 ### Options inherited from parent commands

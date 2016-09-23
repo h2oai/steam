@@ -43,17 +43,23 @@ sbin/start-yarn.sh
 /etc/init.d/iptables save
 /etc/init.d/iptables stop
 
-# Setting up postgres
-sed -n -i.bak 'H;${x;s/\[base]\n/&exclude=postgres*\n/g; s/\[updates]\n/&exclude=postgres*\n/g;p;}' /etc/yum.repos.d/CentOS-Base.repo
-yum localinstall -y http://yum.postgresql.org/9.5/redhat/rhel-6-x86_64/pgdg-centos95-9.5-2.noarch.rpm
-yum install -y postgresql95-server
+# Setup Go
+yum groupinstall -y 'Development Tools'
+wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz
+tar -C /usr/local -xzf go1.7.1.linux-amd64.tar.gz
 
-service postgresql-9.5 initdb
-# this is required to get steam to connect to postgres; changes configurations on authentication; see http://www.cyberciti.biz/faq/psql-fatal-ident-authentication-failed-for-user/
-sed -n -i.bak 'H;${x;s/peer/trust/g; s/ident/trust/g;p;}' /var/lib/pgsql/9.5/data/pg_hba.conf
+# # Setting up postgres
+# sed -n -i.bak 'H;${x;s/\[base]\n/&exclude=postgres*\n/g; s/\[updates]\n/&exclude=postgres*\n/g;p;}' /etc/yum.repos.d/CentOS-Base.repo
+# yum localinstall -y http://yum.postgresql.org/9.5/redhat/rhel-6-x86_64/pgdg-centos95-9.5-2.noarch.rpm
+# yum install -y postgresql95-server
 
-service postgresql-9.5 start
-chmod 755 /home/vagrant
-sudo -u postgres createuser steam
+# service postgresql-9.5 initdb
+# # this is required to get steam to connect to postgres; changes configurations on authentication; see http://www.cyberciti.biz/faq/psql-fatal-ident-authentication-failed-for-user/
+# sed -n -i.bak 'H;${x;s/peer/trust/g; s/ident/trust/g;p;}' /var/lib/pgsql/9.5/data/pg_hba.conf
 
-echo export PATH=$PATH:/usr/local/hadoop/bin >> /home/vagrant/.bashrc
+# service postgresql-9.5 start
+# chmod 755 /home/vagrant
+# sudo -u postgres createuser steam
+
+echo export GOPATH=/home/vagrant/Go >> /home/vagrant/.bashrc
+echo export PATH=$PATH:/usr/local/hadoop/bin:/usr/local/go/bin:$GOPATH/bin >> /home/vagrant/.bashrc

@@ -27,14 +27,16 @@ const (
 	WwwDir         = "www"
 	AssetsDir      = "assets"
 	DbDir          = "db"
+	KTDir          = "kt"
 	ProjectDir     = "project"
 	ModelDir       = "model"
 	LibDir         = "lib"
 	OutDir         = "out"
 	TmpDir         = "tmp"
 	LogDir         = "log"
-	DirPerm        = 0766
+	DirPerm        = 0755
 	FilePerm       = 0666
+	KTPerm         = 0600
 	PackExt        = ".steam"
 	KindEngine     = "engine"
 	KindFile       = "file"

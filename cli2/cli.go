@@ -1223,6 +1223,7 @@ Commands:
     $ steam get attributes ...
     $ steam get cluster ...
     $ steam get clusters ...
+    $ steam get config ...
     $ steam get dataset ...
     $ steam get datasets ...
     $ steam get datasource ...
@@ -1258,6 +1259,7 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getAttributes(c))
 	cmd.AddCommand(getCluster(c))
 	cmd.AddCommand(getClusters(c))
+	cmd.AddCommand(getConfig(c))
 	cmd.AddCommand(getDataset(c))
 	cmd.AddCommand(getDatasets(c))
 	cmd.AddCommand(getDatasource(c))
@@ -1594,6 +1596,36 @@ func getClusters(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	return cmd
+}
+
+var getConfigHelp = `
+config [?]
+Get Config
+Examples:
+
+    No description available
+    $ steam get config
+
+`
+
+func getConfig(c *context) *cobra.Command {
+
+	cmd := newCmd(c, getConfigHelp, func(c *context, args []string) {
+
+		// No description available
+		config, err := c.remote.GetConfig()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		lines := []string{
+			fmt.Sprintf("KerberosEnabled:\t%v\t", config.KerberosEnabled),         // No description available
+			fmt.Sprintf("ClusterProxyAddress:\t%v\t", config.ClusterProxyAddress), // No description available
+		}
+		c.printt("Attribute\tValue\t", lines)
+		return
+	})
+
 	return cmd
 }
 
@@ -3829,7 +3861,7 @@ Examples:
         --engine-id=? \
         --size=? \
         --memory=? \
-        --username=?
+        --keytab=?
 
 `
 
@@ -3837,9 +3869,9 @@ func startCluster(c *context) *cobra.Command {
 	var onYarn bool        // Switch for StartClusterOnYarn()
 	var clusterName string // No description available
 	var engineId int64     // No description available
+	var keytab string      // No description available
 	var memory string      // No description available
 	var size int           // No description available
-	var username string    // No description available
 
 	cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
 		if onYarn { // StartClusterOnYarn
@@ -3850,7 +3882,7 @@ func startCluster(c *context) *cobra.Command {
 				engineId,    // No description available
 				size,        // No description available
 				memory,      // No description available
-				username,    // No description available
+				keytab,      // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3863,9 +3895,9 @@ func startCluster(c *context) *cobra.Command {
 
 	cmd.Flags().StringVar(&clusterName, "cluster-name", clusterName, "No description available")
 	cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
+	cmd.Flags().StringVar(&keytab, "keytab", keytab, "No description available")
 	cmd.Flags().StringVar(&memory, "memory", memory, "No description available")
 	cmd.Flags().IntVar(&size, "size", size, "No description available")
-	cmd.Flags().StringVar(&username, "username", username, "No description available")
 	return cmd
 }
 
@@ -3932,13 +3964,15 @@ Examples:
 
     Stop a cluster using Yarn
     $ steam stop cluster --on-yarn \
-        --cluster-id=?
+        --cluster-id=? \
+        --keytab=?
 
 `
 
 func stopCluster(c *context) *cobra.Command {
 	var onYarn bool     // Switch for StopClusterOnYarn()
 	var clusterId int64 // No description available
+	var keytab string   // No description available
 
 	cmd := newCmd(c, stopClusterHelp, func(c *context, args []string) {
 		if onYarn { // StopClusterOnYarn
@@ -3946,6 +3980,7 @@ func stopCluster(c *context) *cobra.Command {
 			// Stop a cluster using Yarn
 			err := c.remote.StopClusterOnYarn(
 				clusterId, // No description available
+				keytab,    // No description available
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3956,6 +3991,7 @@ func stopCluster(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&onYarn, "on-yarn", onYarn, "Stop a cluster using Yarn")
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
+	cmd.Flags().StringVar(&keytab, "keytab", keytab, "No description available")
 	return cmd
 }
 
