@@ -31,6 +31,7 @@ type Service struct {
 	ds                        *data.Datastore
 	compilationServiceAddress string
 	scoringServiceAddress     string
+	clusterProxyAddress       string
 	scoringServicePortMin     int
 	scoringServicePortMax     int
 	kerberosEnabled           bool
@@ -38,17 +39,21 @@ type Service struct {
 	keytab                    string
 }
 
-func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, scoringServicePortsRange [2]int, kerberos bool, username, keytab string) *Service {
+func NewService(
+	workingDir string,
+	ds *data.Datastore,
+	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
+	scoringServicePortsRange [2]int,
+	kerberos bool,
+	username, keytab string,
+) *Service {
 	return &Service{
 		workingDir,
 		ds,
-		compilationServiceAddress,
-		scoringServiceAddress,
-		scoringServicePortsRange[0],
-		scoringServicePortsRange[1],
+		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
+		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
-		username,
-		keytab,
+		username, keytab,
 	}
 }
 
@@ -65,7 +70,10 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 }
 
 func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
-	return &web.Config{s.kerberosEnabled}, nil
+	return &web.Config{
+		KerberosEnabled:     s.kerberosEnabled,
+		ClusterProxyAddress: s.clusterProxyAddress,
+	}, nil
 }
 
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
@@ -1177,7 +1185,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 }
 
 func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bindings.ModelMetrics, category string) error {
-	log.Println("iama", category)
 	switch category {
 	case "Binomial":
 		if err := s.ds.CreateBinomialModel(
@@ -1319,9 +1326,15 @@ func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) er
 		return err
 	}
 
-	err := s.ds.UnlinkLabelFromModel(pz, labelId, modelId)
+	oldLabel, ok, err := s.ds.ReadLabelByModel(pz, modelId)
 	if err != nil {
 		return err
+	}
+
+	if ok {
+		if err := s.ds.UnlinkLabelFromModel(pz, oldLabel.Id, modelId); err != nil {
+			return err
+		}
 	}
 
 	return s.ds.LinkLabelWithModel(pz, labelId, modelId)

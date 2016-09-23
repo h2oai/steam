@@ -290,9 +290,9 @@ export function unregisterCluster(clusterId: number) {
   };
 }
 
-export function stopClusterOnYarn(clusterId: number) {
+export function stopClusterOnYarn(clusterId: number, keytabFilename: string) {
   return (dispatch) => {
-    Remote.stopClusterOnYarn(clusterId, 'vagrant.keytab', (error) => {
+    Remote.stopClusterOnYarn(clusterId, keytabFilename, (error) => {
       if (error) {
         dispatch(openNotification('error', error.toString(), null));
         return;

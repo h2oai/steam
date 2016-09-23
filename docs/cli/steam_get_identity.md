@@ -25,8 +25,8 @@ steam get identity [?]
 
 ```
       --by-name[=false]: Get identity details by name
-      --identity-id=0: No description available
-      --name="": No description available
+      --identity-id=0: Integer ID of an identity in Steam.
+      --name="": An identity name.
 ```
 
 ### Options inherited from parent commands

@@ -3935,7 +3935,6 @@ func (ds *Datastore) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int6
 		if err != nil {
 			return err
 		}
-
 		if _, err := tx.Exec(`
 			UPDATE
 				label
@@ -3984,10 +3983,42 @@ func (ds *Datastore) ReadLabelsForProject(pz az.Principal, projectId int64) ([]L
 	return ScanLabels(rows)
 }
 
-func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
+func scanLabel(rows *sql.Rows) (Label, bool, error) {
+	var label Label
+
+	labels, err := ScanLabels(rows)
+	if err != nil {
+		return label, false, err
+	}
+
+	if len(labels) == 0 {
+		return label, false, nil
+	}
+
+	return labels[0], true, nil
+}
+
+func (ds *Datastore) ReadLabelByModel(pz az.Principal, modelId int64) (Label, bool, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			id, project_id, model_id, name, description, created
+		FROM
+			label
+		WHERE
+			model_id = $1
+		`, modelId)
+	if err != nil {
+		return Label{}, false, err
+	}
+	defer rows.Close()
+
+	return scanLabel(rows)
+}
+
+func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			
 		FROM
 			label
 		WHERE

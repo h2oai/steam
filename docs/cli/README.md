@@ -20,6 +20,7 @@ steam v build : Command Line Interface to Steam
 * [steam deactivate](steam_deactivate.md)	 - Deactivate entities
 * [steam delete](steam_delete.md)	 - Delete entities
 * [steam deploy](steam_deploy.md)	 - Deploy a resource of the specified type.
+* [steam find](steam_find.md)	 - Find entities
 * [steam get](steam_get.md)	 - Get entities
 * [steam import](steam_import.md)	 - Import entities
 * [steam link](steam_link.md)	 - Link entities
@@ -28,6 +29,7 @@ steam v build : Command Line Interface to Steam
 * [steam register](steam_register.md)	 - Register entities
 * [steam reset](steam_reset.md)	 - Reset Steam client configuration.
 * [steam serve](steam_serve.md)	 - Launch a new service.
+* [steam set](steam_set.md)	 - Set entities
 * [steam share](steam_share.md)	 - Share entities
 * [steam split](steam_split.md)	 - Split entities
 * [steam start](steam_start.md)	 - Start entities
@@ -36,4 +38,5 @@ steam v build : Command Line Interface to Steam
 * [steam unregister](steam_unregister.md)	 - Unregister entities
 * [steam unshare](steam_unshare.md)	 - Unshare entities
 * [steam update](steam_update.md)	 - Update entities
+* [steam upload](steam_upload.md)	 - Upload a resource of the specified type.
 

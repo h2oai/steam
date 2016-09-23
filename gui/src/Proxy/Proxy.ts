@@ -101,6 +101,8 @@ export interface Config {
   
   kerberos_enabled: boolean
   
+  cluster_proxy_address: string
+  
 }
 
 export interface Dataset {

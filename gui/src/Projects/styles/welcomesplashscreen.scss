@@ -36,31 +36,6 @@
       color: $brand-white;
     }
   }
-  .eula-line {
-    margin-top: $xsmall;
-    font-family: $font-text;
-    font-size: 12px;
-  }
-}
-
-.eula-modal {
-  .eula-content {
-    height: 100%;
-    width: 100%;
-    padding: $xsmall;
-  }
-  .eula-text {
-    border: $rule-solid-thin;
-    height: 80%;
-    width: 100%;
-    overflow: auto;
-  }
-  .buttons-container {
-    margin-top: $xsmall;
-    button:first-of-type {
-      margin-right: $xsmall;
-    }
-  }
 }
 
 .nav-container.hidden {

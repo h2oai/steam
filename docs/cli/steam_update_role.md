@@ -22,9 +22,9 @@ steam update role [?]
 ### Options
 
 ```
-      --description="": No description available
-      --name="": No description available
-      --role-id=0: No description available
+      --description="": A string description
+      --name="": A string name.
+      --role-id=0: Integer ID of a role in Steam.
 ```
 
 ### Options inherited from parent commands

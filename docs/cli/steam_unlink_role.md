@@ -22,8 +22,8 @@ steam unlink role [?]
 
 ```
       --from-permission[=false]: Unlink a role from a permission
-      --permission-id=0: No description available
-      --role-id=0: No description available
+      --permission-id=0: Integer ID of a permission in Steam.
+      --role-id=0: Integer ID of a role in Steam.
 ```
 
 ### Options inherited from parent commands

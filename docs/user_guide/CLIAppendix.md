@@ -1,27 +1,42 @@
 # <a name="CLI Command Reference"></a>CLI Command Reference Appendix
 
+
+- [`add engine`](#addengine)
+- [`build model`](#buildmodel)
+- [`create dataset`](#createdataset)
+- [`create datasource`](#createdatasource) 
 - [`create identity`](#createidentity)
+- [`create project`](#createproject)
 - [`create role`](#createrole)
 - [`create workgroup`](#createworkgroup)
 - [`deactivate identity`](#deactivateidentity)
 - [`delete cluster`](#deletecluster)
+- [`delete dataset`](#deletedataset)
+- [`delete datasource`](#deletedatasource)
 - [`delete engine`](#deleteengine)
 - [`delete model`](#deletemodel)
+- [`delete project`](#deleteproject)
 - [`delete role`](#deleterole)
 - [`delete service`](#deleteservice)
 - [`delete workgroup`](#deleteworkgroup)
-- [`deploy engine`](#deployengine)
+- [`get all cluster-types`](#getallclustertypes)
+- [`get all entity-types`](#getallentitytypes)
+- [`get all permissions`](#getallpermissions)
 - [`get cluster`](#getcluster)
 - [`get clusters`](#getclusters)
+- [`get dataset`](#getdataset)
+- [`get datasets`](#getdatasets)
+- [`get datasource`](#getdatasource)
+- [`get datasources`](#getdatasources)
 - [`get engine`](#getengine)
 - [`get engines`](#getengines)
-- [`get entities`](#getentities)
-- [`get history`](#gethistory)
 - [`get identities`](#getidentities)
 - [`get identity`](#getidentity)
 - [`get model`](#getmodel)
 - [`get models`](#getmodels)
 - [`get permissions`](#getpermissions)
+- [`get project`](#getproject)
+- [`get projects`](#getprojects)
 - [`get role`](#getrole)
 - [`get roles`](#getroles)
 - [`get service`](#getservice)
@@ -44,6 +59,124 @@
 
 ------
 
+<a name="addengine"></a>
+### `add engine`
+
+**Description**
+
+Adds a new engine to the Steam database. After an engine is successfully added, it can be specified when starting a cluster. (See [`start cluster`](#startcluster).) 
+
+**Usage**
+
+	./steam add engine --engine-name="[name]" --engine-path="[path]"
+	
+**Parameters**
+
+- `--engine-name="[name]"`: Enter the name of the engine
+- `--engine-path="[path]"`: Enter the path for the engine
+
+**Example**
+
+The following example adds **h2o-genmodel.jar** to the list of available engines.
+
+	./steam add engine --engine-name="h2o-genmodel.jar" --engine-path="../Desktop/engines"
+
+-------
+
+<a name="buildmodel"></a>
+### `build model`
+
+**Description**
+
+Builds a model using either a specified algorithm or through AutoML.
+
+**Usage**
+
+	./steam build model --cluster-id="[cluster]" --dataset-id="[dataset]" --algorithm="[algorithm]"
+	
+	./steam build model --auto --cluster-id="[cluster]" --dataset-id="[dataset]" --target-name="[model_name]" --max-run-time="[seconds]"
+	
+**Parameters**
+
+- `--cluster-id="[cluster]"`: Specify the ID of the cluster that contains the dataset and will contain this model
+- `--dataset-id="[dataset]"`: Specify the ID of the dataset to use to build the model
+- `--algorithm="[algorithm]"`: Specify the algorithm to use for the model. This option cannot be used with `--auto`. Options include:
+	- `gbm`: Build a Gradient Boosting Machine model
+	- `glm`: Build a Generalized Linear model
+	- `glrm`: Build a Generalized Low Rank model
+	- `rf`: Build a Random Forest model
+	- `svm`: Build a Support Vector Machine model
+	- `dl`: Build a Deep Learning model
+	- `nb`: Build a Naive Bayes model
+- `--auto`: Specify to use AutoML to build the model
+- `--target-name=[model_name]`: Specify a name for the AutoML model
+- `--max_run_time`: When building an AutoML model, speicfy the maximum runtime in seconds to allow for the model to build. 
+
+**Example**
+
+The following example builds a gbm model from the airlines dataset. This dataset was added using [`create dataset`](#createdataset) and has an ID of 1.
+
+	./steam build model --cluster-id="1" --dataset-id="1" --algorithm="gbm"
+
+------
+
+<a name="createdataset"></a>
+### `create dataset`
+
+**Description**
+
+Creates a dataset from an available source file. Once created, the dataset can be used to build a model.
+
+**Usage**
+
+	./steam create dataset --cluster-id=[cluster] --datasource-id=[source] --name="[datasetname]" --description="[description]" --response-column-name="[column]"
+
+**Parameters**
+
+- `--cluster-id=[cluster]`: Specify the ID of the cluster running H2O that will contain this dataset 
+- `--datasource-id=[source]`: Specify the ID of the datasource that will be used to create this dataset
+- `--name="[datasetname]"`: Optionally enter a name for this dataset
+- `--description="[description]"`: Optionally provide a description for this dataset
+- `--response-column-name="[column"]`: Specify the column that will be used when making predictions
+
+**Example**
+
+The following example creates a dataset from a source file that was added using [`create datasource`](#createdatasource). In this example, Steam will generate a name for the dataset. Note that H2O must be running on the specified cluster.
+
+	./steam create dataset --cluster-id=1 --datasource-id=1 --response-column-name="Origin"
+	DatasetId:	1
+
+------
+
+<a name="createdatasource"></a>
+### `create datasource`
+
+**Description**
+
+Adds a datasource to the Steam database. Once added, this source file can be used to create a dataset.
+
+**Usage**
+
+	./steam create datasource --name="[sourcename]" --description="[description]" --path="[path]" --project-id=[id]
+
+**Parameters**
+
+- `--name="[datasetname]"`: Optionally enter a name for this dataset
+- `--description="[description]"`: Optionally provide a description for this dataset
+- `--path="[path]"`: Enter the path for the source file. This path is relative to the H2O cluster. 
+- `--project-id=[id]`: Specify the ID of the project that will contain this source file
+
+**Example**
+
+The following example creates a project, then adds the allyears2k.csv file to the Steam database.
+
+	./steam create project --name="Prediction" --description="Prediction project"
+	ProjectId:	1
+	./steam create datasource --name="allyears2k.csv" --description="airline data" --path="../../Desktop/allyears2k.csv" --project-id=1
+	DatasourceId:	1
+
+------
+
 <a name="createidentity"></a>
 ### `create identity`
 
@@ -53,21 +186,48 @@ Creates a new user.
 
 **Usage**
 
-	./steam create identity [username] [password]
+	./steam create identity --name="[username]" --password="[password]"
 
 
 **Parameters**
 
-- `[username]`: Enter a unique string for the new user name
-- `[password]`: Enter a string for the new user's password
+- `--name="[username]"`: Enter a unique string for the new user name
+- `--password="[password]`: Enter a string for the new user's password
 
 **Example**
 
-The following example creates a new user with a username of "minsky" and a password of "m1n5kypassword". 
+The following example creates two users: bob and jim. 
  
-	./steam create identity minsky m1n5kypassword
-	Created user minsky ID: 2
-	
+	./steam create identity --name="bob" --password="bobSpassword"
+	IdentityId:	2
+	./steam create identity --name="jim" --password="j1mSpassword"
+	IdentityId:	3
+
+------
+
+<a name="createproject"></a>
+### `create project`
+
+**Description**
+
+Creates a project in the Steam database. Once created, datasources can be added to the project, ensuring that allo associated datasets and models are contained in this single location. 
+
+**Usage**
+
+	./steam create project --name="[projectName]" --description="[description]"
+
+**Parameters**
+
+- `--name="[projectName]"`: Enter a unique name for the project
+- `--description="[description]"`: Enter a description for the project
+
+**Example**
+
+The following example creates a Prediction project.
+
+	./steam create project --name="Prediction" --description="Prediction project"
+	ProjectId:	1
+
 ------
 
 ### <a name="createrole"></a>`create role`
@@ -78,21 +238,23 @@ Creates a new role.
 
 **Usage**
 
-	./steam create role [rolename] --desc="[description]"
+	./steam create role --name="[rolename]" --description="[description]"
 
 
 **Parameters**
 
-- `[rolename]`: Enter a unique string for the new role
-- `--desc="[description]"`: Optionally enter a string that describes the new role
+- `--name="[rolename]"`: Enter a unique string for the new role
+- `--description="[description]"`: Optionally enter a string that describes the new role
 
 **Example**
 
-The following example creates an engineer role. 
+The following examples create an engineer role and then a datascience role. 
  
-	./steam create role engineer --desc="a default engineer role"
-	Created role engineer ID: 2
-		
+	./steam create role --name="engineer" --description="a default engineer role"
+	RoleId:	2
+	./steam create role --name="datascience" --description="a default data science role"
+	RoleId:	3
+	
 ------
 
 ### <a name="createworkgroup"></a>`create workgroup`
@@ -103,19 +265,21 @@ Creates a new workgroup.
 
 **Usage**
 
-	./steam create workgroup [workgroupname] --desc="[description]"
+	./steam create workgroup --name="[workgroupname]" --description="[description]"
 
 **Parameters**
 
-- `[workgroupname]`: Enter a unique string for the new workgroup
-- `--desc="[description]"`: Optionally enter a string that describes the new workgroup
+- `--name="[workgroupname]"`: Enter a unique string for the new workgroup
+- `--description="[description]"`: Optionally enter a string that describes the new workgroup
 
 **Example**
 
-The following example creates a data preparation workgroup. 
+The following example creates a data preparation and a production workgroup. 
  
-	./steam create workgroup preparation --desc="data prep group"	
-	Created workgroup preparation ID: 1
+	./steam create workgroup --name="preparation" --description="data prep group"	
+	WorkgroupId:	1
+	./steam create workgroup --name="production" --description="production group"	
+	WorkgroupId:	2
 		
 ------
 
@@ -127,17 +291,17 @@ Deactivates an identity based on the specified username.
 
 **Usage**
 
-	./steam deactivate identity [username]
+	./steam deactivate identity --identity-id=[identityId]
 
 **Parameters**
 
-- `[username]`: Specify the username of the identity that you want to deactivate.
+- `--identity-id=[identityId]`: Specify the identity of the user you want to deactivate.
 
 **Example**
 
-The following example deactivates user "minsky". 
+The following example deactivates a user whose ID is 3. 
 
-	./steam deactivate minsky 
+	./steam deactivate identity --identity-id=3
 
 -----
 
@@ -145,23 +309,77 @@ The following example deactivates user "minsky".
 
 **Description**
 
-Deletes the specified YARN cluster from the database. Note that this command can only be used with YARN clusters (i.e., those started using [`start cluster`](#start cluster).) This command will not work with local clusters. In addition, this commmand will only work on cluster that have been stopped using [`stop cluster`](#stop cluster).
+Deletes the specified YARN cluster from the database. Note that this command can only be used with YARN clusters (i.e., those started using [`start cluster`](#startcluster).) This command will not work with local clusters. In addition, this commmand will only work on cluster that have been stopped using [`stop cluster`](#stopcluster).
 
 **Usage**
 
-	./steam delete cluster [id]
+	./steam delete cluster --cluster-id=[clusterId]
 
 **Parameters**
 
-- `[id]`: Specify the ID of the cluster that you want to delete.
+- `--cluster-id=[clusterId]`: Specify the ID of the cluster that you want to delete.
 
 **Example**
 
-The following example deletes cluster 1.
+The following example retrieves a list of clusters, then stops and deletes cluster 2.
 
 	./steam get clusters
-	NAME		ID	ADDRESS			STATE	TYPE		AGE
-	user     	1	localhost:54321	started	external	2016-07-01 11:45:58 -0700 PDT	Cluster deleted: 1
+	Id	Name	TypeId	DetailId	Address	State	CreatedAt
+	1	user	1		0			localhost:54321	started	1473883790
+	2	user	1		0			localhost:54323	started	1474323838
+	./steam stop cluster --cluster-id=2
+	./steam delete cluster --cluster-id=2
+	Cluster deleted: 1
+
+------
+
+<a name="deletedataet"></a>
+### `delete dataset`
+
+**Decription**
+
+Deletes the specified dataset from the Steam database.
+
+**Note**: You cannot delete a dataset that was used to build an existing model. You must delete the model(s) first before you can delete the dataset that was used to build the model. 
+
+**Usage**
+
+	./steam delete dataset --dataset-id=[datasetId]
+	
+**Parameters**
+
+- `--dataset-id=[datasetId]`: Specify the ID of the dataset that that you want to delete. Note that you can use [`get datasets`](#getdataets) to retrieve a list of datasets in the database.
+
+**Example**
+
+The following example deletes a dataset whose ID is 2.
+
+	./steam delete dataset --dataset-id=2
+
+------
+
+<a name="deletedatasource"></a>
+### `delete datasrouce`
+
+**Decription**
+
+Deletes the specified data source file from the Steam database.
+
+**Note**: You cannot delete a datasource that was used to build an existing dataset. You must delete the dataset(s) first before you can delete its source file. 
+
+**Usage**
+
+	./steam delete datasource --datasource-id=[datasourceId]
+	
+**Parameters**
+
+- `--datasource-id=[datasourceId]`: Specify the ID of the file that that you want to delete. Note that you can use [`get datasources`](#getdatasources) to retrieve a list of datasources in the database.
+
+**Example**
+
+The following example deletes a datasource whose ID is 4.
+
+	./steam delete datasource --datasource-id=4
 
 ------
 
@@ -173,22 +391,20 @@ Deletes the specified engine from the database.
 
 **Usage**
 
-	./steam delete engine [id]
+	./steam delete engine --engine-id=[engineId]
 
 **Parameters**
 
-- `[id]`: Specify the ID of the engine that you want to delete.
+- `--engine-id=[engineId]`: Specify the ID of the engine that you want to delete.
 
 **Example**
 
-The following example retrieves a list of engines currently added to the database. It then specifies to delete that automodel-hdp2.2.jar engine.
+The following example retrieves a list of engines currently added to the database. It then specifies to delete that h2o-genmodel.jar engine.
 
 	./steam get engines
-	NAME			ID	AGE
-	automl-hdp2.2.jar	1	2016-07-14 11:48:42 -0700 PDT
-	h2o-genmodel.jar	2	2016-07-14 11:49:47 -0700 PDT
-	./steam delete engine 1
-	Engine deleted: 1
+	Id	Name				Location			CreatedAt
+	1	h2o-genmodel.jar	../Desktop/engines	1473874219
+	./steam delete engine --engine-id=1
 
 ------
 
@@ -200,17 +416,41 @@ Deletes a model from the database based on the model's ID.
 
 **Usage**
 
-	./steam delete model [modelId]
+	./steam delete model --model-id=[modelId]
 
 **Parameters**
 
-- `[modelId]`: Specify the ID of the model that you want to delete.
+- `--model-id=[modelId]`: Specify the ID of the model that you want to delete.
 
 **Example**
 
 The following example deletes model 3 from the database. Note that you can use [`get models`](#getmodels) to retrieve a list of models.
 
-	./steam delete model 3
+	./steam delete model --model-id=3
+
+-----
+
+### <a name="deleteproject"></a>`delete project`
+
+**Description**
+
+Deletes a project from the database based on its ID. 
+
+**Note**: You cannot delete a project that includes existing data (datasources, datasets, or models). 
+
+**Usage**
+
+	./steam delete project --project-id=[projectId]
+
+**Parameters**
+
+- `--project-id=[projectId]`: Specify the ID of the project that you want to delete.
+
+**Example**
+
+The following example deletes project 3 from the database. Note that you can use [`get projects`](#getprojects) to retrieve a list of projects. 
+
+	./steam delete project --project-id=3
 
 -----
 
@@ -222,17 +462,17 @@ Deletes a role from the database based on its ID.
 
 **Usage**
 
-	./steam delete role [roleId]
+	./steam delete role --role-id=[roleId]
 
 **Parameters**
 
-- `[roleId]`: Specify the ID of the role that you want to delete.
+- `--role-id=[roleId]`: Specify the ID of the role that you want to delete.
 
 **Example**
 
-The following example deletes role 3 from the database. Note that you can use [`get roles`]'(#get roles) to retrieve a list of roles. In the case below, this role corresponds to the default data science role. 
+The following example deletes role 3 from the database. Note that you can use [`get roles`](#getroles) to retrieve a list of roles. In the case below, this role corresponds to the default data science role. 
 
-	./steam delete role 3
+	./steam delete role --role-id=3
 
 -----
 
@@ -240,23 +480,23 @@ The following example deletes role 3 from the database. Note that you can use [`
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring Service. This command deletes a service from the database based on its ID. Note that you must first stop a service before it can be deleted. (See [`stop service`](#stop service).)
+A service represents a successfully deployed model on the Steam Scoring Service. This command deletes a service from the database based on its ID. Note that you must first stop a service before it can be deleted. (See [`stop service`](#stopservice).)
 
 **Usage**
 
-	./steam delete service [serviceId]
+	./steam delete service --service-id=[id]
 
 **Parameters**
 
-- `[serviceId]`: Specify the ID of the service that you want to delete. Note that you can use [`get services`](#get services) to retrieve a list of services. 
+- `--service-id=[id]`: Specify the ID of the service that you want to delete. Note that you can use [`get services`](#getservices) to retrieve a list of services. 
 
 
 **Example**
 
 The following example stops and then deletes service 2. This service will no longer be available on the database.
 
-	./steam stop service 2
-	./steam delete service 2
+	./steam stop service --service-id=2
+	./steam delete service --service-id=2
 
 -----
 
@@ -268,39 +508,122 @@ Deletes a workgroup from the database based on its ID.
 
 **Usage**
 
-	./steam delete workgroup [workgroupId]
+	./steam delete workgroup --workgroup-id=[workgroupId]
 
 **Parameters**
 
-- `[workgroupId]`: Specify the ID of the role that you want to delete.
+- `--workgroup-id=[workgroupId]`: Specify the ID of the workgroup that you want to delete.
 
 **Example**
 
-The following example deletes workgroup 3 from the database. Note that you can use [`get workgroups`](#get workgroups) to retrieve a list of workgroups.  
+The following example deletes workgroup 3 from the database. Note that you can use [`get workgroups`](#getworkgroups) to retrieve a list of workgroups.  
 
-	./steam delete workgroup 3
+	./steam delete workgroup --workgroup-id=3
 
 -----
 
-### <a name="deployengine"></a>`deploy engine` 
+<a name="getallclustertypes"></a>
+### `get all cluster-types`
 
-**Description**
+**Description** 
 
-Deploys an H2O engine. After an engine is successfully deployed, it can be specified when starting a cluster. (See [`start cluster`](#start cluster).) 
+Retrieves a list of cluster types that are available in Steam along with the corresponding code. Note that these cluster types are currently hard coded into Steam.
 
 **Usage**
 
-	./steam deploy engine [path/to/engine]
+	./steam get all --cluster-types
 
 **Parameters**
 
-- `[path/to/engine]`: Specify the location of the engine that you want to deploy. 
+None
 
 **Example**
 
-The following specifies to deploy the H2O AutoML engine.
+The following example retrieves a list of the Steam cluster types.
 
-	./steam deploy engine ../engines/automl-hdp2.2.jar
+	./steam get all --cluster-types
+	Id	Name		
+	1	external
+	2	yarn
+
+-----
+
+### <a name="getallentitytypes"></a>`get all entity-types`
+
+**Description** 
+
+Retrieves a list of entity types that are available in Steam along with the corresponding code. Note that these entity types are currently hard coded into Steam. 
+
+**Usage**
+
+	./steam get all --entity-types
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of Steam entity types.
+
+	./steam get all --entity-types
+	Id	Name
+	1	role		
+	2	workgroup	
+	3	identity	
+	4	engine		
+	5	cluster		
+	6	project		
+	7	datasource	
+	8	dataset		
+	9	model		
+	10	label		
+	11	service		
+
+-----
+
+### <a name="getallpermissions"></a>`get all permissions`
+
+**Description** 
+
+Retrieves a list of permissions available in Steam along with the corresponding code. These permissions are currently hard coded into Steam. 
+
+**Usage**
+
+	./steam get all --permissions
+
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of Steam permissions.
+
+	./steam get all --permissions
+	Id	Code				Description		
+	9	ManageCluster		Manage clusters
+	15	ManageDataset		Manage datasets
+	13	ManageDatasource	Manage datasources
+	7	ManageEngine		Manage engines
+	5	ManageIdentity	Manage identities
+	19	ManageLabel		Manage labels	
+	17	ManageModel		Manage models	
+	11	ManageProject		Manage projects
+	1	ManageRole		Manage roles
+	21	ManageService		Manage services
+	3	ManageWorkgroup	Manage workgroups
+	10	ViewCluster		View clusters
+	16	ViewDataset		View datasets
+	14	ViewDatasource	View datasources
+	8	ViewEngine		View engines
+	6	ViewIdentity		View identities
+	20	ViewLabel			View labels
+	18	ViewModel			View models
+	12	ViewProject		View projects
+	2	ViewRole			View roles
+	22	ViewService		View services
+	4	ViewWorkgroup		View workgroups	
 
 -----
 
@@ -312,25 +635,25 @@ Retrieves detailed information for a specific cluster based on its ID.
 
 **Usage**
 
-	./steam get cluster [clusterId]
+	./steam get cluster --cluster-id=[clusterId]
 
 **Parameters**
 
-- `[clusterId]`: Specify the ID of the cluster that you want to retrieve
+- `--cluster-id=[clusterId]`: Specify the ID of the cluster that you want to retrieve
 
 **Example**
 
 The following example retrieves information for cluster ID 1.
 
-	./steam get cluster 1
-					user
-	TYPE:			external
-	STATE:			healthy
-	H2O VERSION:	3.8.2.8
-	MEMORY:			3.56 GB
-	TOTAL CPUS:		8
-	ID:				1
-	AGE:			2016-07-15 09:23:16 -0700 PDT
+	./steam get cluster --cluster-id=1
+	Attribute		Value
+	Id:				1
+	Name:			H2O_from_python_techwriter_hh4m3i
+	TypeId:		1
+	DetailId:		0
+	Address:		localhost:54321
+	State:			started
+	CreatedAt:	1473883790
 
 -----
 
@@ -350,11 +673,127 @@ None
 
 **Example**
 
-The following example retrieves a list of clusters that are running H2O and are registered in Steam. (See [`register cluster`](#register cluster).)
+The following example retrieves a list of clusters that are running H2O and are registered in Steam. (See [`register cluster`](#registercluster).)
 
 	./steam get clusters
 	NAME		ID	ADDRESS			STATE	TYPE		AGE
 	user     	1	localhost:54321	started	external	2016-07-01 11:45:58 -0700 PDT
+
+-----
+
+<a name="getdataset"></a>
+### `get dataset`
+
+**Description**
+
+Retrieves information about a specific dataset based on its ID.
+
+**Usage** 
+
+	./steam get dataset --dataset-id=[datasetId]
+
+**Parameters**
+
+- `--dataset-id=[datasetId]`: Specify the ID of the dataset that you want to retrieve.
+
+**Example**
+
+The following example retrieves information about a dataset whose ID is 1. Note that you can use [`get datasets`](#getdatasets) to retrieve a list of all datasets.
+
+	./steam get dataset --dataset-id=1
+	Attribute				Value
+	Id:						1
+	DatasourceId:			2
+	Name:				
+	Description:		
+	FrameName:			allyears2k.hex
+	ResponseColumnName:	Origin	
+	JSONProperties:		{...<properties>...}
+	CreatedAt:			1474321931
+
+-----
+
+<a name="getdatasets"></a>
+### `get datasets`
+
+**Description**
+
+Retrieves a list of all datasets available in the database.
+
+**Usage**
+
+	./steam get datasets
+	
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of all datasets.
+
+	./steam get datasets
+	Id	DatasourceId	Name	Description	FrameName		ResponseColumnName	JSONProperties			CreatedAt
+	1	2									prostate.csv	CAPSULE				{...<properties>...}	1473887458
+	2	1									allyears2k.csv	Origin				{...<properties>...}	1474321931
+
+-----
+
+<a name="getdatasource"></a>
+### `get datasource`
+
+**Description**
+
+Retrieves information about a specific source file based on its ID.
+
+**Usage** 
+
+	./steam get datasource --datasource-id=[datasourceId]
+
+**Parameters**
+
+- `--datasource-id=[datasourceId]`: Specify the ID of the datasource that you want to retrieve.
+
+**Example**
+
+The following example retrieves information about a datasource whose ID is 1. Note that you can use [`get datasources`](#getdatasources) to retrieve a list of all datasources.
+
+	./steam get datasource --datasource-id=1
+	Attribute			Value
+	Id:					1
+	ProjectId:		1
+	Name:				allyears2k.csv
+	Description:		airline data
+	Kind:				CSV	
+	Configuration:	{"path":"../Desktop"}
+	CreatedAt:		1473879765
+
+-----
+
+<a name="getdatasources"></a>
+### `get datasources`
+
+**Description**
+
+Retrieves a list of all datasources available in the database.
+
+**Usage**
+
+	./steam get datasources
+	
+**Parameters**
+
+None
+
+**Example**
+
+The following example retrieves a list of all datasources.
+
+	./steam get datasources
+	
+	Id	ProjectId	Name			Description		Kind	Configuration			CreatedAt
+	1	1			allyears2k.csv	airline data	CSV		{"path":"../Desktop"}	1473879765
+	2	1			prostate.csv	prostate data	CSV		{"path":"../Desktop"}	1473880195
 
 -----
 
@@ -366,20 +805,22 @@ Retrieves information for a specific engine based on its ID.
 
 **Usage**
 
-	./steam get engine [engineId]
+	./steam get engine --engine-id=[engineId]
 
 **Parameters**
 
-- `[engineId]`: Specify the ID of the engine that you want to retrieve
+- `--engine-id=[engineId]`: Specify the ID of the engine that you want to retrieve
 
 **Example**
 
 The following example retrieves information about engine 1.
 
-	./steam get engine 1
-		h2o-genmodel.jar
-	ID:		1
-	AGE:	2016-07-15 09:44:10 -0700 PDT
+	./steam get engine --engine-id=1
+	Attribute		Value
+	ID:				1
+	Name:			h2o-genmodel.jar			
+	Location:		../Desktop/engines
+	CreatedAt:	1473874219
 
 -----
 
@@ -399,70 +840,11 @@ None
 
 **Example**
 
-The following example retrieves a list of engines that have been deployed. (Refer to [`deploy engine`](#deploy engine).)
+The following example retrieves a list of engines that have been deployed. (Refer to [`deploy engine`](#deployengine).)
 
 	./steam get engines
-	NAME				ID	AGE
-	h2o-genmodel.jar	1	2016-07-01 13:30:50 -0700 PDT
-	h2o.jar				2	2016-07-01 13:32:10 -0700 PDT
-
------
-
-### <a name="getentities"></a>`get entities`
-
-**Description** 
-
-Retrieves a list of supported Steam entity types.
-
-**Usage**
-
-	./steam get entities
-
-**Parameters**
-
-None
-
-**Example**
-
-The following example retrieves a list of the supported Steam entity types.
-
-	./steam get entities
-	NAME		ID
-	role		1
-	workgroup	2
-	identity	3
-	engine		4
-	cluster		5
-	project		6
-	model		7
-	service		8
-
------
-
-### <a name="gethistory"></a>`get history`
-
-**Description** 
-
-Retrieves recent activity information related to a specific user or for a specific cluster.
-
-**Usage**
-
-	./steam get history [identity [identityName] | cluster [clusterId]]
-
-**Parameters**
-
-- `identity [identityName]`: Specifies to retrieve activity information related to a specific user
-- `cluster [clusterId]`: Specifies to retrieve a activity information related to a specific cluster
-
-**Example**
-
-The following example retrieves information for user "bob".
-
-	./steam get history identity bob
-	USER	ACTION	DESCRITPION						TIME
-	1		link	{"id":"2","name":"preparation","type":"workgroup"}	2016-07-15 09:32:55 -0700 PDT
-	1		link	{"id":"2","name":"engineer","type":"role"}		2016-07-15 09:32:44 -0700 PDT
-	1		create	{"name":"bob"}						2016-07-15 09:32:32 -0700 PDT
+	Id	Name				Location			CreatedAt
+	1	h2o-genmodel.jar	../Desktop/engines	1473874219
 
 -----
 
@@ -500,7 +882,8 @@ Retrieve information about a specific user.
 
 **Usage**
 
-	./steam get identity [identityId]
+	./steam get identity --identity-id=[identityId]
+	./steam get identity --by-name --name="[username]"
 
 **Parameters**
 
@@ -508,26 +891,16 @@ Retrieve information about a specific user.
 
 **Example**
 
-The following example retrieves information about user Jim.
+The following example retrieves information about a user whose ID is 2.
 
-	./steam get identity jim
-				jim
-	STATUS:		Active
-	LAST LOGIN:	0000-12-31 16:00:00 -0800 PST
-	ID:		3
-	AGE:		2016-07-15 09:32:38 -0700 PDT
-
-	WORKGROUP	DESCRIPTION
-	production	production group
-
-	ROLE		DESCRIPTION
-	datascience	a default data scientist role
-
-	PERMISSIONS
-	Manage models
-	View clusters
-	Manage projects
-
+	./steam get identity 2
+	Attribute		Value		
+	Id:				2		
+	Name:			bob		
+	IsActive:		true		
+	LastLogin:	-62135596800	
+	Created:		1474305548
+	
 -----
 
 ### <a name="getmodel"></a>`get model`
@@ -538,17 +911,17 @@ Retrieves detailed information for a specific model.
 
 **Usage**
 
-	./steam get model [modelId]
+	./steam get model --model-id=[modelId]
 
 **Parameters**
 
-- `[modelId]`: Specify the ID of the model that you want to retrieve
+- `--model-id=[modelId]`: Specify the ID of the model that you want to retrieve
 
 **Example**
 
 The following example retrieves information for model 2.
 
-	./steam get model 2
+	./steam get model --model-id2
 	
 -----
 
@@ -574,15 +947,73 @@ The following example retrieves a list of models that are available on the datab
 	
 -----
 
-### <a name="getpermissions"></a>`get permissions`
+<a name="getpermissions"></a>
+### `get permissions`
 
-**Description** 
+**Description**
 
-Retrieves a list of permissions available in Steam along with the corresponding code. These permissions are currently hard coded into Steam. 
+Retrieves permission information for an identity or role.
 
 **Usage**
 
-	./steam get permissions
+	./steam get permissions --for-role --role-id=[roleId]
+	./steam get permissions --for-identity --identity-id=[identityId]
+
+**Parameters**
+
+- `--role-id=[roleId]`: When retrieving permissions for a role, specify the ID of the role that you want to view
+- `--identity-id=[identityId]`: When retrieving permissions for an identity, specify the ID that you want to view
+
+**Examples**
+
+The following example retrieves the permissions assigned to a role whose ID is 2.
+
+	Id	Code			Description		
+	18	ViewModel		View models		
+	12	ViewProject		View projects		
+	4	ViewWorkgroup	 View workgroups	
+
+-----
+
+<a name="getproject"></a>
+### `get project`
+
+**Description**
+
+Retrieves detailed information for a specific project based on its ID.
+
+**Usage**
+
+	./steam get project --project-id=[id]
+	
+**Parameters**
+
+- `--project-id=[id]`: Specify the ID of the project that you want to retrieve
+
+**Examples**
+
+The following example retrieves information about a project whose ID is 1. Note that you can use [`get projects`](#getprojects) to retrieve a list of all projects and IDs.
+
+	./steam get project --project-id=1
+	Attribute		Value				
+	Id:				1				
+	Name:			Prediction			
+	Description:	Prediction project	
+	ModelCategory:					
+	CreatedAt:		1473878624	
+
+-----
+
+<a name="getprojects"></a>
+### `get projects`
+
+**Description**
+
+Retrieves a list of all projects in the Steam database.
+
+**Usage**
+
+	./steam get projects
 
 **Parameters**
 
@@ -590,30 +1021,18 @@ None
 
 **Example**
 
-The following example retrieves a list of Steam permissions.
+The following example retrieves a list of projects that are available on the database.
 
-	./steam get permissions
-	ID	DESCRIPTION		CODE
-	9	Manage clusters		ManageCluster
-	7	Manage engines		ManageEngine
-	5	Manage identities	ManageIdentity
-	13	Manage models		ManageModel
-	11	Manage projects		ManageProject
-	1	Manage roles		ManageRole
-	15	Manage services		ManageService
-	3	Manage workgroups	ManageWorkgroup
-	10	View clusters		ViewCluster
-	8	View engines		ViewEngine
-	6	View identities		ViewIdentity
-	14	View models		ViewModel
-	12	View projects		ViewProject
-	2	View roles		ViewRole
-	16	View services		ViewService
-	4	View workgroups		ViewWorkgroup
+	./steam get projects
+	Id	Name		Description			ModelCategory	CreatedAt
+	1	Prediction	Prediction project					1473878624
+	2	Churn		Customer churn project				1473879033
+
 
 -----
 
-### <a name="getrole"></a>`get role`
+<a name="getrole"></a>
+### `get role`
 
 **Description** 
 
@@ -621,30 +1040,22 @@ Retrieves detailed information for a specific role based on its name.
 
 **Usage**
 
-	./steam get role [roleName]
+	./steam get role --role-id=[id]
 
 **Parameters**
 
-- `[roleName]`: Specify the name of the role that you want to retrieve
+- `--role-id=[id]`: Specify the ID of the role that you want to retrieve
 
 **Example**
 
 The following example retrieves information about the datascience role.
 
-	./steam get role datascience
-				datascience
-	DESCRIPTION:	a default data scientist role
-	ID:		3
-	AGE:	2016-07-15 09:32:10 -0700 PDT
-
-	IDENTITES: 1
-	NAME	STATUS	LAST LOGIN
-	jim		Active	0000-12-31 16:00:00 -0800 PST
-
-	PERMISSIONS
-	Manage models
-	Manage projects
-	View clusters
+	./steam get role --role-id=2
+	Attribute		Value
+	Id:				2
+	Name:			datascience
+	Description:	a default data science role
+	Created:		1473874053
 
 -----
 
@@ -667,11 +1078,10 @@ None
 The following example retrieves a list of roles that are available on the database.
 
 	./steam get roles
-	NAME		ID	DESCRIPTION			AGE
-	Superuser	1	Superuser			2016-07-14 09:25:30 -0700 PDT
-	datascience	3	a default data scientist role	2016-07-14 15:39:03 -0700 PDT
-	engineer	2	a default engineer role		2016-07-14 15:38:10 -0700 PDT
-
+	NAME		ID	DESCRIPTION					CREATED
+	Superuser	1	Superuser					1473874053
+	datascience	2	a default data science role	1473893347	
+	
 -----
 
 ### <a name="getservice"></a>`get service`
@@ -804,21 +1214,27 @@ Links a user to a specific role or workgroup.
 
 **Usage**
 
-	./steam link identity [identityName] [role [roleId] | workgroup [workgroupId]]
+	./steam link identity --with-role --identity-id=[identityId] --role-id=[roleId]
+	./steam link identity --with-workgroup --identity-id=[identityId] --workgroup-id=[workgroupId]
 
 **Parameters**
 
-- `[identityName]`: Specify the user that will be linked to a role or workgroup.
-- `role [roleId]`: Specify the role that the user will be linked to.
-- `workgroup [workgroupId]`: Specify the workgroup that the the user will be linked to.
+- 	Link identity to a specific role:	
+	- `--with-role`: Enable this flag to associate an identity with a role
+	- `--identity-id=[identityId]`: Specify the ID of user that will be linked to a role
+	- `--role-id=[roleId]`: Specify the ID of the role that the user will be linked to
+-	Link identity to a specific workgroup: 
+	- `--with-workgroup`: Enable this flag to associate an identity with a workgroup
+	- `--identity-id=[identityId]`: Specify the ID of user that will be linked to a workgroup
+	- `--workgroup-id=[workgroupId]`: Specify the ID of the workgroup that the the user will be linked to
 
 **Example**
 
 The following example links user Jim to datascience role and then to the production workgroup.
 
-	./steam link identity jim role datascience
-	./steam link identity jim workgroup production
-
+	./steam link identity --with-role --identity-id=3 --role-id=3
+	./steam link identity --with-workgroup --identity-id=3 --workgroup-id=3
+	
 -----
 
 ### <a name="linkrole"></a>`link role`
@@ -829,18 +1245,21 @@ Links a role to a certain set of permissions.
 
 **Usage**
 
-	./steam link role [roleId] [permissionId1 permissionId2 ...]
+	./steam link role --with-permission --role-id=[roleId] --permission-id=[permissionId]
 
 **Parameters**
 
-- `[roleId]`: Specify the role that the user will be linked to.
-- `[permissionId]`: Specify a single permission or a list of permissions to assign to this role.  
+- `--with-permission`: Enable this flag when setting permissions
+- `role-id=[roleId]`: Specify the role that the user will be linked to.
+- `permission-id=[permissionId]`: Specify a single permission to assign to this role.  
 
 **Example**
 
-The following example links the datascience role to the ManageProject, ManageModel, and ViewCluster permissions.
+The following example links the datascience role to the ManageProject, ManageModel, and ViewCluster permissions. Note that you can use [get all --permissions](#getallpermissions) to view a list of permission IDs. 
 
-	./steam link role datascience ManageProject ManageModel ViewCluster 
+		./steam link role --with-permission --role-id=3 --permission-id=11
+		./steam link role --with-permission --role-id=3 --permission-id=17
+		./steam link role --with-permission --role-id=3 --permission-id=10
 
 -----
 
@@ -875,22 +1294,22 @@ The following example logs user Bob into a Steam instance running on localhost:9
 
 Registers a cluster that is currently running H2O (typically a local cluster). Once registered, the cluster can be used to perform machine learning tasks through Python, R, and Flow. The cluster will also be visible in the Steam web UI. 
 
-Note that clusters that are started using this command can be stopped from within the web UI or using [`unregister cluster`](#unregister cluster). You will receive an error if you attemt to stop registered clusters using the `stop cluster` command. 
+Note that clusters that are started using this command can be stopped from within the web UI or using [`unregister cluster`](#unregistercluster). You will receive an error if you attemt to stop registered clusters using the `stop cluster` command. 
 
 **Usage**
 
-	./steam register cluster [address]
+	./steam register cluster --address="[address]"
 
 **Parameters**
 
-- `[address]`: Specify the IP address and port of the cluster that you want to register.
+- `--address="[address]"`: Specify the IP address and port of the cluster that you want to register.
 
 **Example**
 
 The following example registers Steam on localhost:54323. Note that this will only be successful if H2O is already running on this cluster. 
 
-	./steam register cluster localhost:54323
-	Successfully connected to cluster 2 at address localhost:54323
+	./steam register cluster --address="localhost:54323"
+	ClusterId:	2
 
 -----
 
@@ -936,7 +1355,7 @@ After you have deployed engine, you can use this command to start a new cluster 
 
 **Example**
 
-The following example retrieves a list of engines, then starts a cluster through YARN using one from the list. The cluster is configured with 2 nodes that are 2 gigabytes each. 
+The following example retrieves a list of engines, then starts a cluster through YARN using an engine from the list. The cluster is configured with 2 nodes that are 2 gigabytes each. 
 
 	./steam get engines
 	NAME				ID	AGE
@@ -1063,7 +1482,7 @@ The following example changes the name of the engineer role to be "science engin
 		
 ------
 
-### <a name="createworkgroup"></a>`create workgroup`
+### <a name="updateworkgroup"></a>`update workgroup`
 
 **Description**
 

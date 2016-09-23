@@ -15,20 +15,28 @@ import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
 import './styles/clusters.scss';
 import { Link } from 'react-router';
+import { getConfig } from './actions/clusters.actions';
 
 interface DispatchProps {
   fetchClusters: Function
   fetchModelsFromCluster: Function
   registerCluster: Function,
   unregisterCluster: Function,
-  stopClusterOnYarn: Function
+  stopClusterOnYarn: Function,
+  getConfig: Function
 }
 
 interface Props {
-  clusters: Cluster[]
+  clusters: Cluster[],
+  config: any
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
+  refs: {
+    [key: string]: Element
+    keytabFilename: HTMLInputElement
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -40,12 +48,14 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.clusters)) {
       this.props.fetchClusters();
+      this.props.getConfig();
     }
   }
 
   removeCluster(cluster) {
     if (cluster.type_id === 2) {
-      this.props.stopClusterOnYarn(cluster.id);
+      let keytabFilename = _.get((this.refs.keytabFilename as HTMLInputElement), 'value', '');
+      this.props.stopClusterOnYarn(cluster.id, keytabFilename);
     } else {
       this.props.unregisterCluster(cluster.id);
     }
@@ -106,11 +116,13 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank"
-                                                        rel="noopener">{cluster.name}
-                    @ {cluster.address}</a></span>
-                  <button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster)}><i
-                    className="fa fa-trash"/></button>
+                  <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + _.get(this.props.config, 'cluster_proxy_address', '') + '/flow/?cluster_id=' + cluster.id} target="_blank"
+                                                        rel="noopener">{cluster.name}</a></span>
+                  <span className="remove-cluster">
+                    {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
+                    <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
+                      className="fa fa-trash"/></button>
+                  </span>
                 </header>
                 <article>
                   <h3>
@@ -140,7 +152,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state): any {
   return {
-    clusters: state.projects.clusters
+    clusters: state.projects.clusters,
+    config: state.clusters.config
   };
 }
 
@@ -150,7 +163,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
     registerCluster: bindActionCreators(registerCluster, dispatch),
     unregisterCluster: bindActionCreators(unregisterCluster, dispatch),
-    stopClusterOnYarn: bindActionCreators(stopClusterOnYarn, dispatch)
+    stopClusterOnYarn: bindActionCreators(stopClusterOnYarn, dispatch),
+    getConfig: bindActionCreators(getConfig, dispatch)
   };
 }
 
