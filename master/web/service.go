@@ -1429,19 +1429,14 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		return 0, err
 	}
 
-	address, err := fs.GetExternalHost() // FIXME there is no need to re-scan this every time. Can be a property on *Service at init time.
-	if err != nil {
-		return 0, err
-	}
-
-	log.Printf("Scoring service started at %s:%d\n", address, port)
+	log.Printf("Scoring service started at %s:%d\n", s.scoringServiceAddress, port)
 
 	service := data.Service{
 		0,
 		model.ProjectId,
 		model.Id,
 		name,
-		address,
+		s.scoringServiceAddress,
 		int64(port), // FIXME change to int
 		int64(pid),  // FIXME change to int
 		data.StartedState,

@@ -133,6 +133,19 @@ func Run(version, buildDate string, opts Opts) {
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}
 
+	// --- set up scoring service launch host
+
+	var scoringServiceHost string
+	if opts.ScoringServiceHost != "" {
+		scoringServiceHost = opts.ScoringServiceHost
+	} else {
+		var err error
+		scoringServiceHost, err = fs.GetExternalHost()
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	// --- create web services ---
 
 	webServeMux := http.NewServeMux()
@@ -140,7 +153,7 @@ func Run(version, buildDate string, opts Opts) {
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
-		opts.ScoringServiceHost,
+		scoringServiceHost,
 		opts.ClusterProxyAddress,
 		opts.ScoringServicePorts,
 		opts.Yarn.KerberosEnabled,
