@@ -1,4 +1,5 @@
 import sys
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -23,11 +24,11 @@ def goClusters(driver):
 		print "Failed to navigate to cluster page"
 		return False
 
-def clusterExists(driver, addr, port, name):
+def clusterExists(driver, name):
 	if not goClusters(driver):
 		return False
 	try:
-		elm = driver.find_element_by_link_text("{0}@ {1}:{2}".format(name, addr, port))
+		elm = driver.find_element_by_link_text("{0}".format(name))
 		return True
 	except Exception as e:
 		print "New cluster did not appear on cluster page"
@@ -39,8 +40,8 @@ def addCluster(driver, addr, port, name):
 		wait.until(lambda x: x.find_element_by_name("ip-address").is_displayed())
 		driver.find_element_by_name("ip-address").send_keys(addr)
 		driver.find_element_by_name("port").send_keys(port)
-		driver.find_element_by_xpath("//div[@class='connect-cluster']//button").click()
-		wait.until(lambda x: x.find_element_by_xpath("//div[text()='{0}']".format(name)))
+		driver.find_element_by_xpath("//button[@type='submit']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//span[text()='{0}']".format(name)))
 	except:
 		print "Cannot add new cluster"
 		return False
@@ -50,18 +51,22 @@ def connectTest(driver):
 	goHome(driver)
 	newProject(driver)
 	addCluster(driver, "localhost", "54535", "steamtest")
-	return clusterExists(driver, "localhost", "54535", "steamtest")	
+	return clusterExists(driver, "steamtest")	
 
 def deleteClusterTest(driver):
 	if not goClusters(driver):
 		return False
 	try:
-		l = driver.find_elements_by_xpath("//button[@class='remove-cluster']")
+		l = driver.find_elements_by_xpath("//button[@class='remove-cluster-button']")
+		if len(l) == 0:
+			print "Failed to view cluster on clusters page"
+			return False
 		init = len(l)
 		l[0].click()
 		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-		wait.until(lambda x: len(x.find_elements_by_xpath("//button[@class='remove-cluster']")) < init)
-	except:
+		wait.until(lambda x: len(x.find_elements_by_xpath("//button[@class='remove-cluster-button']")) < init)
+	except Exception as e:
+		print e
 		print "Failed to delete cluster"
 		return False
 	return True
@@ -73,7 +78,7 @@ def dataframeTest(driver):
 		if not addCluster(driver, "localhost", "54535", "steamtest"):
 			print "Failed to re-connect to a cluster that had been deleted"
 			return False
-		if not clusterExists(driver, "localhost", "54535", "steamtest"):
+		if not clusterExists(driver, "steamtest"):
 			print "Failed to re-connect to a cluster that had been deleted"
 			return False	
 		goHome(driver)
@@ -103,7 +108,6 @@ def main():
 	failcount = 0
 	d = webdriver.Chrome()
 	d.get("http://superuser:superuser@localhost:9000")
-	d.find_element_by_css_selector("input").click()
 	if not connectTest(d):
 		failcount += 1
 	if not deleteClusterTest(d):

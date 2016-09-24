@@ -59,35 +59,6 @@ def regressSortTest(driver):
 		passed = passed and checkSorting(driver, "MSE", "mse")
 		passed = passed and checkSorting(driver, "R2", "r2")
 		passed = passed and checkSorting(driver, "MRD", "mrd")
-		"""
-		tu.sortModels(driver, "MSE", True)
-		if not isAscending(driver, "mse"):
-			outOfOrder("MSE", "ASC")
-			passed = False
-		tu.sortModels(driver, "MSE", False)
-		if not isDescending(driver, "mse"):
-			outOfOrder("MSE", "DES")
-			passed = False
-
-		tu.sortModels(driver, "MRD", True)
-		if not isAscending(driver, "mrd"):
-			outOfOrder("MRD", "ASC")
-			passed = False
-		tu.sortModels(driver, "MRD", False)
-		if not isDescending(driver, "mrd"):
-			outOfOrder("MRD", "DES")
-			passed = False
-
-	
-		tu.sortModels(driver, "R2", True)
-		if not isAscending(driver, "r2"):
-			outOfOrder("R2", "ASC")
-			passed = False
-		tu.sortModels(driver, "R2", False)
-		if not isDescending(driver, "r2"):
-			outOfOrder("R2", "DES")
-			passed = False
-		"""
 	except Exception as e:
 		print e
 		print "models failed to sort"

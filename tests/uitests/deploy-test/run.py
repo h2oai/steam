@@ -28,7 +28,6 @@ def deployOneTest(driver):
 			return False
 
 	except Exception as e:
-		print e
 		print "Failed to deploy a model"
 		return False
 	return True
@@ -36,10 +35,20 @@ def deployOneTest(driver):
 def deleteTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Stop Service']"))
+	except:
+		print "no service displayed on deployment page"
+		return False
+	try:
 		driver.find_element_by_xpath("//div[text()='Stop Service']").click()
 		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) == 0)
 	except:
-		print "Failed to stop/delete a service"
+		driver.refresh()
+		time.sleep(1)
+		if len(driver.find_elements_by_class_name("services-panel")) == 0:
+			print "Deployment page must be refreshed before stopped services are removed"
+		else:
+			print "Failed to stop/delete a service"
 		return False
 	return True
 
@@ -48,6 +57,7 @@ def projectDeployTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='select-cluster']//button"))
 		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
@@ -65,7 +75,6 @@ def projectDeployTest(driver):
 		tu.viewProject(driver, "deptest")
 		tu.goProjectDeployment(driver)
 	except Exception as e:
-		print e
 		print "Failed to setup project deploy test"
 		return False
 	try:
@@ -115,7 +124,6 @@ def multiDeployTest(driver):
 		tu.goHome(driver)
 		tu.goServices(driver)
 	except Exception as e:
-		print e
 		print "failed to setup multi deploy test"
 		return False
 	try:
@@ -133,11 +141,9 @@ def multiDeployTest(driver):
 				return False
 
 	except Exception as e:
-		print e
 		print "Failed to find deployments on services page"
 		return False	
 	return True
-
 
 def main():
 	failcount = 0

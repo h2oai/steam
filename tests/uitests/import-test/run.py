@@ -179,7 +179,6 @@ def main():
 	failcount = 0
 	d = webdriver.Chrome()
 	d.get("http://superuser:superuser@localhost:9000")
-	d.find_element_by_css_selector("input").click()
 	if not createProjectTest(d):
 		failcount += 1
 	if not viewProjectTest(d):
