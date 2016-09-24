@@ -9,9 +9,7 @@ This document describes how to get up and running with Steam without the need fo
 - Deploying the model using Steam
 - Making predictions using the Steam Prediction Service
 
-During this demo, four terminal windows will remain open for the Steam, Scoring, H2O, and postgres services. A fifth terminal window will be used to run H2O commands in the Python or R example. 
-
-Finally, these steps were created using H2O version 3.10.0.3, and that version resides in a Downloads folder. Wherever used, this version number and path should be adjusted to match your version and path.
+These steps were created using H2O version 3.10.0.7, and that version resides in a Downloads folder. Wherever used, this version number and path should be adjusted to match your version and path.
 
 <a name="installation"></a>
 # Installation and Setup
@@ -47,64 +45,46 @@ The following are required if you use a Python or R demo.
 
 ## <a name="startingsteam"></a>Starting Steam
 
-This section describes how to set up and start Steam and start the Steam CLI for user management. Five terminal windows will be open the first time you run this setup; four terminal windows will be open for subsequent logins.
+This section describes how to set up and start Steam and start the Steam CLI for user management.
 
-1. Go to <a href="http://www.h2o.ai/steam" target="_blank">www.h2o.ai/steam</a> and download the Steam package. Be sure to accept the EULA.
+1. Go to the <a href="http://h2o.ai/download">H2O Download</a> site and download Steam. 
 
-1. Open a terminal window and untar the Steam binary. Note that the command below untars the OS X binary. Replace `darwin` with `linux` in the steps that follow to build on Linux.
+2. Change directories to the Steam download file and untar the file.
+    
+		cd ~/Downloads/steam-1.0.0-darwin-amd64
+		tar -xzvf steam-1.0.0-darwin-amd64.tar.gz 
 
-        tar xvf steamY-master-darwin-amd64.tar.gz
-    <!-- -->
-
-1. Open a second terminal window and start PostgreSQL. This should be started from the folder where PostgreSQL was installed.
-
-        postgres -D /usr/local/var/postgres
-    <!-- -->
-
-1. Open a third terminal window to create a new user for the Steam database. The commands below only need to be performed once. The example below creates a steam **superuser**. ***If prompted, do not enter a password***. 
-
-        createuser -P steam
-        Enter password for new role:
-        Enter it again:
-    <!-- -->
-
-1. Change directories to the Steam /var/master/scripts folder and create the database. 
-
-        cd steam-master-darwin-amd64/var/master/scripts
-        ./create-database.sh
-   <!-- -->
-
-1. Change directories to your Steam directory, and start the Jetty server.
+3. Change directories to your Steam directory, and start the Jetty server.
 
         cd steam-master-darwin-amd64
         java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 		
  >***Note***: The Jetty server defaults to port 8080. You can optionally provide a `--port` value for **jetty-runner.jar**.
 		
-1. Open a fourth terminal window. From within the **steam-master-darwin-amd64** folder, start the Steam compilation and scoring service. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on localhost:9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster.
+4. Open another terminal window. From within the **steam-master-darwin-amd64** folder, start the Steam compilation and scoring service. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on localhost:9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster.
 
         ./steam serve master --superuser-name=superuser --superuser-password=superuser
 
  This starts the Steam web service on `localhost:9000`, the compilation service on `localhost:8080` (same as the Jetty server), and the scoring service to the external IP address of `localhost`. You can change these using `--compilation-service-address=<ip_address:port>` and `--scoring-service-address=<ip_address>`. Use `./steam help serve master` or `./steam serve master -h` to view additional options.
  
- **Note**: If you are demoing Steam and do not have an Internet connection, you can set the scoring service to point to localhost using `--scoring-service-address=localhost`. 
+ >***Note***: If you are demoing Steam and do not have an Internet connection, you can set the scoring service to point to localhost using `--scoring-service-address=localhost`. 
 
-1. <a name="step8"></a>Open a fifth terminal window to run CLI commands. From within the Steam folder, log in to the machine running Steam (localhost:9000). Use the superuser login and password that you created in the previous step.
+5. Open another terminal window to run CLI commands. From within the Steam folder, log in to the machine running Steam (localhost:9000). Use the superuser login and password that you created in the previous step.
 
         ./steam login localhost:9000 --username=superuser --password=superuser
    <!-- -->
 
-1. Run the following to verify that the CLI is working correctly.
+6. Run the following to verify that the CLI is working correctly.
 
         ./steam help
 		
-At this point, you can open a browser and navigate to localhost:9000. Note that you may be prompted to once more provide the login credentials supplied in Step 8. 
+At this point, you can open a browser and navigate to localhost:9000. Note that you may be prompted to once more provide the login credentials created in Step 4. 
 
 The next section describes how to add additional users to the Steam database. 
 
 ### <a name="adding"></a>Adding Roles, Workgroups, and Users
 
-The following example creates sample roles, workgroups, and users using the CLI. Refer to the <a href="https://github.com/h2oai/steamY/tree/master/docs/cli">CLI Commands</a> in github for information about all of the commands available in the CLI. These commands are run from the terminal window used to log in to Steam ([Step 7](#step7) above).
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the Appendix at the end of this document or to the <a href="https://github.com/h2oai/steamY/tree/master/docs/cli">CLI Commands</a> in GitHub for information about all of the commands available in the CLI.
 
 1. Create an engineer role and link that role to permissions. Note that you can use `./steam get all --permissions` to view all available permissions and their corresponding IDs. 
 
