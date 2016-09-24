@@ -111,7 +111,9 @@ After Steam is installed, the following steps describe how to start Steam.
 
   ./steam serve master --superuser-name=superuser --superuser-password=superuser
 
- **Note**: Use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or scoring service on a different location.
+ This starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the scoring service to the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--scoring-service-address=<ip_address>``. Use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
+ 
+ **Note**: If you are demoing Steam and do not have an Internet connection, you can set the scoring service to point to localhost using ``--scoring-service-address=localhost``. 
 
 3. Open another terminal window and start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
 
