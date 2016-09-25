@@ -1,6 +1,6 @@
 package web
 
-import github.com/h2oai/steamY/master/az
+import github.com/h2oai/steam/master/az
 
 service Service
 

@@ -9,7 +9,7 @@ package web
 
 import (
   "encoding/json"
-  "github.com/h2oai/steamY/master/az"
+  "github.com/h2oai/steam/master/az"
   "github.com/rs/xid"
   "log"
   "net/http"

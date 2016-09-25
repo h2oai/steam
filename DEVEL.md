@@ -50,7 +50,7 @@ Finally, clone this repo:
 ```
 $ mkdir -p $GOPATH/src/github.com/h2oai
 $ cd go/src/github.com/h2oai/
-$ git clone https://github.com/h2oai/steamY
-$ cd steamY
+$ git clone https://github.com/h2oai/steam
+$ cd steam
 $ make
 ```

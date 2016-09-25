@@ -1,3 +1,20 @@
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package web
 
 import (
@@ -13,16 +30,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/h2oai/steamY/bindings"
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/lib/svc"
-	"github.com/h2oai/steamY/lib/yarn"
-	"github.com/h2oai/steamY/master/auth"
-	"github.com/h2oai/steamY/master/az"
-	"github.com/h2oai/steamY/master/data"
-	"github.com/h2oai/steamY/srv/compiler"
-	"github.com/h2oai/steamY/srv/h2ov3"
-	"github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/bindings"
+	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/lib/svc"
+	"github.com/h2oai/steam/lib/yarn"
+	"github.com/h2oai/steam/master/auth"
+	"github.com/h2oai/steam/master/az"
+	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/srv/compiler"
+	"github.com/h2oai/steam/srv/h2ov3"
+	"github.com/h2oai/steam/srv/web"
 	"github.com/pkg/errors"
 )
 
@@ -1429,19 +1446,14 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		return 0, err
 	}
 
-	address, err := fs.GetExternalHost() // FIXME there is no need to re-scan this every time. Can be a property on *Service at init time.
-	if err != nil {
-		return 0, err
-	}
-
-	log.Printf("Scoring service started at %s:%d\n", address, port)
+	log.Printf("Scoring service started at %s:%d\n", s.scoringServiceAddress, port)
 
 	service := data.Service{
 		0,
 		model.ProjectId,
 		model.Id,
 		name,
-		address,
+		s.scoringServiceAddress,
 		int64(port), // FIXME change to int
 		int64(pid),  // FIXME change to int
 		data.StartedState,
