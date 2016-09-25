@@ -11,14 +11,14 @@ This vagrant creates a CentOS 6.8 box with YARN and PostgreSQL set ready for Ste
 
 2. Build the go project. (This needs to be done in a linux machine, cannot cross compile!)
     ```
-    cd ./Go/src/github.com/steamY
+    cd ./Go/src/github.com/steam
     go build
     ```
     
 3. In order to utilize yarn with steam, steam needs to be started as root. (The scoring service can be run using the default, no need for root.) 
     ```
     sudo env PATH=$PATH:/usr/local/hadoop/bin \
-    ./steamY serve master \
+    ./steam serve master \
     --superuser-name=vagrant \
     --superuser-password=superuser
     ```
