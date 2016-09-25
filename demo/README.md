@@ -205,24 +205,16 @@ Steam makes use of project-based machine learning. Whether you are trying to det
 Now that you have added files to your H2O cluster, you can create your first Steam project. Point your browser to the Steam URL, for example, http://localhost:9000/.
  
 1. Click **Start New Project**.  
-
  ![NewProject](images/welcome.png)
-
-2. When you first log in to Steam, the list of clusters will be empty. Enter the IP address of the cluster that is running H2O, then click **Connect**. 
-3. Once connected, the current list of clusters will immediately populate with the cluster's information. Click **Connect** beside this cluster to continue.
-
+1. When you first log in to Steam, the list of clusters will be empty. Enter the IP address of the cluster that is running H2O, then click **Connect**. 
+1. Once connected, the current list of clusters will immediately populate with the cluster's information. Click **Connect** beside this cluster to continue.
  ![Create a Project](images/connect_to_cluster.png)
-
-
-4. Select an available H2O frame from the Datasets dropdown, then select the Model Category. Note that these dropdowns are automatically populated with information from datasets that are available on the selected cluster. If no datasets are available, then the dropdown lists will be empty. For clusters that contain datasets, after a dataset is selected, a list of corresponding model will display.
-5. Select the checkbox beside the model(s) to import into the Steam project.
-6. Specify a name for the project.
-
-
+1. Select an available H2O frame from the Datasets dropdown, then select the Model Category. Note that these dropdowns are automatically populated with information from datasets that are available on the selected cluster. If no datasets are available, then the dropdown lists will be empty. For clusters that contain datasets, after a dataset is selected, a list of corresponding model will display.
+1. Select the checkbox beside the model(s) to import into the Steam project.
+1. Specify a name for the project.
  ![Create a Project](images/create_project.png)
-
-6. Click **Create Project** when you are done. Upon successful completion, the Models page will be populated with the model(s) that you added to your project, and the new project will be available on the **Projects** page.
-7. On the **Projects** page, click on the newly created project. This opens a submenu allowing you to view the imported models, deployed models, and configurations specific to that project. Information about these topics is available in the sections that follow.
+1. Click **Create Project** when you are done. Upon successful completion, the Models page will be populated with the model(s) that you added to your project, and the new project will be available on the **Projects** page.
+1. On the **Projects** page, click on the newly created project. This opens a submenu allowing you to view the imported models, deployed models, and configurations specific to that project. Information about these topics is available in the sections that follow.
 
  ![Models page](images/models_page.png)
  
