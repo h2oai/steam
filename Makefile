@@ -126,7 +126,7 @@ darwin:
 	rm -rf ./dist/$(DIST_DARWIN)
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=darwin GOARCH=amd64 go build
-	mkdir -p ./dist/$(DIST_DARWIN)/var/master&& mv ./steam ./dist/$(DIST_DARWIN)/steam
+	mkdir -p ./dist/$(DIST_DARWIN)/var/master && mv ./steam ./dist/$(DIST_DARWIN)/steam
 	cp LICENSE ./dist/$(DIST_DARWIN)/LICENSE
 	mv $(SLA)/steamlauncher ./dist/$(DIST_DARWIN)/steam-launcher
 	cp $(SLA)/config.toml ./dist/$(DIST_DARWIN)/config.toml

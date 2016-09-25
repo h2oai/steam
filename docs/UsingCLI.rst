@@ -22,14 +22,14 @@ Perform the following steps to start the Steam CLI.
 
    ::
 
-		cd steam-0
+		cd steam--darwin-amd64/
 		./steam login 192.168.2.182:8080 --username=bob --password=bobSpassword
 
 3. Run the following to verify that the CLI is working correctly.
 
    ::
 
-       ./steam help
+       ./steam --help
 
 Refer to the `CLI Command Reference Appendix <CLIAppendix.md>`__ for
 information on the commands available in the CLI.
