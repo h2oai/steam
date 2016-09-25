@@ -160,23 +160,18 @@ The following steps show how to build model using the Iris dataset and the GBM a
         >>> from h2o.estimators.gbm import H2OGradientBoostingEstimator
    <!-- -->
 
-1. Initialize H2O using localhost and port 54321. (Note that if started Steam on a different machine, then replace `localhost` with the IP address of that machine.)
+1. Initialize H2O. By default, this starts H2O on localhost and port 54321. (Note that if started Steam on a different machine, then replace `localhost` with the IP address of that machine.)
 
-        >>> h2o.init(ip="localhost", port=54321)
-        ------------------------------  -------------------------------------
-        H2O cluster uptime:             2 minutes 37 seconds 168 milliseconds
-        H2O cluster version:            3.10.0.3
-        H2O cluster name:               user
-        H2O cluster total nodes:        1
-        H2O cluster total free memory:  3.35 GB
-        H2O cluster total cores:        8
-        H2O cluster allowed cores:      8
-        H2O cluster healthy:            True
-        H2O Connection ip:              127.0.0.1
-        H2O Connection port:            54321
-        H2O Connection proxy:
-        Python Version:                 2.7.9
-        ------------------------------  -------------------------------------
+        >>> h2o.init()
+		Checking whether there is an H2O instance running at http://localhost:54321..... not found.
+		Attempting to start a local H2O server...
+		  Java Version: java version "1.8.0_25"; Java(TM) SE Runtime Environment (build 1.8.0_25-b17); Java HotSpot(TM) 64-Bit Server VM (build 25.25-b02, mixed mode)
+		  Starting server from /usr/local/h2o_jar/h2o.jar
+		  Ice root: /var/folders/yl/cq5nhky53hjcl9wrqxt39kz80000gn/T/tmpKiBrI1
+		  JVM stdout: /var/folders/yl/cq5nhky53hjcl9wrqxt39kz80000gn/T/tmpKiBrI1/h2o_techwriter_started_from_python.out
+		  JVM stderr: /var/folders/yl/cq5nhky53hjcl9wrqxt39kz80000gn/T/tmpKiBrI1/h2o_techwriter_started_from_python.err
+		  Server is running at http://127.0.0.1:54321
+		Connecting to H2O server at http://127.0.0.1:54321... successful.
 
  >**Note**: After initializing, verify that the H2O cluster version is 3.10.0.3 or greater. Steam will not run on earlier versions. If necessary, follow the instructions on the <a href="http://www.h2o.ai/download/h2o/python">http://www.h2o.ai/download/h2o/python</a> or <a href="http://www.h2o.ai/download/h2o/r">http://www.h2o.ai/download/h2o/r</a> page to upgrade H2O for Python or R.
 
@@ -209,21 +204,24 @@ Steam makes use of project-based machine learning. Whether you are trying to det
 
 Now that you have added files to your H2O cluster, you can create your first Steam project. Point your browser to the Steam URL, for example, http://localhost:9000/.
  
-1. To start a new project from scratch, click **Create New Project**.  
+1. Click **Start New Project**.  
 
- ![NewProject](images/new_project.png)
+ ![NewProject](images/welcome.png)
 
-2. When you first log in to Steam, the list of clusters will be empty. Enter the IP address of the cluster that is running H2O, then click **Connect**. Once connected, the current list of clusters will immediately populate with this cluster. Connect to this cluster to continue.
-3. Select an available H2O frame from the Datasets dropdown, then select the Category. Note that these dropdowns are automatically populated with information from datasets that are available on the selected cluster. If no datasets are available, the the dataset list will be empty. For clusters that contain datasets, after a dataset is selected, a list of corresponding models will display.
-4. Select the checkbox beside the model(s) to import into the Steam project. In this example, two models are available on the H2O cluster: one model built using GBM and one model built using GLM. 
-5. Specify a name for the project.
+2. When you first log in to Steam, the list of clusters will be empty. Enter the IP address of the cluster that is running H2O, then click **Connect**. 
+3. Once connected, the current list of clusters will immediately populate with the cluster's information. Click **Connect** beside this cluster to continue.
+
+ ![Create a Project](images/connect_to_cluster.png)
+
+
+4. Select an available H2O frame from the Datasets dropdown, then select the Model Category. Note that these dropdowns are automatically populated with information from datasets that are available on the selected cluster. If no datasets are available, then the dropdown lists will be empty. For clusters that contain datasets, after a dataset is selected, a list of corresponding model will display.
+5. Select the checkbox beside the model(s) to import into the Steam project.
+6. Specify a name for the project.
+
 
  ![Create a Project](images/create_project.png)
 
 6. Click **Create Project** when you are done. Upon successful completion, the Models page will be populated with the model(s) that you added to your project, and the new project will be available on the **Projects** page.
-
- ![Project created](images/project_created.png)
-
 7. On the **Projects** page, click on the newly created project. This opens a submenu allowing you to view the imported models, deployed models, and configurations specific to that project. Information about these topics is available in the sections that follow.
 
  ![Models page](images/models_page.png)
@@ -317,11 +315,11 @@ Steam allows you to export models to your local machine.
 
  ![Deploy Model](images/export_model.png)
 
-# <a name="deployment"></a>Deployment
+## <a name="deployment"></a>Deployment
 
 The **Deployment** page lists all available deployed services. For each deployed service, this page shows the model name, model ID, and the status. You can stop a running service by clicking the **Stop Service** button 
 
-![Deployed Services](images/deployed_services.png)
+![Deployed Services](images/deployment_page.png)
 
 In addition to showing deployed services, a Packaging tab is available showing the preprocessing packages used in the deployment.
 
@@ -371,11 +369,46 @@ Upon successful completion, the new label will display on the Project Configurat
 
 ![Label as](images/label_as.png) 
 
+<a name="collaborators"></a>
+## Collaborators
+
+The Collaborators page shows the users who have been added to the Steam database as well as the Labels Access (permissions) assigned to each user. Currently, users can only be added by the Steam superuser using the CLI.
+
+![Collaborators](images/collaborators.png)
+   
 # <a name="clusters"></a>Clusters
 
-The **Clusters** page shows all H2O clusters that Steam is connected to along with the status of the cluster. From this page, you can click the link to access H2O Flow (see next section), or delete a cluster using the trashcan icon.
+The **Clusters** page shows all H2O clusters that Steam is connected to along with the status of the cluster. From this page, you can click the link to access H2O Flow (see next section), launch a new cluster, or delete a cluster.
 
-   ![Steam Clusters page](images/cluster_page.png)
+![Steam Clusters page](images/cluster_page.png)
+
+
+## Launch a New Cluster
+
+You can connect to additional clusters that are running H2O by clicking the **Launch New Cluster** button.
+
+![Launch new cluser](images/launch_new_cluster.png)
+
+1. On the Launch New Cluster form, enter the following information:
+
+ - Cluster Name
+ - Number of Nodes
+ - Memory per Node (in MB or GB)
+ - H2O version (specifying a jar file)
+
+2. Click **Launch New Clusters** when you are done. 
+
+
+# Users
+
+The Users page includes a list of all users are have been added to the Steam database along with the user's role. Note that currently, only Steam superusers can add users and roles. 
+
+![Users page](images/users.png)
+
+The Roles tab provides a table of the permissions assigned to each role.
+
+![Roles tab](images/roles_tab.png)
+
    
 # <a name="usesteamwithflow"></a>Using Steam with H2O Flow
 
