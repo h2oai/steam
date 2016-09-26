@@ -23,7 +23,7 @@ Not all Jetty Jar files work. There's a working Jar for each Jetty version inclu
 
 Perform the following steps to build the H2O Scoring Service Builder:
 
-1. In a terminal window, navigate to the **steamY/scoring-service-builder** folder.
+1. In a terminal window, navigate to the **steam/scoring-service-builder** folder.
 
 2. Run `./gradlew build` to build the service.
 
@@ -40,7 +40,7 @@ Perform the following steps to build the H2O Scoring Service Builder:
 
 When the Builder Service is running, you can make a War file using the Web UI.
 
-The following screenshot shows how to make a War file using a POJO file and a Jar file, which are specified in the **JAVA PREDICTION FILES SECTION**. An example model and an H2O Jar file are included in the  **steamY/scoring-service-builder/examples/pojo-server** folder. 
+The following screenshot shows how to make a War file using a POJO file and a Jar file, which are specified in the **JAVA PREDICTION FILES SECTION**. An example model and an H2O Jar file are included in the  **steam/scoring-service-builder/examples/pojo-server** folder. 
 
 ![Make War](images/make_war.png)
 
@@ -67,7 +67,7 @@ Note that when the Builder Service is running, you can also make a war file usin
  - `gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java` is the POJO file from H2O
  - `h2o-genmodel.jar` is the corresponding Jar file from your version of H2O
 
-The POJO and Jar files are included in the **steamY/scoring-service-builder/examples/pojo-server** folder.
+The POJO and Jar files are included in the **steam/scoring-service-builder/examples/pojo-server** folder.
 
 
 ## Starting the H2O Prediction Service
@@ -88,7 +88,7 @@ This starts the H2O Prediction Service at localhost:55001. You can use this web 
 
 This distribution includes scripts that can be used to quickly get your prediction service up and running. 
 
-Open a terminal window and run the following commands from the **steamY/steam-scoring-service** folder. 
+Open a terminal window and run the following commands from the **steam/steam-scoring-service** folder. 
 
 	# Run an example using the airline dataset
 	cd examples/pojo-server

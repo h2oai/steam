@@ -19,7 +19,7 @@ Steam on a YARN edge node using the instructions provided in the Steam Installat
 and Setup steps.
 
 **Note**: Before you begin using Steam, be sure that your minimum version of H2O
-is 3.10.0.3. Earlier versions are not supported. If necessary, follow the instructions
+is 3.10.0.7. Earlier versions are not supported. If necessary, follow the instructions
 on the `H2O Download page <http://h2o.ai/download>`__ for your platform to upgrade H2O.
 
 .. toctree::
@@ -38,6 +38,7 @@ on the `H2O Download page <http://h2o.ai/download>`__ for your platform to upgra
    Login
    Projects
    Clusters
+   Users
    UseSteamWithFlow
    StopSteam
 

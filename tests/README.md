@@ -27,8 +27,8 @@ Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
 
 1. Get Steam:
 
-        s3cmd get s3://steam-release/steamY-master-darwin-amd64.tar.gz
-        tar xvf steamY-master-darwin-amd64.tar.gz
+        s3cmd get s3://steam-release/steam-master-darwin-amd64.tar.gz
+        tar xvf steam-master-darwin-amd64.tar.gz
         cd steam-master-darwin-amd64
 
 1. Create application user (one-time only):
@@ -55,8 +55,8 @@ Edit `/usr/local/var/postgres/postgresql.conf` and turn on verbose logging:
 
 ## Running tests
 
-    git clone https://github.com/h2oai/steamY.git
-    cd steamY/tests
+    git clone https://github.com/h2oai/steam.git
+    cd steam/tests
     python example.py
 
 TODO: Add specifics

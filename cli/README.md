@@ -1,7 +1,7 @@
 Basic Command Line Interface:
 ====
 
-Use `steamY help ...` for assistance.
+Use `steam help ...` for assistance.
 
 
 TODO:
