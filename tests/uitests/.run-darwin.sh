@@ -6,7 +6,7 @@ H2O_PATH=/Users/patrickrice/Documents/h2o-3/build/h2o.jar
 
 rm -rf ./steam*-develop-darwin-amd64*
 rm -rf ./steam*-develop-darwin-amd64*
-s3cmd get s3://steam-release/steamY-develop-darwin-amd64.tar.gz -f
+curl -O http://s3.amazonaws.com/steam-release/steamY-develop-darwin-amd64.tar.gz 
 
 tar xvf steamY-develop-darwin-amd64.tar.gz
 
