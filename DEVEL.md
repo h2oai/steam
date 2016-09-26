@@ -43,3 +43,5 @@ $ git clone https://github.com/h2oai/steam
 $ cd steam
 $ make
 ```
+
+Note: If you do not follow above path to clone steam source, you will get build errors. golang is very specific about where the source code is cloned.
