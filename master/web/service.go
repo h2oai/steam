@@ -461,28 +461,59 @@ func (s *Service) GetProject(pz az.Principal, projectId int64) (*web.Project, er
 	return toProject(project), nil
 }
 
+func (s *Service) deleteImplicitDatasouce(pz az.Principal, d data.Datasource) error {
+	// Verify Datasource is Implicit
+	if d.Kind != "Implicit" {
+		return fmt.Errorf("non-implicit datasource: %s", d.Name)
+	}
+
+	// Read and delete all Datasets associated with Implicit Datasource
+	dts, err := s.ds.ReadDatasets(pz, d.Id, 0, 10000)
+	if err != nil {
+		return errors.Wrap(err, "failed to read datasets")
+	}
+	for _, dt := range dts {
+		if err := s.ds.DeleteDataset(pz, dt.Id); err != nil {
+			return errors.Wrapf(err, "failed to delete dataset %s", dt.Name)
+		}
+	}
+
+	// Delete Datasource
+	return s.ds.DeleteDatasource(pz, d.Id)
+}
+
 func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
 		return err
 	}
 
-	if _, ok, err := s.ds.ReadDatasourceByProject(pz, projectId); err != nil {
-		return err
-	} else if ok {
-		return fmt.Errorf("This project still contains at least one datasource.")
-	}
-
+	// Verify no Models in Project
 	if _, ok, err := s.ds.ReadModelsForProject(pz, projectId, 0, 1); err != nil {
 		return err
 	} else if ok {
 		return fmt.Errorf("This project still contains at least one model.")
 	}
 
-	if err := s.ds.DeleteProject(pz, projectId); err != nil {
+	// Verify no Datasources in Project
+	if _, ok, err := s.ds.ReadDatasourceByProject(pz, projectId); err != nil {
 		return err
+	} else if ok {
+		// If Datasources present, remove all Implicit Datasources/Datasets
+		ds, err := s.ds.ReadDatasources(pz, projectId, 0, 10000)
+		if err != nil {
+			return errors.Wrap(err, "failed to read datasources for project")
+		}
+		for _, d := range ds {
+			if d.Kind != "Implicit" {
+				return fmt.Errorf("project contains at least one datasource")
+			}
+			if err := s.deleteImplicitDatasouce(pz, d); err != nil {
+				return errors.Wrapf(err, "failed to delete implicit datasource %s", d.Name)
+			}
+		}
 	}
 
-	return nil
+	return s.ds.DeleteProject(pz, projectId)
 }
 
 // --- Datasource ---
