@@ -45,3 +45,26 @@ $ make
 ```
 
 Note: If you do not follow above path to clone steam source, you will get build errors. golang is very specific about where the source code is cloned.
+
+**Step 5**
+
+After your build is successful you will see steam binary is available. Now you would need to initialize database (sqlite) which is must have requirement for steam. To initialize data base do the following:
+
+```
+make db
+```
+
+Now you are ready to start the server. 
+
+**Step 6**
+Start the server as below
+
+```
+./steam serve master --superuser-name USER_NAME --superuser-password PASSWORD
+```
+
+
+
+
+
+
