@@ -30,6 +30,8 @@ export const FETCH_LEADERBOARD = 'FETCH_LEADERBOARD';
 export const RECEIVE_LEADERBOARD = 'RECEIVE_LEADERBOARD';
 export const RECEIVE_SORT_CRITERIA = 'RECEIVE_SORT_CRITERIA';
 export const RECEIVE_MODEL_COUNT = 'RECEIVE_MODEL_COUNT';
+export const REQUEST_DELETE_MODEL = 'REQUEST_DELETE_MODEL';
+export const RECEIVE_DELETE_MODEL = 'RECEIVE_DELETE_MODEL';
 
 interface Leaderboard {
   id: number,
@@ -38,6 +40,20 @@ interface Leaderboard {
 }
 
 export const MAX_ITEMS = 5;
+
+export function requestDeleteModel(id) {
+  return {
+    type: REQUEST_DELETE_MODEL,
+    id
+  };
+};
+export function receiveDeleteModel(id, success) {
+  return {
+    type: RECEIVE_DELETE_MODEL,
+    id,
+    success
+  };
+};
 
 export const requestLeaderboard = () => {
   return {
@@ -150,6 +166,21 @@ export function findModelsCount(projectId: number) {
         return;
       }
       dispatch(receiveModelCount(count));
+    });
+  };
+}
+
+export function deleteModel(modelId: number, fetchLeaderboard: Function) {
+  return(dispatch) => {
+    dispatch(requestDeleteModel(modelId));
+    Remote.deleteModel(modelId, (error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Delete Error', error.toString(), null));
+        dispatch(receiveDeleteModel(modelId, false));
+        return;
+      }
+      dispatch(receiveDeleteModel(modelId, true));
+      fetchLeaderboard();
     });
   };
 }

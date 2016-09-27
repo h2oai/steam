@@ -26,14 +26,21 @@ import * as React from 'react';
 import { Project } from '../../Proxy/Proxy';
 import '../styles/projectslist.scss';
 import { hashHistory } from 'react-router';
+import InputFeedback from '../../App/components/InputFeedback';
+import { FeedbackType } from '../../App/components/InputFeedback';
 
 interface Props {
-  projects: Project[]
+  projects: Project[],
+  deleteProject: Function
 }
 
 export default class ProjectsList extends React.Component<Props, any> {
   openProject(projectId) {
     hashHistory.push('/projects/' + projectId + '/models');
+  }
+
+  deleteProject(projectId) {
+    this.props.deleteProject(projectId);
   }
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -46,16 +53,22 @@ export default class ProjectsList extends React.Component<Props, any> {
         <div>
           <h1>All Projects</h1>
           <div className="panel-container">
-            {this.props.projects.map((project, i) => {
+            {this.props.projects.map((project: any, i) => {
               return (
-                <Panel key={i} onClick={this.openProject.bind(this, project.id)}>
+                <Panel className="project-card" key={i}>
                   <article>
-                    <div className="project-metadata">
-                      <header>{project.name}</header>
+                    <div className="project-metadata" onClick={this.openProject.bind(this, project.id)}>
+                      <header className="link">{project.name}</header>
                       <div>{project.model_category}</div>
                       <div>{moment.unix(project.created_at).format('YYYY-MM-DD HH:mm')}</div>
                     </div>
                   </article>
+                  { project.isDeleteInProgress ?
+                    <div className="deleting-progress">
+                      <InputFeedback type={FeedbackType.Info} message="Deleting project" />
+                    </div>
+                    : <i className="fa fa-trash" aria-hidden="true" onClick={ () => this.deleteProject(project.id) }></i>
+                  }
                 </Panel>
               );
             })}
