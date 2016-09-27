@@ -24,7 +24,8 @@ If you're an Open Source community member, you can contact H2O using one of the 
 - Ask your question on the [H2O Community] (https://community.h2o.ai/) site (create an account if necessary)
 
 
-
-
+## Advisory Committee
+- Subodh Kumar (Capital One)
+- Jaideep Mokha (Capital One)
 
 
