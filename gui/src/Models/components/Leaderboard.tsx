@@ -170,9 +170,7 @@ export class Leaderboard extends React.Component<Props & DispatchProps, any> {
                 onDeploy={this.onDeploy.bind(this)} packages={this.props.packages || []}></Deploy>
         <PageHeader>
           <span>Models</span>
-          <div className="buttons">
-            <button className="default" onClick={this.openImportModels.bind(this)}>Import Models</button>
-          </div>
+          <div className="button-primary header-buttons" onClick={this.openImportModels.bind(this)}>Import Models</div>
         </PageHeader>
         <div className="filter">
           <input ref="filterModels" type="text" placeholder="filter models" onChange={this.onFilter.bind(this)}/>

@@ -34,7 +34,8 @@ import {
 import { Cluster, Model, Dataset } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
-import Progress from '../../App/components/Progress';
+import InputFeedback from '../../App/components/InputFeedback';
+import { FeedbackType } from '../../App/components/InputFeedback';
 
 interface DispatchProps {
   fetchClusters: Function,
@@ -52,6 +53,7 @@ interface Props {
   datasets: Dataset[],
   isClusterFetchInProcess: boolean,
   isModelFetchInProcess: boolean
+  registerClusterError: string
 }
 
 export class ImportNewProject extends React.Component<DispatchProps & Props, any> {
@@ -162,9 +164,9 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
       <div className="import-new-project">
         <div className="step-1">
           <div className="select-cluster">
-            <h1>1. Select H2O cluster</h1>
+            <h2>1. Select H2O cluster</h2>
             { this.state.clusterId ?
-              <div className="cluster-info">
+              <div className="cluster-info intro">
                 <span><i className="fa fa-cubes cluster-image"/></span>
                 <div className="cluster-details">
                   <div>{selectedClusterName}</div>
@@ -172,7 +174,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                   <div onClick={this.resetClusterSelection.bind(this)} className="select-new-cluster"><i className="fa fa-close"/> use a different cluster</div>
                 </div>
               </div> :
-              <div>
+              <div className="intro">
                 Select an H2O cluster to import models and datasets from.
                 <Table>
                   <Row header={true}>
@@ -188,7 +190,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
                         <Cell>N/A</Cell>
                         <Cell>N/A</Cell>
                         <Cell>
-                          <button className="default" onClick={this.retrieveClusterDataframes.bind(this, cluster.id)}>
+                          <button className="button-primary" onClick={this.retrieveClusterDataframes.bind(this, cluster.id)}>
                             Connect
                           </button>
                         </Cell>
@@ -201,24 +203,27 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           </div>
           { !this.state.clusterId ?
             <div className="connect-cluster">
-              <h1>&hellip; or connect to a new H2O cluster</h1>
-              <div>
+              <h2>&hellip; or connect to a new H2O cluster</h2>
+              <div className="intro">
                 Connect to a H2O cluster where your existing models and data sets are located.
               </div>
               <form onSubmit={this.registerCluster.bind(this)}>
                 <input type="text" name="ip-address" placeholder="IP Address"/>
+                { this.props.registerClusterError ?
+                  <InputFeedback message={ this.props.registerClusterError } type={FeedbackType.Error} />
+                  : null }
                 <input type="text" name="port" placeholder="Port"/>
-                <button type="submit" className="default">Connect</button>
+                <button type="submit" className="button-primary">Connect</button>
               </form>
               { this.props.isClusterFetchInProcess ?
-                  <Progress message="Connecting..." />
+                  <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
                  : null }
             </div>
           : null }
         </div>
         {this.state.clusterId ? <div>
-          <h1>2. Select Dataframe</h1>
-          <div>
+          <h2>2. Select Dataframe</h2>
+          <div className="intro">
             <select name="selectDataframe" onChange={this.selectDataset.bind(this)}>
               <option></option>
               {this.props.datasets ? this.props.datasets.map((dataset, i) => {
@@ -226,14 +231,14 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               }) : null}
             </select>
             { this.props.isModelFetchInProcess ?
-                <Progress message="Connecting..." />
+                <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
               : null }
           </div>
         </div> : null}
         {(this.state.datasetId && !this.props.isModelFetchInProcess) ?
           <div>
-            <h1>3. Select Model Category</h1>
-            <div>
+            <h2>3. Select Model Category</h2>
+            <div className="intro">
               <select name="selectModelCategory" onChange={this.selectCategory.bind(this)}>
                 <option></option>
                 {this.props.models ? _.uniqBy(this.props.models, 'model_category').map((model, i) => {
@@ -243,8 +248,8 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
             </div>
           </div> : null}
         {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
-          <h1>4. Pick Models to Import</h1>
-          <div>
+          <h2>4. Pick Models to Import</h2>
+          <div className="intro">
             Models in a project must share the same feature set and response column to enable comparison.
           </div>
           <Table className="import-models">
@@ -269,13 +274,13 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
           </Table>
         </div> : null}
         {this.state.datasetId && !_.isEmpty(this.props.models && this.state.modelCategory) ? <div className="name-project">
-          <h1>5. Name Project</h1>
-          <div>
+          <h2>5. Name Project</h2>
+          <div className="intro">
             <input ref="projectName" type="text"/>
           </div>
         </div> : null}
         {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
-          <button className={classNames('default', {disabled: !this.state.isModelSelected})}
+          <button className={classNames('button-primary', {disabled: !this.state.isModelSelected})}
                   onClick={this.createProject.bind(this)}>Create Project
           </button>
         </div> : null}
@@ -291,7 +296,8 @@ function mapStateToProps(state): any {
     datasets: state.projects.datasets,
     project: state.project,
     isClusterFetchInProcess: state.projects.isClusterFetchInProcess,
-    isModelFetchInProcess: state.projects.isModelFetchInProcess
+    isModelFetchInProcess: state.projects.isModelFetchInProcess,
+    registerClusterError: state.projects.registerClusterError
   };
 }
 

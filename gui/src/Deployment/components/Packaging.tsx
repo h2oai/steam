@@ -47,7 +47,7 @@ export class Packaging extends React.Component<Props & DispatchProps, any> {
     return (
       <div className="packaging">
         <h1>PREPROCESSING PACKAGES</h1>
-        <div>
+        <div className="intro">
           Custom packaging methods for model deployment
         </div>
         <Table>

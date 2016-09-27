@@ -132,8 +132,8 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
             <Row>
               <Cell/>
               <Cell className="button-container">
-                <button type="submit" className="default">Import</button>
-                <button type="button" onClick={this.props.onCancel.bind(this)} className="default invert">Cancel</button>
+                <button type="submit" className="button-primary">Import</button>
+                <button type="button" onClick={this.props.onCancel.bind(this)} className="button-secondary">Cancel</button>
               </Cell>
             </Row>
           </Table>

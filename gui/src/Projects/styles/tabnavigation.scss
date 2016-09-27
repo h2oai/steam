@@ -4,18 +4,28 @@
   position: relative;
   z-index: 1;
   white-space: nowrap;
-  border-bottom: $rule-solid-thick;
+  border-style: solid;
+  border-bottom-width: 2px;
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  border-color: #979797;
   .tab {
+    font-family: "Oswald", sans-serif;
     position: relative;
     display: inline-block;
-    padding: 1em 1.5em 0.7em;
-    color: inherit;
+    font-weight: 500;
+    padding-left: 28px;
+    padding-top: 15px;
+    padding-right: 28px;
+    padding-bottom: 5px;
+    color: $h2o-charcoal-grey;
     text-decoration: none;
     margin: 0 -0.1em;
     cursor: pointer;
     text-transform: uppercase;
     &:not(.selected):before {
-      background: $brand-dark-4;
+      background: #f7f7f7;
     }
     &.selected:before {
       border-bottom: $brand-white;
@@ -29,9 +39,11 @@
       bottom: 0;
       left: 0;
       z-index: -1;
-      border: $rule-solid-thick;
+      border-style: solid;
+      border-width: 2px;
+      border-color: #979797;
       border-bottom: none;
-      background: $brand-white;
+      background: white;
       transform: perspective(5px) rotateX(1deg);
       transform-origin: bottom;
     }

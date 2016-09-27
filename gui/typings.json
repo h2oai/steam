@@ -13,6 +13,7 @@
     "react-addons-test-utils": "registry:dt/react-addons-test-utils#0.14.0+20160427035638",
     "react-addons-update": "registry:dt/react-addons-update#0.14.0+20160316155526",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
+    "react-motion": "registry:dt/react-motion#0.0.0+20160705193226",
     "react-redux": "registry:dt/react-redux#4.4.0+20160501125835",
     "react-router/history": "registry:dt/react-router/history#2.0.0+20160608102730",
     "redux": "registry:dt/redux#3.3.1+20160326112656",

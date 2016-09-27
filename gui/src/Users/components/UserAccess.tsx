@@ -86,7 +86,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
 
   render(): React.ReactElement<HTMLDivElement> {
     return (
-      <div className="user-access">
+      <div className="user-access intro">
         <div className="filter-column">
           FILTERS
           <Table className="full-size">
