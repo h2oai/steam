@@ -26,7 +26,8 @@ import * as React from 'react';
 import { Project } from '../../Proxy/Proxy';
 import '../styles/projectslist.scss';
 import { hashHistory } from 'react-router';
-import Progress from '../../App/components/Progress';
+import InputFeedback from '../../App/components/InputFeedback';
+import { FeedbackType } from '../../App/components/InputFeedback';
 
 interface Props {
   projects: Project[],
@@ -64,7 +65,7 @@ export default class ProjectsList extends React.Component<Props, any> {
                   </article>
                   { project.isDeleteInProgress ?
                     <div className="deleting-progress">
-                      <Progress message="Deleting project" />
+                      <InputFeedback type={FeedbackType.Info} message="Deleting project" />
                     </div>
                     : <i className="fa fa-trash" aria-hidden="true" onClick={ () => this.deleteProject(project.id) }></i>
                   }

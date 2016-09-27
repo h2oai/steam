@@ -175,7 +175,7 @@ export function deleteModel(modelId: number, fetchLeaderboard: Function) {
     dispatch(requestDeleteModel(modelId));
     Remote.deleteModel(modelId, (error) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Delete Error', error.toString(), null));
         dispatch(receiveDeleteModel(modelId, false));
         return;
       }
