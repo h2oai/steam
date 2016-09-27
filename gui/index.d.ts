@@ -21,6 +21,7 @@
 
 declare function require(string): string;
 
-interface Window { 
-  devToolsExtension: any; 
+interface Window {
+  devToolsExtension: any
+  ga: any
 }

@@ -87,7 +87,14 @@ function invoke(method: string, param: any, headers: any, go: (error: Error, dat
   if (headers) {
     settings.headers = headers;
   }
-
+  if (window.ga) {
+    window.ga('send', {
+      hitType: 'event',
+      eventCategory: 'API',
+      eventAction: req.method,
+      eventLabel: settings.url
+    });
+  }
   _invoke(settings, go);
 
 }
@@ -101,7 +108,14 @@ export function upload(formData: FormData, go: (error: Error, data: any) => void
     contentType: false,
     processData: false
   };
-
+  if (window.ga) {
+    window.ga('send', {
+      hitType: 'event',
+      eventCategory: 'API',
+      eventAction: 'upload',
+      eventLabel: settings.url
+    });
+  }
   _invoke(settings, go);
 }
 
