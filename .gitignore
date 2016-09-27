@@ -70,4 +70,5 @@ coverage.out
 -*.pickle
 -/docs/_build
 /npm-debug.log
+/.idea
 /gui/.idea
