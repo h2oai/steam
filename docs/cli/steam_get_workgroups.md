@@ -26,9 +26,9 @@ steam get workgroups [?]
 
 ```
       --for-identity[=false]: List workgroups for an identity
-      --identity-id=0: No description available
-      --limit=0: No description available
-      --offset=0: No description available
+      --identity-id=0: Integer ID of an identity in Steam.
+      --limit=0: The maximum returned objects.
+      --offset=0: An offset to start the search on.
 ```
 
 ### Options inherited from parent commands

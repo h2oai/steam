@@ -1,3 +1,20 @@
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package data
 
 import (
@@ -6,8 +23,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/h2oai/steamY/master/auth"
-	"github.com/h2oai/steamY/master/az"
+	"github.com/h2oai/steam/master/auth"
+	"github.com/h2oai/steam/master/az"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 )
@@ -3935,7 +3952,6 @@ func (ds *Datastore) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int6
 		if err != nil {
 			return err
 		}
-
 		if _, err := tx.Exec(`
 			UPDATE
 				label
@@ -3984,10 +4000,42 @@ func (ds *Datastore) ReadLabelsForProject(pz az.Principal, projectId int64) ([]L
 	return ScanLabels(rows)
 }
 
-func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
+func scanLabel(rows *sql.Rows) (Label, bool, error) {
+	var label Label
+
+	labels, err := ScanLabels(rows)
+	if err != nil {
+		return label, false, err
+	}
+
+	if len(labels) == 0 {
+		return label, false, nil
+	}
+
+	return labels[0], true, nil
+}
+
+func (ds *Datastore) ReadLabelByModel(pz az.Principal, modelId int64) (Label, bool, error) {
 	rows, err := ds.db.Query(`
 		SELECT
 			id, project_id, model_id, name, description, created
+		FROM
+			label
+		WHERE
+			model_id = $1
+		`, modelId)
+	if err != nil {
+		return Label{}, false, err
+	}
+	defer rows.Close()
+
+	return scanLabel(rows)
+}
+
+func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			
 		FROM
 			label
 		WHERE

@@ -26,11 +26,11 @@ steam link identity [?]
 ### Options
 
 ```
-      --identity-id=0: No description available
-      --role-id=0: No description available
+      --identity-id=0: Integer ID of an identity in Steam.
+      --role-id=0: Integer ID of a role in Steam.
       --with-role[=false]: Link an identity with a role
       --with-workgroup[=false]: Link an identity with a workgroup
-      --workgroup-id=0: No description available
+      --workgroup-id=0: Integer ID of a workgroup in Steam.
 ```
 
 ### Options inherited from parent commands

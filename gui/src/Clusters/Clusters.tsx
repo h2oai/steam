@@ -1,3 +1,20 @@
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /**
  * Created by justin on 6/27/16.
  */
@@ -15,20 +32,28 @@ import { Cluster } from '../Proxy/Proxy';
 import { connect } from 'react-redux';
 import './styles/clusters.scss';
 import { Link } from 'react-router';
+import { getConfig } from './actions/clusters.actions';
 
 interface DispatchProps {
   fetchClusters: Function
   fetchModelsFromCluster: Function
   registerCluster: Function,
   unregisterCluster: Function,
-  stopClusterOnYarn: Function
+  stopClusterOnYarn: Function,
+  getConfig: Function
 }
 
 interface Props {
-  clusters: Cluster[]
+  clusters: Cluster[],
+  config: any
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
+  refs: {
+    [key: string]: Element
+    keytabFilename: HTMLInputElement
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -40,12 +65,14 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     if (_.isEmpty(this.props.clusters)) {
       this.props.fetchClusters();
+      this.props.getConfig();
     }
   }
 
   removeCluster(cluster) {
     if (cluster.type_id === 2) {
-      this.props.stopClusterOnYarn(cluster.id);
+      let keytabFilename = _.get((this.refs.keytabFilename as HTMLInputElement), 'value', '');
+      this.props.stopClusterOnYarn(cluster.id, keytabFilename);
     } else {
       this.props.unregisterCluster(cluster.id);
     }
@@ -106,11 +133,13 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes"/> <a href={cluster.address} target="_blank"
-                                                        rel="noopener">{cluster.name}
-                    @ {cluster.address}</a></span>
-                  <button className="remove-cluster" onClick={this.removeCluster.bind(this, cluster)}><i
-                    className="fa fa-trash"/></button>
+                  <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + _.get(this.props.config, 'cluster_proxy_address', '') + '/flow/?cluster_id=' + cluster.id} target="_blank"
+                                                        rel="noopener">{cluster.name}</a></span>
+                  <span className="remove-cluster">
+                    {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
+                    <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
+                      className="fa fa-trash"/></button>
+                  </span>
                 </header>
                 <article>
                   <h2>
@@ -138,7 +167,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state): any {
   return {
-    clusters: state.projects.clusters
+    clusters: state.projects.clusters,
+    config: state.clusters.config
   };
 }
 
@@ -148,7 +178,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
     registerCluster: bindActionCreators(registerCluster, dispatch),
     unregisterCluster: bindActionCreators(unregisterCluster, dispatch),
-    stopClusterOnYarn: bindActionCreators(stopClusterOnYarn, dispatch)
+    stopClusterOnYarn: bindActionCreators(stopClusterOnYarn, dispatch),
+    getConfig: bindActionCreators(getConfig, dispatch)
   };
 }
 

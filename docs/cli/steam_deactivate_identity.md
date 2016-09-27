@@ -20,7 +20,7 @@ steam deactivate identity [?]
 ### Options
 
 ```
-      --identity-id=0: No description available
+      --identity-id=0: Integer ID of an identity in Steam.
 ```
 
 ### Options inherited from parent commands

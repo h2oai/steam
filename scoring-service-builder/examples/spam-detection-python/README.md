@@ -5,7 +5,7 @@ In this example we'll build a spam detector for text messages. The model is buil
 Feature preprocessing is done in Python. 
 After that we create a Prediction Web Service that includes the Python preprocessing.
 
-This example is in ```examples/spam-detection-python``` in the ```steamY/scoring_service_builder``` directory.
+This example is in ```examples/spam-detection-python``` in the ```steam/scoring_service_builder``` directory.
 
 ## Train and preprocess data (Optional)
 
@@ -135,16 +135,16 @@ $ sh run-example-python.sh
  starting prediction service on port 55001
  2016-08-03 14:16:38.157:INFO:omjr.Runner:Runner
  2016-08-03 14:16:38.157:WARN:omjr.Runner:No tx manager found
- 2016-08-03 14:16:38.190:INFO:omjr.Runner:Deploying file:/Users/magnus/Git/steamY/scoring-service-builder/examples/spam-detection-python/example-python.war @ /
+ 2016-08-03 14:16:38.190:INFO:omjr.Runner:Deploying file:/Users/magnus/Git/steam/scoring-service-builder/examples/spam-detection-python/example-python.war @ /
  2016-08-03 14:16:38.214:INFO:oejs.Server:jetty-8.y.z-SNAPSHOT
- 2016-08-03 14:16:38.235:INFO:oejw.WebInfConfiguration:Extract jar:file:/Users/magnus/Git/steamY/scoring-service-builder/examples/spam-detection-python/example-python.war!/ to /private/var/folders/fq/lm9wfzqj5ksg4tkhm1ml1fcc0000gn/T/jetty-0.0.0.0-55001-example-python.war-_-any-/webapp
+ 2016-08-03 14:16:38.235:INFO:oejw.WebInfConfiguration:Extract jar:file:/Users/magnus/Git/steam/scoring-service-builder/examples/spam-detection-python/example-python.war!/ to /private/var/folders/fq/lm9wfzqj5ksg4tkhm1ml1fcc0000gn/T/jetty-0.0.0.0-55001-example-python.war-_-any-/webapp
  2016-08-03 14:16:38.453:INFO:oejpw.PlusConfiguration:No Transaction manager found - if your webapp requires one, please configure one.
  2016-08-03 14:16:39.019 -0700 [main] INFO PredictPythonServlet - Python started
  2016-08-03 14:16:39.019:WARN:oejsh.RequestLogHandler:!RequestLog
  2016-08-03 14:16:39.039:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:55001
  ^C2016-08-03 14:20:33.501 -0700 [Thread-0] INFO PredictPythonServlet - Python destroyed
  2016-08-03 14:20:33.505:INFO:oejsl.ELContextCleaner:javax.el.BeanELResolver purged
- 2016-08-03 14:20:33.505:INFO:oejsh.ContextHandler:stopped o.e.j.w.WebAppContext{/,file:/private/var/folders/fq/lm9wfzqj5ksg4tkhm1ml1fcc0000gn/T/jetty-0.0.0.0-55001-example-python.war-_-any-/webapp/},file:/Users/magnus/Git/steamY/scoring-service-builder/examples/spam-detection-python/example-python.war
+ 2016-08-03 14:20:33.505:INFO:oejsh.ContextHandler:stopped o.e.j.w.WebAppContext{/,file:/private/var/folders/fq/lm9wfzqj5ksg4tkhm1ml1fcc0000gn/T/jetty-0.0.0.0-55001-example-python.war-_-any-/webapp/},file:/Users/magnus/Git/steam/scoring-service-builder/examples/spam-detection-python/example-python.war
 ```
 It is now started at ```http://localhost:55001```
 and looks like this

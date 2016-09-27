@@ -1,3 +1,20 @@
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package web
 
 import (
@@ -13,16 +30,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/h2oai/steamY/bindings"
-	"github.com/h2oai/steamY/lib/fs"
-	"github.com/h2oai/steamY/lib/svc"
-	"github.com/h2oai/steamY/lib/yarn"
-	"github.com/h2oai/steamY/master/auth"
-	"github.com/h2oai/steamY/master/az"
-	"github.com/h2oai/steamY/master/data"
-	"github.com/h2oai/steamY/srv/compiler"
-	"github.com/h2oai/steamY/srv/h2ov3"
-	"github.com/h2oai/steamY/srv/web"
+	"github.com/h2oai/steam/bindings"
+	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/lib/svc"
+	"github.com/h2oai/steam/lib/yarn"
+	"github.com/h2oai/steam/master/auth"
+	"github.com/h2oai/steam/master/az"
+	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/srv/compiler"
+	"github.com/h2oai/steam/srv/h2ov3"
+	"github.com/h2oai/steam/srv/web"
 	"github.com/pkg/errors"
 )
 
@@ -31,6 +48,7 @@ type Service struct {
 	ds                        *data.Datastore
 	compilationServiceAddress string
 	scoringServiceAddress     string
+	clusterProxyAddress       string
 	scoringServicePortMin     int
 	scoringServicePortMax     int
 	kerberosEnabled           bool
@@ -38,17 +56,21 @@ type Service struct {
 	keytab                    string
 }
 
-func NewService(workingDir string, ds *data.Datastore, compilationServiceAddress, scoringServiceAddress string, scoringServicePortsRange [2]int, kerberos bool, username, keytab string) *Service {
+func NewService(
+	workingDir string,
+	ds *data.Datastore,
+	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
+	scoringServicePortsRange [2]int,
+	kerberos bool,
+	username, keytab string,
+) *Service {
 	return &Service{
 		workingDir,
 		ds,
-		compilationServiceAddress,
-		scoringServiceAddress,
-		scoringServicePortsRange[0],
-		scoringServicePortsRange[1],
+		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
+		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
-		username,
-		keytab,
+		username, keytab,
 	}
 }
 
@@ -65,7 +87,10 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 }
 
 func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
-	return &web.Config{s.kerberosEnabled}, nil
+	return &web.Config{
+		KerberosEnabled:     s.kerberosEnabled,
+		ClusterProxyAddress: s.clusterProxyAddress,
+	}, nil
 }
 
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
@@ -1177,7 +1202,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 }
 
 func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bindings.ModelMetrics, category string) error {
-	log.Println("iama", category)
 	switch category {
 	case "Binomial":
 		if err := s.ds.CreateBinomialModel(
@@ -1319,9 +1343,15 @@ func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) er
 		return err
 	}
 
-	err := s.ds.UnlinkLabelFromModel(pz, labelId, modelId)
+	oldLabel, ok, err := s.ds.ReadLabelByModel(pz, modelId)
 	if err != nil {
 		return err
+	}
+
+	if ok {
+		if err := s.ds.UnlinkLabelFromModel(pz, oldLabel.Id, modelId); err != nil {
+			return err
+		}
 	}
 
 	return s.ds.LinkLabelWithModel(pz, labelId, modelId)
@@ -1416,19 +1446,14 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		return 0, err
 	}
 
-	address, err := fs.GetExternalHost() // FIXME there is no need to re-scan this every time. Can be a property on *Service at init time.
-	if err != nil {
-		return 0, err
-	}
-
-	log.Printf("Scoring service started at %s:%d\n", address, port)
+	log.Printf("Scoring service started at %s:%d\n", s.scoringServiceAddress, port)
 
 	service := data.Service{
 		0,
 		model.ProjectId,
 		model.Id,
 		name,
-		address,
+		s.scoringServiceAddress,
 		int64(port), // FIXME change to int
 		int64(pid),  // FIXME change to int
 		data.StartedState,

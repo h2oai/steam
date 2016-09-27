@@ -1,3 +1,20 @@
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /**
  * Created by justin on 6/25/16.
  */
@@ -12,31 +29,23 @@ import { getRoute } from '../../../App/utils/getRoute';
 import { routes } from '../../../routes';
 import * as _ from 'lodash';
 import { connect } from 'react-redux';
-import { fetchProfile } from '../../../Profile/actions/profile.actions';
-import { bindActionCreators } from 'redux';
 import './navigation.scss';
 import { Project } from '../../../Proxy/Proxy';
-const logo = require('../../../../assets/h2o-home.png');
 import {Motion, spring} from 'react-motion';
 
 interface Props {
   routes: any
   params: any
-  profile: {
-    isEulaAgreed: boolean
-  },
   project: Project
 }
 
 interface DispatchProps {
-  fetchProfile: Function
 }
 
 
 interface State {
   activeTopLevelPath: string
   isSubMenuActive: boolean
-  isEulaAgreed: boolean
 }
 
 export class Navigation extends React.Component<Props & DispatchProps, any> {
@@ -46,20 +55,15 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     this.state = {
       activeTopLevelPath: '',
       isSubMenuActive: false,
-      isEulaAgreed: false
     };
   }
 
   componentWillMount(): void {
     this.setMenuState(this.props.routes);
-    this.props.fetchProfile();
   }
 
   componentWillReceiveProps(nextProps: Props): void {
     this.setMenuState(nextProps.routes);
-    this.setState({
-      isEulaAgreed: nextProps.profile.isEulaAgreed as boolean
-    });
   }
 
   setMenuState(newRoutes: any[]): void {
@@ -157,7 +161,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLElement> {
     let submenu = <div></div>;
     return (
-      <div className={classNames('nav-container', {hidden: !this.state.isEulaAgreed})}>
+      <div className={classNames('nav-container')}>
         <Sidebar className="primary-navigation">
           <nav className="navigation--primary">
             <div className="navigation">
@@ -219,14 +223,12 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
 
 function mapStateToProps(state): any {
   return {
-    project: state.projects.project,
-    profile: state.profile
+    project: state.projects.project
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps() {
   return {
-    fetchProfile: bindActionCreators(fetchProfile, dispatch)
   };
 }
 

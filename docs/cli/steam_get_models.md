@@ -17,7 +17,8 @@ Examples:
 
     List models from a cluster
     $ steam get models --from-cluster \
-        --cluster-id=?
+        --cluster-id=? \
+        --frame-key=?
 
 ```
 steam get models [?]
@@ -27,6 +28,7 @@ steam get models [?]
 
 ```
       --cluster-id=0: No description available
+      --frame-key="": No description available
       --from-cluster[=false]: List models from a cluster
       --limit=0: No description available
       --offset=0: No description available

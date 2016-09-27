@@ -15,6 +15,10 @@ Examples:
         --offset=? \
         --limit=?
 
+    Get a list of datasets on a cluster
+    $ steam get datasets --from-cluster \
+        --cluster-id=?
+
 ```
 steam get datasets [?]
 ```
@@ -22,7 +26,9 @@ steam get datasets [?]
 ### Options
 
 ```
+      --cluster-id=0: No description available
       --datasource-id=0: No description available
+      --from-cluster[=false]: Get a list of datasets on a cluster
       --limit=0: No description available
       --offset=0: No description available
 ```

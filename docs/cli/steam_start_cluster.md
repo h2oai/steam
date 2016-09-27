@@ -15,7 +15,7 @@ Examples:
         --engine-id=? \
         --size=? \
         --memory=? \
-        --username=?
+        --keytab=?
 
 ```
 steam start cluster [?]
@@ -26,10 +26,10 @@ steam start cluster [?]
 ```
       --cluster-name="": No description available
       --engine-id=0: No description available
+      --keytab="": No description available
       --memory="": No description available
       --on-yarn[=false]: Start a cluster using Yarn
       --size=0: No description available
-      --username="": No description available
 ```
 
 ### Options inherited from parent commands

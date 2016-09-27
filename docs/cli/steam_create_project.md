@@ -12,7 +12,8 @@ Examples:
     Create a project
     $ steam create project \
         --name=? \
-        --description=?
+        --description=? \
+        --model-category=?
 
 ```
 steam create project [?]
@@ -22,6 +23,7 @@ steam create project [?]
 
 ```
       --description="": No description available
+      --model-category="": No description available
       --name="": No description available
 ```
 

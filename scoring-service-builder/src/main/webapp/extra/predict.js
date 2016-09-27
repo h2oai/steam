@@ -1,5 +1,19 @@
-// predict.js
-// H2O Scoring Service
+/*
+Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 // TODO
 // check for timeouts in $.get calls
@@ -7,6 +21,9 @@
 (function(window) {
   'use strict';
   var outputDomain;
+
+
+
   // Sort values if not sorted properly
   // This is needed because c-1, c-2, ... are sorted alphabetically which is wrong
   function sortValues(values) {
@@ -369,5 +386,46 @@
     $('#stats-btn').click(function() {
       window.open('/stats', '_blank');
     });
+
+    $('.file-icon').click(function(){
+    $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
+    });
+
+    $('.file-input').click(function(){
+        $(this).closest('.input-inline-row').find("input[type='file']").trigger('click');
+    });
+
+    $('input[type="file"]').change(function(){
+
+        var names = [];
+        for (var i = 0; i < $(this).get(0).files.length; ++i) {
+            names.push( $(this).get(0).files[i].name );
+        }
+
+        $(this).closest('.input-inline-row').find("input[type='text']").val(names);
+    });
+
+    $('#batch-predict').click(function(){
+        if ( !$('#batch form input[name="inpfile"]').val() ){
+           alert('You must select a files with multiple lines of JSON predictions.');
+        }
+
+        $('#batch form input[name="inpfile"]').get(0).files = $('#batch form input[name="inpfile"]').get(0).files;
+
+        $('#batch form').submit();
+    });
+
+    $('#batch-reset').click(function(){
+      $('input[type="text"]').val('');
+      $('input[type="file"]').val('');
+    });
+
+    $('#predict-btn').click(function(){
+        $('#allparams').submit();
+    })
+
+    $('#reset-btn').click(function(){
+        $('#allparams')[0].reset();       
+    })
   });
 })(window);

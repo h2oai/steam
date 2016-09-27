@@ -11,7 +11,8 @@ Examples:
 
     Stop a cluster using Yarn
     $ steam stop cluster --on-yarn \
-        --cluster-id=?
+        --cluster-id=? \
+        --keytab=?
 
 ```
 steam stop cluster [?]
@@ -21,6 +22,7 @@ steam stop cluster [?]
 
 ```
       --cluster-id=0: No description available
+      --keytab="": No description available
       --on-yarn[=false]: Stop a cluster using Yarn
 ```
 
