@@ -25,6 +25,7 @@ import { BinomialModel } from '../../Proxy/Proxy';
 import { RegressionModel } from '../../Proxy/Proxy';
 import { MultinomialModel } from '../../Proxy/Proxy';
 import { openNotification } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 export const FETCH_LEADERBOARD = 'FETCH_LEADERBOARD';
 export const RECEIVE_LEADERBOARD = 'RECEIVE_LEADERBOARD';
 export const RECEIVE_SORT_CRITERIA = 'RECEIVE_SORT_CRITERIA';
@@ -72,7 +73,7 @@ export function fetchLeaderboard(projectId: number, modelCategory: string, name:
     dispatch(requestLeaderboard());
     findModelStrategy(modelCategory.toLowerCase())(projectId, name, sortBy || '', ascending || false, offset, MAX_ITEMS, (error, models) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         return;
       }
       dispatch(receiveLeaderboard(models as BinomialModel[] | MultinomialModel[] | RegressionModel[]));
@@ -102,7 +103,7 @@ export function fetchSortCriteria(modelCategory: string) {
   return (dispatch) => {
     getSortStrategy(modelCategory)((error, criteria: string[]) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         return;
       }
       dispatch(receiveSortCriteria(criteria));
@@ -125,7 +126,7 @@ export function linkLabelWithModel(labelId: number, modelId: number) {
     return new Promise((resolve, reject) => {
       Remote.linkLabelWithModel(labelId, modelId, (error) => {
         if (error) {
-          dispatch(openNotification('error', error.toString(), null));
+          dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
           reject(error);
           return;
         }
@@ -140,7 +141,7 @@ export function unlinkLabelFromModel(labelId: number, modelId: number) {
     return new Promise((resolve, reject) => {
       Remote.unlinkLabelFromModel(labelId, modelId, (error) => {
         if (error) {
-          dispatch(openNotification('error', error.toString(), null));
+          dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
           reject(error);
           return;
         }
@@ -161,7 +162,7 @@ export function findModelsCount(projectId: number) {
   return (dispatch) => {
     return Remote.findModelsCount(projectId, (error, count) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         return;
       }
       dispatch(receiveModelCount(count));

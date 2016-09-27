@@ -21,8 +21,8 @@
 import * as _ from 'lodash';
 import {
   RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED, SET_CURRENT_PROJECT,
-  RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER, RECEIVE_MODELS_FROM_PROJECT, RECEIVE_PROJECT, REQUEST_CLUSTERS, REQUEST_MODELS, REQUEST_DELETE_PROJECT, RECEIVE_DELETE_PROJECT
-} from '../actions/projects.actions';
+  RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER, RECEIVE_MODELS_FROM_PROJECT, RECEIVE_PROJECT, REQUEST_CLUSTERS, REQUEST_DELETE_PROJECT, RECEIVE_DELETE_PROJECT,
+  REQUEST_MODELS, REGISTER_CLUSTER_ERROR } from '../actions/projects.actions';
 
 let initialState = {
   clusters: [],
@@ -50,7 +50,8 @@ export const projectsReducer = (state = initialState, action: any) => {
     case RECEIVE_CLUSTERS:
       return _.assign({}, state, {
         clusters: action.clusters,
-        isClusterFetchInProcess: false
+        isClusterFetchInProcess: false,
+        registerClusterError: null
       });
     case REQUEST_MODELS:
       return _.assign({}, state, {
@@ -103,6 +104,10 @@ export const projectsReducer = (state = initialState, action: any) => {
       } else {
         return state;
       }
+    case REGISTER_CLUSTER_ERROR:
+      return _.assign({}, state, {
+        registerClusterError: action.message
+      });
     default:
       return state;
   }

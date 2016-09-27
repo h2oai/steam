@@ -19,7 +19,8 @@
  * Created by justin on 6/28/16.
  */
 import * as Remote from '../../Proxy/Proxy';
-import { openNotification, closeNotification } from '../../App/actions/notification.actions';
+import { openNotification, closeNotificationManager } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 import { hashHistory } from 'react-router';
 export const FETCH_MODEL_OVERVIEW = 'FETCH_MODEL_OVERVIEW';
 export const RECEIVE_MODEL_OVERVIEW = 'RECEIVE_MODEL_OVERVIEW';
@@ -57,7 +58,7 @@ export function fetchModelOverview(modelId: number): Function {
     dispatch(requestModelOverview());
     Remote.getModel(modelId, (error, model) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         return;
       }
       getModelStrategy(model.model_category.toLowerCase())(modelId, (error, res) => {
@@ -90,13 +91,13 @@ export function downloadModel(): Function {
 
 export function deployModel(modelId: number, name: string, projectId: string, packageName: string): Function {
   return (dispatch) => {
-    dispatch(openNotification('info', 'Deploying model', null));
+    dispatch(openNotification(NotificationType.Info, 'Deploying model', null, null));
     Remote.startService(modelId, name, packageName, (error, res) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, "Deployment Error", error.toString(), null));
         return;
       }
-      dispatch(closeNotification());
+      dispatch(closeNotificationManager());
       hashHistory.push('/projects/' + projectId + '/deployment');
     });
   };

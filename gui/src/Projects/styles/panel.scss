@@ -1,10 +1,11 @@
 @import '../../variables.scss';
 
 .panel {
-  border: $rule-solid-thin;
+  border: 1px solid #bcbcbc;
   border-radius: 3px;
-  box-shadow: 0 3px 3px $brand-dark-3;
-  margin-bottom: $medium;
+  box-shadow: 0 3px 3px #bcbcbc;
+  margin-bottom: 16px;
+  margin-right: 16px;
   display: flex;
   font-family: $font-text;
 

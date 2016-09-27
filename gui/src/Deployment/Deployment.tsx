@@ -124,8 +124,8 @@ export class Deployment extends React.Component<Props & DispatchProps, any> {
                                     upload={this.upload.bind(this)}/> : null}
         <PageHeader>
           <span>Deployment</span>
-          {!_.isUndefined(this.props.params.projectid) ? <span><button className="default"
-                                                                     onClick={this.openUpload.bind(this)}>Upload New Package</button></span> : null}
+          {!_.isUndefined(this.props.params.projectid) ? <div className="button-primary header-buttons"
+                                                                     onClick={this.openUpload.bind(this)}>Upload New Package</div> : null}
         </PageHeader>
         {!_.isUndefined(this.props.params.projectid) ? <TabNavigation tabs={this.state.tabs}/> : null}
         <main>
