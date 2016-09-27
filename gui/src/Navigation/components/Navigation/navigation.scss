@@ -55,14 +55,8 @@ $navigation-width: $base-grid-unit * 5;
         }
         .nav-list--label {
           text-align: left;
-          /*width:0;*/
           width:150px;
           transition: width .3s ease-in-out;
-        }
-        &:hover {
-          .nav-list--label {
-            /*width:150px;*/
-          }
         }
       }
     }
@@ -73,8 +67,6 @@ $navigation-width: $base-grid-unit * 5;
   background: $brand-dark-2;
   .nav-list--item {
     margin-left: 24px;
-    /*position: relative;
-    padding: 0 $small;*/
     &.active {
       &::before {
         border-right-color: $brand-white;
