@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
 
 def goHome(driver):
 	driver.find_element_by_class_name("logo").click()
@@ -177,7 +178,10 @@ def importMultiTest(driver):
 
 def main():
 	failcount = 0
-	d = webdriver.Chrome()
+	o = Options()
+	o.add_argument("--no-sandbox")
+	o.add_argument("--user-data-dir=/tmp")
+	d = webdriver.Chrome(chrome_options=o)
 	d.get("http://superuser:superuser@localhost:9000")
 	if not createProjectTest(d):
 		failcount += 1

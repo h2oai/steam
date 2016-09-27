@@ -7,7 +7,7 @@ from selenium.common import exceptions as se
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
-
+from selenium.webdriver.chrome.options import Options
 """
 Perm id		Permission		Index
 ============================================
@@ -371,12 +371,18 @@ def createProject(driver, cluster, name, data, kind, mods):
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
 
 def testAs(user, pw):
-	driver = webdriver.Chrome()
+	o = Options()
+	o.add_argument("--no-sandbox")
+	o.add_argument("--user-data-dir=/tmp")
+	driver = webdriver.Chrome(chrome_options=o)
 	driver.get("http://{0}:{1}@localhost:9000".format(user, pw))
 	return driver
 
 def newtest():
-	driver = webdriver.Chrome()
+	o = Options()
+	o.add_argument("--no-sandbox")
+	o.add_argument("--user-data-dir=/tmp")
+	driver = webdriver.Chrome(chrome_options=o)
 	driver.get("http://superuser:superuser@localhost:9000")
 	return driver
 
