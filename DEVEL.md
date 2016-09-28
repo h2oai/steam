@@ -48,7 +48,7 @@ Note: If you do not follow above path to clone steam source, you will get build 
 
 **Step 5**
 
-After your build is successful you will see steam binary is available. Now you would need to initialize database (sqlite) which is must have requirement for steam. To initialize data base do the following:
+After your build is successful you will see steam binary is available. Now initialize the (sqlite) database required for steam. To initialize the sqlite database:
 
 ```
 make db
