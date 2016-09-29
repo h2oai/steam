@@ -7,16 +7,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
 def connectTest(driver):
-	tu.goHome(driver)
-	tu.newProject(driver)
+	tu.goClusters(driver)
 	return tu.clusterExists(driver, "steamtest")	
 
 def deleteClusterTest(driver):
 	if not tu.goClusters(driver):
 		return False
 	try:
-		tu.addCluster(driver, "sri.h2o.ai", "54321", "H2ODemo")
-		
+		tu.addCluster(driver, "sri.h2o.ai", "54321", "H2ODemo")		
 		tu.deleteCluster(driver, "H2ODemo")
 	except Exception as e:
 		print e

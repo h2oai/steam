@@ -25,16 +25,16 @@ for dir in `ls -d *-test`; do
 	fi
 	i=`expr $i + 1`
 	cp testutil.py $dir/
-	python $dir/run.py > /root/.tmp
+	python $dir/run.py > /root/.tmp 2>&1
 	pass=$?
 	if [ $pass -ne 0 ] 
 	then
 		echo $dir >> /root/.failures
 		cat /root/.tmp >> /root/.failures
-		i=`expr $i + 1`
-		echo "$dir FAILED"
+		echo "$dir FAILED" > "/root/steam/.out.$num"
+		cat /root/.failures >> "/root/steam/.out.$num"
 	else
-		echo "$dir PASSED"
+		echo "$dir PASSED" > "/root/steam/.out.$num"
 	fi
 	rm $dir/testutil.*
 	break

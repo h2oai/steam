@@ -85,7 +85,9 @@ def cleanupTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	tu.goHome(driver)
 	tu.goServices(driver)
-	wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) >= 2)
+	time.sleep(2)
+	if not (tu.serviceExists(driver, "swell") and tu.serviceExists(driver, "double")):
+		print "A service wasn't there"
 	cnt = len(driver.find_elements_by_class_name("services-panel"))
 	tu.stopService(driver, "swell")
 	tu.stopService(driver, "double")
@@ -101,8 +103,7 @@ def multiDeployTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='select-cluster']//button"))
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
 		tu.selectModel(driver, "linmiss")

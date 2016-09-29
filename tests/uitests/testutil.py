@@ -271,16 +271,21 @@ def goServices(driver):
 	return True
 
 def goProjects(driver):
-	driver.find_element_by_class_name("fa-folder").click()
-	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	wait.until(lambda x: x.find_element_by_xpath("//div[@class='project-details']"))
+	try:
+		driver.find_element_by_class_name("fa-folder").click()
+		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='project-details']"))
+	except:
+		return False
+	return True
 
 
 def clusterExists(driver, name):
 	if not goClusters(driver):
 		return False
 	try:
-		elm = driver.find_element_by_link_text("{0}".format(name))
+		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+		wait.until(lambda x: x.find_element_by_link_text("{0}".format(name)))
 		return True
 	except Exception as e:
 		print "New cluster did not appear on cluster page"
@@ -295,7 +300,8 @@ def addCluster(driver, addr, port, name):
 		driver.find_element_by_name("ip-address").send_keys(addr)
 		driver.find_element_by_name("port").send_keys(port)
 		driver.find_element_by_xpath("//button[@type='submit']").click()
-		wait.until(lambda x: x.find_element_by_xpath("//span[text()='{0}']".format(name)))
+		time.sleep(2)
+		wait.until(lambda x: x.find_element_by_link_text("{0}".format(name)))
 	except:
 		print "Cannot add new cluster"
 		return False
@@ -303,6 +309,8 @@ def addCluster(driver, addr, port, name):
 
 
 def selectCluster(driver, name):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	wait.until(lambda x: x.find_element_by_class_name("name-cell"))
 	clsts = driver.find_elements_by_class_name("name-cell")
 	i = 0
 	for cluster in clsts:
@@ -335,8 +343,16 @@ def deleteCluster(driver, name):
 	driver.find_elements_by_class_name("remove-cluster-button")[i].click()	
 	wait.until(lambda x: len(x.find_elements_by_xpath("//a[@rel='noopener']")) < len(clsts))
 
+def serviceExists(driver, name):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		wait.until(lambda x: x.find_element_by_xpath("//span[text()='{0}']".format(name)))
+	except:
+		return False
+	return True
+
 def stopService(driver, name):
-	servs = driver.find_elements_by_xpath("//div[@class='panel-title]/span")
+	servs = driver.find_elements_by_xpath("//div[@class='panel-title']/span")
 	i = 0
 	for s in servs:
 		if name in s.text:

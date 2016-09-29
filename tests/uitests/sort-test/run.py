@@ -40,8 +40,7 @@ def regressSortTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
 		tu.newProject(driver)
-		tu.addCluster(driver, "localhost", "54535", "steamtest")
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
 		models = ["regress", "gradi", "missin", "linmiss"] 
@@ -72,7 +71,7 @@ def binomSortTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Binomial")
 		models = ["first", "second", "third", "fourth"] 
@@ -101,7 +100,7 @@ def mulnomSortTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Multinomial")
 		models = ["multinom", "valimon", "multimiss", "vamiss"] 

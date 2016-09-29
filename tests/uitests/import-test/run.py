@@ -1,3 +1,4 @@
+import testutil as tu
 import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -5,117 +6,27 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 
-def goHome(driver):
-	driver.find_element_by_class_name("logo").click()
-	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	wait.until(lambda x: x.find_element_by_class_name("start-project").is_displayed())
-
-def newProject(driver):
-	strt = driver.find_element_by_class_name("start-project")
-	strt.click()
-	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	try:
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='import-new-project']").is_displayed())
-	except:
-		return False
-	return True
-
-def goClusters(driver):
-	try:
-		clust = driver.find_element_by_class_name("fa-cube")
-		clust.click()
-		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='clusters']").is_displayed())
-		return True
-	except Exception as e:
-		print "Failed to navigate to cluster page through navbar"
-		return False
-
-def goProjects(driver):
-	try:
-		proj = driver.find_element_by_class_name("fa-folder")
-		proj.click()
-		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='project-details']"))
-		return True
-	except:
-		print "Failed to navigate to projects page through navbar"
-		return False
-
-def clusterExists(driver, addr, port, name):
-	if not goClusters(driver):
-		return False
-	try:
-		elm = driver.find_element_by_link_text("{0}@ {1}:{2}".format(name, addr, port))
-		return True
-	except Exception as e:
-		print "New cluster did not appear on cluster page"
-		return False
-
-def addCluster(driver, addr, port, name):
-	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	try:
-		wait.until(lambda x: x.find_element_by_name("ip-address").is_displayed())
-		driver.find_element_by_name("ip-address").send_keys(addr)
-		driver.find_element_by_name("port").send_keys(port)
-		driver.find_element_by_xpath("//div[@class='connect-cluster']//button").click()
-		wait.until(lambda x: x.find_element_by_xpath("//div[text()='{0}']".format(name)))
-	except:
-		print "Cannot add new cluster"
-		return False
-	return True
-
-def selectDataframe(driver, frame):
-	#locate the select
-	try:
-		sel = Select(driver.find_element_by_name("selectDataframe"))
-		sel.select_by_visible_text(frame)
-	except Exception as e:
-		print "Cannot select dataframe"
-		return False
-	return True
-
-def selectModelCategory(driver, category):
-	try:
-		sel = Select(driver.find_element_by_name("selectModelCategory"))
-		sel.select_by_visible_text(category)
-	except:
-		print "Failed to select model category"
-		return False
-	return True
-
-def selectModel(driver, name):
-	try:
-		mod = driver.find_element_by_xpath("//input[@type='checkbox' and @name='{0}']".format(name))
-		mod.click()
-	except:
-		print "Failed to select model"
-		return False
-	return True
-
 def createProjectTest(driver):
 	try:
-		newProject(driver)
-		addCluster(driver, "localhost", "54535", "steamtest")
+		tu.newProject(driver)
 		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 		wait.until(lambda x: x.find_element_by_class_name("select-cluster").is_displayed())
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
-		wait.until(lambda x: x.find_element_by_css_selector("select").is_displayed())
+		tu.selectCluster(driver, "steamtest")
 	except:
 		print "Failed to connect to cluster"
 		return False
 	try:
 		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 		wait.until(lambda x: x.find_element_by_xpath("//option[@value='bank_full.hex']"))	
-		if not selectDataframe(driver, "bank_full.hex"):
+		if not tu.selectDataframe(driver, "bank_full.hex"):
 			print "Failed to access expected dataframe"
 			return False
 		wait.until(lambda x: x.find_element_by_xpath("//option[@value='Regression']").is_displayed())
-		if not selectModelCategory(driver, "Regression"):
+		if not tu.selectModelCategory(driver, "Regression"):
 			print "Failed to find regression models"
 			return False
 		wait.until(lambda x: x.find_element_by_name("regress").is_displayed())
-		if not selectModel(driver, "regress"):
+		if not tu.selectModel(driver, "regress"):
 			print "Failed to select an expected model for importing"
 			return False
 		pnam = driver.find_element_by_xpath("//div[@class='name-project']//input")
@@ -132,8 +43,9 @@ def createProjectTest(driver):
 	return True	
 
 def viewProjectTest(driver):
-	goHome(driver)
-	if not goProjects(driver):
+	tu.goHome(driver)
+	if not tu.goProjects(driver):
+		print "Failed setting up viewproject"
 		return False
 	try:
 		proj = driver.find_element_by_xpath("//div[@class='project-metadata']/header[text()='imported']")
@@ -146,24 +58,24 @@ def viewProjectTest(driver):
 	return True
 
 def importMultiTest(driver):
-	goHome(driver)
-	if not newProject(driver):
+	tu.goHome(driver)
+	if not tu.newProject(driver):
 		print "Failed to navigate to new project page after creating a project"
 		return False
-	driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+	tu.selectCluster(driver, "steamtest")
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
 		wait.until(lambda x: x.find_element_by_xpath("//option[@value='bank_full.hex']"))
-		if not selectDataframe(driver, "bank_full.hex"):
+		if not tu.selectDataframe(driver, "bank_full.hex"):
 			print "Failed to access expected dataframe"
 			return False
 		wait.until(lambda x: x.find_element_by_xpath("//option[@value='Regression']"))
-		if not selectModelCategory(driver, "Regression"):
+		if not tu.selectModelCategory(driver, "Regression"):
 			print "Failed to find regression models"
 			return False
 		models = ["regress", "gradi", "missin", "linmiss"]
 		for mod in models:
-			if not selectModel(driver, mod):
+			if not tu.selectModel(driver, mod):
 				print "Failed to select expected model for importing"
 				return False
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("multimod")
@@ -178,16 +90,16 @@ def importMultiTest(driver):
 
 def main():
 	failcount = 0
-	o = Options()
-	o.add_argument("--no-sandbox")
-	o.add_argument("--user-data-dir=/tmp")
-	d = webdriver.Chrome(chrome_options=o)
+	d = tu.newtest()
 	d.get("http://superuser:superuser@localhost:9000")
 	if not createProjectTest(d):
+		print "createproj"
 		failcount += 1
 	if not viewProjectTest(d):
+		print "viewproj"
 		failcount += 1
 	if not importMultiTest(d):
+		print "importmulti"
 		failcount += 1
 
 	d.quit()
