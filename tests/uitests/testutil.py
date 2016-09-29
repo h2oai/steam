@@ -37,7 +37,7 @@ Perm id		Permission		Index
 
 _steampath = "./steam"
 if sys.platform.startswith("linux"):
-	_steampath = "/root/steam/steam/steam"
+	_steampath = "./steam/steam"
 elif sys.platform == "darwin":
 	_steampath = "./steam--darwin-amd64/steam"
 else:

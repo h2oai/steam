@@ -16,7 +16,6 @@ fi
 ./steam/steam login localhost:9000 --username superuser --password superuser
 
 
-
 for dir in `ls -d *-test`; do
 	if [ $i -ne $num ] 
 	then
