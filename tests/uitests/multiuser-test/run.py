@@ -52,6 +52,7 @@ EntityType
 
 def superShareTest():
 	res = [True, True]
+	tu.cliLogin("superuser", "superuser")
 	wg = tu.createWorkgroup("supertest", "testin super share")
 	d = tu.newtest()
 	wait = WebDriverWait(d, timeout=5, poll_frequency=0.2)

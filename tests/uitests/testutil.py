@@ -37,7 +37,7 @@ Perm id		Permission		Index
 
 _steampath = "./steam"
 if sys.platform.startswith("linux"):
-	_steampath = "./steam-develop-linux-amd64/steam"
+	_steampath = "/root/steam/steam/steam"
 elif sys.platform == "darwin":
 	_steampath = "./steam--darwin-amd64/steam"
 else:
@@ -63,8 +63,13 @@ def createIdentity(name, pw):
 	return int(re.search(r'\d+', ret).group())
 
 def createWorkgroup(wg, desc):
-	ret = sp.check_output("{0} create workgroup --name={1} --description=\"{2}\""\
-		.format(_steampath, wg, desc), shell=True)
+	ret = ""
+	try:
+		ret = sp.check_output("{0} create workgroup --name={1} --description=\"{2}\""\
+			.format(_steampath, wg, desc), shell=True)
+	except Exception as e:
+		print ret
+		raise e
 	return int(re.search(r'\d+', ret).group())
 
 def assignRole(iden, role):
@@ -283,6 +288,8 @@ def clusterExists(driver, name):
 
 def addCluster(driver, addr, port, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	if len(driver.find_elements_by_xpath("//button[text()='Connect to Cluster']")) > 0:
+		driver.find_element_by_xpath("//button[text()='Connect to Cluster']").click()
 	try:
 		wait.until(lambda x: x.find_element_by_name("ip-address").is_displayed())
 		driver.find_element_by_name("ip-address").send_keys(addr)
@@ -293,6 +300,54 @@ def addCluster(driver, addr, port, name):
 		print "Cannot add new cluster"
 		return False
 	return True
+
+
+def selectCluster(driver, name):
+	clsts = driver.find_elements_by_class_name("name-cell")
+	i = 0
+	for cluster in clsts:
+		if cluster.text == name:
+			break
+		i += 1
+	if i >= len(clsts):
+		print "Failed to locate named cluster {0}".format(name)
+		return False
+	driver.find_elements_by_xpath("//div[@class='select-cluster']//button")[i].click()
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	wait.until(lambda x: x.find_element_by_class_name("cluster-info"))
+
+def deleteCluster(driver, name):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	wait.until(lambda x: x.find_element_by_xpath("//a[text()='{0}']".format(name)))
+	if len(driver.find_elements_by_xpath("//a[@rel='noopener']")) != \
+		len(driver.find_elements_by_class_name("remove-cluster-button")):
+		print "failed to locate cluster names on page"
+		return False
+	i = 0
+	clsts = driver.find_elements_by_xpath("//a[@rel='noopener']")
+	for cluster in clsts:
+		if cluster.text == name:
+			break
+		i += 1
+	if i >= len(clsts):
+		print "failed to locate named cluster {0}".format(name)
+		return False
+	driver.find_elements_by_class_name("remove-cluster-button")[i].click()	
+	wait.until(lambda x: len(x.find_elements_by_xpath("//a[@rel='noopener']")) < len(clsts))
+
+def stopService(driver, name):
+	servs = driver.find_elements_by_xpath("//div[@class='panel-title]/span")
+	i = 0
+	for s in servs:
+		if name in s.text:
+			break
+		i += 1
+	if i >= len(servs):
+		print "Failed to locate named service {0}".format(name)
+		return False
+	driver.find_elements_by_xpath("//div[@class='panel-action']")[i].click()
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	wait.until(lambda x: len(x.find_elements_by_class_name("panel-title")) < len(servs))
 
 def viewProject(driver, proj):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)

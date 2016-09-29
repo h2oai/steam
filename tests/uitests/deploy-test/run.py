@@ -8,8 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 def deployOneTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	tu.newProject(driver)
-	tu.addCluster(driver, "localhost", "54535", "steamtest")
-	driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+	tu.selectCluster(driver, "steamtest")
 	tu.selectDataframe(driver, "bank_full.hex")
 	tu.selectModelCategory(driver, "Regression")
 	try:
@@ -35,13 +34,7 @@ def deployOneTest(driver):
 def deleteTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
-		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Stop Service']"))
-	except:
-		print "no service displayed on deployment page"
-		return False
-	try:
-		driver.find_element_by_xpath("//div[text()='Stop Service']").click()
-		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) == 0)
+		tu.stopService(driver, "happy")
 	except:
 		driver.refresh()
 		time.sleep(1)
@@ -57,8 +50,7 @@ def projectDeployTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='select-cluster']//button"))
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
 		tu.selectModel(driver, "regress")
@@ -93,15 +85,12 @@ def cleanupTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	tu.goHome(driver)
 	tu.goServices(driver)
+	wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) >= 2)
+	cnt = len(driver.find_elements_by_class_name("services-panel"))
+	tu.stopService(driver, "swell")
+	tu.stopService(driver, "double")
 	try:
-		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Stop Service']"))
-	except:
-		i = 1
-	stp = driver.find_elements_by_xpath("//div[text()='Stop Service']")
-	for serv in stp:
-		serv.click()
-	try:
-		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) == 0)
+		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) <= (cnt - 2))
 	except:
 		print "failed to stop running services"
 		return False
