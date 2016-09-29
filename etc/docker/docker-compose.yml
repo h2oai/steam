@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  steam:
+    image: h2oai/steam:v1
+    ports:
+      - "9000"
+      - "9001"
+  hadoop:
+    image: sequenceiq/hadoop-docker
+    ports:
+      - "8030-8033"
+      - "8040"
+      - "8042"
+      - "8088"
