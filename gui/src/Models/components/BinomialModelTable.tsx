@@ -36,7 +36,9 @@ interface Props {
   items: any,
   projectId: number,
   openDeploy: Function,
+  deleteModel: Function,
   onChangeHandler: Function,
+  fetchLeaderboard: Function,
   labels: {
     [projectId: number]: Label[]
   }
@@ -145,6 +147,9 @@ export default class BinomialModelTable extends React.Component<Props, any> {
                   </li>
                   <li onClick={this.props.openDeploy.bind(this, model)}><span><i className="fa fa-arrow-up"></i></span>
                     <span>deploy model</span></li>
+                  <li>
+                    <span><i className="fa fa-trash" onClick={() => this.props.deleteModel(model.id, this.props.fetchLeaderboard)}></i> delete model</span>
+                  </li>
                 </ul>
               </Cell>
             </Row>

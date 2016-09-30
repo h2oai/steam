@@ -32,6 +32,7 @@ coverage.out
 
 # ignore list
 /steamY
+/steam
 /dist/
 /var/
 /var/master/www/
@@ -64,8 +65,12 @@ coverage.out
 /demo/_book
 /demo/node_modules
 
-# ignore generated files
-
-*.doctree
-*.pickle
-/docs/_build
+-# ignore generated files
+-
+-*.doctree
+-*.pickle
+-/docs/_build
+/npm-debug.log
+/.idea
+/gui/.idea
+/tools/steamlauncher/steamlauncher
