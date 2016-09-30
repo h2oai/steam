@@ -98,6 +98,10 @@ pretest: lint vet fmtcheck
 test:
 	cd tests && ./goh2orunner.sh
 
+reset: db
+	rm -rf var/master/model
+	rm -rf var/master/project
+
 cov:
 	@ go get -v github.com/axw/gocov/gocov
 	@ go get golang.org/x/tools/cmd/cover

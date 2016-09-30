@@ -16,6 +16,8 @@ $ which go
 - If not, restart your terminal and try again.
 - If not, add `export PATH=$PATH:/usr/local/go/bin` to your ~/.bash_profile and then `$ source ~/.bash_profile`.
 
+Note: Check go version and make sure go version is 1.7.1 or above. If go version is lower then 1.7.1 you will have errors. 
+
 **Step 3**
 
 ```
@@ -41,3 +43,28 @@ $ git clone https://github.com/h2oai/steam
 $ cd steam
 $ make
 ```
+
+Note: If you do not follow above path to clone steam source, you will get build errors. golang is very specific about where the source code is cloned.
+
+**Step 5**
+
+After your build is successful you will see steam binary is available. Now initialize the (sqlite) database required for steam. To initialize the sqlite database:
+
+```
+make db
+```
+
+Now you are ready to start the server. 
+
+**Step 6**
+Start the server as below
+
+```
+./steam serve master --superuser-name USER_NAME --superuser-password PASSWORD
+```
+
+
+
+
+
+
