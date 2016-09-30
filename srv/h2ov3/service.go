@@ -197,6 +197,7 @@ func (h *H2O) ExportGenModel(p string) (string, error) {
 	return f, nil
 }
 
+// FIXME: MUST BE H2O VERSION 3.10.0.7
 func (h *H2O) ExportMOJO(modelID, p string) (string, error) {
 	f, err := h.download("/3/Models/"+modelID+"/mojo", p, true)
 	if err != nil {

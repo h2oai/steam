@@ -171,16 +171,19 @@ type Model struct {
 	Id                  int64
 	ProjectId           int64
 	TrainingDatasetId   int64
-	ValidationDatasetId int64
+	ValidationDatasetId sql.NullInt64
 	Name                string
+	ClusterId           int64
 	ClusterName         string
 	ModelKey            string
 	Algorithm           string
 	ModelCategory       string
 	DatasetName         string
 	ResponseColumnName  string
-	LogicalName         string
+	LogicalName         sql.NullString
 	Location            string
+	HasPOJO             bool
+	HasMOJO             bool
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
@@ -193,16 +196,19 @@ type BinomialModel struct {
 	Id                  int64
 	ProjectId           int64
 	TrainingDatasetId   int64
-	ValidationDatasetId int64
+	ValidationDatasetId sql.NullInt64
 	Name                string
+	ClusterId           int64
 	ClusterName         string
 	ModelKey            string
 	Algorithm           string
 	ModelCategory       string
 	DatasetName         string
 	ResponseColumnName  string
-	LogicalName         string
+	LogicalName         sql.NullString
 	Location            string
+	HasPOJO             bool
+	HasMOJO             bool
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
@@ -220,16 +226,19 @@ type MultinomialModel struct {
 	Id                  int64
 	ProjectId           int64
 	TrainingDatasetId   int64
-	ValidationDatasetId int64
+	ValidationDatasetId sql.NullInt64
 	Name                string
+	ClusterId           int64
 	ClusterName         string
 	ModelKey            string
 	Algorithm           string
 	ModelCategory       string
 	DatasetName         string
 	ResponseColumnName  string
-	LogicalName         string
+	LogicalName         sql.NullString
 	Location            string
+	HasPOJO             bool
+	HasMOJO             bool
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
@@ -245,16 +254,19 @@ type RegressionModel struct {
 	Id                   int64
 	ProjectId            int64
 	TrainingDatasetId    int64
-	ValidationDatasetId  int64
+	ValidationDatasetId  sql.NullInt64
 	Name                 string
+	ClusterId            int64
 	ClusterName          string
 	ModelKey             string
 	Algorithm            string
 	ModelCategory        string
 	DatasetName          string
 	ResponseColumnName   string
-	LogicalName          string
+	LogicalName          sql.NullString
 	Location             string
+	HasPOJO              bool
+	HasMOJO              bool
 	MaxRunTime           int64
 	Metrics              string
 	MetricsVersion       string

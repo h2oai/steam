@@ -3401,11 +3401,22 @@ Examples:
         --model-key=? \
         --model-name=?
 
+    Import a model's POJO from a cluster
+    $ steam import model --pojo \
+        --model-id=?
+
+    Import a model's MOJO from a cluster
+    $ steam import model --mojo \
+        --model-id=?
+
 `
 
 func importModel(c *context) *cobra.Command {
 	var fromCluster bool // Switch for ImportModelFromCluster()
+	var pojo bool        // Switch for ImportModelPojo()
+	var mojo bool        // Switch for ImportModelMojo()
 	var clusterId int64  // No description available
+	var modelId int64    // No description available
 	var modelKey string  // No description available
 	var modelName string // No description available
 	var projectId int64  // No description available
@@ -3426,10 +3437,35 @@ func importModel(c *context) *cobra.Command {
 			fmt.Printf("ModelId:\t%v\n", modelId)
 			return
 		}
+		if pojo { // ImportModelPojo
+
+			// Import a model's POJO from a cluster
+			err := c.remote.ImportModelPojo(
+				modelId, // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return
+		}
+		if mojo { // ImportModelMojo
+
+			// Import a model's MOJO from a cluster
+			err := c.remote.ImportModelMojo(
+				modelId, // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return
+		}
 	})
 	cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "Import models from a cluster")
+	cmd.Flags().BoolVar(&pojo, "pojo", pojo, "Import a model's POJO from a cluster")
+	cmd.Flags().BoolVar(&mojo, "mojo", mojo, "Import a model's MOJO from a cluster")
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
+	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
 	cmd.Flags().StringVar(&modelKey, "model-key", modelKey, "No description available")
 	cmd.Flags().StringVar(&modelName, "model-name", modelName, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")

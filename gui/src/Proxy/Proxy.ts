@@ -615,6 +615,12 @@ export interface Service {
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
   
+  // Import a model's POJO from a cluster
+  importModelPojo: (modelId: number, go: (error: Error) => void) => void
+  
+  // Import a model's MOJO from a cluster
+  importModelMojo: (modelId: number, go: (error: Error) => void) => void
+  
   // Delete a model
   deleteModel: (modelId: number, go: (error: Error) => void) => void
   
@@ -1440,6 +1446,26 @@ interface ImportModelFromClusterIn {
 interface ImportModelFromClusterOut {
   
   model_id: number
+  
+}
+
+interface ImportModelPojoIn {
+  
+  model_id: number
+  
+}
+
+interface ImportModelPojoOut {
+  
+}
+
+interface ImportModelMojoIn {
+  
+  model_id: number
+  
+}
+
+interface ImportModelMojoOut {
   
 }
 
@@ -2824,6 +2850,30 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
     } else {
       const d: ImportModelFromClusterOut = <ImportModelFromClusterOut> data;
       return go(null, d.model_id);
+    }
+  });
+}
+
+export function importModelPojo(modelId: number, go: (error: Error) => void): void {
+  const req: ImportModelPojoIn = { model_id: modelId };
+  Proxy.Call("ImportModelPojo", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: ImportModelPojoOut = <ImportModelPojoOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function importModelMojo(modelId: number, go: (error: Error) => void): void {
+  const req: ImportModelMojoIn = { model_id: modelId };
+  Proxy.Call("ImportModelMojo", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: ImportModelMojoOut = <ImportModelMojoOut> data;
+      return go(null);
     }
   });
 }

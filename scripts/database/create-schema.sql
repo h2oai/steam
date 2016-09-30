@@ -96,7 +96,6 @@
 --
 
 CREATE TABLE binomial_model (
-    id integer PRIMARY KEY AUTOINCREMENT,
     model_id integer NOT NULL,
     mse double precision,
     r_squared double precision,
@@ -104,6 +103,7 @@ CREATE TABLE binomial_model (
     auc double precision,
     gini double precision, 
 
+    PRIMARY KEY (model_id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
 );
 
@@ -594,16 +594,19 @@ CREATE TABLE model (
     id integer PRIMARY KEY AUTOINCREMENT,
     project_id integer NOT NULL,
     training_dataset_id integer NOT NULL,
-    validation_dataset_id integer NOT NULL,
+    validation_dataset_id integer,
     name text NOT NULL,
+    cluster_id integer NOT NULL,
     cluster_name text NOT NULL,
     model_key text NOT NULL,
     algorithm text NOT NULL,
     model_category text NOT NULL,
     dataset_name text NOT NULL,
     response_column_name text NOT NULL,
-    logical_name text NOT NULL,
+    logical_name text,
     location text NOT NULL,
+    has_pojo boolean DEFAULT 0,
+    has_mojo boolean DEFAULT 0,
     max_run_time integer,
     metrics text NOT NULL,
     metrics_version text NOT NULL,
@@ -611,7 +614,9 @@ CREATE TABLE model (
 
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (training_dataset_id) REFERENCES dataset(id),
-    FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id)
+    FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id),
+    FOREIGN KEY (cluster_id) REFERENCES cluster(id)
+
 );
 
 
@@ -685,12 +690,12 @@ CREATE TABLE model (
 --
 
 CREATE TABLE multinomial_model (
-    id integer PRIMARY KEY AUTOINCREMENT,
     model_id integer NOT NULL,
     mse double precision,
     r_squared double precision,
     logloss double precision,
 
+    PRIMARY KEY (model_id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
 );
 
@@ -811,12 +816,12 @@ CREATE TABLE project (
 --
 
 CREATE TABLE regression_model (
-    id integer PRIMARY KEY AUTOINCREMENT,
     model_id integer NOT NULL,
     mse double precision,
     r_squared double precision,
     mean_residual_deviance double precision,
 
+    PRIMARY KEY (model_id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
 );
 

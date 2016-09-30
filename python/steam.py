@@ -898,6 +898,36 @@ class RPCClient:
 		response = self.connection.call("ImportModelFromCluster", request)
 		return response['model_id']
 	
+	def import_model_pojo(self, model_id):
+		"""
+		Import a model's POJO from a cluster
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("ImportModelPojo", request)
+		return 
+	
+	def import_model_mojo(self, model_id):
+		"""
+		Import a model's MOJO from a cluster
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("ImportModelMojo", request)
+		return 
+	
 	def delete_model(self, model_id):
 		"""
 		Delete a model
