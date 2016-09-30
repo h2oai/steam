@@ -1484,7 +1484,7 @@ func (s *Service) assignPort() (int, error) {
 	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName string) (int64, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName, kind string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return 0, err
 	}
@@ -1492,6 +1492,19 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return 0, err
+	}
+
+	switch kind {
+	case "pojo":
+		if !model.HasPOJO {
+			return 0, fmt.Errorf("model %d has no pojo", modelId)
+		}
+	case "mojo":
+		if !model.HasMOJO {
+			return 0, fmt.Errorf("model %d has no mojo", modelId)
+		}
+	default:
+		return 0, errors.New("invalid model kind")
 	}
 
 	artifact := compiler.ArtifactWar
@@ -1506,6 +1519,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		model.Id,
 		model.LogicalName.String,
 		artifact,
+		kind,
 		packageName,
 	)
 	if err != nil {

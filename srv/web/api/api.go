@@ -698,6 +698,7 @@ type StartService struct {
 	ModelId     int64
 	Name        string
 	PackageName string
+	Kind        string
 	_           int
 	ServiceId   int64
 }

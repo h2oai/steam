@@ -3963,11 +3963,13 @@ Examples:
     $ steam start service \
         --model-id=? \
         --name=? \
-        --package-name=?
+        --package-name=? \
+        --kind=?
 
 `
 
 func startService(c *context) *cobra.Command {
+	var kind string        // No description available
 	var modelId int64      // No description available
 	var name string        // No description available
 	var packageName string // No description available
@@ -3979,6 +3981,7 @@ func startService(c *context) *cobra.Command {
 			modelId,     // No description available
 			name,        // No description available
 			packageName, // No description available
+			kind,        // No description available
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -3987,6 +3990,7 @@ func startService(c *context) *cobra.Command {
 		return
 	})
 
+	cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
 	cmd.Flags().StringVar(&name, "name", name, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")

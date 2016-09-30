@@ -1047,7 +1047,7 @@ class RPCClient:
 		response = self.connection.call("GetLabelsForProject", request)
 		return response['labels']
 	
-	def start_service(self, model_id, name, package_name):
+	def start_service(self, model_id, name, package_name, kind):
 		"""
 		Start a service
 
@@ -1055,6 +1055,7 @@ class RPCClient:
 		model_id: No description available (int64)
 		name: No description available (string)
 		package_name: No description available (string)
+		kind: No description available (string)
 
 		Returns:
 		service_id: No description available (int64)
@@ -1063,6 +1064,7 @@ class RPCClient:
 			'model_id': model_id
 			'name': name
 			'package_name': package_name
+			'kind': kind
 		}
 		response = self.connection.call("StartService", request)
 		return response['service_id']

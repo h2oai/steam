@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/h2oai/steam/lib/fs"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -38,17 +39,33 @@ const (
 	ArtifactPythonWar = "pywar"
 )
 
+type fileType string
+
 const (
-	fileTypeJava        = "pojo"
-	fileTypeJavaDep     = "jar"
-	fileTypePythonMain  = "python"
-	fileTypePythonOther = "pythonextra"
+	fileTypeJava        fileType = "pojo"
+	fileTypeJavaDep              = "jar"
+	fileTypeMOJO                 = "mojo"
+	fileTypePythonMain           = "python"
+	fileTypePythonOther          = "pythonextra"
 )
 
-func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName, artifact, packageName string) (string, error) {
+type asset struct {
+	path string
+	typ  fileType
+}
+
+func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName, artifact, kind, packageName string) (string, error) {
 
 	genModelPath := fs.GetGenModelPath(wd, modelId)
-	javaModelPath := fs.GetJavaModelPath(wd, modelId, modelLogicalName)
+	var modelAsset asset
+	switch kind {
+	case "pojo":
+		modelAsset.typ = fileTypeJava
+		modelAsset.path = fs.GetJavaModelPath(wd, modelId, modelLogicalName)
+	case "mojo":
+		modelAsset.typ = fileTypeMOJO
+		modelAsset.path = fs.GetMOJOPath(wd, modelId, modelLogicalName)
+	}
 
 	var targetFile, slug string
 
@@ -71,7 +88,7 @@ func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName
 
 	// ping to check if service is up
 	if _, err := http.Get(toUrl(address, "ping")); err != nil {
-		return "", fmt.Errorf("Failed connecting to scoring service builder: %s", err)
+		return "", errors.Wrap(err, "could not connect to prediction service builder")
 	}
 
 	packageName = strings.TrimSpace(packageName)
@@ -87,23 +104,23 @@ func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName
 		}
 	}
 
-	if err := callCompiler(toUrl(address, slug), targetFile, javaModelPath, genModelPath, pythonMainFilePath, pythonOtherFilePaths); err != nil {
-		return "", err
+	if err := callCompiler(toUrl(address, slug), targetFile, genModelPath, pythonMainFilePath, modelAsset, pythonOtherFilePaths); err != nil {
+		return "", errors.Wrap(err, "failed compiler request")
 	}
 
 	return targetFile, nil
 }
 
-func callCompiler(url, targetFile, javaFilePath, javaDepPath, pythonMainFilePath string, pythonOtherFilePaths []string) error {
+func callCompiler(url, targetFile, javaDepPath, pythonMainFilePath string, modelAsset asset, pythonOtherFilePaths []string) error {
 	b := &bytes.Buffer{}
 	writer := multipart.NewWriter(b)
 
-	if err := attachFile(writer, javaFilePath, fileTypeJava); err != nil {
-		return fmt.Errorf("Failed attaching Java file to compilation request: %s", err)
+	if err := attachFile(writer, modelAsset.path, string(modelAsset.typ)); err != nil {
+		return errors.Wrap(err, "failed attaching model")
 	}
 
 	if err := attachFile(writer, javaDepPath, fileTypeJavaDep); err != nil {
-		return fmt.Errorf("Failed attaching Java dependency to compilation request: %s", err)
+		return errors.Wrap(err, "failed attaching java dependency")
 	}
 
 	if len(pythonMainFilePath) > 0 {
