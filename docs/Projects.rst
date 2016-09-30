@@ -263,21 +263,20 @@ Making Predictions
 Configurations
 --------------
 
-Steam allows you to set labels for models (such as Production, Test,
-etc.) and apply permissions for using the labels. The Steam
-admin/superuser is responsible for creating new Steam users and setting
-roles and workgroups for those users. When setting Steam project
-configurations, labels can be created that allow, for example, only
-users in a Production workgroup to label a model as a production model.
+When maintaining and storing models in Steam, it is useful to know whether the version of a model that you're viewing is used for testing, development, production, etc. Steam allows admins/superusers to set labels (or versioning) for models and to apply permissions for those models using the labels. The Steam admin/superuser is responsible for creating new Steam users and setting roles and workgroups for those users. When setting Steam project configurations, labels can be created that allow, for example, only users in a Production workgroup to label a model as a Deployment model.
 
-When a label is applied to a model, the Project Configurations page will
-show all models associated with a label.
+When a label is applied to a model, the Project Configurations page will show all models associated with a label.
+
+.. figure :: images/model_labels.png
+   :alt: Project Configurations page
+   
+   Project Configurations page
 
 Creating a New Label
 ~~~~~~~~~~~~~~~~~~~~
 
 1. On the Configurations page, click the **Create New Label** button.
-2. Enter a unique name for the label, the provide a description.
+2. Enter a unique name for the label, then provide a description.
 3. Click **Save** when you are done.
 
  .. figure:: images/create_label.png

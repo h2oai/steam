@@ -182,7 +182,7 @@ The following steps show how to build model using the Iris dataset and the GBM a
 
 4. Specify the configuration options to use when building a GBM model.
 
-        >>> gbm_regressor = H2OGradientBoostingEstimator(distribution="gaussian", ntrees=10, max_depth=3, min_rows=2, learn_rate="0.2")
+        >>> gbm_regressor = H2OGradientBoostingEstimator(distribution="gaussian", ntrees=10, max_depth=3, min_rows=2, learn_rate=0.2)
    <!-- -->
 
 5. Train the model using the Iris dataset (`df` object) and the GBM configuration options. 
