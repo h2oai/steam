@@ -22,7 +22,7 @@ import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
-import {fetchPermissionsWithRoles, PermissionsWithRoles} from "../actions/users.actions";
+import { fetchPermissionsWithRoles, PermissionsWithRoles, saveUpdatedPermissions } from "../actions/users.actions";
 import {Role} from "../../Proxy/Proxy";
 
 interface Props {
@@ -31,30 +31,52 @@ interface Props {
 }
 
 interface DispatchProps {
-  fetchPermissionsWithRoles: Function
+  fetchPermissionsWithRoles: Function,
+  saveUpdatedPermissions: Function
 }
 
 export class RolePermissions extends React.Component<Props & DispatchProps, any> {
+  permissionInputs = {};
 
   componentWillMount() {
     this.props.fetchPermissionsWithRoles();
   }
 
+  registerInput(input, flag, flagIndex, permissionSet, permissionIndex) {
+    if (!(this as any).permissionInputs.hasOwnProperty(permissionIndex)) {
+      (this as any).permissionInputs[permissionIndex] = {
+        permissionSet,
+        flags: {}
+      };
+    }
+    (this as any).permissionInputs[permissionIndex].flags[flagIndex] = {
+      originalFlag: flag,
+      input
+    };
+  }
+
+  updatePermissions = () => {
+    this.props.saveUpdatedPermissions((this as any).permissionInputs);
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     let permissionRows;
+    (this as any)._checkboxes = {};
+    console.log(this);
+
     if (this.props.permissionsWithRoles) {
-      permissionRows = this.props.permissionsWithRoles.map(function (permissionSet, index) {
-        return<Row key={index}>
+      permissionRows = this.props.permissionsWithRoles.map(function (permissionSet, permissionIndex) {
+        return<Row key={permissionIndex}>
           <Cell className="right-table-bar" key={permissionSet.description}>{permissionSet.description}</Cell>
           {permissionSet.flags.map((flag,flagIndex) => {
             if (flagIndex === 0) {
-              return <Cell className="center-text" key={flagIndex}><input type="checkbox" value="on" checked={true} readOnly={true} disabled={true}></input></Cell>;
+              return <Cell className="center-text" key={flagIndex}><input ref={(input) => this.registerInput(input, true, flagIndex, permissionSet, permissionIndex)}  type="checkbox" value="on" defaultChecked={true} readOnly={false} disabled={false}></input></Cell>;
             } else {
-              return <Cell className="center-text" key={flagIndex}><input type="checkbox" value="on" checked={flag} readOnly={true} disabled={true}></input></Cell>;
+              return <Cell className="center-text" key={flagIndex}><input ref={(input) => this.registerInput(input, flag, flagIndex, permissionSet, permissionIndex)}  type="checkbox" value="on" defaultChecked={flag} readOnly={false} disabled={false}></input></Cell>;
             }
           })}
         </Row>;
-      });
+      }, this);
     }
 
     return (
@@ -66,11 +88,10 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
               return <Cell className="center-text" key={rolesIndex}>{role.description}</Cell>;
             })}
           </Row>
-
           {permissionRows}
-
         </Table>
         : null}
+        <div className="button-primary" onClick={this.updatePermissions}>Save</div>
       </div>
     );
   }
@@ -85,7 +106,8 @@ function mapStateToProps(state): any {
 
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
-    fetchPermissionsWithRoles: bindActionCreators(fetchPermissionsWithRoles, dispatch)
+    fetchPermissionsWithRoles: bindActionCreators(fetchPermissionsWithRoles, dispatch),
+    saveUpdatedPermissions: bindActionCreators(saveUpdatedPermissions, dispatch)
   };
 }
 

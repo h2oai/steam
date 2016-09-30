@@ -33,6 +33,19 @@ export const REQUEST_ROLE_NAMES = 'REQUEST_ROLE_NAMES';
 export const RECEIVE_ROLE_NAMES = 'RECEIVE_ROLE_NAMES';
 export const REQUEST_PROJECTS = 'REQUEST_PROJECTS';
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
+export const REQUEST_SAVE_PERMISSIONS = 'REQUEST_SAVE_PERMISSIONS';
+export const RECEIVE_SAVE_PERMISSIONS = 'RECEIVE_SAVE_PERMISSIONS';
+
+export function requestSavePermissions() {
+  return {
+    type: REQUEST_SAVE_PERMISSIONS
+  };
+}
+export function receiveSavePermissions() {
+  return {
+    type: RECEIVE_SAVE_PERMISSIONS
+  };
+}
 
 export function filterSelectionsChanged(id, selected) {
   return {
@@ -257,6 +270,7 @@ export function fetchPermissionsWithRoles() {
               }
               output.push({
                 description : descriptions[i].description,
+                id: descriptions[i].id,
                 flags
               });
             }
@@ -265,5 +279,37 @@ export function fetchPermissionsWithRoles() {
         });
       });
     });
+  };
+}
+
+export function saveUpdatedPermissions(permissionInputs) {
+  return (dispatch) => {
+    dispatch(requestSavePermissions());
+
+    let updates = [];
+
+    for (var permissionKey in permissionInputs) {
+      for (var flagKey in permissionInputs[permissionKey].flags) {
+        let flagset = permissionInputs[permissionKey].flags[flagKey];
+        if (flagset.originalFlag !== flagset.input.checked) {
+          updates.push({
+            newFlag: flagset.input.checked,
+            userIndex: flagKey,
+            permissionIndex: permissionKey,
+            description: permissionInputs[permissionKey].permissionSet.description,
+            permissionId: permissionInputs[permissionKey].permissionSet.id
+          });
+        }
+      }
+    }
+
+    for (let update of updates) {
+      if(update.newFlag === true) {
+        //Remote.linkRoleWithPermission(roleId, permissionId, (error) => console.log(error));
+      } else {
+        //Remote.unlinkRoleFromPermission(roleId, permissionId, (error) => console.log(error));
+      }
+    }
+    console.log(updates);
   };
 }
