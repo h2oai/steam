@@ -225,3 +225,26 @@ input[type="text"], textarea {
   margin-right: 44px;
 }
 
+.flexrow {
+  display: flex;
+  flex-direction: row;
+}
+.flexcolumn {
+  display: flex;
+  flex-direction: column;
+}
+.mar-right-12 {
+  margin-right: 12px;
+}
+.mar-right-3 {
+  margin-right: 3px;
+}
+.mar-right-71 {
+  margin-right: 71px;
+}
+.mar-bot-20 {
+  margin-bottom: 20px;
+}
+.mar-bot-7 {
+  margin-bottom: 7px;
+}

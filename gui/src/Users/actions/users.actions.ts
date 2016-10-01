@@ -304,7 +304,7 @@ export function saveUpdatedPermissions(permissionInputs) {
     }
 
     for (let update of updates) {
-      if(update.newFlag === true) {
+      if (update.newFlag === true) {
         //Remote.linkRoleWithPermission(roleId, permissionId, (error) => console.log(error));
       } else {
         //Remote.unlinkRoleFromPermission(roleId, permissionId, (error) => console.log(error));
