@@ -24,7 +24,9 @@ func TestServiceCRUD(tt *testing.T) {
 
 	// var names [...]string{"service1","service2","service3","service4", "service5"}
 
+	//
 	// -- Setup --
+	//
 
 	projectId, err := t.svc.CreateProject(t.su, "project1", "test project", "")
 	t.nil(err)
@@ -33,7 +35,9 @@ func TestServiceCRUD(tt *testing.T) {
 	modelId, err := t.svc.ImportModelFromCluster(t.su, clusterId, projectId, h2oModels[0].name, "")
 	t.nil(err)
 
+	//
 	// -- C --
+	//
 
 	serviceId := make([]int64, 5)
 	for i := 0; i < 5; i++ {
@@ -44,7 +48,9 @@ func TestServiceCRUD(tt *testing.T) {
 		}
 	}
 
+	//
 	// -- R --
+	//
 
 	services, err := t.svc.GetServices(t.su, 0, 1000)
 	t.nil(err)
@@ -55,9 +61,23 @@ func TestServiceCRUD(tt *testing.T) {
 
 	t.log(service)
 
+	//
 	// -- U --
+	//
 
+	updatedName := "NewName"
+
+	err = t.svc.UpdateService(t.su, services[0].Id, updatedName)
+	t.nil(err)
+	service, err = t.svc.GetService(t.su, services[0].Id)
+	t.nil(err)
+
+	t.ok(service.Name == updatedName, "Updated model name")
+
+	//
 	// -- D --
+	//
+
 	for i := 0; i < 5; i++ {
 		err := t.svc.StopService(t.su, serviceId[i])
 		t.nil(err)

@@ -320,6 +320,7 @@ type Service struct {
 	FindModelsRegression          FindModelsRegression          `help:"List regression models"`
 	GetModelRegression            GetModelRegression            `help:"View a binomial model"`
 	ImportModelFromCluster        ImportModelFromCluster        `help:"Import models from a cluster"`
+	UpdateModel                   UpdateModel                   `help:"Update a model"`
 	DeleteModel                   DeleteModel                   `help:"Delete a model"`
 	CreateLabel                   CreateLabel                   `help:"Create a label"`
 	UpdateLabel                   UpdateLabel                   `help:"Update a label"`
@@ -333,6 +334,7 @@ type Service struct {
 	GetServices                   GetServices                   `help:"List all services"`
 	GetServicesForProject         GetServicesForProject         `help:"List services for a project"`
 	GetServicesForModel           GetServicesForModel           `help:"List services for a model"`
+	UpdateService                 UpdateService                 `help:"Update a service"`
 	DeleteService                 DeleteService                 `help:"Delete a service"`
 	AddEngine                     AddEngine                     `help:"Add an engine"`
 	GetEngine                     GetEngine                     `help:"Get engine details"`
@@ -653,6 +655,10 @@ type ImportModelFromCluster struct {
 	_         int
 	ModelId   int64
 }
+type UpdateModel struct {
+	ModelId   int64
+	ModelName string
+}
 type DeleteModel struct {
 	ModelId int64
 }
@@ -718,6 +724,10 @@ type GetServicesForModel struct {
 	Limit    int64
 	_        int
 	Services []ScoringService
+}
+type UpdateService struct {
+	ServiceId   int64
+	ServiceName string
 }
 type DeleteService struct {
 	ServiceId int64
