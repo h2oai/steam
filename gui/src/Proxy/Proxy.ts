@@ -615,6 +615,9 @@ export interface Service {
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
   
+  // Check if a model category can generate MOJOs
+  checkMojo: (algo: string, go: (error: Error, canMojo: boolean) => void) => void
+  
   // Import a model's POJO from a cluster
   importModelPojo: (modelId: number, go: (error: Error) => void) => void
   
@@ -643,7 +646,7 @@ export interface Service {
   getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
   
   // Start a service
-  startService: (modelId: number, name: string, packageName: string, kind: string, go: (error: Error, serviceId: number) => void) => void
+  startService: (modelId: number, name: string, packageName: string, go: (error: Error, serviceId: number) => void) => void
   
   // Stop a service
   stopService: (serviceId: number, go: (error: Error) => void) => void
@@ -1449,6 +1452,18 @@ interface ImportModelFromClusterOut {
   
 }
 
+interface CheckMojoIn {
+  
+  algo: string
+  
+}
+
+interface CheckMojoOut {
+  
+  can_mojo: boolean
+  
+}
+
 interface ImportModelPojoIn {
   
   model_id: number
@@ -1562,8 +1577,6 @@ interface StartServiceIn {
   name: string
   
   package_name: string
-  
-  kind: string
   
 }
 
@@ -2856,6 +2869,18 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   });
 }
 
+export function checkMojo(algo: string, go: (error: Error, canMojo: boolean) => void): void {
+  const req: CheckMojoIn = { algo: algo };
+  Proxy.Call("CheckMojo", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: CheckMojoOut = <CheckMojoOut> data;
+      return go(null, d.can_mojo);
+    }
+  });
+}
+
 export function importModelPojo(modelId: number, go: (error: Error) => void): void {
   const req: ImportModelPojoIn = { model_id: modelId };
   Proxy.Call("ImportModelPojo", req, function(error, data) {
@@ -2964,8 +2989,8 @@ export function getLabelsForProject(projectId: number, go: (error: Error, labels
   });
 }
 
-export function startService(modelId: number, name: string, packageName: string, kind: string, go: (error: Error, serviceId: number) => void): void {
-  const req: StartServiceIn = { model_id: modelId, name: name, package_name: packageName, kind: kind };
+export function startService(modelId: number, name: string, packageName: string, go: (error: Error, serviceId: number) => void): void {
+  const req: StartServiceIn = { model_id: modelId, name: name, package_name: packageName };
   Proxy.Call("StartService", req, function(error, data) {
     if (error) {
       return go(error, null);

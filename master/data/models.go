@@ -182,8 +182,7 @@ type Model struct {
 	ResponseColumnName  string
 	LogicalName         sql.NullString
 	Location            string
-	HasPOJO             bool
-	HasMOJO             bool
+	ModelObjectType     sql.NullString
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
@@ -207,8 +206,7 @@ type BinomialModel struct {
 	ResponseColumnName  string
 	LogicalName         sql.NullString
 	Location            string
-	HasPOJO             bool
-	HasMOJO             bool
+	ModelObjectType     sql.NullString
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
@@ -237,8 +235,7 @@ type MultinomialModel struct {
 	ResponseColumnName  string
 	LogicalName         sql.NullString
 	Location            string
-	HasPOJO             bool
-	HasMOJO             bool
+	ModelObjectType     sql.NullString
 	MaxRunTime          int64
 	Metrics             string
 	MetricsVersion      string
@@ -265,8 +262,7 @@ type RegressionModel struct {
 	ResponseColumnName   string
 	LogicalName          sql.NullString
 	Location             string
-	HasPOJO              bool
-	HasMOJO              bool
+	ModelObjectType      sql.NullString
 	MaxRunTime           int64
 	Metrics              string
 	MetricsVersion       string

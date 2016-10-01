@@ -3791,7 +3791,7 @@ func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, locatio
 	})
 }
 
-func (ds *Datastore) UpdateModelPOJO(pz az.Principal, modelId int64, exists bool) error {
+func (ds *Datastore) UpdateModelObjectType(pz az.Principal, modelId int64, typ string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
 		return errors.Wrap(err, "failed checking edit privilege")
 	}
@@ -3801,39 +3801,18 @@ func (ds *Datastore) UpdateModelPOJO(pz az.Principal, modelId int64, exists bool
 			UPDATE
 				model
 			SET
-				has_pojo = $1
+				model_object_type = $1
 			WHERE
 				id = $2	
-			`, exists, modelId); err != nil {
+			`, typ, modelId); err != nil {
 			return errors.Wrap(err, "failed executing transaction")
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{
-			"has_pojo": strconv.FormatBool(exists),
+			"has_pojo": typ,
 		})
 	})
 }
 
-func (ds *Datastore) UpdateModelMOJO(pz az.Principal, modelId int64, exists bool) error {
-	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
-		return errors.Wrap(err, "failed checking edit privilege")
-	}
-
-	return ds.exec(func(tx *sql.Tx) error {
-		if _, err := tx.Exec(`
-			UPDATE
-				model
-			SET
-				has_mojo = $1
-			WHERE
-				id = $2	
-			`, exists, modelId); err != nil {
-			return errors.Wrap(err, "failed executing transaction")
-		}
-		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{
-			"has_mojo": strconv.FormatBool(exists),
-		})
-	})
-}
 func (ds *Datastore) UpdateModelName(pz az.Principal, modelId int64, name string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
 		return err

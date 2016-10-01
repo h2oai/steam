@@ -884,8 +884,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		targetName,
 		sql.NullString{},
 		"",
-		false,
-		false,
+		sql.NullString{},
 		int64(maxRunTime),
 		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
@@ -1204,19 +1203,6 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return 0, err
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelKey, modelId)
-	if err != nil {
-		return 0, err
-	}
-
-	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
-		return 0, err
-	}
-
-	if err := s.ds.UpdateModelPOJO(pz, modelId, true); err != nil {
-		return 0, errors.Wrap(err, "failed updating POJO status in database")
-	}
-
 	if err := s.createMetricsTable(pz, modelId, m.Output.TrainingMetrics, string(m.Output.ModelCategory)); err != nil {
 		return 0, err
 	}
@@ -1264,6 +1250,14 @@ func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bi
 	return nil
 }
 
+func (s *Service) CheckMojo(pz az.Principal, algo string) (bool, error) {
+	switch algo {
+	case "Gradient Boosting Method", "Distributed Random Forest":
+		return false, nil
+	}
+	return false, nil
+}
+
 func (s *Service) ImportModelPojo(pz az.Principal, modelId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
 		return errors.Wrap(err, "failed checking permissions")
@@ -1285,12 +1279,15 @@ func (s *Service) ImportModelPojo(pz az.Principal, modelId int64) error {
 	if err != nil {
 		return errors.Wrap(err, "failed exporting java model from h2o")
 	}
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return errors.Wrap(err, "failed to export java dependency")
+	}
 
 	if !m.LogicalName.Valid {
 		s.ds.UpdateModelLocation(pz, modelId, strconv.FormatInt(modelId, 10), fs.GetBasenameWithoutExt(javaModelPath))
 	}
 
-	return s.ds.UpdateModelPOJO(pz, modelId, true)
+	return s.ds.UpdateModelObjectType(pz, modelId, "pojo")
 }
 
 func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
@@ -1301,6 +1298,11 @@ func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
 	m, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return errors.Wrap(err, "failed reading model from database")
+	}
+
+	// Doesn't return errors
+	if ok, _ := s.CheckMojo(pz, m.Algorithm); !ok {
+		return fmt.Errorf("model of type %s does not have MOJO support", m.Algorithm)
 	}
 
 	c, err := s.ds.ReadCluster(pz, m.ClusterId)
@@ -1314,12 +1316,15 @@ func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
 	if err != nil {
 		return errors.Wrap(err, "failed exporting MOJO from h2o")
 	}
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return errors.Wrap(err, "failed to export java dependency")
+	}
 
 	if !m.LogicalName.Valid {
 		s.ds.UpdateModelLocation(pz, modelId, strconv.FormatInt(modelId, 10), fs.GetBasenameWithoutExt(mojoPath))
 	}
 
-	return s.ds.UpdateModelMOJO(pz, modelId, true)
+	return s.ds.UpdateModelObjectType(pz, modelId, "mojo")
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
@@ -1484,7 +1489,7 @@ func (s *Service) assignPort() (int, error) {
 	return 0, fmt.Errorf("No open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
 }
 
-func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName, kind string) (int64, error) {
+func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageService); err != nil {
 		return 0, err
 	}
@@ -1492,19 +1497,6 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 	model, err := s.ds.ReadModel(pz, modelId)
 	if err != nil {
 		return 0, err
-	}
-
-	switch kind {
-	case "pojo":
-		if !model.HasPOJO {
-			return 0, fmt.Errorf("model %d has no pojo", modelId)
-		}
-	case "mojo":
-		if !model.HasMOJO {
-			return 0, fmt.Errorf("model %d has no mojo", modelId)
-		}
-	default:
-		return 0, errors.New("invalid model kind")
 	}
 
 	artifact := compiler.ArtifactWar
@@ -1519,7 +1511,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		model.Id,
 		model.LogicalName.String,
 		artifact,
-		kind,
+		model.ModelObjectType.String,
 		packageName,
 	)
 	if err != nil {

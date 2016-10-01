@@ -898,6 +898,22 @@ class RPCClient:
 		response = self.connection.call("ImportModelFromCluster", request)
 		return response['model_id']
 	
+	def check_mojo(self, algo):
+		"""
+		Check if a model category can generate MOJOs
+
+		Parameters:
+		algo: No description available (string)
+
+		Returns:
+		can_mojo: No description available (bool)
+		"""
+		request = {
+			'algo': algo
+		}
+		response = self.connection.call("CheckMojo", request)
+		return response['can_mojo']
+	
 	def import_model_pojo(self, model_id):
 		"""
 		Import a model's POJO from a cluster
@@ -1047,7 +1063,7 @@ class RPCClient:
 		response = self.connection.call("GetLabelsForProject", request)
 		return response['labels']
 	
-	def start_service(self, model_id, name, package_name, kind):
+	def start_service(self, model_id, name, package_name):
 		"""
 		Start a service
 
@@ -1055,7 +1071,6 @@ class RPCClient:
 		model_id: No description available (int64)
 		name: No description available (string)
 		package_name: No description available (string)
-		kind: No description available (string)
 
 		Returns:
 		service_id: No description available (int64)
@@ -1064,7 +1079,6 @@ class RPCClient:
 			'model_id': model_id
 			'name': name
 			'package_name': package_name
-			'kind': kind
 		}
 		response = self.connection.call("StartService", request)
 		return response['service_id']

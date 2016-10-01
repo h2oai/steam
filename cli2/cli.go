@@ -33,6 +33,7 @@ func registerGeneratedCommands(c *context, cmd *cobra.Command) {
 	cmd.AddCommand(
 		add(c),
 		build(c),
+		check(c),
 		create(c),
 		deactivate(c),
 		delete_(c),
@@ -206,6 +207,52 @@ func buildModel(c *context) *cobra.Command {
 	cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
 	cmd.Flags().IntVar(&maxRunTime, "max-run-time", maxRunTime, "No description available")
 	cmd.Flags().StringVar(&targetName, "target-name", targetName, "No description available")
+	return cmd
+}
+
+var checkHelp = `
+check [?]
+Check entities
+Commands:
+
+    $ steam check mojo ...
+`
+
+func check(c *context) *cobra.Command {
+	cmd := newCmd(c, checkHelp, nil)
+
+	cmd.AddCommand(checkMojo(c))
+	return cmd
+}
+
+var checkMojoHelp = `
+mojo [?]
+Check Mojo
+Examples:
+
+    Check if a model category can generate MOJOs
+    $ steam check mojo \
+        --algo=?
+
+`
+
+func checkMojo(c *context) *cobra.Command {
+	var algo string // No description available
+
+	cmd := newCmd(c, checkMojoHelp, func(c *context, args []string) {
+
+		// Check if a model category can generate MOJOs
+		canMojo, err := c.remote.CheckMojo(
+			algo, // No description available
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("CanMojo:\t%v\n", canMojo)
+		return
+	})
+
+	cmd.Flags().StringVar(&algo, "algo", algo, "No description available")
 	return cmd
 }
 
@@ -3963,13 +4010,11 @@ Examples:
     $ steam start service \
         --model-id=? \
         --name=? \
-        --package-name=? \
-        --kind=?
+        --package-name=?
 
 `
 
 func startService(c *context) *cobra.Command {
-	var kind string        // No description available
 	var modelId int64      // No description available
 	var name string        // No description available
 	var packageName string // No description available
@@ -3981,7 +4026,6 @@ func startService(c *context) *cobra.Command {
 			modelId,     // No description available
 			name,        // No description available
 			packageName, // No description available
-			kind,        // No description available
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -3990,7 +4034,6 @@ func startService(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().StringVar(&kind, "kind", kind, "No description available")
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
 	cmd.Flags().StringVar(&name, "name", name, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")

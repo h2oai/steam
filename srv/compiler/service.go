@@ -65,6 +65,8 @@ func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName
 	case "mojo":
 		modelAsset.typ = fileTypeMOJO
 		modelAsset.path = fs.GetMOJOPath(wd, modelId, modelLogicalName)
+	default:
+		return "", fmt.Errorf("invalid model object type %q", kind)
 	}
 
 	var targetFile, slug string

@@ -261,6 +261,11 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
   Proxy.Call("ImportModelFromCluster", req, print);
 }
 
+export function checkMojo(algo: string): void {
+  const req: any = { algo: algo };
+  Proxy.Call("CheckMojo", req, print);
+}
+
 export function importModelPojo(modelId: number): void {
   const req: any = { model_id: modelId };
   Proxy.Call("ImportModelPojo", req, print);
@@ -306,8 +311,8 @@ export function getLabelsForProject(projectId: number): void {
   Proxy.Call("GetLabelsForProject", req, print);
 }
 
-export function startService(modelId: number, name: string, packageName: string, kind: string): void {
-  const req: any = { model_id: modelId, name: name, package_name: packageName, kind: kind };
+export function startService(modelId: number, name: string, packageName: string): void {
+  const req: any = { model_id: modelId, name: name, package_name: packageName };
   Proxy.Call("StartService", req, print);
 }
 

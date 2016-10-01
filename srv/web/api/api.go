@@ -320,6 +320,7 @@ type Service struct {
 	FindModelsRegression          FindModelsRegression          `help:"List regression models"`
 	GetModelRegression            GetModelRegression            `help:"View a binomial model"`
 	ImportModelFromCluster        ImportModelFromCluster        `help:"Import models from a cluster"`
+	CheckMojo                     CheckMojo                     `help:"Check if a model category can generate MOJOs"`
 	ImportModelPojo               ImportModelPojo               `help:"Import a model's POJO from a cluster"`
 	ImportModelMojo               ImportModelMojo               `help:"Import a model's MOJO from a cluster"`
 	DeleteModel                   DeleteModel                   `help:"Delete a model"`
@@ -655,6 +656,11 @@ type ImportModelFromCluster struct {
 	_         int
 	ModelId   int64
 }
+type CheckMojo struct {
+	Algo    string
+	_       int
+	CanMojo bool
+}
 type ImportModelPojo struct {
 	ModelId int64
 	_       int
@@ -698,7 +704,6 @@ type StartService struct {
 	ModelId     int64
 	Name        string
 	PackageName string
-	Kind        string
 	_           int
 	ServiceId   int64
 }

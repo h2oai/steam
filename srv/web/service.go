@@ -331,6 +331,7 @@ type Service interface {
 	FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error)
 	GetModelRegression(pz az.Principal, modelId int64) (*RegressionModel, error)
 	ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
+	CheckMojo(pz az.Principal, algo string) (bool, error)
 	ImportModelPojo(pz az.Principal, modelId int64) error
 	ImportModelMojo(pz az.Principal, modelId int64) error
 	DeleteModel(pz az.Principal, modelId int64) error
@@ -340,7 +341,7 @@ type Service interface {
 	LinkLabelWithModel(pz az.Principal, labelId int64, modelId int64) error
 	UnlinkLabelFromModel(pz az.Principal, labelId int64, modelId int64) error
 	GetLabelsForProject(pz az.Principal, projectId int64) ([]*Label, error)
-	StartService(pz az.Principal, modelId int64, name string, packageName string, kind string) (int64, error)
+	StartService(pz az.Principal, modelId int64, name string, packageName string) (int64, error)
 	StopService(pz az.Principal, serviceId int64) error
 	GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
 	GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
@@ -805,6 +806,14 @@ type ImportModelFromClusterOut struct {
 	ModelId int64 `json:"model_id"`
 }
 
+type CheckMojoIn struct {
+	Algo string `json:"algo"`
+}
+
+type CheckMojoOut struct {
+	CanMojo bool `json:"can_mojo"`
+}
+
 type ImportModelPojoIn struct {
 	ModelId int64 `json:"model_id"`
 }
@@ -880,7 +889,6 @@ type StartServiceIn struct {
 	ModelId     int64  `json:"model_id"`
 	Name        string `json:"name"`
 	PackageName string `json:"package_name"`
-	Kind        string `json:"kind"`
 }
 
 type StartServiceOut struct {
@@ -1832,6 +1840,16 @@ func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, mod
 	return out.ModelId, nil
 }
 
+func (this *Remote) CheckMojo(algo string) (bool, error) {
+	in := CheckMojoIn{algo}
+	var out CheckMojoOut
+	err := this.Proc.Call("CheckMojo", &in, &out)
+	if err != nil {
+		return false, err
+	}
+	return out.CanMojo, nil
+}
+
 func (this *Remote) ImportModelPojo(modelId int64) error {
 	in := ImportModelPojoIn{modelId}
 	var out ImportModelPojoOut
@@ -1922,8 +1940,8 @@ func (this *Remote) GetLabelsForProject(projectId int64) ([]*Label, error) {
 	return out.Labels, nil
 }
 
-func (this *Remote) StartService(modelId int64, name string, packageName string, kind string) (int64, error) {
-	in := StartServiceIn{modelId, name, packageName, kind}
+func (this *Remote) StartService(modelId int64, name string, packageName string) (int64, error) {
+	in := StartServiceIn{modelId, name, packageName}
 	var out StartServiceOut
 	err := this.Proc.Call("StartService", &in, &out)
 	if err != nil {
@@ -4138,6 +4156,41 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 	return nil
 }
 
+func (this *Impl) CheckMojo(r *http.Request, in *CheckMojoIn, out *CheckMojoOut) error {
+	const name = "CheckMojo"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.CheckMojo(pz, in.Algo)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.CanMojo = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
 func (this *Impl) ImportModelPojo(r *http.Request, in *ImportModelPojoIn, out *ImportModelPojoOut) error {
 	const name = "ImportModelPojo"
 
@@ -4456,7 +4509,7 @@ func (this *Impl) StartService(r *http.Request, in *StartServiceIn, out *StartSe
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.StartService(pz, in.ModelId, in.Name, in.PackageName, in.Kind)
+	val0, err := this.Service.StartService(pz, in.ModelId, in.Name, in.PackageName)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
