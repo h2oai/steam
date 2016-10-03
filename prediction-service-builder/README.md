@@ -21,15 +21,15 @@ Not all Jetty Jar files work. There's a working Jar for each Jetty version inclu
 
 ## Build and Run the Builder Service
 
-Perform the following steps to build the H2O Scoring Service Builder:
+Perform the following steps to build the H2O Prediction Service Builder:
 
-1. In a terminal window, navigate to the **steam/scoring-service-builder** folder.
+1. In a terminal window, navigate to the **steam/prediction-service-builder** folder.
 
 2. Run `./gradlew build` to build the service.
 
 3. You will see a **BUILD SUCCESSFUL** message upon completion. Run 	`./gradlew jettyRunWar` to run the builder service.
 
-4. Open a browser and navigate to localhost:55000 to begin using the H2O Scoring Service Builder web UI. 
+4. Open a browser and navigate to localhost:55000 to begin using the H2O Prediction Service Builder web UI. 
 
 	![Builder Service](images/builder_service.png)
 
@@ -40,7 +40,7 @@ Perform the following steps to build the H2O Scoring Service Builder:
 
 When the Builder Service is running, you can make a War file using the Web UI.
 
-The following screenshot shows how to make a War file using a POJO file and a Jar file, which are specified in the **JAVA PREDICTION FILES SECTION**. An example model and an H2O Jar file are included in the  **steam/scoring-service-builder/examples/pojo-server** folder. 
+The following screenshot shows how to make a War file using a POJO file and a Jar file, which are specified in the **JAVA PREDICTION FILES SECTION**. An example model and an H2O Jar file are included in the  **steam/prediction-service-builder/examples/pojo-server** folder. 
 
 ![Make War](images/make_war.png)
 
@@ -53,7 +53,7 @@ Click **Upload** to upload the files to the Prediction Service Builder and creat
 > Java/Scala/Jar. Specify a Jar file that contains everyting you need, then the name of the Class that performs the preprocessing. Use the regular `makewar`. When these files are specified, the prediction file will perform additional pre-processing on the specified model before predicting with the model POJO..
 
 
->For testing, an example python file is available in the **/scoring-service/builder/examples/spam-detection-python** folder. The additional python files are available in the **/scoring-service/builder/examples/spam-detection-python/lib** folder.
+>For testing, an example python file is available in the **/prediction-service/builder/examples/spam-detection-python** folder. The additional python files are available in the **/prediction-service/builder/examples/spam-detection-python/lib** folder.
 
 
 ### Using the CLI
@@ -67,7 +67,7 @@ Note that when the Builder Service is running, you can also make a war file usin
  - `gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.java` is the POJO file from H2O
  - `h2o-genmodel.jar` is the corresponding Jar file from your version of H2O
 
-The POJO and Jar files are included in the **steam/scoring-service-builder/examples/pojo-server** folder.
+The POJO and Jar files are included in the **steam/prediction-service-builder/examples/pojo-server** folder.
 
 
 ## Starting the H2O Prediction Service
@@ -76,7 +76,7 @@ You can start the H2O Prediction Service using the CLI, or you can run the examp
 
 ### Using the CLI
 
-Open a terminal window and run the following command to run the scoring service using the gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.war file that was just built:
+Open a terminal window and run the following command to run the prediction service using the gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.war file that was just built:
 
 		java -jar jetty-runner-9.3.9.M1.jar --port 55001 ~/Downloads/gbm_3f258f27_f0ad_4520_b6a5_3d2bb4a9b0ff.war
 
@@ -88,7 +88,7 @@ This starts the H2O Prediction Service at localhost:55001. You can use this web 
 
 This distribution includes scripts that can be used to quickly get your prediction service up and running. 
 
-Open a terminal window and run the following commands from the **steam/steam-scoring-service** folder. 
+Open a terminal window and run the following commands from the **steam/steam-prediction-service** folder. 
 
 	# Run an example using the airline dataset
 	cd examples/pojo-server

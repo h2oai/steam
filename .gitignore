@@ -37,8 +37,8 @@ coverage.out
 /var/
 /var/master/www/
 /var/master/db/steam.db
-/scoring-service-builder/.gradle
-/scoring-service-builder/build
+/prediction-service-builder/.gradle
+/prediction-service-builder/build
 /var/master/assets/*.war
 /var/master/assets/*.jar
 /var/master/model
