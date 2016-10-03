@@ -22,7 +22,7 @@ if go is already installed, check go version:
 $ go version
 ```
 
-if the go version displayed is below `1.7.1`, follow the instructions at golang.org to:
+if the go version displayed is below `1.7.0`, follow the instructions at golang.org to:
 - [uninstall the old version of go](https://golang.org/doc/install#uninstall)
 - [install the latest version of go](https://golang.org/doc/install)
 
