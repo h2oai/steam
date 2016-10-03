@@ -16,7 +16,15 @@ $ which go
 - If not, restart your terminal and try again.
 - If not, add `export PATH=$PATH:/usr/local/go/bin` to your ~/.bash_profile and then `$ source ~/.bash_profile`.
 
-Note: Check go version and make sure go version is 1.7.1 or above. If go version is lower then 1.7.1 you will have errors. 
+if go is already installed, check go version: 
+
+```
+$ go version
+```
+
+if the go version displayed is below `1.7.0`, follow the instructions at golang.org to:
+- [uninstall the old version of go](https://golang.org/doc/install#uninstall)
+- [install the latest version of go](https://golang.org/doc/install)
 
 **Step 3**
 
