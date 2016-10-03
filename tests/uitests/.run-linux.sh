@@ -65,7 +65,7 @@ done
 echo "$i test(s) failed"
 cat $WD/.failures
 rm $WD/.failtmp $WD/.failures $WD/.testmp
-rm -rf $WD/steamY-develop-linux-amd64.tar.gz $WD/steam-develop-linux-amd64
+rm -rf $WD/steamY-develop-linux-amd64.tar.gz $WD/steam-develop-linux-amd64 $WD/steam
 
 
 

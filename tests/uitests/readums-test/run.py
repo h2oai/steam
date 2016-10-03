@@ -78,17 +78,21 @@ def readRolesTest():
 	iden = tu.createIdentity("billy", "bob")
 	tu.assignRole(iden, role)
 	d = tu.newtest()
+	wait = WebDriverWait(d, timeout=5, poll_frequency=0.2)
 	try:
 		tu.goUsers(d)	
 		tu.goRoles(d)
-		time.sleep(1)
+		time.sleep(2)
+		wait.until(lambda x: len(x.find_elements_by_xpath("//input[@type='checkbox']")) > 22)
 		checked = d.find_elements_by_xpath("//input[@type='checkbox' and @value='on']")
+		boxes = d.find_elements_by_xpath("//input[@type='checkbox']")
 		for i in inds:
 			box = d.find_elements_by_xpath("//input[@type='checkbox']")[(i * 2) + 1]
 			if not box in checked:
 				print "Permission {0} isn't checked".format(i)
 				return False
-	except:
+	except Exception as e:
+		print e
 		print "Failed to access users/roles page"
 		return False
 	finally:

@@ -104,7 +104,7 @@ def shareEntity(kind, eid, wg, level):
 def goUsers(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	driver.find_element_by_class_name("fa-user").click()
-	wait.until(lambda x: x.find_element_by_class_name("user-access"))
+	wait.until(lambda x: x.find_element_by_class_name("users"))
 
 def goRoles(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
@@ -445,7 +445,7 @@ def testAs(user, pw):
 	o = Options()
 	o.add_argument("--no-sandbox")
 	o.add_argument("--user-data-dir=/tmp")
-	driver = webdriver.Chrome(chrome_options=o)
+	driver = webdriver.Chrome()
 	driver.get("http://{0}:{1}@localhost:9000".format(user, pw))
 	return driver
 
@@ -453,7 +453,7 @@ def newtest():
 	o = Options()
 	o.add_argument("--no-sandbox")
 	o.add_argument("--user-data-dir=/tmp")
-	driver = webdriver.Chrome(chrome_options=o)
+	driver = webdriver.Chrome()
 	driver.get("http://superuser:superuser@localhost:9000")
 	return driver
 
