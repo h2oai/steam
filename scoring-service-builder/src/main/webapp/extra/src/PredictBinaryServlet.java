@@ -24,8 +24,6 @@ import java.util.List;
 public class PredictBinaryServlet extends HttpServlet {
   private final Logger logger = Logging.getLogger(this.getClass());
 
-  private static final Class ROW_DATA_TYPE = new RowData().getClass();
-
   private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   private static GenModel rawModel = null;
@@ -61,7 +59,8 @@ public class PredictBinaryServlet extends HttpServlet {
       List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
       for (FileItem i : items) {
         String field = i.getFieldName();
-        String value = i.getName();
+        String value = i.getString();
+        logger.debug("field {}  value {}", field, value);
         if (field.startsWith("binary_")) {
           String binFieldName = field.substring("binary_".length());
           if (binFieldName == null || binFieldName.length() == 0)
@@ -75,13 +74,18 @@ public class PredictBinaryServlet extends HttpServlet {
           logger.debug("binary field {} size {}", binFieldName, bindata.length);
           row.put(binFieldName, bindata);
         }
+        else if (field.equals("data")) {
+          RowData r = gson.fromJson(value, ServletUtil.ROW_DATA_TYPE);
+          logger.debug("data {}", r);
+          row.putAll(r);
+        }
         else {
           logger.debug("text field {} value {}", field, value);
           row.put(field, value);
         }
       }
       // now have parameters in row
-      logger.debug("row size {}", row.size());
+      logger.debug("row size {}  keys {}", row.size(), row.keySet());
 
       AbstractPrediction pr;
       String prJson;
