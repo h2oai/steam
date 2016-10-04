@@ -58,7 +58,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     }
 
     return (
-      <div className="role-permissions">
+      <div className="role-permissions intro">
         {this.props.permissionsWithRoles && this.props.roles ? <Table>
           <Row header={true}>
             <Cell className="right-table-bar">Permission Name</Cell>

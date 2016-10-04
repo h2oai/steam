@@ -45,5 +45,5 @@ on the `H2O Download page <http://h2o.ai/download>`__ for your platform to upgra
 .. toctree::
    :maxdepth: 2
    
-   UsingCLI
+   prediction_service
    CLIAppendix

@@ -104,11 +104,11 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
       <div className="clusters">
         <PageHeader>CLUSTERS
           { !this.state.newClusterRequested ?
-            <div className="buttons default">
-              <button className="default invert" onClick={this.onCreateNewClusterClicked.bind(this)}>
+            <div className="buttons header-buttons">
+              <div className="button-secondary" onClick={this.onCreateNewClusterClicked.bind(this)}>
                 Connect to Cluster
-              </button>
-              <Link to="clusters/new" className="default">Launch New Cluster</Link>
+              </div>
+              <Link to="clusters/new" className="button-primary">Launch New Cluster</Link>
             </div>
             : null }
         </PageHeader>
@@ -116,14 +116,14 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
           { this.state.newClusterRequested ?
             <Panel>
               <header>
-                <h3 className="new-cluster-header">New Cluster</h3>
+                <h2 className="new-cluster-header">New Cluster</h2>
               </header>
               <p>Connect to a H2O cluster where your existing models and data sets are located.</p>
               <div className="new-cluster-form">
                 <form onSubmit={this.registerCluster.bind(this)}>
-                  <input type="text" name="ip-address" placeholder="IP Address"/>&nbsp;
-                  <input type="text" name="port" placeholder="Port"/>&nbsp;<br /><br />
-                  <button type="submit" className="default">Connect</button>
+                  <input type="text" name="ip-address" placeholder="IP Address"/>
+                  <input type="text" name="port" placeholder="Port"/>
+                  <button type="submit" className="button-primary">Connect</button>
                 </form>
               </div>
             </Panel>
@@ -142,17 +142,15 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   </span>
                 </header>
                 <article>
-                  <h3>
+                  <h2>
                     ID: {cluster.id}
-                  </h3>
-                  <h3>
                     STATUS
-                  </h3>
+                  </h2>
                   <h2 className="cluster-status">
                     {cluster.state === 'started' ? 'OK' : cluster.state}
                   </h2>
                 </article>
-                <h3>ACCESS</h3>
+                <h2>ACCESS</h2>
                 { (cluster as any).identities ?
                   (cluster as any).identities.map((identity, index) => {
                     return <div key={index}>{ identity.identity_name }&nbsp;</div>;

@@ -96,7 +96,7 @@
 --
 
 CREATE TABLE binomial_model (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     model_id integer NOT NULL,
     mse double precision,
     r_squared double precision,
@@ -104,7 +104,6 @@ CREATE TABLE binomial_model (
     auc double precision,
     gini double precision, 
 
-    PRIMARY KEY (id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
 );
 
@@ -137,7 +136,7 @@ CREATE TABLE binomial_model (
 --
 
 CREATE TABLE cluster (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL,
     type_id integer NOT NULL,
     detail_id integer NOT NULL,
@@ -145,7 +144,6 @@ CREATE TABLE cluster (
     state job_state NOT NULL,
     created datetime NOT NULL,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (type_id) REFERENCES cluster_type(id)
 );
 
@@ -178,10 +176,8 @@ CREATE TABLE cluster (
 --
 
 CREATE TABLE cluster_type (
-    id integer NOT NULL,
-    name text NOT NULL UNIQUE, 
-
-    PRIMARY KEY (id)
+    id integer PRIMARY KEY AUTOINCREMENT,
+    name text NOT NULL UNIQUE 
 );
 
 
@@ -213,7 +209,7 @@ CREATE TABLE cluster_type (
 --
 
 CREATE TABLE cluster_yarn (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     engine_id integer NOT NULL,
     size integer NOT NULL,
     application_id text NOT NULL,
@@ -221,7 +217,6 @@ CREATE TABLE cluster_yarn (
     username text NOT NULL,
     output_dir text NOT NULL,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (engine_id) REFERENCES engine(id)
 );
 
@@ -261,7 +256,7 @@ CREATE TABLE cluster_yarn (
 --
 
 CREATE TABLE dataset (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     datasource_id integer NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
@@ -271,7 +266,6 @@ CREATE TABLE dataset (
     properties_version text NOT NULL,
     created datetime NOT NULL,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (datasource_id) REFERENCES datasource(id) ON DELETE CASCADE
 );
 
@@ -304,7 +298,7 @@ CREATE TABLE dataset (
 --
 
 CREATE TABLE datasource (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     project_id integer NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
@@ -312,7 +306,6 @@ CREATE TABLE datasource (
     configuration text NOT NULL,
     created datetime NOT NULL,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );
 
@@ -345,12 +338,10 @@ CREATE TABLE datasource (
 --
 
 CREATE TABLE engine (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL,
     location text NOT NULL,
-    created datetime NOT NULL,
-
-    PRIMARY KEY (id)
+    created datetime NOT NULL
 );
 
 
@@ -382,10 +373,8 @@ CREATE TABLE engine (
 --
 
 CREATE TABLE entity_type (
-    id integer NOT NULL,
-    name text NOT NULL UNIQUE,
-
-    PRIMARY KEY (id)
+    id integer PRIMARY KEY AUTOINCREMENT,
+    name text NOT NULL UNIQUE
 );
 
 
@@ -417,7 +406,7 @@ CREATE TABLE entity_type (
 --
 
 CREATE TABLE history (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     action text NOT NULL,
     identity_id integer NOT NULL,
     entity_type_id integer NOT NULL,
@@ -425,10 +414,8 @@ CREATE TABLE history (
     description text NOT NULL,
     created datetime NOT NULL,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (entity_type_id) REFERENCES entity_type(id),
     FOREIGN KEY (identity_id) REFERENCES identity(id)
-
 );
 
 
@@ -460,15 +447,13 @@ CREATE TABLE history (
 --
 
 CREATE TABLE identity (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
     password text NOT NULL,
     workgroup_id integer NOT NULL,
     is_active boolean NOT NULL,
     last_login integer with time zone,
-    created datetime NOT NULL,
-
-    PRIMARY KEY (id)
+    created datetime NOT NULL
 );
 
 
@@ -530,16 +515,15 @@ CREATE TABLE identity_workgroup (
 --
 
 CREATE TABLE label (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     project_id integer NOT NULL,
     model_id integer,
     name text NOT NULL,
     description text NOT NULL,
     created datetime NOT NULL,
 
-    PRIMARY KEY (id),
-    FOREIGN KEY (model_id) REFERENCES model(id),
-    FOREIGN KEY (project_id) REFERENCES project(id)
+    FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE SET NULL,
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );
 
 
@@ -607,7 +591,7 @@ CREATE TABLE meta (
 --
 
 CREATE TABLE model (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     project_id integer NOT NULL,
     training_dataset_id integer NOT NULL,
     validation_dataset_id integer NOT NULL,
@@ -625,7 +609,6 @@ CREATE TABLE model (
     metrics_version text NOT NULL,
     created datetime NOT NULL,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (training_dataset_id) REFERENCES dataset(id),
     FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id)
@@ -702,13 +685,12 @@ CREATE TABLE model (
 --
 
 CREATE TABLE multinomial_model (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     model_id integer NOT NULL,
     mse double precision,
     r_squared double precision,
     logloss double precision,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
 );
 
@@ -741,11 +723,9 @@ CREATE TABLE multinomial_model (
 --
 
 CREATE TABLE permission (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     code text NOT NULL UNIQUE,
-    description text NOT NULL,
-
-    PRIMARY KEY (id)
+    description text NOT NULL
 );
 
 
@@ -795,13 +775,11 @@ CREATE TABLE privilege (
 --
 
 CREATE TABLE project (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL,
     description text NOT NULL,
     model_category text NOT NULL,
-    created datetime NOT NULL,
-
-    PRIMARY KEY (id)
+    created datetime NOT NULL  
 );
 
 
@@ -833,13 +811,12 @@ CREATE TABLE project (
 --
 
 CREATE TABLE regression_model (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     model_id integer NOT NULL,
     mse double precision,
     r_squared double precision,
     mean_residual_deviance double precision,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
 );
 
@@ -872,12 +849,10 @@ CREATE TABLE regression_model (
 --
 
 CREATE TABLE role (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
-    created datetime NOT NULL,
-
-    PRIMARY KEY (id)
+    created datetime NOT NULL  
 );
 
 
@@ -925,7 +900,7 @@ CREATE TABLE role_permission (
 --
 
 CREATE TABLE service (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     project_id integer NOT NULL,
     model_id integer NOT NULL,
     name text NOT NULL,
@@ -935,7 +910,6 @@ CREATE TABLE service (
     state job_state NOT NULL,
     created datetime NOT NULL,
 
-    PRIMARY KEY (id),
     FOREIGN KEY (model_id) REFERENCES model(id)
 );
 
@@ -968,13 +942,11 @@ CREATE TABLE service (
 --
 
 CREATE TABLE workgroup (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     type workgroup_type NOT NULL,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
-    created datetime NOT NULL,
-
-    PRIMARY KEY (id)
+    created datetime NOT NULL 
 );
 
 
