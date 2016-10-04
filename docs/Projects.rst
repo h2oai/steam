@@ -240,16 +240,12 @@ Model`_ or `Exporting a Model`_.)
 Making Predictions
 ~~~~~~~~~~~~~~~~~~
 
-1. To reach the Steam Prediction Service, click the IP address link
-   listed under the Deployed Services for the deployed model that you
-   want to score. This opens Steam Prediction Service tool. The fields
-   that display on the Prediction Service tool are automatically
-   populated with field information from the deployed model.
+1. To reach the Steam Prediction Service Buider, click the IP address link listed under the Deployed Services for the model that you have deployed and want to score. Clicking this link opens the Steam Prediction Service Builder. (Refer to the `Prediction Service Builder <prediction_service.html>`__ appendix for more information.) The fields that display on the Prediction Service Builder are automatically populated with field information from the deployed model, making it easy for you to make predictions based on any model that you deploy.
 
  .. figure:: images/prediction_service.png
-   :alt: Prediction Services tool
+   :alt: Prediction Service tool
 
-   Prediction Services tool
+   Prediction Service tool
 
 2. Make predictions by specifying input values based on column data from
    the original dataset. This automatically populates the fields in the
@@ -258,7 +254,10 @@ Making Predictions
 
 3. Click **Predict** when you are done.
 
-**Note**: Use the **Clear** button to clear all entries and begin a new prediction. Use the **More Stats** button to view additional statistics about the scoring service results.
+**Notes**: 
+ - Use the **Clear** button to clear all entries and begin a new prediction. 
+ - Use the **More Stats** button to view additional statistics about the scoring service results.
+ - The Steam Prediction Service is available as a completely standalone utility. Refer to the `Prediction Service Builder <prediction_service.html>`__ appendix for more information about using the Prediction Service Builder. 
 
 Configurations
 --------------
