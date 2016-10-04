@@ -36,6 +36,7 @@ import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
 import InputFeedback from '../../App/components/InputFeedback';
 import { FeedbackType } from '../../App/components/InputFeedback';
+import MojoPojoSelector from "./MojoPojoSelector";
 
 interface DispatchProps {
   fetchClusters: Function,
@@ -250,7 +251,8 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <h2>4. Pick Models to Import</h2>
           <div className="intro">
-            Models in a project must share the same feature set and response column to enable comparison.
+            Models in a project must share the same feature set and response column to enable comparison. By default, Steam picks the most optimized model format for you to import. Advanced users can choose your own model type&nbsp;
+            <MojoPojoSelector/>.
           </div>
           <Table className="import-models">
             <Row header={true}>
