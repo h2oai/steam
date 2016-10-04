@@ -162,10 +162,7 @@ This workflow is followed in the example that follows.
 User Management Example
 -----------------------
 
-The following example creates sample roles, workgroups, and users using
-the CLI. Refer to the **CLI Command Reference Appendix** in the *Steam
-User Guide* for information about all of the commands available in the
-CLI.
+The following example creates sample roles, workgroups, and users using the CLI. Refer to the `CLI Command Reference <CLIAppendix.html>`__  for information about all of the commands available in the CLI.
 
 1. Log in as the Steam superuser on the machine that is running Steam.
 

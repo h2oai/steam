@@ -60,6 +60,7 @@ coverage.out
 /docs/user_guide/node_modules
 /docs/install/_book
 /docs/install/node_modules
+/docs/_build
 
 # ignore list of generated demo docs
 /demo/_book
@@ -74,3 +75,4 @@ coverage.out
 /.idea
 /gui/.idea
 /tools/steamlauncher/steamlauncher
+
