@@ -1253,7 +1253,7 @@ func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bi
 func (s *Service) CheckMojo(pz az.Principal, algo string) (bool, error) {
 	switch algo {
 	case "Gradient Boosting Method", "Distributed Random Forest":
-		return false, nil
+		return true, nil
 	}
 	return false, nil
 }
