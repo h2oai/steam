@@ -117,7 +117,7 @@ After Steam is installed, the following steps describe how to start Steam.
 
   ./steam serve master --superuser-name=superuser --superuser-password=superuser
 
-  **Note**: If you are demoing Steam and do not have an Internet connection, you can set the prediction service to point to localhost using ``--prediction-service-address=localhost``. 
+ **Note**: If you are demoing Steam and do not have an Internet connection, you can set the prediction service to point to localhost using ``--prediction-service-address=localhost``. 
 
 4. Open a Chrome browser and navigate to http://localhost:9000.
 
