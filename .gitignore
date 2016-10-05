@@ -37,8 +37,8 @@ coverage.out
 /var/
 /var/master/www/
 /var/master/db/steam.db
-/scoring-service-builder/.gradle
-/scoring-service-builder/build
+/prediction-service-builder/.gradle
+/prediction-service-builder/build
 /var/master/assets/*.war
 /var/master/assets/*.jar
 /var/master/model
@@ -60,6 +60,7 @@ coverage.out
 /docs/user_guide/node_modules
 /docs/install/_book
 /docs/install/node_modules
+/docs/_build
 
 # ignore list of generated demo docs
 /demo/_book
@@ -74,6 +75,10 @@ coverage.out
 /.idea
 /gui/.idea
 /tools/steamlauncher/steamlauncher
+<<<<<<< HEAD
 /steam.log
 /service.log
 /tools/steamlauncher/service.log
+=======
+
+>>>>>>> b02f98d62d780b97cb3c6b5aafb7246446603c34
