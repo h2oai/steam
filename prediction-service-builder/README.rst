@@ -54,9 +54,9 @@ Perform the following steps to build the H2O Prediction Service Builder:
    Prediction Service Builder web UI.
 
    .. figure:: images/builder_service.png
-      :alt: Builder Service
+      :alt: Prediction Builder Service
 
-      Builder Service
+      Prediction Builder Service
 
 Running an Example War File
 ---------------------------
