@@ -522,8 +522,8 @@ CREATE TABLE label (
     description text NOT NULL,
     created datetime NOT NULL,
 
-    FOREIGN KEY (model_id) REFERENCES model(id),
-    FOREIGN KEY (project_id) REFERENCES project(id)
+    FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE SET NULL,
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );
 
 

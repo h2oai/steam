@@ -42,9 +42,9 @@ func TestRoleCRUD(tt *testing.T) {
 	roles, err := t.svc.GetRoles(t.su, 0, 1000)
 	t.nil(err)
 
-	t.ok(len(roles) == 2, "role count: expected 1, got %d", len(roles))
+	t.ok(len(roles) == 1, "role count: expected 1, got %d", len(roles))
 
-	role = roles[1]
+	role = roles[0]
 	t.ok(name1 == role.Name, "name")
 	t.ok(description1 == role.Description, "description")
 
@@ -68,9 +68,9 @@ func TestRoleCRUD(tt *testing.T) {
 	roles, err = t.svc.GetRoles(t.su, 0, 2000)
 	t.nil(err)
 
-	t.ok(len(roles) == 2, "role count")
+	t.ok(len(roles) == 1, "role count")
 
-	role = roles[1]
+	role = roles[0]
 	t.ok(name2 == role.Name, "name")
 	t.ok(description2 == role.Description, "description")
 
@@ -98,7 +98,7 @@ func TestRoleDeletion(tt *testing.T) {
 
 	roles, err := t.svc.GetRoles(t.su, 0, 1000)
 	t.nil(err)
-	t.ok(len(roles) == 1, "role count")
+	t.ok(len(roles) == 0, "role count")
 
 	// err = t.svc.DeleteRole(t.su, id) // should fail on a duplicate attempt
 	// t.notnil(err)
