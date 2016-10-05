@@ -29,7 +29,7 @@ import Row from './Row';
 import Cell from './Cell';
 import {
   fetchClusters, fetchModelsFromCluster, resetClusterSelection,
-  importModelFromCluster, createProjectAndImportModelsFromCluster, registerCluster, fetchDatasetsFromCluster
+  createProjectAndImportModelsFromCluster, registerCluster, fetchDatasetsFromCluster
 } from '../actions/projects.actions';
 import { Cluster, Model, Dataset } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
@@ -41,7 +41,6 @@ import MojoPojoSelector from "./MojoPojoSelector";
 interface DispatchProps {
   fetchClusters: Function,
   fetchModelsFromCluster: Function,
-  importModelFromCluster: Function,
   createProjectAndImportModelsFromCluster: Function,
   registerCluster: Function,
   fetchDatasetsFromCluster: Function,
@@ -308,7 +307,6 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchClusters: bindActionCreators(fetchClusters, dispatch),
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
     createProjectAndImportModelsFromCluster: bindActionCreators(createProjectAndImportModelsFromCluster, dispatch),
-    importModelFromCluster: bindActionCreators(importModelFromCluster, dispatch),
     registerCluster: bindActionCreators(registerCluster, dispatch),
     fetchDatasetsFromCluster: bindActionCreators(fetchDatasetsFromCluster, dispatch),
     resetClusterSelection: bindActionCreators(resetClusterSelection, dispatch)
