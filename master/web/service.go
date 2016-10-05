@@ -2469,6 +2469,7 @@ func toModel(m data.Model) *web.Model {
 		m.ResponseColumnName,
 		m.LogicalName.String,
 		m.Location,
+		m.ModelObjectType.String,
 		int(m.MaxRunTime), // FIXME change db field to int
 		m.Metrics,
 		toTimestamp(m.Created),
@@ -2492,6 +2493,7 @@ func toBinomialModel(model data.BinomialModel) *web.BinomialModel {
 		model.ResponseColumnName,
 		model.LogicalName.String,
 		model.Location,
+		model.ModelObjectType.String,
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
@@ -2528,6 +2530,7 @@ func toMultinomialModel(model data.MultinomialModel) *web.MultinomialModel {
 		model.ResponseColumnName,
 		model.LogicalName.String,
 		model.Location,
+		model.ModelObjectType.String,
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
@@ -2561,6 +2564,7 @@ func toRegressionModel(model data.RegressionModel) *web.RegressionModel {
 		model.ResponseColumnName,
 		model.LogicalName.String,
 		model.Location,
+		model.ModelObjectType.String,
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),

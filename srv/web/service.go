@@ -45,6 +45,7 @@ type BinomialModel struct {
 	ResponseColumnName  string  `json:"response_column_name"`
 	LogicalName         string  `json:"logical_name"`
 	Location            string  `json:"location"`
+	ModelObjectType     string  `json:"model_object_type"`
 	MaxRuntime          int     `json:"max_runtime"`
 	JSONMetrics         string  `json:"json_metrics"`
 	CreatedAt           int64   `json:"created_at"`
@@ -171,6 +172,7 @@ type Model struct {
 	ResponseColumnName  string `json:"response_column_name"`
 	LogicalName         string `json:"logical_name"`
 	Location            string `json:"location"`
+	ModelObjectType     string `json:"model_object_type"`
 	MaxRuntime          int    `json:"max_runtime"`
 	JSONMetrics         string `json:"json_metrics"`
 	CreatedAt           int64  `json:"created_at"`
@@ -191,6 +193,7 @@ type MultinomialModel struct {
 	ResponseColumnName  string  `json:"response_column_name"`
 	LogicalName         string  `json:"logical_name"`
 	Location            string  `json:"location"`
+	ModelObjectType     string  `json:"model_object_type"`
 	MaxRuntime          int     `json:"max_runtime"`
 	JSONMetrics         string  `json:"json_metrics"`
 	CreatedAt           int64   `json:"created_at"`
@@ -228,6 +231,7 @@ type RegressionModel struct {
 	ResponseColumnName   string  `json:"response_column_name"`
 	LogicalName          string  `json:"logical_name"`
 	Location             string  `json:"location"`
+	ModelObjectType      string  `json:"model_object_type"`
 	MaxRuntime           int     `json:"max_runtime"`
 	JSONMetrics          string  `json:"json_metrics"`
 	CreatedAt            int64   `json:"created_at"`

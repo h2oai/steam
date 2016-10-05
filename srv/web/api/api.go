@@ -102,6 +102,7 @@ type Model struct {
 	ResponseColumnName  string
 	LogicalName         string
 	Location            string
+	ModelObjectType     string
 	MaxRuntime          int
 	JSONMetrics         string
 	CreatedAt           int64
@@ -122,6 +123,7 @@ type BinomialModel struct {
 	ResponseColumnName  string
 	LogicalName         string
 	Location            string
+	ModelObjectType     string
 	MaxRuntime          int
 	JSONMetrics         string
 	CreatedAt           int64
@@ -147,6 +149,7 @@ type MultinomialModel struct {
 	ResponseColumnName  string
 	LogicalName         string
 	Location            string
+	ModelObjectType     string
 	MaxRuntime          int
 	JSONMetrics         string
 	CreatedAt           int64
@@ -170,6 +173,7 @@ type RegressionModel struct {
 	ResponseColumnName   string
 	LogicalName          string
 	Location             string
+	ModelObjectType      string
 	MaxRuntime           int
 	JSONMetrics          string
 	CreatedAt            int64

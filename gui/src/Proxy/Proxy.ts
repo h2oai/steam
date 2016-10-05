@@ -52,6 +52,8 @@ export interface BinomialModel {
   
   location: string
   
+  model_object_type: string
+  
   max_runtime: number
   
   json_metrics: string
@@ -276,6 +278,8 @@ export interface Model {
   
   location: string
   
+  model_object_type: string
+  
   max_runtime: number
   
   json_metrics: string
@@ -313,6 +317,8 @@ export interface MultinomialModel {
   logical_name: string
   
   location: string
+  
+  model_object_type: string
   
   max_runtime: number
   
@@ -381,6 +387,8 @@ export interface RegressionModel {
   logical_name: string
   
   location: string
+  
+  model_object_type: string
   
   max_runtime: number
   
