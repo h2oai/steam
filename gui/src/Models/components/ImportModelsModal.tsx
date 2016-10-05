@@ -24,6 +24,7 @@ import PageHeader from '../../Projects/components/PageHeader';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
+import MojoPojoSelector from '../../Projects/components/MojoPojoSelector';
 import { bindActionCreators } from 'redux';
 import {
   fetchClusters, fetchModelsFromCluster,
@@ -55,6 +56,7 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
     super();
     this.state = {
       clusterId: null,
+
       models: []
     };
   }
@@ -89,6 +91,12 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
         <PageHeader>IMPORT MODELS</PageHeader>
         <form onSubmit={this.importModelsFromCluster.bind(this)}>
           <Table className="outer-table">
+            <Row>
+              <Cell>
+                By default, Steam picks the most optimized model format for you to import. Advanced users can choose your own model type&nbsp;
+                <MojoPojoSelector></MojoPojoSelector>.
+              </Cell>
+            </Row>
             <Row>
               <Cell>
                 CLUSTER
