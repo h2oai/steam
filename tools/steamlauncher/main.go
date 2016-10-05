@@ -19,6 +19,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -29,12 +30,12 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"sync"
 	"syscall"
 
 	"github.com/BurntSushi/toml"
 	"github.com/h2oai/steam/lib/rpc"
 	"github.com/h2oai/steam/srv/web"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -64,23 +65,21 @@ func init() {
 
 // Run checks, launch services, and handle errors
 func main() {
+	var err error
 	sigChan := make(chan os.Signal, 1)
-	failCh := make(chan error, 3)
-	killCh := make(chan bool)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	// Start services in WaitGroup to insure both exit before returning from main
-	wg := &sync.WaitGroup{}
-	go func() { wg.Add(1); failCh <- launchSteam(killCh); wg.Done() }()
-	go func() { wg.Add(1); failCh <- launchScoringService(killCh); wg.Done() }()
+	go func() { err = errors.Wrap(launchSteam(ctx), "failed launching steam"); cancel() }()
+	go func() {
+		err = errors.Wrap(launchPredictionBuilder(ctx), "failed launching scoring service")
+		cancel()
+	}()
 
 	select {
-	// Error case: close channel and wait until services exit.
-	case err := <-failCh:
-		log.Println(err)
-		close(killCh)
-		wg.Wait()
-		return
+	case <-ctx.Done():
+		log.Fatalln(err)
 	case sig := <-sigChan:
 		log.Println("Caught signal", sig)
 		log.Println("Shut down gracefully.")
@@ -88,92 +87,76 @@ func main() {
 	}
 }
 
-func launchScoringService(killch chan bool) error {
+func launchPredictionBuilder(ctx context.Context) error {
 	log.Println("Launching Scoring Service...")
 
 	// Issue commands and start scoring service
 	argv := []string{
-		"-jar",
-		config.ScoringSerivce.JettyPath,
-		"--port",
-		strconv.Itoa(config.ScoringSerivce.Port),
-		config.ScoringSerivce.WarPath,
+		"-jar", config.PredictionBuilder.JettyPath,
+		"--port", strconv.Itoa(config.PredictionBuilder.Port),
+		config.PredictionBuilder.WarPath,
 	}
-	cmd := exec.Command("java", argv...)
+	cmd := exec.CommandContext(ctx, "java", argv...)
 	stdErr, err := cmd.StderrPipe() // StdErr for logging
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to set stderr pipe")
 	}
 	defer stdErr.Close()
-	if err := cmd.Start(); err != nil {
-		return err
+	stdOut, err := cmd.StdoutPipe() // StdOut for logging
+	if err != nil {
+		return errors.Wrap(err, "failed to set stdout pipe")
 	}
-	// Kill process if main fails
-	go func() { <-killch; cmd.Process.Kill() }()
+	defer stdOut.Close()
+	if err := cmd.Start(); err != nil {
+		return errors.Wrap(err, "failed to start")
+	}
 
-	// Start log and issue any successful startup commands
-	okCh := make(chan bool)
-	success := regexp.MustCompile(`Started @\d+ms`)
-	go writeToLog(stdErr, "service.log", success, okCh)
+	pass := make(chan struct{})
+	re := regexp.MustCompile(`Started @\d+`)
+	go logScan(stdErr, "BUILDER", re, pass)
+	go logScan(stdOut, "BUILDER", re, pass)
 
-	go func() {
-		ok := <-okCh
-		if !ok {
-			killch <- true
-		}
-		log.Println("Scoring service is up.")
-	}()
-
-	// Blocking: if this function returns, an error occured.
-	return fmt.Errorf("Unexpectedly quit Scoring Service. See service log file.: %v", cmd.Wait())
+	return errors.Wrap(cmd.Wait(), "unexpetedly quit")
 }
 
-func launchSteam(killch chan bool) error {
+func launchSteam(ctx context.Context) error {
 	log.Println("Launching Steam...")
 
 	// Issue commands and start steam
 	argv := []string{
-		"serve",
-		"master",
+		"serve", "master",
 		"--superuser-name=" + config.Superuser.Name,
 		"--superuser-password=" + config.Superuser.Pass,
 		"--web-address=:" + strconv.Itoa(config.Steam.Port),
-		"--scoring-service-address=:" + strconv.Itoa(config.ScoringSerivce.Port),
-		"--scoring-service-port-range=" + config.ScoringSerivce.PortRange,
+		"--compilation-service-address=" + config.PredictionBuilder.Host + ":" + strconv.Itoa(config.PredictionBuilder.Port),
+		"--scoring-service-port-range=" + config.PredictionService.PortRange,
 	}
-	cmd := exec.Command("./steam", argv...)
+	cmd := exec.CommandContext(ctx, "./steam", argv...)
 	stdErr, err := cmd.StderrPipe() // StdErr for logging
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed setting stderr pipe")
 	}
 	defer stdErr.Close()
-	if err := cmd.Start(); err != nil {
-		return err
+	stdOut, err := cmd.StdoutPipe() // StdOut for logging
+	if err != nil {
+		return errors.Wrap(err, "failed setting stdout pipe")
 	}
+	defer stdOut.Close()
 
-	// Kill process if main fails
-	go func() { <-killch; cmd.Process.Kill() }()
-
-	// Start log and issue any successful startup commands
-	okCh := make(chan bool)
-	success := regexp.MustCompile("Web server listening at")
-	go writeToLog(stdErr, "steam.log", success, okCh)
-	go func() { // On success run Initialization if -init specified
-		ok := <-okCh
-		if !ok {
-			killch <- true
-		}
+	pass := make(chan struct{})
+	re := regexp.MustCompile(`Web server listening at :\d+`)
+	go logScan(stdErr, "STEAM", re, pass)
+	go logScan(stdOut, "STEAM", re, pass)
+	defer close(pass)
+	go func() {
+		_ = <-pass
 		if doInit {
-			if err := initSteam(); err != nil {
-				log.Println(err)
-				killch <- true
-			}
+			//FIXME: Not checking for errors here should be fixed
+			initSteam()
 		}
-		log.Printf("Steam is up on port %d", config.Steam.Port)
 	}()
 
-	// Blocking: if this function returns, an error occured.
-	return fmt.Errorf("Unexpectedly quit Steam. See steam log file.: %v", cmd.Wait())
+	return errors.Wrap(cmd.Run(), "unexpectedly quit")
 }
 
 func initSteam() error {
@@ -220,27 +203,14 @@ func initSteam() error {
 	return nil
 }
 
-func writeToLog(stream io.ReadCloser, fileName string, succ *regexp.Regexp, okCh chan bool) error {
+func logScan(stream io.ReadCloser, src string, re *regexp.Regexp, pass chan struct{}) error {
+
 	in := bufio.NewScanner(stream)
-
-	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
-	if err != nil {
-		log.Println(err)
-		okCh <- false
-		return err
-	}
-	defer f.Close()
-
 	for in.Scan() {
-		if _, err := f.WriteString(in.Text() + "\n"); err != nil {
-			return err
-		}
-		if err := f.Sync(); err != nil {
-			return err
-		}
+		fmt.Println(src, in.Text())
 
-		if succ.Match(in.Bytes()) {
-			okCh <- true
+		if re.Match(in.Bytes()) {
+			close(pass)
 		}
 	}
 
