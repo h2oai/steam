@@ -109,6 +109,7 @@ select {
   padding-right: 16px;
   padding-top: 11px;
   padding-bottom: 11px;
+  display: inline-flex;
 }
 .button-secondary {
   @extend .button-base;
@@ -123,8 +124,10 @@ select {
   padding-bottom: 9px;
 }
 .button {
+  display: inline-flex;
   color: $h2o-soft-grey;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 button, a {

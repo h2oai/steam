@@ -36,6 +36,14 @@ interface DispatchProps {
 }
 
 export class RolePermissions extends React.Component<Props & DispatchProps, any> {
+
+  constructor(params) {
+    super(params);
+    this.state = {
+      requestedChanges: null
+    };
+  }
+
   permissionInputs = {};
 
   componentWillMount() {
@@ -55,46 +63,112 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     };
   }
 
-  updatePermissions = () => {
-    this.props.saveUpdatedPermissions((this as any).permissionInputs);
+  cancelIndividualChange = (index) => {
+    let clone = this.state.requestedChanges.slice(0);
+    clone.splice(index, 1);
+
+    this.setState({
+      requestedChanges: clone
+    });
+  };
+
+  requestChanges = () => {
+    let updates = [];
+
+    for (var permissionKey in this.permissionInputs) {
+      for (var flagKey in this.permissionInputs[permissionKey].flags) {
+        let flagset = this.permissionInputs[permissionKey].flags[flagKey];
+        if (flagset.originalFlag !== flagset.input.checked) {
+          updates.push({
+            newFlag: flagset.input.checked,
+            userIndex: flagKey,
+            userDescription: this.props.roles[flagKey].description,
+            permissionIndex: permissionKey,
+            description: this.permissionInputs[permissionKey].permissionSet.description,
+            permissionId: this.permissionInputs[permissionKey].permissionSet.id,
+            confirmed: false
+          });
+        }
+      }
+    }
+
+    updates.sort((a, b) => {
+      if (a.newFlag) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+
+    this.setState({
+      requestedChanges: updates
+    });
+    //this.props.saveUpdatedPermissions((this as any).permissionInputs);
   };
 
   render(): React.ReactElement<HTMLDivElement> {
-    let permissionRows;
-    (this as any)._checkboxes = {};
-    console.log(this);
+    console.log(this.state);
+    if (this.state.requestedChanges === null) { //list options
+      let permissionRows;
+      (this as any)._checkboxes = {};
 
-    if (this.props.permissionsWithRoles) {
-      permissionRows = this.props.permissionsWithRoles.map(function (permissionSet, permissionIndex) {
-        return<Row key={permissionIndex}>
-          <Cell className="right-table-bar" key={permissionSet.description}>{permissionSet.description}</Cell>
-          {permissionSet.flags.map((flag,flagIndex) => {
-            if (flagIndex === 0) {
-              return <Cell className="center-text" key={flagIndex}><input ref={(input) => this.registerInput(input, true, flagIndex, permissionSet, permissionIndex)}  type="checkbox" value="on" defaultChecked={true} readOnly={false} disabled={false}></input></Cell>;
-            } else {
-              return <Cell className="center-text" key={flagIndex}><input ref={(input) => this.registerInput(input, flag, flagIndex, permissionSet, permissionIndex)}  type="checkbox" value="on" defaultChecked={flag} readOnly={false} disabled={false}></input></Cell>;
-            }
-          })}
-        </Row>;
-      }, this);
-    }
-
-    return (
-      <div className="role-permissions intro">
-        {this.props.permissionsWithRoles && this.props.roles ? <Table>
-          <Row header={true}>
-            <Cell className="right-table-bar">Permission Name</Cell>
-            {this.props.roles.map((role, rolesIndex) => {
-              return <Cell className="center-text" key={rolesIndex}>{role.description}</Cell>;
+      if (this.props.permissionsWithRoles) {
+        permissionRows = this.props.permissionsWithRoles.map(function (permissionSet, permissionIndex) {
+          return<Row key={permissionIndex}>
+            <Cell className="right-table-bar" key={permissionSet.description}>{permissionSet.description}</Cell>
+            {permissionSet.flags.map((flag, flagIndex) => {
+              if (flagIndex === 0) {
+                return <Cell className="center-text" key={flagIndex}><input
+                  ref={(input) => this.registerInput(input, true, flagIndex, permissionSet, permissionIndex)}
+                  type="checkbox" value="on" defaultChecked={true} readOnly={false} disabled={false}></input></Cell>;
+              } else {
+                return <Cell className="center-text" key={flagIndex}><input
+                  ref={(input) => this.registerInput(input, flag, flagIndex, permissionSet, permissionIndex)}
+                  type="checkbox" value="on" defaultChecked={flag} readOnly={false} disabled={false}></input></Cell>;
+              }
             })}
-          </Row>
-          {permissionRows}
-        </Table>
-        : null}
-        <div className="button-primary" onClick={this.updatePermissions}>Save</div>
-      </div>
-    );
+          </Row>;
+        }, this);
+      }
+
+      return (
+        <div className="role-permissions intro">
+          {this.props.permissionsWithRoles && this.props.roles ? <Table>
+            <Row header={true}>
+              <Cell className="right-table-bar">Permission Name</Cell>
+              {this.props.roles.map((role, rolesIndex) => {
+                return <Cell className="center-text" key={rolesIndex}>{role.description}</Cell>;
+              })}
+            </Row>
+            {permissionRows}
+          </Table>
+            : null}
+          <div className="button-primary" onClick={this.requestChanges}>Save</div>
+        </div>
+      );
+    } else { //confirm screen
+      return (
+        <div>
+          <h1>CONFIRMING PERMISSION CHANGES</h1>
+          <p>You are making the following changes</p>
+          <Table>
+            <Row header={true}>
+              <Cell>CHANGE</Cell>
+              <Cell>CONFIRM</Cell>
+            </Row>
+            { this.state.requestedChanges.map((requestedChange, index, array) => {
+              return <Row key={index}>
+                <Cell>{requestedChange.userDescription} &nbsp; {requestedChange.newFlag ? <span>gains</span> : <span>loses</span>} &nbsp; {requestedChange.description}</Cell>
+                <Cell>{requestedChange.confirmed ? <span>Confirmed</span> : <span className="button-primary">Confirm</span>} <span onClick={() => this.cancelIndividualChange(index)} className="button">Cancel Change</span></Cell>
+              </Row>;
+            })}
+          </Table>
+        </div>
+      );
+    }
   }
+
+
 }
 
 function mapStateToProps(state): any {
