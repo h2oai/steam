@@ -46,7 +46,7 @@ echo "Building and testing spam-prejar prediction service"
 (cd spam-prejar  && bash test_suite.sh) || exit 1
 
 echo "Building and testing compile to jar"
-(cd compile  && bash compile.sh) || exit 1
+(cd compile  && bash example.sh) || exit 1
 (cd compile  && bash test_suite.sh) || exit 1
 
 # kill process
