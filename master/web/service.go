@@ -1528,6 +1528,8 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),
 		s.scoringServiceAddress,
 		port,
+		name,
+		pz.Name(),
 	)
 	if err != nil {
 		return 0, err
