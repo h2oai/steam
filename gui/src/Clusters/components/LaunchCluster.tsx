@@ -152,7 +152,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
             </Row> : null}
           </Table>
-          <div type="submit" className="button-primary">Launch New Clusters</div>
+          <button type="submit" className="button-primary">Launch New Clusters</button>
         </form>
       </div>
     );
