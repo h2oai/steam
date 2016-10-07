@@ -34,11 +34,7 @@ $ mkdir -p $HOME/go
 
 Then, edit your ~/.bash_profile and add `export GOPATH=$HOME/go` and then `$ source ~/.bash_profile`.
 
-Next, install this Go dependency management tool.
-
-```
-go get github.com/tools/godep
-```
+**Note**: Refer to [https://golang.org/doc/install](https://golang.org/doc/install) for detailed installation instructions. 
 
 **Step 4**
 
@@ -52,7 +48,7 @@ $ cd steam
 $ make
 ```
 
-Note: If you do not follow above path to clone steam source, you will get build errors. golang is very specific about where the source code is cloned.
+Note: If you do not follow above path to clone steam source, you will get build errors. golang is very specific about where the source code is cloned. 
 
 **Step 5**
 
