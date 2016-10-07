@@ -92,7 +92,7 @@ select {
 .button-base {
   font-family: "Open Sans";
   position: relative;
-  display: inline-block;
+  display: inline-flex;
   top: -3px;
   margin-right: 16px;
   border-radius: 3px;
@@ -100,6 +100,12 @@ select {
   text-decoration: none;
   cursor: pointer;
   border-width: 0px;
+  &.disabled {
+    background: $brand-dark-3;
+    border-color: $brand-dark-3;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
 }
 .button-primary {
   @extend .button-base;

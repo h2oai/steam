@@ -263,9 +263,9 @@ export function fetchPermissionsWithRoles() {
                 if (_.findIndex(permissionSet.permissions, (o: Permission) => {
                   return o.id === descriptions[i].id;
                 }) !== -1) {
-                  flags.push(true);
+                  flags.push({value: true, roleId: permissionSet.roleId});
                 } else {
-                  flags.push(false);
+                  flags.push({value: false, roleId: permissionSet.roleId});
                 }
               }
               output.push({
@@ -282,34 +282,20 @@ export function fetchPermissionsWithRoles() {
   };
 }
 
-export function saveUpdatedPermissions(permissionInputs) {
+export function saveUpdatedPermissions(updates) {
   return (dispatch) => {
     dispatch(requestSavePermissions());
 
-    let updates = [];
-
-    for (var permissionKey in permissionInputs) {
-      for (var flagKey in permissionInputs[permissionKey].flags) {
-        let flagset = permissionInputs[permissionKey].flags[flagKey];
-        if (flagset.originalFlag !== flagset.input.checked) {
-          updates.push({
-            newFlag: flagset.input.checked,
-            userIndex: flagKey,
-            permissionIndex: permissionKey,
-            description: permissionInputs[permissionKey].permissionSet.description,
-            permissionId: permissionInputs[permissionKey].permissionSet.id
-          });
-        }
-      }
-    }
-
     for (let update of updates) {
       if (update.newFlag === true) {
+        console.log(true);
+        console.log(update);
         //Remote.linkRoleWithPermission(roleId, permissionId, (error) => console.log(error));
       } else {
+        console.log(false);
+        console.log(update);
         //Remote.unlinkRoleFromPermission(roleId, permissionId, (error) => console.log(error));
       }
     }
-    console.log(updates);
   };
 }
