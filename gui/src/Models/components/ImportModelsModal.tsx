@@ -67,10 +67,12 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   }
 
   onChange(event) {
-    this.setState({
-      clusterId: event.target.value
-    });
-    this.props.fetchModelsFromCluster(parseInt(event.target.value, 10), this.props.datasetName);
+    if (event.target.value) {
+      this.setState({
+        clusterId: event.target.value
+      });
+      this.props.fetchModelsFromCluster(parseInt(event.target.value, 10), this.props.datasetName);
+    }
   }
 
   importModelsFromCluster(event) {
