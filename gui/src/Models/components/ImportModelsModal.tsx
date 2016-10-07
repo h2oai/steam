@@ -42,7 +42,8 @@ interface Props {
   models: Model[],
   fetchLeaderboard: Function,
   modelCategory: string,
-  datasetName: string
+  datasetName: string,
+  project: any
 }
 
 interface DispatchProps {
@@ -86,6 +87,7 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   }
 
   render() {
+    console.log(this.props.project);
     return (
       <DefaultModal className="import-modal" open={this.props.open}>
         <PageHeader>IMPORT MODELS</PageHeader>
@@ -124,7 +126,9 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
                     <Cell>RESPONSE COLUMN</Cell>
                     <Cell/>
                   </Row>
-                  {this.props.models.map((model, i) => {
+                  {this.props.models.filter((model) => {
+                    return model.model_category === this.props.project.model_category;
+                  }).map((model, i) => {
                     return (
                       <Row key={i}>
                         <Cell>{model.name}</Cell>
@@ -154,7 +158,8 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
 function mapStateToProps(state) {
   return {
     clusters: state.projects.clusters,
-    models: state.projects.models
+    models: state.projects.models,
+    project: state.projects.project
   };
 }
 
