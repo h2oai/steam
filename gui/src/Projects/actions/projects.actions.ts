@@ -25,12 +25,8 @@ import { Project, UserRole } from '../../Proxy/Proxy';
 import { fetchEntityIds } from '../../App/actions/global.actions';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-<<<<<<< HEAD
 import {ClusterStatus, Cluster} from "../../Proxy/Proxy";
-=======
 import {Model} from "../../Proxy/Proxy";
->>>>>>> 98f8cb20d7d2a56b36d1c9a4c298ec4e8be5636c
-
 export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
