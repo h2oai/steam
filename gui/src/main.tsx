@@ -43,7 +43,7 @@
  *    it in the license file.
  */
 
-// Testing PR Builder2
+// Testing PR Builder
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
