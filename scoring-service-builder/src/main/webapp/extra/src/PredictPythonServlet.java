@@ -45,6 +45,40 @@ public class PredictPythonServlet extends HttpServlet {
     }
   }
 
+  private void setupVirtualPythonEnv(String envName, String envFile) throws Exception {
+    logger.debug("setup virtual conda environment");
+    pb = new ProcessBuilder("source", "activate", envName);
+    pb.start();
+    int returnCode = pb.waitFor();
+    if (returnCode == 0) {
+      logger.info("python virtual environment {} already exists", envName);
+    }
+    else {
+      if (envFile == null) {
+        logger.info("creating python virtual environment {}", envName);
+        pb = new ProcessBuilder("conda", "create", "-n", envName);
+      }
+      else {
+        logger.info("creating python virtual environment {} with environment file {}", envName, envFile);
+        pb = new ProcessBuilder("conda", "env", "create", "-f", envFile, "-n", envName);
+      }
+      pb.redirectErrorStream(true); // send stderr to stdout
+      InputStream stdout = p.getInputStream();
+      reader = new BufferedReader(new InputStreamReader(stdout));
+      pb.start();
+      int returnCode = pb.waitFor();
+      if (returnCode == 0) {
+        logger.info("python environment {} created", envName);
+      }
+      else {
+        logger.error("Failed to create environemnt {}", envName);
+        showStdout(reader);
+        throw new Exception("Can't created virtual python environment " + envName + " env file " + envFile);
+      }
+    }
+
+  }
+
   private void startPython() throws Exception {
     logger.debug("startPython");
     String program = servletPath.getAbsolutePath() + "/WEB-INF/python.py";
@@ -90,6 +124,7 @@ public class PredictPythonServlet extends HttpServlet {
     try {
       // restart if python failed
       if (p == null) {
+        logger.info("python process not started, trying again");
         startPython();
 
       }
@@ -102,7 +137,7 @@ public class PredictPythonServlet extends HttpServlet {
         logger.debug("result {}", result);
       }
       catch (IOException e) {
-        String msg = "ERROR IOException in sendPython restarting python";
+        String msg = "ERROR IOException in sendPython";
         result = msg;
         logger.error(msg, e);
         showStderr();
@@ -114,11 +149,11 @@ public class PredictPythonServlet extends HttpServlet {
 //        stdin.flush();
 //        result = reader.readLine();
       }
-//        showStderr();
+//        showStderr(err_reader);
     }
     catch (Exception ex) {
       logger.error("sendPython failed", ex);
-      showStderr();
+      showStderr(err_reader);
     }
     return result;
   }
@@ -159,7 +194,7 @@ public class PredictPythonServlet extends HttpServlet {
     logger.debug("Python Get time {}", ServletUtil.getPythonTimes);
   }
 
-  private void showStderr() {
+  private void showStderr(BufferedReader err_reader) {
     String line;
     try {
       while ((line=err_reader.readLine())!=null) {
@@ -167,6 +202,17 @@ public class PredictPythonServlet extends HttpServlet {
       }
     } catch (Exception ex2) {
       logger.error("showStderr failed", ex2);
+    }
+  }
+
+  private void showStdout(BufferedReader reader) {
+    String line;
+    try {
+      while ((line=reader.readLine())!=null) {
+        logger.info(line);
+      }
+    } catch (Exception ex2) {
+      logger.error("showStdout failed", ex2);
     }
   }
 
