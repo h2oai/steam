@@ -33,6 +33,7 @@ import {
 import { connect } from 'react-redux';
 import '../styles/importmodelsmodal.scss';
 import { Cluster, Model } from '../../Proxy/Proxy';
+import { Project } from '../../../../../steamY/gui/src/Proxy/Proxy';
 
 interface Props {
   open: boolean,
@@ -43,7 +44,7 @@ interface Props {
   fetchLeaderboard: Function,
   modelCategory: string,
   datasetName: string,
-  project: any
+  project: Project
 }
 
 interface DispatchProps {
@@ -87,7 +88,6 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   }
 
   render() {
-    console.log(this.props.project);
     return (
       <DefaultModal className="import-modal" open={this.props.open}>
         <PageHeader>IMPORT MODELS</PageHeader>
