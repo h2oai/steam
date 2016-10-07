@@ -19,9 +19,11 @@
  * Created by justin on 7/13/16.
  */
 
-declare function require(string): string;
+declare function require(string): any;
 
 interface Window {
   devToolsExtension: any
   ga: any
 }
+
+declare var residualsVis: any;
