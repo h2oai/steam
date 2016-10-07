@@ -58,7 +58,7 @@ the URL of the edge node and the superuser login credentials. The superuser can 
 
   ssh <user>@<yarn_edge_node>
 
-2. Open another terminal window and start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
+2. Navigate to the Steam folder and start the Jetty server. This allows you to deploy models and run the Steam Prediction Service.
 
   ::
 
@@ -104,7 +104,7 @@ After Steam is installed, the following steps describe how to start Steam.
 
   cd steam--darwin-amd64
 
-2. Open another terminal window and start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
+2. Start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
 
   ::
 
