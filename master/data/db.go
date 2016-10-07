@@ -3156,25 +3156,44 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		res, err := tx.Exec(`
 			INSERT INTO
 				model
-				(project_id, training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(
+					project_id,
+					training_dataset_id,
+					validation_dataset_id,
+					name,
+					cluster_name,
+					cluster_id,
+					model_key,
+					algorithm,
+					model_category,
+					dataset_name,
+					response_column_name,
+					logical_name,
+					location,
+					max_run_time,
+					metrics,
+					metrics_version,
+					created
+				)
 			VALUES
-				($1,         $2,                  $3,                    $4,    $5,           $6,        $7,        $8,             $9,           $10,                  $11,          $12,      $13,          $14,     $15,             datetime('now'))
+				($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, datetime('now'))
 			`,
-			model.ProjectId,
-			model.TrainingDatasetId,
-			model.ValidationDatasetId,
-			model.Name,
-			model.ClusterName,
-			model.ModelKey,
-			model.Algorithm,
-			model.ModelCategory,
-			model.DatasetName,
-			model.ResponseColumnName,
-			model.LogicalName,
-			model.Location,
-			model.MaxRunTime,
-			model.Metrics,
-			model.MetricsVersion,
+			model.ProjectId,           //$1
+			model.TrainingDatasetId,   //$2
+			model.ValidationDatasetId, //$3
+			model.Name,                //$4
+			model.ClusterName,         //$5
+			model.ClusterId,           //$6
+			model.ModelKey,            //$7
+			model.Algorithm,           //$8
+			model.ModelCategory,       //$9
+			model.DatasetName,         //$10
+			model.ResponseColumnName,  //$11
+			model.LogicalName,         //$12
+			model.Location,            //$13
+			model.MaxRunTime,          //$14
+			model.Metrics,             //$15
+			model.MetricsVersion,      //$16
 		)
 		if err != nil {
 			return err
@@ -3201,7 +3220,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 			"algorithm":          model.Algorithm,
 			"datasetName":        model.DatasetName,
 			"responseColumnName": model.ResponseColumnName,
-			"logicalName":        model.LogicalName,
+			"logicalName":        model.LogicalName.String,
 			"location":           model.Location,
 			"maxRunTime":         strconv.FormatInt(model.MaxRunTime, 10),
 		})
@@ -3768,6 +3787,28 @@ func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, locatio
 		}
 		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{
 			"location": location,
+		})
+	})
+}
+
+func (ds *Datastore) UpdateModelObjectType(pz az.Principal, modelId int64, typ string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
+		return errors.Wrap(err, "failed checking edit privilege")
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				model
+			SET
+				model_object_type = $1
+			WHERE
+				id = $2	
+			`, typ, modelId); err != nil {
+			return errors.Wrap(err, "failed executing transaction")
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{
+			"has_pojo": typ,
 		})
 	})
 }

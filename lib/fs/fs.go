@@ -286,6 +286,10 @@ func GetJavaModelPath(wd string, modelId int64, logicalName string) string {
 	return path.Join(GetModelPath(wd, modelId), logicalName) + ".java"
 }
 
+func GetMOJOPath(wd string, modelId int64, logcialName string) string {
+	return path.Join(GetModelPath(wd, modelId), logcialName) + ".zip"
+}
+
 func GetWarFilePath(wd string, modelId int64, logicalName string) string {
 	return path.Join(GetModelPath(wd, modelId), logicalName) + ".war"
 }

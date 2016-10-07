@@ -102,6 +102,7 @@ type Model struct {
 	ResponseColumnName  string
 	LogicalName         string
 	Location            string
+	ModelObjectType     string
 	MaxRuntime          int
 	JSONMetrics         string
 	CreatedAt           int64
@@ -122,6 +123,7 @@ type BinomialModel struct {
 	ResponseColumnName  string
 	LogicalName         string
 	Location            string
+	ModelObjectType     string
 	MaxRuntime          int
 	JSONMetrics         string
 	CreatedAt           int64
@@ -147,6 +149,7 @@ type MultinomialModel struct {
 	ResponseColumnName  string
 	LogicalName         string
 	Location            string
+	ModelObjectType     string
 	MaxRuntime          int
 	JSONMetrics         string
 	CreatedAt           int64
@@ -170,6 +173,7 @@ type RegressionModel struct {
 	ResponseColumnName   string
 	LogicalName          string
 	Location             string
+	ModelObjectType      string
 	MaxRuntime           int
 	JSONMetrics          string
 	CreatedAt            int64
@@ -320,6 +324,9 @@ type Service struct {
 	FindModelsRegression          FindModelsRegression          `help:"List regression models"`
 	GetModelRegression            GetModelRegression            `help:"View a binomial model"`
 	ImportModelFromCluster        ImportModelFromCluster        `help:"Import models from a cluster"`
+	CheckMojo                     CheckMojo                     `help:"Check if a model category can generate MOJOs"`
+	ImportModelPojo               ImportModelPojo               `help:"Import a model's POJO from a cluster"`
+	ImportModelMojo               ImportModelMojo               `help:"Import a model's MOJO from a cluster"`
 	DeleteModel                   DeleteModel                   `help:"Delete a model"`
 	CreateLabel                   CreateLabel                   `help:"Create a label"`
 	UpdateLabel                   UpdateLabel                   `help:"Update a label"`
@@ -652,6 +659,19 @@ type ImportModelFromCluster struct {
 	ModelName string
 	_         int
 	ModelId   int64
+}
+type CheckMojo struct {
+	Algo    string
+	_       int
+	CanMojo bool
+}
+type ImportModelPojo struct {
+	ModelId int64
+	_       int
+}
+type ImportModelMojo struct {
+	ModelId int64
+	_       int
 }
 type DeleteModel struct {
 	ModelId int64

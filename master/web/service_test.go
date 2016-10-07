@@ -32,6 +32,8 @@ func TestServiceCRUD(tt *testing.T) {
 	t.nil(err)
 	modelId, err := t.svc.ImportModelFromCluster(t.su, clusterId, projectId, h2oModels[0].name, "")
 	t.nil(err)
+	err = t.svc.ImportModelPojo(t.su, modelId)
+	t.nil(err)
 
 	// -- C --
 

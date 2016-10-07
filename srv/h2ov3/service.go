@@ -30,6 +30,7 @@ import (
 
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
+	"github.com/pkg/errors"
 )
 
 type H2O struct {
@@ -192,6 +193,15 @@ func (h *H2O) ExportGenModel(p string) (string, error) {
 	f, err := h.download("/3/h2o-genmodel.jar", path.Join(p, "h2o-genmodel.jar"), false)
 	if err != nil {
 		return "", fmt.Errorf("Java genmodel jar export failed: %s", err)
+	}
+	return f, nil
+}
+
+// FIXME: MUST BE H2O VERSION 3.10.0.7
+func (h *H2O) ExportMOJO(modelID, p string) (string, error) {
+	f, err := h.download("/3/Models/"+modelID+"/mojo", p, true)
+	if err != nil {
+		return "", errors.Wrap(err, "mojo export failed")
 	}
 	return f, nil
 }

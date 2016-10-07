@@ -75,6 +75,12 @@ coverage.out
 /.idea
 /gui/.idea
 /tools/steamlauncher/steamlauncher
+<<<<<<< HEAD
 /steam.log
 /service.log
 /tools/steamlauncher/service.log
+=======
+/tools/steamlauncher/service.log
+/steam.log
+/service.log
+>>>>>>> 98f8cb20d7d2a56b36d1c9a4c298ec4e8be5636c
