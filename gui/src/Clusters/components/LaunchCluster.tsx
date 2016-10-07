@@ -133,7 +133,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               <Cell>
                 <div className="upload-engine">
                   <input ref="engine" type="file" name="engine"/>
-                  <button className="button-primary" onClick={this.uploadEngine.bind(this)}>Upload Engine</button>
+                  <div className="button-primary" onClick={this.uploadEngine.bind(this)}>Upload Engine</div>
                 </div>
                 <select onChange={this.onChangeEngine.bind(this)}>
                   <option></option>
