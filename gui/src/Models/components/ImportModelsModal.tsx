@@ -32,8 +32,7 @@ import {
 } from '../../Projects/actions/projects.actions';
 import { connect } from 'react-redux';
 import '../styles/importmodelsmodal.scss';
-import { Cluster, Model } from '../../Proxy/Proxy';
-import { Project } from '../../../../../steamY/gui/src/Proxy/Proxy';
+import { Cluster, Model, Project } from '../../Proxy/Proxy';
 
 interface Props {
   open: boolean,
