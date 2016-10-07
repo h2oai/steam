@@ -1,4 +1,0 @@
-{"Dest":"JFK"}
-{"Dest":"SFO"}
-{"Dest":"JFK"}
-{"Dest":"SFO"}

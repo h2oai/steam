@@ -4035,7 +4035,7 @@ func (ds *Datastore) ReadLabelByModel(pz az.Principal, modelId int64) (Label, bo
 func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			
+			id, project_id, model_id, name, description, created
 		FROM
 			label
 		WHERE

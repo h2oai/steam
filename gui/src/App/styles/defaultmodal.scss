@@ -9,24 +9,22 @@
   display: flex;
   width: 100%;
   justify-content: center;
-  max-height: 70%;
+  max-height: 80%;
 }
 
 .default-modal {
-  width: 50%;
+  width: 75%;
+  max-width: 800px;
+  margin-left: 22px;
+  margin-right: 22px;
+  margin-top: 44px;
+  margin-bottom: 44px;
   background: $brand-white;
   border-radius: 2px;
   border: 1px solid $brand-dark-1;
   box-shadow: 0px 3px 5px 0 $brand-dark-3;
-  padding: $medium;
+  padding: 44px;
   overflow: auto;
-  header {
-    font-size: 2.5em;
-    border-bottom: 2px solid $brand-dark-3;
-    padding: 0 0 $small 0;
-    margin-bottom: $xsmall;
-    color: $brand-orange;
-  }
   .button-row {
     button {
       margin-right:10px;

@@ -19,6 +19,7 @@ import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { fetchEntityIds } from '../../App/actions/global.actions';
 import { openNotification } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 
 export const REQUEST_MEMBERS_FOR_PROJECT = 'REQUEST_MEMBERS_FOR_PROJECT';
 export const RECEIVE_MEMBERS_FOR_PROJECT = 'RECEIVE_MEMBERS_FOR_PROJECT';
@@ -52,7 +53,7 @@ export function receiveLabelsForProject(response) {
 function _fetchMembersForProject(dispatch, state) {
   Remote.getIdentitiesForEntity(state.global.entityIds.project, state.projects.project.id, (error, res) => {
     if (error) {
-      openNotification('error', error.toString(), null);
+      openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
       return;
     }
     dispatch(receiveMembersForProject(res));
@@ -77,7 +78,7 @@ export function fetchMembersForProject() {
 function _fetchLabelsForProject(dispatch, state) {
   Remote.getLabelsForProject(state.projects.project.id, (error, labels) => {
     if (error) {
-      openNotification('error', error.toString(), null);
+      openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
       return;
     }
 
@@ -87,7 +88,7 @@ function _fetchLabelsForProject(dispatch, state) {
       identityPromises.push(new Promise((resolve, reject) => {
         Remote.getIdentitiesForEntity(state.global.entityIds.label, label.id, (identitiesError, identitiesRes) => {
           if (identitiesError) {
-            openNotification('error', identitiesError.toString(), null);
+            openNotification(NotificationType.Error, 'Load Error', identitiesError.toString(), null);
             reject(identitiesError.toString());
             return;
           }

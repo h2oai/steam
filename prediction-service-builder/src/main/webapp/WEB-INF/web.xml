@@ -1,0 +1,57 @@
+<!--
+Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+         version="2.4">
+    <servlet>
+        <servlet-name>Ping</servlet-name>
+        <servlet-class>ai.h2o.servicebuilder.PingServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CompilePojo</servlet-name>
+        <servlet-class>ai.h2o.servicebuilder.CompilePojoServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>MakeWar</servlet-name>
+        <servlet-class>ai.h2o.servicebuilder.MakeWarServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>MakePythonWar</servlet-name>
+        <servlet-class>ai.h2o.servicebuilder.MakePythonWarServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Ping</servlet-name>
+        <url-pattern>/ping</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CompilePojo</servlet-name>
+        <url-pattern>/compile</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MakeWar</servlet-name>
+        <url-pattern>/makewar</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MakePythonWar</servlet-name>
+        <url-pattern>/makepythonwar</url-pattern>
+    </servlet-mapping>
+
+</web-app>
