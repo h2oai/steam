@@ -22,6 +22,7 @@ import * as React from 'react';
 import * as classNames from 'classnames';
 import { Link } from 'react-router';
 import '../styles/welcomesplashscreen.scss';
+import PageHeader from './PageHeader';
 
 interface Props {
 }
@@ -34,9 +35,9 @@ export default class WelcomeSplashScreen extends React.Component<Props & Dispatc
     return (
       <div className="welcome-splash-screen">
         <div className="welcome-splash-screen--content">
-          <div>WELCOME TO</div>
-          <div className="welcome-splash-screen--content--product-name">H<sub>2</sub>O STEAM</div>
-          <div>Fast, distributed data science for teams</div>
+          <h1>WELCOME TO</h1>
+          <div className="page-header product-title">H<span className="half-size"><sub>2</sub></span>O STEAM</div>
+          <h1>Fast, distributed data science for teams</h1>
           <div><Link to="/newproject"
                      className={classNames('default', 'start-project')}>Start A New Project</Link>
           </div>
