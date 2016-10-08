@@ -17,18 +17,23 @@
 
 import * as _ from 'lodash';
 import {
-  RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS,
+  RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS, RESET_UPDATES,
   RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED
 } from '../actions/users.actions';
 
 let initialState = {
   permissionWithRoles: [],
   roles: [],
-  projects: []
+  projects: [],
+  updates: [],
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case RESET_UPDATES :
+      return _.assign({}, state, {
+        updates: []
+      });
     case FILTER_SELECTIONS_CHANGED :
       let index = _.findIndex(state.selectedRoles, (o) => {
         if ((o as any).id === action.id) {
@@ -81,6 +86,21 @@ export const usersReducer = (state: any = initialState, action: any) => {
       return _.assign({}, state, {
         users: action.users
       });
+    case RECEIVE_SAVE_PERMISSIONS :
+      let newState: any = _.assign({}, state);
+      if (action.hasOwnProperty("roleId")) {
+        newState.updates.push({
+          roleId: action.roleId,
+          permissionId: action.permissionId
+        });
+      } else if (action.hasOwnProperty("error")) {
+        newState.updates.push({
+          error: action.error
+        });
+      } else {
+        console.log("ERROR: invalid update state");
+      }
+      return newState;
     default:
       return state;
   }

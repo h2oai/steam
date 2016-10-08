@@ -28,7 +28,8 @@ import RolePermissionsConfirm from "./RolePermissionsConfirm";
 
 interface Props {
   permissionsWithRoles: Array<PermissionsWithRoles>,
-  roles: Array<Role>
+  roles: Array<Role>,
+  updates: Array<any>
 }
 
 interface DispatchProps {
@@ -66,10 +67,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
   }
 
   modalCloseHandler = () => {
-    this.setState({
-      requestedChanges: [],
-      confirmOpen: false
-    });
+    this.requestChanges();
   };
 
   requestChanges = () => {
@@ -116,13 +114,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
 
   render(): React.ReactElement<HTMLDivElement> {
     let permissionRows;
-    let disableConfirmButton;
     (this as any)._checkboxes = {};
-    if (this.state.requestedChanges.length < 1) {
-      disableConfirmButton = true;
-    } else {
-      disableConfirmButton = false;
-    }
 
     if (this.props.permissionsWithRoles) {
       permissionRows = this.props.permissionsWithRoles.map(function (permissionSet, permissionIndex) {
@@ -132,7 +124,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
             if (flagIndex === 0) {
               return <Cell className="center-text" key={flagIndex}><input data-roleid={flag.roleId}
                 ref={(input) => this.registerInput(input, {value: true, roleId: flag.roleId}, flagIndex, permissionSet, permissionIndex)}
-                type="checkbox" value="on" defaultChecked={true} readOnly={false} disabled={false} onClick={this.requestChanges}></input></Cell>;
+                type="checkbox" value="on" defaultChecked={true} readOnly={true} disabled={true}></input></Cell>;
             } else {
               return <Cell className="center-text" key={flagIndex}><input data-roleid={flag.roleId}
                 ref={(input) => this.registerInput(input, flag, flagIndex, permissionSet, permissionIndex)}
@@ -155,12 +147,15 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
           {permissionRows}
         </Table>
           : null}
-        { disableConfirmButton ?
-          <div className="button-primary disabled">Save</div> :
-          <div className="button-primary" onClick={this.requestConfirm}>Save</div> }
-
-      <RolePermissionsConfirm open={this.state.confirmOpen} closeHandler={this.modalCloseHandler.bind(this)} requestedChanges={this.state.requestedChanges} saveUpdatedPermissions={this.props.saveUpdatedPermissions} />
-      </div>
+        <br />
+        { this.state.requestedChanges.length === 0 ?
+          <div className="button-primary disabled">Review Changes</div> : null }
+        { this.state.requestedChanges.length === 1 ?
+          <div className="button-primary" onClick={this.requestConfirm}>Review 1 Change</div> : null }
+        { this.state.requestedChanges.length > 1 ?
+          <div className="button-primary" onClick={this.requestConfirm}>Review {this.state.requestedChanges.length} Changes</div> : null }
+      <RolePermissionsConfirm open={this.state.confirmOpen} closeHandler={this.modalCloseHandler.bind(this)} requestedChanges={this.state.requestedChanges} saveUpdatedPermissions={this.props.saveUpdatedPermissions} updates={this.props.updates} />
+    </div>
     );
   }
 }
@@ -168,7 +163,8 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
 function mapStateToProps(state): any {
   return {
     permissionsWithRoles: state.users.permissionsWithRoles,
-    roles: state.users.roles
+    roles: state.users.roles,
+    updates: state.users.updates
   };
 }
 

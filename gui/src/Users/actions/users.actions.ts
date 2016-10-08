@@ -35,16 +35,33 @@ export const REQUEST_PROJECTS = 'REQUEST_PROJECTS';
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
 export const REQUEST_SAVE_PERMISSIONS = 'REQUEST_SAVE_PERMISSIONS';
 export const RECEIVE_SAVE_PERMISSIONS = 'RECEIVE_SAVE_PERMISSIONS';
+export const RESET_UPDATES = 'RESET_UPDATES';
 
+export function resetUpdates() {
+  return (dispatch, getState) => {
+    dispatch({
+      type: RESET_UPDATES
+    });
+  };
+}
 export function requestSavePermissions() {
   return {
     type: REQUEST_SAVE_PERMISSIONS
   };
 }
-export function receiveSavePermissions() {
-  return {
-    type: RECEIVE_SAVE_PERMISSIONS
-  };
+export function receiveSavePermissions(data): any {
+  if (data.hasOwnProperty("roleId")) {
+    return {
+      type: RECEIVE_SAVE_PERMISSIONS,
+      roleId: data.roleId,
+      permissionId: data.permissionId
+    };
+  } else {
+    return {
+      type: RECEIVE_SAVE_PERMISSIONS,
+      error: data.error
+    };
+  }
 }
 
 export function filterSelectionsChanged(id, selected) {
@@ -287,14 +304,32 @@ export function saveUpdatedPermissions(updates) {
     dispatch(requestSavePermissions());
 
     for (let update of updates) {
-      if (update.newFlag === true) {
-        console.log(true);
-        console.log(update);
-        //Remote.linkRoleWithPermission(roleId, permissionId, (error) => console.log(error));
+      if (update.newFlag.value === true) {
+        Remote.linkRoleWithPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
+          if (error) {
+            dispatch(receiveSavePermissions({
+                error
+            }));
+            return;
+          }
+          dispatch(receiveSavePermissions({
+            roleId: parseInt(update.newFlag.roleId, 10),
+            permissionId: update.permissionId
+          }));
+        });
       } else {
-        console.log(false);
-        console.log(update);
-        //Remote.unlinkRoleFromPermission(roleId, permissionId, (error) => console.log(error));
+        Remote.unlinkRoleFromPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
+          if (error) {
+            dispatch(receiveSavePermissions({
+              error
+            }));
+            return;
+          }
+          dispatch(receiveSavePermissions({
+            roleId: parseInt(update.newFlag.roleId, 10),
+            permissionId: update.permissionId
+          }));
+        });
       }
     }
   };
