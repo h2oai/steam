@@ -3,7 +3,6 @@
 html, body, .app-container, #app {
   height: 100%;
   min-height: 100%;
-  background-color: #eeeeee;
   font-family: "Open Sans";
   font-size: 14px;
   color: $h2o-charcoal-grey;
@@ -71,7 +70,6 @@ a {
 }
 .link {
   color:$link-color;
-  text-decoration:underline;
   cursor:pointer;
 }
 .intro {
@@ -184,12 +182,12 @@ button, a {
   .body-container {
     left: 300px;
     max-width: 1100px;
-
     background-color: $brand-white;
     width: 100%;
     z-index: $body-index;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0 7px rgba(0,0,0,0.35);
   }
 }
 

@@ -2,7 +2,13 @@
 
 .breadcrumb {
   &.filled {
-    box-shadow: 0 0 7px rgba(0,0,0,0.35);
+    border-bottom: solid;
+    border-style: solid;
+    border-bottom-width: 2px;
+    border-right-width: 0px;
+    border-top-width: 0px;
+    border-left-width: 0px;
+    border-color: #e6e6e6;
   }
   height: $base-grid-unit;
   margin: 0;
