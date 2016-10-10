@@ -21,6 +21,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/h2oai/steam/master/auth"
@@ -82,7 +83,7 @@ const (
 )
 
 const (
-	Version = "1"
+	Version = "1.1.0"
 
 	SuperuserRoleName = "Superuser"
 
@@ -596,7 +597,7 @@ func isPrimed(db *sql.DB) (bool, error) {
 func prime(db *sql.DB) error {
 	// FIXME logging needs to be handled for testing
 	// log.Println("Priming database for first time use...")
-	if err := createMetadata(db, "version", "1"); err != nil {
+	if err := createMetadata(db, "version", Version); err != nil {
 		return err
 	}
 	if err := primePermissions(db, Permissions); err != nil {
@@ -703,11 +704,18 @@ func primePermissions(db *sql.DB, permissions []Permission) error {
 }
 
 func upgrade(db *sql.DB, currentVersion string) error {
-	if currentVersion == Version {
-		return nil
-	}
+	for currentVersion != Version {
+		var err error
+		switch {
+		case currentVersion == "1":
+			log.Println("Upgrading database to 1.1.0")
+			currentVersion, err = upgradeTo_1_1_0(db)
+		}
 
-	// TODO add stepwise upgrades
+		if err != nil {
+			return errors.Wrap(err, "upgrading database")
+		}
+	}
 
 	return nil
 }
@@ -760,16 +768,16 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 
 		workgroupId, err = createDefaultWorkgroup(tx, name)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "creating workgroup")
 		}
 
 		id, err = createIdentity(tx, name, password, workgroupId)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "creating identity")
 		}
 
 		if err := linkIdentityAndWorkgroup(tx, id, workgroupId); err != nil {
-			return err
+			return errors.Wrap(err, "linking identity and workgroup")
 		}
 
 		if err := createPrivilege(tx, Privilege{
@@ -778,7 +786,7 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 			ds.EntityTypes.Identity,
 			id,
 		}); err != nil {
-			return err
+			return errors.Wrap(err, "creating identity privilege")
 		}
 
 		if err := createPrivilege(tx, Privilege{
@@ -787,12 +795,12 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 			ds.EntityTypes.Workgroup,
 			workgroupId,
 		}); err != nil {
-			return err
+			return errors.Wrap(err, "creating workgroup privilege")
 		}
 
 		roleId, err := createRole(tx, SuperuserRoleName, SuperuserRoleName)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "creating role")
 		}
 
 		if err := linkIdentityAndRole(tx, id, roleId); err != nil {
@@ -2216,6 +2224,7 @@ func (ds *Datastore) DeletePrivilege(pz az.Principal, privilege Privilege) error
 }
 
 func createPrivilege(tx *sql.Tx, privilege Privilege) error {
+
 	_, err := tx.Exec(`
 			INSERT INTO
 				privilege
@@ -2227,7 +2236,7 @@ func createPrivilege(tx *sql.Tx, privilege Privilege) error {
 		privilege.EntityType,
 		privilege.EntityId,
 	)
-	return err
+	return errors.Wrap(err, "executing query")
 }
 
 func deletePrivilegesOn(tx *sql.Tx, entityTypeId, entityId int64) error {
@@ -3156,25 +3165,44 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 		res, err := tx.Exec(`
 			INSERT INTO
 				model
-				(project_id, training_dataset_id, validation_dataset_id, name,  cluster_name, model_key, algorithm, model_category, dataset_name, response_column_name, logical_name, location, max_run_time, metrics, metrics_version, created)
+				(
+					project_id,
+					training_dataset_id,
+					validation_dataset_id,
+					name,
+					cluster_name,
+					cluster_id,
+					model_key,
+					algorithm,
+					model_category,
+					dataset_name,
+					response_column_name,
+					logical_name,
+					location,
+					max_run_time,
+					metrics,
+					metrics_version,
+					created
+				)
 			VALUES
-				($1,         $2,                  $3,                    $4,    $5,           $6,        $7,        $8,             $9,           $10,                  $11,          $12,      $13,          $14,     $15,             datetime('now'))
+				($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, datetime('now'))
 			`,
-			model.ProjectId,
-			model.TrainingDatasetId,
-			model.ValidationDatasetId,
-			model.Name,
-			model.ClusterName,
-			model.ModelKey,
-			model.Algorithm,
-			model.ModelCategory,
-			model.DatasetName,
-			model.ResponseColumnName,
-			model.LogicalName,
-			model.Location,
-			model.MaxRunTime,
-			model.Metrics,
-			model.MetricsVersion,
+			model.ProjectId,           //$1
+			model.TrainingDatasetId,   //$2
+			model.ValidationDatasetId, //$3
+			model.Name,                //$4
+			model.ClusterName,         //$5
+			model.ClusterId,           //$6
+			model.ModelKey,            //$7
+			model.Algorithm,           //$8
+			model.ModelCategory,       //$9
+			model.DatasetName,         //$10
+			model.ResponseColumnName,  //$11
+			model.LogicalName,         //$12
+			model.Location,            //$13
+			model.MaxRunTime,          //$14
+			model.Metrics,             //$15
+			model.MetricsVersion,      //$16
 		)
 		if err != nil {
 			return err
@@ -3201,7 +3229,7 @@ func (ds *Datastore) CreateModel(pz az.Principal, model Model) (int64, error) {
 			"algorithm":          model.Algorithm,
 			"datasetName":        model.DatasetName,
 			"responseColumnName": model.ResponseColumnName,
-			"logicalName":        model.LogicalName,
+			"logicalName":        model.LogicalName.String,
 			"location":           model.Location,
 			"maxRunTime":         strconv.FormatInt(model.MaxRunTime, 10),
 		})
@@ -3772,6 +3800,28 @@ func (ds *Datastore) UpdateModelLocation(pz az.Principal, modelId int64, locatio
 	})
 }
 
+func (ds *Datastore) UpdateModelObjectType(pz az.Principal, modelId int64, typ string) error {
+	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
+		return errors.Wrap(err, "failed checking edit privilege")
+	}
+
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				model
+			SET
+				model_object_type = $1
+			WHERE
+				id = $2	
+			`, typ, modelId); err != nil {
+			return errors.Wrap(err, "failed executing transaction")
+		}
+		return ds.audit(pz, tx, UpdateOp, ds.EntityTypes.Model, modelId, metadata{
+			"has_pojo": typ,
+		})
+	})
+}
+
 func (ds *Datastore) UpdateModelName(pz az.Principal, modelId int64, name string) error {
 	if err := pz.CheckEdit(ds.EntityTypes.Model, modelId); err != nil {
 		return err
@@ -4035,7 +4085,7 @@ func (ds *Datastore) ReadLabelByModel(pz az.Principal, modelId int64) (Label, bo
 func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			
+			id, project_id, model_id, name, description, created
 		FROM
 			label
 		WHERE

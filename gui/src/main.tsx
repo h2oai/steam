@@ -71,6 +71,15 @@ const store: any = createStore(
 
 let history: any = syncHistoryWithStore(hashHistory, store);
 
+hashHistory.listen((e) => {
+  if (window.ga) {
+    window.ga('send', {
+      hitType: 'pageview',
+      page: e.pathname
+    });
+  }
+});
+
 ReactDOM.render(
   <Provider store={store}>
     <Router history={hashHistory} routes={routes}></Router>

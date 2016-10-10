@@ -1,5 +1,14 @@
 @import '../../../variables.scss';
 
+.left-submenu {
+  position: absolute;
+  top: 0px;
+  width: 228px;
+  height: 100%;
+  z-index: $body-index - 1;
+  box-shadow: inset -9px 0px 10px -5px rgba(0,0,0,0.35);
+}
+
 $navigation-width: $base-grid-unit * 5;
 .navigation-wrapper {
   display: flex;
@@ -8,6 +17,8 @@ $navigation-width: $base-grid-unit * 5;
 
 .nav-container {
   display: flex;
+  width: 300px;
+  max-width: 300px;
   flex: 1 0 auto;
   transition: transform .3s ease-in-out;
 }
@@ -32,6 +43,7 @@ $navigation-width: $base-grid-unit * 5;
 .primary-navigation {
   z-index: $body-index - 2;
   .navigation--primary {
+    width: 300px;
     .navigation {
       .nav-list {
         .nav-list--item {
@@ -43,13 +55,8 @@ $navigation-width: $base-grid-unit * 5;
         }
         .nav-list--label {
           text-align: left;
-          width:0;
+          width:150px;
           transition: width .3s ease-in-out;
-        }
-        &:hover {
-          .nav-list--label {
-            width:150px;
-          }
         }
       }
     }
@@ -57,12 +64,9 @@ $navigation-width: $base-grid-unit * 5;
 }
 
 .secondary-navigation {
-  z-index: $body-index - 1;
   background: $brand-dark-2;
-  box-shadow: inset -9px 0px 10px -5px rgba(0,0,0,0.35);
   .nav-list--item {
-    position: relative;
-    padding: 0 $small;
+    margin-left: 24px;
     &.active {
       &::before {
         border-right-color: $brand-white;
@@ -141,7 +145,11 @@ $navigation-width: $base-grid-unit * 5;
   white-space: nowrap;
   text-overflow: ellipsis;
   color: $brand-dark-3;
-  padding: $small $small 0 $small;
+  padding-top: 20px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  margin-left: 24px;
 }
 .navigation {
   height: 100%;
@@ -161,7 +169,8 @@ $navigation-width: $base-grid-unit * 5;
       justify-content: flex-start;
       align-items: center;
       display: flex;
-      padding: 0 $small;
+      padding: 0px;
+      margin-left: 24px;
       i {
         margin-right: 5px;
       }
@@ -172,7 +181,7 @@ $navigation-width: $base-grid-unit * 5;
     }
     .logo-container {
       height: $xlarge;
-      width: $xlarge;
+      width: $left-column-width;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -216,8 +225,9 @@ $navigation-width: $base-grid-unit * 5;
       height: $xlarge;
       i {
         height: $xlarge;
-        width: $xlarge;
-        flex-basis: $xlarge;
+        width: 24px;
+        margin-left: 24px;
+        margin-right: 24px;
         line-height: $xlarge;
         text-align: center;
       }

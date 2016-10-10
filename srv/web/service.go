@@ -45,6 +45,7 @@ type BinomialModel struct {
 	ResponseColumnName  string  `json:"response_column_name"`
 	LogicalName         string  `json:"logical_name"`
 	Location            string  `json:"location"`
+	ModelObjectType     string  `json:"model_object_type"`
 	MaxRuntime          int     `json:"max_runtime"`
 	JSONMetrics         string  `json:"json_metrics"`
 	CreatedAt           int64   `json:"created_at"`
@@ -171,6 +172,7 @@ type Model struct {
 	ResponseColumnName  string `json:"response_column_name"`
 	LogicalName         string `json:"logical_name"`
 	Location            string `json:"location"`
+	ModelObjectType     string `json:"model_object_type"`
 	MaxRuntime          int    `json:"max_runtime"`
 	JSONMetrics         string `json:"json_metrics"`
 	CreatedAt           int64  `json:"created_at"`
@@ -191,6 +193,7 @@ type MultinomialModel struct {
 	ResponseColumnName  string  `json:"response_column_name"`
 	LogicalName         string  `json:"logical_name"`
 	Location            string  `json:"location"`
+	ModelObjectType     string  `json:"model_object_type"`
 	MaxRuntime          int     `json:"max_runtime"`
 	JSONMetrics         string  `json:"json_metrics"`
 	CreatedAt           int64   `json:"created_at"`
@@ -228,6 +231,7 @@ type RegressionModel struct {
 	ResponseColumnName   string  `json:"response_column_name"`
 	LogicalName          string  `json:"logical_name"`
 	Location             string  `json:"location"`
+	ModelObjectType      string  `json:"model_object_type"`
 	MaxRuntime           int     `json:"max_runtime"`
 	JSONMetrics          string  `json:"json_metrics"`
 	CreatedAt            int64   `json:"created_at"`
@@ -331,6 +335,9 @@ type Service interface {
 	FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error)
 	GetModelRegression(pz az.Principal, modelId int64) (*RegressionModel, error)
 	ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
+	CheckMojo(pz az.Principal, algo string) (bool, error)
+	ImportModelPojo(pz az.Principal, modelId int64) error
+	ImportModelMojo(pz az.Principal, modelId int64) error
 	DeleteModel(pz az.Principal, modelId int64) error
 	CreateLabel(pz az.Principal, projectId int64, name string, description string) (int64, error)
 	UpdateLabel(pz az.Principal, labelId int64, name string, description string) error
@@ -801,6 +808,28 @@ type ImportModelFromClusterIn struct {
 
 type ImportModelFromClusterOut struct {
 	ModelId int64 `json:"model_id"`
+}
+
+type CheckMojoIn struct {
+	Algo string `json:"algo"`
+}
+
+type CheckMojoOut struct {
+	CanMojo bool `json:"can_mojo"`
+}
+
+type ImportModelPojoIn struct {
+	ModelId int64 `json:"model_id"`
+}
+
+type ImportModelPojoOut struct {
+}
+
+type ImportModelMojoIn struct {
+	ModelId int64 `json:"model_id"`
+}
+
+type ImportModelMojoOut struct {
 }
 
 type DeleteModelIn struct {
@@ -1813,6 +1842,36 @@ func (this *Remote) ImportModelFromCluster(clusterId int64, projectId int64, mod
 		return 0, err
 	}
 	return out.ModelId, nil
+}
+
+func (this *Remote) CheckMojo(algo string) (bool, error) {
+	in := CheckMojoIn{algo}
+	var out CheckMojoOut
+	err := this.Proc.Call("CheckMojo", &in, &out)
+	if err != nil {
+		return false, err
+	}
+	return out.CanMojo, nil
+}
+
+func (this *Remote) ImportModelPojo(modelId int64) error {
+	in := ImportModelPojoIn{modelId}
+	var out ImportModelPojoOut
+	err := this.Proc.Call("ImportModelPojo", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) ImportModelMojo(modelId int64) error {
+	in := ImportModelMojoIn{modelId}
+	var out ImportModelMojoOut
+	err := this.Proc.Call("ImportModelMojo", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *Remote) DeleteModel(modelId int64) error {
@@ -4090,6 +4149,107 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 	}
 
 	out.ModelId = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) CheckMojo(r *http.Request, in *CheckMojoIn, out *CheckMojoOut) error {
+	const name = "CheckMojo"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.CheckMojo(pz, in.Algo)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.CanMojo = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) ImportModelPojo(r *http.Request, in *ImportModelPojoIn, out *ImportModelPojoOut) error {
+	const name = "ImportModelPojo"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.ImportModelPojo(pz, in.ModelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) ImportModelMojo(r *http.Request, in *ImportModelMojoIn, out *ImportModelMojoOut) error {
+	const name = "ImportModelMojo"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.ImportModelMojo(pz, in.ModelId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

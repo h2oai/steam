@@ -19,63 +19,71 @@
  * Created by justin on 8/8/16.
  */
 import * as React from 'react';
-import * as classNames from 'classnames';
-import { Overlay } from 'h2oUIKit';
-import { connect } from 'react-redux';
 import '../styles/notification.scss';
-import { closeNotification } from '../actions/notification.actions';
+import { NotificationData } from '../actions/notification.actions';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { dismissNotification } from '../actions/notification.actions';
+
+export enum NotificationType { Info, Confirm, Warning, Error }
 
 interface Props {
-  notification: {
-    isOpen: boolean,
-    notificationType: string,
-    text: string,
-    actions: any
+  notificationData: NotificationData,
+  dismissNotification: Function
+}
+
+export class Notification extends React.Component<Props, any> {
+
+  constructor() {
+    super();
+    this.state = {
+      hasViewButton: false,
+    };
   }
-}
 
-interface DispatchProps {
-  closeNotification: Function
-}
+  onDismissClicked() {
+    this.props.dismissNotification(this.props.notificationData);
+  }
 
-export class Notification extends React.Component<Props & DispatchProps, any> {
-  render(): React.ReactElement<Overlay> {
-    return (
-      <Overlay className={classNames('notification', this.props.notification.notificationType)}
-               open={this.props.notification.isOpen}>
+  render(): React.ReactElement<HTMLElement> {
+    if (this.props.notificationData) {
+      let guideClassName = "left-type-guide ";
+      switch (this.props.notificationData.notificationType) {
+        case NotificationType.Info :
+          guideClassName += "left-type-guide-info ";
+          break;
+        case NotificationType.Warning :
+          guideClassName += "left-type-guide-warning ";
+          break;
+        case NotificationType.Error :
+          guideClassName += "left-type-guide-error ";
+          break;
+        case NotificationType.Confirm :
+          guideClassName += "left-type-guide-confirm ";
+          break;
+      }
+
+      return <div className='notification'>
         <div className="inner-notification">
-          <div className="icon-container">
-            <i className={classNames('fa', {
-              'fa-warning': this.props.notification.notificationType === 'error',
-              'fa-info-circle': this.props.notification.notificationType === 'warn',
-              'fa-check-circle': this.props.notification.notificationType === 'success',
-              'fa-circle-o-notch': this.props.notification.notificationType === 'info',
-              'fa-spin': this.props.notification.notificationType === 'info'
-            })}/>
-          </div>
+          <div className={guideClassName}></div>
           <div className="text-container">
-            {this.props.notification.text}
+            <div className="header">
+              {this.props.notificationData.header}
+            </div>
+            <div className="detail">
+              {this.props.notificationData.detail}
+            </div>
           </div>
           <div className="actions-container">
-            <button onClick={this.props.closeNotification}><i className="fa fa-close"/> Close</button>
+            { this.state.hasViewButton ?
+              <div onClick={ this.onDismissClicked.bind(this) } className="view-button"> View</div> : null }
+            <div onClick={ this.onDismissClicked.bind(this) } className="dismiss-button"> Dismiss</div>
           </div>
         </div>
-      </Overlay>
-    );
+      </div>;
+    } else {
+      return null;
+    }
+
   }
 }
-
-function mapStateToProps(state) {
-  return {
-    notification: state.notification
-  };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    closeNotification: bindActionCreators(closeNotification, dispatch)
-  };
-}
-
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(Notification);

@@ -461,28 +461,59 @@ func (s *Service) GetProject(pz az.Principal, projectId int64) (*web.Project, er
 	return toProject(project), nil
 }
 
+func (s *Service) deleteImplicitDatasouce(pz az.Principal, d data.Datasource) error {
+	// Verify Datasource is Implicit
+	if d.Kind != "Implicit" {
+		return fmt.Errorf("non-implicit datasource: %s", d.Name)
+	}
+
+	// Read and delete all Datasets associated with Implicit Datasource
+	dts, err := s.ds.ReadDatasets(pz, d.Id, 0, 10000)
+	if err != nil {
+		return errors.Wrap(err, "failed to read datasets")
+	}
+	for _, dt := range dts {
+		if err := s.ds.DeleteDataset(pz, dt.Id); err != nil {
+			return errors.Wrapf(err, "failed to delete dataset %s", dt.Name)
+		}
+	}
+
+	// Delete Datasource
+	return s.ds.DeleteDatasource(pz, d.Id)
+}
+
 func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
 		return err
 	}
 
-	if _, ok, err := s.ds.ReadDatasourceByProject(pz, projectId); err != nil {
-		return err
-	} else if ok {
-		return fmt.Errorf("This project still contains at least one datasource.")
-	}
-
+	// Verify no Models in Project
 	if _, ok, err := s.ds.ReadModelsForProject(pz, projectId, 0, 1); err != nil {
 		return err
 	} else if ok {
 		return fmt.Errorf("This project still contains at least one model.")
 	}
 
-	if err := s.ds.DeleteProject(pz, projectId); err != nil {
+	// Verify no Datasources in Project
+	if _, ok, err := s.ds.ReadDatasourceByProject(pz, projectId); err != nil {
 		return err
+	} else if ok {
+		// If Datasources present, remove all Implicit Datasources/Datasets
+		ds, err := s.ds.ReadDatasources(pz, projectId, 0, 10000)
+		if err != nil {
+			return errors.Wrap(err, "failed to read datasources for project")
+		}
+		for _, d := range ds {
+			if d.Kind != "Implicit" {
+				return fmt.Errorf("project contains at least one datasource")
+			}
+			if err := s.deleteImplicitDatasouce(pz, d); err != nil {
+				return errors.Wrapf(err, "failed to delete implicit datasource %s", d.Name)
+			}
+		}
 	}
 
-	return nil
+	return s.ds.DeleteProject(pz, projectId)
 }
 
 // --- Datasource ---
@@ -840,18 +871,20 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 
 	modelId, err := s.ds.CreateModel(pz, data.Model{
 		0,
-		0,        //FIXME -- should be a valid project ID to prevent a FK violation.
-		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
-		0,        // FIXME -- should be a valid dataset ID to prevent a FK violation.
-		modelKey, // TODO this should be a modelName
+		0,               //FIXME -- should be a valid project ID to prevent a FK violation.
+		0,               // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		sql.NullInt64{}, // FIXME -- should be a valid dataset ID to prevent a FK violation.
+		modelKey,        // TODO this should be a modelName
+		cluster.Id,
 		cluster.Name,
 		modelKey,
 		"AutoML",
 		"", // ModelCategory
 		dataset,
 		targetName,
+		sql.NullString{},
 		"",
-		"",
+		sql.NullString{},
 		int64(maxRunTime),
 		"",  // TODO Sebastian: put raw metrics json here (do not unmarshal/marshal json from h2o)
 		"1", // MUST be "1"; will change when H2O's API version is bumped.
@@ -925,25 +958,13 @@ func dataFrameName(m *bindings.ModelSchema) string {
 
 func h2oToModel(model *bindings.ModelSchema) data.Model {
 	return data.Model{
-		0,
-		0,
-		0,
-		0,
-		model.ModelId.Name,
-		"",
-		model.ModelId.Name,
-		model.AlgoFullName,
-		string(model.Output.ModelCategory),
-		dataFrameName(model),
-		model.ResponseColumnName,
-		"",
-		"",
-		0,
-		"",
-		"",
-		time.Now(),
-		sql.NullInt64{0, false},
-		sql.NullString{"", false},
+		Name:               model.ModelId.Name,
+		ModelKey:           model.ModelId.Name,
+		Algorithm:          model.AlgoFullName,
+		ModelCategory:      string(model.Output.ModelCategory),
+		DatasetName:        dataFrameName(model),
+		ResponseColumnName: model.ResponseColumnName,
+		Created:            time.Now(),
 	}
 }
 
@@ -1007,12 +1028,12 @@ func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart,
 
 	// Verify project exists
 	if _, err := s.ds.ReadProject(pz, projectId); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read project from database")
 	}
 
 	models, err := s.ds.ReadBinomialModels(pz, projectId, namePart, sortBy, ascending, offset, limit)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read binomial models from database")
 	}
 
 	return toBinomialModels(models), nil
@@ -1160,37 +1181,25 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return 0, err
 	}
 
-	modelId, err := s.ds.CreateModel(pz, data.Model{
-		0,
-		projectId,
-		trainingDatasetId,
-		trainingDatasetId,
-		modelName,
-		cluster.Name,
-		modelKey,
-		m.AlgoFullName,
-		string(m.Output.ModelCategory),
-		dataFrameName(m),
-		m.ResponseColumnName,
-		"",
-		"",
-		0,
-		string(rawModel),
-		"1", // MUST be "1"; will change when H2O's API version is bumped.
-		time.Now(),
-		sql.NullInt64{0, false},
-		sql.NullString{"", false},
-	})
-	if err != nil {
-		return 0, err
+	// TODO: create a function to make this statically typed
+	model := data.Model{
+		ProjectId:          projectId,
+		TrainingDatasetId:  trainingDatasetId,
+		Name:               modelName,
+		ClusterName:        cluster.Name,
+		ClusterId:          cluster.Id,
+		ModelKey:           modelKey,
+		Algorithm:          m.AlgoFullName,
+		ModelCategory:      string(m.Output.ModelCategory),
+		DatasetName:        dataFrameName(m),
+		ResponseColumnName: m.ResponseColumnName,
+		Metrics:            string(rawModel),
+		MetricsVersion:     "1",
+		Created:            time.Now(),
 	}
 
-	location, logicalName, err := s.exportModel(h2o, modelKey, modelId)
+	modelId, err := s.ds.CreateModel(pz, model)
 	if err != nil {
-		return 0, err
-	}
-
-	if err := s.ds.UpdateModelLocation(pz, modelId, location, logicalName); err != nil {
 		return 0, err
 	}
 
@@ -1239,6 +1248,83 @@ func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bi
 	}
 
 	return nil
+}
+
+func (s *Service) CheckMojo(pz az.Principal, algo string) (bool, error) {
+	switch algo {
+	case "Gradient Boosting Method", "Distributed Random Forest":
+		return true, nil
+	}
+	return false, nil
+}
+
+func (s *Service) ImportModelPojo(pz az.Principal, modelId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return errors.Wrap(err, "failed checking permissions")
+	}
+
+	m, err := s.ds.ReadModel(pz, modelId)
+	if err != nil {
+		return errors.Wrap(err, "failed reading model from database")
+	}
+
+	c, err := s.ds.ReadCluster(pz, m.ClusterId)
+	if err != nil {
+		return errors.Wrap(err, "failed reading cluster from database")
+	}
+	h2o := h2ov3.NewClient(c.Address)
+
+	modelPath := fs.GetModelPath(s.workingDir, modelId)
+	javaModelPath, err := h2o.ExportJavaModel(m.ModelKey, modelPath)
+	if err != nil {
+		return errors.Wrap(err, "failed exporting java model from h2o")
+	}
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return errors.Wrap(err, "failed to export java dependency")
+	}
+
+	if !m.LogicalName.Valid {
+		s.ds.UpdateModelLocation(pz, modelId, strconv.FormatInt(modelId, 10), fs.GetBasenameWithoutExt(javaModelPath))
+	}
+
+	return s.ds.UpdateModelObjectType(pz, modelId, "pojo")
+}
+
+func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageModel); err != nil {
+		return errors.Wrap(err, "failed checking permissions")
+	}
+
+	m, err := s.ds.ReadModel(pz, modelId)
+	if err != nil {
+		return errors.Wrap(err, "failed reading model from database")
+	}
+
+	// Doesn't return errors
+	if ok, _ := s.CheckMojo(pz, m.Algorithm); !ok {
+		return fmt.Errorf("model of type %s does not have MOJO support", m.Algorithm)
+	}
+
+	c, err := s.ds.ReadCluster(pz, m.ClusterId)
+	if err != nil {
+		return errors.Wrap(err, "failed reading cluster from database")
+	}
+	h2o := h2ov3.NewClient(c.Address)
+
+	modelPath := fs.GetModelPath(s.workingDir, modelId)
+	mojoPath, err := h2o.ExportMOJO(m.ModelKey, modelPath)
+	if err != nil {
+		return errors.Wrap(err, "failed exporting MOJO from h2o")
+	}
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return errors.Wrap(err, "failed to export java dependency")
+	}
+
+	if !m.LogicalName.Valid {
+		s.ds.UpdateModelLocation(pz, modelId, strconv.FormatInt(modelId, 10), fs.GetBasenameWithoutExt(mojoPath))
+	}
+
+	return s.ds.UpdateModelObjectType(pz, modelId, "mojo")
 }
 
 func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
@@ -1423,8 +1509,9 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		s.workingDir,
 		model.ProjectId,
 		model.Id,
-		model.LogicalName,
+		model.LogicalName.String,
 		artifact,
+		model.ModelObjectType.String,
 		packageName,
 	)
 	if err != nil {
@@ -1441,6 +1528,8 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),
 		s.scoringServiceAddress,
 		port,
+		name,
+		pz.Name(),
 	)
 	if err != nil {
 		return 0, err
@@ -2367,11 +2456,12 @@ func fromNullString(maybeId sql.NullString) string {
 	return ""
 }
 
+// TODO: Fix these NULLSQL values
 func toModel(m data.Model) *web.Model {
 	return &web.Model{
 		m.Id,
 		m.TrainingDatasetId,
-		m.ValidationDatasetId,
+		m.ValidationDatasetId.Int64,
 		m.Name,
 		m.ClusterName,
 		m.ModelKey,
@@ -2379,8 +2469,9 @@ func toModel(m data.Model) *web.Model {
 		m.ModelCategory,
 		m.DatasetName,
 		m.ResponseColumnName,
-		m.LogicalName,
+		m.LogicalName.String,
 		m.Location,
+		m.ModelObjectType.String,
 		int(m.MaxRunTime), // FIXME change db field to int
 		m.Metrics,
 		toTimestamp(m.Created),
@@ -2389,11 +2480,12 @@ func toModel(m data.Model) *web.Model {
 	}
 }
 
+// TODO: Fix these NULLSQL values
 func toBinomialModel(model data.BinomialModel) *web.BinomialModel {
 	return &web.BinomialModel{
 		model.Id,
 		model.TrainingDatasetId,
-		model.ValidationDatasetId,
+		model.ValidationDatasetId.Int64,
 		model.Name,
 		model.ClusterName,
 		model.ModelKey,
@@ -2401,8 +2493,9 @@ func toBinomialModel(model data.BinomialModel) *web.BinomialModel {
 		model.ModelCategory,
 		model.DatasetName,
 		model.ResponseColumnName,
-		model.LogicalName,
+		model.LogicalName.String,
 		model.Location,
+		model.ModelObjectType.String,
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
@@ -2424,11 +2517,12 @@ func toBinomialModels(models []data.BinomialModel) []*web.BinomialModel {
 	return array
 }
 
+// TODO: Fix these NULLSQL values
 func toMultinomialModel(model data.MultinomialModel) *web.MultinomialModel {
 	return &web.MultinomialModel{
 		model.Id,
 		model.TrainingDatasetId,
-		model.ValidationDatasetId,
+		model.ValidationDatasetId.Int64,
 		model.Name,
 		model.ClusterName,
 		model.ModelKey,
@@ -2436,8 +2530,9 @@ func toMultinomialModel(model data.MultinomialModel) *web.MultinomialModel {
 		model.ModelCategory,
 		model.DatasetName,
 		model.ResponseColumnName,
-		model.LogicalName,
+		model.LogicalName.String,
 		model.Location,
+		model.ModelObjectType.String,
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),
@@ -2461,7 +2556,7 @@ func toRegressionModel(model data.RegressionModel) *web.RegressionModel {
 	return &web.RegressionModel{
 		model.Id,
 		model.TrainingDatasetId,
-		model.ValidationDatasetId,
+		model.ValidationDatasetId.Int64,
 		model.Name,
 		model.ClusterName,
 		model.ModelKey,
@@ -2469,8 +2564,9 @@ func toRegressionModel(model data.RegressionModel) *web.RegressionModel {
 		model.ModelCategory,
 		model.DatasetName,
 		model.ResponseColumnName,
-		model.LogicalName,
+		model.LogicalName.String,
 		model.Location,
+		model.ModelObjectType.String,
 		int(model.MaxRunTime), // FIXME change db field to int
 		model.Metrics,
 		toTimestamp(model.Created),

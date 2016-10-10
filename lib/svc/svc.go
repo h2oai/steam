@@ -21,7 +21,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -33,10 +35,26 @@ import (
 	"time"
 
 	"github.com/h2oai/steam/srv/web"
+	"github.com/pkg/errors"
 )
 
+func svcScan(r io.Reader, name, username string, err *string, pass chan struct{}) {
+	in := bufio.NewScanner(r)
+	for in.Scan() {
+		log.Println("PRED", name, username, in.Text())
+
+		if strings.Contains(in.Text(), "Started @") {
+			close(pass)
+		}
+		if strings.Contains(in.Text(), "FAILED") {
+			s := strings.SplitAfter(in.Text(), "FAILED")
+			*err += s[1] + "\n"
+		}
+	}
+}
+
 // Start starts a scoring service.
-func Start(warfile, jetty, host string, port int) (int, error) {
+func Start(warfile, jetty, host string, port int, name, username string) (int, error) {
 
 	argv := []string{"-jar", jetty, "--port", strconv.Itoa(port)}
 
@@ -49,55 +67,30 @@ func Start(warfile, jetty, host string, port int) (int, error) {
 	cmd := exec.Command("java", argv...)
 	stdErr, err := cmd.StderrPipe()
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "failed setting standard out")
 	}
-	// stdOut, err := cmd.StdoutPipe()
-	// if err != nil {
-	// 	return 0, err
-	// }
-
-	defer stdErr.Close()
-
+	stdOut, err := cmd.StdoutPipe()
+	if err != nil {
+		return 0, errors.Wrap(err, "failed setting standard err")
+	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
-	var errText string
-	if err := cmd.Start(); err != nil {
-		return 0, err
-	}
+	pass := make(chan struct{})
+	fail := make(chan struct{})
+	var cmdErr string
+	go svcScan(stdErr, name, username, &cmdErr, pass)
+	go svcScan(stdOut, name, username, &cmdErr, pass)
 
-	e := make(chan error)
-	success := false
-	// the cool bits
-	// goroutines will only pipe to e if their condition is met
-	go func() { // This is the success condition
-		in := bufio.NewScanner(stdErr)
-		for in.Scan() {
-			errText = errText + in.Text() + "\n"
-			if strings.Contains(in.Text(), "Started @") {
-				e <- nil
-				success = true
-			}
-		}
-	}()
-	go func() { // This is the fail condition
-		if err := cmd.Wait(); err != nil {
-			if !success {
-				e <- fmt.Errorf("Scoring service launch failed: warfile %s at address %s:%d:\n%v",
-					warfile,
-					host,
-					port,
-					errText,
-				)
-			}
-		}
-	}()
-	// Blocking here, until either goroutine returns with their condition
-	if err := <-e; err != nil {
-		return 0, err
+	go func() { err = cmd.Run(); close(fail) }()
+
+	select {
+	case <-pass:
+		pid := cmd.Process.Pid
+		return pid, nil
+	case <-fail:
+		e := fmt.Errorf("%v", cmdErr)
+		return 0, errors.Wrap(e, "starting service")
 	}
-	pid := cmd.Process.Pid
-	cmd.Process.Release()
-	return pid, nil
 }
 
 // Stop stops a scoring service.

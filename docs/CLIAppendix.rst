@@ -1,5 +1,5 @@
-CLI Command Reference Appendix
-==============================
+Appendix B: CLI Command Reference 
+=================================
 
 This document describes the CLI commands available in Steam. In addition to this reference, you can view information about each command when you're in the CLI by typing ``./steam help``. 
 
@@ -546,7 +546,7 @@ the case below, this role corresponds to the default data science role.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. This command deletes a service from the database based on its
 ID. Note that you must first stop a service before it can be deleted.
 (See `stop service`_.)
@@ -1289,7 +1289,7 @@ the database.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. This command retrieves detailed information about a specific
 service based on its ID.
 
@@ -1319,7 +1319,7 @@ The following example retrieve information about service 2.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. This command retrieves a list of services available on the
 database.
 
@@ -1697,7 +1697,7 @@ The following example stops a cluster that has an ID of 9.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. Use this command to stop a service.
 
 **Usage**

@@ -183,6 +183,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
   }
 
   render(): React.ReactElement<HTMLDivElement> {
+
     if (_.isEmpty(this.props.model)) {
       return <div></div>;
     }
@@ -195,7 +196,7 @@ export class ModelDetails extends React.Component<Props & DispatchProps, any> {
                              onSelectModel={this.onSelectModel.bind(this)}
                              onCancel={this.onCancel.bind(this)}
                              count={this.props.count}/>
-        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()}
+        <ExportModal open={this.state.isExportModalOpen} name={this.props.model.name.toUpperCase()} modelObjectType={this.props.model.model_object_type}
                      onCancel={this.cancel.bind(this)} modelId={parseInt(this.props.params.modelid, 10)}
                      projectId={parseInt(this.props.params.projectid, 10)} onDownload={this.downloadModel.bind(this)}/>
         <Deploy open={this.state.isDeployModalOpen} onCancel={this.closeDeployModal.bind(this)} model={this.props.model}

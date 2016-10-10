@@ -58,19 +58,19 @@ the URL of the edge node and the superuser login credentials. The superuser can 
 
   ssh <user>@<yarn_edge_node>
 
-2. Start the Steam compilation and scoring service. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster.
+2. Navigate to the Steam folder and start the Jetty server. This allows you to deploy models and run the Steam Prediction Service.
+
+  ::
+
+    java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+
+3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster.
 
  ::
 
   sudo ./steam serve master --superuser-name=superuser --superuser-password=superuser
 
- **Note**: Use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or scoring service on a different location.
-
-3. Open another terminal window and start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
-
-  ::
-
-    java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+ **Note**: Use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location.
 
 4. Open a Chrome browser and navigate to the YARN edge node.
 
@@ -104,22 +104,20 @@ After Steam is installed, the following steps describe how to start Steam.
 
   cd steam--darwin-amd64
 
-2. Start the Steam compilation and scoring service. Be sure to include the ``--superuser-name=superuser`` and
-   ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on localhost:9000 and creates a Steam superuser. A Steam superuser is responsible for creating roles,workgroups, and users.
+2. Start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
+
+  ::
+
+    java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+
+3. Open another terminal window and start Steam. Be sure to include the ``--superuser-name=superuser`` and
+   ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This creates Steam superuser. A Steam superuser is responsible for creating roles,workgroups, and users. This also starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the prediction service on the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--prediction-service-address=<ip_address>``. Use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
 
  ::
 
   ./steam serve master --superuser-name=superuser --superuser-password=superuser
 
- This starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the scoring service to the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--scoring-service-address=<ip_address>``. Use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
- 
- **Note**: If you are demoing Steam and do not have an Internet connection, you can set the scoring service to point to localhost using ``--scoring-service-address=localhost``. 
-
-3. Open another terminal window and start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
-
-  ::
-
-    java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+ **Note**: If you are demoing Steam and do not have an Internet connection, you can set the prediction service to point to localhost using ``--prediction-service-address=localhost``. 
 
 4. Open a Chrome browser and navigate to http://localhost:9000.
 

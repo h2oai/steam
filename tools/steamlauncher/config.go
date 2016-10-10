@@ -18,11 +18,12 @@
 package main
 
 type tomlConfig struct {
-	Title          string
-	Superuser      superuser
-	Steam          steam
-	DefaultRoles   map[string]role `toml:"roles"`
-	ScoringSerivce scoringServiceConfig
+	Title             string
+	Superuser         superuser
+	Steam             steam
+	DefaultRoles      map[string]role `toml:"roles"`
+	PredictionBuilder predictionBuilderConfig
+	PredictionService predictionServiceConfig
 }
 
 type superuser struct {
@@ -39,9 +40,13 @@ type role struct {
 	Permissions []string
 }
 
-type scoringServiceConfig struct {
+type predictionBuilderConfig struct {
 	JettyPath string
 	WarPath   string
+	Host      string
 	Port      int
+}
+
+type predictionServiceConfig struct {
 	PortRange string
 }

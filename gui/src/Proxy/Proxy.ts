@@ -52,6 +52,8 @@ export interface BinomialModel {
   
   location: string
   
+  model_object_type: string
+  
   max_runtime: number
   
   json_metrics: string
@@ -276,6 +278,8 @@ export interface Model {
   
   location: string
   
+  model_object_type: string
+  
   max_runtime: number
   
   json_metrics: string
@@ -313,6 +317,8 @@ export interface MultinomialModel {
   logical_name: string
   
   location: string
+  
+  model_object_type: string
   
   max_runtime: number
   
@@ -381,6 +387,8 @@ export interface RegressionModel {
   logical_name: string
   
   location: string
+  
+  model_object_type: string
   
   max_runtime: number
   
@@ -614,6 +622,15 @@ export interface Service {
   
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
+  
+  // Check if a model category can generate MOJOs
+  checkMojo: (algo: string, go: (error: Error, canMojo: boolean) => void) => void
+  
+  // Import a model's POJO from a cluster
+  importModelPojo: (modelId: number, go: (error: Error) => void) => void
+  
+  // Import a model's MOJO from a cluster
+  importModelMojo: (modelId: number, go: (error: Error) => void) => void
   
   // Delete a model
   deleteModel: (modelId: number, go: (error: Error) => void) => void
@@ -1440,6 +1457,38 @@ interface ImportModelFromClusterIn {
 interface ImportModelFromClusterOut {
   
   model_id: number
+  
+}
+
+interface CheckMojoIn {
+  
+  algo: string
+  
+}
+
+interface CheckMojoOut {
+  
+  can_mojo: boolean
+  
+}
+
+interface ImportModelPojoIn {
+  
+  model_id: number
+  
+}
+
+interface ImportModelPojoOut {
+  
+}
+
+interface ImportModelMojoIn {
+  
+  model_id: number
+  
+}
+
+interface ImportModelMojoOut {
   
 }
 
@@ -2824,6 +2873,42 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
     } else {
       const d: ImportModelFromClusterOut = <ImportModelFromClusterOut> data;
       return go(null, d.model_id);
+    }
+  });
+}
+
+export function checkMojo(algo: string, go: (error: Error, canMojo: boolean) => void): void {
+  const req: CheckMojoIn = { algo: algo };
+  Proxy.Call("CheckMojo", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: CheckMojoOut = <CheckMojoOut> data;
+      return go(null, d.can_mojo);
+    }
+  });
+}
+
+export function importModelPojo(modelId: number, go: (error: Error) => void): void {
+  const req: ImportModelPojoIn = { model_id: modelId };
+  Proxy.Call("ImportModelPojo", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: ImportModelPojoOut = <ImportModelPojoOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function importModelMojo(modelId: number, go: (error: Error) => void): void {
+  const req: ImportModelMojoIn = { model_id: modelId };
+  Proxy.Call("ImportModelMojo", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: ImportModelMojoOut = <ImportModelMojoOut> data;
+      return go(null);
     }
   });
 }

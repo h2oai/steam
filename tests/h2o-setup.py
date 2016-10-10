@@ -15,16 +15,16 @@ h2o.init(ip=ip, port=port)
 bin_frame = h2o.create_frame(
     has_response=True,
     response_factors=2,
-    id="bin_hex")
+    frame_id="bin_hex")
 mul_frame = h2o.create_frame(
     has_response=True,
     response_factors=10,
-    id="mul_hex")
+    frame_id="mul_hex")
 reg_frame = h2o.create_frame(
     cols=11,
     categorical_fraction=0,
     binary_fraction=0,
-    id="reg_hex")
+    frame_id="reg_hex")
 
 # Create multiple models for testing
 # gbm models
