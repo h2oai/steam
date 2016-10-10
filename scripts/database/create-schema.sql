@@ -596,7 +596,7 @@ CREATE TABLE model (
     training_dataset_id integer NOT NULL,
     validation_dataset_id integer,
     name text NOT NULL,
-    cluster_id integer NOT NULL,
+    cluster_id integer,
     cluster_name text NOT NULL,
     model_key text NOT NULL,
     algorithm text NOT NULL,
@@ -614,7 +614,7 @@ CREATE TABLE model (
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (training_dataset_id) REFERENCES dataset(id),
     FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id),
-    FOREIGN KEY (cluster_id) REFERENCES cluster(id)
+    FOREIGN KEY (cluster_id) REFERENCES cluster(id) ON DELETE SET NULL
 
 );
 
