@@ -69,6 +69,15 @@ export default class Breadcrumb extends React.Component<Props, any> {
                 {crumbs.map((route, i) => {
                     if (crumbs.length > 1) {
                         let crumb = (i === crumbs.length - 1) ? route.name : (<Link to={route.path}>{route.name}</Link>);
+                        if (i === 2) {
+                          if (crumbs[1].path === "/projects" ) {
+                            return <li id="projectIdCrumb" key={i}>{crumb}</li>;
+                          }
+                        }
+                        if (i === 4) {
+                          if (crumbs[3].path.indexOf("/models") !== -1)
+                          return <li id="modelIdCrumb" key={i}>{crumb}</li>;
+                        }
                         return <li key={i}>{crumb}</li>;
                     }
                     return null;
