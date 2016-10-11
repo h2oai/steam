@@ -21,6 +21,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/h2oai/steam/master/auth"
@@ -82,7 +83,7 @@ const (
 )
 
 const (
-	Version = "1"
+	Version = "1.1.0"
 
 	SuperuserRoleName = "Superuser"
 
@@ -596,7 +597,7 @@ func isPrimed(db *sql.DB) (bool, error) {
 func prime(db *sql.DB) error {
 	// FIXME logging needs to be handled for testing
 	// log.Println("Priming database for first time use...")
-	if err := createMetadata(db, "version", "1"); err != nil {
+	if err := createMetadata(db, "version", Version); err != nil {
 		return err
 	}
 	if err := primePermissions(db, Permissions); err != nil {
@@ -703,11 +704,18 @@ func primePermissions(db *sql.DB, permissions []Permission) error {
 }
 
 func upgrade(db *sql.DB, currentVersion string) error {
-	if currentVersion == Version {
-		return nil
-	}
+	for currentVersion != Version {
+		var err error
+		switch {
+		case currentVersion == "1":
+			log.Println("Upgrading database to 1.1.0")
+			currentVersion, err = upgradeTo_1_1_0(db)
+		}
 
-	// TODO add stepwise upgrades
+		if err != nil {
+			return errors.Wrap(err, "upgrading database")
+		}
+	}
 
 	return nil
 }
@@ -760,16 +768,16 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 
 		workgroupId, err = createDefaultWorkgroup(tx, name)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "creating workgroup")
 		}
 
 		id, err = createIdentity(tx, name, password, workgroupId)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "creating identity")
 		}
 
 		if err := linkIdentityAndWorkgroup(tx, id, workgroupId); err != nil {
-			return err
+			return errors.Wrap(err, "linking identity and workgroup")
 		}
 
 		if err := createPrivilege(tx, Privilege{
@@ -778,7 +786,7 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 			ds.EntityTypes.Identity,
 			id,
 		}); err != nil {
-			return err
+			return errors.Wrap(err, "creating identity privilege")
 		}
 
 		if err := createPrivilege(tx, Privilege{
@@ -787,12 +795,12 @@ func (ds *Datastore) CreateSuperuser(name, password string) (int64, int64, error
 			ds.EntityTypes.Workgroup,
 			workgroupId,
 		}); err != nil {
-			return err
+			return errors.Wrap(err, "creating workgroup privilege")
 		}
 
 		roleId, err := createRole(tx, SuperuserRoleName, SuperuserRoleName)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "creating role")
 		}
 
 		if err := linkIdentityAndRole(tx, id, roleId); err != nil {
@@ -2216,6 +2224,7 @@ func (ds *Datastore) DeletePrivilege(pz az.Principal, privilege Privilege) error
 }
 
 func createPrivilege(tx *sql.Tx, privilege Privilege) error {
+
 	_, err := tx.Exec(`
 			INSERT INTO
 				privilege
@@ -2227,7 +2236,7 @@ func createPrivilege(tx *sql.Tx, privilege Privilege) error {
 		privilege.EntityType,
 		privilege.EntityId,
 	)
-	return err
+	return errors.Wrap(err, "executing query")
 }
 
 func deletePrivilegesOn(tx *sql.Tx, entityTypeId, entityId int64) error {
