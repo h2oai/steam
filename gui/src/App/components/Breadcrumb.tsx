@@ -75,8 +75,9 @@ export default class Breadcrumb extends React.Component<Props, any> {
                           }
                         }
                         if (i === 4) {
-                          if (crumbs[3].path.indexOf("/models") !== -1)
-                          return <li id="modelIdCrumb" key={i}>{crumb}</li>;
+                          if (crumbs[3].path.indexOf("/models") === crumbs[3].path.length - "/models".length) {
+                            return <li id="modelIdCrumb" key={i}>{crumb}</li>;
+                          }
                         }
                         return <li key={i}>{crumb}</li>;
                     }
