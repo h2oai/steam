@@ -20,7 +20,6 @@ import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import '../styles/users.scss';
-import { saveUpdatedPermissions } from "../actions/users.actions";
 import DefaultModal from '../../App/components/DefaultModal';
 import InputFeedback from '../../App/components/InputFeedback';
 import { FeedbackType } from '../../App/components/InputFeedback';
@@ -39,15 +38,36 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
     super(props);
     this.state = {
       requestedChanges: this.props.requestedChanges,
-      saveClicked: false
+      saveClicked: false,
+      autoCloseTimer: null
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({
-      requestedChanges: nextProps.requestedChanges,
-      saveClicked: false
-    });
+    if (nextProps.requestedChanges !== this.props.requestedChanges) {
+      this.setState({
+        requestedChanges: nextProps.requestedChanges
+      });
+    }
+
+    if (nextProps.updates !== this.props.updates) {
+      let shouldAutoClose = true;
+      if (nextProps.updates.length !== this.state.requestedChanges.length) {
+        shouldAutoClose = false;
+      } else {
+        for (let update of nextProps.updates) {
+          if (!update.hasOwnProperty("roleId")) {
+            shouldAutoClose = false;
+          }
+        }
+      }
+
+      if (shouldAutoClose && this.state.autoCloseTimer === null && nextProps.open) {
+        this.setState({
+          autoCloseTimer: setTimeout(this.onCancelClicked, 3000)
+        });
+      }
+    }
   }
 
   cancelIndividualChange = (index) => {
@@ -62,6 +82,20 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
     if (clone.length === 0) {
       this.props.closeHandler();
     }
+  };
+
+  onCancelClicked = () => {
+    if (this.state.autoCloseTimer) {
+      clearTimeout(this.state.autoCloseTimer);
+      this.setState({
+        autoCloseTimer: null
+      });
+    }
+
+    this.setState({
+      saveClicked: false
+    });
+    this.props.closeHandler();
   };
 
   confirmClicked = (index: number) => {
@@ -80,7 +114,7 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
       requestedChanges: this.state.requestedChanges.slice(0),
       saveClicked: true
     });
-  }
+  };
 
   render(): React.ReactElement<DefaultModal> {
     let saveChangesEnabled = true;
@@ -90,53 +124,55 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
       }
     }
 
-    var results = [];
-    this.state.requestedChanges.map((requestedChange, index, array) => {
-      let matchUpdate = null;
+    if (this.state.saveClicked) {
+      var results = [];
 
-      for (let update of this.props.updates) {
-        console.log("checking for update");
-        if (update.roleId === requestedChange.newFlag.roleId && update.permissionId === requestedChange.permissionId) {
-          matchUpdate = update;
+      for (let requestedChange of this.state.requestedChanges) {
+        let matchUpdate = null;
+
+        for (let i = 0; i < this.props.updates.length; i++) {
+          if (this.props.updates[i].roleId === requestedChange.newFlag.roleId && this.props.updates[i].permissionId === requestedChange.permissionId) {
+            matchUpdate = this.props.updates[i];
+          }
         }
+
+        let message;
+        let status;
+        if (matchUpdate) {
+          if (matchUpdate.hasOwnProperty("roleId")) {
+            message = "";
+            status = "saved";
+          } else if (matchUpdate.hasOwnProperty("error")) {
+            message = matchUpdate.error;
+            status = "failed";
+          }
+        }
+
+        results.push({
+            requestedChange,
+            status,
+            message
+          }
+        );
       }
 
-      let message;
-      let status;
-      if (matchUpdate) {
-        if (matchUpdate.hasOwnProperty("roleId")) {
-          message = "";
-          status = "saved";
-        } else if (matchUpdate.hasOwnProperty("error")) {
-          message = matchUpdate.error;
-          status = "failed";
-        }
-      }
-
-      results.push({
-          requestedChange,
-          status,
-          message
-        }
-      );
-
-      console.log(this.props.updates);
-    });
+    }
 
     return (
       <DefaultModal open={this.props.open} closeHandler={this.props.closeHandler}>
         { this.state.saveClicked ?
         <div>
           <h1>SAVING CHANGES</h1>
+          <br />
           <Table>
             {results.map((result, index, array) => {
               return <Row key={index}>
                 <Cell>
                   {result.status === null ? <InputFeedback message={ result.message } type={FeedbackType.Progress} /> : null }
-                  {result.status === "failed" ? <InputFeedback message={ result.message } type={FeedbackType.Error} /> : null }
-                  {result.status === "saved" ? <InputFeedback message={ result.message } type={FeedbackType.Confirm} /> : null }
+                  {result.status === "failed" ? <span className="red"><InputFeedback message={ result.message } type={FeedbackType.Error} /></span> : null }
+                  {result.status === "saved" ? <span className="green"><InputFeedback message={ result.message } type={FeedbackType.Confirm} /></span> : null }
 
-                  {result.requestedChange.userDescription } &nbsp; {result.requestedChange.newFlag.value ? <span>gains</span> : <span>loses</span>} &nbsp; {result.requestedChange.description}
+                   &nbsp;&nbsp;&nbsp; {result.requestedChange.userDescription } &nbsp; {result.requestedChange.newFlag.value ? <span>gains</span> : <span>loses</span>} &nbsp; {result.requestedChange.description} &nbsp;&nbsp;&nbsp;
 
                   {result.status === "saved" ? <span className="green">Saved</span> : null}
                   {result.status === "failed" ? <span className="red">Failed</span> : null}
@@ -147,7 +183,8 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
           </Table>
           <br />
           &nbsp;
-          <div className="button-secondary" onClick={this.props.closeHandler}>Cancel</div>
+          <br />
+          <div className="button-secondary" onClick={this.props.closeHandler}>Close</div>
         </div> :
         <div>
           <h1>CONFIRMING PERMISSION CHANGES</h1>
@@ -168,7 +205,7 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
           {saveChangesEnabled ? <div className="button-primary" onClick={this.onSaveChangesClicked}>Save Changes</div>
             : <div className="button-primary disabled">Save Changes</div> }
            &nbsp;
-          <div className="button-secondary" onClick={this.props.closeHandler}>Cancel</div>
+          <div className="button-secondary" onClick={this.onCancelClicked}>Cancel</div>
         </div>}
 
 

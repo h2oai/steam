@@ -89,11 +89,13 @@ export const usersReducer = (state: any = initialState, action: any) => {
     case RECEIVE_SAVE_PERMISSIONS :
       let newState: any = _.assign({}, state);
       if (action.hasOwnProperty("roleId")) {
+        newState.updates = newState.updates.slice(0);
         newState.updates.push({
           roleId: action.roleId,
           permissionId: action.permissionId
         });
       } else if (action.hasOwnProperty("error")) {
+        newState.updates = newState.updates.slice(0);
         newState.updates.push({
           error: action.error
         });

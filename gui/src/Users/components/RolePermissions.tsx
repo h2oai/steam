@@ -16,13 +16,14 @@
 */
 
 import * as React from 'react';
+import * as _ from 'lodash';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
-import { fetchPermissionsWithRoles, PermissionsWithRoles, saveUpdatedPermissions } from "../actions/users.actions";
+import { fetchPermissionsWithRoles, PermissionsWithRoles, saveUpdatedPermissions, resetUpdates } from "../actions/users.actions";
 import {Role} from "../../Proxy/Proxy";
 import RolePermissionsConfirm from "./RolePermissionsConfirm";
 
@@ -34,7 +35,8 @@ interface Props {
 
 interface DispatchProps {
   fetchPermissionsWithRoles: Function,
-  saveUpdatedPermissions: Function
+  saveUpdatedPermissions: Function,
+  resetUpdates: Function
 }
 
 export class RolePermissions extends React.Component<Props & DispatchProps, any> {
@@ -53,6 +55,18 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     this.props.fetchPermissionsWithRoles();
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.permissionsWithRoles !== nextProps.permissionsWithRoles) {
+      this.permissionInputs = {};
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.permissionsWithRoles !== this.props.permissionsWithRoles) {
+      this.requestChanges();
+    }
+  }
+
   registerInput(input, flag, flagIndex, permissionSet, permissionIndex) {
     if (!(this as any).permissionInputs.hasOwnProperty(permissionIndex)) {
       (this as any).permissionInputs[permissionIndex] = {
@@ -67,7 +81,8 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
   }
 
   modalCloseHandler = () => {
-    this.requestChanges();
+    this.props.fetchPermissionsWithRoles();
+    this.props.resetUpdates();
   };
 
   requestChanges = () => {
@@ -78,7 +93,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
         let flagset = this.permissionInputs[permissionKey].flags[flagKey];
         if (flagset.originalFlag.value !== flagset.input.checked) {
           updates.push({
-            newFlag: { value: flagset.input.checked, roleId: flagset.input.dataset["roleid"] },
+            newFlag: { value: flagset.input.checked, roleId: parseInt(flagset.input.dataset["roleid"], 10) },
             userIndex: flagKey,
             userDescription: this.props.roles[flagKey].description,
             permissionIndex: permissionKey,
@@ -102,7 +117,6 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
       requestedChanges: updates,
       confirmOpen: false
     });
-    //this.props.saveUpdatedPermissions((this as any).permissionInputs);
   };
 
   requestConfirm = () => {
@@ -171,7 +185,8 @@ function mapStateToProps(state): any {
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchPermissionsWithRoles: bindActionCreators(fetchPermissionsWithRoles, dispatch),
-    saveUpdatedPermissions: bindActionCreators(saveUpdatedPermissions, dispatch)
+    saveUpdatedPermissions: bindActionCreators(saveUpdatedPermissions, dispatch),
+    resetUpdates: bindActionCreators(resetUpdates, dispatch)
   };
 }
 

@@ -236,7 +236,8 @@ export function fetchUsersWithRolesAndProjects() {
 
 export interface PermissionsWithRoles {
   description: string
-  flags: Array<boolean>
+  id: number
+  flags: Array<any>
 }
 /***
  * @param roles the numeric roleID's to be returned in the permission set
