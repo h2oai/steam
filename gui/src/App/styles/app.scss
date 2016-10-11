@@ -3,25 +3,59 @@
 html, body, .app-container, #app {
   height: 100%;
   min-height: 100%;
-  font-family: $font-body;
-  font-size: $text-size;
-  color: $brand-dark-1;
-  -webkit-font-smoothing: antialiased;
+  background-color: #eeeeee;
+  font-family: "Open Sans";
+  font-size: 14px;
+  color: $h2o-charcoal-grey;
+  line-height: 1.3;
   overflow: hidden;
   margin: 0;
 }
 
+h1 {
+  font-family: Oswald;
+  font-weight:400;
+  font-size: 36px;
+  text-transform: capitalize;
+  color: $h2o-charcoal-grey;
+  line-height: 1.1;
+  margin-bottom: 0px;
+  margin-top: 22px;
+}
+
+h2 {
+  font-family: Oswald;
+  font-weight: 400;
+  font-size: 24px;
+  text-transform: capitalize;
+  color: $h2o-charcoal-grey;
+  line-height: 1.1;
+}
+
+/*Lede text, i.e. primary paragraphs of text on a page that serves introductory purposes.*/
+.lede {
+  font-family: "Open Sans";
+  font-size: 18px;
+  color: $h2o-charcoal-grey;
+  line-height: 1.3;
+  margin-right: 16px;
+}
+/*Supplementary text, i.e. notes about primary conent. Never more than a couple words.*/
+.supplementary {
+  font-family: "Open Sans";
+  font-size: 11px;
+  color: $h2o-charcoal-grey;
+}
+
 article {
-  h1 {
-    font-size:2em;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    font-weight:300;
-    margin:.25em 0;
-  }
   p {
     font-family: $font-text;
   }
+}
+
+input {
+  margin-bottom: 10px;
+  margin-right: 11px;
 }
 
 *:focus {
@@ -33,12 +67,15 @@ article {
 }
 
 a {
-  color:$link-color;
+  color: #4A90E2;
 }
 .link {
   color:$link-color;
   text-decoration:underline;
   cursor:pointer;
+}
+.intro {
+  margin-top: 16px;
 }
 
 select {
@@ -52,9 +89,42 @@ select {
   width: $xlarge * 5;
 }
 
-button {
-  font-size:$text-size;
-  font-family:$font-text;
+.button-base {
+  font-family: "Open Sans";
+  position: relative;
+  display: inline-block;
+  top: -3px;
+  margin-right: 16px;
+  border-radius: 3px;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  border-width: 0px;
+}
+.button-primary {
+  @extend .button-base;
+  color: white;
+  background-color: $h2o-orange-prime;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.button-secondary {
+  @extend .button-base;
+  color: $h2o-orange-prime;
+  background-color: transparent;
+  border-color: $h2o-orange-prime;
+  border-style: solid;
+  border-width: 2px;
+  padding-left: 14px;
+  padding-right: 14px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.button {
+  color: $h2o-soft-grey;
+  text-decoration: underline;
 }
 
 button, a {
@@ -103,6 +173,9 @@ button, a {
 .app-container {
   display: flex;
   .body-container {
+    left: 300px;
+    max-width: 1100px;
+
     background-color: $brand-white;
     width: 100%;
     z-index: $body-index;
@@ -146,4 +219,8 @@ input[type="text"], textarea {
 
 .muted {
   color: $brand-dark-3;
+}
+
+.header-buttons {
+  margin-right: 44px;
 }

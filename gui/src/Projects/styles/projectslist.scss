@@ -15,7 +15,8 @@
     flex-wrap: wrap;
     .panel {
       flex-basis: 40%;
-      margin: $xsmall;
+      margin-top: 16px;
+      margin-bottom: 16px;
       max-height: $xlarge * 2;
       min-height: $xlarge * 2;
       header {
