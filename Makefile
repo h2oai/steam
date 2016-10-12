@@ -140,7 +140,7 @@ darwin:
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: gui ssb db linux 
+release: gui ssb db launcher linux 
 	rm -rf ./dist/$(DIST_LINUX)
 	# rm -rf ./dist/$(DIST_DARWIN)
 
