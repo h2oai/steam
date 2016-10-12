@@ -262,6 +262,7 @@ Making Predictions
 
 **Notes**: 
  - Use the **Clear** button to clear all entries and begin a new prediction. 
+ - You can optionally open a batch JSON file to perform batch predictions.  
  - Use the **More Stats** button to view additional statistics about the scoring service results.
  - The Steam Prediction Service is available as a completely standalone utility. Refer to the `Prediction Service Builder <prediction_service.html>`__ appendix for more information about using the Prediction Service Builder. 
 

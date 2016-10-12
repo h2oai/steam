@@ -19,6 +19,6 @@ You can connect to additional clusters that are running H2O by clicking the **La
  - Cluster Name
  - Number of Nodes
  - Memory per Node (in MB or GB)
- - H2O version (specifying a jar file)
+ - H2O version (specifying a zip file)
 
 2. Click **Launch New Clusters** when you are done. 
