@@ -46,3 +46,22 @@ $h2o-green-prime: #417505;
 $h2o-charcoal-grey: #4a4a4a;
 $h2o-soft-grey: #c5c5c5;
 $h2o-background-grey: #eeeeee;
+
+.light-grey {
+  color: #9b9b9b;
+}
+.charcoal-grey {
+  color: $h2o-charcoal-grey;
+}
+.bold {
+  font-weight: bold;
+}
+.semibold {
+  font-weight: 500;
+}
+.green {
+  color: $h2o-green-prime;
+}
+.red {
+  color: $h2o-red-prime;
+}
