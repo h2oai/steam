@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script   src="http://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+    <title>Title</title>
+</head>
+<body>
+    <button id="start">Start Steam</button>
+    <button id="list">List Containers</button>
+    <div id="link-container">
+
+    </div>
+    <script>
+        var createLink = function(id) {
+            var link = $('<a/>', {
+                href: 'http://54.226.197.142:9000/?id=' + id,
+                text: 'Link',
+                target: '_blank'
+            });
+            $('#link-container').html(link);
+        };
+
+        $('#start').click(function() {
+            $.post('http://localhost:3000/steam', function(data) {
+                var timer = setInterval(function() {
+                    var id = JSON.parse(data).id;
+                    var created = false;
+                    $.get('http://localhost:3000/steam', function(ids)  {
+                        console.log(ids);
+                        if (ids.indexOf(id) > -1) {
+                            if (created === false) {
+                                createLink(JSON.parse(data).id);
+                                created = true;
+                            }
+                            clearInterval(timer);
+                        }
+                    });
+                }, 100);
+
+            });
+        });
+
+        $('#list').click(function() {
+            $.get('http://localhost:3000/steam', function(ids)  {
+                console.log(ids);
+            });
+        });
+    </script>
+</body>
+</html>
