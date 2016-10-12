@@ -1,6 +1,10 @@
 import sys
 import time
 import testutil as tu
+import urlparse
+from browsermobproxy import Server
+from selenium.webdriver.common.keys import Keys
+from selenium import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -57,7 +61,10 @@ def projectDeployTest(driver):
 		tu.selectModel(driver, "gradi")
 		tu.selectModel(driver, "missin")
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("projtest")
+		#driver.find_element_by_xpath("//div").send_keys(Keys.F12)
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()
+		time.sleep(2)
+		driver.refresh()
 		for m in ["regress", "gradi", "missin"]:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(m)))
 		tu.deployModel(driver, "gradi", "swell")
@@ -66,7 +73,9 @@ def projectDeployTest(driver):
 		time.sleep(1)
 		tu.viewProject(driver, "deptest")
 		tu.goProjectDeployment(driver)
-	except Exception as e:
+	except:
+		for entry in driver.get_log('browser'):
+			print entry
 		print "Failed to setup project deploy test"
 		return False
 	try:
@@ -136,15 +145,21 @@ def multiDeployTest(driver):
 	return True
 
 def main():
+	s = Server('/home/pjr/browsermob/bin/browsermob-proxy', { 'port' : 1337})
+	s.start()
+	proxy = s.create_proxy({'port': 1338})
 	failcount = 0
-	d = tu.newtest()
-	
+	d = tu.newProxytest(urlparse.urlparse(proxy.proxy).path)
+	proxy.new_har(options={'captureHeaders':False})
 	if not deployOneTest(d):
 		failcount += 1
 	if not deleteTest(d):
 		failcount += 1
 	if not projectDeployTest(d):
 		failcount += 1
+		out = open('deploy.har', 'w')
+		out.write(str(proxy.har))
+		out.close()
 	# test all services from multiple projects showing up in services
 	if not multiDeployTest(d):
 		failcount += 1
@@ -153,6 +168,7 @@ def main():
 		failcount += 1
 
 	tu.endtest(d)
+	s.stop()
 	sys.exit(failcount)
 
 if __name__ == '__main__':

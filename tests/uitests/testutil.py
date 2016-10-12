@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 """
 Perm id		Permission		Index
 ============================================
@@ -293,8 +294,8 @@ def clusterExists(driver, name):
 
 def addCluster(driver, addr, port, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	if len(driver.find_elements_by_xpath("//button[text()='Connect to Cluster']")) > 0:
-		driver.find_element_by_xpath("//button[text()='Connect to Cluster']").click()
+	if len(driver.find_elements_by_xpath("//div[text()='Connect to Cluster']")) > 0:
+		driver.find_element_by_xpath("//div[text()='Connect to Cluster']").click()
 	try:
 		wait.until(lambda x: x.find_element_by_name("ip-address").is_displayed())
 		driver.find_element_by_name("ip-address").send_keys(addr)
@@ -302,7 +303,8 @@ def addCluster(driver, addr, port, name):
 		driver.find_element_by_xpath("//button[@type='submit']").click()
 		time.sleep(2)
 		wait.until(lambda x: x.find_element_by_link_text("{0}".format(name)))
-	except:
+	except Exception as e:
+		print e
 		print "Cannot add new cluster"
 		return False
 	return True
@@ -443,6 +445,7 @@ def createProject(driver, cluster, name, data, kind, mods):
 
 def testAs(user, pw):
 	o = Options()
+	o.add_argument('--start-fullscreen')
 	o.add_argument("--no-sandbox")
 	o.add_argument("--user-data-dir=/tmp")
 	driver = webdriver.Chrome()
@@ -451,11 +454,21 @@ def testAs(user, pw):
 
 def newtest():
 	o = Options()
-	o.add_argument("--no-sandbox")
-	o.add_argument("--user-data-dir=/tmp")
-	driver = webdriver.Chrome()
+	o.add_argument("--verbose")
+	o.add_argument('--start-fullscreen')
+	d = DesiredCapabilities.CHROME
+	d['loggingPrefs'] = { 'browser':'ALL', 'performance':'ALL', 'driver':'ALL' }
+	driver = webdriver.Chrome(desired_capabilities=d, chrome_options=o)
 	driver.get("http://superuser:superuser@localhost:9000")
 	return driver
+
+def newProxytest(p):
+	o = Options()
+	o.add_argument('--start-fullscreen')
+	o.add_argument("--proxy-server={0}".format(p))
+	d = webdriver.Chrome(chrome_options=o)
+	d.get("http://superuser:superuser@localhost:9000")
+	return d
 
 def endtest(driver):
 	driver.quit()

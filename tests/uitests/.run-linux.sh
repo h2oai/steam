@@ -6,9 +6,9 @@ H2O_PATH=~/Documents/h2o/h2o.jar
 
 rm -rf ./steam*-develop-linux-amd64*
 rm -rf ./steam*-develop-linux-amd64*
-curl -O http://s3.amazonaws.com/steam-release/steamY-develop-linux-amd64.tar.gz 
+curl -O http://s3.amazonaws.com/steam-release/steam-develop-linux-amd64.tar.gz 
 
-tar xvf steamY-develop-linux-amd64.tar.gz
+tar xvf steam-develop-linux-amd64.tar.gz
 cp steam-develop-linux-amd64/var/master/scripts/database/create-schema.sql steam-develop-linux-amd64/var/master/db
 mv steam-develop-linux-amd64 steam
 
@@ -22,7 +22,7 @@ python init_h2o.py
 echo > steam.log
 
 java -jar steam/var/master/assets/jetty-runner.jar \
-	steam/var/master/assets/ROOT.war > scoring-service.log 2>&1 &
+	--port 55000 steam/var/master/assets/ROOT.war > scoring-service.log 2>&1 &
 JETTY_PID=$!
 
 sleep 1
@@ -33,7 +33,7 @@ failcount=0
 cd steam
 echo > $WD/.failures
 ./steam login localhost:9000 --username=superuser --password=superuser > /dev/null
-./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
+./steam serve master --superuser-name superuser --superuser-password superuser --compilation-service-address=":55000" >> ../steam.log  2>&1 &
 STEAM_PID=$!
 disown
 sleep 1
@@ -43,7 +43,7 @@ cd ..
 for dir in `ls -d *-test`; do
 	cd steam
 	sleep 1
-	./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
+	#./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
 	cd ..
 	cp testutil.py $dir/
 	sleep 1
@@ -65,7 +65,7 @@ done
 echo "$i test(s) failed"
 cat $WD/.failures
 rm $WD/.failtmp $WD/.failures $WD/.testmp
-rm -rf $WD/steamY-develop-linux-amd64.tar.gz $WD/steam-develop-linux-amd64 $WD/steam
+rm -rf $WD/steam-develop-linux-amd64.tar.gz $WD/steam-develop-linux-amd64 $WD/steam
 
 
 

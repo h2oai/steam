@@ -1,4 +1,5 @@
 import testutil as tu
+import time
 import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -80,9 +81,13 @@ def importMultiTest(driver):
 				return False
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("multimod")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()	
+		time.sleep(2)
+		driver.refresh()
+		time.sleep(2)
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
-	except:
+	except Exception as e:
+		print e
 		print "new project failed to include all imported models"
 		return False
 	return True

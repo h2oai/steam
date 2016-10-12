@@ -6,8 +6,7 @@ from h2o.estimators.deeplearning import H2ODeepLearningEstimator as dlm
 h2o.connect(ip="localhost", port="54535")
 
 arr = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/flow_examples/arrhythmia.csv.gz")
-train = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/50_cattest_test.csv")
-test = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/50_cattest_train.csv")
+train = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/50_cattest_train.csv")
 bank = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/bank-full.csv.zip")
 
 model = glm(family="binomial", model_id="first")

@@ -5,8 +5,7 @@ touch .failtmp
 H2O_PATH=/Users/patrickrice/Documents/h2o-3/build/h2o.jar
 
 rm -rf ./steam*-develop-darwin-amd64*
-rm -rf ./steam*-develop-darwin-amd64*
-curl -O http://s3.amazonaws.com/steam-release/steamY-develop-darwin-amd64.tar.gz 
+curl -O http://s3.amazonaws.com/steam-release/steam-develop-darwin-amd64.tar.gz 
 tar xvf steam-master-darwin-amd64.tar.gz
 
 java -jar $H2O_PATH -port 54535 -name steamtest > h2o.log 2>&1 &
