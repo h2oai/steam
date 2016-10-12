@@ -48,7 +48,6 @@ public class PredictBinaryServlet extends HttpServlet {
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     long start = System.nanoTime();
-    int count = 0;
     File tmpDir = null;
     try {
       if (model == null)
@@ -60,7 +59,6 @@ public class PredictBinaryServlet extends HttpServlet {
       for (FileItem i : items) {
         String field = i.getFieldName();
         String value = i.getString();
-        logger.debug("field {}  value {}", field, value);
         if (field.startsWith("binary_")) {
           String binFieldName = field.substring("binary_".length());
           if (binFieldName == null || binFieldName.length() == 0)
@@ -128,7 +126,7 @@ public class PredictBinaryServlet extends HttpServlet {
       }
     }
     long done = System.nanoTime();
-    ServletUtil.postTimes.add(start, done, count);
+    ServletUtil.postTimes.add(start, done);
     logger.debug("Post time {}", ServletUtil.postTimes);
   }
 

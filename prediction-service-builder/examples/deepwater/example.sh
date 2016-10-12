@@ -3,7 +3,7 @@
 rm -f example.war
 
 curl -X POST \
---form mojo=@DeepWater_model_python_1476140406268_1.zip \
+--form mojo=@mojo.zip \
 --form jar=@h2o-genmodel.jar \
 localhost:55000/makewar > example.war
 
