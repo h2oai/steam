@@ -42,15 +42,17 @@ Build and Run the Builder Service
 
 Perform the following steps to build the H2O Prediction Service Builder:
 
-1. In a terminal window, navigate to the
+1. Clone the https://github.com/h2oai/steam repository.
+
+2. In a terminal window, navigate to the
    **steam/prediction-service-builder** folder.
 
-2. Run ``./gradlew build`` to build the service.
+3. Run ``./gradlew build`` to build the service.
 
-3. You will see a **BUILD SUCCESSFUL** message upon completion. Run
+4. You will see a **BUILD SUCCESSFUL** message upon completion. Run
    ``./gradlew jettyRunWar`` to run the builder service.
 
-4. Open a browser and navigate to localhost:55000 to begin using the H2O
+5. Open a browser and navigate to localhost:55000 to begin using the H2O
    Prediction Service Builder web UI.
 
    .. figure:: images/builder_service.png
