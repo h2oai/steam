@@ -47,6 +47,7 @@ public class PredictBinaryServlet extends HttpServlet {
   }
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    response.setHeader("Access-Control-Allow-Origin", "*");
     long start = System.nanoTime();
     File tmpDir = null;
     try {
