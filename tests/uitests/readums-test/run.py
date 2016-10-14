@@ -2,7 +2,6 @@ import sys
 import time
 import testutil as tu
 import subprocess as sp
-import re
 from selenium.webdriver.support.wait import WebDriverWait
 """
 Perm id		Permission		Index
