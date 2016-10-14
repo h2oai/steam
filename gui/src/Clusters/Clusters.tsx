@@ -130,7 +130,6 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             : null
           }
           {this.props.clusters.map((cluster :any, i) => {
-            console.log(cluster);
             return (
               <Panel key={i}>
                 <header>
