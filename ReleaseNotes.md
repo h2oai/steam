@@ -10,6 +10,10 @@ If you're an Open Source community member, you can contact H2O using one of the 
 - Send an e-mail message directly to <a href="mailto:support@h2o.ai">support@h2o.ai</a>
 - Ask your question on the [H2O Community](https://community.h2o.ai/spaces/540/index.html) site (create an account if necessary)
 
+## v1.1.2 Changes
+
+- [STEAM-574] Fixes missing protocol in Cluster listing addresses
+
 ## v1.1.1 Changes
 
 - [STEAM-517] The cluster URL to H2O Flow now works correctly.
