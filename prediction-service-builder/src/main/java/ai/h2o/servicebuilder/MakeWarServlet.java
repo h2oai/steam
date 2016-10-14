@@ -186,7 +186,6 @@ public class MakeWarServlet extends HttpServlet {
       InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
 
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictServlet.java", "PredictServlet.java");
-      copyExtraFile(servletPath, srcPath, tmpDir, "PredictBinaryServlet.java", "PredictBinaryServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
@@ -196,8 +195,7 @@ public class MakeWarServlet extends HttpServlet {
       // compile extra
       List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "PredictBinaryServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java",
-          "PingServlet.java", "Transform.java", "Logging.java");
+          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java", "Logging.java");
       runCmd(tmpDir, cmd, "Compilation of extra failed");
 
       // create the war jar file
