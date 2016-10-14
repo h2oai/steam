@@ -81,6 +81,11 @@ def assignWorkgroup(iden, wg):
 	x = sp.check_output("{0} link identity --with-workgroup --identity-id={1} --workgroup-id={2}"\
 		.format(_steampath, iden, wg), shell=True)
 
+def getRolePermissions(role):
+	ret = sp.check_output("{0} get permissions --for-role --role-id={1}"\
+		.format(_steampath, role), shell=True)
+	return ret.split("\n")
+
 """
 EntityType
 

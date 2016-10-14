@@ -150,7 +150,7 @@ def main():
 	proxy = s.create_proxy({'port': 1338})
 	failcount = 0
 	d = tu.newProxytest(urlparse.urlparse(proxy.proxy).path)
-	proxy.new_har(options={'captureHeaders':False})
+	proxy.new_har(options={'captureHeaders':False, 'captureContent': True})
 	if not deployOneTest(d):
 		failcount += 1
 	if not deleteTest(d):
