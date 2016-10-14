@@ -21,7 +21,7 @@
 (function(window) {
   'use strict';
   var outputDomain;
-  var API_HOST = '';
+  var API_HOST = 'http://mr-0xcuda:55011';
   var isBinaryPrediction = false;
 
 
@@ -145,7 +145,6 @@
   function showInputParameters() {
     $.get(API_HOST + '/info', function(data, status) {
       // show result
-      console.log(data);
       if (data.m._problem_type === 'image_classification') {
         isBinaryPrediction = true;
       }
@@ -199,7 +198,7 @@
           return b.probability - a.probability;
         });
         for (var i = 0; i < labelProbabilitiesMapping.length; i++) {
-          if (labelProbabilitiesMapping[i].predict === true) {
+          if (labelProbabilitiesMapping[i].predicted === true) {
             result += '<tr class="rowHighlight">'
           } else {
             result += '<tr>'
