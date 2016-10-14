@@ -130,10 +130,11 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             : null
           }
           {this.props.clusters.map((cluster :any, i) => {
+            console.log(cluster);
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={window.location.protocol + '//' + window.location.hostname + _.get(this.props.config, 'cluster_proxy_address', '') + '/flow/?cluster_id=' + cluster.id} target="_blank"
+                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={cluster.address} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count} nodes</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
