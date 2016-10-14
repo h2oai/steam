@@ -31,7 +31,6 @@ public class InfoServlet extends HttpServlet {
   }
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    response.setHeader("Access-Control-Allow-Origin", "*");
     try {
       String pathInfo = request.getPathInfo();
       logger.debug("pathInfo {}", pathInfo);

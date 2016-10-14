@@ -20,7 +20,6 @@ public class StatsServlet extends HttpServlet {
   public static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    response.setHeader("Access-Control-Allow-Origin", "*");
     try {
       final long now = System.currentTimeMillis();
       final long upTimeMs = now - ServletUtil.startTime;
