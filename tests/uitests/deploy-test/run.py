@@ -1,6 +1,10 @@
 import sys
 import time
 import testutil as tu
+import urlparse
+from browsermobproxy import Server
+from selenium.webdriver.common.keys import Keys
+from selenium import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -8,8 +12,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 def deployOneTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	tu.newProject(driver)
-	tu.addCluster(driver, "localhost", "54535", "steamtest")
-	driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+	tu.selectCluster(driver, "steamtest")
 	tu.selectDataframe(driver, "bank_full.hex")
 	tu.selectModelCategory(driver, "Regression")
 	try:
@@ -28,7 +31,6 @@ def deployOneTest(driver):
 			return False
 
 	except Exception as e:
-		print e
 		print "Failed to deploy a model"
 		return False
 	return True
@@ -36,10 +38,14 @@ def deployOneTest(driver):
 def deleteTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
-		driver.find_element_by_xpath("//div[text()='Stop Service']").click()
-		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) == 0)
+		tu.stopService(driver, "happy")
 	except:
-		print "Failed to stop/delete a service"
+		driver.refresh()
+		time.sleep(1)
+		if len(driver.find_elements_by_class_name("services-panel")) == 0:
+			print "Deployment page must be refreshed before stopped services are removed"
+		else:
+			print "Failed to stop/delete a service"
 		return False
 	return True
 
@@ -48,14 +54,17 @@ def projectDeployTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
 		tu.selectModel(driver, "regress")
 		tu.selectModel(driver, "gradi")
 		tu.selectModel(driver, "missin")
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("projtest")
+		#driver.find_element_by_xpath("//div").send_keys(Keys.F12)
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()
+		time.sleep(2)
+		driver.refresh()
 		for m in ["regress", "gradi", "missin"]:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(m)))
 		tu.deployModel(driver, "gradi", "swell")
@@ -64,8 +73,9 @@ def projectDeployTest(driver):
 		time.sleep(1)
 		tu.viewProject(driver, "deptest")
 		tu.goProjectDeployment(driver)
-	except Exception as e:
-		print e
+	except:
+		for entry in driver.get_log('browser'):
+			print entry
 		print "Failed to setup project deploy test"
 		return False
 	try:
@@ -84,15 +94,14 @@ def cleanupTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	tu.goHome(driver)
 	tu.goServices(driver)
+	time.sleep(2)
+	if not (tu.serviceExists(driver, "swell") and tu.serviceExists(driver, "double")):
+		print "A service wasn't there"
+	cnt = len(driver.find_elements_by_class_name("services-panel"))
+	tu.stopService(driver, "swell")
+	tu.stopService(driver, "double")
 	try:
-		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Stop Service']"))
-	except:
-		i = 1
-	stp = driver.find_elements_by_xpath("//div[text()='Stop Service']")
-	for serv in stp:
-		serv.click()
-	try:
-		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) == 0)
+		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) <= (cnt - 2))
 	except:
 		print "failed to stop running services"
 		return False
@@ -103,8 +112,7 @@ def multiDeployTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='select-cluster']//button"))
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
 		tu.selectModel(driver, "linmiss")
@@ -115,7 +123,6 @@ def multiDeployTest(driver):
 		tu.goHome(driver)
 		tu.goServices(driver)
 	except Exception as e:
-		print e
 		print "failed to setup multi deploy test"
 		return False
 	try:
@@ -133,22 +140,26 @@ def multiDeployTest(driver):
 				return False
 
 	except Exception as e:
-		print e
 		print "Failed to find deployments on services page"
 		return False	
 	return True
 
-
 def main():
+	s = Server('/home/pjr/browsermob/bin/browsermob-proxy', { 'port' : 1337})
+	s.start()
+	proxy = s.create_proxy({'port': 1338})
 	failcount = 0
-	d = tu.newtest()
-	
+	d = tu.newProxytest(urlparse.urlparse(proxy.proxy).path)
+	proxy.new_har(options={'captureHeaders':False, 'captureContent': True})
 	if not deployOneTest(d):
 		failcount += 1
 	if not deleteTest(d):
 		failcount += 1
 	if not projectDeployTest(d):
 		failcount += 1
+		out = open('deploy.har', 'w')
+		out.write(str(proxy.har))
+		out.close()
 	# test all services from multiple projects showing up in services
 	if not multiDeployTest(d):
 		failcount += 1
@@ -157,6 +168,7 @@ def main():
 		failcount += 1
 
 	tu.endtest(d)
+	s.stop()
 	sys.exit(failcount)
 
 if __name__ == '__main__':

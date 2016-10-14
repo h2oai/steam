@@ -129,33 +129,38 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             </Panel>
             : null
           }
-          {this.props.clusters.map((cluster, i) => {
+          {this.props.clusters.map((cluster :any, i) => {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + _.get(this.props.config, 'cluster_proxy_address', '') + '/flow/?cluster_id=' + cluster.id} target="_blank"
-                                                        rel="noopener">{cluster.name}</a></span>
+                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={cluster.address} target="_blank"
+                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count} nodes</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
+
                     <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
-                      className="fa fa-trash"/></button>
+                      className="fa fa-trash no-margin"/></button>
                   </span>
                 </header>
-                <article>
-                  <h2>
-                    ID: {cluster.id}
-                    STATUS
-                  </h2>
-                  <h2 className="cluster-status">
-                    {cluster.state === 'started' ? 'OK' : cluster.state}
-                  </h2>
-                </article>
-                <h2>ACCESS</h2>
-                { (cluster as any).identities ?
-                  (cluster as any).identities.map((identity, index) => {
-                    return <div key={index}>{ identity.identity_name }&nbsp;</div>;
-                  })
-                  : null }
+                <div className="flexrow">
+                  <div className="flexcolumn">
+                    <div className="info-header">STATUS</div>
+                    <div className="flexrow mar-right-71">
+                      { cluster.status.status === "healthy" ?
+                        <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Healthy</div>
+                        : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.status.status}</div>
+                      }
+                      { cluster.state === "started" ?
+                        <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Started</div>
+                        : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.state}</div>
+                      }
+                    </div>
+                </div>
+                <div className="flexcolumn">
+                  <div className="info-header">VERSION</div>
+                  <div className="charcoal-grey">{cluster.status.version}</div>
+                </div>
+              </div>
               </Panel>
             );
           })}

@@ -210,13 +210,13 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               <form onSubmit={this.registerCluster.bind(this)}>
                 <input type="text" name="ip-address" placeholder="IP Address"/>
                 { this.props.registerClusterError ?
-                  <InputFeedback message={ this.props.registerClusterError } type={FeedbackType.Error} />
+                  <div><InputFeedback message={ this.props.registerClusterError } type={FeedbackType.Error} /></div>
                   : null }
                 <input type="text" name="port" placeholder="Port"/>
                 <button type="submit" className="button-primary">Connect</button>
               </form>
               { this.props.isClusterFetchInProcess ?
-                  <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
+                  <div><InputFeedback message="Connecting..." type={FeedbackType.Progress} /></div>
                  : null }
             </div>
           : null }
@@ -231,7 +231,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               }) : null}
             </select>
             { this.props.isModelFetchInProcess ?
-                <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
+               <div><InputFeedback message="Connecting..." type={FeedbackType.Progress} /></div>
               : null }
           </div>
         </div> : null}

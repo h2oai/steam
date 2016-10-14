@@ -33,6 +33,36 @@ export const REQUEST_ROLE_NAMES = 'REQUEST_ROLE_NAMES';
 export const RECEIVE_ROLE_NAMES = 'RECEIVE_ROLE_NAMES';
 export const REQUEST_PROJECTS = 'REQUEST_PROJECTS';
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
+export const REQUEST_SAVE_PERMISSIONS = 'REQUEST_SAVE_PERMISSIONS';
+export const RECEIVE_SAVE_PERMISSIONS = 'RECEIVE_SAVE_PERMISSIONS';
+export const RESET_UPDATES = 'RESET_UPDATES';
+
+export function resetUpdates() {
+  return (dispatch, getState) => {
+    dispatch({
+      type: RESET_UPDATES
+    });
+  };
+}
+export function requestSavePermissions() {
+  return {
+    type: REQUEST_SAVE_PERMISSIONS
+  };
+}
+export function receiveSavePermissions(data): any {
+  if (data.hasOwnProperty("roleId")) {
+    return {
+      type: RECEIVE_SAVE_PERMISSIONS,
+      roleId: data.roleId,
+      permissionId: data.permissionId
+    };
+  } else {
+    return {
+      type: RECEIVE_SAVE_PERMISSIONS,
+      error: data.error
+    };
+  }
+}
 
 export function filterSelectionsChanged(id, selected) {
   return {
@@ -206,7 +236,8 @@ export function fetchUsersWithRolesAndProjects() {
 
 export interface PermissionsWithRoles {
   description: string
-  flags: Array<boolean>
+  id: number
+  flags: Array<any>
 }
 /***
  * @param roles the numeric roleID's to be returned in the permission set
@@ -250,13 +281,14 @@ export function fetchPermissionsWithRoles() {
                 if (_.findIndex(permissionSet.permissions, (o: Permission) => {
                   return o.id === descriptions[i].id;
                 }) !== -1) {
-                  flags.push(true);
+                  flags.push({value: true, roleId: permissionSet.roleId});
                 } else {
-                  flags.push(false);
+                  flags.push({value: false, roleId: permissionSet.roleId});
                 }
               }
               output.push({
                 description : descriptions[i].description,
+                id: descriptions[i].id,
                 flags
               });
             }
@@ -265,5 +297,41 @@ export function fetchPermissionsWithRoles() {
         });
       });
     });
+  };
+}
+
+export function saveUpdatedPermissions(updates) {
+  return (dispatch) => {
+    dispatch(requestSavePermissions());
+
+    for (let update of updates) {
+      if (update.newFlag.value === true) {
+        Remote.linkRoleWithPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
+          if (error) {
+            dispatch(receiveSavePermissions({
+                error
+            }));
+            return;
+          }
+          dispatch(receiveSavePermissions({
+            roleId: parseInt(update.newFlag.roleId, 10),
+            permissionId: update.permissionId
+          }));
+        });
+      } else {
+        Remote.unlinkRoleFromPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
+          if (error) {
+            dispatch(receiveSavePermissions({
+              error
+            }));
+            return;
+          }
+          dispatch(receiveSavePermissions({
+            roleId: parseInt(update.newFlag.roleId, 10),
+            permissionId: update.permissionId
+          }));
+        });
+      }
+    }
   };
 }

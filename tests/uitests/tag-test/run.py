@@ -8,8 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 def createTagTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	tu.newProject(driver)
-	tu.addCluster(driver, "localhost", "54535", "steamtest")
-	driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+	tu.selectCluster(driver, "steamtest")
 	tu.selectDataframe(driver, "bank_full.hex")
 	tu.selectModelCategory(driver, "Regression")
 	try:
@@ -50,9 +49,11 @@ def applyTagTest(driver):
 		return False	
 	try:
 		tu.goProjectConfig(driver)
-		wait.until(lambda x: len(x.find_elements_by_xpath("//span[@class='model-name' and text()='1']")) == 1)
+		tag = driver.find_element_by_xpath("//span[@class='model-name']")
+		if tag.text == "Not currently applied to a model":
+			print "Model associated with tag did not update"
 	except Exception as e:
-		print "Model associated with tag did not update"
+		print e
 		return False
 	return True
 
@@ -79,9 +80,14 @@ def multiTagTest(driver):
 		return False
 	try:
 		tu.goProjectConfig(driver)
-		wait.until(lambda x: len(x.find_elements_by_xpath("//span[@class='model-name' and text()='1']")) == 1)
-	except:
-		print "multiple tags can be attached to the same model"
+		wait.until(lambda x: len(x.find_elements_by_xpath("//span[@class='model-name']")) == 2)
+		mods = driver.find_elements_by_xpath("//span[@class='model-name']")
+		if mods[0].text == mods[1].text:
+			print "Multiple tags reference the same model"
+			return False
+	except Exception as e:
+		print e
+		print "multitag test ecountered an exceptional case"
 		return False
 	return True
 

@@ -40,8 +40,7 @@ def regressSortTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
 		tu.newProject(driver)
-		tu.addCluster(driver, "localhost", "54535", "steamtest")
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
 		models = ["regress", "gradi", "missin", "linmiss"] 
@@ -49,6 +48,8 @@ def regressSortTest(driver):
 			tu.selectModel(driver, mod)
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("regsort")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()	
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name']"))
+		driver.refresh()
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))	
 	except Exception as e:
@@ -59,35 +60,6 @@ def regressSortTest(driver):
 		passed = passed and checkSorting(driver, "MSE", "mse")
 		passed = passed and checkSorting(driver, "R2", "r2")
 		passed = passed and checkSorting(driver, "MRD", "mrd")
-		"""
-		tu.sortModels(driver, "MSE", True)
-		if not isAscending(driver, "mse"):
-			outOfOrder("MSE", "ASC")
-			passed = False
-		tu.sortModels(driver, "MSE", False)
-		if not isDescending(driver, "mse"):
-			outOfOrder("MSE", "DES")
-			passed = False
-
-		tu.sortModels(driver, "MRD", True)
-		if not isAscending(driver, "mrd"):
-			outOfOrder("MRD", "ASC")
-			passed = False
-		tu.sortModels(driver, "MRD", False)
-		if not isDescending(driver, "mrd"):
-			outOfOrder("MRD", "DES")
-			passed = False
-
-	
-		tu.sortModels(driver, "R2", True)
-		if not isAscending(driver, "r2"):
-			outOfOrder("R2", "ASC")
-			passed = False
-		tu.sortModels(driver, "R2", False)
-		if not isDescending(driver, "r2"):
-			outOfOrder("R2", "DES")
-			passed = False
-		"""
 	except Exception as e:
 		print e
 		print "models failed to sort"
@@ -101,7 +73,7 @@ def binomSortTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Binomial")
 		models = ["first", "second", "third", "fourth"] 
@@ -109,6 +81,8 @@ def binomSortTest(driver):
 			tu.selectModel(driver, mod)
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("binsort")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()	
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name']"))
+		driver.refresh()
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))	
 	except Exception as e:
@@ -130,7 +104,7 @@ def mulnomSortTest(driver):
 	try:
 		tu.goHome(driver)
 		tu.newProject(driver)
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Multinomial")
 		models = ["multinom", "valimon", "multimiss", "vamiss"] 
