@@ -1,7 +1,7 @@
 Clusters
 ========
 
-The **Clusters** page shows all H2O clusters that Steam is connected to along with the status of the cluster. From this page, you can click the link to access H2O Flow (see next section), launch a new cluster, or delete a cluster.
+The **Clusters** page shows all H2O clusters that Steam is connected to along with the status of the cluster, the number of nodes available on the cluster, and the version of H2O currently running on the cluster. From this page, you can click the cluster name to access H2O Flow (see `Using Steam with H2O Flow <UseSteamWithFlow.html>`__), launch a new cluster, or delete a cluster.
 
 .. figure:: images/cluster_page.png
    :alt: Steam Clusters page
