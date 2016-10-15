@@ -1,5 +1,5 @@
-CLI Command Reference Appendix
-==============================
+Appendix B: CLI Command Reference 
+=================================
 
 This document describes the CLI commands available in Steam. In addition to this reference, you can view information about each command when you're in the CLI by typing ``./steam help``. 
 
@@ -546,7 +546,7 @@ the case below, this role corresponds to the default data science role.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. This command deletes a service from the database based on its
 ID. Note that you must first stop a service before it can be deleted.
 (See `stop service`_.)
@@ -776,11 +776,11 @@ Retrieves a list of clusters.
 
 ::
 
-    ./steam get clusters
+    ./steam get clusters --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of clusters that you want to retrieve.
 
 **Example**
 
@@ -789,9 +789,9 @@ and are registered in Steam. (See `register cluster`_.)
 
 ::
 
-    ./steam get clusters
-    NAME        ID  ADDRESS         STATE   TYPE        AGE
-    user        1   localhost:54321 started external    2016-07-01 11:45:58 -0700 PDT
+    ./steam get clusters --limit=10
+    Id  Name                      TypeId  DetailId  AddressState            CreatedAt 
+    1 H2O_from_python_usr_6lvjb7  1       0         localhost:54321 started 1476306145
 
 --------------
 
@@ -845,11 +845,11 @@ Retrieves a list of all datasets available in the database.
 
 ::
 
-    ./steam get datasets
+    ./steam get datasets --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of datasets that you want to retrieve.
 
 **Example**
 
@@ -857,7 +857,7 @@ The following example retrieves a list of all datasets.
 
 ::
 
-    ./steam get datasets
+    ./steam get datasets --limit=100
     Id  DatasourceId    Name    Description FrameName       ResponseColumnName  JSONProperties          CreatedAt
     1   2                                   prostate.csv    CAPSULE             {...<properties>...}    1473887458
     2   1                                   allyears2k.csv  Origin              {...<properties>...}    1474321931
@@ -913,11 +913,11 @@ Retrieves a list of all datasources available in the database.
 
 ::
 
-    ./steam get datasources
+    ./steam get datasources --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of datasources that you want to retrieve.
 
 **Example**
 
@@ -925,7 +925,7 @@ The following example retrieves a list of all datasources.
 
 ::
 
-    ./steam get datasources
+    ./steam get datasources --limit=100
 
     Id  ProjectId   Name            Description     Kind    Configuration           CreatedAt
     1   1           allyears2k.csv  airline data    CSV     {"path":"../Desktop"}   1473879765
@@ -1007,11 +1007,11 @@ Retrieves a list of users.
 
 ::
 
-    ./steam get identities
+    ./steam get identities --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of identities that you want to retrieve.
 
 **Example**
 
@@ -1020,11 +1020,11 @@ the database.
 
 ::
 
-    ./steam get identities
-    NAME        ID  LAST LOGIN          AGE
-    bob         2   0000-12-31 16:00:00 -0800 PST   2016-07-15 09:32:32 -0700 PDT
-    jim         3   0000-12-31 16:00:00 -0800 PST   2016-07-15 09:32:38 -0700 PDT
-    superuser   1   0000-12-31 16:00:00 -0800 PST   2016-07-15 09:21:58 -0700 PDT
+    ./steam get identities --limit=100
+    Id    NAME        IsActive  LastLogin     Created          
+     2    bob         true      -62135596804  1473883790
+     3    jim         false     -62135596746  1474323838
+     1    superuser   true      -62135596800  1476306094
 
 --------------
 
@@ -1057,7 +1057,7 @@ The following example retrieves information about a user whose ID is 2.
     Id:             2       
     Name:           bob     
     IsActive:       true        
-    LastLogin:  -62135596800    
+    LastLogin:      -62135596800    
     Created:        1474305548
 
 --------------
@@ -1101,11 +1101,11 @@ Retrieves a list of models.
 
 ::
 
-    ./steam get models
+    ./steam get models --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of models that you want to retrieve.
 
 **Example**
 
@@ -1114,7 +1114,7 @@ the database.
 
 ::
 
-    ./steam get models
+    ./steam get models --limit=100
 
 --------------
 
@@ -1129,8 +1129,8 @@ Retrieves permission information for an identity or role.
 
 ::
 
-    ./steam get permissions --for-role --role-id=[roleId]
-    ./steam get permissions --for-identity --identity-id=[identityId]
+    ./steam get permissions --for-role --role-id=[roleId] 
+    ./steam get permissions --for-identity --identity-id=[identityId] 
 
 **Parameters**
 
@@ -1200,11 +1200,11 @@ Retrieves a list of all projects in the Steam database.
 
 ::
 
-    ./steam get projects
+    ./steam get projects --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of projects that you want to retrieve.
 
 **Example**
 
@@ -1213,10 +1213,11 @@ the database.
 
 ::
 
-    ./steam get projects
-    Id  Name        Description         ModelCategory   CreatedAt
-    1   Prediction  Prediction project                  1473878624
-    2   Churn       Customer churn project              1473879033
+    ./steam get projects --limit=10
+
+    Id  Name        Description             ModelCategory   CreatedAt
+    1   Prediction  Prediction project      Classification  1473878624
+    2   Churn       Customer churn project  Regression      1473879033
 
 --------------
 
@@ -1264,11 +1265,11 @@ Retrieves a list of roles.
 
 ::
 
-    ./steam get roles
+    ./steam get roles --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of identities that you want to retrieve.
 
 **Example**
 
@@ -1277,10 +1278,10 @@ the database.
 
 ::
 
-    ./steam get roles
-    NAME        ID  DESCRIPTION                 CREATED
-    Superuser   1   Superuser                   1473874053
-    datascience 2   a default data science role 1473893347  
+    ./steam get roles --limit=10
+    Id    Name        Description                 Created
+    1     Superuser   Superuser                   1473874053
+    2     datascience a default data science role 1473893347  
 
 --------------
 
@@ -1289,7 +1290,7 @@ the database.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. This command retrieves detailed information about a specific
 service based on its ID.
 
@@ -1319,7 +1320,7 @@ The following example retrieve information about service 2.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. This command retrieves a list of services available on the
 database.
 
@@ -1327,11 +1328,11 @@ database.
 
 ::
 
-    ./steam get services
+    ./steam get services --limit=[num]
 
 **Parameters**
 
-None
+-  ``--limit=[num]``: Specify the maximum number of services that you want to retrieve.
 
 **Example**
 
@@ -1340,7 +1341,9 @@ the database.
 
 ::
 
-    ./steam get services
+    ./steam get services --limit=10
+    Id  ModelId Name      Address     Port  ProcessId State   CreatedAt 
+    1   1       IrisModel 172.16.2.89 50336 26200     started 1476306364
 
 --------------
 
@@ -1392,12 +1395,13 @@ Retrieves a list of workgroups currently available on the database.
 
 ::
 
-    ./steam get workgroups --identity=[identityName]
+    ./steam get workgroups --identity=[identityName] --limit=[num]
 
 **Parameters**
 
 -  ``--identity=[identityName]``: Optionally specify to view all
    workgroups associated with a specific user name
+-  ``--limit=[num]``: Specify the maximum number of workgroups that you want to retrieve
 
 **Example**
 
@@ -1406,10 +1410,10 @@ on the database.
 
 ::
 
-    ./steam get workgroups
-    NAME        ID  DESCRIPTION     AGE
-    preparation 2   data prep group     2016-07-15 09:32:21 -0700 PDT
-    production  3   production group    2016-07-15 09:32:27 -0700 PDT
+    ./steam get workgroups --limit=1
+    Id    Name        Description         Created
+    2     preparation data prep group     1473874219
+    3     production  production group    1473879765
 
 --------------
 
@@ -1697,7 +1701,7 @@ The following example stops a cluster that has an ID of 9.
 
 **Description**
 
-A service represents a successfully deployed model on the Steam Scoring
+A service represents a successfully deployed model on the Steam Prediction
 Service. Use this command to stop a service.
 
 **Usage**

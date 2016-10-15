@@ -29,18 +29,18 @@ import Row from './Row';
 import Cell from './Cell';
 import {
   fetchClusters, fetchModelsFromCluster, resetClusterSelection,
-  importModelFromCluster, createProjectAndImportModelsFromCluster, registerCluster, fetchDatasetsFromCluster
+  createProjectAndImportModelsFromCluster, registerCluster, fetchDatasetsFromCluster
 } from '../actions/projects.actions';
 import { Cluster, Model, Dataset } from '../../Proxy/Proxy';
 import '../styles/importnewproject.scss';
 import { hashHistory } from 'react-router';
 import InputFeedback from '../../App/components/InputFeedback';
 import { FeedbackType } from '../../App/components/InputFeedback';
+import MojoPojoSelector from "./MojoPojoSelector";
 
 interface DispatchProps {
   fetchClusters: Function,
   fetchModelsFromCluster: Function,
-  importModelFromCluster: Function,
   createProjectAndImportModelsFromCluster: Function,
   registerCluster: Function,
   fetchDatasetsFromCluster: Function,
@@ -210,13 +210,13 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               <form onSubmit={this.registerCluster.bind(this)}>
                 <input type="text" name="ip-address" placeholder="IP Address"/>
                 { this.props.registerClusterError ?
-                  <InputFeedback message={ this.props.registerClusterError } type={FeedbackType.Error} />
+                  <div><InputFeedback message={ this.props.registerClusterError } type={FeedbackType.Error} /></div>
                   : null }
                 <input type="text" name="port" placeholder="Port"/>
                 <button type="submit" className="button-primary">Connect</button>
               </form>
               { this.props.isClusterFetchInProcess ?
-                  <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
+                  <div><InputFeedback message="Connecting..." type={FeedbackType.Progress} /></div>
                  : null }
             </div>
           : null }
@@ -231,7 +231,7 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
               }) : null}
             </select>
             { this.props.isModelFetchInProcess ?
-                <InputFeedback message="Connecting..." type={FeedbackType.Progress} />
+               <div><InputFeedback message="Connecting..." type={FeedbackType.Progress} /></div>
               : null }
           </div>
         </div> : null}
@@ -250,7 +250,8 @@ export class ImportNewProject extends React.Component<DispatchProps & Props, any
         {this.state.datasetId && !_.isEmpty(this.props.models) && this.state.modelCategory ? <div>
           <h2>4. Pick Models to Import</h2>
           <div className="intro">
-            Models in a project must share the same feature set and response column to enable comparison.
+            Models in a project must share the same feature set and response column to enable comparison. By default, Steam picks the most optimized model format for you to import. Advanced users can choose your own model type&nbsp;
+            <MojoPojoSelector/>.
           </div>
           <Table className="import-models">
             <Row header={true}>
@@ -306,7 +307,6 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchClusters: bindActionCreators(fetchClusters, dispatch),
     fetchModelsFromCluster: bindActionCreators(fetchModelsFromCluster, dispatch),
     createProjectAndImportModelsFromCluster: bindActionCreators(createProjectAndImportModelsFromCluster, dispatch),
-    importModelFromCluster: bindActionCreators(importModelFromCluster, dispatch),
     registerCluster: bindActionCreators(registerCluster, dispatch),
     fetchDatasetsFromCluster: bindActionCreators(fetchDatasetsFromCluster, dispatch),
     resetClusterSelection: bindActionCreators(resetClusterSelection, dispatch)

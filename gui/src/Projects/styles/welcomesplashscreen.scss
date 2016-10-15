@@ -1,5 +1,15 @@
 @import '../../variables.scss';
 
+.product-title {
+  margin-top: 22px;
+  margin-bottom: 0px;
+  font-size: 72px;
+  justify-content: center;
+}
+.half-size {
+  font-size: 0.5em;
+}
+
 .welcome-splash-screen {
   display: flex;
   justify-content: center;

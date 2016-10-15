@@ -24,6 +24,7 @@ import PageHeader from '../../Projects/components/PageHeader';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
+import MojoPojoSelector from '../../Projects/components/MojoPojoSelector';
 import { bindActionCreators } from 'redux';
 import {
   fetchClusters, fetchModelsFromCluster,
@@ -31,7 +32,7 @@ import {
 } from '../../Projects/actions/projects.actions';
 import { connect } from 'react-redux';
 import '../styles/importmodelsmodal.scss';
-import { Cluster, Model } from '../../Proxy/Proxy';
+import { Cluster, Model, Project } from '../../Proxy/Proxy';
 
 interface Props {
   open: boolean,
@@ -41,7 +42,8 @@ interface Props {
   models: Model[],
   fetchLeaderboard: Function,
   modelCategory: string,
-  datasetName: string
+  datasetName: string,
+  project: Project
 }
 
 interface DispatchProps {
@@ -55,6 +57,7 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
     super();
     this.state = {
       clusterId: null,
+
       models: []
     };
   }
@@ -64,10 +67,12 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   }
 
   onChange(event) {
-    this.setState({
-      clusterId: event.target.value
-    });
-    this.props.fetchModelsFromCluster(parseInt(event.target.value, 10), this.props.datasetName);
+    if (event.target.value) {
+      this.setState({
+        clusterId: event.target.value
+      });
+      this.props.fetchModelsFromCluster(parseInt(event.target.value, 10), this.props.datasetName);
+    }
   }
 
   importModelsFromCluster(event) {
@@ -89,6 +94,12 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
         <PageHeader>IMPORT MODELS</PageHeader>
         <form onSubmit={this.importModelsFromCluster.bind(this)}>
           <Table className="outer-table">
+            <Row>
+              <Cell>
+                By default, Steam picks the most optimized model format for you to import. Advanced users can choose your own model type&nbsp;
+                <MojoPojoSelector></MojoPojoSelector>.
+              </Cell>
+            </Row>
             <Row>
               <Cell>
                 CLUSTER
@@ -116,7 +127,9 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
                     <Cell>RESPONSE COLUMN</Cell>
                     <Cell/>
                   </Row>
-                  {this.props.models.map((model, i) => {
+                  {this.props.models.filter((model) => {
+                    return model.model_category === this.props.project.model_category;
+                  }).map((model, i) => {
                     return (
                       <Row key={i}>
                         <Cell>{model.name}</Cell>
@@ -146,7 +159,8 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
 function mapStateToProps(state) {
   return {
     clusters: state.projects.clusters,
-    models: state.projects.models
+    models: state.projects.models,
+    project: state.projects.project
   };
 }
 

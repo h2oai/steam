@@ -1,8 +1,8 @@
 FROM ubuntu:latest
 
-MAINTAINER H2O.ai version: 1.0.0
+MAINTAINER H2O.ai version: 1.1.2
 
-ENV STEAM_VERSION 1.0.0
+ENV STEAM_VERSION 1.1.2
 ENV PATH /steam/steam-${STEAM_VERSION}-linux-amd64:$PATH
 
 WORKDIR /steam

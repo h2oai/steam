@@ -3,7 +3,7 @@ Using Steam with H2O Flow
 
 As with other H2O products, Flow can be used alongside Steam when
 performing machine learning tasks. On the **Clusters** page, click the
-link for the H2O cluster that you want to open.
+cluster name of the H2O cluster that you want to open.
 
 This opens H2O Flow in a new tab.
 

@@ -27,7 +27,7 @@ SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
 DIST_DARWIN = steam-$(STEAM_RELEASE_VERSION)-darwin-amd64
 SLA=./tools/steamlauncher
-SSB=./scoring-service-builder
+SSB=./prediction-service-builder
 WWW=./var/master/www
 DB=./var/master/db
 GUI=./gui
@@ -44,7 +44,7 @@ build:
 	go build
 
 gui:
-	cd $(GUI) && rm -rf node_modules && npm install && npm run webpack
+	cd $(GUI) && rm -rf node_modules && npm cache clean && npm install && npm run webpack
 
 guitest:
 	cd $(GUI) && npm test
@@ -140,7 +140,7 @@ darwin:
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: gui ssb db linux 
+release: gui ssb db launcher linux 
 	rm -rf ./dist/$(DIST_LINUX)
 	# rm -rf ./dist/$(DIST_DARWIN)
 

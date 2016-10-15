@@ -25,7 +25,8 @@ import { Project, UserRole } from '../../Proxy/Proxy';
 import { fetchEntityIds } from '../../App/actions/global.actions';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-
+import {ClusterStatus, Cluster} from "../../Proxy/Proxy";
+import {Model} from "../../Proxy/Proxy";
 export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
@@ -106,17 +107,18 @@ export function fetchClusters() {
   };
 }
 function _fetchClusters(dispatch, getState) {
-    Remote.getClusters(0, 1000, (error, res) => {
+    Remote.getClusters(0, 1000, (error, clusters: Cluster[]) => {
       if (error) {
         openNotification(NotificationType.Error, "Load Error", error.toString(), null);
         return;
       }
 
       let identityPromises = [];
+      let detailsPromise = [];
       let toReturn = [];
       let state = getState();
 
-      for (let cluster of res) {
+      for (let cluster of clusters) {
         identityPromises.push(new Promise((resolve, reject) => {
           Remote.getIdentitiesForEntity(state.global.entityIds.cluster, cluster.id, (identitiesError: Error, users: UserRole[]) => {
             if (identitiesError) {
@@ -124,8 +126,19 @@ function _fetchClusters(dispatch, getState) {
               reject(identitiesError.toString());
               return;
             }
-            toReturn.push(_.assign({}, cluster, { identities: users }));
-            resolve();
+
+            detailsPromise.push(new Promise((resolve, reject) => {
+              Remote.getClusterStatus(cluster.id, (statusError: Error, clusterStatus: ClusterStatus) => {
+                if (statusError) {
+                  openNotification(NotificationType.Error, "Load Error", statusError.toString(), null);
+                  reject(statusError.toString());
+                  return;
+                }
+
+                toReturn.push(_.assign({}, cluster, { identities: users }, {status: clusterStatus}));
+                resolve();
+              });
+            }).then(() => resolve()));
           });
         }));
       }
@@ -270,18 +283,84 @@ export function createProject(name: string, modelCategory: string) {
 
 export function importModelFromCluster(clusterId: number, projectId: number, modelName: string) {
   return (dispatch) => {
-    return new Promise((resolve, reject) => {
-      Remote.importModelFromCluster(clusterId, projectId, modelName, modelName, (error, res) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
-          reject(error);
-          return;
-        }
-        dispatch(importModelFromClusterCompleted(res));
-        resolve(res);
+
+    function importModelFromClusterAsync(clusterId: number, projectId: number, modelName: string) {
+      return new Promise(function(resolve, reject) {
+        Remote.importModelFromCluster(clusterId, projectId, modelName, modelName, (error, modelId: number) => {
+          if (error) {
+            reject(error);
+          }
+          resolve(modelId);
+        });
       });
-    });
-  };
+    }
+
+    function getAlgoAsync(modelId: number) {
+      return new Promise((resolve, reject) => {
+        Remote.getModel(modelId, (error: Error, model: Model) => {
+          if (error) {
+            reject(error);
+          }
+          resolve({modelId, algo: model.algorithm});
+        });
+      });
+    }
+
+    function checkCanMojoAsync(algo: string, modelId: number) {
+      return new Promise((resolve, reject) => {
+        Remote.checkMojo(algo, (error: Error, canMojo: boolean) => {
+          if (error) {
+            reject(error);
+          }
+          resolve({canMojo, modelId});
+        });
+      });
+    }
+
+    function importMojoAsync(modelId: number) {
+      return new Promise((resolve, reject) => {
+        Remote.importModelMojo(modelId, (error) => {
+          if (error) {
+            reject(error);
+          }
+          resolve();
+        });
+      });
+    }
+
+    function importPojoAsync(modelId: number) {
+      return new Promise((resolve, reject) => {
+        Remote.importModelPojo(modelId, (error) => {
+          if (error) {
+            reject(error);
+          }
+          resolve();
+        });
+      });
+    }
+
+    importModelFromClusterAsync(clusterId, projectId, modelName)
+      .then((modelId: number) => getAlgoAsync(modelId))
+      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
+      .then((algoRes: any) => checkCanMojoAsync(algoRes.algo, algoRes.modelId))
+      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
+      .then((canMojoRes: any) => {
+        if (canMojoRes.canMojo && localStorage.getItem("mojoPojoSelection") !== "pojo") {
+          importMojoAsync(canMojoRes.modelId)
+            .then(() => {
+              dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
+            })
+            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        } else {
+          importPojoAsync(canMojoRes.modelId)
+            .then(() => {
+              dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
+            })
+            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        }
+      })
+      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+    };
 }
 
 export function importModelsFromCluster(clusterId: number, projectId: number, models: string[]) {

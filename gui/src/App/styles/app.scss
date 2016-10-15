@@ -3,7 +3,6 @@
 html, body, .app-container, #app {
   height: 100%;
   min-height: 100%;
-  background-color: #eeeeee;
   font-family: "Open Sans";
   font-size: 14px;
   color: $h2o-charcoal-grey;
@@ -71,7 +70,6 @@ a {
 }
 .link {
   color:$link-color;
-  text-decoration:underline;
   cursor:pointer;
 }
 .intro {
@@ -92,7 +90,7 @@ select {
 .button-base {
   font-family: "Open Sans";
   position: relative;
-  display: inline-block;
+  display: inline-flex;
   top: -3px;
   margin-right: 16px;
   border-radius: 3px;
@@ -100,6 +98,12 @@ select {
   text-decoration: none;
   cursor: pointer;
   border-width: 0px;
+  &.disabled {
+    background: $brand-dark-3;
+    border-color: $brand-dark-3;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
 }
 .button-primary {
   @extend .button-base;
@@ -109,6 +113,7 @@ select {
   padding-right: 16px;
   padding-top: 11px;
   padding-bottom: 11px;
+  display: inline-flex;
 }
 .button-secondary {
   @extend .button-base;
@@ -123,8 +128,10 @@ select {
   padding-bottom: 9px;
 }
 .button {
+  display: inline-flex;
   color: $h2o-soft-grey;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 button, a {
@@ -175,12 +182,12 @@ button, a {
   .body-container {
     left: 300px;
     max-width: 1100px;
-
     background-color: $brand-white;
     width: 100%;
     z-index: $body-index;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0 7px rgba(0,0,0,0.35);
   }
 }
 
@@ -225,3 +232,26 @@ input[type="text"], textarea {
   margin-right: 44px;
 }
 
+.flexrow {
+  display: flex;
+  flex-direction: row;
+}
+.flexcolumn {
+  display: flex;
+  flex-direction: column;
+}
+.mar-right-12 {
+  margin-right: 12px;
+}
+.mar-right-3 {
+  margin-right: 3px;
+}
+.mar-right-71 {
+  margin-right: 71px;
+}
+.mar-bot-20 {
+  margin-bottom: 20px;
+}
+.mar-bot-7 {
+  margin-bottom: 7px;
+}

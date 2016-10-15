@@ -10,8 +10,7 @@ def nameFilterTest(driver):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	try:
 		tu.newProject(driver)
-		tu.addCluster(driver, "localhost", "54535", "steamtest")
-		driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+		tu.selectCluster(driver, "steamtest")
 		tu.selectDataframe(driver, "bank_full.hex")
 		tu.selectModelCategory(driver, "Regression")
 		models = ["regress", "gradi", "missin", "linmiss"]
@@ -19,9 +18,13 @@ def nameFilterTest(driver):
 			tu.selectModel(driver, mod)
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("namefilt")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='filter']"))
+		driver.refresh()
+		time.sleep(2)
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
-	except:
+	except Exception as e:
+		print e
 		print "Failed to setup name filter test"
 		return False
 	try:

@@ -3,7 +3,11 @@ MAINTAINER H2O.ai
 
 USER root
 
+<<<<<<< HEAD
 ENV STEAM_VERSION 1.0.0
+=======
+ENV STEAM_VERSION 1.1.2
+>>>>>>> 40db9e0884586ad6edacaf171aa766624772088e
 ENV PATH /steam/steam-${STEAM_VERSION}-linux-amd64:$PATH
 ENV PATH $PATH:/usr/local/hadoop/bin
 
