@@ -73,7 +73,8 @@
 
       if (card < 2) {
         if (isBinaryPrediction && i1 === 1) {
-          form += '<input type="file" name="' + n + '" onchange="readURL(this);" style="display: block">';
+          form += '<label class="form-control-label file-icon image-picker"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>';
+          form += '<input class="image-file" type="file" name="' + n + '" onchange="readURL(this);">';
           form += '<img id="image-preview"/>';
         } else {
           form += '<input class="form-control" type="text" name="' + n + '" oninput="updateUrl(event);">';
@@ -100,9 +101,14 @@
 
     outputDomain = domains[i1];
 
-    if (element != null)
+    if (element != null) {
       element.innerHTML = form;
-
+      if (isBinaryPrediction) {
+        $('.image-picker').click(function(){
+          $(this).siblings('.image-file').trigger('click');
+        });
+      }
+    }
   }
 
   var params = {};
@@ -147,10 +153,15 @@
       // show result
       if (data.m._problem_type === 'image_classification') {
         isBinaryPrediction = true;
+        hideBatch();
       }
       var info = document.querySelector("#fs-params");
       showModel(data, info);
     }, 'json');
+  }
+
+  function hideBatch() {
+    $('#batch').hide();
   }
 
   function showResult(div, status, data) {
@@ -197,7 +208,7 @@
         labelProbabilitiesMapping.sort(function(a, b) {
           return b.probability - a.probability;
         });
-        for (var i = 0; i < labelProbabilitiesMapping.length; i++) {
+        for (var i = 0; i < 5; i++) {
           if (labelProbabilitiesMapping[i].predicted === true) {
             result += '<tr class="rowHighlight">'
           } else {

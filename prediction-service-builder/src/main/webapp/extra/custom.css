@@ -321,3 +321,8 @@ tr.stat-pad {
         text-shadow: 0px 0px 0px #000;
     }
 }
+
+#image-preview {
+    display: block;
+    margin-top: 10px;
+}
