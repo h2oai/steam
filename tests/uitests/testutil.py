@@ -1,9 +1,11 @@
+import os
 import sys
 import time
 import subprocess as sp
 import re
 from selenium import webdriver
 from selenium.common import exceptions as se
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
@@ -36,15 +38,8 @@ Perm id		Permission		Index
 22			V service		20
 """
 
-_steampath = "./steam"
-if sys.platform.startswith("linux"):
-	_steampath = "./steam/steam"
-elif sys.platform == "darwin":
-	_steampath = "./steam--darwin-amd64/steam"
-else:
-	print "unsupported testing platform"
-	sys.exit(1)
-	
+_steampath = os.getenv('STEAM_PATH', './steam/steam')
+
 def cliLogin(name, pw):
 	ret = sp.check_output("{0} login localhost:9000 --username={1} --password={1}"\
 		.format(_steampath, name, pw), shell=True)
@@ -449,31 +444,36 @@ def createProject(driver, cluster, name, data, kind, mods):
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
 
 def testAs(user, pw):
-	o = Options()
-	o.add_argument('--start-fullscreen')
-	o.add_argument("--no-sandbox")
-	o.add_argument("--user-data-dir=/tmp")
-	driver = webdriver.Chrome()
+	driver = None
+	if 'TEST_FIREFOX' in os.environ:
+		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		driver = webdriver.Firefox(p)
+	else:
+		driver = webdriver.Chrome()
 	driver.get("http://{0}:{1}@localhost:9000".format(user, pw))
 	return driver
 
 def newtest():
-	o = Options()
-	o.add_argument("--verbose")
-	o.add_argument('--start-fullscreen')
-	d = DesiredCapabilities.CHROME
-	d['loggingPrefs'] = { 'browser':'ALL', 'performance':'ALL', 'driver':'ALL' }
-	driver = webdriver.Chrome(desired_capabilities=d, chrome_options=o)
+	driver = None
+	if 'TEST_FIREFOX' in os.environ:
+		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		driver = webdriver.Firefox(p)
+	else:
+		driver = webdriver.Chrome()
 	driver.get("http://superuser:superuser@localhost:9000")
 	return driver
 
-def newProxytest(p):
-	o = Options()
-	o.add_argument('--start-fullscreen')
-	o.add_argument("--proxy-server={0}".format(p))
-	d = webdriver.Chrome(chrome_options=o)
-	d.get("http://superuser:superuser@localhost:9000")
-	return d
+def newProxytest(proxy):
+	if 'TEST_FIREFOX' in os.environ:
+		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		p.set_proxy(proxy.selenium_proxy())
+		driver = webdriver.Firefox(p)
+	else:
+		o = Options()
+		o.add_argument("--proxy-server={0}".format(proxy.proxy))
+		driver = webdriver.Chrome(chrome_options=o)
+	driver.get("http://superuser:superuser@localhost:9000")
+	return driver
 
 def endtest(driver):
 	driver.quit()

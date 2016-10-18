@@ -1,11 +1,15 @@
 import sys
+import os
 import time
+import subprocess as sp
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 import testutil as tu
 import subprocess as sp
+
+_service_pid = 0
 
 def servTest(d):
 	return True
@@ -26,9 +30,15 @@ def servTest(d):
 
 
 def setup():
-	d = webdriver.Chrome()
-	d.get("localhost:55001")
-	return d
+	gopath = os.environ['GOPATH']
+	path = gopath + '/src/github.com/h2oai/steam/prediction-service-builder/examples'
+	os.chdir(gopath + '/src/github.com/h2oai/steam/prediction-service-builder/examples/spam-detection-python')
+	ret = sp.check_output('sh example-python.sh', shell=True)
+	proc = sp.Popen("/usr/bin/env java -jar ../jetty-runner-8.1.14.v20131031.jar --port 55001 example-python.war > /dev/null 2>&1 &", shell=True)
+	_service_pid = proc.pid + 1
+	driver = tu.newtest()
+	driver.get("http://localhost:55001/")
+	return driver
 
 def main():
 	failcount = 0

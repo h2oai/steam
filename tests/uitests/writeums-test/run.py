@@ -54,7 +54,7 @@ def writeumsTest(driver, role):
 		for c in changes:
 			c.click()
 		driver.find_element_by_xpath("//div[@class='button-primary' and text()='Save Changes']").click()
-		time.sleep(5)
+		time.sleep(19)
 		perm = tu.getRolePermissions(role)
 		print len(perm)
 		if len(perm) != 25:
@@ -71,7 +71,7 @@ def writeumsTest(driver, role):
 		for c in changes:
 			c.click()
 		driver.find_element_by_xpath("//div[@class='button-primary' and text()='Save Changes']").click()
-		time.sleep(5)
+		time.sleep(19)
 		perm = tu.getRolePermissions(role)
 		if len(perm) > 3:
 			print "Failed to remove permissions"
