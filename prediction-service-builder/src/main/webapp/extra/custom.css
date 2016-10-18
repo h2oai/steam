@@ -326,3 +326,11 @@ tr.stat-pad {
     display: block;
     margin-top: 10px;
 }
+
+#curl-field {
+    display: none;
+}
+
+#query-string-field {
+    display: none;
+}

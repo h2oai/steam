@@ -73,7 +73,7 @@
 
       if (card < 2) {
         if (isBinaryPrediction && i1 === 1) {
-          form += '<label class="form-control-label file-icon image-picker"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>';
+          form += '<label class="form-control-label file-icon image-picker"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span><span id="image-preview-name"></span></label>';
           form += '<input class="image-file" type="file" name="' + n + '" onchange="readURL(this);">';
           form += '<img id="image-preview"/>';
         } else {
@@ -154,6 +154,8 @@
       if (data.m._problem_type === 'image_classification') {
         isBinaryPrediction = true;
         hideBatch();
+      } else {
+        $('#query-string-field').show();
       }
       var info = document.querySelector("#fs-params");
       showModel(data, info);
@@ -256,10 +258,15 @@
   }
 
   function showCurl(pardiv, params, cmd) {
-    // remove empty parameters returned by serialize.
+    $('#curl-field').show();
     params = params.replace(/'/g, "\\'") // quote quotes
-    var url = "http://" + window.location.host + cmd;
-    pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
+    var url = null;
+    if (isBinaryPrediction) {
+      pardiv.innerHTML = '<code>curl -X POST --form ' + params + ' ' + cmd + '</code>';
+    } else {
+      url = "http://" + window.location.host + cmd;
+      pardiv.innerHTML = '<code>curl -X POST --data \'' + params + '\' ' + url + '</code>';
+    }
   }
 
   function predResults(params) {
@@ -286,6 +293,8 @@
         success: function(data, status){
           console.log(data, status);
           showResult(div, status, JSON.parse(data));
+          var pardiv = document.querySelector(".curl");
+          showCurl(pardiv, 'binary_C1=@' + $(form).find('input[type="file"]')[0].files[0].name, API_HOST + path);
         }
       })
         .fail(function(data, status, error) {
@@ -511,6 +520,7 @@
 
   window.readURL = function(input) {
     if (input.files && input.files[0]) {
+      var name = input.files[0].name;
       var reader = new FileReader();
 
       reader.onload = function (e) {
@@ -519,6 +529,8 @@
           .css({
             maxWidth: '100%'
           });
+        $('#image-preview-name')
+          .text(name);
       };
 
       reader.readAsDataURL(input.files[0]);
