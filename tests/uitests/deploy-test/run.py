@@ -142,7 +142,7 @@ def multiDeployTest(driver):
 	return True
 
 def main():
-	s = Server('/home/creature/browsermob/bin/browsermob-proxy', { 'port' : 1337})
+	s = Server('/home/pjr/browsermob/bin/browsermob-proxy', { 'port' : 1337})
 	s.start()
 	proxy = s.create_proxy({'port': 1338})
 	failcount = 0

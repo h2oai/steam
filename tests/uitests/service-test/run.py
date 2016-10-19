@@ -12,7 +12,6 @@ import subprocess as sp
 _service_pid = 0
 
 def servTest(d):
-	return True
 	try:
 		wait = WebDriverWait(d, timeout=5, poll_frequency=0.2)
 		inp = d.find_element_by_xpath("//div[@class='input-group']/input")
@@ -35,6 +34,7 @@ def setup():
 	os.chdir(gopath + '/src/github.com/h2oai/steam/prediction-service-builder/examples/spam-detection-python')
 	ret = sp.check_output('sh example-python.sh', shell=True)
 	proc = sp.Popen("/usr/bin/env java -jar ../jetty-runner-8.1.14.v20131031.jar --port 55001 example-python.war > /dev/null 2>&1 &", shell=True)
+	time.sleep(5)
 	_service_pid = proc.pid + 1
 	driver = tu.newtest()
 	driver.get("http://localhost:55001/")
