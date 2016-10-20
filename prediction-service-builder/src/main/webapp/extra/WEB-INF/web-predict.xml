@@ -8,6 +8,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         <servlet-class>PredictServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>PredictBinary</servlet-name>
+        <servlet-class>PredictBinaryServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>Info</servlet-name>
         <servlet-class>InfoServlet</servlet-class>
     </servlet>
@@ -23,6 +27,10 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     <servlet-mapping>
         <servlet-name>Predict</servlet-name>
         <url-pattern>/predict/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PredictBinary</servlet-name>
+        <url-pattern>/predictbinary</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Info</servlet-name>
