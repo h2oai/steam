@@ -5,6 +5,7 @@ import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.prediction.AbstractPrediction;
 import hex.genmodel.easy.EasyPredictModelWrapper;
 import hex.genmodel.easy.RowData;
+import hex.genmodel.MojoModel;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -51,9 +52,15 @@ class H2OPredictor {
     }
   }
 
-  private void load(String jarFileName, String modelName)
+  private void loadPojo(String jarFileName, String modelName)
       throws Exception {
     GenModel rawModel = loadClassFromJar(jarFileName, modelName);
+    model = new EasyPredictModelWrapper(rawModel);
+  }
+
+  private void loadMojo(String zipFileName)
+      throws Exception {
+    GenModel rawModel = MojoModel.load(zipFileName);
     model = new EasyPredictModelWrapper(rawModel);
   }
 
@@ -77,10 +84,17 @@ class H2OPredictor {
     return gson.toJson(pr);
   }
 
-  public static String predict(String jarFileName, String modelName, String jsonArgs) {
+  public static String predict(String ojoFileName, String modelName, String jsonArgs) {
     try {
       H2OPredictor p = new H2OPredictor();
-      p.load(jarFileName, modelName);
+      if (ojoFileName == null)
+        throw new Exception("file name can't be null");
+      else if (ojoFileName.endsWith(".jar"))
+        p.loadPojo(ojoFileName, modelName);
+      else if (ojoFileName.endsWith(".zip"))
+        p.loadMojo(ojoFileName);
+      else
+        throw new Exception("unknown model archive type");
       return p.predict2(p.jsonToRowData(jsonArgs));
     }
     catch (Exception e) {
