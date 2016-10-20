@@ -210,7 +210,8 @@
         labelProbabilitiesMapping.sort(function(a, b) {
           return b.probability - a.probability;
         });
-        for (var i = 0; i < 5; i++) {
+        var limit = labelProbabilitiesMapping.length > 5 ? 5 : labelProbabilitiesMapping.length;
+        for (var i = 0; i < limit; i++) {
           if (labelProbabilitiesMapping[i].predicted === true) {
             result += '<tr class="rowHighlight">'
           } else {
