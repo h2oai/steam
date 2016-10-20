@@ -151,7 +151,7 @@
   function showInputParameters() {
     $.get(API_HOST + '/info', function(data, status) {
       // show result
-      if (data.m._problem_type === 'image_classification') {
+      if (data.m._problem_type === 'image') {
         isBinaryPrediction = true;
         hideBatch();
       } else {
