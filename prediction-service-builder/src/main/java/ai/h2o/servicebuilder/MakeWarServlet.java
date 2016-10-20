@@ -92,6 +92,7 @@ public class MakeWarServlet extends HttpServlet {
       String pojofile = null;
       String jarfile = null;
       String prejarfile = null;
+      String deepwaterjarfile = null;
       String rawfile = null;
       String predictorClassName = null;
       String transformerClassName = null;
@@ -112,6 +113,10 @@ public class MakeWarServlet extends HttpServlet {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
+          if (field.equals("deepwater")) {
+            deepwaterjarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
+          }
           if (field.equals("prejar")) {
             prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
@@ -130,8 +135,7 @@ public class MakeWarServlet extends HttpServlet {
           }
         }
       }
-      logger.debug("genmodeljar {}  pojo {}  raw {}", jarfile, pojofile, rawfile);
-//      if (pojofile == null || jarfile == null)
+      logger.debug("genmodeljar {}  deepwaterjar {}  pojo {}  raw {}", jarfile, deepwaterjarfile, pojofile, rawfile);
       if ((pojofile == null || jarfile == null) && (rawfile == null || jarfile == null))
         throw new Exception("need either pojo and genmodel jar, or raw file and genmodel jar ");
 
@@ -142,7 +146,7 @@ public class MakeWarServlet extends HttpServlet {
       if (pojofile != null) {
         // Compile the pojo
         runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION,
-            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile, "-d", outDir.getPath(), pojofile),
+            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile + ";" + deepwaterjarfile, "-d", outDir.getPath(), pojofile),
             "Compilation of pojo failed");
         logger.info("compiled pojo {}", pojofile);
       }
