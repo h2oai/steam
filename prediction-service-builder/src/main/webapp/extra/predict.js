@@ -292,10 +292,10 @@
         processData: false,
         type: 'POST',
         success: function(data, status){
-          console.log(data, status);
           showResult(div, status, JSON.parse(data));
           var pardiv = document.querySelector(".curl");
-          showCurl(pardiv, 'binary_C1=@' + $(form).find('input[type="file"]')[0].files[0].name, API_HOST + path);
+          var host = API_HOST || window.location.protocol + '//' + window.location.host;
+          showCurl(pardiv, 'binary_C1=@' + $(form).find('input[type="file"]')[0].files[0].name, host + path);
         }
       })
         .fail(function(data, status, error) {
