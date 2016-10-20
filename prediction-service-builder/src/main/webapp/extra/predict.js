@@ -21,7 +21,7 @@
 (function(window) {
   'use strict';
   var outputDomain;
-  var API_HOST = 'http://mr-0xcuda:55011';
+  var API_HOST = '';
   var isBinaryPrediction = false;
 
 
