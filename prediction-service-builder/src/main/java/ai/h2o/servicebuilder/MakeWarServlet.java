@@ -145,8 +145,11 @@ public class MakeWarServlet extends HttpServlet {
 
       if (pojofile != null) {
         // Compile the pojo
+        String jarfiles = jarfile;
+        if (deepwaterjarfile != null)
+          jarfiles += ":" + deepwaterjarfile;
         runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION,
-            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile + ";" + deepwaterjarfile, "-d", outDir.getPath(), pojofile),
+            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfiles, "-d", outDir.getPath(), pojofile),
             "Compilation of pojo failed");
         logger.info("compiled pojo {}", pojofile);
       }
