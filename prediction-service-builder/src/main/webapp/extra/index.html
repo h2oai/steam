@@ -55,8 +55,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                 <fieldset id="fs-params" class="form-group">
                 </fieldset>
+                <fieldset id="curl-field">
+                    <legend>Command Line</legend>
+                    <div class="form-group">Another way to run this prediction is through command line, via POST to the REST API.
+                    </div>
+                    <div class="form-group">
+                        <label class="sr-only"></label>
+                        <div class="curl"></div>
+                    </div>
+                </fieldset>
 
-                <fieldset>
+                <fieldset id="query-string-field">
                     <legend>Query String</legend>
                     <div class="form-group">The parameters above gets automatically built into a REST API query string. You can also input your own string if that's easier for you.
                     </div>
