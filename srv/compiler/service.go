@@ -42,50 +42,47 @@ const (
 type fileType string
 
 const (
-	fileTypeJava        fileType = "pojo"
-	fileTypeJavaDep              = "jar"
-	fileTypeMOJO                 = "mojo"
-	fileTypePythonMain           = "python"
-	fileTypePythonOther          = "pythonextra"
+	fileTypeJava        = "pojo"
+	fileTypeJavaDep     = "jar"
+	fileTypeMOJO        = "mojo"
+	fileTypePythonMain  = "python"
+	fileTypePythonOther = "pythonextra"
 )
 
-type asset struct {
-	path string
-	typ  fileType
+type ModelAsset interface {
+	AttachFiles(w *multipart.Writer) error
 }
 
-func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName, artifact, kind, packageName string) (string, error) {
-
-	genModelPath := fs.GetGenModelPath(wd, modelId)
-	var modelAsset asset
-	switch kind {
-	case "pojo":
-		modelAsset.typ = fileTypeJava
-		modelAsset.path = fs.GetJavaModelPath(wd, modelId, modelLogicalName)
-	case "mojo":
-		modelAsset.typ = fileTypeMOJO
-		modelAsset.path = fs.GetMOJOPath(wd, modelId, modelLogicalName)
+func CompileModel(address, wd string, projectId, modelId int64, logicalName, modelType, algorithm, artifact, packageName string) (string, error) {
+	// Verify that model has assets set
+	switch modelType {
+	case "mojo", "pojo":
+	case "":
+		return "", errors.New("model type unset")
 	default:
-		return "", fmt.Errorf("invalid model object type %q", kind)
+		return "", errors.New(fmt.Sprintf("invalid model type %q", modelType))
 	}
 
-	var targetFile, slug string
-
-	switch artifact {
-	case ArtifactWar:
-		targetFile = fs.GetWarFilePath(wd, modelId, modelLogicalName)
-		slug = "makewar"
-	case ArtifactPythonWar:
-		targetFile = fs.GetPythonWarFilePath(wd, modelId, modelLogicalName)
-		slug = "makepythonwar"
-	case ArtifactJar:
-		targetFile = fs.GetModelJarFilePath(wd, modelId, modelLogicalName)
-		slug = "compile"
-	}
-
-	if _, err := os.Stat(targetFile); os.IsNotExist(err) {
-	} else {
+	// Check if target file exist
+	targetFile, slug, ok := getTargetFile(artifact, wd, modelId, logicalName)
+	if ok {
 		return targetFile, nil
+	}
+
+	var pythonFilePaths []string
+	if artifact == ArtifactPythonWar {
+		var err error
+		pythonFilePaths, err = getPythonFilePaths(wd, packageName, projectId)
+		if err != nil {
+			return "", errors.Wrap(err, "getting Python file paths")
+		}
+	}
+
+	var assets ModelAsset
+	if algorithm == "Deep Water" {
+		assets = NewDeepwater(wd, modelId, logicalName, modelType, pythonFilePaths...)
+	} else {
+		assets = NewModel(wd, modelId, logicalName, modelType, pythonFilePaths...)
 	}
 
 	// ping to check if service is up
@@ -93,49 +90,38 @@ func CompileModel(address, wd string, projectId, modelId int64, modelLogicalName
 		return "", errors.Wrap(err, "could not connect to prediction service builder")
 	}
 
-	packageName = strings.TrimSpace(packageName)
-
-	var pythonMainFilePath string
-	var pythonOtherFilePaths []string
-
-	if artifact == ArtifactPythonWar && len(packageName) > 0 {
-		var err error
-		pythonMainFilePath, pythonOtherFilePaths, err = getPythonFilePaths(wd, projectId, packageName)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	if err := callCompiler(toUrl(address, slug), targetFile, genModelPath, pythonMainFilePath, modelAsset, pythonOtherFilePaths); err != nil {
+	if err := callCompiler(toUrl(address, slug), targetFile, assets); err != nil {
 		return "", errors.Wrap(err, "failed compiler request")
 	}
 
 	return targetFile, nil
 }
 
-func callCompiler(url, targetFile, javaDepPath, pythonMainFilePath string, modelAsset asset, pythonOtherFilePaths []string) error {
+func getTargetFile(artifact, workingDirectory string, modelId int64, logicalName string) (string, string, bool) {
+	var targetFile, slug string
+
+	switch artifact {
+	case ArtifactWar:
+		targetFile = fs.GetWarFilePath(workingDirectory, modelId, logicalName)
+		slug = "makewar"
+	case ArtifactPythonWar:
+		targetFile = fs.GetPythonWarFilePath(workingDirectory, modelId, logicalName)
+		slug = "makepythonwar"
+	case ArtifactJar:
+		targetFile = fs.GetModelJarFilePath(workingDirectory, modelId, logicalName)
+		slug = "compile"
+	}
+
+	_, err := os.Stat(targetFile)
+	return targetFile, slug, os.IsExist(err)
+}
+
+func callCompiler(url, targetFile string, model ModelAsset) error {
 	b := &bytes.Buffer{}
 	writer := multipart.NewWriter(b)
 
-	if err := attachFile(writer, modelAsset.path, string(modelAsset.typ)); err != nil {
-		return errors.Wrap(err, "failed attaching model")
-	}
-
-	if err := attachFile(writer, javaDepPath, fileTypeJavaDep); err != nil {
-		return errors.Wrap(err, "failed attaching java dependency")
-	}
-
-	if len(pythonMainFilePath) > 0 {
-		if err := attachFile(writer, pythonMainFilePath, fileTypePythonMain); err != nil {
-			return fmt.Errorf("Failed attaching Python main file to compilation request: %s", err)
-		}
-		if pythonOtherFilePaths != nil && len(pythonOtherFilePaths) > 0 {
-			for _, p := range pythonOtherFilePaths {
-				if err := attachFile(writer, p, fileTypePythonOther); err != nil {
-					return fmt.Errorf("Failed attaching Python file to compilation request: %s", err)
-				}
-			}
-		}
+	if err := model.AttachFiles(writer); err != nil {
+		return err
 	}
 
 	ct := writer.FormDataContentType()
@@ -155,7 +141,7 @@ func callCompiler(url, targetFile, javaDepPath, pythonMainFilePath string, model
 		return fmt.Errorf("Failed compiling scoring service: %s / %s", res.Status, string(body))
 	}
 
-	dst, err := os.OpenFile(targetFile, os.O_WRONLY|os.O_CREATE, 0666)
+	dst, err := os.Create(targetFile)
 	if err != nil {
 		return fmt.Errorf("Failed creating compiled artifact %s: %v", targetFile, err)
 	}
@@ -168,34 +154,39 @@ func callCompiler(url, targetFile, javaDepPath, pythonMainFilePath string, model
 	return nil
 }
 
-func getPythonFilePaths(wd string, projectId int64, packageName string) (string, []string, error) {
+func getPythonFilePaths(workingDirectory, packageName string, projectId int64) ([]string, error) {
+	packageName = strings.TrimSpace(packageName)
+	if len(packageName) < 1 {
+		return nil, errors.New("package not set for PythonWar")
+	}
+
 	var pythonMainFilePath string
 	var pythonOtherFilePaths []string
 
-	packagePath := fs.GetPackagePath(wd, projectId, packageName)
+	packagePath := fs.GetPackagePath(workingDirectory, projectId, packageName)
 
 	if !fs.DirExists(packagePath) {
-		return "", nil, fmt.Errorf("Package %s does not exist")
+		return nil, fmt.Errorf("Package %s does not exist")
 	}
 
-	packageAttrsBytes, err := fs.GetPackageAttributes(wd, projectId, packageName)
+	packageAttrsBytes, err := fs.GetPackageAttributes(workingDirectory, projectId, packageName)
 	if err != nil {
-		return "", nil, fmt.Errorf("Failed reading package attributes: %s", err)
+		return nil, fmt.Errorf("Failed reading package attributes: %s", err)
 	}
 
 	packageAttrs, err := fs.JsonToMap(packageAttrsBytes)
 	if err != nil {
-		return "", nil, fmt.Errorf("Failed parsing package attributes: %s", err)
+		return nil, fmt.Errorf("Failed parsing package attributes: %s", err)
 	}
 
 	pythonMain, ok := packageAttrs["main"]
 	if !ok {
-		return "", nil, fmt.Errorf("Failed determining Python main file from package attributes")
+		return nil, fmt.Errorf("Failed determining Python main file from package attributes")
 	}
 
 	packageFileList, err := fs.ListFiles(packagePath)
 	if err != nil {
-		return "", nil, fmt.Errorf("Failed reading package file list: %s", err)
+		return nil, fmt.Errorf("Failed reading package file list: %s", err)
 	}
 
 	// Filter .py files; separate ancillary files from the main one.
@@ -212,10 +203,10 @@ func getPythonFilePaths(wd string, projectId int64, packageName string) (string,
 	}
 
 	if len(pythonMainFilePath) == 0 {
-		return "", nil, fmt.Errorf("Failed locating Python main file in package file listing")
+		return nil, fmt.Errorf("Failed locating Python main file in package file listing")
 	}
 
-	return pythonMainFilePath, pythonOtherFilePaths, nil
+	return append([]string{pythonMainFilePath}, pythonOtherFilePaths...), nil
 }
 
 func toUrl(address, slug string) string {
