@@ -306,6 +306,10 @@ func GetGenModelPath(wd string, modelId int64) string {
 	return path.Join(GetModelPath(wd, modelId), "h2o-genmodel.jar")
 }
 
+func GetDeepwaterDepPath(wd string, modelId int64) string {
+	return path.Join(GetModelPath(wd, modelId), "deepwater-all.jar")
+}
+
 func GetAssetsPath(wd, asset string) string {
 	return path.Join(wd, AssetsDir, asset)
 }

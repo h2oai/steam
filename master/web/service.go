@@ -1252,7 +1252,7 @@ func (s *Service) createMetricsTable(pz az.Principal, modelId int64, metrics *bi
 
 func (s *Service) CheckMojo(pz az.Principal, algo string) (bool, error) {
 	switch algo {
-	case "Gradient Boosting Method", "Distributed Random Forest":
+	case "Gradient Boosting Method", "Distributed Random Forest", "Deep Water":
 		return true, nil
 	}
 	return false, nil
@@ -1318,6 +1318,13 @@ func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
 	}
 	if _, err := h2o.ExportGenModel(modelPath); err != nil {
 		return errors.Wrap(err, "failed to export java dependency")
+	}
+
+	// MOJO only check
+	if m.Algorithm == "Deep Water" {
+		if _, err := h2o.ExportDeepWaterAll(modelPath); err != nil {
+			return errors.Wrap(err, "exporting Deep Water dependency")
+		}
 	}
 
 	if !m.LogicalName.Valid {
@@ -1510,8 +1517,9 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 		model.ProjectId,
 		model.Id,
 		model.LogicalName.String,
-		artifact,
 		model.ModelObjectType.String,
+		model.Algorithm,
+		artifact,
 		packageName,
 	)
 	if err != nil {
