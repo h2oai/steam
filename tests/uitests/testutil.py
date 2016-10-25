@@ -423,7 +423,7 @@ def deployModel(driver, mod, name):
 	time.sleep(3)
 	wait.until(lambda x: x.find_element_by_class_name("deployed-services"))
 	
-def createProject(driver, cluster, name, data, kind, mods):
+def createProject(driver, name, cluster, data, kind, mods):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	goHome(driver)
 	newProject(driver)
@@ -442,6 +442,7 @@ def createProject(driver, cluster, name, data, kind, mods):
 	driver.find_element_by_xpath("//button[text()='Create Project']").click()
 	for mod in mods:
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
+
 
 def testAs(user, pw):
 	driver = None

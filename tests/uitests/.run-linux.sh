@@ -2,7 +2,7 @@
 
 WD=`pwd`
 touch .failtmp
-H2O_PATH=~/Documents/h2o/h2o.jar
+H2O_PATH=~/documents/h2o/h2o.jar
 
 rm -rf ./steam*-develop-linux-amd64*
 rm -rf ./steam*-develop-linux-amd64*
@@ -21,6 +21,8 @@ python init_h2o.py
 
 echo > steam.log
 
+
+export JETTY_PATH=`pwd`/steam/var/master/assets/jetty-runner.jar
 java -jar steam/var/master/assets/jetty-runner.jar \
 	--port 55000 steam/var/master/assets/ROOT.war > scoring-service.log 2>&1 &
 JETTY_PID=$!
@@ -47,7 +49,7 @@ for dir in `ls -d *-test`; do
 	cd ..
 	cp testutil.py $dir/
 	sleep 1
-	python $dir/run.py > $WD/.testmp
+	TEST_FIREFOX=1 python $dir/run.py > $WD/.testmp
 	pass=$?
 	if [ $pass -ne 0 ] 
 		then
@@ -61,6 +63,7 @@ for dir in `ls -d *-test`; do
 	rm $dir/testutil.py*
 done
 
+unset JETTY_PATH
 
 echo "$i test(s) failed"
 cat $WD/.failures

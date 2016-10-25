@@ -6,6 +6,7 @@ from h2o.estimators.deeplearning import H2ODeepLearningEstimator as dlm
 h2o.connect(ip="localhost", port="54535")
 
 bank = h2o.import_file(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/bank-full.csv.zip")
+arr = h2o.import_file(path="http://s3.amazonaws.com/h2o-public-test-data/smalldata/flow_examples/arrhythmia.csv.gz")
 
 model = glm(family="binomial", model_id="first")
 multi = glm(family="multinomial", model_id="multinom")
@@ -52,4 +53,20 @@ regr.train(y=5, x=[i for i in range(17) if i % 2 == 0], training_frame=bank)
 
 
 #model.train(x=range(2), y=3, model_id="first", training_frame=train, validation_frame=test, family="binomial")
+
+gauss = glm(family='gaussian', model_id='gauss')
+gauss.train(y=14, x=[i for i in range(20) if i != 14], training_frame=arr)
+
+poiss = glm(family='poisson', model_id='poiss')
+poiss.train(y=14, x=[i for i in range(20) if i != 14], training_frame=arr)
+
+gamma = glm(family='gamma', model_id='gamma')
+gamma.train(y=14, x=[i for i in range(20) if i != 14], training_frame=arr)
+
+tweed = glm(family='tweedie', model_id='tweed')
+tweed.train(y=14, x=[i for i in range(20) if i != 14], training_frame=arr)
+
+boost = gbm(model_id='boost')
+boost.train(y=14, x=[i for i in range(20) if i != 14], training_frame=arr)
+
 
