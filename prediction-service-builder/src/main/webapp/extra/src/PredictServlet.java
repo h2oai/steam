@@ -27,7 +27,7 @@ public class PredictServlet extends HttpServlet {
   private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   private static GenModel rawModel = null;
-  private static EasyPredictModelWrapper model = null;
+//  private static EasyPredictModelWrapper model = null;
   private static Transform transform = ServletUtil.transform;
 
   private File servletPath = null;
@@ -38,8 +38,7 @@ public class PredictServlet extends HttpServlet {
       servletPath = new File(servletConfig.getServletContext().getResource("/").getPath());
       logger.debug("servletPath {}", servletPath);
       ServletUtil.loadModels(servletPath);
-      model = ServletUtil.model;
-      logger.debug("model {}", model);
+      logger.debug("model {}", ServletUtil.model);
      }
     catch (MalformedURLException e) {
       logger.error("init failed", e);
@@ -63,6 +62,7 @@ public class PredictServlet extends HttpServlet {
   }
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    response.setHeader("Access-Control-Allow-Origin", "*");
     long start = System.nanoTime();
     RowData row = new RowData();
     String pathInfo = request.getPathInfo();
@@ -89,10 +89,6 @@ public class PredictServlet extends HttpServlet {
       }
     }
     try {
-      if (model == null)
-        throw new Exception("No predictor model");
-
-      // we have a model loaded, do the prediction
       AbstractPrediction pr = null;
       if (modelName == null)
         pr = ServletUtil.predict(row);
@@ -116,12 +112,10 @@ public class PredictServlet extends HttpServlet {
   }
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    response.setHeader("Access-Control-Allow-Origin", "*");
     long start = System.nanoTime();
     int count = 0;
     try {
-      if (model == null)
-        throw new Exception("No predictor model");
-
       BufferedReader r = request.getReader();
       PrintWriter writer = response.getWriter();
       String line;

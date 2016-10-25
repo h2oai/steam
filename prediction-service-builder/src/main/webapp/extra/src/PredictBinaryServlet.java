@@ -51,6 +51,7 @@ public class PredictBinaryServlet extends HttpServlet {
     long start = System.nanoTime();
     File tmpDir = null;
     try {
+      model = ServletUtil.model;
       if (model == null)
         throw new Exception("No predictor model");
 
