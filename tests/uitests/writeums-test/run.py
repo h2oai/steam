@@ -57,7 +57,7 @@ def writeumsTest(driver, role):
 		time.sleep(19)
 		perm = tu.getRolePermissions(role)
 		if len(perm) != 25:
-			print "Failed to add permissions"
+			print "Some permissions failed to update"
 			return False
 		driver.refresh()
 		tu.goRoles(driver)

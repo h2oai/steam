@@ -92,13 +92,16 @@ def cleanupTest(driver):
 	tu.goHome(driver)
 	tu.goServices(driver)
 	time.sleep(2)
-	if not (tu.serviceExists(driver, "swell") and tu.serviceExists(driver, "double")):
-		print "A service wasn't there"
 	cnt = len(driver.find_elements_by_class_name("services-panel"))
-	tu.stopService(driver, "swell")
-	tu.stopService(driver, "double")
+	stopped = 0
+	if tu.serviceExists(driver, "swell"):
+		tu.stopService(driver, "swell")
+		stopped += 1
+	if tu.serviceExists(driver, "double"):
+		tu.stopService(driver, "double")
+		stopped += 1
 	try:
-		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) <= (cnt - 2))
+		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) <= (cnt - stopped))
 	except:
 		print "failed to stop running services"
 		return False
@@ -133,7 +136,7 @@ def multiDeployTest(driver):
 				if name in dep.text:
 					good = True
 			if not good:
-				print "Failed to locate all deployed services on services page"
+				print "Service '{0}' failed to deploy".format(name)
 				return False
 
 	except Exception as e:
