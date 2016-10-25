@@ -18,7 +18,7 @@ import com.google.gson.Gson;
 public class PredictPythonServlet extends HttpServlet {
   private final Logger logger = Logging.getLogger(this.getClass());
 
-  private static GenModel rawModel = ServletUtil.rawModel;
+//  private static GenModel rawModel = ServletUtil.rawModel;
   private static EasyPredictModelWrapper model = ServletUtil.model;
 
   private static Process p = null;
@@ -126,6 +126,7 @@ public class PredictPythonServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     long start = System.nanoTime();
     try {
+      model = ServletUtil.model;
       if (model == null)
         throw new Exception("No predictor model");
 
@@ -234,6 +235,7 @@ public class PredictPythonServlet extends HttpServlet {
     long start = System.nanoTime();
     int count = 0;
     try {
+      model = ServletUtil.model;
       if (model == null)
         throw new Exception("No predictor model");
 

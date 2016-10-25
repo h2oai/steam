@@ -36,6 +36,8 @@ public class InfoServlet extends HttpServlet {
       String pathInfo = request.getPathInfo();
       logger.debug("pathInfo {}", pathInfo);
       EasyPredictModelWrapper mod = null;
+      model = ServletUtil.model;
+      models = ServletUtil.models;
 
       if (pathInfo != null) {
         if (models.size() == 0)
