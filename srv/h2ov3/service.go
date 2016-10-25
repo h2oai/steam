@@ -206,6 +206,13 @@ func (h *H2O) ExportMOJO(modelID, p string) (string, error) {
 	return f, nil
 }
 
+// FIXME: MUST BE H2O VERSION WITH DEEPWATER
+func (h *H2O) ExportDeepWaterAll(p string) (string, error) {
+	f, err := h.download("/3/deepwater-all.jar", path.Join(p, "deepwater-all.jar"), false)
+
+	return f, errors.Wrap(err, "downloading Deepwater depencency")
+}
+
 // func (h *H2O) CompilePojo(javaModel, jar string) error {
 // 	if _, err := h.post("/compile", url.Values{
 // 		"pojo": {javaModel},

@@ -197,8 +197,9 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
-				compiler.ArtifactWar,
 				"pojo",
+				model.Algorithm,
+				compiler.ArtifactWar,
 				"",
 			)
 			if err != nil {
@@ -214,8 +215,9 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
-				compiler.ArtifactWar,
 				"mojo",
+				model.Algorithm,
+				compiler.ArtifactWar,
 				"",
 			)
 			if err != nil {
@@ -235,8 +237,9 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
-				compiler.ArtifactPythonWar,
 				"pojo",
+				model.Algorithm,
+				compiler.ArtifactPythonWar,
 				packageName,
 			)
 			if err != nil {
@@ -257,8 +260,9 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
-				compiler.ArtifactPythonWar,
 				"mojo",
+				model.Algorithm,
+				compiler.ArtifactPythonWar,
 				packageName,
 			)
 			if err != nil {
@@ -273,8 +277,9 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
-				compiler.ArtifactJar,
 				"pojo",
+				model.Algorithm,
+				compiler.ArtifactJar,
 				"",
 			)
 			if err != nil {
