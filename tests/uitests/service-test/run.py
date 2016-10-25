@@ -10,21 +10,27 @@ import testutil as tu
 import subprocess as sp
 
 def regressTest(driver):
-	try:
-		os.chdir("./service-test")
-		for mod in ['gauss', 'poiss', 'gamma', 'tweed']:
-			sp.Popen("sh runservice.sh " + mod, shell=True)
-			time.sleep(5)
-			driver.get("http://localhost:55001/")
-			driver.refresh()
-			
-			sp.check_output("sh stopservice.sh", shell=True)
-			time.sleep(2)
-	except Exception as e:
-		print e
-		print "createProject failed"
-		return False
-	return True
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	passed = True
+	os.chdir("./service-test")
+	for mod in ['gauss', 'poiss', 'gamma', 'tweed']:
+		sp.Popen("sh runservice.sh " + mod, shell=True)
+		time.sleep(5)
+		driver.get("http://localhost:55001/")
+		driver.refresh()
+		try:
+			wait.until(lambda x: x.find_element_by_xpath("//input[@name='C1']"))
+			driver.find_element_by_xpath("//input[@name='C1']").send_keys("20")
+			time.sleep(1)
+			driver.find_element_by_xpath("//input[@id='predict-btn']").click()
+			wait.until(lambda x: x.find_element_by_xpath("//fieldset[@id='modelPredictions']/b"))
+		except Exception as e:
+			print e
+			print "Failed to predict on {0} GLM model".format(mod)
+			passed = False
+		sp.check_output("sh stopservice.sh", shell=True)
+		time.sleep(2)
+	return passed
 
 def pythonTest(d):
 	try:
@@ -67,9 +73,9 @@ def main():
 	
 	if not regressTest(d):
 		failcount += 1
-	if not pythonTest(d):
-		failcount += 1
-	d.get("http://superuser:superuser@localhost:9000/")
+	#if not pythonTest(d):
+	#	failcount += 1
+	print "WAOH"
 	tu.endtest(d)
 
 

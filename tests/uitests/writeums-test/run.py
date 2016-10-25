@@ -56,7 +56,6 @@ def writeumsTest(driver, role):
 		driver.find_element_by_xpath("//div[@class='button-primary' and text()='Save Changes']").click()
 		time.sleep(19)
 		perm = tu.getRolePermissions(role)
-		print len(perm)
 		if len(perm) != 25:
 			print "Failed to add permissions"
 			return False
