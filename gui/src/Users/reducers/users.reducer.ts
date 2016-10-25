@@ -17,19 +17,48 @@
 
 import * as _ from 'lodash';
 import {
-  RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS, RESET_UPDATES,
-  RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED
+  RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
+  RESET_UPDATES,
+  RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE, ENTER_NEW_USER,
+  EXIT_NEW_USER, RECEIVE_CREATE_ROLE
 } from '../actions/users.actions';
 
 let initialState = {
-  permissionWithRoles: [],
+  permissionsWithRoles: [],
   roles: [],
   projects: [],
   updates: [],
+  createNewUserIsEntered: false,
+  createNewRoleIsEntered: false
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case RECEIVE_CREATE_ROLE : {
+      let newState: any = _.assign({}, state);
+      newState.selectedRoles = state.selectedRoles.slice(0);
+      newState.selectedRoles.push({
+        id: action.roleId,
+        selected: true
+      });
+      return newState;
+    }
+    case ENTER_NEW_USER :
+      return _.assign({}, state, {
+        createNewUserIsEntered: true
+      });
+    case EXIT_NEW_USER :
+      return _.assign({}, state, {
+        createNewUserIsEntered: false
+      });
+    case ENTER_NEW_ROLE :
+      return _.assign({}, state, {
+        createNewRoleIsEntered: true
+      });
+    case EXIT_NEW_ROLE :
+      return _.assign({}, state, {
+        createNewRoleIsEntered: false
+      });
     case RESET_UPDATES :
       return _.assign({}, state, {
         updates: []

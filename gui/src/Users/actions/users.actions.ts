@@ -36,7 +36,73 @@ export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
 export const REQUEST_SAVE_PERMISSIONS = 'REQUEST_SAVE_PERMISSIONS';
 export const RECEIVE_SAVE_PERMISSIONS = 'RECEIVE_SAVE_PERMISSIONS';
 export const RESET_UPDATES = 'RESET_UPDATES';
+export const REQUEST_CREATE_ROLE = 'REQUEST_CREATE_ROLE';
+export const RECEIVE_CREATE_ROLE = 'RECEIVE_CREATE_ROLE';
+export const REQUEST_CREATE_USER = 'REQUEST_CREATE_USER';
+export const RECEIVE_CREATE_USER = 'RECEIVE_CREATE_USER';
+export const ENTER_NEW_USER = 'ENTER_NEW_USER';
+export const EXIT_NEW_USER = 'EXIT_NEW_USER';
+export const ENTER_NEW_ROLE = 'ENTER_NEW_ROLE';
+export const EXIT_NEW_ROLE = 'EXIT_NEW_ROLE';
 
+
+export function enterNewUser() {
+  return (dispatch) => {
+    dispatch({
+      type: ENTER_NEW_USER
+    });
+  };
+}
+export function exitNewUser() {
+  return (dispatch) => {
+    dispatch({
+      type: EXIT_NEW_USER
+    });
+  };
+}
+export function enterNewRole() {
+  return (dispatch) => {
+    dispatch({
+      type: ENTER_NEW_ROLE
+    });
+  };
+}
+export function exitNewRole() {
+  return (dispatch) => {
+    dispatch({
+      type: EXIT_NEW_ROLE
+    });
+  };
+}
+export function requestCreateRole() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_CREATE_ROLE
+    });
+  };
+}
+export function receiveCreateRole(roleId) {
+  return ((dispatch) => {
+    dispatch({
+      type: RECEIVE_CREATE_ROLE,
+      roleId
+    });
+  });
+}
+export function requestCreateUser() {
+  return ((dispatch) => {
+    dispatch({
+      type: REQUEST_CREATE_USER
+    });
+  });
+}
+export function receiveCreateUser() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_CREATE_USER
+    });
+  };
+}
 export function resetUpdates() {
   return (dispatch, getState) => {
     dispatch({
@@ -189,7 +255,7 @@ function getPermissionDescriptions(): Promise<Array<Permission>> {
   return new Promise((resolve, reject) => {
     Remote.getAllPermissions((error, res) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
+        openNotification(NotificationType.Error, 'Load Error', error, null);
         reject(error);
       }
       resolve(res);
@@ -197,9 +263,117 @@ function getPermissionDescriptions(): Promise<Array<Permission>> {
   });
 }
 
+function sendCreateRoleRequest(name, description) {
+  return new Promise((resolve, reject) => {
+    Remote.createRole(name, description, (error, roleId) => {
+      if (error) {
+        openNotification(NotificationType.Error, 'Load Error', error, null);
+        reject(error);
+      }
+      resolve(roleId);
+    });
+  });
+}
+
 export function changeFilterSelections(id, selected) {
   return (dispatch, getState) => {
     dispatch(filterSelectionsChanged(id, selected));
+  };
+}
+
+export interface INewRolePermission {
+  permissionId: number,
+  isEnabled: boolean
+}
+export class NewRolePermission implements  INewRolePermission{
+  constructor(public permissionId: number, public isEnabled: boolean) { }
+}
+export function createRole(newRoleName: String, newRoleDescription: String, permissions: Array<INewRolePermission>) {
+  return (dispatch) => {
+    dispatch(requestCreateRole());
+    sendCreateRoleRequest(newRoleName, newRoleDescription).then((roleId: number) => {
+
+      let linkPromises: Array<Promise<any>> = [];
+
+      let permissionIdsToEnable = [];
+      for (let permission of permissions) {
+        if (permission.isEnabled) {
+          permissionIdsToEnable.push(permission.permissionId);
+        }
+      }
+
+      linkPromises.push(new Promise((resolve, reject) => {
+        Remote.linkRoleWithPermissions(roleId, permissionIdsToEnable, (error) => {
+          if (error) {
+            console.log(error);
+            openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+            reject(error);
+          } else {
+            resolve(permissionIdsToEnable);
+          }
+        });
+      }));
+
+      Promise.all(linkPromises).then((p) => {
+        dispatch(receiveCreateRole(roleId));
+        dispatch(exitNewRole());
+      });
+    });
+  };
+}
+
+export interface INewUserDetails {
+  name: string,
+  password: string,
+  workgroupIds: Array<number>,
+  roleIds: Array<number>
+}
+export class NewUserDetails implements INewUserDetails {
+  constructor(public name: string, public password: string, public workgroupIds: Array<number>, public roleIds: Array<number>) {  }
+}
+export function createUser(newUserDetails: INewUserDetails) {
+  return (dispatch) => {
+    dispatch(requestCreateUser());
+    let linkPromises: Array<Promise<any>> = [];
+
+    Remote.createIdentity(newUserDetails.name, newUserDetails.password, (error, identityId) => {
+      if (error) {
+        console.log(error.toString());
+        openNotification(NotificationType.Error, 'Permission Error', error.toString(), null);
+        return;
+      }
+      for (let workgroupId of newUserDetails.workgroupIds) {
+        linkPromises.push(new Promise((resolve, reject) => {
+          Remote.linkIdentityWithWorkgroup(identityId, workgroupId, (error: Error) => {
+            if (error) {
+              console.log(error);
+              openNotification(NotificationType.Error, 'Permission Error', error.toString(), null);
+              reject(error);
+            } else {
+              resolve();
+            }
+          });
+        }));
+      }
+      for (let roleId of newUserDetails.roleIds) {
+        linkPromises.push(new Promise((resolve, reject) => {
+          Remote.linkIdentityWithRole(identityId, roleId, (error: Error) => {
+            if (error) {
+              console.log(error);
+              openNotification(NotificationType.Error, 'Permission Error', error.toString(), null);
+              reject(error);
+            } else {
+              resolve();
+            }
+          });
+        }));
+      }
+
+      Promise.all(linkPromises).then((value) => {
+        dispatch(receiveCreateUser());
+        dispatch(exitNewUser());
+      });
+    });
   };
 }
 

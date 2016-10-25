@@ -27,6 +27,7 @@ import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
 import {ClusterStatus, Cluster} from "../../Proxy/Proxy";
 import {Model} from "../../Proxy/Proxy";
+import {Workgroup} from "../../Proxy/Proxy";
 export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
@@ -43,6 +44,7 @@ export const RECEIVE_PROJECT = 'RECEIVE_PROJECT';
 export const REQUEST_DELETE_PROJECT = 'REQUEST_DELETE_PROJECT';
 export const RECEIVE_DELETE_PROJECT = 'RECEIVE_DELETE_PROJECT';
 export const REGISTER_CLUSTER_ERROR = 'REGISTER_CLUSTER_ERROR';
+export const RECEIVE_WORKGROUPS = 'RECEIVE_WORKGROUPS';
 
 export function requestDeleteProject(projectId: number) {
   return {
@@ -174,7 +176,6 @@ export function receiveProject(project) {
     project
   };
 }
-
 export function importModelFromClusterCompleted(model) {
   return {
     type: IMPORT_MODEL_FROM_CLUSTER_COMPLETED,
@@ -189,6 +190,13 @@ export function receiveProjects(projects) {
   return {
     type: RECEIVE_PROJECTS,
     projects
+  };
+}
+
+export function receiveWorkgroups(workgroups) {
+  return {
+    type: RECEIVE_WORKGROUPS,
+    workgroups
   };
 }
 
@@ -433,6 +441,18 @@ export function fetchProjects() {
         return;
       }
       dispatch(receiveProjects(<Project[]> res));
+    });
+  };
+}
+
+export function fetchWorkgroups() {
+  return (dispatch) => {
+    Remote.getWorkgroups(0, 1000, (error, res) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        return;
+      }
+      dispatch(receiveWorkgroups(<Workgroup[]> res));
     });
   };
 }

@@ -122,7 +122,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
                       <Cell> {
                         userWithRoleAndProject.roles.map((role, index) => {
                           return <span key={index}>
-                            {role.name}
+                            {role.name}&nbsp;&nbsp;
                           </span>;
                         })
                       }</Cell>
