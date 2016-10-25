@@ -33,8 +33,6 @@ def dataframeTest(driver):
 	try:	
 		wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 		wait.until(lambda x: x.find_element_by_xpath("//option[@value='bank_full.hex']"))
-		driver.find_element_by_xpath("//option[@value='arrhythmia.hex']")
-		driver.find_element_by_xpath("//option[@value='X50_cattest_train.hex']")
 	except:
 		print "Dataframe select doesn't include all dataframes related to cluster"
 		return False	

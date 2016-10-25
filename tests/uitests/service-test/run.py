@@ -16,7 +16,8 @@ def regressTest(driver):
 			sp.Popen("sh runservice.sh " + mod, shell=True)
 			time.sleep(5)
 			driver.get("http://localhost:55001/")
-			time.sleep(5)
+			driver.refresh()
+			
 			sp.check_output("sh stopservice.sh", shell=True)
 			time.sleep(2)
 	except Exception as e:

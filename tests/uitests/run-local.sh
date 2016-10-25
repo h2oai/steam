@@ -22,6 +22,7 @@ java -jar $H2O_DIR/h2o.jar --port 54535 --name steamtest > $TESTS_DIR/h2o.log 2>
 H2O_PID=$!
 disown
 
+export JETTY_PATH=`pwd`/var/master/assets/jetty-runner.jar
 java -jar var/master/assets/jetty-runner.jar --port 55000 \
 	var/master/assets/ROOT.war > $TESTS_DIR/scoring-service.log 2>&1 &
 JETTY_PID=$!
@@ -56,6 +57,8 @@ for dir in `ls -d *-test`; do
 	fi	
 	rm $dir/testutil.py*	
 done
+
+unset JETTY_PATH
 
 kill $STEAM_PID
 kill $H2O_PID
