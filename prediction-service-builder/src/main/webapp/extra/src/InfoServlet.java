@@ -31,10 +31,13 @@ public class InfoServlet extends HttpServlet {
   }
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    response.setHeader("Access-Control-Allow-Origin", "*");
     try {
       String pathInfo = request.getPathInfo();
       logger.debug("pathInfo {}", pathInfo);
       EasyPredictModelWrapper mod = null;
+      model = ServletUtil.model;
+      models = ServletUtil.models;
 
       if (pathInfo != null) {
         if (models.size() == 0)

@@ -1274,7 +1274,7 @@ func findModels(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&regression, "regression", regression, "List regression models")
 
 	cmd.Flags().BoolVar(&ascending, "ascending", ascending, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().StringVar(&namePart, "name-part", namePart, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
@@ -1662,7 +1662,7 @@ func getClusters(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	return cmd
 }
@@ -1822,7 +1822,7 @@ func getDatasets(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
 	cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	return cmd
 }
@@ -1913,7 +1913,7 @@ func getDatasources(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
@@ -2040,7 +2040,7 @@ func getHistory(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "Integer ID for an entity in Steam.")
 	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "Integer ID for the type of entity.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
@@ -2183,7 +2183,7 @@ func getIdentities(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "An entity ID.")
 	cmd.Flags().Int64Var(&entityType, "entity-type", entityType, "An entity type ID.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
@@ -2675,7 +2675,7 @@ func getModels(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
 	cmd.Flags().StringVar(&frameKey, "frame-key", frameKey, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
@@ -2974,7 +2974,7 @@ func getProjects(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	return cmd
 }
@@ -3116,7 +3116,7 @@ func getRoles(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
 
 	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
@@ -3282,7 +3282,7 @@ func getServices(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forProject, "for-project", forProject, "List services for a project")
 	cmd.Flags().BoolVar(&forModel, "for-model", forModel, "List services for a model")
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
@@ -3426,7 +3426,7 @@ func getWorkgroups(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List workgroups for an identity")
 
 	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }

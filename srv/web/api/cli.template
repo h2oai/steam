@@ -149,7 +149,7 @@ func {{.Verb}}{{upper .Noun}}(c *context) *cobra.Command {
   {{range .Methods}}{{if .HasFlag}}cmd.Flags().BoolVar(&{{lower .Switch}}, "{{flag .Switch}}", {{lower .Switch}}, "{{.Help}}")
   {{end}}{{end}}
   {{range .Inputs}}
-  cmd.Flags().{{upper .Type}}Var(&{{lower .Name}}, "{{flag .Name}}", {{lower .Name}}, "{{.Help}}"){{end}}
+  cmd.Flags().{{upper .Type}}Var(&{{lower .Name}}, "{{flag .Name}}", {{if eq .Name "Limit"}}10000{{else}}{{lower .Name}}{{end}}, "{{.Help}}"){{end}}
   return cmd
 }
 {{end}}

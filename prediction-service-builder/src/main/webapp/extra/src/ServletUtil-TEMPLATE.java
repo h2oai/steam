@@ -25,7 +25,7 @@ class ServletUtil {
 
   private static List<String> modelNames = null;
 
-  public static void loadModels(File servletPath) {
+  public static synchronized void loadModels(File servletPath) {
     if (modelNames == null) {
       try {
         modelNames = FileUtils.readLines(new File(servletPath, "modelnames.txt"));
@@ -37,6 +37,8 @@ class ServletUtil {
             mod = addPojoModel(m.replace(".java", ""));
           else if (m.endsWith(".zip"))
             mod = addMojoModel(m.replace(".zip", ""), servletPath);
+          if (mod == null)
+            throw new Exception("Failed to load model "  + m);
           if (model == null)
             model = mod;
         }
@@ -46,6 +48,8 @@ class ServletUtil {
         logger.error("can't load model using modelnames.txt", e);
       }
     }
+    else
+      logger.debug("models already loaded");
   }
 
   static GenModel rawModel = null;
