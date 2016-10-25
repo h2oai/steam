@@ -47,7 +47,8 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     this.state = {
       mainFiles: '',
       libraryFiles: [],
-      missingPackageNameError: false
+      missingPackageNameError: false,
+      packageNamed: false
     };
   }
 
@@ -85,7 +86,20 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     this.props.upload(event, uploadedPackage, this.refs.uploadForm);
   }
 
+  onPackageNameChanged = () => {
+    if ((this.refs.packageName as any).value.length < 1) {
+      this.setState({packageNamed: false});
+    } else {
+      this.setState({packageNamed: true});
+    }
+  };
+
   render(): React.ReactElement<DefaultModal> {
+    let disableSubmit = false;
+    if (this.state.libraryFiles.length < 1 || !this.state.mainFiles || !this.state.packageNamed) {
+      disableSubmit = true;
+    }
+
     return (
       <DefaultModal className="upload-preprocessing-modal" open={this.props.open}>
         <header className="page-header">
@@ -145,15 +159,19 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <Cell>
                   <div>Pick a name for this pre-processing package. You will use it as a reference when deploying models.</div>
                   <div className="package-name-label muted">Package name</div>
-                  <input ref="packageName" type="text" className={classNames('package-name', {error: this.state.missingPackageNameError})}/>
+                  <input ref="packageName" type="text" className={classNames('package-name', {error: this.state.missingPackageNameError})} onChange={this.onPackageNameChanged} />
                 </Cell>
               </Row>
               <Row className="button-row">
                 <Cell/>
                 <Cell>
-                  <button type="submit" className="button-primary" onClick={this.uploadPackage.bind(this)}>
-                    Upload
-                  </button>
+                  {disableSubmit ?
+                      <button type="submit" className="button-primary disabled">
+                        Upload
+                      </button> :
+                      <button type="submit" className="button-primary" onClick={this.uploadPackage.bind(this)}>
+                        Upload
+                      </button>}
                   <button className="button-secondary" onClick={this.props.cancel.bind(this)}>
                     Cancel
                   </button>

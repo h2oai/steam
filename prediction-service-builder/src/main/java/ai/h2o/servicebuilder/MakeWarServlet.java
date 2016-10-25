@@ -92,6 +92,7 @@ public class MakeWarServlet extends HttpServlet {
       String pojofile = null;
       String jarfile = null;
       String prejarfile = null;
+      String deepwaterjarfile = null;
       String rawfile = null;
       String predictorClassName = null;
       String transformerClassName = null;
@@ -112,6 +113,10 @@ public class MakeWarServlet extends HttpServlet {
             jarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
+          if (field.equals("deepwater")) {
+            deepwaterjarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
+          }
           if (field.equals("prejar")) {
             prejarfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
@@ -130,8 +135,7 @@ public class MakeWarServlet extends HttpServlet {
           }
         }
       }
-      logger.debug("genmodeljar {}  pojo {}  raw {}", jarfile, pojofile, rawfile);
-//      if (pojofile == null || jarfile == null)
+      logger.debug("genmodeljar {}  deepwaterjar {}  pojo {}  raw {}", jarfile, deepwaterjarfile, pojofile, rawfile);
       if ((pojofile == null || jarfile == null) && (rawfile == null || jarfile == null))
         throw new Exception("need either pojo and genmodel jar, or raw file and genmodel jar ");
 
@@ -141,8 +145,11 @@ public class MakeWarServlet extends HttpServlet {
 
       if (pojofile != null) {
         // Compile the pojo
+        String jarfiles = jarfile;
+        if (deepwaterjarfile != null)
+          jarfiles += ":" + deepwaterjarfile;
         runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION,
-            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfile, "-d", outDir.getPath(), pojofile),
+            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfiles, "-d", outDir.getPath(), pojofile),
             "Compilation of pojo failed");
         logger.info("compiled pojo {}", pojofile);
       }
@@ -186,6 +193,7 @@ public class MakeWarServlet extends HttpServlet {
       InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
 
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictServlet.java", "PredictServlet.java");
+      copyExtraFile(servletPath, srcPath, tmpDir, "PredictBinaryServlet.java", "PredictBinaryServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "StatsServlet.java", "StatsServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "PingServlet.java", "PingServlet.java");
@@ -195,7 +203,8 @@ public class MakeWarServlet extends HttpServlet {
       // compile extra
       List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
-          "PredictServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java", "Logging.java");
+          "PredictServlet.java", "PredictBinaryServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java",
+          "PingServlet.java", "Transform.java", "Logging.java");
       runCmd(tmpDir, cmd, "Compilation of extra failed");
 
       // create the war jar file
