@@ -430,12 +430,8 @@ def createProject(driver, name, cluster, data, kind, mods):
 	#select cluster by name
 	#select the first cluster for now
 	selectCluster(driver, cluster)
-	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectDataframe']"))
-	sel = Select(driver.find_element_by_xpath("//select[@name='selectDataframe']"))
-	sel.select_by_visible_text(data)
-	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectModelCategory']"))
-	sel = Select(driver.find_element_by_xpath("//select[@name='selectModelCategory']"))
-	sel.select_by_visible_text(kind)
+	selectDataframe(driver, data)
+	selectModelCategory(driver, kind)
 	for mod in mods:
 		selectModel(driver, mod)
 	driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys(name)
@@ -449,17 +445,22 @@ def createProject(driver, name, cluster, data, kind, mods):
 def viewModel(driver, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	ind = indexOfModel(driver, name)
-	driver.get_elements_by_xpath("//i[@class='fa fa-eye']")[ind].click()
-	wait.until(lambda x: x.find_element_by_xpath("//header/span[text()='{0}']".format(name)))
+	driver.find_elements_by_xpath("//i[@class='fa fa-eye']")[ind].click()
+	wait.until(lambda x: x.find_element_by_xpath("//li[@id='modelIdCrumb']"))
 
 def compareToModel(driver, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	driver.find_element_by_xpath("//button[@class='model-selection-button']").click()
-	driver.find_element_by_xpath("//input[@placeholder='filter models' and @type='text']").send_keys(name)
-	wait.until(lambda x: len(x.find_elements_by_xpath("//button[text()='Select']")) == 1)
-	driver.find_element_by_xpath("//button[text()='Select']").click()
-	wait.until(lambda x: x.find_element_by_xpath("//button[@class='model-selection-button selected']"))
-	
+	try:
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='comparison-selection']"))
+		driver.find_element_by_xpath("//div[@class='comparison-selection']").click()
+		driver.find_element_by_xpath("//input[@placeholder='filter models' and @type='text']").send_keys(name[:-1])
+		time.sleep(2)
+		driver.find_element_by_xpath("//button[text()='Select']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//button[@class='model-selection-button selected']"))
+	except Exception as e:
+		print e
+		print "failed comparin the model"
+		raise e
 
 def testAs(user, pw):
 	driver = None
