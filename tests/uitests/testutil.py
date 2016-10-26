@@ -450,17 +450,12 @@ def viewModel(driver, name):
 
 def compareToModel(driver, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
-	try:
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='comparison-selection']"))
-		driver.find_element_by_xpath("//div[@class='comparison-selection']").click()
-		driver.find_element_by_xpath("//input[@placeholder='filter models' and @type='text']").send_keys(name[:-1])
-		time.sleep(2)
-		driver.find_element_by_xpath("//button[text()='Select']").click()
-		wait.until(lambda x: x.find_element_by_xpath("//button[@class='model-selection-button selected']"))
-	except Exception as e:
-		print e
-		print "failed comparin the model"
-		raise e
+	wait.until(lambda x: x.find_element_by_xpath("//div[@class='comparison-selection']"))
+	driver.find_element_by_xpath("//div[@class='comparison-selection']").click()
+	driver.find_element_by_xpath("//input[@placeholder='filter models' and @type='text']").send_keys(name[:-1])
+	time.sleep(2)
+	driver.find_element_by_xpath("//button[text()='Select']").click()
+	wait.until(lambda x: x.find_element_by_xpath("//button[@class='model-selection-button selected']"))
 
 def testAs(user, pw):
 	driver = None
