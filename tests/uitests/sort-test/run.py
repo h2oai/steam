@@ -48,11 +48,12 @@ def regressSortTest(driver):
 			tu.selectModel(driver, mod)
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("regsort")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()	
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name']"))
+		wait.until(lambda x: x.find_element_by_xpath("//li[@id='projectIdCrumb']"))
 		driver.refresh()
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))	
 	except Exception as e:
+		print e
 		print "failed to create project"
 		return False
 	
@@ -81,11 +82,12 @@ def binomSortTest(driver):
 			tu.selectModel(driver, mod)
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("binsort")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()	
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name']"))
+		wait.until(lambda x: x.find_element_by_xpath("//li[@id='projectIdCrumb']"))
 		driver.refresh()
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))	
 	except Exception as e:
+		print e
 		print "failed to create project"
 		return False
 	
@@ -112,9 +114,12 @@ def mulnomSortTest(driver):
 			tu.selectModel(driver, mod)
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("multisort")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()	
+		wait.until(lambda x: x.find_element_by_xpath("//li[@id='projectIdCrumb']"))
+		driver.refresh()
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))	
 	except Exception as e:
+		print e
 		print "failed to create project"
 		return False
 	
@@ -130,10 +135,17 @@ def main():
 	failcount = 0
 
 	d = tu.newtest()
+	time.sleep(2)
 	if not regressSortTest(d):
 		failcount += 1
+	tu.endtest(d)
+	d = tu.newtest()
+	time.sleep(2)
 	if not binomSortTest(d):
 		failcount += 1
+	tu.endtest(d)
+	d = tu.newtest()
+	time.sleep(2)
 	if not mulnomSortTest(d):
 		failcount += 1
 
