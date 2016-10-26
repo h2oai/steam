@@ -190,7 +190,7 @@ func (h *H2O) ExportJavaModel(modelID, p string) (string, error) {
 }
 
 func (h *H2O) ExportGenModel(p string) (string, error) {
-	f, err := h.download("/3/h2o-genmodel.jar", path.Join(p, "h2o-genmodel.jar"), false)
+	f, err := h.download("/3/h2o-genmodel2.jar", path.Join(p, "h2o-genmodel.jar"), false)
 	if err != nil {
 		return "", fmt.Errorf("Java genmodel jar export failed: %s", err)
 	}

@@ -340,26 +340,26 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
     }
 
     importModelFromClusterAsync(clusterId, projectId, modelName)
-      .then((modelId: number) => getAlgoAsync(modelId))
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
-      .then((algoRes: any) => checkCanMojoAsync(algoRes.algo, algoRes.modelId))
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
+      .then((modelId: number) => dispatch(getAlgoAsync(modelId)))
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)))
+      .then((algoRes: any) => dispatch(checkCanMojoAsync(algoRes.algo, algoRes.modelId)))
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)))
       .then((canMojoRes: any) => {
         if (canMojoRes.canMojo && localStorage.getItem("mojoPojoSelection") !== "pojo") {
-          importMojoAsync(canMojoRes.modelId)
+          dispatch(importMojoAsync(canMojoRes.modelId)
             .then(() => {
               dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
-            })
-            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+            }))
+            .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
         } else {
-          importPojoAsync(canMojoRes.modelId)
+          dispatch(importPojoAsync(canMojoRes.modelId)
             .then(() => {
               dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
-            })
-            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+            }))
+            .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
         }
       })
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
     };
 }
 
