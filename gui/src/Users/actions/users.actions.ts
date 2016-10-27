@@ -21,6 +21,7 @@ import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
 import { Permission } from "../../Proxy/Proxy";
 import { Role } from "../../Proxy/Proxy";
+import {Identity} from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -44,8 +45,39 @@ export const ENTER_NEW_USER = 'ENTER_NEW_USER';
 export const EXIT_NEW_USER = 'EXIT_NEW_USER';
 export const ENTER_NEW_ROLE = 'ENTER_NEW_ROLE';
 export const EXIT_NEW_ROLE = 'EXIT_NEW_ROLE';
+export const REQUEST_DELETE_USER = 'REQUEST_DELETE_USER';
+export const RECEIVE_DELETE_USER = 'RECEIVE_DELETE_USER';
+export const REQUEST_DELETE_ROLE = 'REQUEST_DELETE_ROLE';
+export const RECEIVE_DELETE_ROLE = 'RECEIVE_DELETE_ROLE';
 
-
+export function requestDeleteUser() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_DELETE_USER
+    });
+  };
+}
+export function receiveDeleteUser() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_DELETE_USER
+    });
+  };
+}
+export function requestDeleteRole() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_DELETE_ROLE
+    });
+  };
+}
+export function receiveDeleteRole() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_DELETE_ROLE
+    });
+  };
+}
 export function enterNewUser() {
   return (dispatch) => {
     dispatch({
@@ -377,6 +409,10 @@ export function createUser(newUserDetails: INewUserDetails) {
   };
 }
 
+export interface UserWithRolesAndProjects {
+  user: Identity,
+  roles: Array<Role>
+}
 export function fetchUsersWithRolesAndProjects() {
   return (dispatch, getState) => {
     dispatch(requestUsersWithRolesAndProjects());
@@ -507,5 +543,36 @@ export function saveUpdatedPermissions(updates) {
         });
       }
     }
+  };
+}
+
+export function deleteUser(userId: number) {
+  return (dispatch) => {
+    dispatch(requestDeleteUser());
+    console.log(`submitting request do deactivate user: ${userId}`);
+    Remote.deactivateIdentity(userId, (error: Error) => {
+      if (error) {
+        console.log(error);
+        openNotification(NotificationType.Error, "Delete Error", error.toString(), null);
+        return;
+      }
+      fetchUsersWithRolesAndProjects();
+      dispatch(receiveDeleteUser());
+    });
+  };
+}
+export function deleteRole(roleId: number) {
+  return (dispatch) => {
+    dispatch(requestDeleteRole());
+    console.log(`Submitting request to delete ${roleId}`);
+    Remote.deleteRole(roleId, (error: Error) => {
+      if (error) {
+        console.log(error);
+        openNotification(NotificationType.Error, "Delete Error", error.toString(), null);
+        return;
+      }
+      fetchUsersWithRolesAndProjects();
+      dispatch(receiveDeleteRole());
+    });
   };
 }

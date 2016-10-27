@@ -109,7 +109,7 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
                 <select onChange={this.onChange.bind(this)}>
                   <option value=""></option>
                   {this.props.clusters.map((cluster, i) => {
-                    return <option key={i} value={cluster.id}>{cluster.name} @ {cluster.address}</option>;
+                    return <option key={i} value={cluster.id.toString()}>{cluster.name} @ {cluster.address}</option>;
                   })}
                 </select>
               </Cell>

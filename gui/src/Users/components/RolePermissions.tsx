@@ -23,7 +23,7 @@ import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
-import { fetchPermissionsWithRoles, PermissionsWithRoles, saveUpdatedPermissions, resetUpdates } from "../actions/users.actions";
+import { fetchPermissionsWithRoles, PermissionsWithRoles, saveUpdatedPermissions, resetUpdates, deleteRole } from "../actions/users.actions";
 import {Role} from "../../Proxy/Proxy";
 import RolePermissionsConfirm from "./RolePermissionsConfirm";
 
@@ -36,7 +36,8 @@ interface Props {
 interface DispatchProps {
   fetchPermissionsWithRoles: Function,
   saveUpdatedPermissions: Function,
-  resetUpdates: Function
+  resetUpdates: Function,
+  deleteRole: Function
 }
 
 export class RolePermissions extends React.Component<Props & DispatchProps, any> {
@@ -126,8 +127,13 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     });
   };
 
+  onDeleteRoleClicked = (roleId) => {
+    this.props.deleteRole(roleId);
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     let permissionRows;
+    let deleteRolesCells;
     (this as any)._checkboxes = {};
 
     if (this.props.permissionsWithRoles) {
@@ -149,13 +155,26 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
       }, this);
     }
 
+    deleteRolesCells = this.props.roles.map((role, rolesIndex) => {
+      if (rolesIndex !== 0) {
+        return <Cell className="center-text" key={rolesIndex}>
+          <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteRoleClicked(role.id)}></i>
+        </Cell>;
+      } else {
+        return <Cell className="center-text" key={rolesIndex}>
+        </Cell>;
+      }
+    });
+
     return (
       <div className="role-permissions intro">
         {this.props.permissionsWithRoles && this.props.roles ? <Table>
           <Row header={true}>
             <Cell className="right-table-bar">Permission Name</Cell>
             {this.props.roles.map((role, rolesIndex) => {
-              return <Cell className="center-text" key={rolesIndex}>{role.description}</Cell>;
+              return <Cell className="center-text" key={rolesIndex}>
+                {role.description}
+                </Cell>;
             })}
           </Row>
           {permissionRows}
@@ -168,6 +187,22 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
           <div className="button-primary" onClick={this.requestConfirm}>Review 1 Change</div> : null }
         { this.state.requestedChanges.length > 1 ?
           <div className="button-primary" onClick={this.requestConfirm}>Review {this.state.requestedChanges.length} Changes</div> : null }
+        <p>&nbsp;</p>
+        <h2>Modify Roles</h2>
+        {this.props.permissionsWithRoles && this.props.roles ? <Table>
+          <Row header={true}>
+            <Cell className="right-table-bar">Action</Cell>
+            {this.props.roles.map((role, rolesIndex) => {
+              return <Cell className="center-text" key={rolesIndex}>
+                {role.description}
+              </Cell>;
+            })}
+          </Row>
+          <Row>
+            <Cell>DELETE</Cell>
+            { deleteRolesCells }
+          </Row>
+        </Table> : null}
       <RolePermissionsConfirm open={this.state.confirmOpen} closeHandler={this.modalCloseHandler.bind(this)} requestedChanges={this.state.requestedChanges} saveUpdatedPermissions={this.props.saveUpdatedPermissions} updates={this.props.updates} />
     </div>
     );
@@ -186,7 +221,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchPermissionsWithRoles: bindActionCreators(fetchPermissionsWithRoles, dispatch),
     saveUpdatedPermissions: bindActionCreators(saveUpdatedPermissions, dispatch),
-    resetUpdates: bindActionCreators(resetUpdates, dispatch)
+    resetUpdates: bindActionCreators(resetUpdates, dispatch),
+    deleteRole: bindActionCreators(deleteRole, dispatch)
   };
 }
 

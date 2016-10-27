@@ -107,7 +107,6 @@ export class CreateRole extends React.Component<Props & DispatchProps, any> {
   }
 
   onCreateRoleClicked = () => {
-    console.log("creating role");
     let newRolePermissions: Array<NewRolePermission> = [];
     let newRolePermission: NewRolePermission;
 
@@ -137,7 +136,7 @@ export class CreateRole extends React.Component<Props & DispatchProps, any> {
             <Cell>IS GRANTED</Cell>
           </Row>
           { this.props.permissionsWithRoles ? this.props.permissionsWithRoles.map((permission, index, array) => {
-            return<Row key={index}>
+            return <Row key={index}>
               <Cell>{permission.description}</Cell>
               <Cell><input ref={(input) => this.registerInput(input, permission.id)} type="checkbox"/></Cell>
             </Row>;

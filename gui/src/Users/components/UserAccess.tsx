@@ -23,23 +23,39 @@ import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
-import {fetchUsersWithRolesAndProjects, changeFilterSelections} from "../actions/users.actions";
-import {Role} from "../../Proxy/Proxy";
+import {
+  fetchUsersWithRolesAndProjects, changeFilterSelections,
+  UserWithRolesAndProjects, deleteUser
+} from "../actions/users.actions";
+import {Role, Identity, Project} from "../../Proxy/Proxy";
+import {Users} from "../Users";
+import DeleteUserConfirm from "./DeleteUserConfirm";
 
 interface Props {
-  projects: Array<any>,
-  roles: Array<any>,
-  users: Array<any>,
-  usersWithRolesAndProjects: Array<any>,
+  projects: Array<Project>,
+  roles: Array<Role>,
+  users: Array<Identity>,
+  usersWithRolesAndProjects: Array<UserWithRolesAndProjects>,
   selectedRoles: any
 }
 
 interface DispatchProps {
   fetchUsersWithRolesAndProjects: Function,
-  changeFilterSelections: Function
+  changeFilterSelections: Function,
+  deleteUser: Function
 }
 
 export class UserAccess extends React.Component<Props & DispatchProps, any> {
+
+  deleteUserConfirm: DeleteUserConfirm;
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      deleteConfirmOpen: false,
+      userToDelete: null
+    };
+  }
 
   componentWillMount() {
     if (!this.props.usersWithRolesAndProjects) {
@@ -84,57 +100,82 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
     return false;
   }
 
+  onDeleteUserClicked = (user: Identity) => {
+    this.setState({
+      userToDelete: user,
+      deleteConfirmOpen: true
+    });
+  };
+  deleteConfirmCloseHandler = () => {
+    this.setState({
+      deleteConfirmOpen: false
+    });
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
+    let tableRows;
+
+    if (this.props.usersWithRolesAndProjects) {
+      let endCell;
+
+      tableRows = this.props.usersWithRolesAndProjects.map((userWithRoleAndProject, index) => {
+        if (userWithRoleAndProject.user.id !== 1) {
+          endCell = <Cell><i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteUserClicked(userWithRoleAndProject.user)}></i></Cell>;
+        } else {
+          endCell = <Cell></Cell>;
+        }
+        if (this.shouldRowBeShown(userWithRoleAndProject.roles)) {
+          return <Row key={index}>
+            <Cell>{userWithRoleAndProject.user.name}</Cell>
+            <Cell> {
+              userWithRoleAndProject.roles.map((role, index) => {
+                return <span key={index}>
+                              {role.name}<br/>
+                        </span>;
+              })
+            }</Cell>
+            { endCell }
+          </Row>;
+        }
+      });
+    }
+
     return (
       <div className="user-access intro">
-        <div className="filter-column">
-          FILTERS
-          <Table className="full-size">
-            <Row header={true}>
-              <Cell>
-                ROLES
-              </Cell>
-            </Row>
-            {this.props.roles ?
-              <div ref="roleBoxes">{
-                this.props.roles.map((role, index) => {
-                  return <Row key={role.name}>
-                    <Cell><input type="checkbox" name="selectedRoles" data-id={role.id} checked={this.checkIsRoleSelected(role.id)} onChange={this.onRoleCheckboxClicked.bind(this)}></input> {role.name}</Cell>
-                  </Row>;
-                })
-              }</div>
-              : null
-            }
-          </Table>
-        </div>
-        <div className="user-access-list">
-          <Table>
-            <Row header={true}>
-              <Cell>User</Cell>
-              <Cell>Role</Cell>
-            </Row>
-
-            { this.props.usersWithRolesAndProjects ?
-                this.props.usersWithRolesAndProjects.map((userWithRoleAndProject,index) => {
-                  if(this.shouldRowBeShown(userWithRoleAndProject.roles)) {
-                    return <Row key={index}>
-                      <Cell>{userWithRoleAndProject.user.name}</Cell>
-                      <Cell> {
-                        userWithRoleAndProject.roles.map((role, index) => {
-                          return <span key={index}>
-                            {role.name}&nbsp;&nbsp;
-                          </span>;
-                        })
-                      }</Cell>
+        <DeleteUserConfirm ref={(component) => this.deleteUserConfirm = component} open={this.state.deleteConfirmOpen} closeHandler={this.deleteConfirmCloseHandler} deleteUserAction={this.props.deleteUser} user={this.state.userToDelete} />
+        <div className="filter-and-list">
+          <div className="filter-column">
+            FILTERS
+            <Table className="full-size">
+              <Row header={true}>
+                <Cell>
+                  ROLES
+                </Cell>
+              </Row>
+              {this.props.roles ?
+                <div ref="roleBoxes">{
+                  this.props.roles.map((role, index) => {
+                    return <Row key={role.name}>
+                      <Cell><input type="checkbox" name="selectedRoles" data-id={role.id} checked={this.checkIsRoleSelected(role.id)} onChange={this.onRoleCheckboxClicked.bind(this)}></input> {role.name}</Cell>
                     </Row>;
-                  } else {
-                    return null;
-                  }
-                })
-              : null
-            }
+                  })
+                }</div>
+                : null
+              }
+            </Table>
+          </div>
+          <div className="user-access-list">
+            <Table>
+              <Row header={true}>
+                <Cell>User</Cell>
+                <Cell>Role(s)</Cell>
+                <Cell>Actions</Cell>
+              </Row>
 
-          </Table>
+              { tableRows }
+
+            </Table>
+          </div>
         </div>
       </div>
     );
@@ -154,7 +195,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     fetchUsersWithRolesAndProjects: bindActionCreators(fetchUsersWithRolesAndProjects, dispatch),
-    changeFilterSelections: bindActionCreators(changeFilterSelections, dispatch)
+    changeFilterSelections: bindActionCreators(changeFilterSelections, dispatch),
+    deleteUser: bindActionCreators(deleteUser, dispatch)
   };
 }
 
