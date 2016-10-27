@@ -15,8 +15,12 @@ mv steam-develop-linux-amd64 steam
 java -jar $H2O_PATH -port 54535 -name steamtest > h2o.log 2>&1 &
 H2O_PID=$!
 disown
-sleep 5
+java -jar $H2O_PATH -port 54321 -name pjr > /dev/null 2>&1 &
+H2O2_PID=$!
+disown
 
+sleep 5
+export H2O_PATH=$H2O_PATH
 python init_h2o.py
 
 echo > steam.log
@@ -64,6 +68,7 @@ for dir in `ls -d *-test`; do
 done
 
 unset JETTY_PATH
+unset H2O_PATH
 
 echo "$i test(s) failed"
 cat $WD/.failures
@@ -74,5 +79,6 @@ rm -rf $WD/steam-develop-linux-amd64.tar.gz $WD/steam-develop-linux-amd64 $WD/st
 
 
 kill -9 $H2O_PID > /dev/null 2>&1
+kill -9 $H2O2_PID > /dev/null 2>&1
 kill -9 $JETTY_PID > /dev/null 2>&1
 kill -9 $STEAM_PID > /dev/null 2>&1
