@@ -29,10 +29,10 @@ func (u *LdapUser) NewUser(auth, user string) {
 	u.mu.Unlock()
 
 	// Launches delete cycle for itself
-	go u.TimedDelete(auth, user)
+	go u.timedDelete(auth, user)
 }
 
-func (u *LdapUser) TimedDelete(auth, user string) {
+func (u *LdapUser) timedDelete(auth, user string) {
 	u.mu.RLock()
 	idl := u.users[auth].Idl
 	max := u.users[auth].Max
@@ -41,13 +41,19 @@ func (u *LdapUser) TimedDelete(auth, user string) {
 	select {
 	case <-idl.C:
 		u.mu.Lock()
-		max.Stop()
+		// If timer went off already, flush the channel
+		if !max.Stop() {
+			<-max.C
+		}
 		delete(u.users, auth)
 		u.mu.Unlock()
 		log.Println(user, "logged out from being idle")
 	case <-max.C:
 		u.mu.Lock()
-		idl.Stop()
+		// If timer went off already, flush the channel
+		if !idl.Stop() {
+			<-idl.C
+		}
 		delete(u.users, auth)
 		u.mu.Unlock()
 		log.Println(user, "logged out due to max time")
@@ -55,7 +61,7 @@ func (u *LdapUser) TimedDelete(auth, user string) {
 }
 
 func (u *LdapUser) Exists(auth string) bool {
-	u.mu.Lock()
+	u.mu.RLock()
 	user, ok := u.users[auth]
 	if ok {
 		if !user.Idl.Stop() {
@@ -63,7 +69,7 @@ func (u *LdapUser) Exists(auth string) bool {
 		}
 		user.Idl.Reset(u.IdlTime)
 	}
-	u.mu.Unlock()
+	u.mu.RUnlock()
 
 	return ok
 }

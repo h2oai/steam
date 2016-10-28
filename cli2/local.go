@@ -143,6 +143,7 @@ func serveMaster(c *context) *cobra.Command {
 		webTLSCertPath            string
 		webTLSKeyPath             string
 		authProvider              string
+		authConfig                string
 		workingDirectory          string
 		clusterProxyAddress       string
 		compilationServiceAddress string
@@ -193,6 +194,7 @@ func serveMaster(c *context) *cobra.Command {
 			webTLSCertPath,
 			webTLSKeyPath,
 			authProvider,
+			authConfig,
 			workingDirectory,
 			clusterProxyAddress,
 			compilationServiceAddress,
@@ -226,7 +228,8 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
 	cmd.Flags().StringVar(&webTLSCertPath, "web-tls-cert-path", opts.WebTLSCertPath, "Web server TLS certificate file path (optional).")
 	cmd.Flags().StringVar(&webTLSKeyPath, "web-tls-key-path", opts.WebTLSKeyPath, "Web server TLS key file path (optional).")
-	cmd.Flags().StringVar(&authProvider, "authentication-provider", opts.AuthProvider, "Authentication mechanismfor client logins (one of \"basic\" or \"digest\")")
+	cmd.Flags().StringVar(&authProvider, "authentication-provider", opts.AuthProvider, "Authentication mechanism for client logins (one of \"basic\", \"digest\"), or \"basic-ldap\"")
+	cmd.Flags().StringVar(&authConfig, "authentication-config", opts.AuthConfig, "Configuration file for authentication (used in \"basic-ldap\")")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")

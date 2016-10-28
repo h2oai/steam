@@ -26,7 +26,6 @@ import (
 	"path"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steam/lib/fs"
@@ -65,6 +64,7 @@ type Opts struct {
 	WebTLSCertPath            string
 	WebTLSKeyPath             string
 	AuthProvider              string
+	AuthConfig                string
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
@@ -93,6 +93,7 @@ var DefaultOpts = &Opts{
 	"",
 	"",
 	"basic",
+	"ldap.toml",
 	path.Join(".", fs.VarDir, "master"),
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
@@ -149,11 +150,11 @@ func Run(version, buildDate string, opts Opts) {
 	case "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
 	case "basic-ldap":
-		conn := ldap.NewLdap(
-			"ldap.0xdata.loc:389", "cn=admin,dc=0xdata,dc=loc", "0xdata",
-			"ou=users,dc=0xdata,dc=loc", "uid", "inetOrgPerson",
-			time.Second*5, time.Second*15,
-		)
+		conn, err := ldap.FromConfig(opts.AuthConfig)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
 		authProvider = NewBasicLdapAuthProvider(webAddress, conn)
 	default: // "basic"
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)

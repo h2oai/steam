@@ -2,8 +2,10 @@ package ldap
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
 )
@@ -11,7 +13,7 @@ import (
 type Ldap struct {
 	Address  string
 	BindDN   string
-	BindPass string
+	BindPass string `toml:"bindPassword"`
 
 	UserBaseDn      string
 	UserIdAttribute string
@@ -75,4 +77,36 @@ func NewLdap(
 
 		Users: NewLdapUser(idleTime, maxTime),
 	}
+}
+
+func FromConfig(fileName string) (*Ldap, error) {
+	A := struct {
+		Hostname        string
+		Port            int
+		BindDn          string
+		BindPassword    string
+		UserBaseDn      string
+		UserIdAttribute string
+		UserObjectClass string
+
+		IsTLS     bool `toml:"useLdaps"`
+		ForceBind bool
+		IdleTime  time.Duration
+		MaxTime   time.Duration
+	}{}
+
+	f, err := filepath.Abs(fileName)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting absolute path")
+	}
+	if _, err := toml.DecodeFile(f, &A); err != nil {
+		return nil, errors.Wrap(err, "decoding config file")
+	}
+
+	return NewLdap(
+		fmt.Sprintf("%s:%d", A.Hostname, A.Port),
+		A.BindDn, A.BindPassword,
+		A.UserBaseDn, A.UserIdAttribute, A.UserObjectClass,
+
+		time.Minute*A.IdleTime, time.Minute*A.MaxTime), nil
 }
