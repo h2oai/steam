@@ -1,7 +1,7 @@
-// ------------------------------
-// --- This is generated code ---
-// ---      DO NOT EDIT       ---
-// ------------------------------
+# ------------------------------
+# --- This is generated code ---
+# ---      DO NOT EDIT       ---
+# ------------------------------
 
 
 import httplib
@@ -160,10 +160,10 @@ class RPCClient:
 		cluster_id: No description available (int64)
 		"""
 		request = {
-			'cluster_name': cluster_name
-			'engine_id': engine_id
-			'size': size
-			'memory': memory
+			'cluster_name': cluster_name,
+			'engine_id': engine_id,
+			'size': size,
+			'memory': memory,
 			'keytab': keytab
 		}
 		response = self.connection.call("StartClusterOnYarn", request)
@@ -180,7 +180,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'cluster_id': cluster_id
+			'cluster_id': cluster_id,
 			'keytab': keytab
 		}
 		response = self.connection.call("StopClusterOnYarn", request)
@@ -230,7 +230,7 @@ class RPCClient:
 		clusters: No description available (Cluster)
 		"""
 		request = {
-			'offset': offset
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetClusters", request)
@@ -279,7 +279,7 @@ class RPCClient:
 		job: No description available (Job)
 		"""
 		request = {
-			'cluster_id': cluster_id
+			'cluster_id': cluster_id,
 			'job_name': job_name
 		}
 		response = self.connection.call("GetJob", request)
@@ -314,8 +314,8 @@ class RPCClient:
 		project_id: No description available (int64)
 		"""
 		request = {
-			'name': name
-			'description': description
+			'name': name,
+			'description': description,
 			'model_category': model_category
 		}
 		response = self.connection.call("CreateProject", request)
@@ -333,7 +333,7 @@ class RPCClient:
 		projects: No description available (Project)
 		"""
 		request = {
-			'offset': offset
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetProjects", request)
@@ -384,9 +384,9 @@ class RPCClient:
 		datasource_id: No description available (int64)
 		"""
 		request = {
-			'project_id': project_id
-			'name': name
-			'description': description
+			'project_id': project_id,
+			'name': name,
+			'description': description,
 			'path': path
 		}
 		response = self.connection.call("CreateDatasource", request)
@@ -405,8 +405,8 @@ class RPCClient:
 		datasources: No description available (Datasource)
 		"""
 		request = {
-			'project_id': project_id
-			'offset': offset
+			'project_id': project_id,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetDatasources", request)
@@ -441,9 +441,9 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'datasource_id': datasource_id
-			'name': name
-			'description': description
+			'datasource_id': datasource_id,
+			'name': name,
+			'description': description,
 			'path': path
 		}
 		response = self.connection.call("UpdateDatasource", request)
@@ -479,10 +479,10 @@ class RPCClient:
 		dataset_id: No description available (int64)
 		"""
 		request = {
-			'cluster_id': cluster_id
-			'datasource_id': datasource_id
-			'name': name
-			'description': description
+			'cluster_id': cluster_id,
+			'datasource_id': datasource_id,
+			'name': name,
+			'description': description,
 			'response_column_name': response_column_name
 		}
 		response = self.connection.call("CreateDataset", request)
@@ -501,8 +501,8 @@ class RPCClient:
 		datasets: No description available (Dataset)
 		"""
 		request = {
-			'datasource_id': datasource_id
-			'offset': offset
+			'datasource_id': datasource_id,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetDatasets", request)
@@ -553,9 +553,9 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'dataset_id': dataset_id
-			'name': name
-			'description': description
+			'dataset_id': dataset_id,
+			'name': name,
+			'description': description,
 			'response_column_name': response_column_name
 		}
 		response = self.connection.call("UpdateDataset", request)
@@ -574,8 +574,8 @@ class RPCClient:
 		dataset_ids: No description available (int64)
 		"""
 		request = {
-			'dataset_id': dataset_id
-			'ratio1': ratio1
+			'dataset_id': dataset_id,
+			'ratio1': ratio1,
 			'ratio2': ratio2
 		}
 		response = self.connection.call("SplitDataset", request)
@@ -609,8 +609,8 @@ class RPCClient:
 		model_id: No description available (int64)
 		"""
 		request = {
-			'cluster_id': cluster_id
-			'dataset_id': dataset_id
+			'cluster_id': cluster_id,
+			'dataset_id': dataset_id,
 			'algorithm': algorithm
 		}
 		response = self.connection.call("BuildModel", request)
@@ -630,9 +630,9 @@ class RPCClient:
 		model: No description available (Model)
 		"""
 		request = {
-			'cluster_id': cluster_id
-			'dataset': dataset
-			'target_name': target_name
+			'cluster_id': cluster_id,
+			'dataset': dataset,
+			'target_name': target_name,
 			'max_run_time': max_run_time
 		}
 		response = self.connection.call("BuildModelAuto", request)
@@ -667,8 +667,8 @@ class RPCClient:
 		models: No description available (Model)
 		"""
 		request = {
-			'project_id': project_id
-			'offset': offset
+			'project_id': project_id,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetModels", request)
@@ -686,7 +686,7 @@ class RPCClient:
 		models: No description available (Model)
 		"""
 		request = {
-			'cluster_id': cluster_id
+			'cluster_id': cluster_id,
 			'frame_key': frame_key
 		}
 		response = self.connection.call("GetModelsFromCluster", request)
@@ -738,11 +738,11 @@ class RPCClient:
 		models: No description available (BinomialModel)
 		"""
 		request = {
-			'project_id': project_id
-			'name_part': name_part
-			'sort_by': sort_by
-			'ascending': ascending
-			'offset': offset
+			'project_id': project_id,
+			'name_part': name_part,
+			'sort_by': sort_by,
+			'ascending': ascending,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("FindModelsBinomial", request)
@@ -794,11 +794,11 @@ class RPCClient:
 		models: No description available (MultinomialModel)
 		"""
 		request = {
-			'project_id': project_id
-			'name_part': name_part
-			'sort_by': sort_by
-			'ascending': ascending
-			'offset': offset
+			'project_id': project_id,
+			'name_part': name_part,
+			'sort_by': sort_by,
+			'ascending': ascending,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("FindModelsMultinomial", request)
@@ -850,11 +850,11 @@ class RPCClient:
 		models: No description available (RegressionModel)
 		"""
 		request = {
-			'project_id': project_id
-			'name_part': name_part
-			'sort_by': sort_by
-			'ascending': ascending
-			'offset': offset
+			'project_id': project_id,
+			'name_part': name_part,
+			'sort_by': sort_by,
+			'ascending': ascending,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("FindModelsRegression", request)
@@ -890,9 +890,9 @@ class RPCClient:
 		model_id: No description available (int64)
 		"""
 		request = {
-			'cluster_id': cluster_id
-			'project_id': project_id
-			'model_key': model_key
+			'cluster_id': cluster_id,
+			'project_id': project_id,
+			'model_key': model_key,
 			'model_name': model_name
 		}
 		response = self.connection.call("ImportModelFromCluster", request)
@@ -972,8 +972,8 @@ class RPCClient:
 		label_id: No description available (int64)
 		"""
 		request = {
-			'project_id': project_id
-			'name': name
+			'project_id': project_id,
+			'name': name,
 			'description': description
 		}
 		response = self.connection.call("CreateLabel", request)
@@ -991,8 +991,8 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'label_id': label_id
-			'name': name
+			'label_id': label_id,
+			'name': name,
 			'description': description
 		}
 		response = self.connection.call("UpdateLabel", request)
@@ -1024,7 +1024,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'label_id': label_id
+			'label_id': label_id,
 			'model_id': model_id
 		}
 		response = self.connection.call("LinkLabelWithModel", request)
@@ -1041,7 +1041,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'label_id': label_id
+			'label_id': label_id,
 			'model_id': model_id
 		}
 		response = self.connection.call("UnlinkLabelFromModel", request)
@@ -1076,8 +1076,8 @@ class RPCClient:
 		service_id: No description available (int64)
 		"""
 		request = {
-			'model_id': model_id
-			'name': name
+			'model_id': model_id,
+			'name': name,
 			'package_name': package_name
 		}
 		response = self.connection.call("StartService", request)
@@ -1126,7 +1126,7 @@ class RPCClient:
 		services: No description available (ScoringService)
 		"""
 		request = {
-			'offset': offset
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetServices", request)
@@ -1145,8 +1145,8 @@ class RPCClient:
 		services: No description available (ScoringService)
 		"""
 		request = {
-			'project_id': project_id
-			'offset': offset
+			'project_id': project_id,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetServicesForProject", request)
@@ -1165,8 +1165,8 @@ class RPCClient:
 		services: No description available (ScoringService)
 		"""
 		request = {
-			'model_id': model_id
-			'offset': offset
+			'model_id': model_id,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetServicesForModel", request)
@@ -1199,7 +1199,7 @@ class RPCClient:
 		engine_id: No description available (int64)
 		"""
 		request = {
-			'engine_name': engine_name
+			'engine_name': engine_name,
 			'engine_path': engine_path
 		}
 		response = self.connection.call("AddEngine", request)
@@ -1336,7 +1336,7 @@ class RPCClient:
 		role_id: Integer ID of the role in Steam. (int64)
 		"""
 		request = {
-			'name': name
+			'name': name,
 			'description': description
 		}
 		response = self.connection.call("CreateRole", request)
@@ -1354,7 +1354,7 @@ class RPCClient:
 		roles: A list of Steam roles. (Role)
 		"""
 		request = {
-			'offset': offset
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetRoles", request)
@@ -1420,8 +1420,8 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'role_id': role_id
-			'name': name
+			'role_id': role_id,
+			'name': name,
 			'description': description
 		}
 		response = self.connection.call("UpdateRole", request)
@@ -1438,7 +1438,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'role_id': role_id
+			'role_id': role_id,
 			'permission_ids': permission_ids
 		}
 		response = self.connection.call("LinkRoleWithPermissions", request)
@@ -1455,7 +1455,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'role_id': role_id
+			'role_id': role_id,
 			'permission_id': permission_id
 		}
 		response = self.connection.call("LinkRoleWithPermission", request)
@@ -1472,7 +1472,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'role_id': role_id
+			'role_id': role_id,
 			'permission_id': permission_id
 		}
 		response = self.connection.call("UnlinkRoleFromPermission", request)
@@ -1505,7 +1505,7 @@ class RPCClient:
 		workgroup_id: Integer ID of the workgroup in Steam. (int64)
 		"""
 		request = {
-			'name': name
+			'name': name,
 			'description': description
 		}
 		response = self.connection.call("CreateWorkgroup", request)
@@ -1523,7 +1523,7 @@ class RPCClient:
 		workgroups: A list of workgroups in Steam. (Workgroup)
 		"""
 		request = {
-			'offset': offset
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetWorkgroups", request)
@@ -1589,8 +1589,8 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'workgroup_id': workgroup_id
-			'name': name
+			'workgroup_id': workgroup_id,
+			'name': name,
 			'description': description
 		}
 		response = self.connection.call("UpdateWorkgroup", request)
@@ -1623,7 +1623,7 @@ class RPCClient:
 		identity_id: Integer ID of the identity in Steam. (int64)
 		"""
 		request = {
-			'name': name
+			'name': name,
 			'password': password
 		}
 		response = self.connection.call("CreateIdentity", request)
@@ -1641,7 +1641,7 @@ class RPCClient:
 		identities: A list of identities in Steam. (Identity)
 		"""
 		request = {
-			'offset': offset
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetIdentities", request)
@@ -1691,7 +1691,7 @@ class RPCClient:
 		users: A list of identites and roles (UserRole)
 		"""
 		request = {
-			'entity_type': entity_type
+			'entity_type': entity_type,
 			'entity_id': entity_id
 		}
 		response = self.connection.call("GetIdentitiesForEntity", request)
@@ -1740,7 +1740,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'identity_id': identity_id
+			'identity_id': identity_id,
 			'workgroup_id': workgroup_id
 		}
 		response = self.connection.call("LinkIdentityWithWorkgroup", request)
@@ -1757,7 +1757,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'identity_id': identity_id
+			'identity_id': identity_id,
 			'workgroup_id': workgroup_id
 		}
 		response = self.connection.call("UnlinkIdentityFromWorkgroup", request)
@@ -1774,7 +1774,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'identity_id': identity_id
+			'identity_id': identity_id,
 			'role_id': role_id
 		}
 		response = self.connection.call("LinkIdentityWithRole", request)
@@ -1791,7 +1791,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'identity_id': identity_id
+			'identity_id': identity_id,
 			'role_id': role_id
 		}
 		response = self.connection.call("UnlinkIdentityFromRole", request)
@@ -1808,7 +1808,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'identity_id': identity_id
+			'identity_id': identity_id,
 			'password': password
 		}
 		response = self.connection.call("UpdateIdentity", request)
@@ -1842,9 +1842,9 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'kind': kind
-			'workgroup_id': workgroup_id
-			'entity_type_id': entity_type_id
+			'kind': kind,
+			'workgroup_id': workgroup_id,
+			'entity_type_id': entity_type_id,
 			'entity_id': entity_id
 		}
 		response = self.connection.call("ShareEntity", request)
@@ -1862,7 +1862,7 @@ class RPCClient:
 		privileges: A list of entity privileges (EntityPrivilege)
 		"""
 		request = {
-			'entity_type_id': entity_type_id
+			'entity_type_id': entity_type_id,
 			'entity_id': entity_id
 		}
 		response = self.connection.call("GetPrivileges", request)
@@ -1881,9 +1881,9 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'kind': kind
-			'workgroup_id': workgroup_id
-			'entity_type_id': entity_type_id
+			'kind': kind,
+			'workgroup_id': workgroup_id,
+			'entity_type_id': entity_type_id,
 			'entity_id': entity_id
 		}
 		response = self.connection.call("UnshareEntity", request)
@@ -1903,9 +1903,9 @@ class RPCClient:
 		history: A list of actions performed on the entity. (EntityHistory)
 		"""
 		request = {
-			'entity_type_id': entity_type_id
-			'entity_id': entity_id
-			'offset': offset
+			'entity_type_id': entity_type_id,
+			'entity_id': entity_id,
+			'offset': offset,
 			'limit': limit
 		}
 		response = self.connection.call("GetHistory", request)
@@ -1922,7 +1922,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'project_id': project_id
+			'project_id': project_id,
 			'name': name
 		}
 		response = self.connection.call("CreatePackage", request)
@@ -1957,8 +1957,8 @@ class RPCClient:
 		directories: No description available (string)
 		"""
 		request = {
-			'project_id': project_id
-			'package_name': package_name
+			'project_id': project_id,
+			'package_name': package_name,
 			'relative_path': relative_path
 		}
 		response = self.connection.call("GetPackageDirectories", request)
@@ -1977,8 +1977,8 @@ class RPCClient:
 		files: No description available (string)
 		"""
 		request = {
-			'project_id': project_id
-			'package_name': package_name
+			'project_id': project_id,
+			'package_name': package_name,
 			'relative_path': relative_path
 		}
 		response = self.connection.call("GetPackageFiles", request)
@@ -1995,7 +1995,7 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'project_id': project_id
+			'project_id': project_id,
 			'name': name
 		}
 		response = self.connection.call("DeletePackage", request)
@@ -2013,8 +2013,8 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'project_id': project_id
-			'package_name': package_name
+			'project_id': project_id,
+			'package_name': package_name,
 			'relative_path': relative_path
 		}
 		response = self.connection.call("DeletePackageDirectory", request)
@@ -2032,8 +2032,8 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'project_id': project_id
-			'package_name': package_name
+			'project_id': project_id,
+			'package_name': package_name,
 			'relative_path': relative_path
 		}
 		response = self.connection.call("DeletePackageFile", request)
@@ -2051,8 +2051,8 @@ class RPCClient:
 		Returns:None
 		"""
 		request = {
-			'project_id': project_id
-			'package_name': package_name
+			'project_id': project_id,
+			'package_name': package_name,
 			'attributes': attributes
 		}
 		response = self.connection.call("SetAttributesForPackage", request)
@@ -2070,7 +2070,7 @@ class RPCClient:
 		attributes: No description available (string)
 		"""
 		request = {
-			'project_id': project_id
+			'project_id': project_id,
 			'package_name': package_name
 		}
 		response = self.connection.call("GetAttributesForPackage", request)
