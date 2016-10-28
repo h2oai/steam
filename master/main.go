@@ -152,7 +152,7 @@ func Run(version, buildDate string, opts Opts) {
 	case "basic-ldap":
 		conn, err := ldap.FromConfig(opts.AuthConfig)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln("Please provide a valid ldap configuration file", err)
 		}
 
 		authProvider = NewBasicLdapAuthProvider(webAddress, conn)

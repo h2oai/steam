@@ -76,7 +76,7 @@ func (a *BasicLdapAuth) CheckAuth(r *http.Request) string {
 		return user
 	}
 
-	log.Println("LDAP bind for user", user)
+	log.Println("LDAP", user, "checking bind")
 	if err := a.Conn.CheckBind(user, password); err != nil {
 		log.Println(err)
 		return ""

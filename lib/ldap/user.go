@@ -1,82 +1,64 @@
 package ldap
 
 import (
-	"log"
 	"sync"
 	"time"
 )
 
 type LdapUser struct {
-	mu    sync.RWMutex
-	users map[string]*Timers
+	mu sync.RWMutex
+	// users map[string]*Timers
+	users map[string]*time.Timer
 
 	IdlTime time.Duration
 	MaxTime time.Duration
 }
 
-type Timers struct {
-	Idl *time.Timer
-	Max *time.Timer
-}
+// type Timers struct {
+// 	Idl *time.Timer
+// 	Max *time.Timer
+// }
 
+// NewUser creates a new LdapUser with it's own "self-destruct" timer
 func (u *LdapUser) NewUser(auth, user string) {
 	u.mu.Lock()
-	t := &Timers{
-		Idl: time.NewTimer(u.IdlTime),
-		Max: time.NewTimer(u.MaxTime),
-	}
+	t := time.AfterFunc(u.MaxTime, func() { u.Delete(auth) })
 	u.users[auth] = t
 	u.mu.Unlock()
-
-	// Launches delete cycle for itself
-	go u.timedDelete(auth, user)
 }
 
-func (u *LdapUser) timedDelete(auth, user string) {
-	u.mu.RLock()
-	idl := u.users[auth].Idl
-	max := u.users[auth].Max
-	u.mu.RUnlock()
-
-	select {
-	case <-idl.C:
-		u.mu.Lock()
-		// If timer went off already, flush the channel
-		if !max.Stop() {
-			<-max.C
-		}
-		delete(u.users, auth)
-		u.mu.Unlock()
-		log.Println(user, "logged out from being idle")
-	case <-max.C:
-		u.mu.Lock()
-		// If timer went off already, flush the channel
-		if !idl.Stop() {
-			<-idl.C
-		}
-		delete(u.users, auth)
-		u.mu.Unlock()
-		log.Println(user, "logged out due to max time")
-	}
-}
-
+// Exists verifies if a user is in the Users map
 func (u *LdapUser) Exists(auth string) bool {
 	u.mu.RLock()
-	user, ok := u.users[auth]
-	if ok {
-		if !user.Idl.Stop() {
-			<-user.Idl.C
-		}
-		user.Idl.Reset(u.IdlTime)
-	}
+	_, ok := u.users[auth]
+	// if ok {
+	// 	if !user.Idl.Stop() {
+	// 		<-user.Idl.C
+	// 	}
+	// 	user.Idl.Reset(u.IdlTime)
+	// }
 	u.mu.RUnlock()
 
 	return ok
 }
 
+// Delete removes a user from the LdapUsers map and stop/flushes the timer
+func (u *LdapUser) Delete(auth string) {
+	u.mu.Lock()
+	t, ok := u.users[auth]
+	if ok {
+		if !t.Stop() {
+			<-t.C
+		}
+		delete(u.users, auth)
+	}
+	u.mu.Unlock()
+}
+
 func NewLdapUser(idleTime, maxTime time.Duration) *LdapUser {
 	return &LdapUser{
-		users:   make(map[string]*Timers),
+		// users:   make(map[string]*Timers),
+		users:   make(map[string]*time.Timer),
 		IdlTime: idleTime,
 		MaxTime: maxTime,
 	}
