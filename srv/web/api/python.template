@@ -99,7 +99,7 @@ class RPCClient:
 		{{- else}}None{{end}}
 		"""
 		request = {
-			{{- range .Inputs}}
+			{{- range $i, $e := .Inputs}}{{if $i}},{{end}}
 			'{{snake .Name}}': {{snake .Name}}
 			{{- end}}
 		}
