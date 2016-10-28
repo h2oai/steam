@@ -104,6 +104,8 @@ def conflictTagTest(driver):
 			tu.selectModel(driver, mod)
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("tagtest")
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()
+		wait.until(lambda x: x.find_element_by_xpath("//li[@id='projectIdCrumb']"))
+		driver.refresh()
 		for mod in models:
 			wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
 	except:

@@ -10,6 +10,14 @@ If you're an Open Source community member, you can contact H2O using one of the 
 - Send an e-mail message directly to <a href="mailto:support@h2o.ai">support@h2o.ai</a>
 - Ask your question on the [H2O Community](https://community.h2o.ai/spaces/540/index.html) site (create an account if necessary)
 
+## v1.1.3 Changes
+
+- [STEAM-567] Updated Prediction Service UI to reflect DeepWater support
+- [STEAM-578] Added support for importing deploying DeepWater models
+- [STEAM-579] Added a default limit for CLI items to 10000
+- [STEAM-504] Modify existing permissions from UMS screen 
+- [STEAM-559] Prediction Service now allows binary input (images, audio, etc...)
+
 ## v1.1.2 Changes
 
 - [STEAM-574] Fixes missing protocol in Cluster listing addresses

@@ -63,7 +63,7 @@ author = u'h2o'
 # built documents.
 #
 # The short X.Y version.
-version = "Steam 1.1.2"
+version = "Steam 1.1.3"
 
 # This commented out code is how the version is displayed in H2O.
 #if os.path.exists("project_version"):
