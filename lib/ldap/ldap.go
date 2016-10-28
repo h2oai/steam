@@ -85,13 +85,16 @@ func (l *Ldap) CheckBind(user, password string) error {
 func NewLdap(
 	address, bindDn, bindPass string,
 	userBaseDn, userIdAttribute, userObjectClass string,
+	forceBind bool,
 	idleTime, maxTime time.Duration) *Ldap {
 	return &Ldap{
+		// Base LDAP settings
 		Address: address, BindDN: bindDn, BindPass: bindPass,
-
+		// User filter settings
 		UserBaseDn: userBaseDn, UserIdAttribute: userIdAttribute, UserObjectClass: userObjectClass,
-
-		Users: NewLdapUser(idleTime, maxTime),
+		// Additional Configs
+		ForceBind: forceBind,
+		Users:     NewLdapUser(idleTime, maxTime),
 	}
 }
 
@@ -124,5 +127,5 @@ func FromConfig(fileName string) (*Ldap, error) {
 		A.BindDn, A.BindPassword,
 		A.UserBaseDn, A.UserIdAttribute, A.UserObjectClass,
 
-		time.Minute*A.IdleTime, time.Minute*A.MaxTime), nil
+		A.ForceBind, time.Minute*A.IdleTime, time.Minute*A.MaxTime), nil
 }
