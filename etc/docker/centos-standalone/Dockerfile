@@ -35,6 +35,9 @@ WORKDIR /steam/src/github.com/h2oai/steam
 RUN make
 RUN make db
 
+# Run Prediction Service Builder
+RUN nohup java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war &
+
 # Run Steam
-CMD ./steam serve master --superuser-name superuser --superuser-password superuser
+CMD ./steam serve master --superuser-name root --superuser-password superuser
 
