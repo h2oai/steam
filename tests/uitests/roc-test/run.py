@@ -6,6 +6,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 import testutil as tu
 
+
+
 def main():
 	failcount = 0
 	d = tu.newtest()

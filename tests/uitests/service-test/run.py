@@ -75,7 +75,6 @@ def main():
 		failcount += 1
 	#if not pythonTest(d):
 	#	failcount += 1
-	print "WAOH"
 	tu.endtest(d)
 
 
