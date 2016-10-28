@@ -26,9 +26,11 @@ import (
 	"path"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/rpc"
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/master/proxy"
@@ -146,6 +148,13 @@ func Run(version, buildDate string, opts Opts) {
 	switch opts.AuthProvider {
 	case "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
+	case "basic-ldap":
+		conn := ldap.NewLdap(
+			"ldap.0xdata.loc:389", "cn=admin,dc=0xdata,dc=loc", "0xdata",
+			"ou=users,dc=0xdata,dc=loc", "uid", "inetOrgPerson",
+			time.Second*5, time.Second*15,
+		)
+		authProvider = NewBasicLdapAuthProvider(webAddress, conn)
 	default: // "basic"
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}

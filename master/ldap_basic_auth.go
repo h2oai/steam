@@ -21,32 +21,28 @@ import (
 	"net/http"
 
 	"github.com/abbot/go-http-auth"
+	"github.com/h2oai/steam/lib/ldap"
 )
 
 type BasicLdapAuthProvider struct {
 	realm string
 
-	address  string
-	bindDn   string
-	bindPass string
+	conn *ldap.Ldap
 }
 
 func (p *BasicLdapAuthProvider) Secure(handler http.Handler) http.Handler {
-	authenticator := NewBasicLdapAuth(p.realm, p.address, p.bindDn, p.bindPass)
+	authenticator := ldap.NewBasicLdapAuth(p.realm, p.conn)
 
 	return auth.JustCheck(authenticator, handler.ServeHTTP)
 }
 
-func NewBasicLdapAuthProvider(realm, address, bindDn, bindPass string) *BasicLdapAuthProvider {
-	return &BasicLdapAuthProvider{
-		realm: realm, address: address, bindDn: bindDn, bindPass: bindPass,
-	}
+func NewBasicLdapAuthProvider(realm string, conn *ldap.Ldap) *BasicLdapAuthProvider {
+	return &BasicLdapAuthProvider{realm: realm, conn: conn}
 }
 
 // Basic/Digest auth have no notion of logouts, so these handlers simply fail auth,
 //  causing a 401 on the original realm, forcing the browser to re-auth.
-
-func (p *BasicAuthProvider) Logout() http.Handler {
+func (p *BasicLdapAuthProvider) Logout() http.Handler {
 	authenticator := auth.NewBasicAuthenticator(p.realm, authNoop)
 	return auth.JustCheck(authenticator, serveNoop)
 }
