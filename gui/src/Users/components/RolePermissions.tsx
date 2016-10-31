@@ -16,7 +16,6 @@
 */
 
 import * as React from 'react';
-import * as _ from 'lodash';
 import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
@@ -26,6 +25,7 @@ import '../styles/users.scss';
 import { fetchPermissionsWithRoles, PermissionsWithRoles, saveUpdatedPermissions, resetUpdates, deleteRole } from "../actions/users.actions";
 import {Role} from "../../Proxy/Proxy";
 import RolePermissionsConfirm from "./RolePermissionsConfirm";
+import DeleteRoleConfirm from "./DeleteRoleConfirm";
 
 interface Props {
   permissionsWithRoles: Array<PermissionsWithRoles>,
@@ -42,11 +42,15 @@ interface DispatchProps {
 
 export class RolePermissions extends React.Component<Props & DispatchProps, any> {
 
+  deleteRoleConfirm: DeleteRoleConfirm;
+
   constructor(params) {
     super(params);
     this.state = {
       requestedChanges: [],
-      confirmOpen: false
+      confirmOpen: false,
+      deleteConfirmOpen: false,
+      roleToDelete: null
     };
   }
 
@@ -92,7 +96,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     for (var permissionKey in this.permissionInputs) {
       for (var flagKey in this.permissionInputs[permissionKey].flags) {
         let flagset = this.permissionInputs[permissionKey].flags[flagKey];
-        if (flagset.originalFlag.value !== flagset.input.checked) {
+        if (flagset.input && flagset.originalFlag.value !== flagset.input.checked) {
           updates.push({
             newFlag: { value: flagset.input.checked, roleId: parseInt(flagset.input.dataset["roleid"], 10) },
             userIndex: flagKey,
@@ -127,8 +131,16 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     });
   };
 
-  onDeleteRoleClicked = (roleId) => {
-    this.props.deleteRole(roleId);
+  onDeleteRoleClicked = (role: Role) => {
+    this.setState({
+      roleToDelete: role,
+      deleteConfirmOpen: true
+    });
+  };
+  deleteConfirmCloseHandler = () => {
+    this.setState({
+      deleteConfirmOpen: false
+    });
   };
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -158,7 +170,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     deleteRolesCells = this.props.roles.map((role, rolesIndex) => {
       if (rolesIndex !== 0) {
         return <Cell className="center-text" key={rolesIndex}>
-          <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteRoleClicked(role.id)}></i>
+          <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteRoleClicked(role)}></i>
         </Cell>;
       } else {
         return <Cell className="center-text" key={rolesIndex}>
@@ -168,6 +180,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
 
     return (
       <div className="role-permissions intro">
+        <DeleteRoleConfirm ref={(component) => this.deleteRoleConfirm = component} open={this.state.deleteConfirmOpen} closeHandler={this.deleteConfirmCloseHandler} deleteRoleAction={this.props.deleteRole} role={this.state.roleToDelete} />
         {this.props.permissionsWithRoles && this.props.roles ? <Table>
           <Row header={true}>
             <Cell className="right-table-bar">Permission Name</Cell>

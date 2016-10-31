@@ -18,9 +18,8 @@
 import * as _ from 'lodash';
 import {
   RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
-  RESET_UPDATES,
-  RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE, ENTER_NEW_USER,
-  EXIT_NEW_USER, RECEIVE_CREATE_ROLE
+  RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE, ENTER_NEW_USER,
+  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY
 } from '../actions/users.actions';
 
 let initialState = {
@@ -34,6 +33,13 @@ let initialState = {
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case RECEIVE_WORKGROUPS_FOR_IDENTITY :
+      return _.assign({}, state, {
+        userWithWorkgroups : {
+          id: action.userId,
+          workgroups: action.workgroups
+        }
+      });
     case RECEIVE_CREATE_ROLE : {
       let newState: any = _.assign({}, state);
       newState.selectedRoles = state.selectedRoles.slice(0);
@@ -115,7 +121,7 @@ export const usersReducer = (state: any = initialState, action: any) => {
       return _.assign({}, state, {
         users: action.users
       });
-    case RECEIVE_SAVE_PERMISSIONS :
+    case RECEIVE_SAVE_PERMISSIONS : {
       let newState: any = _.assign({}, state);
       if (action.hasOwnProperty("roleId")) {
         newState.updates = newState.updates.slice(0);
@@ -132,6 +138,7 @@ export const usersReducer = (state: any = initialState, action: any) => {
         console.log("ERROR: invalid update state");
       }
       return newState;
+    }
     default:
       return state;
   }

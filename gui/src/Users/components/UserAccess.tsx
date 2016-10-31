@@ -25,35 +25,38 @@ import { connect } from 'react-redux';
 import '../styles/users.scss';
 import {
   fetchUsersWithRolesAndProjects, changeFilterSelections,
-  UserWithRolesAndProjects, deleteUser
+  UserWithRolesAndProjects, deleteUser, undeleteUser, UserWithWorkgroups, fetchWorkgroupsForUserId, updateUserWorkgroups
 } from "../actions/users.actions";
-import {Role, Identity, Project} from "../../Proxy/Proxy";
-import {Users} from "../Users";
-import DeleteUserConfirm from "./DeleteUserConfirm";
+import {Role, Identity, Project, Workgroup} from "../../Proxy/Proxy";
+import {fetchWorkgroups} from "../../Projects/actions/projects.actions";
+import EditUserDialog from "./EditUserDialog";
 
 interface Props {
   projects: Array<Project>,
   roles: Array<Role>,
   users: Array<Identity>,
   usersWithRolesAndProjects: Array<UserWithRolesAndProjects>,
-  selectedRoles: any
+  selectedRoles: any,
+  workgroups: Array<Workgroup>,
+  userWithWorkgroups: UserWithWorkgroups
 }
-
 interface DispatchProps {
   fetchUsersWithRolesAndProjects: Function,
   changeFilterSelections: Function,
-  deleteUser: Function
+  deleteUser: Function,
+  undeleteUser: Function,
+  fetchWorkgroups: Function,
+  fetchWorkgroupsForUserId: Function
+  updateUserWorkgroups: Function
 }
 
 export class UserAccess extends React.Component<Props & DispatchProps, any> {
 
-  deleteUserConfirm: DeleteUserConfirm;
-
-  constructor(props) {
-    super(props);
+  constructor(params) {
+    super(params);
     this.state = {
-      deleteConfirmOpen: false,
-      userToDelete: null
+      editUserOpen: false,
+      userToEdit: null
     };
   }
 
@@ -100,15 +103,18 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
     return false;
   }
 
-  onDeleteUserClicked = (user: Identity) => {
+  onEditUserClicked = (user: Identity) => {
+    this.props.fetchWorkgroups();
+    this.props.fetchWorkgroupsForUserId(user.id);
     this.setState({
-      userToDelete: user,
-      deleteConfirmOpen: true
+      editUserOpen: true,
+      userToEdit: user
     });
   };
-  deleteConfirmCloseHandler = () => {
+
+  editUserCloseHandler = () => {
     this.setState({
-      deleteConfirmOpen: false
+      editUserOpen: false
     });
   };
 
@@ -120,16 +126,20 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
 
       tableRows = this.props.usersWithRolesAndProjects.map((userWithRoleAndProject, index) => {
         if (userWithRoleAndProject.user.id !== 1) {
-          endCell = <Cell><i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteUserClicked(userWithRoleAndProject.user)}></i></Cell>;
+          if (userWithRoleAndProject.user.is_active) {
+            endCell = <Cell className="link"><span onClick={() => this.props.deleteUser(userWithRoleAndProject.user.id)}><i className="fa fa-times" aria-hidden="true" alt="Deactivate user"></i>&nbsp;Deactivate User</span><br/><br/><span onClick={() => this.onEditUserClicked(userWithRoleAndProject.user)}><i className="fa fa-edit" aria-hidden="true" alt="edit"></i>&nbsp;Edit</span></Cell>;
+          } else {
+            endCell = <Cell className="link"><span onClick={() => this.props.undeleteUser(userWithRoleAndProject.user.id)}><i className="fa fa-undo" aria-hidden="true" alt="Reactivate user"></i>&nbsp;Reactivate User</span></Cell>;
+          }
         } else {
           endCell = <Cell></Cell>;
         }
         if (this.shouldRowBeShown(userWithRoleAndProject.roles)) {
-          return <Row key={index}>
+          return <Row key={index} className={userWithRoleAndProject.user.is_active ? "" : "inactive"}>
             <Cell>{userWithRoleAndProject.user.name}</Cell>
             <Cell> {
               userWithRoleAndProject.roles.map((role, index) => {
-                return <span key={index}>
+                return  <span key={index}>
                               {role.name}<br/>
                         </span>;
               })
@@ -142,7 +152,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
 
     return (
       <div className="user-access intro">
-        <DeleteUserConfirm ref={(component) => this.deleteUserConfirm = component} open={this.state.deleteConfirmOpen} closeHandler={this.deleteConfirmCloseHandler} deleteUserAction={this.props.deleteUser} user={this.state.userToDelete} />
+        <EditUserDialog open={this.state.editUserOpen} userToEdit={this.state.userToEdit} closeHandler={this.editUserCloseHandler} fetchWorkgroups={this.props.fetchWorkgroups} userWithWorkgroups={this.props.userWithWorkgroups } workgroups={this.props.workgroups} updateUserWorkgroups={this.props.updateUserWorkgroups} />
         <div className="filter-and-list">
           <div className="filter-column">
             FILTERS
@@ -188,7 +198,9 @@ function mapStateToProps(state) {
     roles: state.users.roles,
     users: state.users.users,
     usersWithRolesAndProjects: state.users.usersWithRolesAndProjects,
-    selectedRoles: state.users.selectedRoles
+    selectedRoles: state.users.selectedRoles,
+    workgroups: state.projects.workgroups,
+    userWithWorkgroups: state.users.userWithWorkgroups
   };
 }
 
@@ -196,7 +208,11 @@ function mapDispatchToProps(dispatch) {
   return {
     fetchUsersWithRolesAndProjects: bindActionCreators(fetchUsersWithRolesAndProjects, dispatch),
     changeFilterSelections: bindActionCreators(changeFilterSelections, dispatch),
-    deleteUser: bindActionCreators(deleteUser, dispatch)
+    deleteUser: bindActionCreators(deleteUser, dispatch),
+    undeleteUser: bindActionCreators(undeleteUser, dispatch),
+    fetchWorkgroups: bindActionCreators(fetchWorkgroups, dispatch),
+    fetchWorkgroupsForUserId: bindActionCreators(fetchWorkgroupsForUserId, dispatch),
+    updateUserWorkgroups: bindActionCreators(updateUserWorkgroups, dispatch)
   };
 }
 

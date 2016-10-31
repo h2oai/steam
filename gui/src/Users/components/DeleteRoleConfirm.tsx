@@ -18,23 +18,23 @@
 import * as React from 'react';
 import '../styles/users.scss';
 import DefaultModal from '../../App/components/DefaultModal';
-import {Identity} from "../../Proxy/Proxy";
+import { Role } from "../../Proxy/Proxy";
 
 interface Props {
-  user: Identity
-  deleteUserAction: Function
+  role: Role
+  deleteRoleAction: Function
   closeHandler: Function
   open: boolean
 }
 
-export default class DeleteUserConfirm extends React.Component<Props, any> {
+export default class DeleteRoleConfirm extends React.Component<Props, any> {
 
   onCancelClicked = () => {
     this.props.closeHandler();
   };
 
   onConfirmClicked = () => {
-    this.props.deleteUserAction(this.props.user.id);
+    this.props.deleteRoleAction(this.props.role.id);
     this.props.closeHandler();
   };
 
@@ -42,9 +42,9 @@ export default class DeleteUserConfirm extends React.Component<Props, any> {
     return (
       <DefaultModal open={this.props.open}>
         <div>
-          <h1>CONFIRM DELETE USER</h1>
+          <h1>CONFIRM DELETE ROLE</h1>
           <br />&nbsp;
-          <p>This will removed user: {this.props.user ? this.props.user.name : null}</p>
+          <p>This will removed role: {this.props.role ? this.props.role.name : null}</p>
           <br />&nbsp;
           <div className="button-primary" onClick={this.onConfirmClicked}>Confirm</div>
           <div className="button-secondary" onClick={this.onCancelClicked}>Cancel</div>

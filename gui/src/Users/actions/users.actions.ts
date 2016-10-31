@@ -22,6 +22,7 @@ import { NotificationType } from '../../App/components/Notification';
 import { Permission } from "../../Proxy/Proxy";
 import { Role } from "../../Proxy/Proxy";
 import {Identity} from "../../Proxy/Proxy";
+import {Workgroup} from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -47,9 +48,45 @@ export const ENTER_NEW_ROLE = 'ENTER_NEW_ROLE';
 export const EXIT_NEW_ROLE = 'EXIT_NEW_ROLE';
 export const REQUEST_DELETE_USER = 'REQUEST_DELETE_USER';
 export const RECEIVE_DELETE_USER = 'RECEIVE_DELETE_USER';
+export const REQUEST_REACTIVATE_USER = 'REQUEST_REACTIVATE_USER';
+export const RECEIVE_REACTIVATE_USER = 'RECEIVE_REACTIVATE_USER';
 export const REQUEST_DELETE_ROLE = 'REQUEST_DELETE_ROLE';
 export const RECEIVE_DELETE_ROLE = 'RECEIVE_DELETE_ROLE';
+export const REQUEST_WORKGROUPS_FOR_IDENTITY = 'REQUEST_WORKGROUPS_FOR_IDENTITY';
+export const RECEIVE_WORKGROUPS_FOR_IDENTITY = 'RECEIVE_WORKGROUPS_FOR_IDENTITY';
+export const REQUEST_UPDATE_USER_WORKGROUPS = 'REQUEST_UPDATE_USER_WORKGROUPS';
+export const RECEIVE_UPDATE_USER_WORKGROUPS = 'RECEIVE_UPDATE_USER_WORKGROUPS';
 
+export function requestUpdateUserWorkgroups() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_UPDATE_USER_WORKGROUPS
+    });
+  };
+}
+export function receieveUpdateUserWorkgroups() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_UPDATE_USER_WORKGROUPS
+    });
+  };
+}
+export function requestWorkgroupsForIdentity() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_WORKGROUPS_FOR_IDENTITY
+    });
+  };
+}
+export function receiveWorkgroupsForIdentity(userId: number, workgroups: Array<Workgroup>) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_WORKGROUPS_FOR_IDENTITY,
+      userId,
+      workgroups
+    });
+  };
+}
 export function requestDeleteUser() {
   return (dispatch) => {
     dispatch({
@@ -61,6 +98,20 @@ export function receiveDeleteUser() {
   return (dispatch) => {
     dispatch({
       type: RECEIVE_DELETE_USER
+    });
+  };
+}
+export function requestReactivateUser() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_REACTIVATE_USER
+    });
+  };
+}
+export function receiveReactivateUser() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_REACTIVATE_USER
     });
   };
 }
@@ -404,6 +455,7 @@ export function createUser(newUserDetails: INewUserDetails) {
       Promise.all(linkPromises).then((value) => {
         dispatch(receiveCreateUser());
         dispatch(exitNewUser());
+        dispatch(fetchUsersWithRolesAndProjects());
       });
     });
   };
@@ -549,30 +601,136 @@ export function saveUpdatedPermissions(updates) {
 export function deleteUser(userId: number) {
   return (dispatch) => {
     dispatch(requestDeleteUser());
-    console.log(`submitting request do deactivate user: ${userId}`);
     Remote.deactivateIdentity(userId, (error: Error) => {
       if (error) {
         console.log(error);
-        openNotification(NotificationType.Error, "Delete Error", error.toString(), null);
+        openNotification(NotificationType.Error, "Deactivate Error", error.toString(), null);
         return;
       }
-      fetchUsersWithRolesAndProjects();
       dispatch(receiveDeleteUser());
+      dispatch(fetchUsersWithRolesAndProjects());
     });
+  };
+}
+export function undeleteUser(userId: number) {
+  return (dispatch) => {
+    dispatch(requestReactivateUser());
+    /*Remote.activateIdentity(userId, (error: Error) => {
+      if (error) {
+        console.log(error);
+        openNotification(NotificationType.Error, "Activate Error", error.toString(), null);
+        return;
+      }
+      dispatch(receiveReactivateUser());
+      dispatch(fetchUsersWithRolesAndProjects());
+    });*/
   };
 }
 export function deleteRole(roleId: number) {
   return (dispatch) => {
     dispatch(requestDeleteRole());
-    console.log(`Submitting request to delete ${roleId}`);
     Remote.deleteRole(roleId, (error: Error) => {
       if (error) {
         console.log(error);
         openNotification(NotificationType.Error, "Delete Error", error.toString(), null);
         return;
       }
-      fetchUsersWithRolesAndProjects();
       dispatch(receiveDeleteRole());
+      getRoles(dispatch);
+      dispatch(fetchPermissionsWithRoles());
+      dispatch(fetchUsersWithRolesAndProjects());
+    });
+  };
+}
+
+export interface UserWithWorkgroups {
+  id: number
+  workgroups: Array<Workgroup>
+}
+export function fetchWorkgroupsForUserId(userId: number) {
+  return (dispatch) => {
+    dispatch(requestWorkgroupsForIdentity());
+    Remote.getWorkgroupsForIdentity(userId, (error, workgroups) => {
+      if (error) {
+        console.log(error);
+        openNotification(NotificationType.Error, "Delete Error", error.toString(), null);
+        return;
+      }
+      dispatch(receiveWorkgroupsForIdentity(userId, workgroups));
+    });
+  };
+}
+
+/***
+ * @param userId
+ * @param requestedEnabledWorkgroupIds Workgroup ids to be enabled for given user ID. Workgroup ids not included will be disabled for given userID
+ * @returns {(dispatch:any, getState:any)=>undefined}
+ */
+export function updateUserWorkgroups(userId: number, requestedEnabledWorkgroupIds: Array<number>) {
+  return (dispatch, getState) => {
+    dispatch(requestUpdateUserWorkgroups());
+
+    let state = getState();
+    let updatePromises: Array<Promise<any>> = [];
+
+    if (state.users.userWithWorkgroups.id !== userId) {
+      console.log("Invalid state: user change request does not match last fetch request");
+      return;
+    }
+
+    let isRequestDifferentFromCurrentState: boolean;
+    let isCurrentlyEnabled: boolean;
+
+    for (let workgroup of state.projects.workgroups) {
+      isCurrentlyEnabled = false;
+      for (let currentlyAccessibleWorkgroup of state.users.userWithWorkgroups.workgroups) {
+        if (currentlyAccessibleWorkgroup.id === workgroup.id) {
+          isCurrentlyEnabled = true;
+        }
+      }
+
+      if (isCurrentlyEnabled) {
+        isRequestDifferentFromCurrentState = true;
+        for (let requestedEnabledWorkgroupId of requestedEnabledWorkgroupIds) {
+          if (requestedEnabledWorkgroupId === workgroup.id) {
+            isRequestDifferentFromCurrentState = false;
+          }
+        }
+      } else {
+        isRequestDifferentFromCurrentState = false;
+        for (let requestedEnabledWorkgroupId of requestedEnabledWorkgroupIds) {
+          if (requestedEnabledWorkgroupId === workgroup.id) {
+            isRequestDifferentFromCurrentState = true;
+          }
+        }
+      }
+      if (isRequestDifferentFromCurrentState) {
+
+        if (isCurrentlyEnabled) {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.unlinkIdentityFromWorkgroup(userId, workgroup.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        } else {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.linkIdentityWithWorkgroup(userId, workgroup.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        }
+      }
+    }
+    Promise.all(updatePromises).then((response) => {
+      dispatch(receieveUpdateUserWorkgroups());
     });
   };
 }
