@@ -2081,6 +2081,31 @@ func (ds *Datastore) UpdateIdentity(pz az.Principal, identityId int64, password 
 	})
 }
 
+func (ds *Datastore) ActivateIdentity(pz az.Principal, identityId int64) error {
+	if err := pz.CheckOwns(ds.EntityTypes.Identity, identityId); err != nil {
+		return err
+	}
+
+	identity, err := ds.ReadIdentity(pz, identityId)
+	if err != nil {
+		return err
+	}
+	return ds.exec(func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			UPDATE
+				identity
+			SET
+				is_active = 1
+			WHERE
+				id = $1
+			`, identityId); err != nil {
+			return err
+		}
+
+		return ds.audit(pz, tx, EnableOp, ds.EntityTypes.Identity, identityId, metadata{"name": identity.Name})
+	})
+}
+
 func (ds *Datastore) DeactivateIdentity(pz az.Principal, identityId int64) error {
 	if err := pz.CheckOwns(ds.EntityTypes.Identity, identityId); err != nil {
 		return err
