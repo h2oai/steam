@@ -2104,6 +2104,14 @@ func (s *Service) UpdateIdentity(pz az.Principal, identityId int64, password str
 	return s.ds.UpdateIdentity(pz, identityId, hash)
 }
 
+func (s *Service) ActivateIdentity(pz az.Principal, identityId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
+		return err
+	}
+
+	return s.ds.ActivateIdentity(pz, identityId)
+}
+
 func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
 		return err

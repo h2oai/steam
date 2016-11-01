@@ -1814,6 +1814,21 @@ class RPCClient:
 		response = self.connection.call("UpdateIdentity", request)
 		return 
 	
+	def activate_identity(self, identity_id):
+		"""
+		Activate an identity
+
+		Parameters:
+		identity_id: Integer ID of an identity in Steam. (int64)
+
+		Returns:None
+		"""
+		request = {
+			'identity_id': identity_id
+		}
+		response = self.connection.call("ActivateIdentity", request)
+		return 
+	
 	def deactivate_identity(self, identity_id):
 		"""
 		Deactivate an identity
