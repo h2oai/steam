@@ -612,7 +612,7 @@ export function deleteUser(userId: number) {
 export function undeleteUser(userId: number) {
   return (dispatch) => {
     dispatch(requestReactivateUser());
-    /*Remote.activateIdentity(userId, (error: Error) => {
+    Remote.activateIdentity(userId, (error: Error) => {
       if (error) {
         console.log(error);
         openNotification(NotificationType.Error, "Activate Error", error.toString(), null);
@@ -620,7 +620,7 @@ export function undeleteUser(userId: number) {
       }
       dispatch(receiveReactivateUser());
       dispatch(fetchUsersWithRolesAndProjects());
-    });*/
+    });
   };
 }
 export function deleteRole(roleId: number) {
