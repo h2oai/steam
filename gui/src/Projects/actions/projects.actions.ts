@@ -307,12 +307,14 @@ export function createProjectAsync(dispatch, name: string, modelCategory: string
         reject(error);
         return;
       }
-      dispatch(createProjectCompleted(res));
-      resolve(res);
+      createWorkgroupAsync(dispatch, name).then(() => {
+        dispatch(createProjectCompleted(res));
+        resolve(res);
+      });
     });
   });
 }
-export function createWorkgroupAsync(dispatch, name: String) {
+export function createWorkgroupAsync(dispatch, name: string) {
   return new Promise((resolve, reject) => {
     dispatch(requestCreateWorkgroup());
     Remote.createWorkgroup(name, name, (error: Error, workgroupId: number) => {
@@ -329,7 +331,6 @@ export function createWorkgroupAsync(dispatch, name: String) {
 export function createProject(name: string, modelCategory: string) {
   return (dispatch) => {
     createProjectAsync(dispatch, name, modelCategory);
-    createWorkgroupAsync(dispatch, name);
   };
 }
 
@@ -432,8 +433,8 @@ export function importModelsFromCluster(clusterId: number, projectId: number, mo
 export function createProjectAndImportModelsFromCluster(projectName: string, clusterId: number, modelCategory: string, models: string[]) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
-      dispatch(createProject(projectName, modelCategory)).then((projectId) => {
-        dispatch(importModelsFromCluster(clusterId, projectId, models)).then(() => {
+      createProjectAsync(dispatch, projectName, modelCategory).then((projectId) => {
+        dispatch(importModelsFromCluster(clusterId, projectId as number, models)).then(() => {
           resolve(projectId);
         });
       });
@@ -502,7 +503,7 @@ function deleteWorkgroupAsync(dispatch, workgroupId) {
       deleteWorkgroupResolve(workgroupId);
       return;
     });
-  })
+  });
 }
 function fetchWorkgroupsAsync(dispatch) {
   return new Promise((fetchWorkgroupResolve, fetchWorkgroupReject) => {
@@ -519,7 +520,7 @@ function fetchWorkgroupsAsync(dispatch) {
 }
 export function fetchWorkgroups() {
   return (dispatch) => {
-    new Promise(fetchWorkgroupsAsync(dispatch));
+    fetchWorkgroupsAsync(dispatch);
   };
 }
 
@@ -529,10 +530,10 @@ export function deleteProject(projectId: number) {
       dispatch(requestDeleteProject(projectId));
 
       let deleteWorkgroupPromises = [];
-      let state = getState.getState();
+      let state = getState();
       for (let project of state.projects.availableProjects) {
-        if (project.id == projectId) {
-          for (let workgroup of workgroups) {
+        if (project.id === projectId) {
+          for (let workgroup of workgroups as Array<Workgroup>) {
             if (workgroup.name === project.name) {
               deleteWorkgroupPromises.push(deleteWorkgroupAsync(dispatch, workgroup.id));
             }
