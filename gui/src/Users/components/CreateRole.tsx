@@ -108,7 +108,6 @@ export class CreateRole extends React.Component<Props & DispatchProps, any> {
 
   onCreateRoleClicked = () => {
     let newRolePermissions: Array<NewRolePermission> = [];
-    let newRolePermission: NewRolePermission;
 
     for (let input of this.permissionInputs) {
       newRolePermissions.push(new NewRolePermission(input.permissionId, input.input.checked));
