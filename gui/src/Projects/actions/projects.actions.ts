@@ -45,7 +45,33 @@ export const REQUEST_DELETE_PROJECT = 'REQUEST_DELETE_PROJECT';
 export const RECEIVE_DELETE_PROJECT = 'RECEIVE_DELETE_PROJECT';
 export const REGISTER_CLUSTER_ERROR = 'REGISTER_CLUSTER_ERROR';
 export const RECEIVE_WORKGROUPS = 'RECEIVE_WORKGROUPS';
+export const REQUEST_DELETE_WORKGROUP = 'REQUEST_DELETE_WORKGROUP';
+export const RECEIVE_DELETE_WORKGROUP = 'RECEIVE_DELETE_WORKGROUP';
+export const REQUEST_CREATE_WORKGROUP = 'REQUEST_CREATE_WORKGROUP';
+export const RECEIVE_CREATE_WORKGROUP = 'RECEIVE_CREATE_WORKGROUP';
 
+export function requestCreateWorkgroup() {
+  return {
+    type: REQUEST_CREATE_WORKGROUP
+  };
+};
+export function receiveCreateWorkgroup() {
+  return {
+    type: RECEIVE_CREATE_WORKGROUP
+  };
+};
+export function requestDeleteWorkgroup(workgroupId) {
+  return {
+    type: REQUEST_DELETE_WORKGROUP,
+    workgroupId
+  };
+};
+export function receiveDeleteWorkgroup(workgroupId) {
+  return {
+    type: RECEIVE_DELETE_WORKGROUP,
+    workgroupId
+  };
+};
 export function requestDeleteProject(projectId: number) {
   return {
     type: REQUEST_DELETE_PROJECT,
@@ -273,19 +299,37 @@ export function fetchDatasetsFromCluster(clusterId: number) {
   };
 }
 
+export function createProjectAsync(dispatch, name: string, modelCategory: string) {
+  return new Promise((resolve, reject) => {
+    Remote.createProject(name, '', modelCategory, (error, res) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        reject(error);
+        return;
+      }
+      dispatch(createProjectCompleted(res));
+      resolve(res);
+    });
+  });
+}
+export function createWorkgroupAsync(dispatch, name: String) {
+  return new Promise((resolve, reject) => {
+    dispatch(requestCreateWorkgroup());
+    Remote.createWorkgroup(name, name, (error: Error, workgroupId: number) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Create Error', error.toString(), null));
+        reject(error);
+        return;
+      }
+      dispatch(receiveCreateWorkgroup());
+      resolve();
+    });
+  });
+}
 export function createProject(name: string, modelCategory: string) {
   return (dispatch) => {
-    return new Promise((resolve, reject) => {
-      Remote.createProject(name, '', modelCategory, (error, res) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
-          reject(error);
-          return;
-        }
-        dispatch(createProjectCompleted(res));
-        resolve(res);
-      });
-    });
+    createProjectAsync(dispatch, name, modelCategory);
+    createWorkgroupAsync(dispatch, name);
   };
 }
 
@@ -445,29 +489,68 @@ export function fetchProjects() {
   };
 }
 
-export function fetchWorkgroups() {
-  return (dispatch) => {
+function deleteWorkgroupAsync(dispatch, workgroupId) {
+  return new Promise((deleteWorkgroupResolve, deleteWorkgroupReject) => {
+    dispatch(requestDeleteWorkgroup(workgroupId));
+    Remote.deleteWorkgroup(workgroupId, (error: Error) => {
+      if (error) {
+        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+        deleteWorkgroupReject(error);
+        return;
+      }
+      dispatch(receiveDeleteWorkgroup(workgroupId));
+      deleteWorkgroupResolve(workgroupId);
+      return;
+    });
+  })
+}
+function fetchWorkgroupsAsync(dispatch) {
+  return new Promise((fetchWorkgroupResolve, fetchWorkgroupReject) => {
     Remote.getWorkgroups(0, 1000, (error, res) => {
       if (error) {
-        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+        fetchWorkgroupReject();
         return;
       }
       dispatch(receiveWorkgroups(<Workgroup[]> res));
+      fetchWorkgroupResolve(res);
     });
+  });
+}
+export function fetchWorkgroups() {
+  return (dispatch) => {
+    new Promise(fetchWorkgroupsAsync(dispatch));
   };
 }
 
 export function deleteProject(projectId: number) {
-  return (dispatch) => {
-    dispatch(requestDeleteProject(projectId));
-    Remote.deleteProject(projectId, (error) => {
-      if (error) {
-        dispatch(openNotification(NotificationType.Error, 'Delete error', error.toString(), null));
-        dispatch(receiveDeleteProject(projectId, false));
-        return;
+  return (dispatch, getState) => {
+    fetchWorkgroupsAsync(dispatch).then((workgroups) => {
+      dispatch(requestDeleteProject(projectId));
+
+      let deleteWorkgroupPromises = [];
+      let state = getState.getState();
+      for (let project of state.projects.availableProjects) {
+        if (project.id == projectId) {
+          for (let workgroup of workgroups) {
+            if (workgroup.name === project.name) {
+              deleteWorkgroupPromises.push(deleteWorkgroupAsync(dispatch, workgroup.id));
+            }
+          }
+        }
       }
-      dispatch(receiveDeleteProject(projectId, true));
-      dispatch(fetchProjects());
+
+      Promise.all(deleteWorkgroupPromises).then((dwpResult) => {
+        Remote.deleteProject(projectId, (error) => {
+          if (error) {
+            dispatch(openNotification(NotificationType.Error, 'Delete error', error.toString(), null));
+            dispatch(receiveDeleteProject(projectId, false));
+            return;
+          }
+          dispatch(receiveDeleteProject(projectId, true));
+          dispatch(fetchProjects());
+        });
+      });
     });
   };
 }
