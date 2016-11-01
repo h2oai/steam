@@ -19,10 +19,7 @@ import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-import { Permission } from "../../Proxy/Proxy";
-import { Role } from "../../Proxy/Proxy";
-import {Identity} from "../../Proxy/Proxy";
-import {Workgroup} from "../../Proxy/Proxy";
+import { Permission, Role, Identity, Workgroup } from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -338,7 +335,7 @@ function getPermissionDescriptions(): Promise<Array<Permission>> {
   return new Promise((resolve, reject) => {
     Remote.getAllPermissions((error, res) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', error, null);
+        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
         reject(error);
       }
       resolve(res);
@@ -350,7 +347,7 @@ function sendCreateRoleRequest(name, description) {
   return new Promise((resolve, reject) => {
     Remote.createRole(name, description, (error, roleId) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', error, null);
+        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
         reject(error);
       }
       resolve(roleId);
@@ -371,7 +368,7 @@ export interface INewRolePermission {
 export class NewRolePermission implements  INewRolePermission{
   constructor(public permissionId: number, public isEnabled: boolean) { }
 }
-export function createRole(newRoleName: String, newRoleDescription: String, permissions: Array<INewRolePermission>) {
+export function createRole(newRoleName: string, newRoleDescription: string, permissions: Array<INewRolePermission>) {
   return (dispatch) => {
     dispatch(requestCreateRole());
     sendCreateRoleRequest(newRoleName, newRoleDescription).then((roleId: number) => {

@@ -25,9 +25,7 @@ import { Project, UserRole } from '../../Proxy/Proxy';
 import { fetchEntityIds } from '../../App/actions/global.actions';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-import {ClusterStatus, Cluster} from "../../Proxy/Proxy";
-import {Model} from "../../Proxy/Proxy";
-import {Workgroup} from "../../Proxy/Proxy";
+import { ClusterStatus, Cluster, Model, Workgroup } from "../../Proxy/Proxy";
 export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
@@ -501,7 +499,6 @@ function deleteWorkgroupAsync(dispatch, workgroupId) {
       }
       dispatch(receiveDeleteWorkgroup(workgroupId));
       deleteWorkgroupResolve(workgroupId);
-      return;
     });
   });
 }
