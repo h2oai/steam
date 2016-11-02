@@ -1,5 +1,7 @@
 FROM centos:6.8
 
+MAINTAINER H2O.ai version: 1.1.3
+
 WORKDIR /steam
 
 # Install NodeJS
@@ -37,6 +39,10 @@ RUN make db
 
 # Run Prediction Service Builder
 RUN nohup java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war &
+
+EXPOSE 8080
+EXPOSE 9000
+EXPOSE 9001
 
 # Run Steam
 CMD ./steam serve master --superuser-name root --superuser-password superuser
