@@ -5,7 +5,7 @@ MAINTAINER H2O.ai version: 1.1.3
 WORKDIR /steam
 
 RUN apt-get update
-RUN apt-get install -y curl
+RUN apt-get install -y curl sqlite3 libsqlite3-dev
 
 # Install NodeJS
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
