@@ -18,7 +18,6 @@ package ldap
 
 import (
 	"encoding/base64"
-	"log"
 	"net/http"
 	"strings"
 
@@ -88,18 +87,11 @@ func (a *BasicLdapAuth) CheckAuth(r *http.Request) string {
 		return ""
 	}
 
-	if a.Conn.Users.Exists(s[1]) && !a.Conn.ForceBind {
+	if a.Conn.Users.Exists(s[1]) {
 		return user
 	}
 
-	log.Println("LDAP", user, "checking bind")
-	if err := a.Conn.CheckBind(user, password); err != nil {
-		log.Println(err)
-		return ""
-	}
-	a.Conn.Users.NewUser(s[1], user)
-
-	return user
+	return a.Conn.Users.NewUser(s[1], user, password, a.Conn)
 }
 
 func NewBasicLdapAuth(realm string, conn *Ldap) *BasicLdapAuth {

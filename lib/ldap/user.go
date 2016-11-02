@@ -17,6 +17,7 @@
 package ldap
 
 import (
+	"log"
 	"sync"
 	"time"
 )
@@ -30,29 +31,35 @@ type LdapUser struct {
 	MaxTime time.Duration
 }
 
-// type Timers struct {
-// 	Idl *time.Timer
-// 	Max *time.Timer
-// }
-
 // NewUser creates a new LdapUser with it's own "self-destruct" timer
-func (u *LdapUser) NewUser(auth, user string) {
+func (u *LdapUser) NewUser(auth, user, password string, conn *Ldap) string {
 	u.mu.Lock()
-	t := time.AfterFunc(u.MaxTime, func() { u.Delete(auth) })
+	defer u.mu.Unlock()
+
+	// Verify that user does not exist before continuing
+	if _, ok := u.users[auth]; ok {
+		return user
+	}
+
+	log.Println("LDAP", user, "checking bind")
+	if err := conn.CheckBind(user, password); err != nil {
+		log.Println(err)
+		return ""
+	}
+	t := time.AfterFunc(u.MaxTime, func() {
+		u.mu.Lock()
+		delete(u.users, auth)
+		u.mu.Unlock()
+	})
 	u.users[auth] = t
-	u.mu.Unlock()
+
+	return user
 }
 
 // Exists verifies if a user is in the Users map
 func (u *LdapUser) Exists(auth string) bool {
 	u.mu.RLock()
 	_, ok := u.users[auth]
-	// if ok {
-	// 	if !user.Idl.Stop() {
-	// 		<-user.Idl.C
-	// 	}
-	// 	user.Idl.Reset(u.IdlTime)
-	// }
 	u.mu.RUnlock()
 
 	return ok
@@ -61,8 +68,7 @@ func (u *LdapUser) Exists(auth string) bool {
 // Delete removes a user from the LdapUsers map and stop/flushes the timer
 func (u *LdapUser) Delete(auth string) {
 	u.mu.Lock()
-	t, ok := u.users[auth]
-	if ok {
+	if t, ok := u.users[auth]; ok {
 		if !t.Stop() {
 			<-t.C
 		}
