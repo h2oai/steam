@@ -33,13 +33,14 @@ let initialState = {
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
-    case RECEIVE_WORKGROUPS_FOR_IDENTITY :
+    case RECEIVE_WORKGROUPS_FOR_IDENTITY : {
       return _.assign({}, state, {
-        userWithWorkgroups : {
+        userWithWorkgroups: {
           id: action.userId,
           workgroups: action.workgroups
         }
       });
+    }
     case RECEIVE_CREATE_ROLE : {
       let newState: any = _.assign({}, state);
       newState.selectedRoles = state.selectedRoles.slice(0);
@@ -49,27 +50,32 @@ export const usersReducer = (state: any = initialState, action: any) => {
       });
       return newState;
     }
-    case ENTER_NEW_USER :
+    case ENTER_NEW_USER : {
       return _.assign({}, state, {
         createNewUserIsEntered: true
       });
-    case EXIT_NEW_USER :
+    }
+    case EXIT_NEW_USER : {
       return _.assign({}, state, {
         createNewUserIsEntered: false
       });
-    case ENTER_NEW_ROLE :
+    }
+    case ENTER_NEW_ROLE : {
       return _.assign({}, state, {
         createNewRoleIsEntered: true
       });
-    case EXIT_NEW_ROLE :
+    }
+    case EXIT_NEW_ROLE : {
       return _.assign({}, state, {
         createNewRoleIsEntered: false
       });
-    case RESET_UPDATES :
+    }
+    case RESET_UPDATES : {
       return _.assign({}, state, {
         updates: []
       });
-    case FILTER_SELECTIONS_CHANGED :
+    }
+    case FILTER_SELECTIONS_CHANGED : {
       let index = _.findIndex(state.selectedRoles, (o) => {
         if ((o as any).id === action.id) {
           return true;
@@ -83,23 +89,26 @@ export const usersReducer = (state: any = initialState, action: any) => {
       newSelectedRoles[index].selected = action.selected;
 
       return _.assign({}, state, {
-        selectedRoles : newSelectedRoles
+        selectedRoles: newSelectedRoles
       });
-    case RECEIVE_USERS_WITH_ROLES_AND_PROJECTS:
+    }
+    case RECEIVE_USERS_WITH_ROLES_AND_PROJECTS : {
       return _.assign({}, state, {
         usersWithRolesAndProjects: action.usersWithRolesAndProjects
       });
-    case RECEIVE_PERMISSIONS_WITH_ROLES:
+    }
+    case RECEIVE_PERMISSIONS_WITH_ROLES : {
       return _.assign({}, state, {
         permissionsWithRoles: action.permissions
       });
-    case RECEIVE_ROLE_NAMES:
+    }
+    case RECEIVE_ROLE_NAMES : {
       let roles = action.roleNames;
       roles.sort((a, b) => {
         if (a.id < b.id) return -1; else return 1;
       });
 
-      let toAppend: any = { roles };
+      let toAppend: any = {roles};
       if (!(state as any).selectedRoles) {
         let selectedRoles = new Array(roles.length);
 
@@ -113,14 +122,17 @@ export const usersReducer = (state: any = initialState, action: any) => {
         toAppend.selectedRoles = selectedRoles;
       }
       return _.assign({}, state, toAppend);
-    case RECEIVE_PROJECTS :
+    }
+    case RECEIVE_PROJECTS : {
       return _.assign({}, state, {
         projects: action.projects
       });
-    case RECEIVE_USERS :
+    }
+    case RECEIVE_USERS : {
       return _.assign({}, state, {
         users: action.users
       });
+    }
     case RECEIVE_SAVE_PERMISSIONS : {
       let newState: any = _.assign({}, state);
       if (action.hasOwnProperty("roleId")) {
@@ -139,7 +151,8 @@ export const usersReducer = (state: any = initialState, action: any) => {
       }
       return newState;
     }
-    default:
+    default: {
       return state;
+    }
   }
 };

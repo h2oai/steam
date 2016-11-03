@@ -285,7 +285,7 @@ function getProjects(dispatch): Promise<Array<any>> {
       dispatch(requestProjects());
       Remote.getProjects(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null);
+          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null));
           reject();
         }
         dispatch(receiveProjects(res));
@@ -300,7 +300,7 @@ function getUsers(dispatch): Promise<Array<Role>> {
       dispatch(requestUsers());
       Remote.getIdentities(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null);
+          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null));
           reject();
         }
         dispatch(receiveUsers(res));
@@ -318,7 +318,7 @@ function getRoles(dispatch): Promise<Array<Role>> {
       dispatch(requestRoleNames());
       Remote.getRoles(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null);
+          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null));
           reject();
         }
         dispatch(receiveRoleNames(res));
@@ -331,11 +331,11 @@ function getRoles(dispatch): Promise<Array<Role>> {
 /***
  * @returns {Promise<T>|Promise}  { code:String, description:String, id:number }
  */
-function getPermissionDescriptions(): Promise<Array<Permission>> {
+function getPermissionDescriptionsAsync(dispatch): Promise<Array<Permission>> {
   return new Promise((resolve, reject) => {
     Remote.getAllPermissions((error, res) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         reject(error);
       }
       resolve(res);
@@ -343,11 +343,11 @@ function getPermissionDescriptions(): Promise<Array<Permission>> {
   });
 }
 
-function sendCreateRoleRequest(name, description) {
+function sendCreateRoleRequestAsync(dispatch, name, description) {
   return new Promise((resolve, reject) => {
     Remote.createRole(name, description, (error, roleId) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         reject(error);
       }
       resolve(roleId);
@@ -371,7 +371,7 @@ export class NewRolePermission implements  INewRolePermission{
 export function createRole(newRoleName: string, newRoleDescription: string, permissions: Array<INewRolePermission>) {
   return (dispatch) => {
     dispatch(requestCreateRole());
-    sendCreateRoleRequest(newRoleName, newRoleDescription).then((roleId: number) => {
+    sendCreateRoleRequestAsync(dispatch, newRoleName, newRoleDescription).then((roleId: number) => {
 
       let linkPromises: Array<Promise<any>> = [];
 
@@ -385,8 +385,7 @@ export function createRole(newRoleName: string, newRoleDescription: string, perm
       linkPromises.push(new Promise((resolve, reject) => {
         Remote.linkRoleWithPermissions(roleId, permissionIdsToEnable, (error) => {
           if (error) {
-            console.log(error);
-            openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+            dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
             reject(error);
           } else {
             resolve(permissionIdsToEnable);
@@ -418,16 +417,14 @@ export function createUser(newUserDetails: INewUserDetails) {
 
     Remote.createIdentity(newUserDetails.name, newUserDetails.password, (error, identityId) => {
       if (error) {
-        console.log(error.toString());
-        openNotification(NotificationType.Error, 'Permission Error', error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, 'Permission Error', error.toString(), null));
         return;
       }
       for (let workgroupId of newUserDetails.workgroupIds) {
         linkPromises.push(new Promise((resolve, reject) => {
           Remote.linkIdentityWithWorkgroup(identityId, workgroupId, (error: Error) => {
             if (error) {
-              console.log(error);
-              openNotification(NotificationType.Error, 'Permission Error', error.toString(), null);
+              dispatch(openNotification(NotificationType.Error, 'Permission Error', error.toString(), null));
               reject(error);
             } else {
               resolve();
@@ -439,8 +436,7 @@ export function createUser(newUserDetails: INewUserDetails) {
         linkPromises.push(new Promise((resolve, reject) => {
           Remote.linkIdentityWithRole(identityId, roleId, (error: Error) => {
             if (error) {
-              console.log(error);
-              openNotification(NotificationType.Error, 'Permission Error', error.toString(), null);
+              dispatch(openNotification(NotificationType.Error, 'Permission Error', error.toString(), null));
               reject(error);
             } else {
               resolve();
@@ -505,7 +501,7 @@ export function fetchPermissionsWithRoles() {
   return (dispatch) => {
     dispatch(requestPermissionsByRole());
 
-    const descriptionsPromise = getPermissionDescriptions();
+    const descriptionsPromise = getPermissionDescriptionsAsync(dispatch);
 
     getRoles(dispatch).then((roles) => {
       let permissionRequests: Array<Promise<any>> = [];
@@ -513,7 +509,7 @@ export function fetchPermissionsWithRoles() {
         permissionRequests.push(new Promise(
           (resolve, reject) => Remote.getPermissionsForRole(role.id, (error, res) => {
             if (error) {
-              openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
+              dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null));
               reject();
             }
             resolve({
@@ -600,8 +596,7 @@ export function deleteUser(userId: number) {
     dispatch(requestDeleteUser());
     Remote.deactivateIdentity(userId, (error: Error) => {
       if (error) {
-        console.log(error);
-        openNotification(NotificationType.Error, "Deactivate Error", error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, "Deactivate Error", error.toString(), null));
         return;
       }
       dispatch(receiveDeleteUser());
@@ -614,8 +609,7 @@ export function undeleteUser(userId: number) {
     dispatch(requestReactivateUser());
     Remote.activateIdentity(userId, (error: Error) => {
       if (error) {
-        console.log(error);
-        openNotification(NotificationType.Error, "Activate Error", error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, "Activate Error", error.toString(), null));
         return;
       }
       dispatch(receiveReactivateUser());
@@ -628,8 +622,7 @@ export function deleteRole(roleId: number) {
     dispatch(requestDeleteRole());
     Remote.deleteRole(roleId, (error: Error) => {
       if (error) {
-        console.log(error);
-        openNotification(NotificationType.Error, "Delete Error", error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, "Delete Error", error.toString(), null));
         return;
       }
       dispatch(receiveDeleteRole());
@@ -649,8 +642,7 @@ export function fetchWorkgroupsForUserId(userId: number) {
     dispatch(requestWorkgroupsForIdentity());
     Remote.getWorkgroupsForIdentity(userId, (error, workgroups) => {
       if (error) {
-        console.log(error);
-        openNotification(NotificationType.Error, "Delete Error", error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, "Delete Error", error.toString(), null));
         return;
       }
       dispatch(receiveWorkgroupsForIdentity(userId, workgroups));
@@ -671,7 +663,7 @@ export function updateUserWorkgroups(userId: number, requestedEnabledWorkgroupId
     let updatePromises: Array<Promise<any>> = [];
 
     if (state.users.userWithWorkgroups.id !== userId) {
-      console.log("Invalid state: user change request does not match last fetch request");
+      console.log("Invalid state: user change request does not match last fetch request"); //this line should never be reached
       return;
     }
 

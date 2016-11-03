@@ -118,38 +118,45 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
     });
   };
 
-  render(): React.ReactElement<HTMLDivElement> {
-    let tableRows;
+  renderTableRows = () => {
+    let isSuperuser = (userWithRoleAndProject): boolean => {
+      if (userWithRoleAndProject.user.id !== 1) {
+        return true;
+      }
+      return false;
+    };
 
-    if (this.props.usersWithRolesAndProjects) {
-      let endCell;
 
-      tableRows = this.props.usersWithRolesAndProjects.map((userWithRoleAndProject, index) => {
-        if (userWithRoleAndProject.user.id !== 1) {
-          if (userWithRoleAndProject.user.is_active) {
-            endCell = <Cell className="link"><span onClick={() => this.props.deleteUser(userWithRoleAndProject.user.id)}><i className="fa fa-times" aria-hidden="true" alt="Deactivate user"></i>&nbsp;Deactivate User</span><br/><br/><span onClick={() => this.onEditUserClicked(userWithRoleAndProject.user)}><i className="fa fa-edit" aria-hidden="true" alt="edit"></i>&nbsp;Edit</span></Cell>;
-          } else {
-            endCell = <Cell className="link"><span onClick={() => this.props.undeleteUser(userWithRoleAndProject.user.id)}><i className="fa fa-undo" aria-hidden="true" alt="Reactivate user"></i>&nbsp;Reactivate User</span></Cell>;
-          }
+    let renderLastCell = (userWithRoleAndProject) => {
+      if (isSuperuser(userWithRoleAndProject)) {
+        if (userWithRoleAndProject.user.is_active) {
+          return(<Cell className="link"><span onClick={() => this.props.deleteUser(userWithRoleAndProject.user.id)}><i className="fa fa-times" aria-hidden="true" alt="Deactivate user"></i>&nbsp;Deactivate User</span><br/><br/><span onClick={() => this.onEditUserClicked(userWithRoleAndProject.user)}><i className="fa fa-edit" aria-hidden="true" alt="edit"></i>&nbsp;Edit</span></Cell>);
         } else {
-          endCell = <Cell></Cell>;
+          return(<Cell className="link"><span onClick={() => this.props.undeleteUser(userWithRoleAndProject.user.id)}><i className="fa fa-undo" aria-hidden="true" alt="Reactivate user"></i>&nbsp;Reactivate User</span></Cell>);
         }
-        if (this.shouldRowBeShown(userWithRoleAndProject.roles)) {
-          return <Row key={index} className={userWithRoleAndProject.user.is_active ? "" : "inactive"}>
-            <Cell>{userWithRoleAndProject.user.name}</Cell>
-            <Cell> {
-              userWithRoleAndProject.roles.map((role, index) => {
-                return  <span key={index}>
+      } else {
+        return(<Cell></Cell>);
+      }
+    };
+
+    return(this.props.usersWithRolesAndProjects.map((userWithRoleAndProject, index) => {
+      if (this.shouldRowBeShown(userWithRoleAndProject.roles)) {
+        return <Row key={index} className={userWithRoleAndProject.user.is_active ? "" : "inactive"}>
+          <Cell>{userWithRoleAndProject.user.name}</Cell>
+          <Cell> {
+            userWithRoleAndProject.roles.map((role, index) => {
+              return  <span key={index}>
                               {role.name}<br/>
                         </span>;
-              })
-            }</Cell>
-            { endCell }
-          </Row>;
-        }
-      });
-    }
+            })
+          }</Cell>
+          { renderLastCell(userWithRoleAndProject) }
+        </Row>;
+      }
+    }));
+  };
 
+  render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="user-access intro">
         <EditUserDialog open={this.state.editUserOpen} userToEdit={this.state.userToEdit} closeHandler={this.editUserCloseHandler} fetchWorkgroups={this.props.fetchWorkgroups} userWithWorkgroups={this.props.userWithWorkgroups } workgroups={this.props.workgroups} updateUserWorkgroups={this.props.updateUserWorkgroups} />
@@ -182,7 +189,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
                 <Cell>Actions</Cell>
               </Row>
 
-              { tableRows }
+              { this.props.usersWithRolesAndProjects ? this.renderTableRows() : null }
 
             </Table>
           </div>

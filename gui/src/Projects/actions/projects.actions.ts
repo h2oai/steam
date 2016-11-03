@@ -135,7 +135,7 @@ export function fetchClusters() {
 function _fetchClusters(dispatch, getState) {
     Remote.getClusters(0, 1000, (error, clusters: Cluster[]) => {
       if (error) {
-        openNotification(NotificationType.Error, "Load Error", error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, "Load Error", error.toString(), null));
         return;
       }
 
@@ -148,7 +148,7 @@ function _fetchClusters(dispatch, getState) {
         identityPromises.push(new Promise((resolve, reject) => {
           Remote.getIdentitiesForEntity(state.global.entityIds.cluster, cluster.id, (identitiesError: Error, users: UserRole[]) => {
             if (identitiesError) {
-              openNotification(NotificationType.Error, "Load Error", identitiesError.toString(), null);
+              dispatch(openNotification(NotificationType.Error, "Load Error", identitiesError.toString(), null));
               reject(identitiesError.toString());
               return;
             }
@@ -156,7 +156,7 @@ function _fetchClusters(dispatch, getState) {
             detailsPromise.push(new Promise((resolve, reject) => {
               Remote.getClusterStatus(cluster.id, (statusError: Error, clusterStatus: ClusterStatus) => {
                 if (statusError) {
-                  openNotification(NotificationType.Error, "Load Error", statusError.toString(), null);
+                  dispatch(openNotification(NotificationType.Error, "Load Error", statusError.toString(), null));
                   reject(statusError.toString());
                   return;
                 }
@@ -392,25 +392,25 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
 
     importModelFromClusterAsync(clusterId, projectId, modelName)
       .then((modelId: number) => getAlgoAsync(modelId))
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)))
       .then((algoRes: any) => checkCanMojoAsync(algoRes.algo, algoRes.modelId))
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)))
       .then((canMojoRes: any) => {
         if (canMojoRes.canMojo && localStorage.getItem("mojoPojoSelection") !== "pojo") {
           importMojoAsync(canMojoRes.modelId)
             .then(() => {
               dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
             })
-            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+            .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
         } else {
           importPojoAsync(canMojoRes.modelId)
             .then(() => {
               dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
             })
-            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+            .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
         }
       })
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
     };
 }
 
@@ -493,7 +493,7 @@ function deleteWorkgroupAsync(dispatch, workgroupId) {
     dispatch(requestDeleteWorkgroup(workgroupId));
     Remote.deleteWorkgroup(workgroupId, (error: Error) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         deleteWorkgroupReject(error);
         return;
       }
@@ -506,7 +506,7 @@ function fetchWorkgroupsAsync(dispatch) {
   return new Promise((fetchWorkgroupResolve, fetchWorkgroupReject) => {
     Remote.getWorkgroups(0, 1000, (error, res) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         fetchWorkgroupReject();
         return;
       }

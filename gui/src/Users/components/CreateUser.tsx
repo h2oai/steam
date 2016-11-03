@@ -26,6 +26,8 @@ import {Role, Workgroup} from "../../Proxy/Proxy";
 import { fetchWorkgroups } from '../../Projects/actions/projects.actions';
 import { bindActionCreators } from 'redux';
 import {createUser, NewUserDetails} from "../actions/users.actions";
+import InputFeedback from "../../App/components/InputFeedback";
+import {FeedbackType} from "../../App/components/InputFeedback";
 
 
 interface Props {
@@ -54,6 +56,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
   inputsWithWorkgroups: Array<InputWithWorkgroup>;
   nameInput: HTMLInputElement;
   passwordInput: HTMLInputElement;
+  passwordInputConfirm: HTMLInputElement;
 
   constructor(props) {
     super(props);
@@ -61,7 +64,9 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
     this.inputsWithWorkgroups = [];
     this.state = {
       validNameEntered: false,
-      validPasswordEntered: false
+      validPasswordEntered: false,
+      validPasswordConfirmEntered: false,
+      invalidPasswordConfirmEntered: false
     };
   }
 
@@ -117,6 +122,27 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
     }
   };
 
+  onPasswordConfirmChanged = (): void => {
+    if (this.passwordInputConfirm.value.length < 1) {
+      this.setState({
+        validPasswordConfirmEntered: false,
+        invalidPasswordConfirmEntered: false
+      });
+    } else {
+      if (this.passwordInputConfirm.value === this.passwordInput.value) {
+        this.setState({
+          validPasswordConfirmEntered: true,
+          invalidPasswordConfirmEntered: false
+        });
+      } else {
+        this.setState({
+          validPasswordConfirmEntered: false,
+          invalidPasswordConfirmEntered: true
+        });
+      }
+    }
+  };
+
   onCreateUserClicked = (): void => {
     let workgroupIds = [];
     let roleIds = [];
@@ -161,7 +187,17 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               PASSWORD
             </Cell>
             <Cell>
-              <input type="text" ref={(input) => this.passwordInput = input} onChange={this.onPasswordChanged.bind(this)} />
+              <input type="password" ref={(input) => this.passwordInput = input} onChange={this.onPasswordChanged.bind(this)} />
+            </Cell>
+          </Row>
+          <Row>
+            <Cell>
+              CONFIRM PASSWORD
+            </Cell>
+            <Cell>
+              <input type="password" ref={(input) => this.passwordInputConfirm = input} onChange={this.onPasswordConfirmChanged.bind(this)} /><br />&nbsp;
+              { this.state.invalidPasswordConfirmEntered ? <InputFeedback message="passwords do not match" type={FeedbackType.Error} /> : null }
+              { this.state.validPasswordConfirmEntered ? <InputFeedback message="password confirmed" type={FeedbackType.Confirm} /> : null }
             </Cell>
           </Row>
           <Row>
@@ -200,7 +236,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
         &nbsp;
         <br />
         &nbsp;
-        {this.state.validNameEntered && this.state.validPasswordEntered ?
+        {this.state.validNameEntered && this.state.validPasswordEntered && this.state.validPasswordConfirmEntered ?
         <div className="button-primary" onClick={this.onCreateUserClicked}>Create User</div>
         :<div className="button-primary disabled">Create User</div>}
         <div className="button-secondary" onClick={this.props.cancelHandler}>Cancel</div>

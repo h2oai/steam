@@ -71,27 +71,39 @@ export default class EditUserDialog extends React.Component<Props & DispatchProp
     this.props.closeHandler();
   };
 
+  arePropsReady = (): boolean => {
+    if (this.props.userWithWorkgroups && this.props.userToEdit) { //state exists
+      if (this.props.userWithWorkgroups.id === this.props.userToEdit.id) { //state is not stale
+        return true;
+      }
+    }
+    return false;
+  };
+
+  doesUserHaveAccessToWorkgroup = (workgroupToCheck, workgroupsUserHasAccessTo): boolean => {
+    let toReturn = false;
+    for (let workgroupWithAccess of workgroupsUserHasAccessTo) {
+      if (workgroupToCheck.id === workgroupWithAccess.id) {
+        toReturn = true;
+      }
+    }
+
+    return toReturn;
+  };
+
   render(): React.ReactElement<DefaultModal> {
     this.inputsWithWorkgroups = [];
 
     let workgroupsList;
-    let userHasAccess: boolean;
-    if (this.props.userWithWorkgroups && this.props.userToEdit && this.props.userWithWorkgroups.id === this.props.userToEdit.id) {
-      workgroupsList = this.props.workgroups.map((workgroup: Workgroup, index, array) => {
-        userHasAccess = false;
-        for (let workgroupWithAccess of this.props.userWithWorkgroups.workgroups) {
-          if (workgroup.id === workgroupWithAccess.id) {
-            userHasAccess = true;
-          }
-        }
-
-        if (userHasAccess) {
+    if (this.arePropsReady()) {
+      workgroupsList = this.props.workgroups.map((workgroupToDisplay: Workgroup, index, array) => {
+        if (this.doesUserHaveAccessToWorkgroup(workgroupToDisplay, this.props.userWithWorkgroups.workgroups)) {
           return <div key={index}>
-            <input type="checkbox" defaultChecked={true} ref={(input) => this.registerWorkgroupInput(input, workgroup)} /> {workgroup.name}
+            <input type="checkbox" defaultChecked={true} ref={(input) => this.registerWorkgroupInput(input, workgroupToDisplay)} /> {workgroupToDisplay.name}
           </div>;
         } else {
           return <div key={index}>
-            <input type="checkbox" defaultChecked={false} ref={(input) => this.registerWorkgroupInput(input, workgroup)} /> {workgroup.name}
+            <input type="checkbox" defaultChecked={false} ref={(input) => this.registerWorkgroupInput(input, workgroupToDisplay)} /> {workgroupToDisplay.name}
           </div>;
         }
       });
