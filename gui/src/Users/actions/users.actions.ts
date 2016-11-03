@@ -18,6 +18,7 @@
 import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 import { Permission } from "../../Proxy/Proxy";
 import { Role } from "../../Proxy/Proxy";
 
@@ -32,6 +33,36 @@ export const REQUEST_ROLE_NAMES = 'REQUEST_ROLE_NAMES';
 export const RECEIVE_ROLE_NAMES = 'RECEIVE_ROLE_NAMES';
 export const REQUEST_PROJECTS = 'REQUEST_PROJECTS';
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
+export const REQUEST_SAVE_PERMISSIONS = 'REQUEST_SAVE_PERMISSIONS';
+export const RECEIVE_SAVE_PERMISSIONS = 'RECEIVE_SAVE_PERMISSIONS';
+export const RESET_UPDATES = 'RESET_UPDATES';
+
+export function resetUpdates() {
+  return (dispatch, getState) => {
+    dispatch({
+      type: RESET_UPDATES
+    });
+  };
+}
+export function requestSavePermissions() {
+  return {
+    type: REQUEST_SAVE_PERMISSIONS
+  };
+}
+export function receiveSavePermissions(data): any {
+  if (data.hasOwnProperty("roleId")) {
+    return {
+      type: RECEIVE_SAVE_PERMISSIONS,
+      roleId: data.roleId,
+      permissionId: data.permissionId
+    };
+  } else {
+    return {
+      type: RECEIVE_SAVE_PERMISSIONS,
+      error: data.error
+    };
+  }
+}
 
 export function filterSelectionsChanged(id, selected) {
   return {
@@ -108,7 +139,7 @@ function getProjects(dispatch): Promise<Array<any>> {
       dispatch(requestProjects());
       Remote.getProjects(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification('error', 'There was an error retrieving projects', null);
+          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null);
           reject();
         }
         dispatch(receiveProjects(res));
@@ -123,7 +154,7 @@ function getUsers(dispatch): Promise<Array<Role>> {
       dispatch(requestUsers());
       Remote.getIdentities(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification('error', 'There was an error retrieving users', null);
+          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null);
           reject();
         }
         dispatch(receiveUsers(res));
@@ -141,7 +172,7 @@ function getRoles(dispatch): Promise<Array<Role>> {
       dispatch(requestRoleNames());
       Remote.getRoles(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification('error', 'There was an error retrieving roles', null);
+          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null);
           reject();
         }
         dispatch(receiveRoleNames(res));
@@ -158,7 +189,7 @@ function getPermissionDescriptions(): Promise<Array<Permission>> {
   return new Promise((resolve, reject) => {
     Remote.getAllPermissions((error, res) => {
       if (error) {
-        openNotification('error', 'There was an error retrieving permissions list', null);
+        openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
         reject(error);
       }
       resolve(res);
@@ -205,7 +236,8 @@ export function fetchUsersWithRolesAndProjects() {
 
 export interface PermissionsWithRoles {
   description: string
-  flags: Array<boolean>
+  id: number
+  flags: Array<any>
 }
 /***
  * @param roles the numeric roleID's to be returned in the permission set
@@ -222,7 +254,7 @@ export function fetchPermissionsWithRoles() {
         permissionRequests.push(new Promise(
           (resolve, reject) => Remote.getPermissionsForRole(role.id, (error, res) => {
             if (error) {
-              openNotification('error', 'There was an error retrieving permissions list', null);
+              openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
               reject();
             }
             resolve({
@@ -249,13 +281,14 @@ export function fetchPermissionsWithRoles() {
                 if (_.findIndex(permissionSet.permissions, (o: Permission) => {
                   return o.id === descriptions[i].id;
                 }) !== -1) {
-                  flags.push(true);
+                  flags.push({value: true, roleId: permissionSet.roleId});
                 } else {
-                  flags.push(false);
+                  flags.push({value: false, roleId: permissionSet.roleId});
                 }
               }
               output.push({
                 description : descriptions[i].description,
+                id: descriptions[i].id,
                 flags
               });
             }
@@ -264,5 +297,41 @@ export function fetchPermissionsWithRoles() {
         });
       });
     });
+  };
+}
+
+export function saveUpdatedPermissions(updates) {
+  return (dispatch) => {
+    dispatch(requestSavePermissions());
+
+    for (let update of updates) {
+      if (update.newFlag.value === true) {
+        Remote.linkRoleWithPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
+          if (error) {
+            dispatch(receiveSavePermissions({
+                error
+            }));
+            return;
+          }
+          dispatch(receiveSavePermissions({
+            roleId: parseInt(update.newFlag.roleId, 10),
+            permissionId: update.permissionId
+          }));
+        });
+      } else {
+        Remote.unlinkRoleFromPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
+          if (error) {
+            dispatch(receiveSavePermissions({
+              error
+            }));
+            return;
+          }
+          dispatch(receiveSavePermissions({
+            roleId: parseInt(update.newFlag.roleId, 10),
+            permissionId: update.permissionId
+          }));
+        });
+      }
+    }
   };
 }

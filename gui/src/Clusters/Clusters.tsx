@@ -104,11 +104,11 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
       <div className="clusters">
         <PageHeader>CLUSTERS
           { !this.state.newClusterRequested ?
-            <div className="buttons default">
-              <button className="default invert" onClick={this.onCreateNewClusterClicked.bind(this)}>
+            <div className="buttons header-buttons">
+              <div className="button-secondary" onClick={this.onCreateNewClusterClicked.bind(this)}>
                 Connect to Cluster
-              </button>
-              <Link to="clusters/new" className="default">Launch New Cluster</Link>
+              </div>
+              <Link to="clusters/new" className="button-primary">Launch New Cluster</Link>
             </div>
             : null }
         </PageHeader>
@@ -116,48 +116,51 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
           { this.state.newClusterRequested ?
             <Panel>
               <header>
-                <h3 className="new-cluster-header">New Cluster</h3>
+                <h2 className="new-cluster-header">New Cluster</h2>
               </header>
               <p>Connect to a H2O cluster where your existing models and data sets are located.</p>
               <div className="new-cluster-form">
                 <form onSubmit={this.registerCluster.bind(this)}>
-                  <input type="text" name="ip-address" placeholder="IP Address"/>&nbsp;
-                  <input type="text" name="port" placeholder="Port"/>&nbsp;<br /><br />
-                  <button type="submit" className="default">Connect</button>
+                  <input type="text" name="ip-address" placeholder="IP Address"/>
+                  <input type="text" name="port" placeholder="Port"/>
+                  <button type="submit" className="button-primary">Connect</button>
                 </form>
               </div>
             </Panel>
             : null
           }
-          {this.props.clusters.map((cluster, i) => {
+          {this.props.clusters.map((cluster :any, i) => {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes"/> <a href={window.location.protocol + '//' + window.location.hostname + _.get(this.props.config, 'cluster_proxy_address', '') + '/flow/?cluster_id=' + cluster.id} target="_blank"
-                                                        rel="noopener">{cluster.name}</a></span>
+                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address} target="_blank"
+                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count} nodes</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
+
                     <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
-                      className="fa fa-trash"/></button>
+                      className="fa fa-trash no-margin"/></button>
                   </span>
                 </header>
-                <article>
-                  <h3>
-                    ID: {cluster.id}
-                  </h3>
-                  <h3>
-                    STATUS
-                  </h3>
-                  <h2 className="cluster-status">
-                    {cluster.state === 'started' ? 'OK' : cluster.state}
-                  </h2>
-                </article>
-                <h3>ACCESS</h3>
-                { (cluster as any).identities ?
-                  (cluster as any).identities.map((identity, index) => {
-                    return <div key={index}>{ identity.identity_name }&nbsp;</div>;
-                  })
-                  : null }
+                <div className="flexrow">
+                  <div className="flexcolumn">
+                    <div className="info-header">STATUS</div>
+                    <div className="flexrow mar-right-71">
+                      { cluster.status.status === "healthy" ?
+                        <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Healthy</div>
+                        : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.status.status}</div>
+                      }
+                      { cluster.state === "started" ?
+                        <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Started</div>
+                        : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.state}</div>
+                      }
+                    </div>
+                </div>
+                <div className="flexcolumn">
+                  <div className="info-header">VERSION</div>
+                  <div className="charcoal-grey">{cluster.status.version}</div>
+                </div>
+              </div>
               </Panel>
             );
           })}

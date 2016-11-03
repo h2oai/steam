@@ -46,7 +46,9 @@ const (
 	javaClassDep = "java-class-dep" // gen-model.jar
 	javaJar      = "java-jar"       // foo.jar
 	javaWar      = "java-war"       // foo.war
+	mojoWar      = "mojo-war"       // foo.war
 	javaPyWar    = "java-py-war"    // foo_py.war
+	mojoPyWar    = "mojo-py-war"    // foo_py.war
 )
 
 type DownloadHandler struct {
@@ -195,6 +197,8 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
+				"pojo",
+				model.Algorithm,
 				compiler.ArtifactWar,
 				"",
 			)
@@ -204,6 +208,23 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 			}
 			filePath = warFilePath
 
+		case mojoWar:
+			warFilePath, err := compiler.CompileModel(
+				s.compilerServiceAddress,
+				s.workingDirectory,
+				projectId,
+				modelId,
+				model.LogicalName,
+				"mojo",
+				model.Algorithm,
+				compiler.ArtifactWar,
+				"",
+			)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			filePath = warFilePath
 		case javaPyWar:
 			packageName = strings.TrimSpace(packageName)
 			if len(packageName) == 0 {
@@ -216,6 +237,8 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
+				"pojo",
+				model.Algorithm,
 				compiler.ArtifactPythonWar,
 				packageName,
 			)
@@ -225,6 +248,28 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 			}
 			filePath = warFilePath
 
+		case mojoPyWar:
+			packageName = strings.TrimSpace(packageName)
+			if len(packageName) == 0 {
+				http.Error(w, "No package-name specified", http.StatusBadRequest)
+				return
+			}
+			warFilePath, err := compiler.CompileModel(
+				s.compilerServiceAddress,
+				s.workingDirectory,
+				projectId,
+				modelId,
+				model.LogicalName,
+				"mojo",
+				model.Algorithm,
+				compiler.ArtifactPythonWar,
+				packageName,
+			)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			filePath = warFilePath
 		case javaJar:
 			jarFilePath, err := compiler.CompileModel(
 				s.compilerServiceAddress,
@@ -232,6 +277,8 @@ func (s *DownloadHandler) serveModel(w http.ResponseWriter, r *http.Request, pz 
 				projectId,
 				modelId,
 				model.LogicalName,
+				"pojo",
+				model.Algorithm,
 				compiler.ArtifactJar,
 				"",
 			)

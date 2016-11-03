@@ -2,8 +2,9 @@
 
 .table .row {
   width: 100%;
-  border-bottom: $rule-dotted-thin;
-  padding: 15px 0;
+  border-bottom-style: dotted;
+  border-bottom-width: 1px;
+  border-bottom-color: $h2o-soft-grey;
   @media (min-width: 500px) {
     display: flex;
     flex-direction: row;
@@ -12,6 +13,13 @@
     align-content: flex-start;
   }
   &.header {
-    border-bottom: $rule-solid-thick;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: $h2o-charcoal-grey;
+    font-family: Oswald;
+    font-weight: 500;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: $h2o-charcoal-grey;
   }
 }

@@ -32,12 +32,13 @@ coverage.out
 
 # ignore list
 /steamY
+/steam
 /dist/
 /var/
 /var/master/www/
 /var/master/db/steam.db
-/scoring-service-builder/.gradle
-/scoring-service-builder/build
+/prediction-service-builder/.gradle
+/prediction-service-builder/build
 /var/master/assets/*.war
 /var/master/assets/*.jar
 /var/master/model
@@ -59,13 +60,21 @@ coverage.out
 /docs/user_guide/node_modules
 /docs/install/_book
 /docs/install/node_modules
+/docs/_build
 
 # ignore list of generated demo docs
 /demo/_book
 /demo/node_modules
 
-# ignore generated files
-
-*.doctree
-*.pickle
-/docs/_build
+-# ignore generated files
+-
+-*.doctree
+-*.pickle
+-/docs/_build
+/npm-debug.log
+/.idea
+/gui/.idea
+/tools/steamlauncher/steamlauncher
+/tools/steamlauncher/service.log
+/steam.log
+/service.log

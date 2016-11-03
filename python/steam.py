@@ -898,6 +898,52 @@ class RPCClient:
 		response = self.connection.call("ImportModelFromCluster", request)
 		return response['model_id']
 	
+	def check_mojo(self, algo):
+		"""
+		Check if a model category can generate MOJOs
+
+		Parameters:
+		algo: No description available (string)
+
+		Returns:
+		can_mojo: No description available (bool)
+		"""
+		request = {
+			'algo': algo
+		}
+		response = self.connection.call("CheckMojo", request)
+		return response['can_mojo']
+	
+	def import_model_pojo(self, model_id):
+		"""
+		Import a model's POJO from a cluster
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("ImportModelPojo", request)
+		return 
+	
+	def import_model_mojo(self, model_id):
+		"""
+		Import a model's MOJO from a cluster
+
+		Parameters:
+		model_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'model_id': model_id
+		}
+		response = self.connection.call("ImportModelMojo", request)
+		return 
+	
 	def delete_model(self, model_id):
 		"""
 		Delete a model

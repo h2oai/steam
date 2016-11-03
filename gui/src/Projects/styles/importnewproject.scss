@@ -10,8 +10,17 @@
     .connect-cluster {
       margin-left: $medium;
       flex: 1;
-      form > input + input {
-        margin: $xsmall;
+      form {
+        margin-top: 10px;
+      }
+      input {
+        margin-top: 5px;
+        margin-bottom: 0px;
+        margin-right: 15px;
+      }
+      .button-primary {
+        margin-left: 0px;
+        top: 5px;
       }
     }
   }

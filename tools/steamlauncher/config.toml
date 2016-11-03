@@ -1,5 +1,7 @@
 title = "Steam Config File"
 
+# Simple config file for steam laucher
+
 [superuser]
 name = "superuser"
 password = "superuser"
@@ -8,6 +10,11 @@ password = "superuser"
 port = 9000
 
 # Configurations for default roles
+# More roles may be added using this format
+#	[roles.{NAME}]
+#	description = {DESCRIPTION}
+# 	permissions = [{LIST OF PERMISSIONS}]
+
 [roles]
 
 	[roles.Admin]
@@ -80,8 +87,13 @@ port = 9000
 		"ViewService"
 	]
 
-[scoringserivce]
+[predictionbuilder]
 jettypath = "var/master/assets/jetty-runner.jar"
 warpath = "var/master/assets/ROOT.war"
+host = "localhost"
 port = 8080
+
+
+[predictionservice]
+# host = "localhost" # Set to localhost to use without internet access
 portrange = "1025:65535"

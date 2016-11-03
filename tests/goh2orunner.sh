@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # Start H2O and create a start log + store pid
-java -jar ../var/temp/h2o-$H2OVERSION/h2o.jar > start.log 2>&1 &
+java -jar ../var/temp/h2o-$H2OVERSION/h2o.jar --name steam-h2o > start.log 2>&1 &
 H2OPID=$!
 echo "Started h2o with pid ${H2OPID}"
 
 # Wait for cluster to start
-sleep 5
+sleep 10
 
 # Search log for 'Cloud of size' to determine port of cluster
 ADDRESS=$(sed -n '/Cloud of size/s/.* \[\/\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*:[0-9]*\)]/\1/p' start.log)

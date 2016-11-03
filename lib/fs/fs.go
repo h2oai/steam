@@ -37,6 +37,7 @@ import (
 	"time"
 
 	uuid "github.com/nu7hatch/gouuid"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -286,6 +287,10 @@ func GetJavaModelPath(wd string, modelId int64, logicalName string) string {
 	return path.Join(GetModelPath(wd, modelId), logicalName) + ".java"
 }
 
+func GetMOJOPath(wd string, modelId int64, logcialName string) string {
+	return path.Join(GetModelPath(wd, modelId), logcialName) + ".zip"
+}
+
 func GetWarFilePath(wd string, modelId int64, logicalName string) string {
 	return path.Join(GetModelPath(wd, modelId), logicalName) + ".war"
 }
@@ -300,6 +305,10 @@ func GetModelJarFilePath(wd string, modelId int64, logicalName string) string {
 
 func GetGenModelPath(wd string, modelId int64) string {
 	return path.Join(GetModelPath(wd, modelId), "h2o-genmodel.jar")
+}
+
+func GetDeepwaterDepPath(wd string, modelId int64) string {
+	return path.Join(GetModelPath(wd, modelId), "deepwater-all.jar")
 }
 
 func GetAssetsPath(wd, asset string) string {
@@ -489,15 +498,15 @@ func Download(p, u string, preserveFilename bool) (int64, string, error) {
 		return 0, "", fmt.Errorf("Download directory creation failed: %s: %v", p, err)
 	}
 
-	if _, err := os.Stat(p); !os.IsNotExist(err) {
-		return 0, "", fmt.Errorf("Download file creation failed: file already exists: %s: %v", p, err)
-	}
-
-	dst, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE, FilePerm)
+	dst, err := os.Create(p)
 	if err != nil {
 		return 0, "", fmt.Errorf("Download file creation failed: %s: %v", p, err)
 	}
 	defer dst.Close()
+
+	if err := os.Chmod(p, FilePerm); err != nil {
+		return 0, "", errors.Wrap(err, "setting file permissions")
+	}
 
 	size, err := io.Copy(dst, res.Body)
 	if err != nil {

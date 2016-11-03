@@ -33,6 +33,7 @@ func registerGeneratedCommands(c *context, cmd *cobra.Command) {
 	cmd.AddCommand(
 		add(c),
 		build(c),
+		check(c),
 		create(c),
 		deactivate(c),
 		delete_(c),
@@ -174,6 +175,7 @@ func buildModel(c *context) *cobra.Command {
 				fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName),   // No description available
 				fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName),                 // No description available
 				fmt.Sprintf("Location:\t%v\t", model.Location),                       // No description available
+				fmt.Sprintf("ModelObjectType:\t%v\t", model.ModelObjectType),         // No description available
 				fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime),                   // No description available
 				fmt.Sprintf("JSONMetrics:\t%v\t", model.JSONMetrics),                 // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
@@ -206,6 +208,52 @@ func buildModel(c *context) *cobra.Command {
 	cmd.Flags().Int64Var(&datasetId, "dataset-id", datasetId, "No description available")
 	cmd.Flags().IntVar(&maxRunTime, "max-run-time", maxRunTime, "No description available")
 	cmd.Flags().StringVar(&targetName, "target-name", targetName, "No description available")
+	return cmd
+}
+
+var checkHelp = `
+check [?]
+Check entities
+Commands:
+
+    $ steam check mojo ...
+`
+
+func check(c *context) *cobra.Command {
+	cmd := newCmd(c, checkHelp, nil)
+
+	cmd.AddCommand(checkMojo(c))
+	return cmd
+}
+
+var checkMojoHelp = `
+mojo [?]
+Check Mojo
+Examples:
+
+    Check if a model category can generate MOJOs
+    $ steam check mojo \
+        --algo=?
+
+`
+
+func checkMojo(c *context) *cobra.Command {
+	var algo string // No description available
+
+	cmd := newCmd(c, checkMojoHelp, func(c *context, args []string) {
+
+		// Check if a model category can generate MOJOs
+		canMojo, err := c.remote.CheckMojo(
+			algo, // No description available
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("CanMojo:\t%v\n", canMojo)
+		return
+	})
+
+	cmd.Flags().StringVar(&algo, "algo", algo, "No description available")
 	return cmd
 }
 
@@ -1102,7 +1150,7 @@ func findModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -1115,6 +1163,7 @@ func findModels(c *context) *cobra.Command {
 					e.ResponseColumnName,  // No description available
 					e.LogicalName,         // No description available
 					e.Location,            // No description available
+					e.ModelObjectType,     // No description available
 					e.MaxRuntime,          // No description available
 					e.JSONMetrics,         // No description available
 					e.CreatedAt,           // No description available
@@ -1127,7 +1176,7 @@ func findModels(c *context) *cobra.Command {
 					e.Gini,                // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tLogloss\tAuc\tGini\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tModelObjectType\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tLogloss\tAuc\tGini\t", lines)
 			return
 		}
 		if multinomial { // FindModelsMultinomial
@@ -1147,7 +1196,7 @@ func findModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -1160,6 +1209,7 @@ func findModels(c *context) *cobra.Command {
 					e.ResponseColumnName,  // No description available
 					e.LogicalName,         // No description available
 					e.Location,            // No description available
+					e.ModelObjectType,     // No description available
 					e.MaxRuntime,          // No description available
 					e.JSONMetrics,         // No description available
 					e.CreatedAt,           // No description available
@@ -1170,7 +1220,7 @@ func findModels(c *context) *cobra.Command {
 					e.Logloss,             // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tLogloss\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tModelObjectType\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tLogloss\t", lines)
 			return
 		}
 		if regression { // FindModelsRegression
@@ -1190,7 +1240,7 @@ func findModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                   // No description available
 					e.TrainingDatasetId,    // No description available
 					e.ValidationDatasetId,  // No description available
@@ -1203,6 +1253,7 @@ func findModels(c *context) *cobra.Command {
 					e.ResponseColumnName,   // No description available
 					e.LogicalName,          // No description available
 					e.Location,             // No description available
+					e.ModelObjectType,      // No description available
 					e.MaxRuntime,           // No description available
 					e.JSONMetrics,          // No description available
 					e.CreatedAt,            // No description available
@@ -1213,7 +1264,7 @@ func findModels(c *context) *cobra.Command {
 					e.MeanResidualDeviance, // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tMeanResidualDeviance\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tModelObjectType\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\tMse\tRSquared\tMeanResidualDeviance\t", lines)
 			return
 		}
 	})
@@ -1223,7 +1274,7 @@ func findModels(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&regression, "regression", regression, "List regression models")
 
 	cmd.Flags().BoolVar(&ascending, "ascending", ascending, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().StringVar(&namePart, "name-part", namePart, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
@@ -1611,7 +1662,7 @@ func getClusters(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	return cmd
 }
@@ -1771,7 +1822,7 @@ func getDatasets(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
 	cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	return cmd
 }
@@ -1862,7 +1913,7 @@ func getDatasources(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
@@ -1989,7 +2040,7 @@ func getHistory(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "Integer ID for an entity in Steam.")
 	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "Integer ID for the type of entity.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
@@ -2132,7 +2183,7 @@ func getIdentities(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "An entity ID.")
 	cmd.Flags().Int64Var(&entityType, "entity-type", entityType, "An entity type ID.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
@@ -2391,6 +2442,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName),   // No description available
 				fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName),                 // No description available
 				fmt.Sprintf("Location:\t%v\t", model.Location),                       // No description available
+				fmt.Sprintf("ModelObjectType:\t%v\t", model.ModelObjectType),         // No description available
 				fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime),                   // No description available
 				fmt.Sprintf("JSONMetrics:\t%v\t", model.JSONMetrics),                 // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
@@ -2427,6 +2479,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName),   // No description available
 				fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName),                 // No description available
 				fmt.Sprintf("Location:\t%v\t", model.Location),                       // No description available
+				fmt.Sprintf("ModelObjectType:\t%v\t", model.ModelObjectType),         // No description available
 				fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime),                   // No description available
 				fmt.Sprintf("JSONMetrics:\t%v\t", model.JSONMetrics),                 // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
@@ -2461,6 +2514,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName),     // No description available
 				fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName),                   // No description available
 				fmt.Sprintf("Location:\t%v\t", model.Location),                         // No description available
+				fmt.Sprintf("ModelObjectType:\t%v\t", model.ModelObjectType),           // No description available
 				fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime),                     // No description available
 				fmt.Sprintf("JSONMetrics:\t%v\t", model.JSONMetrics),                   // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                       // No description available
@@ -2495,6 +2549,7 @@ func getModel(c *context) *cobra.Command {
 				fmt.Sprintf("ResponseColumnName:\t%v\t", model.ResponseColumnName),   // No description available
 				fmt.Sprintf("LogicalName:\t%v\t", model.LogicalName),                 // No description available
 				fmt.Sprintf("Location:\t%v\t", model.Location),                       // No description available
+				fmt.Sprintf("ModelObjectType:\t%v\t", model.ModelObjectType),         // No description available
 				fmt.Sprintf("MaxRuntime:\t%v\t", model.MaxRuntime),                   // No description available
 				fmt.Sprintf("JSONMetrics:\t%v\t", model.JSONMetrics),                 // No description available
 				fmt.Sprintf("CreatedAt:\t%v\t", model.CreatedAt),                     // No description available
@@ -2553,7 +2608,7 @@ func getModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -2566,6 +2621,7 @@ func getModels(c *context) *cobra.Command {
 					e.ResponseColumnName,  // No description available
 					e.LogicalName,         // No description available
 					e.Location,            // No description available
+					e.ModelObjectType,     // No description available
 					e.MaxRuntime,          // No description available
 					e.JSONMetrics,         // No description available
 					e.CreatedAt,           // No description available
@@ -2573,7 +2629,7 @@ func getModels(c *context) *cobra.Command {
 					e.LabelName,           // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tModelObjectType\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\t", lines)
 			return
 		}
 		if true { // default
@@ -2590,7 +2646,7 @@ func getModels(c *context) *cobra.Command {
 			lines := make([]string, len(models))
 			for i, e := range models {
 				lines[i] = fmt.Sprintf(
-					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+					"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
 					e.Id,                  // No description available
 					e.TrainingDatasetId,   // No description available
 					e.ValidationDatasetId, // No description available
@@ -2603,6 +2659,7 @@ func getModels(c *context) *cobra.Command {
 					e.ResponseColumnName,  // No description available
 					e.LogicalName,         // No description available
 					e.Location,            // No description available
+					e.ModelObjectType,     // No description available
 					e.MaxRuntime,          // No description available
 					e.JSONMetrics,         // No description available
 					e.CreatedAt,           // No description available
@@ -2610,7 +2667,7 @@ func getModels(c *context) *cobra.Command {
 					e.LabelName,           // No description available
 				)
 			}
-			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\t", lines)
+			c.printt("Id\tTrainingDatasetId\tValidationDatasetId\tName\tClusterName\tModelKey\tAlgorithm\tModelCategory\tDatasetName\tResponseColumnName\tLogicalName\tLocation\tModelObjectType\tMaxRuntime\tJSONMetrics\tCreatedAt\tLabelId\tLabelName\t", lines)
 			return
 		}
 	})
@@ -2618,7 +2675,7 @@ func getModels(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
 	cmd.Flags().StringVar(&frameKey, "frame-key", frameKey, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
@@ -2917,7 +2974,7 @@ func getProjects(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	return cmd
 }
@@ -3059,7 +3116,7 @@ func getRoles(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
 
 	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
@@ -3225,7 +3282,7 @@ func getServices(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forProject, "for-project", forProject, "List services for a project")
 	cmd.Flags().BoolVar(&forModel, "for-model", forModel, "List services for a model")
 
-	cmd.Flags().Int64Var(&limit, "limit", limit, "No description available")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
@@ -3369,7 +3426,7 @@ func getWorkgroups(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List workgroups for an identity")
 
 	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
-	cmd.Flags().Int64Var(&limit, "limit", limit, "The maximum returned objects.")
+	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
 	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
 	return cmd
 }
@@ -3401,11 +3458,22 @@ Examples:
         --model-key=? \
         --model-name=?
 
+    Import a model's POJO from a cluster
+    $ steam import model --pojo \
+        --model-id=?
+
+    Import a model's MOJO from a cluster
+    $ steam import model --mojo \
+        --model-id=?
+
 `
 
 func importModel(c *context) *cobra.Command {
 	var fromCluster bool // Switch for ImportModelFromCluster()
+	var pojo bool        // Switch for ImportModelPojo()
+	var mojo bool        // Switch for ImportModelMojo()
 	var clusterId int64  // No description available
+	var modelId int64    // No description available
 	var modelKey string  // No description available
 	var modelName string // No description available
 	var projectId int64  // No description available
@@ -3426,10 +3494,35 @@ func importModel(c *context) *cobra.Command {
 			fmt.Printf("ModelId:\t%v\n", modelId)
 			return
 		}
+		if pojo { // ImportModelPojo
+
+			// Import a model's POJO from a cluster
+			err := c.remote.ImportModelPojo(
+				modelId, // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return
+		}
+		if mojo { // ImportModelMojo
+
+			// Import a model's MOJO from a cluster
+			err := c.remote.ImportModelMojo(
+				modelId, // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return
+		}
 	})
 	cmd.Flags().BoolVar(&fromCluster, "from-cluster", fromCluster, "Import models from a cluster")
+	cmd.Flags().BoolVar(&pojo, "pojo", pojo, "Import a model's POJO from a cluster")
+	cmd.Flags().BoolVar(&mojo, "mojo", mojo, "Import a model's MOJO from a cluster")
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
+	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
 	cmd.Flags().StringVar(&modelKey, "model-key", modelKey, "No description available")
 	cmd.Flags().StringVar(&modelName, "model-name", modelName, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")

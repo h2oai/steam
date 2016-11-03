@@ -1,0 +1,240 @@
+<!--
+Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Latest compiled and minified CSS -->
+    <title>Steam :: Prediction Service </title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+
+    <link rel="stylesheet" href="custom.css">
+
+    <script src="jquery.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="predict.js"></script>
+</head>
+
+<body>
+
+<div class="title grad container-fluid">
+    <h1>Steam</h1>
+    <h2>Prediction Service</h2>
+</div>
+<main class="container-fluid">
+    <section class="col-md-12 col-sm-12">
+        <p>Select input parameters, OR enter your own custom query string to predict</p>
+    </section>
+
+    <div id="left" class="col-md-6 col-sm-12 col-lg-6"/>
+
+        <section id="inputParams" >
+            <header><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Model input parameters</header>
+
+            <form autocomplete="off" onsubmit="event.preventDefault();runpred2(this.form)" id="allparams" onreset="setEmptyUrl();">
+
+                <fieldset id="fs-params" class="form-group">
+                </fieldset>
+                <fieldset id="curl-field">
+                    <legend>Command Line</legend>
+                    <div class="form-group">Another way to run this prediction is through command line, via POST to the REST API.
+                    </div>
+                    <div class="form-group">
+                        <label class="sr-only"></label>
+                        <div class="curl"></div>
+                    </div>
+                </fieldset>
+
+                <fieldset id="query-string-field">
+                    <legend>Query String</legend>
+                    <div class="form-group">The parameters above gets automatically built into a REST API query string. You can also input your own string if that's easier for you.
+                    </div>
+                    <div class="form-group">
+                        <label class="sr-only"></label>
+                        <div class="input-group">
+                            <div id="url-prefix" class="input-group-addon"></div>
+                            <input type="text" class="form-control" id="queryParams" name="p" onkeydown="clearParameters();">
+                            <div class="input-group-addon"><a id="query-link" href="" target="_blank"><i class="glyphicon glyphicon-new-window"></i></a></div>
+                        </div>
+                    </div>
+                </fieldset>
+
+            </form>
+
+            <div class="btnContainer">
+                <input id="predict-btn" type="submit" class="btn btn-primary" name="okbutton" value="predict">
+
+                <input id="reset-btn" type="reset" class="btn btn-default" value="clear">
+            </div>
+
+            <!--       <form autocomplete="off" id="allparams">
+                      <fieldset class="form-group">
+                        <legend>Parameters</legend>
+
+                        <div class="form-group row">
+                          <label for="distance" class="col-sm-6 form-control-label">Distance</label>
+                          <div class="col-sm-6">
+                            <input type="text" class="form-control" id="input" name="distance">
+                          </div>
+                        </div>
+
+                        <div class="form-group row">
+                          <label for="myname" class="col-sm-6 form-control-label">Month</label>
+                          <div class="col-sm-6">
+                             <input type="radio" name="myname" value="c-1" >c-1</input>
+                             <input type="radio" name="myname" value="c-2" >c-2</input>
+                             <input type="radio" name="myname" value="c-3" >c-3</input>
+                          </div>
+                        </div>
+
+                        <div class="form-group row">
+                          <label for="selectgroup" class="col-sm-6 form-control-label">Month</label>
+                          <div class="col-sm-6">
+                             <select name="selectgroup" id="select" class="form-control">
+                                <option>c-1</option>
+                                <option>c-2</option>
+                                <option>c-3</option>
+                              </select>
+                          </div>
+                        </div>
+
+
+                      </fieldset>
+
+                      <fieldset>
+                        <legend>Query String</legend>
+                        <div class="form-group">The parameters above gets automatically built into a REST API query strong. You can also input your own string if that's easier for you.</div>
+                        <div class="form-group">
+                          <label class="sr-only"></label>
+                          <div class="input-group">
+                            <div class="input-group-addon">http://localhost:55001?</div>
+                            <input type="text" class="form-control" id="queryParams" name="p">
+                          </div>
+                        </div>
+                      </fieldset>
+
+                      <div class="btnContainer">
+                        <input id="upload-btn" class="btn btn-primary" value="Upload"></input>
+                        <input id="reset-btn" class="btn btn-default" type="reset"></input>
+                      </div>
+                  </form> -->
+
+        </section>
+
+        <!--class="col-md-6 col-sm-12 col-lg-6" -->
+
+        <section id="batch">
+            <header>
+              <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Batch Prediction
+              <span class="subtitle">*optional</span>
+            </header>
+            <div id="batch-content">
+              <form method="post" action="predict" enctype="multipart/form-data">
+                  <!--<div class="form-group">-->
+      <!--                 <div class="input-group">
+                          <legend>Input File</legend><input type="file" class="form-control" id="inputFile" name="inpfile" size="40">
+                      </div>
+       -->            <!--</div>-->
+                    <div class="input-inline-row">
+                          <label class="form-control-label file-icon"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span></label>
+                          <div class="file-input-div">
+                              <input class="form-control file-input" type="text" id="inpfile" placeholder="Select a Batch JSON file"/>
+                              <input type="file" name="inpfile" />
+                          </div>
+                    </div>
+
+              </form>
+
+              <div class="btnContainer">
+                  <input type="submit" id="batch-predict" class="btn btn-primary" value="Batch Predict" />
+                  <input type="reset" id="batch-reset" class="btn btn-default" value="clear" />
+              </div>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="right" class="col-lg-5 col-md-6 col-sm-12">
+
+        <section id="results" >
+            <header><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Prediction Results</header>
+            <div class="section-ctn">
+              <fieldset id="modelPredictions">
+                  <!--             <legend>Model Predictions</legend>
+                              <table class="table noBorders">
+                                <tbody>
+                                  <tr>
+                                    <td>labelIndex</td>
+                                    <td>1</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <table class="table">
+                                <thead>
+                                  <tr>
+                                    <th>Labels</th>
+                                    <th>Probability</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>Y</td>
+                                    <td>99.59851912</td>
+                                  </tr>
+                                   <tr>
+                                    <td>N</td>
+                                    <td>0.004014809</td>
+                                  </tr>
+                                </tbody>
+                              </table> -->
+              </fieldset>
+              <fieldset id="modelStats">
+                  <!--            <legend>Model Runtime Stats</legend>
+                             <table class="table noBorders">
+                               <tbody>
+                                 <tr>
+                                   <td>Total prediction time</td>
+                                   <td>24.091915 ms</td>
+                                 </tr>
+                                 <tr>
+                                   <td>Number of predictions</td>
+                                   <td>2</td>
+                                 </tr>
+                                 <tr>
+                                   <td>Last prediction time</td>
+                                   <td>0.122258 ms</td>
+                                 </tr>
+                               </tbody>
+                             </table> -->
+              </fieldset>
+            </div>
+            <div class="btnContainer">
+                <button id="stats-btn" class="btn btn-primary" type="submit">More stats</button>
+            </div>
+        </section>
+      </div>
+
+</main>
+
+</body>
+</html>

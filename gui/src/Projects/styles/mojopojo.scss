@@ -1,0 +1,41 @@
+@import '../../variables.scss';
+
+.mojo-select-launcher {
+  position: relative;
+}
+.mojo-select {
+  position: absolute;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 15px;
+  top: 27px;
+  left: -130px;
+  width: 300px;
+  border-style: solid;
+  border-color: $h2o-charcoal-grey;
+  border-width: 2px;
+  background-color: white;
+  z-index: 20;
+}
+.mojo-select:before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-bottom: 10px solid $h2o-charcoal-grey;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  position: absolute;
+  top: -10px;
+  left: 130px;
+}
+.format-select {
+  border-style: solid;
+  border-color: #4a4a4a;
+  border-radius: 45px;
+  border-width: thin;
+  padding-left: 14px;
+  padding-top: 10px;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}

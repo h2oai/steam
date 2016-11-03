@@ -21,6 +21,7 @@
 import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 
 export const UPLOADING_PACKAGE = 'UPLOADING_PACKAGE_COMPONENT';
 export const FINISH_UPLOADING_PACKAGE_COMPONENT = 'FINISH_UPLOADING_PACKAGE_COMPONENT';
@@ -61,7 +62,7 @@ export function uploadPackage(projectId: number, packageName: string, form) {
           }
           data.append('file', formFiles[i].files[j]);
           if (error) {
-            dispatch(openNotification('error', error.toString(), null));
+            dispatch(openNotification(NotificationType.Error, "Load Error", error.toString(), null));
             return;
           }
 
@@ -69,14 +70,22 @@ export function uploadPackage(projectId: number, packageName: string, form) {
             credentials: 'include',
             method: 'post',
             body: data
+          }).then(() => {
+            Remote.setAttributesForPackage(projectId, packageName, JSON.stringify({main: formFiles[i].files[j].name}), (error) => {
+              if (error) {
+                dispatch(openNotification(NotificationType.Error, "Load Error", error, null));
+                return;
+              }
+            });
+            dispatch(finishUploadingPackageComponent());
+            dispatch(fetchPackages(projectId));
           }));
-
         }
       }
       Promise.all(requests).then(() => {
         Remote.setAttributesForPackage(projectId, packageName, JSON.stringify({main: main}), (error) => {
           if (error) {
-            dispatch(openNotification('error', error, null));
+            dispatch(openNotification(NotificationType.Error, 'Load Error', error, null));
             return;
           }
         });
@@ -91,7 +100,7 @@ export function fetchPackages(projectId: number) {
   return (dispatch) => {
     Remote.getPackages(projectId, (error, res) => {
       if (error) {
-        dispatch(openNotification('error', error.toString(), null));
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         return;
       }
       dispatch(receivePackages(res));

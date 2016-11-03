@@ -1,9 +1,14 @@
 Projects
 ========
 
-Steam makes use of project-based machine learning. Whether you are trying to detect fraud or predict user retention, the datasets, models, and test results are stored and saved in the individual projects. All Steam users within your environment can access these projects and the files within them.
+Steam makes use of project-based machine learning. Whether you are trying to detect fraud or predict user retention, the datasets, models, and test results are stored and saved in the individual projects. All Steam users within your environment can access these projects and the files within them. 
+
+.. figure:: images/projects_page.png
+   :alt: Projects Page
 
 The Steam Projects page includes additional subnavigation items for Models, Deployment, Configuration, and Collaborators. Each of these pages is described in later sections. 
+
+**Note**: You can use the trashcan icon to delete a project, but you cannot delete projects that include a model. Delete the model first, then delete the project.
 
 Creating a Project
 ------------------
@@ -74,6 +79,7 @@ You can perform the following actions directly from this page:
 -  View model details and export the model as a java, jar, or war file
 -  Label a model (Refer to `Configurations`_ for information on how to create labels.)
 -  Deploy the model
+-  Delete a model. Note that all models in a project must be deleted before you can delete a project.
 
     **Note**: The Models page lists models in alphabetical order and
     shows up to five models per page. If your project includes more than five
@@ -240,16 +246,12 @@ Model`_ or `Exporting a Model`_.)
 Making Predictions
 ~~~~~~~~~~~~~~~~~~
 
-1. To reach the Steam Prediction Service, click the IP address link
-   listed under the Deployed Services for the deployed model that you
-   want to score. This opens Steam Prediction Service tool. The fields
-   that display on the Prediction Service tool are automatically
-   populated with field information from the deployed model.
+1. To reach the Steam Prediction Service Buider, click the IP address link listed under the Deployed Services for the model that you have deployed and want to score. Clicking this link opens the Steam Prediction Service Builder. (Refer to the `Prediction Service Builder <prediction_service.html>`__ appendix for more information.) The fields that display on the Prediction Service Builder are automatically populated with field information from the deployed model, making it easy for you to make predictions based on any model that you deploy.
 
  .. figure:: images/prediction_service.png
-   :alt: Prediction Services tool
+   :alt: Prediction Service tool
 
-   Prediction Services tool
+   Prediction Service tool
 
 2. Make predictions by specifying input values based on column data from
    the original dataset. This automatically populates the fields in the
@@ -258,7 +260,11 @@ Making Predictions
 
 3. Click **Predict** when you are done.
 
-**Note**: Use the **Clear** button to clear all entries and begin a new prediction. Use the **More Stats** button to view additional statistics about the scoring service results.
+**Notes**: 
+ - Use the **Clear** button to clear all entries and begin a new prediction. 
+ - You can optionally open a batch JSON file to perform batch predictions.  
+ - Use the **More Stats** button to view additional statistics about the scoring service results.
+ - The Steam Prediction Service is available as a completely standalone utility. Refer to the `Prediction Service Builder <prediction_service.html>`__ appendix for more information about using the Prediction Service Builder. 
 
 Configurations
 --------------

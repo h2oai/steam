@@ -30,7 +30,8 @@
       flex-basis: 40%;
       display: block;
       padding: $small;
-      margin: $xsmall;
+      margin-bottom: 16px;
+      margin-right: 16px;
       min-height: $xlarge * 2;
       header {
         font-size: 1.5em;
@@ -58,5 +59,25 @@
       border: none;
       background: transparent;
     }
+  }
+  .green {
+    color: #417505;
+  }
+  .orange {
+    color: #F5A623;
+  }
+  .infodot-container {
+    display: flex;
+    flex-direction: row;
+    margin-right: 12px;
+    align-items: center;
+  }
+  .info-header {
+    font-weight: bold;
+    color: #9b9b9b;
+    margin-bottom: 7px;
+  }
+  .no-margin {
+    margin: 0px;
   }
 }
