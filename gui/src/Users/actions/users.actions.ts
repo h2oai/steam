@@ -19,8 +19,7 @@ import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-import { Permission } from "../../Proxy/Proxy";
-import { Role } from "../../Proxy/Proxy";
+import { Permission, Role, Identity, Workgroup } from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -36,7 +35,170 @@ export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS';
 export const REQUEST_SAVE_PERMISSIONS = 'REQUEST_SAVE_PERMISSIONS';
 export const RECEIVE_SAVE_PERMISSIONS = 'RECEIVE_SAVE_PERMISSIONS';
 export const RESET_UPDATES = 'RESET_UPDATES';
+export const REQUEST_CREATE_ROLE = 'REQUEST_CREATE_ROLE';
+export const RECEIVE_CREATE_ROLE = 'RECEIVE_CREATE_ROLE';
+export const REQUEST_CREATE_USER = 'REQUEST_CREATE_USER';
+export const RECEIVE_CREATE_USER = 'RECEIVE_CREATE_USER';
+export const ENTER_NEW_USER = 'ENTER_NEW_USER';
+export const EXIT_NEW_USER = 'EXIT_NEW_USER';
+export const ENTER_NEW_ROLE = 'ENTER_NEW_ROLE';
+export const EXIT_NEW_ROLE = 'EXIT_NEW_ROLE';
+export const REQUEST_DELETE_USER = 'REQUEST_DELETE_USER';
+export const RECEIVE_DELETE_USER = 'RECEIVE_DELETE_USER';
+export const REQUEST_REACTIVATE_USER = 'REQUEST_REACTIVATE_USER';
+export const RECEIVE_REACTIVATE_USER = 'RECEIVE_REACTIVATE_USER';
+export const REQUEST_DELETE_ROLE = 'REQUEST_DELETE_ROLE';
+export const RECEIVE_DELETE_ROLE = 'RECEIVE_DELETE_ROLE';
+export const REQUEST_WORKGROUPS_FOR_IDENTITY = 'REQUEST_WORKGROUPS_FOR_IDENTITY';
+export const RECEIVE_WORKGROUPS_FOR_IDENTITY = 'RECEIVE_WORKGROUPS_FOR_IDENTITY';
+export const REQUEST_UPDATE_USER_WORKGROUPS = 'REQUEST_UPDATE_USER_WORKGROUPS';
+export const RECEIVE_UPDATE_USER_WORKGROUPS = 'RECEIVE_UPDATE_USER_WORKGROUPS';
+export const REQUEST_UPDATE_USER_ROLES = 'REQUEST_UPDATE_USER_ROLES';
+export const RECEIVE_UPDATE_USER_ROLES = 'RECEIVE_UPDATE_USER_ROLES';
 
+export function requestUpdateUserRoles() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_UPDATE_USER_ROLES
+    });
+  };
+};
+export function receiveUpdateUserRoles() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_UPDATE_USER_ROLES
+    });
+  };
+};
+export function requestUpdateUserWorkgroups() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_UPDATE_USER_WORKGROUPS
+    });
+  };
+}
+export function receieveUpdateUserWorkgroups() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_UPDATE_USER_WORKGROUPS
+    });
+  };
+}
+export function requestWorkgroupsForIdentity() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_WORKGROUPS_FOR_IDENTITY
+    });
+  };
+}
+export function receiveWorkgroupsForIdentity(userId: number, workgroups: Array<Workgroup>) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_WORKGROUPS_FOR_IDENTITY,
+      userId,
+      workgroups
+    });
+  };
+}
+export function requestDeleteUser() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_DELETE_USER
+    });
+  };
+}
+export function receiveDeleteUser() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_DELETE_USER
+    });
+  };
+}
+export function requestReactivateUser() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_REACTIVATE_USER
+    });
+  };
+}
+export function receiveReactivateUser() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_REACTIVATE_USER
+    });
+  };
+}
+export function requestDeleteRole() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_DELETE_ROLE
+    });
+  };
+}
+export function receiveDeleteRole() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_DELETE_ROLE
+    });
+  };
+}
+export function enterNewUser() {
+  return (dispatch) => {
+    dispatch({
+      type: ENTER_NEW_USER
+    });
+  };
+}
+export function exitNewUser() {
+  return (dispatch) => {
+    dispatch({
+      type: EXIT_NEW_USER
+    });
+  };
+}
+export function enterNewRole() {
+  return (dispatch) => {
+    dispatch({
+      type: ENTER_NEW_ROLE
+    });
+  };
+}
+export function exitNewRole() {
+  return (dispatch) => {
+    dispatch({
+      type: EXIT_NEW_ROLE
+    });
+  };
+}
+export function requestCreateRole() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_CREATE_ROLE
+    });
+  };
+}
+export function receiveCreateRole(roleId) {
+  return ((dispatch) => {
+    dispatch({
+      type: RECEIVE_CREATE_ROLE,
+      roleId
+    });
+  });
+}
+export function requestCreateUser() {
+  return ((dispatch) => {
+    dispatch({
+      type: REQUEST_CREATE_USER
+    });
+  });
+}
+export function receiveCreateUser() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_CREATE_USER
+    });
+  };
+}
 export function resetUpdates() {
   return (dispatch, getState) => {
     dispatch({
@@ -139,7 +301,7 @@ function getProjects(dispatch): Promise<Array<any>> {
       dispatch(requestProjects());
       Remote.getProjects(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null);
+          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null));
           reject();
         }
         dispatch(receiveProjects(res));
@@ -154,7 +316,7 @@ function getUsers(dispatch): Promise<Array<Role>> {
       dispatch(requestUsers());
       Remote.getIdentities(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null);
+          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null));
           reject();
         }
         dispatch(receiveUsers(res));
@@ -172,7 +334,7 @@ function getRoles(dispatch): Promise<Array<Role>> {
       dispatch(requestRoleNames());
       Remote.getRoles(0, 1000, (error, res: any) => {
         if (error) {
-          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null);
+          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null));
           reject();
         }
         dispatch(receiveRoleNames(res));
@@ -185,14 +347,26 @@ function getRoles(dispatch): Promise<Array<Role>> {
 /***
  * @returns {Promise<T>|Promise}  { code:String, description:String, id:number }
  */
-function getPermissionDescriptions(): Promise<Array<Permission>> {
+function getPermissionDescriptionsAsync(dispatch): Promise<Array<Permission>> {
   return new Promise((resolve, reject) => {
     Remote.getAllPermissions((error, res) => {
       if (error) {
-        openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         reject(error);
       }
       resolve(res);
+    });
+  });
+}
+
+function sendCreateRoleRequestAsync(dispatch, name, description) {
+  return new Promise((resolve, reject) => {
+    Remote.createRole(name, description, (error, roleId) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        reject(error);
+      }
+      resolve(roleId);
     });
   });
 }
@@ -203,6 +377,103 @@ export function changeFilterSelections(id, selected) {
   };
 }
 
+export interface INewRolePermission {
+  permissionId: number,
+  isEnabled: boolean
+}
+export class NewRolePermission implements  INewRolePermission{
+  constructor(public permissionId: number, public isEnabled: boolean) { }
+}
+export function createRole(newRoleName: string, newRoleDescription: string, permissions: Array<INewRolePermission>) {
+  return (dispatch) => {
+    dispatch(requestCreateRole());
+    sendCreateRoleRequestAsync(dispatch, newRoleName, newRoleDescription).then((roleId: number) => {
+
+      let linkPromises: Array<Promise<any>> = [];
+
+      let permissionIdsToEnable = [];
+      for (let permission of permissions) {
+        if (permission.isEnabled) {
+          permissionIdsToEnable.push(permission.permissionId);
+        }
+      }
+
+      linkPromises.push(new Promise((resolve, reject) => {
+        Remote.linkRoleWithPermissions(roleId, permissionIdsToEnable, (error) => {
+          if (error) {
+            dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+            reject(error);
+          } else {
+            resolve(permissionIdsToEnable);
+          }
+        });
+      }));
+
+      Promise.all(linkPromises).then((p) => {
+        dispatch(receiveCreateRole(roleId));
+        dispatch(exitNewRole());
+      });
+    });
+  };
+}
+
+export interface INewUserDetails {
+  name: string,
+  password: string,
+  workgroupIds: Array<number>,
+  roleIds: Array<number>
+}
+export class NewUserDetails implements INewUserDetails {
+  constructor(public name: string, public password: string, public workgroupIds: Array<number>, public roleIds: Array<number>) {  }
+}
+export function createUser(newUserDetails: INewUserDetails) {
+  return (dispatch) => {
+    dispatch(requestCreateUser());
+    let linkPromises: Array<Promise<any>> = [];
+
+    Remote.createIdentity(newUserDetails.name, newUserDetails.password, (error, identityId) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Permission Error', error.toString(), null));
+        return;
+      }
+      for (let workgroupId of newUserDetails.workgroupIds) {
+        linkPromises.push(new Promise((resolve, reject) => {
+          Remote.linkIdentityWithWorkgroup(identityId, workgroupId, (error: Error) => {
+            if (error) {
+              dispatch(openNotification(NotificationType.Error, 'Permission Error', error.toString(), null));
+              reject(error);
+            } else {
+              resolve();
+            }
+          });
+        }));
+      }
+      for (let roleId of newUserDetails.roleIds) {
+        linkPromises.push(new Promise((resolve, reject) => {
+          Remote.linkIdentityWithRole(identityId, roleId, (error: Error) => {
+            if (error) {
+              dispatch(openNotification(NotificationType.Error, 'Permission Error', error.toString(), null));
+              reject(error);
+            } else {
+              resolve();
+            }
+          });
+        }));
+      }
+
+      Promise.all(linkPromises).then((value) => {
+        dispatch(receiveCreateUser());
+        dispatch(exitNewUser());
+        dispatch(fetchUsersWithRolesAndProjects());
+      });
+    });
+  };
+}
+
+export interface UserWithRolesAndProjects {
+  user: Identity,
+  roles: Array<Role>
+}
 export function fetchUsersWithRolesAndProjects() {
   return (dispatch, getState) => {
     dispatch(requestUsersWithRolesAndProjects());
@@ -246,7 +517,7 @@ export function fetchPermissionsWithRoles() {
   return (dispatch) => {
     dispatch(requestPermissionsByRole());
 
-    const descriptionsPromise = getPermissionDescriptions();
+    const descriptionsPromise = getPermissionDescriptionsAsync(dispatch);
 
     getRoles(dispatch).then((roles) => {
       let permissionRequests: Array<Promise<any>> = [];
@@ -254,7 +525,7 @@ export function fetchPermissionsWithRoles() {
         permissionRequests.push(new Promise(
           (resolve, reject) => Remote.getPermissionsForRole(role.id, (error, res) => {
             if (error) {
-              openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
+              dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null));
               reject();
             }
             resolve({
@@ -333,5 +604,215 @@ export function saveUpdatedPermissions(updates) {
         });
       }
     }
+  };
+}
+
+export function deleteUser(userId: number) {
+  return (dispatch) => {
+    dispatch(requestDeleteUser());
+    Remote.deactivateIdentity(userId, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Deactivate Error", error.toString(), null));
+        return;
+      }
+      dispatch(receiveDeleteUser());
+      dispatch(fetchUsersWithRolesAndProjects());
+    });
+  };
+}
+export function undeleteUser(userId: number) {
+  return (dispatch) => {
+    dispatch(requestReactivateUser());
+    Remote.activateIdentity(userId, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Activate Error", error.toString(), null));
+        return;
+      }
+      dispatch(receiveReactivateUser());
+      dispatch(fetchUsersWithRolesAndProjects());
+    });
+  };
+}
+export function deleteRole(roleId: number) {
+  return (dispatch) => {
+    dispatch(requestDeleteRole());
+    Remote.deleteRole(roleId, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Delete Error", error.toString(), null));
+        return;
+      }
+      dispatch(receiveDeleteRole());
+      getRoles(dispatch);
+      dispatch(fetchPermissionsWithRoles());
+      dispatch(fetchUsersWithRolesAndProjects());
+    });
+  };
+}
+
+export interface UserWithWorkgroups {
+  id: number
+  workgroups: Array<Workgroup>
+}
+export function fetchWorkgroupsForUserId(userId: number) {
+  return (dispatch) => {
+    dispatch(requestWorkgroupsForIdentity());
+    Remote.getWorkgroupsForIdentity(userId, (error, workgroups) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Delete Error", error.toString(), null));
+        return;
+      }
+      dispatch(receiveWorkgroupsForIdentity(userId, workgroups));
+    });
+  };
+}
+
+/***
+ * @param userId
+ * @param requestedEnabledWorkgroupIds Workgroup ids to be enabled for given user ID. Workgroup ids not included will be disabled for given userID
+ * @returns {(dispatch:any, getState:any)=>undefined}
+ */
+export function updateUserWorkgroups(userId: number, requestedEnabledWorkgroupIds: Array<number>) {
+  return (dispatch, getState) => {
+    dispatch(requestUpdateUserWorkgroups());
+
+    let state = getState();
+    let updatePromises: Array<Promise<any>> = [];
+
+    if (state.users.userWithWorkgroups.id !== userId) {
+      console.log("Invalid state: user change request does not match last fetch request"); //this line should never be reached
+      return;
+    }
+
+    let isRequestDifferentFromCurrentState: boolean;
+    let isCurrentlyEnabled: boolean;
+
+    for (let workgroup of state.projects.workgroups) {
+      isCurrentlyEnabled = false;
+      for (let currentlyAccessibleWorkgroup of state.users.userWithWorkgroups.workgroups) {
+        if (currentlyAccessibleWorkgroup.id === workgroup.id) {
+          isCurrentlyEnabled = true;
+        }
+      }
+
+      if (isCurrentlyEnabled) {
+        isRequestDifferentFromCurrentState = true;
+        for (let requestedEnabledWorkgroupId of requestedEnabledWorkgroupIds) {
+          if (requestedEnabledWorkgroupId === workgroup.id) {
+            isRequestDifferentFromCurrentState = false;
+          }
+        }
+      } else {
+        isRequestDifferentFromCurrentState = false;
+        for (let requestedEnabledWorkgroupId of requestedEnabledWorkgroupIds) {
+          if (requestedEnabledWorkgroupId === workgroup.id) {
+            isRequestDifferentFromCurrentState = true;
+          }
+        }
+      }
+      if (isRequestDifferentFromCurrentState) {
+
+        if (isCurrentlyEnabled) {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.unlinkIdentityFromWorkgroup(userId, workgroup.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        } else {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.linkIdentityWithWorkgroup(userId, workgroup.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        }
+      }
+    }
+    Promise.all(updatePromises).then((response) => {
+      dispatch(receieveUpdateUserWorkgroups());
+    });
+  };
+}
+
+/***
+ * @param userId
+ * @param requestedEnabledRoleIds Role ids to be enabled for given user ID. Role ids not included will be disabled for given userID
+ * @returns {(dispatch:any, getState:any)=>undefined}
+ */
+export function updateUserRoles(userId: number, requestedEnabledRoleIds: Array<number>) {
+  return (dispatch, getState) => {
+    dispatch(requestUpdateUserRoles());
+
+    let state = getState();
+    let updatePromises: Array<Promise<any>> = [];
+    let currentRoles: Array<Role>;
+
+    for (let userWithRoles of state.users.usersWithRolesAndProjects) {
+      if (userWithRoles.user.id === userId) {
+        currentRoles = userWithRoles.roles;
+      }
+    }
+
+    let isRequestDifferentFromCurrentState: boolean;
+    let isCurrentlyEnabled: boolean;
+
+    for (let role of state.users.roles) {
+      isCurrentlyEnabled = false;
+      for (let currentRole of currentRoles) {
+        if (currentRole.id === role.id) {
+          isCurrentlyEnabled = true;
+        }
+      }
+
+      if (isCurrentlyEnabled) {
+        isRequestDifferentFromCurrentState = true;
+        for (let requestedEnabledRoleId of requestedEnabledRoleIds) {
+          if (requestedEnabledRoleId === role.id) {
+            isRequestDifferentFromCurrentState = false;
+          }
+        }
+      } else {
+        isRequestDifferentFromCurrentState = false;
+        for (let requestedEnabledRoleId of requestedEnabledRoleIds) {
+          if (requestedEnabledRoleId === role.id) {
+            isRequestDifferentFromCurrentState = true;
+          }
+        }
+      }
+      if (isRequestDifferentFromCurrentState) {
+
+        if (isCurrentlyEnabled) {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.unlinkIdentityFromRole(userId, role.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        } else {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.linkIdentityWithRole(userId, role.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        }
+      }
+    }
+    Promise.all(updatePromises).then((response) => {
+      dispatch(receiveUpdateUserRoles());
+      dispatch(fetchUsersWithRolesAndProjects());
+    });
   };
 }
