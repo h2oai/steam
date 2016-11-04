@@ -18,15 +18,17 @@
 import * as React from 'react';
 import '../styles/users.scss';
 import DefaultModal from '../../App/components/DefaultModal';
-import {Identity, Workgroup} from "../../Proxy/Proxy";
-import {UserWithWorkgroups} from "../actions/users.actions";
+import {Identity, Workgroup, Role} from "../../Proxy/Proxy";
+import {UserWithWorkgroups, UserWithRolesAndProjects} from "../actions/users.actions";
 
 interface Props {
   userToEdit: Identity
   closeHandler: Function
   open: boolean
   workgroups: Array<Workgroup>
+  roles: Array<Role>
   userWithWorkgroups: UserWithWorkgroups
+  usersWithRolesAndProjects: Array<UserWithRolesAndProjects>
 }
 interface DispatchProps {
   fetchWorkgroups: Function,
@@ -36,14 +38,20 @@ interface InputWithWorkgroup {
   input: HTMLInputElement
   workgroup: Workgroup
 }
+interface InputWithRole {
+  input: HTMLInputElement
+  role: Role
+}
 
 export default class EditUserDialog extends React.Component<Props & DispatchProps, any> {
 
   inputsWithWorkgroups: Array<InputWithWorkgroup>;
+  inputsWithRoles: Array<InputWithRole>;
 
   constructor(props) {
     super(props);
     this.inputsWithWorkgroups = [];
+    this.inputsWithRoles = [];
   }
 
   registerWorkgroupInput = (input: HTMLInputElement, workgroup: Workgroup): void => {
@@ -51,6 +59,14 @@ export default class EditUserDialog extends React.Component<Props & DispatchProp
     this.inputsWithWorkgroups.push({
       input,
       workgroup
+    });
+  };
+
+  registerRoleInput = (input: HTMLInputElement, role: Role): void => {
+    if (!input) return;
+    this.inputsWithRoles.push({
+      input,
+      role
     });
   };
 
@@ -72,7 +88,7 @@ export default class EditUserDialog extends React.Component<Props & DispatchProp
   };
 
   arePropsReady = (): boolean => {
-    if (this.props.userWithWorkgroups && this.props.userToEdit) { //state exists
+    if (this.props.userWithWorkgroups && this.props.userToEdit && this.props.usersWithRolesAndProjects) { //state exists
       if (this.props.userWithWorkgroups.id === this.props.userToEdit.id) { //state is not stale
         return true;
       }
@@ -91,30 +107,56 @@ export default class EditUserDialog extends React.Component<Props & DispatchProp
     return toReturn;
   };
 
+  renderWorkgroupsList = () => {
+    return this.props.workgroups.map((workgroupToDisplay: Workgroup, index, array) => {
+      if (this.doesUserHaveAccessToWorkgroup(workgroupToDisplay, this.props.userWithWorkgroups.workgroups)) {
+        return <div key={index}>
+          <input type="checkbox" defaultChecked={true} ref={(input) => this.registerWorkgroupInput(input, workgroupToDisplay)} /> {workgroupToDisplay.name}
+        </div>;
+      } else {
+        return <div key={index}>
+          <input type="checkbox" defaultChecked={false} ref={(input) => this.registerWorkgroupInput(input, workgroupToDisplay)} /> {workgroupToDisplay.name}
+        </div>;
+      }
+    });
+  };
+
+  renderRolesList = () => {
+    function doesUserCurrentlyHaveRole(roleToDisplay: Role, usersCurrentRoles: Array<Role>): boolean {
+      for (let usersCurrentRole of usersCurrentRoles) {
+        if (roleToDisplay.id === usersCurrentRole.id) {
+          return true;
+        }
+      }
+    }
+
+    for (let userWithRoleAndProject of this.props.usersWithRolesAndProjects) {
+      if (userWithRoleAndProject.user.id === this.props.userToEdit.id) {
+        return this.props.roles.map((roleToDisplay: Role, index, array) => {
+          if (doesUserCurrentlyHaveRole(roleToDisplay, userWithRoleAndProject.roles)) {
+            return <div key={index}>
+              <input type="checkbox" defaultChecked={true} ref={(input) => this.registerRoleInput(input, roleToDisplay)} /> {roleToDisplay.name}
+            </div>;
+          } else {
+            return <div key={index}>
+              <input type="checkbox" defaultChecked={false} ref={(input) => this.registerRoleInput(input, roleToDisplay)} /> {roleToDisplay.name}
+            </div>;
+          }
+        });
+      }
+    }
+  };
+
   render(): React.ReactElement<DefaultModal> {
     this.inputsWithWorkgroups = [];
 
-    let workgroupsList;
-    if (this.arePropsReady()) {
-      workgroupsList = this.props.workgroups.map((workgroupToDisplay: Workgroup, index, array) => {
-        if (this.doesUserHaveAccessToWorkgroup(workgroupToDisplay, this.props.userWithWorkgroups.workgroups)) {
-          return <div key={index}>
-            <input type="checkbox" defaultChecked={true} ref={(input) => this.registerWorkgroupInput(input, workgroupToDisplay)} /> {workgroupToDisplay.name}
-          </div>;
-        } else {
-          return <div key={index}>
-            <input type="checkbox" defaultChecked={false} ref={(input) => this.registerWorkgroupInput(input, workgroupToDisplay)} /> {workgroupToDisplay.name}
-          </div>;
-        }
-      });
-    }
-
     return (
       <DefaultModal open={this.props.open}>
-        <h1>EDIT USER DETAILS</h1>
-        <br />&nbsp;
+        <h1>EDIT USER DETAILS</h1>&nbsp;
         <p> Give {this.props.userToEdit ? this.props.userToEdit.name : null} access to these workgroups:</p>
-        { workgroupsList }
+        { this.arePropsReady() ? this.renderWorkgroupsList() : null }
+        <p> Give {this.props.userToEdit ? this.props.userToEdit.name : null} access to these roles:</p>
+        { this.arePropsReady() ? this.renderRolesList() : null }
         <br />&nbsp;
         <div className="button-primary" onClick={this.onConfirmClicked}>Confirm</div>
         <div className="button-secondary" onClick={this.onCancelClicked}>Cancel</div>
