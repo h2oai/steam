@@ -25,7 +25,7 @@ import { connect } from 'react-redux';
 import '../styles/users.scss';
 import {
   fetchUsersWithRolesAndProjects, changeFilterSelections,
-  UserWithRolesAndProjects, deleteUser, undeleteUser, UserWithWorkgroups, fetchWorkgroupsForUserId, updateUserWorkgroups
+  UserWithRolesAndProjects, deleteUser, undeleteUser, UserWithWorkgroups, fetchWorkgroupsForUserId, updateUserWorkgroups, updateUserRoles
 } from "../actions/users.actions";
 import {Role, Identity, Project, Workgroup} from "../../Proxy/Proxy";
 import {fetchWorkgroups} from "../../Projects/actions/projects.actions";
@@ -48,6 +48,7 @@ interface DispatchProps {
   fetchWorkgroups: Function,
   fetchWorkgroupsForUserId: Function
   updateUserWorkgroups: Function
+  updateUserRoles: Function
 }
 
 export class UserAccess extends React.Component<Props & DispatchProps, any> {
@@ -159,7 +160,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="user-access intro">
-        <EditUserDialog open={this.state.editUserOpen} userToEdit={this.state.userToEdit} closeHandler={this.editUserCloseHandler} fetchWorkgroups={this.props.fetchWorkgroups} userWithWorkgroups={this.props.userWithWorkgroups } workgroups={this.props.workgroups} updateUserWorkgroups={this.props.updateUserWorkgroups} usersWithRolesAndProjects={this.props.usersWithRolesAndProjects} roles={this.props.roles} />
+        <EditUserDialog open={this.state.editUserOpen} userToEdit={this.state.userToEdit} closeHandler={this.editUserCloseHandler} fetchWorkgroups={this.props.fetchWorkgroups} fetchUsersWithRolesAndProjects={this.props.fetchUsersWithRolesAndProjects} userWithWorkgroups={this.props.userWithWorkgroups } workgroups={this.props.workgroups} updateUserWorkgroups={this.props.updateUserWorkgroups} updateUserRoles={this.props.updateUserRoles} usersWithRolesAndProjects={this.props.usersWithRolesAndProjects} roles={this.props.roles} />
         <div className="filter-and-list">
           <div className="filter-column">
             FILTERS
@@ -219,7 +220,8 @@ function mapDispatchToProps(dispatch) {
     undeleteUser: bindActionCreators(undeleteUser, dispatch),
     fetchWorkgroups: bindActionCreators(fetchWorkgroups, dispatch),
     fetchWorkgroupsForUserId: bindActionCreators(fetchWorkgroupsForUserId, dispatch),
-    updateUserWorkgroups: bindActionCreators(updateUserWorkgroups, dispatch)
+    updateUserWorkgroups: bindActionCreators(updateUserWorkgroups, dispatch),
+    updateUserRoles: bindActionCreators(updateUserRoles, dispatch)
   };
 }
 

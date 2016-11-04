@@ -32,7 +32,9 @@ interface Props {
 }
 interface DispatchProps {
   fetchWorkgroups: Function,
-  updateUserWorkgroups: Function
+  fetchUsersWithRolesAndProjects: Function,
+  updateUserWorkgroups: Function,
+  updateUserRoles: Function
 }
 interface InputWithWorkgroup {
   input: HTMLInputElement
@@ -52,6 +54,11 @@ export default class EditUserDialog extends React.Component<Props & DispatchProp
     super(props);
     this.inputsWithWorkgroups = [];
     this.inputsWithRoles = [];
+  }
+
+  componentWillMount() {
+    this.props.fetchWorkgroups();
+    this.props.fetchUsersWithRolesAndProjects();
   }
 
   registerWorkgroupInput = (input: HTMLInputElement, workgroup: Workgroup): void => {
@@ -76,14 +83,21 @@ export default class EditUserDialog extends React.Component<Props & DispatchProp
 
   onConfirmClicked = () => {
     let requestedEnableWorkgroupIds: Array<number> = [];
+    let requestedEnableRoleIds: Array<number> = [];
 
     for (let inputWithWorkgroup of this.inputsWithWorkgroups) {
       if (inputWithWorkgroup.input.checked) {
         requestedEnableWorkgroupIds.push(inputWithWorkgroup.workgroup.id);
       }
     }
+    for (let inputWithRole of this.inputsWithRoles) {
+      if (inputWithRole.input.checked) {
+        requestedEnableRoleIds.push(inputWithRole.role.id);
+      }
+    }
 
     this.props.updateUserWorkgroups(this.props.userToEdit.id, requestedEnableWorkgroupIds);
+    this.props.updateUserRoles(this.props.userToEdit.id, requestedEnableRoleIds);
     this.props.closeHandler();
   };
 

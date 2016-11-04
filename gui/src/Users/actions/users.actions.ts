@@ -53,7 +53,23 @@ export const REQUEST_WORKGROUPS_FOR_IDENTITY = 'REQUEST_WORKGROUPS_FOR_IDENTITY'
 export const RECEIVE_WORKGROUPS_FOR_IDENTITY = 'RECEIVE_WORKGROUPS_FOR_IDENTITY';
 export const REQUEST_UPDATE_USER_WORKGROUPS = 'REQUEST_UPDATE_USER_WORKGROUPS';
 export const RECEIVE_UPDATE_USER_WORKGROUPS = 'RECEIVE_UPDATE_USER_WORKGROUPS';
+export const REQUEST_UPDATE_USER_ROLES = 'REQUEST_UPDATE_USER_ROLES';
+export const RECEIVE_UPDATE_USER_ROLES = 'RECEIVE_UPDATE_USER_ROLES';
 
+export function requestUpdateUserRoles() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_UPDATE_USER_ROLES
+    });
+  };
+};
+export function receiveUpdateUserRoles() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_UPDATE_USER_ROLES
+    });
+  };
+};
 export function requestUpdateUserWorkgroups() {
   return (dispatch) => {
     dispatch({
@@ -720,6 +736,83 @@ export function updateUserWorkgroups(userId: number, requestedEnabledWorkgroupId
     }
     Promise.all(updatePromises).then((response) => {
       dispatch(receieveUpdateUserWorkgroups());
+    });
+  };
+}
+
+/***
+ * @param userId
+ * @param requestedEnabledRoleIds Role ids to be enabled for given user ID. Role ids not included will be disabled for given userID
+ * @returns {(dispatch:any, getState:any)=>undefined}
+ */
+export function updateUserRoles(userId: number, requestedEnabledRoleIds: Array<number>) {
+  return (dispatch, getState) => {
+    dispatch(requestUpdateUserRoles());
+
+    let state = getState();
+    let updatePromises: Array<Promise<any>> = [];
+    let currentRoles: Array<Role>;
+
+    for (let userWithRoles of state.users.usersWithRolesAndProjects) {
+      if (userWithRoles.user.id === userId) {
+        currentRoles = userWithRoles.roles;
+      }
+    }
+
+    let isRequestDifferentFromCurrentState: boolean;
+    let isCurrentlyEnabled: boolean;
+
+    for (let role of state.users.roles) {
+      isCurrentlyEnabled = false;
+      for (let currentRole of currentRoles) {
+        if (currentRole.id === role.id) {
+          isCurrentlyEnabled = true;
+        }
+      }
+
+      if (isCurrentlyEnabled) {
+        isRequestDifferentFromCurrentState = true;
+        for (let requestedEnabledRoleId of requestedEnabledRoleIds) {
+          if (requestedEnabledRoleId === role.id) {
+            isRequestDifferentFromCurrentState = false;
+          }
+        }
+      } else {
+        isRequestDifferentFromCurrentState = false;
+        for (let requestedEnabledRoleId of requestedEnabledRoleIds) {
+          if (requestedEnabledRoleId === role.id) {
+            isRequestDifferentFromCurrentState = true;
+          }
+        }
+      }
+      if (isRequestDifferentFromCurrentState) {
+
+        if (isCurrentlyEnabled) {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.unlinkIdentityFromRole(userId, role.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        } else {
+          updatePromises.push(new Promise((updateResolve, updateReject) => {
+            Remote.linkIdentityWithRole(userId, role.id, (error: Error) => {
+              if (error) {
+                updateReject();
+                return;
+              }
+              updateResolve();
+            });
+          }));
+        }
+      }
+    }
+    Promise.all(updatePromises).then((response) => {
+      dispatch(receiveUpdateUserRoles());
+      dispatch(fetchUsersWithRolesAndProjects());
     });
   };
 }
