@@ -190,7 +190,8 @@ public class MakeWarServlet extends HttpServlet {
         FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), rawfiles);
         modelCode = "MojoModel.load(fileName)";
       }
-      InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, replaceTransform, srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+      InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, replaceTransform, null,
+          srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
 
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictServlet.java", "PredictServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictBinaryServlet.java", "PredictBinaryServlet.java");

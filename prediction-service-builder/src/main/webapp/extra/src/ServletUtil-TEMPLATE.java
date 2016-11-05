@@ -23,6 +23,8 @@ import java.util.Map;
 class ServletUtil {
   private final static Logger logger = Logging.getLogger(ServletUtil.class);
 
+  public static String pythonEnvironmentFile = "REPLACE_WITH_PYTHON_ENVIRONMENT_FILE";
+
   private static List<String> modelNames = null;
 
   public static synchronized void loadModels(File servletPath) {

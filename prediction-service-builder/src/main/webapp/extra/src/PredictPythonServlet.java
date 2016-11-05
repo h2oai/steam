@@ -2,6 +2,9 @@ import java.io.*;
 import java.net.MalformedURLException;
 import javax.servlet.http.*;
 import javax.servlet.*;
+import java.util.Arrays;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +32,9 @@ public class PredictPythonServlet extends HttpServlet {
   private static final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
   private static File servletPath = null;
-  String[] colNames;
+  private String[] colNames;
+
+  private String pythonEnvironmentName = null;
 
   public void init(ServletConfig servletConfig) throws ServletException {
     super.init(servletConfig);
@@ -39,54 +44,79 @@ public class PredictPythonServlet extends HttpServlet {
       ServletUtil.loadModels(servletPath);
       model = ServletUtil.model;
       logger.debug("model {}", model);
+
+      String pythonEnvironmentFile = ServletUtil.pythonEnvironmentFile;
+      if (pythonEnvironmentFile != null && pythonEnvironmentFile.length() > 0) {
+        pythonEnvironmentName = pythonEnvironmentFile.replace(".yaml", "");
+        logger.info("setup python env {}", pythonEnvironmentName);
+        setupVirtualPythonEnv(pythonEnvironmentName, pythonEnvironmentFile);
+      }
+      else
+        logger.info("no python environment");
+
+      logger.info("start python with env {}", pythonEnvironmentName);
+      startPython(pythonEnvironmentName);
     }
-    catch (MalformedURLException e) {
+    catch (Exception e) {
       logger.error("init failed", e);
     }
   }
 
   private void setupVirtualPythonEnv(String envName, String envFile) throws Exception {
     logger.debug("setup virtual conda environment");
-    pb = new ProcessBuilder("source", "activate", envName);
-    pb.start();
-    int returnCode = pb.waitFor();
-    if (returnCode == 0) {
-      logger.info("python virtual environment {} already exists", envName);
-    }
-    else {
-      if (envFile == null) {
-        logger.info("creating python virtual environment {}", envName);
-        pb = new ProcessBuilder("conda", "create", "-n", envName);
-      }
-      else {
-        logger.info("creating python virtual environment {} with environment file {}", envName, envFile);
-        pb = new ProcessBuilder("conda", "env", "create", "-f", envFile, "-n", envName);
-      }
-      pb.redirectErrorStream(true); // send stderr to stdout
-      InputStream stdout = p.getInputStream();
-      reader = new BufferedReader(new InputStreamReader(stdout));
-      pb.start();
-      int returnCode = pb.waitFor();
-      if (returnCode == 0) {
-        logger.info("python environment {} created", envName);
-      }
-      else {
-        logger.error("Failed to create environemnt {}", envName);
-        showStdout(reader);
-        throw new Exception("Can't created virtual python environment " + envName + " env file " + envFile);
-      }
+
+    if (envFile == null || envFile.length() == 0|| envName == null || envFile.length() == 0) {
+      throw new Exception("envFile and envName can't be null or empty");
     }
 
+    // first we'll test if there's already an environment called envName
+//    pb = new ProcessBuilder("bash", "-c", "\"source activate " + envName + "\"");
+    pb = condaEnvProcess(envName, "");
+    Process proc = pb.start();
+    int returnCode = proc.waitFor(); // wait for process to finish
+    if (returnCode == 0) {
+      // there was an environment so we just return
+      logger.debug("conda virtual environment {} already exists", envName);
+      return;
+    }
+
+    logger.info("creating conda virtual environment {} with environment file {}", envName, envFile);
+    pb = new ProcessBuilder("conda", "env", "create", "-f", envFile, "-n", envName);
+    pb.redirectErrorStream(true); // send stderr to stdout
+    proc = pb.start();
+    InputStream stdout = proc.getInputStream();
+    reader = new BufferedReader(new InputStreamReader(stdout));
+    returnCode = proc.waitFor();
+    if (returnCode != 0) {
+      logger.error("Failed to create conda environemnt {}", envName);
+      showBuffer(reader);
+      throw new Exception("Can't create virtual conda environment " + envName + " env file " + envFile);
+    }
+
+    logger.debug("conda environment {} created", envName);
   }
 
-  private void startPython() throws Exception {
-    logger.debug("startPython");
+  private ProcessBuilder condaEnvProcess(String envName, String command) {
+    String cmd = "source activate " + envName;
+    if (command != null && !command.isEmpty())
+      cmd += "; " + command;
+//    cmd = "\"" + cmd + "\"";
+    List<String> list = Arrays.asList("sh", "-c", cmd);
+    logger.debug("list {}", list);
+    return new ProcessBuilder(list);
+  }
+
+  private void startPython(String envName) throws Exception {
+    logger.debug("startPython  envName " + envName);
     String program = servletPath.getAbsolutePath() + "/WEB-INF/python.py";
     logger.debug("program {}", program);
     // start the python process
     try {
       // score.py
-      pb = new ProcessBuilder("python", program);
+      if (envName != null)
+        pb = condaEnvProcess(envName, "python " + program);
+      else
+        pb = new ProcessBuilder("python", program);
       File pythonProcessDir = new File(servletPath, "/WEB-INF");
       pb.directory(pythonProcessDir);
       p = pb.start();
@@ -96,7 +126,7 @@ public class PredictPythonServlet extends HttpServlet {
       reader = new BufferedReader(new InputStreamReader(stdout));
       err_reader = new BufferedReader(new InputStreamReader(stderr));
       logger.info("Python started");
-    } catch (Exception ex) {
+   } catch (Exception ex) {
       logger.error("Python failed", ex);
       throw new Exception("Python failed");
     }
@@ -124,10 +154,10 @@ public class PredictPythonServlet extends HttpServlet {
     try {
       // restart if python failed
       if (p == null) {
-        logger.info("python process not started, trying again");
-        startPython();
-
+        logger.info("python process has crashed, trying to run again");
+        startPython(pythonEnvironmentName);
       }
+
       try {
         logger.debug("send {}", queryString);
         stdin.write(queryString.getBytes());
@@ -140,20 +170,20 @@ public class PredictPythonServlet extends HttpServlet {
         String msg = "ERROR IOException in sendPython";
         result = msg;
         logger.error(msg, e);
-        showStderr();
+        showBuffer(err_reader);
         // it failed so we restart it and retry
 //        if (p != null) p.destroy();
-//        startPython();
+//        startPython(pythonEnvironmentName);
 //        stdin.write(queryString.getBytes());
 //        stdin.write(NewlineByteArray);
 //        stdin.flush();
 //        result = reader.readLine();
       }
-//        showStderr(err_reader);
+//        showBuffer(err_reader);
     }
     catch (Exception ex) {
       logger.error("sendPython failed", ex);
-      showStderr(err_reader);
+      showBuffer(err_reader);
     }
     return result;
   }
@@ -195,25 +225,14 @@ public class PredictPythonServlet extends HttpServlet {
     logger.debug("Python Get time {}", ServletUtil.getPythonTimes);
   }
 
-  private void showStderr(BufferedReader err_reader) {
-    String line;
-    try {
-      while ((line=err_reader.readLine())!=null) {
-        logger.info(line);
-      }
-    } catch (Exception ex2) {
-      logger.error("showStderr failed", ex2);
-    }
-  }
-
-  private void showStdout(BufferedReader reader) {
+  private void showBuffer(BufferedReader reader) {
     String line;
     try {
       while ((line=reader.readLine())!=null) {
         logger.info(line);
       }
     } catch (Exception ex2) {
-      logger.error("showStdout failed", ex2);
+      logger.error("showBuffer failed", ex2);
     }
   }
 
