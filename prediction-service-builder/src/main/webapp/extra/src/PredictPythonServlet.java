@@ -21,7 +21,6 @@ import com.google.gson.Gson;
 public class PredictPythonServlet extends HttpServlet {
   private final Logger logger = Logging.getLogger(this.getClass());
 
-//  private static GenModel rawModel = ServletUtil.rawModel;
   private static EasyPredictModelWrapper model = ServletUtil.model;
 
   private static Process p = null;
@@ -62,6 +61,14 @@ public class PredictPythonServlet extends HttpServlet {
     }
   }
 
+  /**
+   * Setup virtual Anaconda Python environemnt.
+   * Note that only Anaconda Python works and it does not work on Windows.
+   *
+   * @param envName
+   * @param envFile
+   * @throws Exception
+   */
   private void setupVirtualPythonEnv(String envName, String envFile) throws Exception {
     logger.debug("setup virtual conda environment");
 
@@ -70,7 +77,6 @@ public class PredictPythonServlet extends HttpServlet {
     }
 
     // first we'll test if there's already an environment called envName
-//    pb = new ProcessBuilder("bash", "-c", "\"source activate " + envName + "\"");
     pb = condaEnvProcess(envName, "");
     Process proc = pb.start();
     int returnCode = proc.waitFor(); // wait for process to finish
@@ -100,7 +106,6 @@ public class PredictPythonServlet extends HttpServlet {
     String cmd = "source activate " + envName;
     if (command != null && !command.isEmpty())
       cmd += "; " + command;
-//    cmd = "\"" + cmd + "\"";
     List<String> list = Arrays.asList("sh", "-c", cmd);
     logger.debug("list {}", list);
     return new ProcessBuilder(list);
@@ -112,7 +117,6 @@ public class PredictPythonServlet extends HttpServlet {
     logger.debug("program {}", program);
     // start the python process
     try {
-      // score.py
       if (envName != null)
         pb = condaEnvProcess(envName, "python " + program);
       else
