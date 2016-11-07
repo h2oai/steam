@@ -166,9 +166,18 @@ These example scripts generate a War file and then start the prediction
 service at http://localhost:55001 using a subset of either the airline
 or spam-detection dataset.
 
+Using example-python.sh
+~~~~~~~~~~~~~~~~~~~~~~~
+
 **Note**: If you run the example-python.sh and run-example-python.sh
 files, be sure to install textblob (``pip install textblob``) so that
 the python example runs properly.
+
+To help ensure that all libraries are installed for python, there's an optional file that can be sent
+to makewarpython. Set the form field envfile to the content of this file. This file has to be an Anaconda Python
+environment specification YAML file. A Conda environment will be created with the same name as this filename,
+except the .yaml extension. For example, if the file is names spam-python.yaml, the conda environment will be named
+spam-python. example-envfile.sh is an example of how to use this feature.
 
 Making Predictions
 ------------------

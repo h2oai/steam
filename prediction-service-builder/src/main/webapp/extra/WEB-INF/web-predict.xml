@@ -10,6 +10,7 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     <servlet>
         <servlet-name>PredictBinary</servlet-name>
         <servlet-class>PredictBinaryServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
         <servlet-name>Info</servlet-name>
