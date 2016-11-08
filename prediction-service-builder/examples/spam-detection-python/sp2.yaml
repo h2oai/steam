@@ -18,5 +18,4 @@ dependencies:
   - scipy==0.18.1
   - sklearn==0.0
   - textblob==0.11.1
-prefix: /Users/magnus/anaconda/envs/python-spam
 
