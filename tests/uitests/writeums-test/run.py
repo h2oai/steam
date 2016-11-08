@@ -91,8 +91,8 @@ def createUserTest(driver):
 		print "Couldn't click create user"
 		return False
 	try:
-		tu.createUser(driver, "billy", "bobben", ["Superuser"], [])
-		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell' and text()='billy']"))
+		tu.createUser(driver, "rach", "bobben", ["Superuser"], [])
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell' and text()='rach']"))
 	except:
 		print "Failed to create user through UI"
 		return False

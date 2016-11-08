@@ -46,7 +46,8 @@ def compBinTest(driver):
 	try:
 		tu.viewModel(driver, "third")
 		tu.compareToModel(driver, "second")
-	except:
+	except Exception as e:
+		print e
 		print "Failed to compare third to second (GLM binomial models)"
 		return False	
 
@@ -61,7 +62,9 @@ def compMultiTest(driver):
 		print "Failed to setup multinomial comparison test"
 		return False
 	try:
+		print "cool"
 		tu.viewModel(driver, "multinom")
+		print "viewed it"
 		tu.compareToModel(driver, "valimon")
 	except:
 		print "Failed to compare multinom to valimon (GLM multinomial models)"
