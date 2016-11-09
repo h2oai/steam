@@ -114,6 +114,8 @@ def createRoleTest(driver):
 		print e
 		print "Failed to create role through UI"
 		return False
+	try:
+		
 
 	return True
 
@@ -129,6 +131,8 @@ def main():
 	if not createUserTest(d):
 		failcount += 1
 	if not createRoleTest(d):
+		failcount += 1
+	if not createRoleUserTest(d):
 		failcount += 1
 
 	tu.endtest(d)
