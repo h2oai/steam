@@ -174,10 +174,17 @@ files, be sure to install textblob (``pip install textblob``) so that
 the python example runs properly.
 
 To help ensure that all libraries are installed for python, there's an optional file that can be sent
-to makewarpython. Set the form field envfile to the content of this file. This file has to be an Anaconda Python
+to makewarpython. Set the form field envfile to the contents of this file. This file has to be an Anaconda Python
 environment specification YAML file. A Conda environment will be created with the same name as this filename,
 except the .yaml extension. For example, if the file is names spam-python.yaml, the conda environment will be named
 spam-python. example-envfile.sh is an example of how to use this feature.
+
+To create the YAML environment file, do
+    conda env export > sp2.yaml
+
+To test the environment file you can create a new one with
+    conda env create -f sp2.yaml -n newenv
+which creates a new Anaconda environment using the sp2.yaml environment specification.
 
 Making Predictions
 ------------------
