@@ -3,7 +3,7 @@ User Management Overview
 
 Before using Steam, it is important to understand User Management within
 your YARN environment. In Steam, User Management is supported in a
-PostgreSQL database. The User Management functions in Steam determine
+database. The User Management functions in Steam determine
 the level of access that users have for Steam features. The Steam
 database supports setup via CLI commands. Refer to the `CLI Command
 Reference Appendix <CLIAppendix.html>`__ for a list of all
