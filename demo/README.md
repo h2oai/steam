@@ -397,9 +397,19 @@ The Users page includes a list of all users are have been added to the Steam dat
 
 ![Users page](images/users.png)
 
-The Roles tab provides a table of the permissions assigned to each role.
+The Roles tab provides a table of the permissions assigned to each role. The information in this table is viewable only to users with appropriate privileges.
 
 ![Roles tab](images/roles_tab.png)
+
+## Changing Permissions
+
+Superusers can add or remove permissions for each role directly on this page. Select the checkbox for the correspoding permission and role that you want to change, then click **Review Changes** at the bottom of the page. A popup displays, providing you with a summary of the changes.
+
+![Confirm changes](images/update_permissions_confirm.png)
+
+Click the **Confirm** button beside each change that you want to make, then click **Save Changes** to complete the update.
+
+![Save changes](images/update_permissions_save.png)
 
    
 # <a name="usesteamwithflow"></a>Using Steam with H2O Flow
