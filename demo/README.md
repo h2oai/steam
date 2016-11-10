@@ -397,9 +397,19 @@ The Users page includes a list of all users are have been added to the Steam dat
 
 ![Users page](images/users.png)
 
-The Roles tab provides a table of the permissions assigned to each role.
+The Roles tab provides a table of the permissions assigned to each role. The information in this table is viewable only to users with appropriate privileges.
 
 ![Roles tab](images/roles_tab.png)
+
+## Changing Permissions
+
+Superusers can add or remove permissions for each role directly on this page. Select the checkbox for the correspoding permission and role that you want to change, then click **Review Changes** at the bottom of the page. A popup displays, providing you with a summary of the changes.
+
+![Confirm changes](images/update_permissions_confirm.png)
+
+Click the **Confirm** button beside each change that you want to make, then click **Save Changes** to complete the update.
+
+![Save changes](images/update_permissions_save.png)
 
    
 # <a name="usesteamwithflow"></a>Using Steam with H2O Flow
@@ -949,7 +959,7 @@ The following example deletes workgroup 3 from the database. Note that you can u
 
 **Description**
 
-Retrieves a list of cluster types that are available in Steam along with the corresponding code. Note that these cluster types are currently hard coded into Steam.
+Retrieves a list of cluster types that are available in Steam along with the corresponding code. 
 
 **Usage**
 
@@ -976,7 +986,7 @@ The following example retrieves a list of the Steam cluster types.
 
 **Description**
 
-Retrieves a list of entity types that are available in Steam along with the corresponding code. Note that these entity types are currently hard coded into Steam.
+Retrieves a list of entity types that are available in Steam along with the corresponding code. 
 
 **Usage**
 
@@ -1012,7 +1022,9 @@ The following example retrieves a list of Steam entity types.
 
 **Description**
 
-Retrieves a list of permissions available in Steam along with the corresponding code. These permissions are currently hard coded into Steam.
+Retrieves a list of permissions available in Steam along with the corresponding code. A permission code is used when linking roles to permissions.
+
+Note that permission IDs are randomly generated during installation, and the IDs will vary between Steam installations. 
 
 **Usage**
 

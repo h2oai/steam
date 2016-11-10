@@ -25,8 +25,7 @@ import { Project, UserRole } from '../../Proxy/Proxy';
 import { fetchEntityIds } from '../../App/actions/global.actions';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-import {ClusterStatus, Cluster} from "../../Proxy/Proxy";
-import {Model} from "../../Proxy/Proxy";
+import { ClusterStatus, Cluster, Model, Workgroup } from "../../Proxy/Proxy";
 export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
@@ -43,7 +42,34 @@ export const RECEIVE_PROJECT = 'RECEIVE_PROJECT';
 export const REQUEST_DELETE_PROJECT = 'REQUEST_DELETE_PROJECT';
 export const RECEIVE_DELETE_PROJECT = 'RECEIVE_DELETE_PROJECT';
 export const REGISTER_CLUSTER_ERROR = 'REGISTER_CLUSTER_ERROR';
+export const RECEIVE_WORKGROUPS = 'RECEIVE_WORKGROUPS';
+export const REQUEST_DELETE_WORKGROUP = 'REQUEST_DELETE_WORKGROUP';
+export const RECEIVE_DELETE_WORKGROUP = 'RECEIVE_DELETE_WORKGROUP';
+export const REQUEST_CREATE_WORKGROUP = 'REQUEST_CREATE_WORKGROUP';
+export const RECEIVE_CREATE_WORKGROUP = 'RECEIVE_CREATE_WORKGROUP';
 
+export function requestCreateWorkgroup() {
+  return {
+    type: REQUEST_CREATE_WORKGROUP
+  };
+};
+export function receiveCreateWorkgroup() {
+  return {
+    type: RECEIVE_CREATE_WORKGROUP
+  };
+};
+export function requestDeleteWorkgroup(workgroupId) {
+  return {
+    type: REQUEST_DELETE_WORKGROUP,
+    workgroupId
+  };
+};
+export function receiveDeleteWorkgroup(workgroupId) {
+  return {
+    type: RECEIVE_DELETE_WORKGROUP,
+    workgroupId
+  };
+};
 export function requestDeleteProject(projectId: number) {
   return {
     type: REQUEST_DELETE_PROJECT,
@@ -109,7 +135,7 @@ export function fetchClusters() {
 function _fetchClusters(dispatch, getState) {
     Remote.getClusters(0, 1000, (error, clusters: Cluster[]) => {
       if (error) {
-        openNotification(NotificationType.Error, "Load Error", error.toString(), null);
+        dispatch(openNotification(NotificationType.Error, "Load Error", error.toString(), null));
         return;
       }
 
@@ -122,7 +148,7 @@ function _fetchClusters(dispatch, getState) {
         identityPromises.push(new Promise((resolve, reject) => {
           Remote.getIdentitiesForEntity(state.global.entityIds.cluster, cluster.id, (identitiesError: Error, users: UserRole[]) => {
             if (identitiesError) {
-              openNotification(NotificationType.Error, "Load Error", identitiesError.toString(), null);
+              dispatch(openNotification(NotificationType.Error, "Load Error", identitiesError.toString(), null));
               reject(identitiesError.toString());
               return;
             }
@@ -130,7 +156,7 @@ function _fetchClusters(dispatch, getState) {
             detailsPromise.push(new Promise((resolve, reject) => {
               Remote.getClusterStatus(cluster.id, (statusError: Error, clusterStatus: ClusterStatus) => {
                 if (statusError) {
-                  openNotification(NotificationType.Error, "Load Error", statusError.toString(), null);
+                  dispatch(openNotification(NotificationType.Error, "Load Error", statusError.toString(), null));
                   reject(statusError.toString());
                   return;
                 }
@@ -174,7 +200,6 @@ export function receiveProject(project) {
     project
   };
 }
-
 export function importModelFromClusterCompleted(model) {
   return {
     type: IMPORT_MODEL_FROM_CLUSTER_COMPLETED,
@@ -189,6 +214,13 @@ export function receiveProjects(projects) {
   return {
     type: RECEIVE_PROJECTS,
     projects
+  };
+}
+
+export function receiveWorkgroups(workgroups) {
+  return {
+    type: RECEIVE_WORKGROUPS,
+    workgroups
   };
 }
 
@@ -265,19 +297,38 @@ export function fetchDatasetsFromCluster(clusterId: number) {
   };
 }
 
-export function createProject(name: string, modelCategory: string) {
-  return (dispatch) => {
-    return new Promise((resolve, reject) => {
-      Remote.createProject(name, '', modelCategory, (error, res) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
-          reject(error);
-          return;
-        }
+export function createProjectAsync(dispatch, name: string, modelCategory: string) {
+  return new Promise((resolve, reject) => {
+    Remote.createProject(name, '', modelCategory, (error, res) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        reject(error);
+        return;
+      }
+      createWorkgroupAsync(dispatch, name).then(() => {
         dispatch(createProjectCompleted(res));
         resolve(res);
       });
     });
+  });
+}
+export function createWorkgroupAsync(dispatch, name: string) {
+  return new Promise((resolve, reject) => {
+    dispatch(requestCreateWorkgroup());
+    Remote.createWorkgroup(name, name, (error: Error, workgroupId: number) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Create Error', error.toString(), null));
+        reject(error);
+        return;
+      }
+      dispatch(receiveCreateWorkgroup());
+      resolve();
+    });
+  });
+}
+export function createProject(name: string, modelCategory: string) {
+  return (dispatch) => {
+    createProjectAsync(dispatch, name, modelCategory);
   };
 }
 
@@ -341,25 +392,25 @@ export function importModelFromCluster(clusterId: number, projectId: number, mod
 
     importModelFromClusterAsync(clusterId, projectId, modelName)
       .then((modelId: number) => getAlgoAsync(modelId))
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)))
       .then((algoRes: any) => checkCanMojoAsync(algoRes.algo, algoRes.modelId))
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null))
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)))
       .then((canMojoRes: any) => {
         if (canMojoRes.canMojo && localStorage.getItem("mojoPojoSelection") !== "pojo") {
           importMojoAsync(canMojoRes.modelId)
             .then(() => {
               dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
             })
-            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+            .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
         } else {
           importPojoAsync(canMojoRes.modelId)
             .then(() => {
               dispatch(importModelFromClusterCompleted(canMojoRes.modelId));
             })
-            .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+            .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
         }
       })
-      .catch((error) => openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+      .catch((error) => dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null)));
     };
 }
 
@@ -380,8 +431,8 @@ export function importModelsFromCluster(clusterId: number, projectId: number, mo
 export function createProjectAndImportModelsFromCluster(projectName: string, clusterId: number, modelCategory: string, models: string[]) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {
-      dispatch(createProject(projectName, modelCategory)).then((projectId) => {
-        dispatch(importModelsFromCluster(clusterId, projectId, models)).then(() => {
+      createProjectAsync(dispatch, projectName, modelCategory).then((projectId) => {
+        dispatch(importModelsFromCluster(clusterId, projectId as number, models)).then(() => {
           resolve(projectId);
         });
       });
@@ -437,17 +488,67 @@ export function fetchProjects() {
   };
 }
 
-export function deleteProject(projectId: number) {
-  return (dispatch) => {
-    dispatch(requestDeleteProject(projectId));
-    Remote.deleteProject(projectId, (error) => {
+function deleteWorkgroupAsync(dispatch, workgroupId) {
+  return new Promise((deleteWorkgroupResolve, deleteWorkgroupReject) => {
+    dispatch(requestDeleteWorkgroup(workgroupId));
+    Remote.deleteWorkgroup(workgroupId, (error: Error) => {
       if (error) {
-        dispatch(openNotification(NotificationType.Error, 'Delete error', error.toString(), null));
-        dispatch(receiveDeleteProject(projectId, false));
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        deleteWorkgroupReject(error);
         return;
       }
-      dispatch(receiveDeleteProject(projectId, true));
-      dispatch(fetchProjects());
+      dispatch(receiveDeleteWorkgroup(workgroupId));
+      deleteWorkgroupResolve(workgroupId);
+    });
+  });
+}
+function fetchWorkgroupsAsync(dispatch) {
+  return new Promise((fetchWorkgroupResolve, fetchWorkgroupReject) => {
+    Remote.getWorkgroups(0, 1000, (error, res) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+        fetchWorkgroupReject();
+        return;
+      }
+      dispatch(receiveWorkgroups(<Workgroup[]> res));
+      fetchWorkgroupResolve(res);
+    });
+  });
+}
+export function fetchWorkgroups() {
+  return (dispatch) => {
+    fetchWorkgroupsAsync(dispatch);
+  };
+}
+
+export function deleteProject(projectId: number) {
+  return (dispatch, getState) => {
+    fetchWorkgroupsAsync(dispatch).then((workgroups) => {
+      dispatch(requestDeleteProject(projectId));
+
+      let deleteWorkgroupPromises = [];
+      let state = getState();
+      for (let project of state.projects.availableProjects) {
+        if (project.id === projectId) {
+          for (let workgroup of workgroups as Array<Workgroup>) {
+            if (workgroup.name === project.name) {
+              deleteWorkgroupPromises.push(deleteWorkgroupAsync(dispatch, workgroup.id));
+            }
+          }
+        }
+      }
+
+      Promise.all(deleteWorkgroupPromises).then((dwpResult) => {
+        Remote.deleteProject(projectId, (error) => {
+          if (error) {
+            dispatch(openNotification(NotificationType.Error, 'Delete error', error.toString(), null));
+            dispatch(receiveDeleteProject(projectId, false));
+            return;
+          }
+          dispatch(receiveDeleteProject(projectId, true));
+          dispatch(fetchProjects());
+        });
+      });
     });
   };
 }

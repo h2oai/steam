@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 source bash_unit_tests.sh
 
 (cd .. && ./gradlew build) || exit 1
@@ -45,9 +47,9 @@ echo "Building and testing spam-prejar prediction service"
 (cd spam-prejar  && bash build.sh) || exit 1
 (cd spam-prejar  && bash test_suite.sh) || exit 1
 
-echo "Building and testing compile to jar"
-(cd compile  && bash compile.sh) || exit 1
-(cd compile  && bash test_suite.sh) || exit 1
+# echo "Building and testing compile to jar"
+# (cd compile  && bash compile.sh) || exit 1
+# (cd compile  && bash test_suite.sh) || exit 1
 
 # kill process
 echo "Stopping building server"

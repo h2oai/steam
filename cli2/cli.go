@@ -31,6 +31,7 @@ import (
 //   supplied Cobra context.
 func registerGeneratedCommands(c *context, cmd *cobra.Command) {
 	cmd.AddCommand(
+		activate(c),
 		add(c),
 		build(c),
 		check(c),
@@ -53,6 +54,51 @@ func registerGeneratedCommands(c *context, cmd *cobra.Command) {
 		unshare(c),
 		update(c),
 	)
+}
+
+var activateHelp = `
+activate [?]
+Activate entities
+Commands:
+
+    $ steam activate identity ...
+`
+
+func activate(c *context) *cobra.Command {
+	cmd := newCmd(c, activateHelp, nil)
+
+	cmd.AddCommand(activateIdentity(c))
+	return cmd
+}
+
+var activateIdentityHelp = `
+identity [?]
+Activate Identity
+Examples:
+
+    Activate an identity
+    $ steam activate identity \
+        --identity-id=?
+
+`
+
+func activateIdentity(c *context) *cobra.Command {
+	var identityId int64 // Integer ID of an identity in Steam.
+
+	cmd := newCmd(c, activateIdentityHelp, func(c *context, args []string) {
+
+		// Activate an identity
+		err := c.remote.ActivateIdentity(
+			identityId, // Integer ID of an identity in Steam.
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return
+	})
+
+	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
+	return cmd
 }
 
 var addHelp = `
