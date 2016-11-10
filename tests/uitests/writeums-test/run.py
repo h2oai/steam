@@ -114,9 +114,33 @@ def createRoleTest(driver):
 		print e
 		print "Failed to create role through UI"
 		return False
-	try:
 		
 
+	return True
+
+def createRoleUserTest(driver):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		tu.goUsers(driver)
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Create Role']"))
+		driver.find_element_by_xpath("//div[text()='Create Role']").click()
+	except:
+		print "Failed to view 'Create Role' page"
+		return False
+	try:
+		tu.createRoleUI(driver, "future", "future", [1, 4, 5, 7])
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell center-text' and text()='future']"))
+	except:
+		print "Failed to create role 'future'"
+		return False
+	try:
+		driver.find_element_by_xpath("//div[text()='Create User']").click()
+		tu.createUser(driver, "morg", "morg", ["future"], [])
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell' and text()='morg']"))
+		wait.until(lambda x: x.find_element_by_xpath("//span[text()='future']"))
+	except:
+		print "Failed to create user with role 'future'"
+		return False
 	return True
 
 def main():
