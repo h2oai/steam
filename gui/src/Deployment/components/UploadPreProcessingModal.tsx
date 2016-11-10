@@ -47,8 +47,13 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     this.state = {
       mainFiles: '',
       libraryFiles: [],
+      condaFiles: [],
       missingPackageNameError: false,
-      packageNamed: false
+      packageNamed: false,
+      showTooltipMain: false,
+      showTooltipLibrary: false,
+      showTooltipConfig: false,
+      showTooltipName: false
     };
   }
 
@@ -60,6 +65,10 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     $('input[name="selectLibraries"]').click();
   }
 
+  selectConda() {
+    $('input[name="selectConda"]').click();
+  }
+
   selectMainHandler(event) {
     this.setState({
       mainFiles: event.target.files[0]
@@ -69,6 +78,12 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
   selectLibrariesHandler(event) {
     this.setState({
       libraryFiles: Array.prototype.slice.call(event.target.files)
+    });
+  }
+
+  selectCondaHandler(event) {
+    this.setState({
+      condaFiles: event.target.files[0]
     });
   }
 
@@ -94,6 +109,54 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     }
   };
 
+  onMainTooltipOver = () => {
+    this.setState({
+      showTooltipMain: true
+    });
+  };
+
+  onMainTooltipOut = () => {
+    this.setState({
+      showTooltipMain: false
+    });
+  };
+
+  onLibraryTooltipOver = () => {
+    this.setState({
+      showTooltipLibrary: true
+    });
+  };
+
+  onLibraryTooltipOut = () => {
+    this.setState({
+      showTooltipLibrary: false
+    });
+  };
+
+  onCondaTooltipOver = () => {
+    this.setState({
+      showTooltipConda: true
+    });
+  };
+
+  onCondaTooltipOut = () => {
+    this.setState({
+      showTooltipConda: false
+    });
+  };
+
+  onNameTooltipOver = () => {
+    this.setState({
+      showTooltipName: true
+    });
+  };
+
+  onNameTooltipOut = () => {
+    this.setState({
+      showTooltipName: true
+    });
+  };
+
   render(): React.ReactElement<DefaultModal> {
     let disableSubmit = false;
     if (this.state.libraryFiles.length < 1 || !this.state.mainFiles || !this.state.packageNamed) {
@@ -113,7 +176,10 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                   SELECT PYTHON MAIN
                 </Cell>
                 <Cell>
-                  <div>Select a main Python file for pre-processing.</div>
+                  <div>
+                    Select a main Python file for pre-processing. &nbsp; <i className="fa fa-question-circle-o orange" aria-hidden="true" onMouseEnter={this.onMainTooltipOver} onMouseLeave={this.onMainTooltipOut}></i>
+                    <div>The output from this Python file should be one of row of an H2O data form that your model is expecting.</div>
+                  </div>
                   <span className="muted">The output from this Python file should be one row of an H2O data from that your model is expecting.</span>
                   <div className="upload">
                     <div className="upload-info" onClick={this.selectMain.bind(this)}>
@@ -134,7 +200,10 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                   SELECT PYTHON LIBRARIES
                 </Cell>
                 <Cell>
-                  <div>Select a one or more Python files for your library.</div>
+                  <div>
+                    Select a one or more Python files for your library. &nbsp; <i className="fa fa-question-circle-o orange" aria-hidden="true" onMouseEnter={this.onLibraryTooltipOver} onMouseLeave={this.onLibraryTooltipOut} />
+                    <div>Any non-standard libraries called here should be installed into your deployment environment prior to launching services</div>
+                  </div>
                   <span className="muted">Any non-standard libraries called here should be installed into your deployment environment prior to launching services.</span>
                   <div className="upload">
                     <div className="upload-info" onClick={this.selectLibraries.bind(this)}>
@@ -152,12 +221,42 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                   </div>
                 </Cell>
               </Row>
+
+              <Row>
+                <Cell>
+                  SELECT CONDA CONFIG
+                </Cell>
+                <Cell>
+                  <div>
+                    Pick a .yaml file that defines your conda environment. &nbsp; <i className="fa fa-question-circle-o orange" aria-hidden="true" onMouseEnter={this.onCondaTooltipOver} onMouseLeave={this.onCondaTooltipOver} />
+                  </div>
+                  <div>
+                    you can get this file by doing this in your commandline of conda environment
+                    <p>$ conda env export > mypackage.yaml</p>
+                  </div>
+                  <span className="muted">Any non-standard libraries called here should be installed into your deployment environment prior to launching services.</span>
+                  <div className="upload">
+                    <div className="upload-info" onClick={this.selectConda.bind(this)}>
+                      <span>
+                        <i className="fa fa-folder-o"/>
+                      </span>
+                      <span className="file-list">{this.state.condaFiles ? this.state.condaFiles.name : 'N/A'}</span>
+                      <span>
+                        <i className="fa fa-close"/>
+                      </span>
+                      <input type="file" name="selectConda" onChange={this.selectCondaHandler.bind(this)} />
+                    </div>
+                  </div>
+                </Cell>
+              </Row>
+
               <Row>
                 <Cell>
                   NAME THE PACKAGE
                 </Cell>
                 <Cell>
-                  <div>Pick a name for this pre-processing package. You will use it as a reference when deploying models.</div>
+                  <div>Pick a name for this pre-processing package.</div> &nbsp; <i className="fa fa-question-circle-o orange" aria-hidden="true" onMouseEnter={this.onNameTooltipOver} onMouseLeave={this.onNameTooltipOut} />
+                  <div>You will use it as a reference when deploying models.</div>
                   <div className="package-name-label muted">Package name</div>
                   <input ref="packageName" type="text" className={classNames('package-name', {error: this.state.missingPackageNameError})} onChange={this.onPackageNameChanged} />
                 </Cell>
