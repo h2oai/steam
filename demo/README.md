@@ -375,7 +375,7 @@ The **Clusters** page shows all H2O clusters that Steam is connected to along wi
 ![Steam Clusters page](images/cluster_page.png)
 
 
-## Launch a New Cluster
+## <a name="launchcluster"></a>Launch a New Cluster
 
 You can connect to additional clusters that are running H2O by clicking the **Launch New Cluster** button.
 
@@ -393,15 +393,59 @@ You can connect to additional clusters that are running H2O by clicking the **La
 
 # Users
 
-The Users page includes a list of all users are have been added to the Steam database along with the user's role. Note that currently, only Steam superusers can add users and roles. 
+The Users page includes a list of all users are have been added to the Steam database along with the user's role. From this page, Steam superusers can add, edit, and deactivate users and roles. 
 
 ![Users page](images/users.png)
 
-The Roles tab provides a table of the permissions assigned to each role. The information in this table is viewable only to users with appropriate privileges.
+The Roles tab provides a table of the permissions assigned to each role. The information in this table is viewable only to users with appropriate privileges. 
 
 ![Roles tab](images/roles_tab.png)
 
-## Changing Permissions
+## <a name="createroles"></a>Creating Roles
+
+Roles must be created before users can be added to Steam. 
+
+1. To create a new role, click on the **Create Role** button. 
+2. Specify a name and description for the role, then select the permissions that will be granted to the role. 
+3. Click **Create Role** at the bottom of the form when you are done.
+
+![Create role](images/create_role.png)
+
+## <a name="deleteroles"></a>Deleting Roles
+
+On the Roles tab, scroll down to the bottom of the page, and click the trashcan icon beside the role that you want to delete. A confirmation page will display, prompting you to confirm the deletion. Click **Confirm** to remove the role.
+
+![Delete role](images/delete_role.png)
+
+## <a name="addusers"></a>Adding Users
+
+Superusers can add users directly from within the UI. 
+
+**Note**: Users must be assigned to a role. Because of that, roles must be created before new users can be added. 
+
+1. Click the **Create User** button.
+2. Enter the name of the user. Note that the name must match with a username in your YARN system.
+3. Specify and confirm a password for the user. 
+4. Specify the role(s) and workgroup(s) for this user. 
+5. Click **Create User** when you are done.
+
+![Create user](images/create_user.png)
+
+Upon successful completion, the new user will appear in the list of Steam users.
+
+## <a name="editusers"></a>Editing Users
+
+On the Users tab, click the **Edit** link beside the user you want to edit. This opens the Edit User Details form. Change the user's workgroup and/or roles, then click **Confirm** when you are done. 
+
+![Edit user](images/edit_user.png)
+
+## <a name="deactivateusers"></a>Deactivating/Reactivating Users
+
+On the Users tab, click the **Deactivate User** link beside the user whose Steam access you want to revoke. Click **Reactivate User** to once again grant access for that user. 
+
+![Deactivate/reactivate user](images/deactivate_user.png)
+
+## <a name="changepermissions"></a>Changing Permissions
 
 Superusers can add or remove permissions for each role directly on this page. Select the checkbox for the correspoding permission and role that you want to change, then click **Review Changes** at the bottom of the page. A popup displays, providing you with a summary of the changes.
 
