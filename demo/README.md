@@ -949,7 +949,7 @@ The following example deletes workgroup 3 from the database. Note that you can u
 
 **Description**
 
-Retrieves a list of cluster types that are available in Steam along with the corresponding code. Note that these cluster types are currently hard coded into Steam.
+Retrieves a list of cluster types that are available in Steam along with the corresponding code. 
 
 **Usage**
 
@@ -976,7 +976,7 @@ The following example retrieves a list of the Steam cluster types.
 
 **Description**
 
-Retrieves a list of entity types that are available in Steam along with the corresponding code. Note that these entity types are currently hard coded into Steam.
+Retrieves a list of entity types that are available in Steam along with the corresponding code. 
 
 **Usage**
 
@@ -1012,7 +1012,9 @@ The following example retrieves a list of Steam entity types.
 
 **Description**
 
-Retrieves a list of permissions available in Steam along with the corresponding code. These permissions are currently hard coded into Steam.
+Retrieves a list of permissions available in Steam along with the corresponding code. A permission code is used when linking roles to permissions.
+
+Note that permission IDs are randomly generated during installation, and the IDs will vary between Steam installations. 
 
 **Usage**
 

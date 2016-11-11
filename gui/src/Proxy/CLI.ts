@@ -536,6 +536,11 @@ export function updateIdentity(identityId: number, password: string): void {
   Proxy.Call("UpdateIdentity", req, print);
 }
 
+export function activateIdentity(identityId: number): void {
+  const req: any = { identity_id: identityId };
+  Proxy.Call("ActivateIdentity", req, print);
+}
+
 export function deactivateIdentity(identityId: number): void {
   const req: any = { identity_id: identityId };
   Proxy.Call("DeactivateIdentity", req, print);

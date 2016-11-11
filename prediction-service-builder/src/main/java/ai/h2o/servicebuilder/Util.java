@@ -19,7 +19,6 @@ package ai.h2o.servicebuilder;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.List;
@@ -36,9 +35,9 @@ public class Util {
   private static final Logger logger = Logging.getLogger(Util.class);
 
   public static final String JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME = "REPLACE_THIS_WITH_PREDICTOR_CLASS_NAME";
+  public static final String JAVA_TEMPLATE_REPLACE_WITH_PYTHON_ENVIRONMENT_FILE = "REPLACE_WITH_PYTHON_ENVIRONMENT_FILE";
   public static final String JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT = "REPLACE_THIS_WITH_TRANSFORMER_OBJECT";
-//  public static final String JAVA_TEMPLATE_REPLACE_WITH_POJO_BOOLEAN = "REPLACE_THIS_WITH_POJO_BOOLEAN";
-  public static final String REPLACE_THIS_WITH_MODEL = "REPLACE_THIS_WITH_MODEL";
+  public static final String JAVA_TEMPLATE_REPLACE_THIS_WITH_MODEL = "REPLACE_THIS_WITH_MODEL";
 
   protected static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
   protected static final String JAVA_TARGET_VERSION = "1.6";
@@ -233,14 +232,18 @@ public class Util {
    * @param resultFileName    restult file
    * @throws IOException
    */
-  public static void InstantiateJavaTemplateFile(File tmpDir, String modelCode, String javaClassName, String replaceTransform, String templateFileName, String resultFileName) throws IOException {
+  public static void InstantiateJavaTemplateFile(File tmpDir, String modelCode, String javaClassName,
+                                                 String replaceTransform, String pythonEnvironment,
+                                                 String templateFileName, String resultFileName) throws IOException {
     byte[] templateJava = FileUtils.readFileToByteArray(new File(tmpDir, templateFileName));
     String java = new String(templateJava)
         .replace(JAVA_TEMPLATE_REPLACE_WITH_PREDICTOR_CLASS_NAME, javaClassName);
     if (replaceTransform != null)
       java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_TRANSFORMER_OBJECT, replaceTransform);
+    if (pythonEnvironment != null)
+      java = java.replace(JAVA_TEMPLATE_REPLACE_WITH_PYTHON_ENVIRONMENT_FILE, pythonEnvironment);
     if (modelCode != null)
-      java = java.replace(REPLACE_THIS_WITH_MODEL, modelCode);
+      java = java.replace(JAVA_TEMPLATE_REPLACE_THIS_WITH_MODEL, modelCode);
     FileUtils.writeStringToFile(new File(tmpDir, resultFileName), java);
   }
 

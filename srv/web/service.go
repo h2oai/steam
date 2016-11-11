@@ -390,6 +390,7 @@ type Service interface {
 	LinkIdentityWithRole(pz az.Principal, identityId int64, roleId int64) error
 	UnlinkIdentityFromRole(pz az.Principal, identityId int64, roleId int64) error
 	UpdateIdentity(pz az.Principal, identityId int64, password string) error
+	ActivateIdentity(pz az.Principal, identityId int64) error
 	DeactivateIdentity(pz az.Principal, identityId int64) error
 	ShareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) error
 	GetPrivileges(pz az.Principal, entityTypeId int64, entityId int64) ([]*EntityPrivilege, error)
@@ -1255,6 +1256,13 @@ type UpdateIdentityIn struct {
 }
 
 type UpdateIdentityOut struct {
+}
+
+type ActivateIdentityIn struct {
+	IdentityId int64 `json:"identity_id"`
+}
+
+type ActivateIdentityOut struct {
 }
 
 type DeactivateIdentityIn struct {
@@ -2388,6 +2396,16 @@ func (this *Remote) UpdateIdentity(identityId int64, password string) error {
 	in := UpdateIdentityIn{identityId, password}
 	var out UpdateIdentityOut
 	err := this.Proc.Call("UpdateIdentity", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) ActivateIdentity(identityId int64) error {
+	in := ActivateIdentityIn{identityId}
+	var out ActivateIdentityOut
+	err := this.Proc.Call("ActivateIdentity", &in, &out)
 	if err != nil {
 		return err
 	}
@@ -6026,6 +6044,39 @@ func (this *Impl) UpdateIdentity(r *http.Request, in *UpdateIdentityIn, out *Upd
 	}
 
 	err := this.Service.UpdateIdentity(pz, in.IdentityId, in.Password)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) ActivateIdentity(r *http.Request, in *ActivateIdentityIn, out *ActivateIdentityOut) error {
+	const name = "ActivateIdentity"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.ActivateIdentity(pz, in.IdentityId)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
