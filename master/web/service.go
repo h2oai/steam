@@ -1537,7 +1537,6 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 	pid, err := svc.Start(
 		warFilePath,
 		fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),
-		s.scoringServiceAddress,
 		port,
 		name,
 		pz.Name(),

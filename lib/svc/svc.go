@@ -54,13 +54,9 @@ func svcScan(r io.Reader, name, username string, err *string, pass chan struct{}
 }
 
 // Start starts a scoring service.
-func Start(warfile, jetty, host string, port int, name, username string) (int, error) {
+func Start(warfile, jetty string, port int, name, username string) (int, error) {
 
 	argv := []string{"-jar", jetty, "--port", strconv.Itoa(port)}
-
-	if len(host) > 0 {
-		argv = append(argv, "--host", host)
-	}
 
 	argv = append(argv, warfile)
 
