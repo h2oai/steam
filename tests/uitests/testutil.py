@@ -53,10 +53,31 @@ def createRole(role, desc, perm):
 			.format(_steampath, i, p), shell=True).communicate()
 	return i
 
+def createRoleUI(driver, role, desc, perm):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	wait.until(lambda x: x.find_element_by_xpath("//div[@class='button-primary disabled' and text()='Create Role']"))
+	inp = driver.find_elements_by_xpath("//input[@type='text']")
+	inp[0].send_keys(role)
+	inp[1].send_keys(desc)
+	driver.find_element_by_xpath("//div[text()='Create Role']").click()
+
 def createIdentity(name, pw):
 	ret = sp.check_output("{0} create identity --name={1} --password={2}"\
 		.format(_steampath, name, pw), shell=True)
 	return int(re.search(r'\d+', ret).group())
+
+def createUser(driver, user, pw, roles, wgs):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	driver.find_element_by_xpath("//input[@type='text']").send_keys(user)
+	pb = driver.find_elements_by_xpath("//input[@type='password']")
+	pb[0].send_keys(pw)
+	pb[1].send_keys(pw)
+	for role in roles:
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='{0}']/input[@type='checkbox']".format(role)))
+		driver.find_element_by_xpath("//div[text()='{0}']/input[@type='checkbox']".format(role)).click()
+	for wg in wgs:
+		driver.find_element_by_xpath("//div[text()='{0}']/input[@type='checkbox']".format(wg)).click()
+	driver.find_element_by_xpath("//div[@class='button-primary' and text()='Create User']").click()
 
 def createWorkgroup(wg, desc):
 	ret = ""
@@ -431,6 +452,7 @@ def createProject(driver, name, cluster, data, kind, mods):
 	#select the first cluster for now
 	selectCluster(driver, cluster)
 	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectDataframe']"))
+	wait.until(lambda x: x.find_element_by_xpath("//option[@value='{0}']".format(data)))
 	sel = Select(driver.find_element_by_xpath("//select[@name='selectDataframe']"))
 	sel.select_by_visible_text(data)
 	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectModelCategory']"))
@@ -448,15 +470,19 @@ def createProject(driver, name, cluster, data, kind, mods):
 
 def viewModel(driver, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	print "getting ind"
 	ind = indexOfModel(driver, name)
-	driver.get_elements_by_xpath("//i[@class='fa fa-eye']")[ind].click()
-	wait.until(lambda x: x.find_element_by_xpath("//header/span[text()='{0}']".format(name)))
+	print "got ind of {0}".format(ind)
+	driver.find_elements_by_xpath("//span[text()='view model details']")[ind].click()
+	print "clicked view"
+	wait.until(lambda x: x.find_element_by_xpath("//div[@class='comparison-selection']"))
+	print "waited"
 
 def compareToModel(driver, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	driver.find_element_by_xpath("//button[@class='model-selection-button']").click()
 	driver.find_element_by_xpath("//input[@placeholder='filter models' and @type='text']").send_keys(name)
-	wait.until(lambda x: len(x.find_elements_by_xpath("//button[text()='Select']")) == 1)
+	time.sleep(2)
 	driver.find_element_by_xpath("//button[text()='Select']").click()
 	wait.until(lambda x: x.find_element_by_xpath("//button[@class='model-selection-button selected']"))
 	

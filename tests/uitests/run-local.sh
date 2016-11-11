@@ -12,6 +12,8 @@ unzip h2o.zip
 H2O_DIR=$STEAM_DIR/h2o-3.10.0.8
 rm h2o.zip
 
+export H2O_PATH=$H2O_DIR/h2o.jar
+
 ./steam serve master --superuser-name=superuser --superuser-password=superuser --compilation-service-address=":55000" > \
 	$TESTS_DIR/steam.log 2>&1 &
 
@@ -21,6 +23,10 @@ disown
 java -jar $H2O_DIR/h2o.jar --port 54535 --name steamtest > $TESTS_DIR/h2o.log 2>&1 &
 H2O_PID=$!
 disown
+java -jar $H2O_DIR/h2o.jar --port 54321 --name pjr > /dev/null 2>&1 &
+H2O2_PID=$!
+disown
+
 
 export JETTY_PATH=`pwd`/var/master/assets/jetty-runner.jar
 java -jar var/master/assets/jetty-runner.jar --port 55000 \
@@ -59,9 +65,11 @@ for dir in `ls -d *-test`; do
 done
 
 unset JETTY_PATH
+unset H2O_PATH
 
 kill $STEAM_PID
 kill $H2O_PID
+kill $H2O2_PID
 kill $JETTY_PID
 
 cat .failures
