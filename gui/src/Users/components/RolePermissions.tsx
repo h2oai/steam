@@ -186,7 +186,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
             <Cell className="right-table-bar">Permission Name</Cell>
             {this.props.roles.map((role, rolesIndex) => {
               return <Cell className="center-text" key={rolesIndex}>
-                {role.description}
+                {role.name}
                 </Cell>;
             })}
           </Row>
