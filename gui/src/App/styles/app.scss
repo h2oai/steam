@@ -187,7 +187,6 @@ button, a {
     z-index: $body-index;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 7px rgba(0,0,0,0.35);
   }
 }
 
@@ -254,4 +253,52 @@ input[type="text"], textarea {
 }
 .mar-bot-7 {
   margin-bottom: 7px;
+}
+
+@import '../../variables.scss';
+
+.tooltip-launcher {
+  position: relative;
+}
+.tooltip {
+  position: absolute;
+  top: 29px;
+  left: -130px;
+  width: 300px;
+
+  color: $h2o-charcoal-grey;
+  padding-left: 14px;
+  padding-right: 14px;
+  padding-bottom: 14px;
+  border-style: solid;
+  border-color: $h2o-charcoal-grey;
+  border-width: 2px;
+  background-color: white;
+  z-index: 20;
+}
+
+.tooltip-question {
+  font-size: 10px;
+  font-weight: 300;
+  color: $h2o-charcoal-grey;
+  padding-top: 14px;
+}
+
+.caret {
+  position: absolute;
+  width: 20px;
+  stroke-width: 20px;
+  top: -18px;
+  left: 125px;
+}
+
+.caret-triangle {
+  fill:#FFFFFF;
+  stroke: $h2o-charcoal-grey;
+  stroke-miterlimit:10;
+}
+.caret-cover {
+  fill:#FFFFFF;
+  stroke:#FFFFFF;
+  stroke-miterlimit:10;
 }
