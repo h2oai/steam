@@ -1,9 +1,11 @@
+import os
 import sys
 import time
 import subprocess as sp
 import re
 from selenium import webdriver
 from selenium.common import exceptions as se
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
@@ -36,15 +38,8 @@ Perm id		Permission		Index
 22			V service		20
 """
 
-_steampath = "./steam"
-if sys.platform.startswith("linux"):
-	_steampath = "./steam/steam"
-elif sys.platform == "darwin":
-	_steampath = "./steam--darwin-amd64/steam"
-else:
-	print "unsupported testing platform"
-	sys.exit(1)
-	
+_steampath = os.getenv('STEAM_PATH', './steam/steam')
+
 def cliLogin(name, pw):
 	ret = sp.check_output("{0} login localhost:9000 --username={1} --password={1}"\
 		.format(_steampath, name, pw), shell=True)
@@ -58,10 +53,31 @@ def createRole(role, desc, perm):
 			.format(_steampath, i, p), shell=True).communicate()
 	return i
 
+def createRoleUI(driver, role, desc, perm):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	wait.until(lambda x: x.find_element_by_xpath("//div[@class='button-primary disabled' and text()='Create Role']"))
+	inp = driver.find_elements_by_xpath("//input[@type='text']")
+	inp[0].send_keys(role)
+	inp[1].send_keys(desc)
+	driver.find_element_by_xpath("//div[text()='Create Role']").click()
+
 def createIdentity(name, pw):
 	ret = sp.check_output("{0} create identity --name={1} --password={2}"\
 		.format(_steampath, name, pw), shell=True)
 	return int(re.search(r'\d+', ret).group())
+
+def createUser(driver, user, pw, roles, wgs):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	driver.find_element_by_xpath("//input[@type='text']").send_keys(user)
+	pb = driver.find_elements_by_xpath("//input[@type='password']")
+	pb[0].send_keys(pw)
+	pb[1].send_keys(pw)
+	for role in roles:
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='{0}']/input[@type='checkbox']".format(role)))
+		driver.find_element_by_xpath("//div[text()='{0}']/input[@type='checkbox']".format(role)).click()
+	for wg in wgs:
+		driver.find_element_by_xpath("//div[text()='{0}']/input[@type='checkbox']".format(wg)).click()
+	driver.find_element_by_xpath("//div[@class='button-primary' and text()='Create User']").click()
 
 def createWorkgroup(wg, desc):
 	ret = ""
@@ -428,14 +444,15 @@ def deployModel(driver, mod, name):
 	time.sleep(3)
 	wait.until(lambda x: x.find_element_by_class_name("deployed-services"))
 	
-def createProject(driver, cluster, name, data, kind, mods):
+def createProject(driver, name, cluster, data, kind, mods):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	goHome(driver)
 	newProject(driver)
 	#select cluster by name
 	#select the first cluster for now
-	driver.find_element_by_xpath("//div[@class='select-cluster']//button").click()
+	selectCluster(driver, cluster)
 	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectDataframe']"))
+	wait.until(lambda x: x.find_element_by_xpath("//option[@value='{0}']".format(data)))
 	sel = Select(driver.find_element_by_xpath("//select[@name='selectDataframe']"))
 	sel.select_by_visible_text(data)
 	wait.until(lambda x: x.find_element_by_xpath("//select[@name='selectModelCategory']"))
@@ -445,35 +462,62 @@ def createProject(driver, cluster, name, data, kind, mods):
 		selectModel(driver, mod)
 	driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys(name)
 	driver.find_element_by_xpath("//button[text()='Create Project']").click()
+	wait.until(lambda x: x.find_element_by_xpath("//li[@id='projectIdCrumb']"))
+	driver.refresh()
 	for mod in mods:
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
 
+
+def viewModel(driver, name):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	print "getting ind"
+	ind = indexOfModel(driver, name)
+	print "got ind of {0}".format(ind)
+	driver.find_elements_by_xpath("//span[text()='view model details']")[ind].click()
+	print "clicked view"
+	wait.until(lambda x: x.find_element_by_xpath("//div[@class='comparison-selection']"))
+	print "waited"
+
+def compareToModel(driver, name):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	driver.find_element_by_xpath("//button[@class='model-selection-button']").click()
+	driver.find_element_by_xpath("//input[@placeholder='filter models' and @type='text']").send_keys(name)
+	time.sleep(2)
+	driver.find_element_by_xpath("//button[text()='Select']").click()
+	wait.until(lambda x: x.find_element_by_xpath("//button[@class='model-selection-button selected']"))
+	
+
 def testAs(user, pw):
-	o = Options()
-	o.add_argument('--start-fullscreen')
-	o.add_argument("--no-sandbox")
-	o.add_argument("--user-data-dir=/tmp")
-	driver = webdriver.Chrome()
+	driver = None
+	if 'TEST_FIREFOX' in os.environ:
+		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		driver = webdriver.Firefox(p)
+	else:
+		driver = webdriver.Chrome()
 	driver.get("http://{0}:{1}@localhost:9000".format(user, pw))
 	return driver
 
 def newtest():
-	o = Options()
-	o.add_argument("--verbose")
-	o.add_argument('--start-fullscreen')
-	d = DesiredCapabilities.CHROME
-	d['loggingPrefs'] = { 'browser':'ALL', 'performance':'ALL', 'driver':'ALL' }
-	driver = webdriver.Chrome(desired_capabilities=d, chrome_options=o)
+	driver = None
+	if 'TEST_FIREFOX' in os.environ:
+		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		driver = webdriver.Firefox(p)
+	else:
+		driver = webdriver.Chrome()
 	driver.get("http://superuser:superuser@localhost:9000")
 	return driver
 
-def newProxytest(p):
-	o = Options()
-	o.add_argument('--start-fullscreen')
-	o.add_argument("--proxy-server={0}".format(p))
-	d = webdriver.Chrome(chrome_options=o)
-	d.get("http://superuser:superuser@localhost:9000")
-	return d
+def newProxytest(proxy):
+	if 'TEST_FIREFOX' in os.environ:
+		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		p.set_proxy(proxy.selenium_proxy())
+		driver = webdriver.Firefox(p)
+	else:
+		o = Options()
+		o.add_argument("--proxy-server={0}".format(proxy.proxy))
+		driver = webdriver.Chrome(chrome_options=o)
+	driver.get("http://superuser:superuser@localhost:9000")
+	return driver
 
 def endtest(driver):
 	driver.quit()

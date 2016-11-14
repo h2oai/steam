@@ -1,6 +1,9 @@
 @import '../../variables.scss';
 
 .user-access {
+
+}
+.filter-and-list {
   display: flex;
   flex-direction: row;
 }
@@ -23,4 +26,7 @@
 }
 .user-access-list {
   width: 100%;
+}
+.inactive {
+  color: $h2o-soft-grey;
 }

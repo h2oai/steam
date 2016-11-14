@@ -206,7 +206,8 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
             : <div className="button-primary disabled">Save Changes</div> }
            &nbsp;
           <div className="button-secondary" onClick={this.onCancelClicked}>Cancel</div>
-        </div>}
+        </div>
+        }
 
 
       </DefaultModal>

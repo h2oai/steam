@@ -91,16 +91,17 @@ public class MakePythonWarServlet extends HttpServlet {
       List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
       String pojofile = null;
       String jarfile = null;
-      String rawfile = null;
+      String mojofile = null;
       String pythonfile = null;
       String predictorClassName = null;
+      String pythonenvfile = null;
       ArrayList<String> pojos = new ArrayList<String>();
       ArrayList<String> rawfiles = new ArrayList<String>();
       for (FileItem i : items) {
         String field = i.getFieldName();
         String filename = i.getName();
         if (filename != null && filename.length() > 0) {
-          if (field.equals("pojo")) {
+          if (field.equals("pojo")) { // pojo file name, use this or a mojo file
             pojofile = filename;
             pojos.add(pojofile);
             predictorClassName = filename.replace(".java", "");
@@ -115,21 +116,26 @@ public class MakePythonWarServlet extends HttpServlet {
             pythonfile = "WEB-INF" + File.separator + "python.py";
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(webInfDir, "python.py"));
           }
-          if (field.equals("pythonextra")) {
+          if (field.equals("pythonextra")) { // optional extra files for python
             pythonfile = "WEB-INF" + File.separator + "lib" + File.separator + filename;
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(libDir, filename));
           }
-          if (field.equals("mojo")) { // a raw model zip file, a mojo file
-            rawfile = filename;
-            rawfiles.add(rawfile);
+          if (field.equals("mojo")) { // a raw model zip file, a mojo file (optional)
+            mojofile = filename;
+            rawfiles.add(mojofile);
             predictorClassName = filename.replace(".zip", "");
             FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
             logger.info("added mojo model {}", filename);
           }
+          if (field.equals("envfile")) { // optional conda environment file
+            pythonenvfile = filename;
+            FileUtils.copyInputStreamToFile(i.getInputStream(), new File(tmpDir, filename));
+            logger.debug("using conda environment file {}", pythonenvfile);
+          }
         }
       }
-      System.out.printf("jar %s  pojo %s  python %s\n", jarfile, pojofile, pythonfile);
-      if ((pojofile == null || jarfile == null) && (rawfile == null || jarfile == null))
+      logger.debug("jar {}  pojo {}  mojo {}  python {}  envfile {}", jarfile, pojofile, mojofile, pythonfile, pythonenvfile);
+      if ((pojofile == null || jarfile == null) && (mojofile == null || jarfile == null))
         throw new Exception("need either pojo and genmodel jar, or raw file and genmodel jar ");
 
       if (pojofile != null) {
@@ -165,7 +171,8 @@ public class MakePythonWarServlet extends HttpServlet {
         FileUtils.writeLines(new File(tmpDir, "modelnames.txt"), rawfiles);
         modelCode = "MojoModel.load(fileName)";
       }
-      InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, "null", srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
+      InstantiateJavaTemplateFile(tmpDir, modelCode, predictorClassName, "null", pythonenvfile == null ? "" : pythonenvfile,
+          srcPath + "ServletUtil-TEMPLATE.java", "ServletUtil.java");
 
       copyExtraFile(servletPath, srcPath, tmpDir, "PredictPythonServlet.java", "PredictPythonServlet.java");
       copyExtraFile(servletPath, srcPath, tmpDir, "InfoServlet.java", "InfoServlet.java");

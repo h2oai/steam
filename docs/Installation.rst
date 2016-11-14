@@ -64,13 +64,18 @@ the URL of the edge node and the superuser login credentials. The superuser can 
 
     java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 
-3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster.
+3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster. Use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location and for additional flags that can be specified when starting Steam. 
 
  ::
 
   sudo ./steam serve master --superuser-name=superuser --superuser-password=superuser
 
- **Note**: Use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location.
+ **Note**: This version of Steam currently includes an experimental/early release of LDAP basic authentication support using the ``—-authentication-provider`` and ``—-authentication-config`` flags. When used, a configuration file is required. For example:
+
+ ::
+
+  sudo ./steam serve master --superuser-name=superuser --superuser-password=superuser —-authentication-provider="ldap-basic" —-authentication-config="file/path.toml"
+
 
 4. Open a Chrome browser and navigate to the YARN edge node.
 

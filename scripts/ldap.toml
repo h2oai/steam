@@ -1,0 +1,13 @@
+
+# hostname=string
+# port=int
+
+# bindDn=string
+# bindPassword=string
+
+# userBaseDn=string
+# userIdAttribute=string
+# userObjectClass=string
+
+# forceBind=bool
+# maxTime=int(1=1 minute)

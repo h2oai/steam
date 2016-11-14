@@ -39,13 +39,13 @@ export default class InputFeedback extends React.Component<Props, any> {
             <div></div>
             <div></div>
           </div>
-          <span>{this.props.message}</span>
+          <span>&nbsp;{this.props.message}</span>
         </div>
         : null }
 
         { this.props.type === FeedbackType.Info ?
           <div className="input-feedback feedback-info">
-            <span>{this.props.message}</span>
+            <span>&nbsp;{this.props.message}</span>
           </div>
         : null }
 
@@ -54,7 +54,7 @@ export default class InputFeedback extends React.Component<Props, any> {
           <div className="feedback-confirm-icon">
             <i className="fa fa-check-circle" aria-hidden="true"></i>
           </div>
-          <span>{this.props.message}</span>
+          <span>&nbsp;{this.props.message}</span>
         </div>
         : null }
 
@@ -63,7 +63,7 @@ export default class InputFeedback extends React.Component<Props, any> {
           <div className="feedback-warning-icon">
             <i className="fa fa-exclamation-triangle" aria-hidden="true"></i>
           </div>
-          <span>{this.props.message}</span>
+          <span>&nbsp;{this.props.message}</span>
         </div>
         : null }
 
@@ -72,7 +72,7 @@ export default class InputFeedback extends React.Component<Props, any> {
           <div className="feedback-error-icon">
             <i className="fa fa-exclamation-triangle" aria-hidden="true"></i>
           </div>
-          <span>{this.props.message}</span>
+          <span>&nbsp;{this.props.message}</span>
         </div>
         : null }
       </div>

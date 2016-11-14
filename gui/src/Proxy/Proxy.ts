@@ -788,6 +788,9 @@ export interface Service {
   // Update an identity
   updateIdentity: (identityId: number, password: string, go: (error: Error) => void) => void
   
+  // Activate an identity
+  activateIdentity: (identityId: number, go: (error: Error) => void) => void
+  
   // Deactivate an identity
   deactivateIdentity: (identityId: number, go: (error: Error) => void) => void
   
@@ -2131,6 +2134,16 @@ interface UpdateIdentityIn {
 }
 
 interface UpdateIdentityOut {
+  
+}
+
+interface ActivateIdentityIn {
+  
+  identity_id: number
+  
+}
+
+interface ActivateIdentityOut {
   
 }
 
@@ -3532,6 +3545,18 @@ export function updateIdentity(identityId: number, password: string, go: (error:
       return go(error);
     } else {
       const d: UpdateIdentityOut = <UpdateIdentityOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function activateIdentity(identityId: number, go: (error: Error) => void): void {
+  const req: ActivateIdentityIn = { identity_id: identityId };
+  Proxy.Call("ActivateIdentity", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: ActivateIdentityOut = <ActivateIdentityOut> data;
       return go(null);
     }
   });

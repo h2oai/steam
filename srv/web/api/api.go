@@ -379,6 +379,7 @@ type Service struct {
 	LinkIdentityWithRole          LinkIdentityWithRole          `help:"Link an identity with a role"`
 	UnlinkIdentityFromRole        UnlinkIdentityFromRole        `help:"Unlink an identity from a role"`
 	UpdateIdentity                UpdateIdentity                `help:"Update an identity"`
+	ActivateIdentity              ActivateIdentity              `help:"Activate an identity"`
 	DeactivateIdentity            DeactivateIdentity            `help:"Deactivate an identity"`
 	ShareEntity                   ShareEntity                   `help:"Share an entity with a workgroup"`
 	GetPrivileges                 GetPrivileges                 `help:"List privileges for an entity"`
@@ -921,6 +922,9 @@ type UnlinkIdentityFromRole struct {
 type UpdateIdentity struct {
 	IdentityId int64  `help:"Integer ID of an identity in Steam."`
 	Password   string `help:"Password for identity"`
+}
+type ActivateIdentity struct {
+	IdentityId int64 `help:"Integer ID of an identity in Steam."`
 }
 type DeactivateIdentity struct {
 	IdentityId int64 `help:"Integer ID of an identity in Steam."`

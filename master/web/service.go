@@ -302,13 +302,16 @@ func (s *Service) GetClusterStatus(pz az.Principal, cloudId int64) (*web.Cluster
 
 	h2o := h2ov3.NewClient(cluster.Address)
 
-	cloud, err := h2o.GetCloudStatus()
+	stat, err := h2o.GetCloudStatus()
+	if err != nil {
+		return &web.ClusterStatus{Status: "Unknown"}, nil
+	}
 
 	var (
 		tot, all int32
 		mem      int64
 	)
-	for _, n := range cloud.Nodes {
+	for _, n := range stat.Nodes {
 		mem += n.MaxMem
 		tot += n.NumCpus
 		all += n.CpusAllowed
@@ -316,14 +319,14 @@ func (s *Service) GetClusterStatus(pz az.Principal, cloudId int64) (*web.Cluster
 
 	// FIXME: this needs a better impl
 	var health string
-	if cloud.CloudHealthy {
+	if stat.CloudHealthy {
 		health = "healthy"
 	} else {
 		health = "unknown"
 	}
 
 	return &web.ClusterStatus{
-		cloud.Version,
+		stat.Version,
 		health,
 		toSizeBytes(mem),
 		int(tot),
@@ -1534,7 +1537,6 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 	pid, err := svc.Start(
 		warFilePath,
 		fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),
-		s.scoringServiceAddress,
 		port,
 		name,
 		pz.Name(),
@@ -2102,6 +2104,14 @@ func (s *Service) UpdateIdentity(pz az.Principal, identityId int64, password str
 	}
 
 	return s.ds.UpdateIdentity(pz, identityId, hash)
+}
+
+func (s *Service) ActivateIdentity(pz az.Principal, identityId int64) error {
+	if err := pz.CheckPermission(s.ds.Permissions.ManageIdentity); err != nil {
+		return err
+	}
+
+	return s.ds.ActivateIdentity(pz, identityId)
 }
 
 func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {

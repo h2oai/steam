@@ -1,0 +1,22 @@
+name: python-spam
+channels: !!python/tuple
+- !!python/unicode 'defaults'
+dependencies:
+- openssl=1.0.2j=0
+- pip=9.0.0=py27_0
+- python=2.7.12=1
+- readline=6.2=2
+- setuptools=27.2.0=py27_0
+- sqlite=3.13.0=0
+- tk=8.5.18=0
+- wheel=0.29.0=py27_0
+- zlib=1.2.8=3
+- pip:
+  - nltk==3.2.1
+  - numpy==1.11.2
+  - scikit-learn==0.17.1
+  - scipy==0.18.1
+  - sklearn==0.0
+  - textblob==0.11.1
+prefix: /Users/magnus/anaconda/envs/python-spam
+

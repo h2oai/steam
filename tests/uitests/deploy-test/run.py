@@ -4,7 +4,6 @@ import testutil as tu
 import urlparse
 from browsermobproxy import Server
 from selenium.webdriver.common.keys import Keys
-from selenium import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -74,9 +73,7 @@ def projectDeployTest(driver):
 		tu.viewProject(driver, "deptest")
 		tu.goProjectDeployment(driver)
 	except:
-		for entry in driver.get_log('browser'):
-			print entry
-		print "Failed to setup project deploy test"
+		print "Failed to deploy gradi"
 		return False
 	try:
 		time.sleep(1)
@@ -95,13 +92,16 @@ def cleanupTest(driver):
 	tu.goHome(driver)
 	tu.goServices(driver)
 	time.sleep(2)
-	if not (tu.serviceExists(driver, "swell") and tu.serviceExists(driver, "double")):
-		print "A service wasn't there"
 	cnt = len(driver.find_elements_by_class_name("services-panel"))
-	tu.stopService(driver, "swell")
-	tu.stopService(driver, "double")
+	stopped = 0
+	if tu.serviceExists(driver, "swell"):
+		tu.stopService(driver, "swell")
+		stopped += 1
+	if tu.serviceExists(driver, "double"):
+		tu.stopService(driver, "double")
+		stopped += 1
 	try:
-		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) <= (cnt - 2))
+		wait.until(lambda x: len(x.find_elements_by_class_name("services-panel")) <= (cnt - stopped))
 	except:
 		print "failed to stop running services"
 		return False
@@ -136,7 +136,7 @@ def multiDeployTest(driver):
 				if name in dep.text:
 					good = True
 			if not good:
-				print "Failed to locate all deployed services on services page"
+				print "Service '{0}' failed to deploy".format(name)
 				return False
 
 	except Exception as e:
@@ -145,11 +145,11 @@ def multiDeployTest(driver):
 	return True
 
 def main():
-	s = Server('/home/pjr/browsermob/bin/browsermob-proxy', { 'port' : 1337})
+	s = Server('/home/creature/browsermob/bin/browsermob-proxy', { 'port' : 1337})
 	s.start()
 	proxy = s.create_proxy({'port': 1338})
 	failcount = 0
-	d = tu.newProxytest(urlparse.urlparse(proxy.proxy).path)
+	d = tu.newProxytest(proxy)
 	proxy.new_har(options={'captureHeaders':False, 'captureContent': True})
 	if not deployOneTest(d):
 		failcount += 1
