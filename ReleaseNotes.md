@@ -10,6 +10,13 @@ If you're an Open Source community member, you can contact H2O using one of the 
 - Send an e-mail message directly to <a href="mailto:support@h2o.ai">support@h2o.ai</a>
 - Ask your question on the [H2O Community](https://community.h2o.ai/spaces/540/index.html) site (create an account if necessary)
 
+## v1.1.4 Changes
+
+- [STEAM-496] Early release support for LDAP basic authentication using the ``--authentication-provider`` and ``--authentication-config`` flags when starting Steam.
+- [STEAM-562] Steam superusers can add and maintain users and roles in the UI.
+- [PUBSTEAM-4] When a dataframe that is used to train a model is deleted from the cluster, the model metadata will remain in the Steam database.
+- [PUBSTEAM-3] Servers that are down are no longer shown as green in the main view.
+
 ## v1.1.3 Changes
 
 - [STEAM-567] Updated Prediction Service UI to reflect DeepWater support
