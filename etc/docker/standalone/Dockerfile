@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-MAINTAINER H2O.ai version: 1.1.3
+MAINTAINER H2O.ai version: 1.1.4
 
 WORKDIR /steam
 
