@@ -134,7 +134,7 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dst, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE, fs.FilePerm)
+	dst, err := os.OpenFile(dstPath, os.O_CREATE|os.O_TRUNC, fs.FilePerm)
 	if err != nil {
 		log.Println("Upload file open operation failed:", err)
 		http.Error(w, fmt.Sprintf("Error writing uploaded file to disk: %s", err), http.StatusInternalServerError)

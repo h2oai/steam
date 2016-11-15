@@ -29,10 +29,10 @@ type Model struct {
 	modelType string
 	javaDep   string
 
-	pythonFilePaths []string
+	pythonFiles pythonPackage
 }
 
-func NewModel(workingDirectory string, modelId int64, logicalName, modelType string, pythonFiles ...string) *Model {
+func NewModel(workingDirectory string, modelId int64, logicalName, modelType string, pythonFiles pythonPackage) *Model {
 	m := &Model{javaDep: fs.GetGenModelPath(workingDirectory, modelId)}
 
 	switch modelType {
@@ -48,16 +48,13 @@ func NewModel(workingDirectory string, modelId int64, logicalName, modelType str
 		panic(fmt.Errorf("invalid model type %q", modelType))
 	}
 
-	pythonPaths := make([]string, len(pythonFiles))
-	for i, path := range pythonFiles {
-		pythonPaths[i] = path
-	}
-	m.pythonFilePaths = pythonPaths
+	m.pythonFiles = pythonFiles
 
 	return m
 }
 
 func (c *Model) AttachFiles(w *multipart.Writer) error {
+	// Attach Java files
 	if err := attachFile(w, c.modelPath, c.modelType); err != nil {
 		return errors.Wrap(err, "attaching model")
 	}
@@ -65,15 +62,18 @@ func (c *Model) AttachFiles(w *multipart.Writer) error {
 		return errors.Wrap(err, "attaching java dependency")
 	}
 
-	for i, file := range c.pythonFilePaths {
-		if i < 1 {
-			if err := attachFile(w, file, fileTypePythonMain); err != nil {
-				return errors.Wrap(err, "attaching Python main file")
-			}
-		} else {
-			if err := attachFile(w, file, fileTypePythonOther); err != nil {
-				return errors.Wrap(err, "attaching Python file")
-			}
+	// Attach Python Package Files
+	if err := attachFile(w, c.pythonFiles.Main, fileTypePythonMain); err != nil {
+		return errors.Wrap(err, "attaching Python main file")
+	}
+	for _, file := range c.pythonFiles.Other {
+		if err := attachFile(w, file, fileTypePythonOther); err != nil {
+			return errors.Wrap(err, "attaching Python file")
+		}
+	}
+	if c.pythonFiles.Yaml != "" {
+		if err := attachFile(w, c.pythonFiles.Yaml, fileTypePythonEnv); err != nil {
+			return errors.Wrap(err, "attaching Python env file")
 		}
 	}
 
