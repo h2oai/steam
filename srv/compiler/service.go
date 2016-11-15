@@ -47,7 +47,14 @@ const (
 	fileTypeMOJO        = "mojo"
 	fileTypePythonMain  = "python"
 	fileTypePythonOther = "pythonextra"
+	fileTypePythonEnv   = "envfile"
 )
+
+type pythonPackage struct {
+	Main  string
+	Yaml  string
+	Other []string
+}
 
 type ModelAsset interface {
 	AttachFiles(w *multipart.Writer) error
@@ -69,7 +76,7 @@ func CompileModel(address, wd string, projectId, modelId int64, logicalName, mod
 		return targetFile, nil
 	}
 
-	var pythonFilePaths []string
+	var pythonFilePaths pythonPackage
 	if artifact == ArtifactPythonWar {
 		var err error
 		pythonFilePaths, err = getPythonFilePaths(wd, packageName, projectId)
@@ -80,9 +87,9 @@ func CompileModel(address, wd string, projectId, modelId int64, logicalName, mod
 
 	var assets ModelAsset
 	if algorithm == "Deep Water" {
-		assets = NewDeepwater(wd, modelId, logicalName, modelType, pythonFilePaths...)
+		assets = NewDeepwater(wd, modelId, logicalName, modelType, pythonFilePaths)
 	} else {
-		assets = NewModel(wd, modelId, logicalName, modelType, pythonFilePaths...)
+		assets = NewModel(wd, modelId, logicalName, modelType, pythonFilePaths)
 	}
 
 	// ping to check if service is up
@@ -154,39 +161,41 @@ func callCompiler(url, targetFile string, model ModelAsset) error {
 	return nil
 }
 
-func getPythonFilePaths(workingDirectory, packageName string, projectId int64) ([]string, error) {
+func getPythonFilePaths(workingDirectory, packageName string, projectId int64) (pythonPackage, error) {
 	packageName = strings.TrimSpace(packageName)
 	if len(packageName) < 1 {
-		return nil, errors.New("package not set for PythonWar")
+		return pythonPackage{}, errors.New("package not set for PythonWar")
 	}
 
-	var pythonMainFilePath string
-	var pythonOtherFilePaths []string
+	var (
+		pythonMainFilePath, pythonYamlFilePath string
+		pythonOtherFilePaths                   []string
+	)
 
 	packagePath := fs.GetPackagePath(workingDirectory, projectId, packageName)
 
 	if !fs.DirExists(packagePath) {
-		return nil, fmt.Errorf("Package %s does not exist")
+		return pythonPackage{}, fmt.Errorf("Package %s does not exist")
 	}
 
 	packageAttrsBytes, err := fs.GetPackageAttributes(workingDirectory, projectId, packageName)
 	if err != nil {
-		return nil, fmt.Errorf("Failed reading package attributes: %s", err)
+		return pythonPackage{}, fmt.Errorf("Failed reading package attributes: %s", err)
 	}
 
 	packageAttrs, err := fs.JsonToMap(packageAttrsBytes)
 	if err != nil {
-		return nil, fmt.Errorf("Failed parsing package attributes: %s", err)
+		return pythonPackage{}, fmt.Errorf("Failed parsing package attributes: %s", err)
 	}
 
 	pythonMain, ok := packageAttrs["main"]
 	if !ok {
-		return nil, fmt.Errorf("Failed determining Python main file from package attributes")
+		return pythonPackage{}, fmt.Errorf("Failed determining Python main file from package attributes")
 	}
 
 	packageFileList, err := fs.ListFiles(packagePath)
 	if err != nil {
-		return nil, fmt.Errorf("Failed reading package file list: %s", err)
+		return pythonPackage{}, fmt.Errorf("Failed reading package file list: %s", err)
 	}
 
 	// Filter .py files; separate ancillary files from the main one.
@@ -199,14 +208,20 @@ func getPythonFilePaths(workingDirectory, packageName string, projectId int64) (
 			} else {
 				pythonOtherFilePaths = append(pythonOtherFilePaths, p)
 			}
+		} else if strings.ToLower(path.Ext(f)) == ".yaml" {
+			pythonYamlFilePath = path.Join(packagePath, f)
 		}
 	}
 
 	if len(pythonMainFilePath) == 0 {
-		return nil, fmt.Errorf("Failed locating Python main file in package file listing")
+		return pythonPackage{}, fmt.Errorf("Failed locating Python main file in package file listing")
 	}
 
-	return append([]string{pythonMainFilePath}, pythonOtherFilePaths...), nil
+	return pythonPackage{
+		Main:  pythonMainFilePath,
+		Yaml:  pythonYamlFilePath,
+		Other: pythonOtherFilePaths,
+	}, nil
 }
 
 func toUrl(address, slug string) string {
