@@ -110,11 +110,16 @@ export const usersReducer = (state: any = initialState, action: any) => {
 
       let toAppend: any = {roles};
       if (!(state as any).selectedRoles) {
-        let selectedRoles = new Array(roles.length);
+        let selectedRoles = new Array(roles.length + 1);
 
-        for (let i = 0; i < selectedRoles.length; i++) {
+        selectedRoles[0] = {
+          id: -1,
+          selected: true
+        };
+
+        for (let i = 1; i < selectedRoles.length; i++) {
           selectedRoles[i] = {
-            id: roles[i].id,
+            id: roles[i - 1].id,
             selected: true
           };
         }

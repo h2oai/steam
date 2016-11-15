@@ -30,6 +30,8 @@ import {
 import {Role, Identity, Project, Workgroup} from "../../Proxy/Proxy";
 import {fetchWorkgroups} from "../../Projects/actions/projects.actions";
 import EditUserDialog from "./EditUserDialog";
+import InputFeedback from "../../App/components/InputFeedback";
+import {FeedbackType} from "../../App/components/InputFeedback";
 
 interface Props {
   projects: Array<Project>,
@@ -67,9 +69,9 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
     }
   }
 
-  onRoleCheckboxClicked(e) {
+  onRoleCheckboxClicked = (e) => {
     this.props.changeFilterSelections(parseInt((e.target.dataset as any).id, 10), e.target.checked);
-  }
+  };
 
   checkIsRoleSelected(id): boolean {
     if (_.isEmpty(this.props.selectedRoles)) {
@@ -86,6 +88,14 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
   }
 
   shouldRowBeShown(roles: Array<Role>): boolean {
+    if (roles.length === 0) {
+      for (let selectedRole of this.props.selectedRoles) {
+        if (selectedRole.id === -1) {
+          return selectedRole.selected;
+        }
+      }
+    }
+
     for (let role of roles) {
       let index = _.findIndex(this.props.selectedRoles, (o) => {
         if ((o as any).id === role.id) {
@@ -145,6 +155,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
         return <Row key={index} className={userWithRoleAndProject.user.is_active ? "" : "inactive"}>
           <Cell>{userWithRoleAndProject.user.name}</Cell>
           <Cell> {
+            userWithRoleAndProject.roles.length === 0 ? <span><InputFeedback type={FeedbackType.Error} message="No roles assigned." /><br /><span className="link" onClick={() => this.onEditUserClicked(userWithRoleAndProject.user)}>Assign one or more roles</span></span> :
             userWithRoleAndProject.roles.map((role, index) => {
               return  <span key={index}>
                               {role.name}<br/>
@@ -157,7 +168,27 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
     }));
   };
 
+  onSelectNoneClicked = () => {
+    for (let selectedRole of this.props.selectedRoles) {
+      this.props.changeFilterSelections(selectedRole.id, false);
+    }
+  };
+  onSelectAllClicked = () => {
+    for (let selectedRole of this.props.selectedRoles) {
+      this.props.changeFilterSelections(selectedRole.id, true);
+    }
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
+    let numRolesSelected = 0;
+    if (this.props.selectedRoles) {
+      for (let selectedRole of this.props.selectedRoles) {
+        if (selectedRole.selected) {
+          numRolesSelected++;
+        }
+      }
+    }
+
     return (
       <div className="user-access intro">
         <EditUserDialog open={this.state.editUserOpen} userToEdit={this.state.userToEdit} closeHandler={this.editUserCloseHandler} fetchWorkgroups={this.props.fetchWorkgroups} fetchUsersWithRolesAndProjects={this.props.fetchUsersWithRolesAndProjects} userWithWorkgroups={this.props.userWithWorkgroups } workgroups={this.props.workgroups} updateUserWorkgroups={this.props.updateUserWorkgroups} updateUserRoles={this.props.updateUserRoles} usersWithRolesAndProjects={this.props.usersWithRolesAndProjects} roles={this.props.roles} />
@@ -167,7 +198,37 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
             <Table className="full-size">
               <Row header={true}>
                 <Cell>
-                  ROLES
+                  ROLES<br/>
+                  <div className="bulk-select">
+                    {numRolesSelected === 0 ?
+                    <div>
+                      <input type="radio" name="roleBulkSelect" onChange={this.onSelectNoneClicked} checked={true}></input>
+                      Select None<br/>
+                    </div>
+                    : <div>
+                        <input type="radio" name="roleBulkSelect" onChange={this.onSelectNoneClicked} checked={false}></input>
+                        Select None<br/>
+                    </div> }
+
+                    {this.props.selectedRoles && numRolesSelected > 0 && numRolesSelected < this.props.selectedRoles.length ?
+                      <div>
+                        <input type="radio" name="roleBulkSelect" checked={true}></input>Select Some<br/>
+                      </div>
+                      : <div>
+                        <input type="radio" name="roleBulkSelect" checked={false}></input>Select Some<br/>
+                      </div>
+                    }
+
+                    {this.props.selectedRoles && numRolesSelected === this.props.selectedRoles.length ?
+                      <div>
+                        <input type="radio" name="roleBulkSelect" onChange={this.onSelectAllClicked} checked={true}></input>Select All
+                      </div>
+                      :<div>
+                        <input type="radio" name="roleBulkSelect" onChange={this.onSelectAllClicked} checked={false}></input>Select All
+                      </div>
+                    }
+
+                  </div>
                 </Cell>
               </Row>
               {this.props.roles ?
@@ -180,6 +241,11 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
                 }</div>
                 : null
               }
+              <Row>
+                <Cell className="light-grey">
+                  <input type="checkbox" name="selectedRoles" data-id={-1} checked={this.checkIsRoleSelected(-1)} onChange={this.onRoleCheckboxClicked}></input> [No roles]
+                </Cell>
+              </Row>
             </Table>
           </div>
           <div className="user-access-list">
