@@ -49,16 +49,15 @@ def writeumsTest(driver, role):
 		boxes = driver.find_elements_by_xpath("//input[@data-roleid='{0}']".format(role))
 		for b in boxes:
 			b.click()
-		driver.find_element_by_xpath("//div[@class='button-primary']").click()
+		driver.find_element_by_xpath("//div[@class='role-permissions intro']/div[@class='button-primary']").click()
 		changes = driver.find_elements_by_xpath("//span[@class='button-primary']")
 		for c in changes:
 			c.click()
 		driver.find_element_by_xpath("//div[@class='button-primary' and text()='Save Changes']").click()
-		time.sleep(5)
+		time.sleep(19)
 		perm = tu.getRolePermissions(role)
-		print len(perm)
 		if len(perm) != 25:
-			print "Failed to add permissions"
+			print "Some permissions failed to update"
 			return False
 		driver.refresh()
 		tu.goRoles(driver)
@@ -66,12 +65,12 @@ def writeumsTest(driver, role):
 		boxes = driver.find_elements_by_xpath("//input[@data-roleid='{0}']".format(role))
 		for b in boxes:
 			b.click()
-		driver.find_element_by_xpath("//div[@class='button-primary']").click()
+		driver.find_element_by_xpath("//div[@class='role-permissions intro']/div[@class='button-primary']").click()
 		changes = driver.find_elements_by_xpath("//span[@class='button-primary']")
 		for c in changes:
 			c.click()
 		driver.find_element_by_xpath("//div[@class='button-primary' and text()='Save Changes']").click()
-		time.sleep(5)
+		time.sleep(19)
 		perm = tu.getRolePermissions(role)
 		if len(perm) > 3:
 			print "Failed to remove permissions"
@@ -82,6 +81,67 @@ def writeumsTest(driver, role):
 		return False
 	return True
 
+def createUserTest(driver):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		tu.goUsers(driver)
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Create User']"))
+		driver.find_element_by_xpath("//div[text()='Create User']").click()
+	except:
+		print "Couldn't click create user"
+		return False
+	try:
+		tu.createUser(driver, "rach", "bobben", ["Superuser"], [])
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell' and text()='rach']"))
+	except:
+		print "Failed to create user through UI"
+		return False
+	return True
+
+def createRoleTest(driver):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		tu.goUsers(driver)
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Create Role']"))
+		driver.find_element_by_xpath("//div[text()='Create Role']").click()
+	except:
+		print "Couldn't click create role"
+		return False
+	try:
+		tu.createRoleUI(driver, "darole", "excellent", [1, 2, 3, 4])
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell center-text' and text()='excellent']"))
+	except Exception as e:
+		print e
+		print "Failed to create role through UI"
+		return False
+		
+
+	return True
+
+def createRoleUserTest(driver):
+	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
+	try:
+		tu.goUsers(driver)
+		wait.until(lambda x: x.find_element_by_xpath("//div[text()='Create Role']"))
+		driver.find_element_by_xpath("//div[text()='Create Role']").click()
+	except:
+		print "Failed to view 'Create Role' page"
+		return False
+	try:
+		tu.createRoleUI(driver, "future", "future", [1, 4, 5, 7])
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell center-text' and text()='future']"))
+	except:
+		print "Failed to create role 'future'"
+		return False
+	try:
+		driver.find_element_by_xpath("//div[text()='Create User']").click()
+		tu.createUser(driver, "morg", "morg", ["future"], [])
+		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell' and text()='morg']"))
+		wait.until(lambda x: x.find_element_by_xpath("//span[text()='future']"))
+	except:
+		print "Failed to create user with role 'future'"
+		return False
+	return True
 
 def main():
 	failcount = 0
@@ -90,7 +150,15 @@ def main():
 
 	if not writeumsTest(d, r):
 		failcount += 1
-	
+	d.refresh()
+	tu.goHome(d)
+	if not createUserTest(d):
+		failcount += 1
+	if not createRoleTest(d):
+		failcount += 1
+	if not createRoleUserTest(d):
+		failcount += 1
+
 	tu.endtest(d)
 	sys.exit(failcount)	
 

@@ -22,6 +22,11 @@
 			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
 		},
 		{
+			"ImportPath": "github.com/go-ldap/ldap",
+			"Comment": "v2.4.1",
+			"Rev": "d0a5ced67b4dc310b9158d63a2c6f9c5ec13f105"
+		},
+		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
 		},
@@ -101,6 +106,11 @@
 		{
 			"ImportPath": "golang.org/x/net/context",
 			"Rev": "d7bf3545bb0dacf009c535b3d3fbf53ac0a339ab"
+		},
+		{
+			"ImportPath": "gopkg.in/asn1-ber.v1",
+			"Comment": "v1.1",
+			"Rev": "4e86f4367175e39f69d9358a5f17b4dda270378d"
 		}
 	]
 }

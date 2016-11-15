@@ -34,7 +34,7 @@ interface Props {
 export default class DetailLine extends React.Component<Props, any> {
   render(): React.ReactElement<HTMLDivElement> {
     return (
-      <div className={classNames('details', this.props.className)}>
+      <div className={classNames('details', this.props.className, this.props.label.toString())}>
         <div className="details--label">
           {this.props.icon ? <i className={this.props.icon}></i> : null}{this.props.label}
         </div>

@@ -17,24 +17,65 @@
 
 import * as _ from 'lodash';
 import {
-  RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS, RESET_UPDATES,
-  RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED
+  RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
+  RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE, ENTER_NEW_USER,
+  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY
 } from '../actions/users.actions';
 
 let initialState = {
-  permissionWithRoles: [],
+  permissionsWithRoles: [],
   roles: [],
   projects: [],
   updates: [],
+  createNewUserIsEntered: false,
+  createNewRoleIsEntered: false
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
-    case RESET_UPDATES :
+    case RECEIVE_WORKGROUPS_FOR_IDENTITY : {
+      return _.assign({}, state, {
+        userWithWorkgroups: {
+          id: action.userId,
+          workgroups: action.workgroups
+        }
+      });
+    }
+    case RECEIVE_CREATE_ROLE : {
+      let newState: any = _.assign({}, state);
+      newState.selectedRoles = state.selectedRoles.slice(0);
+      newState.selectedRoles.push({
+        id: action.roleId,
+        selected: true
+      });
+      return newState;
+    }
+    case ENTER_NEW_USER : {
+      return _.assign({}, state, {
+        createNewUserIsEntered: true
+      });
+    }
+    case EXIT_NEW_USER : {
+      return _.assign({}, state, {
+        createNewUserIsEntered: false
+      });
+    }
+    case ENTER_NEW_ROLE : {
+      return _.assign({}, state, {
+        createNewRoleIsEntered: true
+      });
+    }
+    case EXIT_NEW_ROLE : {
+      return _.assign({}, state, {
+        createNewRoleIsEntered: false
+      });
+    }
+    case RESET_UPDATES : {
       return _.assign({}, state, {
         updates: []
       });
-    case FILTER_SELECTIONS_CHANGED :
+    }
+    case FILTER_SELECTIONS_CHANGED : {
       let index = _.findIndex(state.selectedRoles, (o) => {
         if ((o as any).id === action.id) {
           return true;
@@ -48,23 +89,26 @@ export const usersReducer = (state: any = initialState, action: any) => {
       newSelectedRoles[index].selected = action.selected;
 
       return _.assign({}, state, {
-        selectedRoles : newSelectedRoles
+        selectedRoles: newSelectedRoles
       });
-    case RECEIVE_USERS_WITH_ROLES_AND_PROJECTS:
+    }
+    case RECEIVE_USERS_WITH_ROLES_AND_PROJECTS : {
       return _.assign({}, state, {
         usersWithRolesAndProjects: action.usersWithRolesAndProjects
       });
-    case RECEIVE_PERMISSIONS_WITH_ROLES:
+    }
+    case RECEIVE_PERMISSIONS_WITH_ROLES : {
       return _.assign({}, state, {
         permissionsWithRoles: action.permissions
       });
-    case RECEIVE_ROLE_NAMES:
+    }
+    case RECEIVE_ROLE_NAMES : {
       let roles = action.roleNames;
       roles.sort((a, b) => {
         if (a.id < b.id) return -1; else return 1;
       });
 
-      let toAppend: any = { roles };
+      let toAppend: any = {roles};
       if (!(state as any).selectedRoles) {
         let selectedRoles = new Array(roles.length);
 
@@ -78,15 +122,18 @@ export const usersReducer = (state: any = initialState, action: any) => {
         toAppend.selectedRoles = selectedRoles;
       }
       return _.assign({}, state, toAppend);
-    case RECEIVE_PROJECTS :
+    }
+    case RECEIVE_PROJECTS : {
       return _.assign({}, state, {
         projects: action.projects
       });
-    case RECEIVE_USERS :
+    }
+    case RECEIVE_USERS : {
       return _.assign({}, state, {
         users: action.users
       });
-    case RECEIVE_SAVE_PERMISSIONS :
+    }
+    case RECEIVE_SAVE_PERMISSIONS : {
       let newState: any = _.assign({}, state);
       if (action.hasOwnProperty("roleId")) {
         newState.updates = newState.updates.slice(0);
@@ -103,7 +150,9 @@ export const usersReducer = (state: any = initialState, action: any) => {
         console.log("ERROR: invalid update state");
       }
       return newState;
-    default:
+    }
+    default: {
       return state;
+    }
   }
 };

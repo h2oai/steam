@@ -22,13 +22,14 @@ import * as _ from 'lodash';
 import {
   RECEIVE_CLUSTERS, RECEIVE_MODELS, CREATE_PROJECT_COMPLETED, SET_CURRENT_PROJECT,
   RECEIVE_PROJECTS, RECEIVE_DATASETS_FROM_CLUSTER, RECEIVE_MODELS_FROM_PROJECT, RECEIVE_PROJECT, REQUEST_CLUSTERS, REQUEST_DELETE_PROJECT, RECEIVE_DELETE_PROJECT,
-  REQUEST_MODELS, REGISTER_CLUSTER_ERROR } from '../actions/projects.actions';
+  REQUEST_MODELS, REGISTER_CLUSTER_ERROR, RECEIVE_WORKGROUPS } from '../actions/projects.actions';
 
 let initialState = {
   clusters: [],
   models: [],
   project: {},
   availableProjects: null,
+  workgroups: [],
   isClusterFetchInProcess: false
 };
 
@@ -77,6 +78,10 @@ export const projectsReducer = (state = initialState, action: any) => {
     case RECEIVE_PROJECTS:
       return _.assign({}, state, {
         availableProjects: action.projects
+      });
+    case RECEIVE_WORKGROUPS:
+      return _.assign({}, state, {
+        workgroups: action.workgroups
       });
     case RECEIVE_DATASETS_FROM_CLUSTER:
       return _.assign({}, state, {
