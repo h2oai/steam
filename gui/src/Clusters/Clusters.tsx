@@ -63,10 +63,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   }
 
   componentWillMount(): void {
-    if (_.isEmpty(this.props.clusters)) {
-      this.props.fetchClusters();
-      this.props.getConfig();
-    }
+    this.props.fetchClusters();
+    this.props.getConfig();
   }
 
   removeCluster(cluster) {
