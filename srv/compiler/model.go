@@ -63,19 +63,20 @@ func (c *Model) AttachFiles(w *multipart.Writer) error {
 	}
 
 	// Attach Python Package Files
-	if err := attachFile(w, c.pythonFiles.Main, fileTypePythonMain); err != nil {
-		return errors.Wrap(err, "attaching Python main file")
-	}
-	for _, file := range c.pythonFiles.Other {
-		if err := attachFile(w, file, fileTypePythonOther); err != nil {
-			return errors.Wrap(err, "attaching Python file")
+	if c.pythonFiles.Main != "" {
+		if err := attachFile(w, c.pythonFiles.Main, fileTypePythonMain); err != nil {
+			return errors.Wrap(err, "attaching Python main file")
+		}
+		for _, file := range c.pythonFiles.Other {
+			if err := attachFile(w, file, fileTypePythonOther); err != nil {
+				return errors.Wrap(err, "attaching Python file")
+			}
+		}
+		if c.pythonFiles.Yaml != "" {
+			if err := attachFile(w, c.pythonFiles.Yaml, fileTypePythonEnv); err != nil {
+				return errors.Wrap(err, "attaching Python env file")
+			}
 		}
 	}
-	if c.pythonFiles.Yaml != "" {
-		if err := attachFile(w, c.pythonFiles.Yaml, fileTypePythonEnv); err != nil {
-			return errors.Wrap(err, "attaching Python env file")
-		}
-	}
-
 	return nil
 }
