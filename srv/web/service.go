@@ -64,6 +64,7 @@ type Cluster struct {
 	TypeId    int64  `json:"type_id"`
 	DetailId  int64  `json:"detail_id"`
 	Address   string `json:"address"`
+	Token     string `json:"token"`
 	State     string `json:"state"`
 	CreatedAt int64  `json:"created_at"`
 }
@@ -294,7 +295,7 @@ type Service interface {
 	GetConfig(pz az.Principal) (*Config, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
-	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, keytab string) (int64, error)
+	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
 	StopClusterOnYarn(pz az.Principal, clusterId int64, keytab string) error
 	GetCluster(pz az.Principal, clusterId int64) (*Cluster, error)
 	GetClusterOnYarn(pz az.Principal, clusterId int64) (*YarnCluster, error)
@@ -442,6 +443,7 @@ type StartClusterOnYarnIn struct {
 	EngineId    int64  `json:"engine_id"`
 	Size        int    `json:"size"`
 	Memory      string `json:"memory"`
+	Secure      bool   `json:"secure"`
 	Keytab      string `json:"keytab"`
 }
 
@@ -1432,8 +1434,8 @@ func (this *Remote) UnregisterCluster(clusterId int64) error {
 	return nil
 }
 
-func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size int, memory string, keytab string) (int64, error) {
-	in := StartClusterOnYarnIn{clusterName, engineId, size, memory, keytab}
+func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error) {
+	in := StartClusterOnYarnIn{clusterName, engineId, size, memory, secure, keytab}
 	var out StartClusterOnYarnOut
 	err := this.Proc.Call("StartClusterOnYarn", &in, &out)
 	if err != nil {
@@ -2694,7 +2696,7 @@ func (this *Impl) StartClusterOnYarn(r *http.Request, in *StartClusterOnYarnIn, 
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.StartClusterOnYarn(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Keytab)
+	val0, err := this.Service.StartClusterOnYarn(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Secure, in.Keytab)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err

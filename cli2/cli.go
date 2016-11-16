@@ -3976,6 +3976,7 @@ func startCluster(c *context) *cobra.Command {
 	var engineId int64     // No description available
 	var keytab string      // No description available
 	var memory string      // No description available
+	var secure bool        // No description available
 	var size int           // No description available
 
 	cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
@@ -3987,6 +3988,7 @@ func startCluster(c *context) *cobra.Command {
 				engineId,    // No description available
 				size,        // No description available
 				memory,      // No description available
+				secure,      // No description available
 				keytab,      // No description available
 			)
 			if err != nil {
@@ -4002,6 +4004,7 @@ func startCluster(c *context) *cobra.Command {
 	cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
 	cmd.Flags().StringVar(&keytab, "keytab", keytab, "No description available")
 	cmd.Flags().StringVar(&memory, "memory", memory, "No description available")
+	cmd.Flags().BoolVar(&secure, "secure", secure, "No description available")
 	cmd.Flags().IntVar(&size, "size", size, "No description available")
 	return cmd
 }

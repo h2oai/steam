@@ -124,6 +124,7 @@ type Cluster struct {
 	DetailId int64
 	Address  string
 	State    string
+	Token    string
 	Created  time.Time
 }
 

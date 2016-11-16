@@ -41,6 +41,7 @@ import (
 	"github.com/h2oai/steam/srv/h2ov3"
 	"github.com/h2oai/steam/srv/web"
 	"github.com/pkg/errors"
+	"github.com/h2oai/steam/lib/haproxy"
 )
 
 type Service struct {
@@ -139,7 +140,7 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 	return nil
 }
 
-func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, keytab string) (int64, error) {
+func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ManageCluster); err != nil {
 		return 0, err
 	}
@@ -166,7 +167,8 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	// FIXME check if file exists
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
 
-	appId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName, engine.Location, identity.Name, keytabPath)
+	appId, address, out, token, err := yarn.StartCloud(size, s.kerberosEnabled, memory,
+		clusterName, engine.Location, identity.Name, keytabPath, secure)
 	if err != nil {
 		return 0, err
 	}
@@ -181,8 +183,13 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		out,
 	}
 
-	clusterId, err := s.ds.CreateYarnCluster(pz, clusterName, address, data.StartedState, yarnCluster)
+	clusterId, err := s.ds.CreateYarnCluster(pz, clusterName, address, token, data.StartedState, yarnCluster)
 	if err != nil {
+		log.Println("Failed to create yarn cluster.")
+		return 0, err
+	}
+
+	if err := reloadProxyConf(s, pz, identity.Name); err != nil {
 		return 0, err
 	}
 
@@ -226,7 +233,27 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 		return err
 	}
 
-	return s.ds.DeleteCluster(pz, clusterId)
+	res := s.ds.DeleteCluster(pz, clusterId)
+
+	if err := reloadProxyConf(s, pz, identity.Name); err != nil {
+		return err
+	}
+
+	return res
+}
+
+func reloadProxyConf(s *Service, pz az.Principal, name string) error {
+	clusters, err := s.ds.ReadAllClusters(pz)
+	if err != nil {
+		log.Println("Failed to read clusters.")
+		return err
+	}
+
+	uid, gid, err := yarn.GetUser(name)
+	if err := haproxy.Reload(clusters, uid, gid); err != nil {
+		log.Println("Failed to reload proxy configuration.")
+	}
+	return nil
 }
 
 func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, error) {
@@ -2431,6 +2458,7 @@ func toCluster(c data.Cluster) *web.Cluster {
 		c.TypeId,
 		c.DetailId,
 		c.Address,
+		c.Token,
 		c.State,
 		toTimestamp(c.Created),
 	}

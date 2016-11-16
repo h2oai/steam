@@ -804,7 +804,7 @@ func TestYarnClusters(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	id1, err := ds.CreateYarnCluster(p, "cluster1", "address1", "started", YarnCluster{
+	id1, err := ds.CreateYarnCluster(p, "cluster1", "address1", "", "started", YarnCluster{
 		0,
 		eid,
 		4,
@@ -818,7 +818,7 @@ func TestYarnClusters(t *testing.T) {
 	}
 	t.Log(id1)
 
-	id2, err := ds.CreateYarnCluster(p, "cluster2", "address2", "started", YarnCluster{
+	id2, err := ds.CreateYarnCluster(p, "cluster2", "address2", "", "started", YarnCluster{
 		0,
 		eid,
 		4,

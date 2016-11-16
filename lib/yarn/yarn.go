@@ -33,6 +33,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/h2oai/steam/lib/haproxy"
+	"os"
 )
 
 func kInit(username, keytab string, uid, gid uint32) error {
@@ -77,7 +79,7 @@ func cleanDir(dir string, uid, gid uint32) {
 	}
 }
 
-func getUser(username string) (uint32, uint32, error) {
+func GetUser(username string) (uint32, uint32, error) {
 	u, err := user.Lookup(username)
 	if err != nil {
 		return 0, 0, errors.Wrap(err, "failed to lookup user")
@@ -171,23 +173,23 @@ func yarnCommand(uid, gid uint32, name, username string, args ...string) (string
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string) (string, string, string, error) {
+func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string, secure bool) (string, string, string, string, error) {
 	// Get user information for Kerberos and Yarn reasons
-	uid, gid, err := getUser(username)
+	uid, gid, err := GetUser(username)
 	if err != nil {
-		return "", "", "", errors.Wrap(err, "failed getting user")
+		return "", "", "", "", errors.Wrap(err, "failed getting user")
 	}
 
 	// If kerberos enabled, initialize and defer destroy
 	if kerberos {
 		if err := kInit(username, keytab, uid, gid); err != nil {
-			return "", "", "", errors.Wrap(err, "failed initializing kerberos")
+			return "", "", "", "", errors.Wrap(err, "failed initializing kerberos")
 		}
 		defer kDest(uid, gid)
 	}
 
 	// Randomize outfile name
-	out := "steam/" + name + "_" + randStr(5) + "_out"
+	out := "steam-output/" + name + "_" + randStr(5) + "_out"
 
 	cmdArgs := []string{
 		"jar", enginePath,
@@ -196,19 +198,31 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		"-mapperXmx", mem,
 		"-output", out,
 		"-disown",
+		"-J", "-context_path",
+		"-J", "/" + name,
 	}
+
+	token := ""
+	if secure {
+		passwd := randStr(10)
+		token, _ = haproxy.GenRealmFile(username, passwd)
+		defer os.Remove(token + "_realm.properties")
+		securityArgs := []string{"-hash_login", "-login_conf", token+"_realm.properties"}
+		cmdArgs = append(cmdArgs, securityArgs...)
+	}
+
 	appID, address, err := yarnCommand(uid, gid, name, username, cmdArgs...)
 	if err != nil {
 		cleanDir(out, uid, gid)
-		return "", "", "", errors.Wrap(err, "failed executing command")
+		return "", "", "", "", errors.Wrap(err, "failed executing command")
 	}
 
-	return appID, address, out, nil
+	return appID, address, out, token, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
 func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
-	uid, gid, err := getUser(username)
+	uid, gid, err := GetUser(username)
 	if err != nil {
 		return errors.Wrap(err, "failed getting user")
 	}

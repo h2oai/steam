@@ -70,7 +70,10 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
     let keytab = _.get((this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement), 'value', '');
+    let secure = (this.refs.clusterForm.querySelector('input[name="secure"]') as HTMLInputElement).value === "on";
+
     this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', keytab);
+    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', secure, keytab);
   }
 
   uploadEngine(event) {
@@ -113,6 +116,16 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
               <Cell>
                 <NumericInput name="memory" min="1"/>GB
+              </Cell>
+            </Row>
+            <Row>
+              <Cell>
+                SECURE
+              </Cell>
+              <Cell>
+                <div className="checkbox">
+                  <input type="checkbox" name="secure" />
+                </div>
               </Cell>
             </Row>
             <Row>

@@ -143,7 +143,7 @@ Ping(status bool) status bool
 
 RegisterCluster(address string) clusterId int64
 UnregisterCluster(clusterId int64)
-StartYarnCluster(clusterName string, engineId int64, size int, memory string, username string) clusterId int64 
+StartYarnCluster(clusterName string, engineId int64, size int, memory string, secure bool, username string) clusterId int64
 StopYarnCluster(clusterId int64)
 GetCluster(clusterId int64) cluster *Cluster
 GetYarnCluster(clusterId int64) cluster *YarnCluster

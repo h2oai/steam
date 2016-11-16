@@ -141,6 +141,7 @@ CREATE TABLE cluster (
     type_id integer NOT NULL,
     detail_id integer NOT NULL,
     address text NOT NULL,
+    token text NOT NULL,
     state job_state NOT NULL,
     created datetime NOT NULL,
 
