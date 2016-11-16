@@ -44,8 +44,6 @@ type driverDBOpts struct {
 
 type driverYarnOpts struct {
 	KerberosEnabled bool
-	Username        string
-	Keytab          string
 }
 
 func newService(opts driverOpts) (web.Service, az.Directory, error) {
@@ -72,7 +70,5 @@ func newService(opts driverOpts) (web.Service, az.Directory, error) {
 		opts.ClusterProxyAddress,
 		opts.ScoringServicePorts,
 		opts.Yarn.KerberosEnabled,
-		opts.Yarn.Username,
-		opts.Yarn.Keytab,
 	), ds, nil
 }

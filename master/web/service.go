@@ -52,8 +52,6 @@ type Service struct {
 	scoringServicePortMin     int
 	scoringServicePortMax     int
 	kerberosEnabled           bool
-	username                  string
-	keytab                    string
 }
 
 func NewService(
@@ -62,7 +60,6 @@ func NewService(
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
 	kerberos bool,
-	username, keytab string,
 ) *Service {
 	return &Service{
 		workingDir,
@@ -70,7 +67,6 @@ func NewService(
 		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
 		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
-		username, keytab,
 	}
 }
 
