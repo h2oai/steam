@@ -270,7 +270,7 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                       <span>
                         <i className="fa fa-close"/>
                       </span>
-                      <input type="file" name="selectConda" onChange={this.selectCondaHandler.bind(this)} />
+                      <input type="file" name="selectConda" onChange={this.selectCondaHandler.bind(this)} accept=".yaml" />
                     </div>
                   </div>
                 </Cell>
