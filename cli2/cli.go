@@ -32,7 +32,6 @@ import (
 func registerGeneratedCommands(c *context, cmd *cobra.Command) {
 	cmd.AddCommand(
 		activate(c),
-		add(c),
 		build(c),
 		check(c),
 		create(c),
@@ -98,56 +97,6 @@ func activateIdentity(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
-	return cmd
-}
-
-var addHelp = `
-add [?]
-Add entities
-Commands:
-
-    $ steam add engine ...
-`
-
-func add(c *context) *cobra.Command {
-	cmd := newCmd(c, addHelp, nil)
-
-	cmd.AddCommand(addEngine(c))
-	return cmd
-}
-
-var addEngineHelp = `
-engine [?]
-Add Engine
-Examples:
-
-    Add an engine
-    $ steam add engine \
-        --engine-name=? \
-        --engine-path=?
-
-`
-
-func addEngine(c *context) *cobra.Command {
-	var engineName string // No description available
-	var enginePath string // No description available
-
-	cmd := newCmd(c, addEngineHelp, func(c *context, args []string) {
-
-		// Add an engine
-		engineId, err := c.remote.AddEngine(
-			engineName, // No description available
-			enginePath, // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Printf("EngineId:\t%v\n", engineId)
-		return
-	})
-
-	cmd.Flags().StringVar(&engineName, "engine-name", engineName, "No description available")
-	cmd.Flags().StringVar(&enginePath, "engine-path", enginePath, "No description available")
 	return cmd
 }
 

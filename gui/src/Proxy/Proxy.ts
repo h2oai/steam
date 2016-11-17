@@ -674,9 +674,6 @@ export interface Service {
   // Delete a service
   deleteService: (serviceId: number, go: (error: Error) => void) => void
   
-  // Add an engine
-  addEngine: (engineName: string, enginePath: string, go: (error: Error, engineId: number) => void) => void
-  
   // Get engine details
   getEngine: (engineId: number, go: (error: Error, engine: Engine) => void) => void
   
@@ -1672,20 +1669,6 @@ interface DeleteServiceIn {
 }
 
 interface DeleteServiceOut {
-  
-}
-
-interface AddEngineIn {
-  
-  engine_name: string
-  
-  engine_path: string
-  
-}
-
-interface AddEngineOut {
-  
-  engine_id: number
   
 }
 
@@ -3090,18 +3073,6 @@ export function deleteService(serviceId: number, go: (error: Error) => void): vo
     } else {
       const d: DeleteServiceOut = <DeleteServiceOut> data;
       return go(null);
-    }
-  });
-}
-
-export function addEngine(engineName: string, enginePath: string, go: (error: Error, engineId: number) => void): void {
-  const req: AddEngineIn = { engine_name: engineName, engine_path: enginePath };
-  Proxy.Call("AddEngine", req, function(error, data) {
-    if (error) {
-      return go(error, null);
-    } else {
-      const d: AddEngineOut = <AddEngineOut> data;
-      return go(null, d.engine_id);
     }
   });
 }
