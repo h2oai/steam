@@ -1676,15 +1676,6 @@ func (s *Service) DeleteService(pz az.Principal, serviceId int64) error {
 	return nil
 }
 
-// FIXME this should not be here - not an client-facing API
-func (s *Service) AddEngine(pz az.Principal, engineName, enginePath string) (int64, error) {
-	if err := pz.CheckPermission(s.ds.Permissions.ManageEngine); err != nil {
-		return 0, err
-	}
-
-	return s.ds.CreateEngine(pz, engineName, enginePath)
-}
-
 func (s *Service) GetEngine(pz az.Principal, engineId int64) (*web.Engine, error) {
 	if err := pz.CheckPermission(s.ds.Permissions.ViewEngine); err != nil {
 		return nil, err

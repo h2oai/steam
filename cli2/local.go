@@ -257,49 +257,6 @@ func serveMaster(c *context) *cobra.Command {
 
 }
 
-var deployHelp = `
-deploy [resource-type]
-Deploy a resource of the specified type.
-Examples:
-
-	$ steam deploy engine
-`
-
-func deploy(c *context) *cobra.Command {
-	cmd := newCmd(c, deployHelp, nil)
-	cmd.AddCommand(deployEngine(c))
-	return cmd
-}
-
-var deployEngineHelp = `
-engine [enginePath]
-Deploy an H2O engine to Steam.
-Examples:
-
-	$ steam deploy engine --file-path=path/to/engine
-`
-
-func deployEngine(c *context) *cobra.Command {
-	var (
-		filePath string
-	)
-	cmd := newCmd(c, deployEngineHelp, func(c *context, args []string) {
-		attrs := map[string]string{
-			"type": fs.KindEngine,
-		}
-
-		if err := c.transmitFile(filePath, attrs); err != nil {
-			log.Fatalln(err)
-		}
-
-		log.Println("Engine deployed:", path.Base(filePath))
-	})
-
-	cmd.Flags().StringVar(&filePath, "file-path", "", "Path to engine")
-
-	return cmd
-}
-
 var uploadHelp = `
 upload [resource-type]
 Upload a resource of the specified type.
@@ -311,15 +268,18 @@ Examples:
 func upload(c *context) *cobra.Command {
 	cmd := newCmd(c, uploadHelp, nil)
 	cmd.AddCommand(uploadFile(c))
+	cmd.AddCommand(uploadEngine(c))
 	return cmd
 }
 
 var uploadFileHelp = `
 file [path]
-Upload an H2O engine to Steam.
+Upload an asset to Steam. 
 Examples:
 
-	$ steam upload engine path/to/engine
+	$ steam upload file \
+		--file-path=? \
+		--project-id=?
 `
 
 func uploadFile(c *context) *cobra.Command {
@@ -356,6 +316,35 @@ func uploadFile(c *context) *cobra.Command {
 	cmd.Flags().Int64Var(&projectId, "project-id", 0, "Target project id")
 	cmd.Flags().StringVar(&packageName, "package-name", "", "Target package")
 	cmd.Flags().StringVar(&relativePath, "relative-path", "", "Relative path to copy file to")
+
+	return cmd
+}
+
+var uploadEngineHelp = `
+engine [path]
+Upload an engine to Steam. 
+Examples:
+
+	$ steam upload engine \
+		--file-path=?
+`
+
+func uploadEngine(c *context) *cobra.Command {
+	var (
+		filePath string
+	)
+	cmd := newCmd(c, uploadEngineHelp, func(c *context, args []string) {
+		attrs := map[string]string{
+			"type": fs.KindEngine,
+		}
+		if err := c.transmitFile(filePath, attrs); err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Println("Engine uploaded:", path.Base(filePath))
+	})
+
+	cmd.Flags().StringVar(&filePath, "file-path", "", "File to be uploaded")
 
 	return cmd
 }

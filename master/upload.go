@@ -199,7 +199,7 @@ func (s *UploadHandler) handleEngine(w http.ResponseWriter, pz az.Principal, fil
 	}
 
 	// Add Engine to datastore
-	if _, err := s.webService.AddEngine(pz, dstBase, dstPath); err != nil {
+	if _, err := s.ds.CreateEngine(pz, dstBase, dstPath); err != nil {
 		http.Error(w, fmt.Sprintf("Error saving engine to datastore: %v", err), http.StatusInternalServerError)
 		return errors.Wrap(err, "failed saving engine to datastore")
 	}
