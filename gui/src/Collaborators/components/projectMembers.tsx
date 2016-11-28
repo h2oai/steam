@@ -25,6 +25,7 @@ import { connect } from 'react-redux';
 import '../styles/collaborators.scss';
 import { fetchMembersForProject } from '../actions/collaborators.actions';
 import { setCurrentProject } from '../../Projects/actions/projects.actions';
+import MouseEvent = __React.MouseEvent;
 
 interface Props {
   projectid: string,
@@ -43,13 +44,17 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
     this.props.fetchMembersForProject();
   }
 
+  onLoadLabelsClicked = (e: MouseEvent) => {
+    this.props.loadLabelsTab();
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="projectMembers">
         <p></p>
         <h1>Members</h1>
         <p className="lede">Theses are users who have access to this project, meaning they can see data, models and services associated with the project. Additionally, owners and collaborators can create new models, and new services based on those models.</p>
-        <p className="lede">Labels associated with projects have <span className="link" onClick={ this.props.loadLabelsTab }>their own access controls, shown here</span>.</p>
+        <p className="lede">Labels associated with projects have <span className="link" onClick={ this.onLoadLabelsClicked }>their own access controls, shown here</span>.</p>
         <Table>
           <Row header={true}>
             <Cell>USER</Cell>

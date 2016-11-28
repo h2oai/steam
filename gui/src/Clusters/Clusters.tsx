@@ -136,7 +136,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count} nodes</span>
                   <span className="remove-cluster">
-                    {_.get(this.props.config, 'kerberos_enabled', false) === true ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
+                    {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
 
                     <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
                       className="fa fa-trash no-margin"/></button>

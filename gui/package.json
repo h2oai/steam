@@ -21,6 +21,7 @@
     "redux": "^3.5.2",
     "redux-thunk": "^2.1.0",
     "roc-chart": "^1.1.0",
+    "typescript": "^2.1.1",
     "vis-components": "^0.2.0"
   },
   "devDependencies": {
@@ -39,7 +40,7 @@
     "ts-loader": "^0.8.2",
     "tslint": "^3.13.0",
     "tslint-loader": "^2.1.5",
-    "typescript": "^1.8.10",
+    "typescript": "^2.1.1",
     "typings": "^1.3.0",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1"

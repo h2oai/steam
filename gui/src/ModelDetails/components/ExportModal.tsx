@@ -24,6 +24,7 @@ import '../styles/exportmodal.scss';
 import { fetchPackages } from '../../Deployment/actions/deployment.actions';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import MouseEvent = __React.MouseEvent;
 
 interface Props {
   name: string,
@@ -69,6 +70,10 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
       });
     }
   }
+
+  onCancelClicked = (e: MouseEvent) => {
+    this.props.onCancel();
+  };
 
   render(): React.ReactElement<DefaultModal> {
     return (
@@ -128,7 +133,7 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
                 <a
                   href={`/download?type=model&artifact=${this.state.packageName && this.state.artifact === 'java-war' ? 'java-py-war' : this.state.artifact}&model-id=${this.props.modelId}&project-id=${this.props.projectId}&package-name=${this.state.packageName}`}
                   className="default" target="_blank" rel="noopener">Download</a>
-                <button type="button" className="default invert" onClick={this.props.onCancel}>Cancel</button>
+                <button type="button" className="default invert" onClick={this.onCancelClicked}>Cancel</button>
               </div>
             </div>
           </form>

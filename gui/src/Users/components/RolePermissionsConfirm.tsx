@@ -23,6 +23,7 @@ import '../styles/users.scss';
 import DefaultModal from '../../App/components/DefaultModal';
 import InputFeedback from '../../App/components/InputFeedback';
 import { FeedbackType } from '../../App/components/InputFeedback';
+import MouseEvent = __React.MouseEvent;
 
 interface Props {
   requestedChanges: Array<any>,
@@ -116,6 +117,10 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
     });
   };
 
+  onCloseClicked = (e: MouseEvent) => {
+    this.props.closeHandler();
+  };
+
   render(): React.ReactElement<DefaultModal> {
     let saveChangesEnabled = true;
     for (let requestedChange of this.state.requestedChanges) {
@@ -184,7 +189,7 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
           <br />
           &nbsp;
           <br />
-          <div className="button-secondary" onClick={this.props.closeHandler}>Close</div>
+          <div className="button-secondary" onClick={this.onCloseClicked}>Close</div>
         </div> :
         <div>
           <h1>CONFIRMING PERMISSION CHANGES</h1>

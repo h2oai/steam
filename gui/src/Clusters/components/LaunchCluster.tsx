@@ -143,7 +143,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 </select>
               </Cell>
             </Row>
-            {_.get(this.props.config, 'kerberos_enabled', false) === true ? <Row>
+            {_.get(this.props.config, 'kerberos_enabled', false) ? <Row>
               <Cell>
                 Kerberos Keytab
               </Cell>

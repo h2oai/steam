@@ -28,7 +28,7 @@ import { bindActionCreators } from 'redux';
 import {createUser, NewUserDetails} from "../actions/users.actions";
 import InputFeedback from "../../App/components/InputFeedback";
 import {FeedbackType} from "../../App/components/InputFeedback";
-
+import MouseEvent = __React.MouseEvent;
 
 interface Props {
   workgroups: Array<Workgroup>,
@@ -166,6 +166,10 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
     ));
   };
 
+  onCancelClicked = (e: MouseEvent) => {
+    this.props.cancelHandler();
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     this.inputsWithRoles = [];
     this.inputsWithWorkgroups = [];
@@ -239,7 +243,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
         {this.state.validNameEntered && this.state.validPasswordEntered && this.state.validPasswordConfirmEntered ?
         <div className="button-primary" onClick={this.onCreateUserClicked}>Create User</div>
         :<div className="button-primary disabled">Create User</div>}
-        <div className="button-secondary" onClick={this.props.cancelHandler}>Cancel</div>
+        <div className="button-secondary" onClick={this.onCancelClicked}>Cancel</div>
       </div>
     );
   }
