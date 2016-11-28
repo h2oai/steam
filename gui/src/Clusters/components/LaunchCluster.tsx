@@ -54,7 +54,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
-      memorySizeUnit: 'm',
       engineId: null
     };
   }
@@ -71,18 +70,12 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
     let keytab = _.get((this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement), 'value', '');
-    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + this.state.memorySizeUnit, keytab);
+    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', keytab);
   }
 
   uploadEngine(event) {
     event.preventDefault();
     this.props.uploadEngine(this.refs.engine);
-  }
-
-  onChangeMemory(event) {
-    this.setState({
-      memorySizeUnit: event.target.value
-    });
   }
 
   onChangeEngine(event) {
@@ -119,11 +112,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 MEMORY PER NODE
               </Cell>
               <Cell>
-                <NumericInput name="memory" min="1"/>
-                <select className="memory-selection" onChange={this.onChangeMemory.bind(this)}>
-                  <option value="m">MB</option>
-                  <option value="g">GB</option>
-                </select>
+                <NumericInput name="memory" min="1"/>GB
               </Cell>
             </Row>
             <Row>
