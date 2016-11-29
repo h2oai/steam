@@ -352,7 +352,6 @@ type Service interface {
 	GetServicesForProject(pz az.Principal, projectId int64, offset int64, limit int64) ([]*ScoringService, error)
 	GetServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
 	DeleteService(pz az.Principal, serviceId int64) error
-	AddEngine(pz az.Principal, engineName string, enginePath string) (int64, error)
 	GetEngine(pz az.Principal, engineId int64) (*Engine, error)
 	GetEngines(pz az.Principal) ([]*Engine, error)
 	DeleteEngine(pz az.Principal, engineId int64) error
@@ -949,15 +948,6 @@ type DeleteServiceIn struct {
 }
 
 type DeleteServiceOut struct {
-}
-
-type AddEngineIn struct {
-	EngineName string `json:"engine_name"`
-	EnginePath string `json:"engine_path"`
-}
-
-type AddEngineOut struct {
-	EngineId int64 `json:"engine_id"`
 }
 
 type GetEngineIn struct {
@@ -2020,16 +2010,6 @@ func (this *Remote) DeleteService(serviceId int64) error {
 		return err
 	}
 	return nil
-}
-
-func (this *Remote) AddEngine(engineName string, enginePath string) (int64, error) {
-	in := AddEngineIn{engineName, enginePath}
-	var out AddEngineOut
-	err := this.Proc.Call("AddEngine", &in, &out)
-	if err != nil {
-		return 0, err
-	}
-	return out.EngineId, nil
 }
 
 func (this *Remote) GetEngine(engineId int64) (*Engine, error) {
@@ -4744,41 +4724,6 @@ func (this *Impl) DeleteService(r *http.Request, in *DeleteServiceIn, out *Delet
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
-
-	res, merr := json.Marshal(out)
-	if merr != nil {
-		log.Println(guid, "RES", pz, name, merr)
-	} else {
-		log.Println(guid, "RES", pz, name, string(res))
-	}
-
-	return nil
-}
-
-func (this *Impl) AddEngine(r *http.Request, in *AddEngineIn, out *AddEngineOut) error {
-	const name = "AddEngine"
-
-	guid := xid.New().String()
-
-	pz, azerr := this.Az.Identify(r)
-	if azerr != nil {
-		return azerr
-	}
-
-	req, merr := json.Marshal(in)
-	if merr != nil {
-		log.Println(guid, "REQ", pz, name, merr)
-	} else {
-		log.Println(guid, "REQ", pz, name, string(req))
-	}
-
-	val0, err := this.Service.AddEngine(pz, in.EngineName, in.EnginePath)
-	if err != nil {
-		log.Println(guid, "ERR", pz, name, err)
-		return err
-	}
-
-	out.EngineId = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

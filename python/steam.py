@@ -1187,24 +1187,6 @@ class RPCClient:
 		response = self.connection.call("DeleteService", request)
 		return 
 	
-	def add_engine(self, engine_name, engine_path):
-		"""
-		Add an engine
-
-		Parameters:
-		engine_name: No description available (string)
-		engine_path: No description available (string)
-
-		Returns:
-		engine_id: No description available (int64)
-		"""
-		request = {
-			'engine_name': engine_name,
-			'engine_path': engine_path
-		}
-		response = self.connection.call("AddEngine", request)
-		return response['engine_id']
-	
 	def get_engine(self, engine_id):
 		"""
 		Get engine details

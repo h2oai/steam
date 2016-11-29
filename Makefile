@@ -112,7 +112,7 @@ clean:
 	rm -rf var
 	cd $(SSB) && ./gradlew clean
 
-linux:
+linux: gui
 	rm -rf ./dist/$(DIST_LINUX)
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=linux GOARCH=amd64 go build
@@ -126,7 +126,7 @@ linux:
 	cp -r $(SCRIPTS) ./dist/$(DIST_LINUX)/var/master/
 	tar czfC ./dist/$(DIST_LINUX).tar.gz dist $(DIST_LINUX)
 
-darwin:
+darwin: gui
 	rm -rf ./dist/$(DIST_DARWIN)
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=darwin GOARCH=amd64 go build
@@ -140,7 +140,5 @@ darwin:
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: gui ssb db launcher linux 
-	rm -rf ./dist/$(DIST_LINUX)
-	# rm -rf ./dist/$(DIST_DARWIN)
+release: ssb db launcher linux
 

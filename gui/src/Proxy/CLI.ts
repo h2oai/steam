@@ -346,11 +346,6 @@ export function deleteService(serviceId: number): void {
   Proxy.Call("DeleteService", req, print);
 }
 
-export function addEngine(engineName: string, enginePath: string): void {
-  const req: any = { engine_name: engineName, engine_path: enginePath };
-  Proxy.Call("AddEngine", req, print);
-}
-
 export function getEngine(engineId: number): void {
   const req: any = { engine_id: engineId };
   Proxy.Call("GetEngine", req, print);

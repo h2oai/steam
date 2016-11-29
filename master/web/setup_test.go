@@ -106,7 +106,7 @@ func newTest(t *testing.T) *test {
 		compilationServiceAddress,
 		"",
 		[2]int{1025, 65535},
-		driverYarnOpts{false, "", ""},
+		driverYarnOpts{false},
 		dbOpts,
 	}
 	svc, dir, err := newService(opts)
