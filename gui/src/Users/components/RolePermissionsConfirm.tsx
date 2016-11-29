@@ -23,7 +23,6 @@ import '../styles/users.scss';
 import DefaultModal from '../../App/components/DefaultModal';
 import InputFeedback from '../../App/components/InputFeedback';
 import { FeedbackType } from '../../App/components/InputFeedback';
-import MouseEvent = __React.MouseEvent;
 
 interface Props {
   requestedChanges: Array<any>,
@@ -117,7 +116,7 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
     });
   };
 
-  onCloseClicked = (e: MouseEvent) => {
+  onCloseClicked = (e: React.MouseEvent) => {
     this.props.closeHandler();
   };
 

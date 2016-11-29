@@ -22,7 +22,6 @@
 import * as React from 'react';
 import * as classNames from 'classnames';
 import '../styles/panel.scss';
-import MouseEvent = __React.MouseEvent;
 
 interface Props {
   className?: any,
@@ -31,7 +30,7 @@ interface Props {
 
 export default class Panel extends React.Component<Props, any> {
 
-  onClick = (e: MouseEvent) => {
+  onClick = (e: React.MouseEvent) => {
     this.props.onClick();
   };
 

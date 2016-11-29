@@ -25,7 +25,6 @@ import Table from "../../Projects/components/Table";
 import Row from "../../Projects/components/Row";
 import {PermissionsWithRoles, fetchPermissionsWithRoles, createRole, NewRolePermission} from "../actions/users.actions";
 import {Role} from "../../Proxy/Proxy";
-import MouseEvent = __React.MouseEvent;
 
 
 interface Props {
@@ -117,7 +116,7 @@ export class CreateRole extends React.Component<Props & DispatchProps, any> {
     this.props.createRole(this.nameInput.value, this.descriptionInput.value, newRolePermissions);
   }
 
-  onCancelClicked = (e: MouseEvent) => {
+  onCancelClicked = (e: React.MouseEvent) => {
     this.props.cancelHandler();
   };
 

@@ -28,7 +28,6 @@ import { bindActionCreators } from 'redux';
 import {createUser, NewUserDetails} from "../actions/users.actions";
 import InputFeedback from "../../App/components/InputFeedback";
 import {FeedbackType} from "../../App/components/InputFeedback";
-import MouseEvent = __React.MouseEvent;
 
 interface Props {
   workgroups: Array<Workgroup>,
@@ -166,7 +165,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
     ));
   };
 
-  onCancelClicked = (e: MouseEvent) => {
+  onCancelClicked = (e: React.MouseEvent) => {
     this.props.cancelHandler();
   };
 
