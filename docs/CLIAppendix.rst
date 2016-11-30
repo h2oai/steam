@@ -3,6 +3,12 @@ Appendix B: CLI Command Reference
 
 This document describes the CLI commands available in Steam. In addition to this reference, you can view information about each command when you're in the CLI by typing ``./steam help``. 
 
+**Note**: To access the Steam CLI, open a terminal window and log in to Steam as the superuser:
+
+::
+
+    ./steam login <yarn_edge_node>:<port> --username=superuser --password=superuser
+
 ----- 
 
 ``build model``
