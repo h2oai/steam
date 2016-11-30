@@ -29,9 +29,14 @@ interface Props {
 }
 
 export default class Panel extends React.Component<Props, any> {
+
+  onClick = (e: React.MouseEvent) => {
+    this.props.onClick();
+  };
+
   render() {
     return (
-      <div className={classNames('panel', this.props.className)} onClick={this.props.onClick}>
+      <div className={classNames('panel', this.props.className)} onClick={this.onClick}>
         {this.props.children}
       </div>
     );

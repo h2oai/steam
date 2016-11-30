@@ -70,6 +70,10 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
     }
   }
 
+  onCancelClicked = (e: React.MouseEvent) => {
+    this.props.onCancel();
+  };
+
   render(): React.ReactElement<DefaultModal> {
     return (
       <DefaultModal className="export-modal" open={this.props.open}>
@@ -128,7 +132,7 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
                 <a
                   href={`/download?type=model&artifact=${this.state.packageName && this.state.artifact === 'java-war' ? 'java-py-war' : this.state.artifact}&model-id=${this.props.modelId}&project-id=${this.props.projectId}&package-name=${this.state.packageName}`}
                   className="default" target="_blank" rel="noopener">Download</a>
-                <button type="button" className="default invert" onClick={this.props.onCancel}>Cancel</button>
+                <button type="button" className="default invert" onClick={this.onCancelClicked}>Cancel</button>
               </div>
             </div>
           </form>

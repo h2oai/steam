@@ -103,7 +103,7 @@ export default class CreateNewLabelModal extends React.Component<Props, any> {
                                       </div>
                                       <div className="form-item">
                                           <label className="muted" htmlFor="description">Label description</label>
-                                          <textarea name="description" value={this.state.description} rows="4" cols="50" onChange={this.updateState.bind(this)}></textarea>
+                                          <textarea name="description" value={this.state.description} rows={4} cols={50} onChange={this.updateState.bind(this)}></textarea>
                                       </div>
                                     </div>
                                 </Cell>

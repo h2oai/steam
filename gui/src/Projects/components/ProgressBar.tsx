@@ -72,10 +72,14 @@ export default class ProgressBar extends React.Component<Props, any> {
     }
   }
 
+  onClick = (e: React.MouseEvent) => {
+    this.props.onClick();
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div ref="progressBar"
-           className={classNames('progress-bar-container', {complete: this.state.progress === 100}, this.props.className)} onClick={this.props.onClick}>
+           className={classNames('progress-bar-container', {complete: this.state.progress === 100}, this.props.className)} onClick={this.onClick}>
         <div className="progress-bar" style={{width: this.state.progress + '%'}}>
         </div>
         <div
