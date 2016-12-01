@@ -66,10 +66,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   }
 
   componentWillMount(): void {
-    if (_.isEmpty(this.props.clusters)) {
-      this.props.fetchClusters();
-      this.props.getConfig();
-    }
+    this.props.fetchClusters();
+    this.props.getConfig();
   }
 
   openYarnClusterModal() {
@@ -161,7 +159,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
               <Panel key={i}>
                 <header>
                   <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address} target="_blank"
-                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count} nodes</span>
+                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
 

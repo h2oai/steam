@@ -444,6 +444,7 @@ export function registerCluster(address: string) {
   return (dispatch) => {
     Remote.registerCluster(address, (error, res) => {
       if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load error', error.toString(), null));
         dispatch(registerClusterError(error.message));
         return;
       }

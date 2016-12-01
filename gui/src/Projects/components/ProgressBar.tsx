@@ -22,7 +22,6 @@ import * as React from 'react';
 import * as classNames from 'classnames';
 import * as _ from 'lodash';
 import '../styles/progressbar.scss';
-import MouseEvent = __React.MouseEvent;
 
 interface Props {
   showPercentage: boolean,
@@ -73,7 +72,7 @@ export default class ProgressBar extends React.Component<Props, any> {
     }
   }
 
-  onClick = (e: MouseEvent) => {
+  onClick = (e: React.MouseEvent) => {
     this.props.onClick();
   };
 

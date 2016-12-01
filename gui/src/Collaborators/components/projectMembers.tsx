@@ -25,7 +25,6 @@ import { connect } from 'react-redux';
 import '../styles/collaborators.scss';
 import { fetchMembersForProject } from '../actions/collaborators.actions';
 import { setCurrentProject } from '../../Projects/actions/projects.actions';
-import MouseEvent = __React.MouseEvent;
 
 interface Props {
   projectid: string,
@@ -44,7 +43,7 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
     this.props.fetchMembersForProject();
   }
 
-  onLoadLabelsClicked = (e: MouseEvent) => {
+  onLoadLabelsClicked = (e: React.MouseEvent) => {
     this.props.loadLabelsTab();
   };
 

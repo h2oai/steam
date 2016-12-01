@@ -24,7 +24,6 @@ import '../styles/exportmodal.scss';
 import { fetchPackages } from '../../Deployment/actions/deployment.actions';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import MouseEvent = __React.MouseEvent;
 
 interface Props {
   name: string,
@@ -71,7 +70,7 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
     }
   }
 
-  onCancelClicked = (e: MouseEvent) => {
+  onCancelClicked = (e: React.MouseEvent) => {
     this.props.onCancel();
   };
 
