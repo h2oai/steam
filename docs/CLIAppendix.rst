@@ -3,36 +3,13 @@ Appendix B: CLI Command Reference
 
 This document describes the CLI commands available in Steam. In addition to this reference, you can view information about each command when you're in the CLI by typing ``./steam help``. 
 
+**Note**: To access the Steam CLI, open a terminal window and log in to Steam as the superuser:
+
+::
+
+    ./steam login <yarn_edge_node>:<port> --username=superuser --password=superuser
+
 ----- 
-
-``add engine``
-~~~~~~~~~~~~~~
-
-**Description**
-
-Adds a new engine to the Steam database. After an engine is successfully added, it can be specified when starting a cluster. (See `start cluster`_.)
-
-**Usage**
-
-::
-
-    ./steam add engine --engine-name="[name]" --engine-path="[path]"
-
-**Parameters**
-
--  ``--engine-name="[name]"``: Enter the name of the engine
--  ``--engine-path="[path]"``: Enter the path for the engine
-
-**Example**
-
-The following example adds **h2o-genmodel.jar** to the list of available
-engines.
-
-::
-
-    ./steam add engine --engine-name="h2o-genmodel.jar" --engine-path="../Desktop/engines"
-
---------------
 
 ``build model``
 ~~~~~~~~~~~~~~~
@@ -984,7 +961,7 @@ None
 **Example**
 
 The following example retrieves a list of engines that have been
-added. (Refer to `add engine`_.)
+added. (Refer to `upload engine`_.)
 
 ::
 
@@ -1854,3 +1831,59 @@ The following example changes the name of the production workgroup to be
 
     ./steam update workgroup production --desc="A deploy workgroup" --name="deploy"
     Successfully updated workgroup: production
+
+--------------
+
+``upload engine``
+~~~~~~~~~~~~~~~~~
+
+**Description**
+
+Adds a new engine to the Steam database. After an engine is successfully added, it can be specified when starting a cluster. (See `start cluster`_.)
+
+**Usage**
+
+::
+
+    ./steam upload engine --file-path="[path]"
+
+**Parameters**
+
+-  ``--file-path="[path]"``: Enter the path for the engine that you want to upload
+
+**Example**
+
+The following example adds **h2o-genmodel.jar** to the list of available
+engines.
+
+::
+
+    ./steam upload engine --file-path="../Desktop/engines/h2o.genmodel.jar"
+
+--------------
+
+``upload file``
+~~~~~~~~~~~~~~~
+
+Adds a new preprocessing file to the Steam database. 
+
+**Usage**
+
+::
+
+    ./steam upload file --file-path="[path]" --project-id=[id] --package-name="[target_name]" --relative-path="[path_to_copy_to]"
+
+**Parameters**
+
+-  ``--file-path="[path]"``: Enter the path for the preprocessing file that you want to upload
+-  ``--project-id=[id]``: Preprocessing files must be associated with a project. Enter the ID of the project that will have access to this file.
+-  ``--package-name="[target_name]"``: Specify the name for this package
+-  ``--relative-path="[path_to_copy_to]"``: Specify the relative path to copy this file to
+
+**Example**
+
+The following example adds a preprocessing file to a project whose ID is 5. The file will be copied to the Steam assets folder.
+
+::
+
+  /steam upload file --file-path="../preprocess/score.py" --package-name="score.py" --project-id=5 --relative-path="var/master/assets"

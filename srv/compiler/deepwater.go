@@ -32,9 +32,9 @@ type Deepwater struct {
 }
 
 // NewDeepWater returns a new instance of Deepwater.
-func NewDeepwater(workingDirectory string, modelId int64, logicalName, modelType string, pythonFiles ...string) *Deepwater {
+func NewDeepwater(workingDirectory string, modelId int64, logicalName, modelType string, pythonFiles pythonPackage) *Deepwater {
 	return &Deepwater{
-		Model:        NewModel(workingDirectory, modelId, logicalName, modelType, pythonFiles...),
+		Model:        NewModel(workingDirectory, modelId, logicalName, modelType, pythonFiles),
 		deepwaterDep: fs.GetDeepwaterDepPath(workingDirectory, modelId),
 	}
 }

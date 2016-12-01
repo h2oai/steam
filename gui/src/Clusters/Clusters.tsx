@@ -33,6 +33,7 @@ import { connect } from 'react-redux';
 import './styles/clusters.scss';
 import { Link } from 'react-router';
 import { getConfig } from './actions/clusters.actions';
+import ConfirmDeleteClusterDialog from "./components/ConfirmDeleteClusterDialog ";
 
 interface DispatchProps {
   fetchClusters: Function
@@ -58,24 +59,15 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     super(props);
     this.state = {
       yarnClusterModalOpen: false,
-      newClusterRequested: false
+      newClusterRequested: false,
+      selectedCluster: null,
+      confirmDeleteClusterOpen: false
     };
   }
 
   componentWillMount(): void {
-    if (_.isEmpty(this.props.clusters)) {
-      this.props.fetchClusters();
-      this.props.getConfig();
-    }
-  }
-
-  removeCluster(cluster) {
-    if (cluster.type_id === 2) {
-      let keytabFilename = _.get((this.refs.keytabFilename as HTMLInputElement), 'value', '');
-      this.props.stopClusterOnYarn(cluster.id, keytabFilename);
-    } else {
-      this.props.unregisterCluster(cluster.id);
-    }
+    this.props.fetchClusters();
+    this.props.getConfig();
   }
 
   openYarnClusterModal() {
@@ -96,12 +88,45 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     this.setState({newClusterRequested: true});
   }
 
+  removeCluster = (cluster) => {
+    if (cluster.type_id === 2) {
+      let keytabFilename = _.get((this.refs.keytabFilename as HTMLInputElement), 'value', '');
+      this.props.stopClusterOnYarn(cluster.id, keytabFilename);
+    } else {
+      this.props.unregisterCluster(cluster.id);
+    }
+  };
+
+  onDeleteClusterClicked = (cluster) => {
+    this.setState({
+      selectedCluster: cluster,
+      confirmDeleteClusterOpen: true
+    });
+  };
+
+  onDeleteClusterConfirmed = () => {
+    this.removeCluster(this.state.selectedCluster);
+    this.setState({
+      selectedCluster: null,
+      confirmDeleteClusterOpen: false
+    });
+  };
+
+  onDeleteClusterCanceled = () => {
+    this.setState({
+      selectedCluster: null,
+      confirmDeleteClusterOpen: false
+    });
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     if (!this.props.clusters) {
       return <div></div>;
     }
     return (
       <div className="clusters">
+        <ConfirmDeleteClusterDialog isOpen={this.state.confirmDeleteClusterOpen} clusterToDelete={this.state.selectedCluster} onDeleteConfirmed={this.onDeleteClusterConfirmed} onCancel={this.onDeleteClusterCanceled} />
+
         <PageHeader>CLUSTERS
           { !this.state.newClusterRequested ?
             <div className="buttons header-buttons">
@@ -134,11 +159,11 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
               <Panel key={i}>
                 <header>
                   <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address} target="_blank"
-                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count} nodes</span>
+                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
 
-                    <button className="remove-cluster-button" onClick={this.removeCluster.bind(this, cluster)}><i
+                    <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
                       className="fa fa-trash no-margin"/></button>
                   </span>
                 </header>
