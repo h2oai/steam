@@ -1,6 +1,6 @@
 FROM centos:6.8
 
-MAINTAINER H2O.ai version: 1.1.4
+MAINTAINER H2O.ai version: 1.1.5
 
 WORKDIR /steam
 
