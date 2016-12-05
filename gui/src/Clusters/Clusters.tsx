@@ -33,7 +33,7 @@ import { connect } from 'react-redux';
 import './styles/clusters.scss';
 import { Link } from 'react-router';
 import { getConfig } from './actions/clusters.actions';
-import ConfirmDeleteClusterDialog from "./components/ConfirmDeleteClusterDialog ";
+import ConfirmDeleteClusterDialog from "./components/ConfirmDeleteClusterDialog";
 
 interface DispatchProps {
   fetchClusters: Function
