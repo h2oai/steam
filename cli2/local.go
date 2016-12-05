@@ -139,53 +139,51 @@ Examples:
 
 func serveMaster(c *context) *cobra.Command {
 	var (
-		webAddress                string
-		webTLSCertPath            string
-		webTLSKeyPath             string
-		authProvider              string
-		authConfig                string
-		workingDirectory          string
-		clusterProxyAddress       string
-		compilationServiceAddress string
-		scoringServiceHost        string
-		scoringServicePortsString string
-		enableProfiler            bool
-		yarnEnableKerberos        bool
-		yarnUserName              string
-		yarnKeytab                string
-		dbName                    string
-		dbUserName                string
-		dbPassword                string
-		dbHost                    string
-		dbPort                    string
-		dbConnectionTimeout       string
-		dbSSLMode                 string
-		dbSSLCertPath             string
-		dbSSLKeyPath              string
-		dbSSLRootCertPath         string
-		superuserName             string
-		superuserPassword         string
+		webAddress                   string
+		webTLSCertPath               string
+		webTLSKeyPath                string
+		authProvider                 string
+		authConfig                   string
+		workingDirectory             string
+		clusterProxyAddress          string
+		compilationServiceAddress    string
+		predictionServiceHost        string
+		predictionServicePortsString string
+		enableProfiler               bool
+		yarnEnableKerberos           bool
+		dbName                       string
+		dbUserName                   string
+		dbPassword                   string
+		dbHost                       string
+		dbPort                       string
+		dbConnectionTimeout          string
+		dbSSLMode                    string
+		dbSSLCertPath                string
+		dbSSLKeyPath                 string
+		dbSSLRootCertPath            string
+		superuserName                string
+		superuserPassword            string
 	)
 
 	opts := master.DefaultOpts
 
 	cmd := newCmd(c, serveMasterHelp, func(c *context, args []string) {
-		ports := strings.Split(scoringServicePortsString, ":")
+		ports := strings.Split(predictionServicePortsString, ":")
 		if len(ports) != 2 {
-			log.Fatalln("Invalid usage of scoring service ports range. See 'steam help serve master'.")
+			log.Fatalln("Invalid usage of prediction service ports range. See 'steam help serve master'.")
 		}
-		var scoringServicePorts [2]int
+		var predictionServicePorts [2]int
 		for i, port := range ports {
 			var err error
-			scoringServicePorts[i], err = strconv.Atoi(port)
+			predictionServicePorts[i], err = strconv.Atoi(port)
 			if err != nil {
-				log.Fatalln("Invalid usage of scoring service ports range. See 'steam help serve master'.")
+				log.Fatalln("Invalid usage of prediction service ports range. See 'steam help serve master'.")
 			}
-			if scoringServicePorts[i] < 1025 || scoringServicePorts[i] > 65535 {
+			if predictionServicePorts[i] < 1025 || predictionServicePorts[i] > 65535 {
 				log.Fatalln("Invalid port range.")
 			}
 		}
-		if scoringServicePorts[0] > scoringServicePorts[1] {
+		if predictionServicePorts[0] > predictionServicePorts[1] {
 			log.Fatalln("Invalid port range.")
 		}
 
@@ -198,13 +196,11 @@ func serveMaster(c *context) *cobra.Command {
 			workingDirectory,
 			clusterProxyAddress,
 			compilationServiceAddress,
-			scoringServiceHost,
-			scoringServicePorts,
+			predictionServiceHost,
+			predictionServicePorts,
 			enableProfiler,
 			master.YarnOpts{
 				yarnEnableKerberos,
-				yarnUserName,
-				yarnKeytab,
 			},
 			master.DBOpts{
 				data.Connection{
@@ -224,7 +220,6 @@ func serveMaster(c *context) *cobra.Command {
 			},
 		})
 	})
-
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
 	cmd.Flags().StringVar(&webTLSCertPath, "web-tls-cert-path", opts.WebTLSCertPath, "Web server TLS certificate file path (optional).")
 	cmd.Flags().StringVar(&webTLSKeyPath, "web-tls-key-path", opts.WebTLSKeyPath, "Web server TLS key file path (optional).")
@@ -233,71 +228,29 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
-	cmd.Flags().StringVar(&scoringServiceHost, "scoring-service-address", opts.ScoringServiceHost, "Address to start scoring services on (\"<ip>\")")
-	// TODO: this uses a hardcoded port range, not the default const
-	cmd.Flags().StringVar(&scoringServicePortsString, "scoring-service-port-range", "1025:65535", "Specified port range to create scoring services on. (\"<from>:<to>\")")
+	cmd.Flags().StringVar(&predictionServiceHost, "scoring-service-address", opts.PredictionServiceHost, "Hostname to start prediction services on (\"<ip>\")")
+	cmd.Flags().MarkDeprecated("scoring-service-address", "please use \"prediction-service-host\"")
+	cmd.Flags().StringVar(&predictionServiceHost, "prediction-service-host", opts.PredictionServiceHost, "Hostname to start prediction services on (\"<ip>\")")
+	cmd.Flags().StringVar(&predictionServicePortsString, "scoring-service-port-range", "1025:65535", "Specified port range to create prediction services on. (\"<from>:<to>\")")
+	cmd.Flags().MarkDeprecated("scoring-service-port-range", "please use \"prediction-service-port-range\"")
+	cmd.Flags().StringVar(&predictionServicePortsString, "prediction-service-port-range", "1025:65535", "Specified port range to create prediction services on. (\"<from>:<to>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
-	cmd.Flags().StringVar(&yarnUserName, "yarn-username", opts.Yarn.Username, "Username to enable Kerberos")
-	cmd.Flags().StringVar(&yarnKeytab, "yarn-keytab", opts.Yarn.Keytab, "Keytab file to be used with Kerberos authentication")
-	cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Connection.DbName, "Database name to use for application data storage (required)")
-	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Connection.User, "Database username (required)")
-	cmd.Flags().StringVar(&dbPassword, "db-password", opts.DB.Connection.Password, "Database password (optional)")
-	cmd.Flags().StringVar(&dbHost, "db-host", opts.DB.Connection.Host, "Database host (optional, defaults to localhost")
-	cmd.Flags().StringVar(&dbPort, "db-port", opts.DB.Connection.Port, "Database port (optional, defaults to 5432)")
-	cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DB.Connection.ConnectionTimeout, "Database connection timeout (optional)")
-	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.Connection.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
-	cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DB.Connection.SSLCert, "Database connection SSL certificate path (optional)")
-	cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DB.Connection.SSLKey, "Database connection SSL key path (optional)")
-	cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DB.Connection.SSLRootCert, "Database connection SSL root certificate path (optional)")
+	// cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Connection.DbName, "Database name to use for application data storage (required)")
+	// cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Connection.User, "Database username (required)")
+	// cmd.Flags().StringVar(&dbPassword, "db-password", opts.DB.Connection.Password, "Database password (optional)")
+	// cmd.Flags().StringVar(&dbHost, "db-host", opts.DB.Connection.Host, "Database host (optional, defaults to localhost")
+	// cmd.Flags().StringVar(&dbPort, "db-port", opts.DB.Connection.Port, "Database port (optional, defaults to 5432)")
+	// cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DB.Connection.ConnectionTimeout, "Database connection timeout (optional)")
+	// cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.Connection.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	// cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DB.Connection.SSLCert, "Database connection SSL certificate path (optional)")
+	// cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DB.Connection.SSLKey, "Database connection SSL key path (optional)")
+	// cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DB.Connection.SSLRootCert, "Database connection SSL root certificate path (optional)")
 	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DB.SuperuserName, "Set superuser username (required for first-time-use only)")
 	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DB.SuperuserPassword, "Set superuser password (required for first-time-use only)")
 
 	return cmd
 
-}
-
-var deployHelp = `
-deploy [resource-type]
-Deploy a resource of the specified type.
-Examples:
-
-	$ steam deploy engine
-`
-
-func deploy(c *context) *cobra.Command {
-	cmd := newCmd(c, deployHelp, nil)
-	cmd.AddCommand(deployEngine(c))
-	return cmd
-}
-
-var deployEngineHelp = `
-engine [enginePath]
-Deploy an H2O engine to Steam.
-Examples:
-
-	$ steam deploy engine --file-path=path/to/engine
-`
-
-func deployEngine(c *context) *cobra.Command {
-	var (
-		filePath string
-	)
-	cmd := newCmd(c, deployEngineHelp, func(c *context, args []string) {
-		attrs := map[string]string{
-			"type": fs.KindEngine,
-		}
-
-		if err := c.transmitFile(filePath, attrs); err != nil {
-			log.Fatalln(err)
-		}
-
-		log.Println("Engine deployed:", path.Base(filePath))
-	})
-
-	cmd.Flags().StringVar(&filePath, "file-path", "", "Path to engine")
-
-	return cmd
 }
 
 var uploadHelp = `
@@ -311,15 +264,18 @@ Examples:
 func upload(c *context) *cobra.Command {
 	cmd := newCmd(c, uploadHelp, nil)
 	cmd.AddCommand(uploadFile(c))
+	cmd.AddCommand(uploadEngine(c))
 	return cmd
 }
 
 var uploadFileHelp = `
 file [path]
-Upload an H2O engine to Steam.
+Upload an asset to Steam. 
 Examples:
 
-	$ steam upload engine path/to/engine
+	$ steam upload file \
+		--file-path=? \
+		--project-id=?
 `
 
 func uploadFile(c *context) *cobra.Command {
@@ -356,6 +312,35 @@ func uploadFile(c *context) *cobra.Command {
 	cmd.Flags().Int64Var(&projectId, "project-id", 0, "Target project id")
 	cmd.Flags().StringVar(&packageName, "package-name", "", "Target package")
 	cmd.Flags().StringVar(&relativePath, "relative-path", "", "Relative path to copy file to")
+
+	return cmd
+}
+
+var uploadEngineHelp = `
+engine [path]
+Upload an engine to Steam. 
+Examples:
+
+	$ steam upload engine \
+		--file-path=?
+`
+
+func uploadEngine(c *context) *cobra.Command {
+	var (
+		filePath string
+	)
+	cmd := newCmd(c, uploadEngineHelp, func(c *context, args []string) {
+		attrs := map[string]string{
+			"type": fs.KindEngine,
+		}
+		if err := c.transmitFile(filePath, attrs); err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Println("Engine uploaded:", path.Base(filePath))
+	})
+
+	cmd.Flags().StringVar(&filePath, "file-path", "", "File to be uploaded")
 
 	return cmd
 }

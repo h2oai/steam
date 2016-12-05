@@ -341,7 +341,6 @@ type Service struct {
 	GetServicesForProject         GetServicesForProject         `help:"List services for a project"`
 	GetServicesForModel           GetServicesForModel           `help:"List services for a model"`
 	DeleteService                 DeleteService                 `help:"Delete a service"`
-	AddEngine                     AddEngine                     `help:"Add an engine"`
 	GetEngine                     GetEngine                     `help:"Get engine details"`
 	GetEngines                    GetEngines                    `help:"List engines"`
 	DeleteEngine                  DeleteEngine                  `help:"Delete an engine"`
@@ -742,12 +741,6 @@ type GetServicesForModel struct {
 }
 type DeleteService struct {
 	ServiceId int64
-}
-type AddEngine struct {
-	EngineName string
-	EnginePath string
-	_          int
-	EngineId   int64
 }
 type GetEngine struct {
 	EngineId int64

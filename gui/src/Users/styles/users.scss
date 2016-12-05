@@ -1,7 +1,12 @@
 @import '../../variables.scss';
 
 .user-access {
-
+  .bulk-select {
+    font-family: "Open Sans", sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: none;
+  }
 }
 .filter-and-list {
   display: flex;

@@ -143,7 +143,7 @@ Comparing Models
    Select model to compare
 
 2. Select to compare the current model with any available model. This
-   exampel compares a GLM model with a GBM model. Once a model is
+   example compares a GLM model with a GBM model. Once a model is
    selected, the Model Details page immediately populates with the
    comparison information. The current model values are displayed in
    blue, and the selected comparison model displays in orange.

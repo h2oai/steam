@@ -153,7 +153,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
         return<Row key={permissionIndex}>
           <Cell className="right-table-bar" key={permissionSet.description}>{permissionSet.description}</Cell>
           {permissionSet.flags.map((flag: any, flagIndex) => {
-            if (flagIndex === 0) {
+            if (flag.roleId === 1) {
               return <Cell className="center-text" key={flagIndex}><input data-roleid={flag.roleId}
                 ref={(input) => this.registerInput(input, {value: true, roleId: flag.roleId}, flagIndex, permissionSet, permissionIndex)}
                 type="checkbox" value="on" defaultChecked={true} readOnly={true} disabled={true}></input></Cell>;
@@ -168,7 +168,7 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
     }
 
     deleteRolesCells = this.props.roles.map((role, rolesIndex) => {
-      if (rolesIndex !== 0) {
+      if (role.id !== 1) {
         return <Cell className="center-text" key={rolesIndex}>
           <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteRoleClicked(role)}></i>
         </Cell>;

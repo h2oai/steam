@@ -52,8 +52,6 @@ type Service struct {
 	scoringServicePortMin     int
 	scoringServicePortMax     int
 	kerberosEnabled           bool
-	username                  string
-	keytab                    string
 }
 
 func NewService(
@@ -62,7 +60,6 @@ func NewService(
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
 	kerberos bool,
-	username, keytab string,
 ) *Service {
 	return &Service{
 		workingDir,
@@ -70,7 +67,6 @@ func NewService(
 		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
 		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
-		username, keytab,
 	}
 }
 
@@ -1674,15 +1670,6 @@ func (s *Service) DeleteService(pz az.Principal, serviceId int64) error {
 	}
 
 	return nil
-}
-
-// FIXME this should not be here - not an client-facing API
-func (s *Service) AddEngine(pz az.Principal, engineName, enginePath string) (int64, error) {
-	if err := pz.CheckPermission(s.ds.Permissions.ManageEngine); err != nil {
-		return 0, err
-	}
-
-	return s.ds.CreateEngine(pz, engineName, enginePath)
 }
 
 func (s *Service) GetEngine(pz az.Principal, engineId int64) (*web.Engine, error) {

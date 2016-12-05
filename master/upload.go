@@ -134,7 +134,7 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dst, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE, fs.FilePerm)
+	dst, err := os.OpenFile(dstPath, os.O_CREATE|os.O_TRUNC, fs.FilePerm)
 	if err != nil {
 		log.Println("Upload file open operation failed:", err)
 		http.Error(w, fmt.Sprintf("Error writing uploaded file to disk: %s", err), http.StatusInternalServerError)
@@ -199,7 +199,7 @@ func (s *UploadHandler) handleEngine(w http.ResponseWriter, pz az.Principal, fil
 	}
 
 	// Add Engine to datastore
-	if _, err := s.webService.AddEngine(pz, dstBase, dstPath); err != nil {
+	if _, err := s.ds.CreateEngine(pz, dstBase, dstPath); err != nil {
 		http.Error(w, fmt.Sprintf("Error saving engine to datastore: %v", err), http.StatusInternalServerError)
 		return errors.Wrap(err, "failed saving engine to datastore")
 	}

@@ -38,14 +38,14 @@ import (
 )
 
 const (
-	defaultWebAddress                = ":9000"
-	defaultClusterProxyAddress       = ":9001"
-	defaultCompilationAddress        = ":8080"
-	defaultScoringServiceHost        = ""
-	DefaultScoringServicePortsString = "1025:65535"
+	defaultWebAddress                   = ":9000"
+	defaultClusterProxyAddress          = ":9001"
+	defaultCompilationAddress           = ":8080"
+	defaultPredictionServiceHost        = ""
+	DefaultPredictionServicePortsString = "1025:65535"
 )
 
-var defaultScoringServicePorts = [...]int{1025, 65535}
+var defaultPredictionServicePorts = [...]int{1025, 65535}
 
 type DBOpts struct {
 	Connection        data.Connection
@@ -55,8 +55,6 @@ type DBOpts struct {
 
 type YarnOpts struct {
 	KerberosEnabled bool
-	Username        string
-	Keytab          string
 }
 
 type Opts struct {
@@ -68,8 +66,8 @@ type Opts struct {
 	WorkingDirectory          string
 	ClusterProxyAddress       string
 	CompilationServiceAddress string
-	ScoringServiceHost        string
-	ScoringServicePorts       [2]int
+	PredictionServiceHost     string
+	PredictionServicePorts    [2]int
 	EnableProfiler            bool
 	Yarn                      YarnOpts
 	DB                        DBOpts
@@ -97,10 +95,10 @@ var DefaultOpts = &Opts{
 	path.Join(".", fs.VarDir, "master"),
 	defaultClusterProxyAddress,
 	defaultCompilationAddress,
-	defaultScoringServiceHost,
-	defaultScoringServicePorts,
+	defaultPredictionServiceHost,
+	defaultPredictionServicePorts,
 	false,
-	YarnOpts{false, "", ""},
+	YarnOpts{false},
 	DBOpts{DefaultConnection, "", ""},
 }
 
@@ -160,14 +158,14 @@ func Run(version, buildDate string, opts Opts) {
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}
 
-	// --- set up scoring service launch host
+	// --- set up prediction service launch host
 
-	var scoringServiceHost string
-	if opts.ScoringServiceHost != "" {
-		scoringServiceHost = opts.ScoringServiceHost
+	var predictionServiceHost string
+	if opts.PredictionServiceHost != "" {
+		predictionServiceHost = opts.PredictionServiceHost
 	} else {
 		var err error
-		scoringServiceHost, err = fs.GetExternalHost()
+		predictionServiceHost, err = fs.GetExternalHost()
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -180,12 +178,10 @@ func Run(version, buildDate string, opts Opts) {
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
-		scoringServiceHost,
+		predictionServiceHost,
 		opts.ClusterProxyAddress,
-		opts.ScoringServicePorts,
+		opts.PredictionServicePorts,
 		opts.Yarn.KerberosEnabled,
-		opts.Yarn.Username,
-		opts.Yarn.Keytab,
 	)
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 

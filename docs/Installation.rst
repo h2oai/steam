@@ -64,7 +64,7 @@ the URL of the edge node and the superuser login credentials. The superuser can 
 
     java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 
-3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster. Use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location and for additional flags that can be specified when starting Steam. 
+3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location and for additional flags that can be specified when starting Steam. 
 
  ::
 
@@ -116,15 +116,70 @@ After Steam is installed, the following steps describe how to start Steam.
     java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 
 3. Open another terminal window and start Steam. Be sure to include the ``--superuser-name=superuser`` and
-   ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This creates Steam superuser. A Steam superuser is responsible for creating roles,workgroups, and users. This also starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the prediction service on the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--prediction-service-address=<ip_address>``. Use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
+   ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This creates Steam superuser. A Steam superuser is responsible for creating roles,workgroups, and users. This also starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the prediction service on the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--prediction-service-host=<hostname>``. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
 
  ::
 
   ./steam serve master --superuser-name=superuser --superuser-password=superuser
 
- **Note**: If you are demoing Steam and do not have an Internet connection, you can set the prediction service to point to localhost using ``--prediction-service-address=localhost``. 
+ **Note**: If you are demoing Steam and do not have an Internet connection, you can set the prediction service to point to localhost using ``--prediction-service-host=localhost``. 
 
 4. Open a Chrome browser and navigate to http://localhost:9000.
+
+Steam Start Flags
+-----------------
+
+The following table lists the options/flags that can be added to the ``./steam serve master`` command when starting Steam. Use ``./steam serve master --help`` or ``./steam serve master -h`` for the most up-to-date list of available options.
+
++-------------------------------------------+-----------------------------------------+
+| Flag                                      | Description                             |
++===========================================+=========================================+
+| ``--authentication-config=``              | Specify a configuration file to use     |
+|                                           | for authentication.                     |
++-------------------------------------------+-----------------------------------------+ 
+| ``--authentication-provider=``            | Specify either ``basic`` or ``digest``  |
+|                                           | as the authentication mechanism for     |
+|                                           | client logins.                          |
++-------------------------------------------+-----------------------------------------+ 
+| ``--cluster-proxy-address=``              | Specify a proxy address. For example:   |
+|                                           | ``<ip>:<port>`` or ``:<port>``.         |
++-------------------------------------------+-----------------------------------------+
+| ``--compilation-service-address=``        | Specify an address to use for the       |
+|                                           | compilation service. For example:       |
+|                                           | ``<ip>:<port>`` or ``:<port>``.         |
++-------------------------------------------+-----------------------------------------+
+| ``--prediction-service-host=``            | Specify the hostname to use for the     |
+|                                           | prediction service.                     |
++-------------------------------------------+-----------------------------------------+
+| ``--prediction-service-port-range=``      | Specify a range of ports to create      |
+|                                           | prediction services on. For example:    |
+|                                           | ``<from_port>:<to_port>``.              |
++-------------------------------------------+-----------------------------------------+
+| ``--profile=``                            | Specify ``true`` to enable the Go       |
+|                                           | profiler.                               |
++-------------------------------------------+-----------------------------------------+
+| ``--superuser-name=``                     | Set the superuser username. This is     |
+|                                           | required at first-time-use only.        |
++-------------------------------------------+-----------------------------------------+
+| ``--superuser-password=``                 | Set the superuser password. This is     |
+|                                           | required at first-time-use only.        |
++-------------------------------------------+-----------------------------------------+
+| ``--web-address=``                        | Specify the web server address. For     |
+|                                           | example: ``<ip>:<port>`` or ``:<port>``.|
++-------------------------------------------+-----------------------------------------+
+| ``--web-tls-cert-path=``                  | Specify the web server TLS certificate  |
+|                                           | path.                                   |
++-------------------------------------------+-----------------------------------------+
+| ``--web-tls-key-path=``                   | Specify the web server TLK key file     |
+|                                           | path.                                   |
++-------------------------------------------+-----------------------------------------+
+| ``--working-directory=``                  | Specify the working directory for       |
+|                                           | application files.                      |
++-------------------------------------------+-----------------------------------------+
+| ``--yarn-enable-kerberos=``               | Specify whether to enable Kerberos      |
+|                                           | authentication. This requires a username|
+|                                           | and keytab.                             |
++-------------------------------------------+-----------------------------------------+
 
 Next Steps
 ----------

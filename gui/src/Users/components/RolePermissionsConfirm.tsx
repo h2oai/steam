@@ -116,6 +116,10 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
     });
   };
 
+  onCloseClicked = (e: React.MouseEvent) => {
+    this.props.closeHandler();
+  };
+
   render(): React.ReactElement<DefaultModal> {
     let saveChangesEnabled = true;
     for (let requestedChange of this.state.requestedChanges) {
@@ -184,7 +188,7 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
           <br />
           &nbsp;
           <br />
-          <div className="button-secondary" onClick={this.props.closeHandler}>Close</div>
+          <div className="button-secondary" onClick={this.onCloseClicked}>Close</div>
         </div> :
         <div>
           <h1>CONFIRMING PERMISSION CHANGES</h1>

@@ -29,7 +29,6 @@ import {createUser, NewUserDetails} from "../actions/users.actions";
 import InputFeedback from "../../App/components/InputFeedback";
 import {FeedbackType} from "../../App/components/InputFeedback";
 
-
 interface Props {
   workgroups: Array<Workgroup>,
   roles: Array<Role>,
@@ -166,6 +165,10 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
     ));
   };
 
+  onCancelClicked = (e: React.MouseEvent) => {
+    this.props.cancelHandler();
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     this.inputsWithRoles = [];
     this.inputsWithWorkgroups = [];
@@ -239,7 +242,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
         {this.state.validNameEntered && this.state.validPasswordEntered && this.state.validPasswordConfirmEntered ?
         <div className="button-primary" onClick={this.onCreateUserClicked}>Create User</div>
         :<div className="button-primary disabled">Create User</div>}
-        <div className="button-secondary" onClick={this.props.cancelHandler}>Cancel</div>
+        <div className="button-secondary" onClick={this.onCancelClicked}>Cancel</div>
       </div>
     );
   }
