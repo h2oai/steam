@@ -10,6 +10,11 @@ If you're an Open Source community member, you can contact H2O using one of the 
 - Send an e-mail message directly to <a href="mailto:support@h2o.ai">support@h2o.ai</a>
 - Ask your question on the [H2O Community](https://community.h2o.ai/spaces/540/index.html) site (create an account if necessary)
 
+## v1.1.5 Changes
+
+- [STEAM-613] The ``./steam add engine`` command has been replaced with ``./steam upload engine``. 
+- [STEAM-604] When adding clusters to Steam, node sizes are now only specified in GB.
+
 ## v1.1.4 Changes
 
 - [STEAM-496] Early release support for LDAP basic authentication using the ``--authentication-provider`` and ``--authentication-config`` flags when starting Steam.
