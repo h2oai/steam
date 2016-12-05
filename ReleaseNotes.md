@@ -14,6 +14,8 @@ If you're an Open Source community member, you can contact H2O using one of the 
 
 - [STEAM-613] The ``./steam add engine`` command has been replaced with ``./steam upload engine``. 
 - [STEAM-604] When adding clusters to Steam, node sizes are now only specified in GB.
+- [STEAM-619] Adds a confirmation dialog on deletion of a cluster
+- [STEAM-601] Adds functionality to import a yaml imports file for Anaconda
 
 ## v1.1.4 Changes
 
