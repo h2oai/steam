@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/h2oai/steam/master/az"
@@ -9,19 +10,23 @@ import (
 )
 
 type QueryConfig struct {
+	// Sql query setting
 	tx       *goqu.TxDatabase
 	table    string
 	dataset  *goqu.Dataset
 	fields   map[string]interface{}
 	postFunc []QueryOpt
-	result   int64
-	audit    bool
-	pz       az.Principal
-
-	clusterType clusterTypeKeys
-	state       stateKeys
-	permission  permissionKeys
-	entityType  entityTypeKeys
+	// Entity options
+	entityTypeId int64
+	entityId     int64
+	audit        string
+	// Principal options
+	pz az.Principal
+	// Enum references
+	clusterTypes clusterTypeKeys
+	state        stateKeys
+	permissions  permissionKeys
+	entityTypes  entityTypeKeys
 }
 
 func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, table string, data *goqu.Dataset) *QueryConfig {
@@ -38,6 +43,11 @@ func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, table string, data *goqu
 		entityTypes = ds.EntityType
 	}
 
+	var entityTypeId int64
+	if ds != nil {
+		entityTypeId = toEntityId(ds, table)
+	}
+
 	return &QueryConfig{
 		tx:       tx,
 		table:    table,
@@ -45,10 +55,12 @@ func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, table string, data *goqu
 		fields:   make(map[string]interface{}),
 		postFunc: make([]QueryOpt, 0),
 
-		clusterType: clusterTypes,
-		state:       states,
-		permission:  permissions,
-		entityType:  entityTypes,
+		entityTypeId: entityTypeId,
+
+		clusterTypes: clusterTypes,
+		state:        states,
+		permissions:  permissions,
+		entityTypes:  entityTypes,
 	}
 }
 
@@ -78,18 +90,6 @@ func WithAddress(address string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["address"] = address; return }
 }
 
-// WithAudit adds a history entry for the provided principal
-func WithAudit(pz az.Principal) QueryOpt {
-	return func(q *QueryConfig) error {
-		if q.pz == nil {
-			return errors.New("WithAudit: no principal provided")
-		}
-		q.pz = pz
-		q.audit = true
-		return nil
-	}
-}
-
 // WithDescription adds a description value to the query
 func WithDescription(description string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["description"] = description; return }
@@ -98,6 +98,9 @@ func WithDescription(description string) QueryOpt {
 // WithDefaultIdentityWorkgroup creates and links a default workgroup for an identity
 func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 	// Fetch identity name
+	if q.entityTypeId != q.entityTypes.Identity {
+		return errors.New("WithDefaultIdentityWorkgroup: entity must be of type 'Identity'")
+	}
 	name := q.fields["name"]
 	val, ok := name.(string)
 	if !ok || val == "" {
@@ -111,15 +114,15 @@ func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 	// Add workgroup to query and add post functions
 	q.fields["workgroup_id"] = workgroupId
 	q.AddPostFunc(func(c *QueryConfig) error {
-		_, err := createIdentityWorkgroup(c.tx, c.result, workgroupId)
+		_, err := createIdentityWorkgroup(c.tx, c.entityId, workgroupId)
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: linking identity to workgroup")
 	})
 	q.AddPostFunc(func(c *QueryConfig) error {
-		_, err := createPrivilege(c.tx, Owns, workgroupId, c.entityType.Identity, c.result)
+		_, err := createPrivilege(c.tx, Owns, workgroupId, c.entityTypes.Identity, c.entityId)
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: creating identity privilege")
 	})
 	q.AddPostFunc(func(c *QueryConfig) error {
-		_, err := createPrivilege(c.tx, Owns, workgroupId, c.entityType.Workgroup, workgroupId)
+		_, err := createPrivilege(c.tx, Owns, workgroupId, c.entityTypes.Workgroup, workgroupId)
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: creating workgroup privilege")
 	})
 	return nil
@@ -127,7 +130,7 @@ func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 
 // WithExternal adds a type_id of external
 func WithExternal(q *QueryConfig) (err error) {
-	q.fields["type_id"] = q.clusterType.External
+	q.fields["type_id"] = q.clusterTypes.External
 	return
 }
 
@@ -221,38 +224,66 @@ func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir strin
 			return errors.Wrap(err, "WithYarnDetail: creating cluster yarn details in database")
 		}
 
-		q.fields["type_id"] = q.clusterType.Yarn
+		q.fields["type_id"] = q.clusterTypes.Yarn
 		q.fields["detail_id"] = yarnId
 		return nil
 	}
 }
 
 // WithPrivilege adds a privilege to an entity with the corresponding principal
-func WithPrivilege(pz az.Principal, typ string, entityTypeId int64) QueryOpt {
+func WithPrivilege(pz az.Principal, typ string) QueryOpt {
 	return func(q *QueryConfig) error {
 		q.AddPostFunc(func(c *QueryConfig) error {
-			_, err := createPrivilege(c.tx, typ, pz.WorkgroupId(), entityTypeId, c.result)
+			_, err := createPrivilege(c.tx, typ, pz.WorkgroupId(), q.entityTypeId, c.entityTypeId)
 			return err
 		})
 		return nil
 	}
 }
 
-// CheckPrivilege checks the privilege of the principal with an entity
-func CheckPrivilege(pz az.Principal, entityTypeId int64) QueryOpt {
-	return func(q *QueryConfig) error {
-		if pz.IsSuperuser() {
-			return nil
-		}
-		x := q.tx.From("identity_workgroup").Select("workgroup_id").Where(
-			goqu.I("identity_id").Eq(pz.Id()),
-		)
-		aux := q.tx.From("privilege").SelectDistinct("entity_id").Where(
-			goqu.I("workgroup_id").In(x),
-			goqu.I("entity_type").Eq(entityTypeId),
-		)
+// ------ ------ ------
+// ------ Checks ------
+// ------ ------ ------
 
-		q.dataset = q.dataset.Where(goqu.I("id").In(aux))
+func WithPrincipal(pz az.Principal) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.pz = pz; return }
+}
+
+// WithAudit adds a history entry for the provided principal
+func WithAudit(q *QueryConfig) error {
+	q.AddPostFunc(func(c *QueryConfig) error {
+		if c.pz == nil {
+			return errors.New("WithAudit: no principal provided")
+		}
+		json, err := json.Marshal(c.fields)
+		if err != nil {
+			return errors.Wrap(err, "WithAudit: serializing metadata")
+		}
+		_, err = createHistory(c.tx, c.audit, c.pz.Id(), c.entityTypeId, c.entityId,
+			WithDescription(string(json)),
+		)
+		return errors.Wrap(err, "WithAudit: creating audit entry")
+	})
+	return nil
+}
+
+// ByPrivilege returns only entries that match the privileges of the
+func ByPrivilege(q *QueryConfig) error {
+	if q.pz == nil {
+		return errors.New("CheckPrivilege: no principal provided")
+	}
+	// Noop if isSuperuser
+	if q.pz.IsSuperuser() {
 		return nil
 	}
+	x := q.tx.From("identity_workgroup").Select("workgroup_id").Where(
+		goqu.I("identity_id").Eq(q.pz.Id()),
+	)
+	aux := q.tx.From("privilege").SelectDistinct("entity_id").Where(
+		goqu.I("workgroup_id").In(x),
+		goqu.I("entity_type").Eq(q.entityTypeId),
+	)
+
+	q.dataset = q.dataset.Where(goqu.I("id").In(aux))
+	return nil
 }

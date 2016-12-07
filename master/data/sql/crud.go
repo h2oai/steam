@@ -4,7 +4,6 @@ package sql
 
 import (
 	"database/sql"
-	"encoding/json"
 	"log"
 	"time"
 
@@ -52,25 +51,14 @@ func (ds *Datastore) CreateCluster(name string, clusterTypeId int64, options ...
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Cluster, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Cluster, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -185,20 +173,11 @@ func (ds *Datastore) UpdateCluster(clusterId int64, options ...QueryOpt) error {
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = clusterId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Cluster, clusterId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -225,18 +204,14 @@ func (ds *Datastore) DeleteCluster(clusterId int64, options ...QueryOpt) error {
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = clusterId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Cluster, clusterId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -333,12 +308,6 @@ func updateCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) error {
@@ -450,12 +419,6 @@ func updateClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...QueryOpt) error {
@@ -513,25 +476,14 @@ func (ds *Datastore) CreateClusterYarnDetail(engineId, size int64, applicationId
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.ClusterYarnDetail, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.ClusterYarnDetail, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -646,20 +598,11 @@ func (ds *Datastore) UpdateClusterYarnDetail(clusterYarnDetailId int64, options 
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = clusterYarnDetailId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.ClusterYarnDetail, clusterYarnDetailId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -686,18 +629,14 @@ func (ds *Datastore) DeleteClusterYarnDetail(clusterYarnDetailId int64, options 
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = clusterYarnDetailId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.ClusterYarnDetail, clusterYarnDetailId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -795,12 +734,6 @@ func updateClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, options ...QueryOpt) error {
@@ -856,25 +789,14 @@ func (ds *Datastore) CreateEngine(name, location string, options ...QueryOpt) (i
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Engine, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Engine, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -989,20 +911,11 @@ func (ds *Datastore) UpdateEngine(engineId int64, options ...QueryOpt) error {
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = engineId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Engine, engineId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -1029,18 +942,14 @@ func (ds *Datastore) DeleteEngine(engineId int64, options ...QueryOpt) error {
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = engineId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Engine, engineId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -1136,12 +1045,6 @@ func updateEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) error {
@@ -1253,12 +1156,6 @@ func updateEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryOpt) error {
@@ -1374,12 +1271,6 @@ func updateHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) error {
@@ -1435,25 +1326,14 @@ func (ds *Datastore) CreateIdentity(name string, options ...QueryOpt) (int64, er
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Identity, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Identity, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -1568,20 +1448,11 @@ func (ds *Datastore) UpdateIdentity(identityId int64, options ...QueryOpt) error
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = identityId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Identity, identityId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -1608,18 +1479,14 @@ func (ds *Datastore) DeleteIdentity(identityId int64, options ...QueryOpt) error
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = identityId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Identity, identityId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -1715,12 +1582,6 @@ func updateIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) error {
@@ -1830,12 +1691,6 @@ func updateIdentityRole(tx *goqu.TxDatabase, identityRoleId int64, options ...Qu
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteIdentityRole(tx *goqu.TxDatabase, identityRoleId int64, options ...QueryOpt) error {
@@ -1948,12 +1803,6 @@ func updateIdentityWorkgroup(tx *goqu.TxDatabase, identityWorkgroupId int64, opt
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteIdentityWorkgroup(tx *goqu.TxDatabase, identityWorkgroupId int64, options ...QueryOpt) error {
@@ -2065,12 +1914,6 @@ func updateModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...QueryOpt) error {
@@ -2125,25 +1968,14 @@ func (ds *Datastore) CreatePermission(code, description string, options ...Query
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Permission, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Permission, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -2258,20 +2090,11 @@ func (ds *Datastore) UpdatePermission(permissionId int64, options ...QueryOpt) e
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = permissionId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Permission, permissionId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -2298,18 +2121,14 @@ func (ds *Datastore) DeletePermission(permissionId int64, options ...QueryOpt) e
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = permissionId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Permission, permissionId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -2404,12 +2223,6 @@ func updatePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryOpt) error {
@@ -2466,25 +2279,14 @@ func (ds *Datastore) CreatePrivilege(typ string, workgroupId, entityType, entity
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Privilege, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Privilege, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -2599,20 +2401,11 @@ func (ds *Datastore) UpdatePrivilege(privilegeId int64, options ...QueryOpt) err
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = privilegeId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Privilege, privilegeId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -2639,18 +2432,14 @@ func (ds *Datastore) DeletePrivilege(privilegeId int64, options ...QueryOpt) err
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = privilegeId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Privilege, privilegeId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -2747,12 +2536,6 @@ func updatePrivilege(tx *goqu.TxDatabase, privilegeId int64, options ...QueryOpt
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deletePrivilege(tx *goqu.TxDatabase, privilegeId int64, options ...QueryOpt) error {
@@ -2809,25 +2592,14 @@ func (ds *Datastore) CreateProject(name, description, modelCategory string, opti
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Project, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Project, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -2942,20 +2714,11 @@ func (ds *Datastore) UpdateProject(projectId int64, options ...QueryOpt) error {
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = projectId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Project, projectId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -2982,18 +2745,14 @@ func (ds *Datastore) DeleteProject(projectId int64, options ...QueryOpt) error {
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = projectId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Project, projectId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -3090,12 +2849,6 @@ func updateProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) error {
@@ -3150,25 +2903,14 @@ func (ds *Datastore) CreateRole(name string, options ...QueryOpt) (int64, error)
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Role, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Role, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -3283,20 +3025,11 @@ func (ds *Datastore) UpdateRole(roleId int64, options ...QueryOpt) error {
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = roleId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Role, roleId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -3323,18 +3056,14 @@ func (ds *Datastore) DeleteRole(roleId int64, options ...QueryOpt) error {
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = roleId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Role, roleId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -3429,12 +3158,6 @@ func updateRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
@@ -3547,12 +3270,6 @@ func updateRolePermission(tx *goqu.TxDatabase, rolePermissionId int64, options .
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteRolePermission(tx *goqu.TxDatabase, rolePermissionId int64, options ...QueryOpt) error {
@@ -3664,12 +3381,6 @@ func updateState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error {
@@ -3727,25 +3438,14 @@ func (ds *Datastore) CreateService(projectId, modelId int64, name string, option
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Service, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Service, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -3860,20 +3560,11 @@ func (ds *Datastore) UpdateService(serviceId int64, options ...QueryOpt) error {
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = serviceId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Service, serviceId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -3900,18 +3591,14 @@ func (ds *Datastore) DeleteService(serviceId int64, options ...QueryOpt) error {
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = serviceId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Service, serviceId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -4009,12 +3696,6 @@ func updateService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) error {
@@ -4070,25 +3751,14 @@ func (ds *Datastore) CreateWorkgroup(typ, name string, options ...QueryOpt) (int
 			return errors.Wrap(err, "executing query")
 		}
 		id, err = res.LastInsertId()
-		q.result = id
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Workgroup, CreateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		// Create audit for entity
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, CreateOp, q.pz.Id(), q.entityType.Workgroup, id,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 
 		return nil
@@ -4203,20 +3873,11 @@ func (ds *Datastore) UpdateWorkgroup(workgroupId int64, options ...QueryOpt) err
 		// Execute query
 		_, err := q.dataset.Update(q.fields).Exec()
 		return errors.Wrap(err, "executing query")
+		q.entityId, q.audit = workgroupId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, UpdateOp, q.pz.Id(), q.entityType.Workgroup, workgroupId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -4243,18 +3904,14 @@ func (ds *Datastore) DeleteWorkgroup(workgroupId int64, options ...QueryOpt) err
 		}
 		// Execute query
 		_, err := q.dataset.Delete().Exec()
+		q.entityId, q.audit = workgroupId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
 		if err != nil {
 			return errors.Wrap(err, "executing query")
-		}
-		if q.audit {
-			json, err := json.Marshal(q.fields)
-			if err != nil {
-				return errors.Wrap(err, "serializing metadata")
-			}
-			_, err = createHistory(q.tx, DeleteOp, q.pz.Id(), q.entityType.Workgroup, workgroupId,
-				WithDescription(string(json)),
-			)
-			return errors.Wrap(err, "creating audit entry")
 		}
 		return nil
 	})
@@ -4350,12 +4007,6 @@ func updateWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 	// Execute query
 	_, err := q.dataset.Update(q.fields).Exec()
 	return errors.Wrap(err, "executing query")
-	for _, post := range q.postFunc {
-		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
-		}
-	}
-	return nil
 }
 
 func deleteWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt) error {

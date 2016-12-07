@@ -68,6 +68,30 @@ type entityTypeKeys struct {
 	Workgroup         int64
 }
 
+func toEntityId(ds *Datastore, name string) int64 {
+	switch name {
+	case "cluster":
+		return ds.EntityType.Cluster
+	case "engine":
+		return ds.EntityType.Engine
+	case "identity":
+		return ds.EntityType.Identity
+	case "permission":
+		return ds.EntityType.Permission
+	case "privilege":
+		return ds.EntityType.Privilege
+	case "project":
+		return ds.EntityType.Project
+	case "role":
+		return ds.EntityType.Role
+	case "service":
+		return ds.EntityType.Service
+	case "workgroup":
+		return ds.EntityType.Workgroup
+	}
+	return 0
+}
+
 func toEntityTypeMap(entityTypes []entityType) map[int64]string {
 	m := make(map[int64]string)
 	for _, e := range entityTypes {

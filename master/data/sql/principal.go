@@ -66,7 +66,7 @@ func (pz *Principal) CheckPermission(code int64) error {
 	if pz.HasPermission(code) {
 		return nil
 	}
-	return fmt.Errorf("Identity %s does not have permission '%s' to perform this operation", pz.Name(), pz.ds.permissionMap[code])
+	return fmt.Errorf("identity %s does not have permission '%s' to perform this operation", pz.Name(), pz.ds.permissionMap[code])
 }
 
 // TODO use bitwise ops to simplify this
@@ -129,7 +129,7 @@ func (pz *Principal) checkPrivilege(entityTypeId, entityId int64, expectedPrivil
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("Identity %s does not have privilege '%s' on the entity %s:%d", pz.Name(), expectedPrivilege, pz.ds.entityTypeMap[entityTypeId], entityId)
+		return fmt.Errorf("identity %s does not have privilege '%s' on the entity %s:%d", pz.Name(), expectedPrivilege, pz.ds.entityTypeMap[entityTypeId], entityId)
 	}
 	return nil
 }
