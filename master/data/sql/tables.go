@@ -18,18 +18,18 @@ type Cluster struct {
 	Created       time.Time      `db:"created,def=time.Now()"`
 }
 
-type ClusterType struct {
+type clusterType struct {
 	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`
 }
 
 type ClusterYarnDetail struct {
-	Id            int64          `db:"id,pk"`
-	EngineId      int64          `db:"engine_id,arg"`
-	Size          sql.NullInt64  `db:"size"`
-	ApplicationId sql.NullString `db:"application_id"`
-	Memory        sql.NullString `db:"memory"`
-	OutputDir     string         `db:"output_dir,arg"`
+	Id            int64  `db:"id,pk"`
+	EngineId      int64  `db:"engine_id,arg"`
+	Size          int64  `db:"size,arg"`
+	ApplicationId string `db:"application_id,arg"`
+	Memory        string `db:"memory,arg"`
+	OutputDir     string `db:"output_dir,arg"`
 }
 
 type Engine struct {
@@ -39,37 +39,42 @@ type Engine struct {
 	Created  time.Time `db:"created,def=time.Now()"`
 }
 
-type Entity_Type struct {
-	Id   int    `db:"id,pk"`
+type entityType struct {
+	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`
 }
 
-type History struct {
-	Id           int            `db:"id,pk"`
+type history struct {
+	Id           int64          `db:"id,pk"`
 	Action       string         `db:"action,arg"`
-	IdentityId   int            `db:"identity_id,arg"`
-	EntityTypeId int            `db:"entity_type_id,arg"`
-	EntityId     int            `db:"entity_id,arg"`
+	IdentityId   int64          `db:"identity_id,arg"`
+	EntityTypeId int64          `db:"entity_type_id,arg"`
+	EntityId     int64          `db:"entity_id,arg"`
 	Description  sql.NullString `db:"description"`
 	Created      string         `db:"created,def=time.Now()"`
 }
 
 type Identity struct {
-	Id           int            `db:"id,pk"`
-	Name         string         `db:"name,arg"`
-	Password     sql.NullString `db:"password"`
-	Workgroup_id int            `db:"workgroup_id,arg"`
-	Is_active    bool           `db:"is_active,def=true"`
-	Last_login   sql.NullInt64  `db:"last_login"`
-	Created      time.Time      `db:"created,def=time.Now()"`
+	Id          int64          `db:"id,pk"`
+	Name        string         `db:"name,arg"`
+	Password    sql.NullString `db:"password"`
+	WorkgroupId sql.NullInt64  `db:"workgroup_id"`
+	IsActive    bool           `db:"is_active,def=1"`
+	LastLogin   sql.NullInt64  `db:"last_login"`
+	Created     time.Time      `db:"created,def=time.Now()"`
 }
 
-type IdentityWorkgroup struct {
+type identityRole struct {
+	IdentityId int64 `db:"identity_id"`
+	RoleId     int64 `db:"role_id"`
+}
+
+type identityWorkgroup struct {
 	IdentityId  int64 `db:"identity_id,arg"`
 	WorkgroupId int64 `db:"workgroup_id,arg"`
 }
 
-type ModelCategory struct {
+type modelCategory struct {
 	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`
 }
@@ -82,7 +87,7 @@ type Permission struct {
 
 type Privilege struct {
 	Id          int64  `db:"id,pk"`
-	Typ         string `db:"type,arg"`
+	Type        string `db:"privilege_type,arg"`
 	WorkgroupId int64  `db:"workgroup_id,arg"`
 	EntityType  int64  `db:"entity_type_id,arg"`
 	EntityId    int64  `db:"entity_id,arg"`
@@ -96,7 +101,19 @@ type Project struct {
 	Created       time.Time `db:"created,def=time.Now()"`
 }
 
-type State struct {
+type Role struct {
+	Id          int64          `db:"id,pk"`
+	Name        string         `db:"name,arg"`
+	Description sql.NullString `db:"description"`
+	Created     time.Time      `db:"created,def=time.Now()"`
+}
+
+type rolePermission struct {
+	RoleId       int64 `db:"role_id,arg"`
+	PermissionId int64 `db:"permission_id,arg"`
+}
+
+type state struct {
 	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`
 }
@@ -111,4 +128,12 @@ type Service struct {
 	ProcessId sql.NullInt64  `db:"process_id"`
 	State     int64          `db:"state,def=q.state.Starting"`
 	Created   time.Time      `db:"created,def=time.Now()"`
+}
+
+type Workgroup struct {
+	Id          int64          `db:"id,pk"`
+	Type        string         `db:"type,arg"`
+	Name        string         `db:"name,arg"`
+	Description sql.NullString `db:"description"`
+	Created     time.Time      `db:"created,def=time.Now()"`
 }

@@ -106,6 +106,7 @@ func TestSqliteDB(t *testing.T) {
 	}
 
 	t.Run("Sqlite_Cluster", func(t *testing.T) { testClusterCRUD(t, ds) })
+	t.Run("Sqlite_Identity", func(t *testing.T) { testIdentityCRUD(t, ds) })
 
 	if clean {
 		os.RemoveAll(dir)

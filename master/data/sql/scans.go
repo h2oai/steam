@@ -44,22 +44,22 @@ func ScanClusters(rs *sql.Rows) ([]Cluster, error) {
 	return structs, nil
 }
 
-func ScanClusterType(r *sql.Row) (ClusterType, error) {
-	var s ClusterType
+func ScanClusterType(r *sql.Row) (clusterType, error) {
+	var s clusterType
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
 	); err != nil {
-		return ClusterType{}, err
+		return clusterType{}, err
 	}
 	return s, nil
 }
 
-func ScanClusterTypes(rs *sql.Rows) ([]ClusterType, error) {
-	structs := make([]ClusterType, 0, 16)
+func ScanClusterTypes(rs *sql.Rows) ([]clusterType, error) {
+	structs := make([]clusterType, 0, 16)
 	var err error
 	for rs.Next() {
-		var s ClusterType
+		var s clusterType
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
@@ -146,22 +146,162 @@ func ScanEngines(rs *sql.Rows) ([]Engine, error) {
 	return structs, nil
 }
 
-func ScanIdentityWorkgroup(r *sql.Row) (IdentityWorkgroup, error) {
-	var s IdentityWorkgroup
+func ScanEntityType(r *sql.Row) (entityType, error) {
+	var s entityType
 	if err := r.Scan(
-		&s.IdentityId,
-		&s.WorkgroupId,
+		&s.Id,
+		&s.Name,
 	); err != nil {
-		return IdentityWorkgroup{}, err
+		return entityType{}, err
 	}
 	return s, nil
 }
 
-func ScanIdentityWorkgroups(rs *sql.Rows) ([]IdentityWorkgroup, error) {
-	structs := make([]IdentityWorkgroup, 0, 16)
+func ScanEntityTypes(rs *sql.Rows) ([]entityType, error) {
+	structs := make([]entityType, 0, 16)
 	var err error
 	for rs.Next() {
-		var s IdentityWorkgroup
+		var s entityType
+		if err = rs.Scan(
+			&s.Id,
+			&s.Name,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanHistory(r *sql.Row) (history, error) {
+	var s history
+	if err := r.Scan(
+		&s.Id,
+		&s.Action,
+		&s.IdentityId,
+		&s.EntityTypeId,
+		&s.EntityId,
+		&s.Description,
+		&s.Created,
+	); err != nil {
+		return history{}, err
+	}
+	return s, nil
+}
+
+func ScanHistorys(rs *sql.Rows) ([]history, error) {
+	structs := make([]history, 0, 16)
+	var err error
+	for rs.Next() {
+		var s history
+		if err = rs.Scan(
+			&s.Id,
+			&s.Action,
+			&s.IdentityId,
+			&s.EntityTypeId,
+			&s.EntityId,
+			&s.Description,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanIdentity(r *sql.Row) (Identity, error) {
+	var s Identity
+	if err := r.Scan(
+		&s.Id,
+		&s.Name,
+		&s.Password,
+		&s.WorkgroupId,
+		&s.IsActive,
+		&s.LastLogin,
+		&s.Created,
+	); err != nil {
+		return Identity{}, err
+	}
+	return s, nil
+}
+
+func ScanIdentitys(rs *sql.Rows) ([]Identity, error) {
+	structs := make([]Identity, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Identity
+		if err = rs.Scan(
+			&s.Id,
+			&s.Name,
+			&s.Password,
+			&s.WorkgroupId,
+			&s.IsActive,
+			&s.LastLogin,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanIdentityRole(r *sql.Row) (identityRole, error) {
+	var s identityRole
+	if err := r.Scan(
+		&s.IdentityId,
+		&s.RoleId,
+	); err != nil {
+		return identityRole{}, err
+	}
+	return s, nil
+}
+
+func ScanIdentityRoles(rs *sql.Rows) ([]identityRole, error) {
+	structs := make([]identityRole, 0, 16)
+	var err error
+	for rs.Next() {
+		var s identityRole
+		if err = rs.Scan(
+			&s.IdentityId,
+			&s.RoleId,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanIdentityWorkgroup(r *sql.Row) (identityWorkgroup, error) {
+	var s identityWorkgroup
+	if err := r.Scan(
+		&s.IdentityId,
+		&s.WorkgroupId,
+	); err != nil {
+		return identityWorkgroup{}, err
+	}
+	return s, nil
+}
+
+func ScanIdentityWorkgroups(rs *sql.Rows) ([]identityWorkgroup, error) {
+	structs := make([]identityWorkgroup, 0, 16)
+	var err error
+	for rs.Next() {
+		var s identityWorkgroup
 		if err = rs.Scan(
 			&s.IdentityId,
 			&s.WorkgroupId,
@@ -176,22 +316,22 @@ func ScanIdentityWorkgroups(rs *sql.Rows) ([]IdentityWorkgroup, error) {
 	return structs, nil
 }
 
-func ScanModelCategory(r *sql.Row) (ModelCategory, error) {
-	var s ModelCategory
+func ScanModelCategory(r *sql.Row) (modelCategory, error) {
+	var s modelCategory
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
 	); err != nil {
-		return ModelCategory{}, err
+		return modelCategory{}, err
 	}
 	return s, nil
 }
 
-func ScanModelCategorys(rs *sql.Rows) ([]ModelCategory, error) {
-	structs := make([]ModelCategory, 0, 16)
+func ScanModelCategorys(rs *sql.Rows) ([]modelCategory, error) {
+	structs := make([]modelCategory, 0, 16)
 	var err error
 	for rs.Next() {
-		var s ModelCategory
+		var s modelCategory
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
@@ -242,7 +382,7 @@ func ScanPrivilege(r *sql.Row) (Privilege, error) {
 	var s Privilege
 	if err := r.Scan(
 		&s.Id,
-		&s.Typ,
+		&s.Type,
 		&s.WorkgroupId,
 		&s.EntityType,
 		&s.EntityId,
@@ -259,7 +399,7 @@ func ScanPrivileges(rs *sql.Rows) ([]Privilege, error) {
 		var s Privilege
 		if err = rs.Scan(
 			&s.Id,
-			&s.Typ,
+			&s.Type,
 			&s.WorkgroupId,
 			&s.EntityType,
 			&s.EntityId,
@@ -310,22 +450,86 @@ func ScanProjects(rs *sql.Rows) ([]Project, error) {
 	return structs, nil
 }
 
-func ScanState(r *sql.Row) (State, error) {
-	var s State
+func ScanRole(r *sql.Row) (Role, error) {
+	var s Role
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
+		&s.Description,
+		&s.Created,
 	); err != nil {
-		return State{}, err
+		return Role{}, err
 	}
 	return s, nil
 }
 
-func ScanStates(rs *sql.Rows) ([]State, error) {
-	structs := make([]State, 0, 16)
+func ScanRoles(rs *sql.Rows) ([]Role, error) {
+	structs := make([]Role, 0, 16)
 	var err error
 	for rs.Next() {
-		var s State
+		var s Role
+		if err = rs.Scan(
+			&s.Id,
+			&s.Name,
+			&s.Description,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanRolePermission(r *sql.Row) (rolePermission, error) {
+	var s rolePermission
+	if err := r.Scan(
+		&s.RoleId,
+		&s.PermissionId,
+	); err != nil {
+		return rolePermission{}, err
+	}
+	return s, nil
+}
+
+func ScanRolePermissions(rs *sql.Rows) ([]rolePermission, error) {
+	structs := make([]rolePermission, 0, 16)
+	var err error
+	for rs.Next() {
+		var s rolePermission
+		if err = rs.Scan(
+			&s.RoleId,
+			&s.PermissionId,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanState(r *sql.Row) (state, error) {
+	var s state
+	if err := r.Scan(
+		&s.Id,
+		&s.Name,
+	); err != nil {
+		return state{}, err
+	}
+	return s, nil
+}
+
+func ScanStates(rs *sql.Rows) ([]state, error) {
+	structs := make([]state, 0, 16)
+	var err error
+	for rs.Next() {
+		var s state
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
@@ -372,6 +576,42 @@ func ScanServices(rs *sql.Rows) ([]Service, error) {
 			&s.Port,
 			&s.ProcessId,
 			&s.State,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanWorkgroup(r *sql.Row) (Workgroup, error) {
+	var s Workgroup
+	if err := r.Scan(
+		&s.Id,
+		&s.Type,
+		&s.Name,
+		&s.Description,
+		&s.Created,
+	); err != nil {
+		return Workgroup{}, err
+	}
+	return s, nil
+}
+
+func ScanWorkgroups(rs *sql.Rows) ([]Workgroup, error) {
+	structs := make([]Workgroup, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Workgroup
+		if err = rs.Scan(
+			&s.Id,
+			&s.Type,
+			&s.Name,
+			&s.Description,
 			&s.Created,
 		); err != nil {
 			return nil, err

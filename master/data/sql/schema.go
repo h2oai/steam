@@ -5,12 +5,18 @@ var schema = map[string]string{
 	"cluster_type":        createTableClusterType,
 	"cluster_yarn_detail": createTableClusterYarnDetail,
 	"engine":              createTableEngine,
+	"entity_type":         createTableEntityType,
+	"identity":            createTableIdentity,
 	"identity_workgroup":  createTableIdentityWorkgroup,
+	"identity_role":       createTableIdentityRole,
 	"history":             createTableHistory,
 	"meta":                createTableMeta,
 	"permission":          createTablePermission,
 	"privilege":           createTablePrivilege,
+	"role":                createTableRole,
+	"role_permission":     createTableRolePermission,
 	"state":               createTableState,
+	"workgroup":           createTableWorkgroup,
 }
 
 var createTableCluster = `
@@ -40,9 +46,9 @@ var createTableClusterYarnDetail = `
 CREATE TABLE cluster_yarn_detail (
     id integer PRIMARY KEY AUTOINCREMENT,
     engine_id integer NOT NULL,
-    size integer,
-    application_id text,
-    memory text,
+    size integer NOT NULL,
+    application_id text NOT NULL,
+    memory text NOT NULL,
     output_dir text NOT NULL,
 
     FOREIGN KEY (engine_id) REFERENCES engine(id)
@@ -58,7 +64,7 @@ CREATE TABLE engine (
 )
 `
 
-var createEntityType = `
+var createTableEntityType = `
 CREATE TABLE entity_type (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE
@@ -84,11 +90,22 @@ var createTableIdentity = `
 CREATE TABLE identity (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
-    password text NOT NULL,
-    workgroup_id integer NOT NULL,
+    password text,
+    workgroup_id integer,
     is_active boolean NOT NULL,
     last_login integer with time zone,
     created datetime NOT NULL
+)
+`
+
+var createTableIdentityRole = `
+CREATE TABLE identity_role (
+    identity_id integer NOT NULL,
+    role_id integer NOT NULL,
+
+    PRIMARY KEY (identity_id, role_id),
+    FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
 )
 `
 
@@ -145,6 +162,28 @@ CREATE TABLE project (
 )
 `
 
+var createTableRole = `
+CREATE TABLE role (
+    id integer NOT NULL,
+    name text NOT NULL UNIQUE,
+    description text NOT NULL,
+    created datetime NOT NULL,
+
+    PRIMARY KEY (id)
+)
+`
+
+var createTableRolePermission = `
+CREATE TABLE role_permission (
+    role_id integer NOT NULL,
+    permission_id integer NOT NULL,
+
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permission(id) ON DELETE CASCADE
+)
+`
+
 var createTableService = `
 CREATE TABLE service (
     id integer PRIMARY KEY AUTOINCREMENT,
@@ -168,5 +207,15 @@ CREATE TABLE state (
     name text NOT NULL,
 
     PRIMARY KEY (id)
+)
+`
+
+var createTableWorkgroup = `
+CREATE TABLE workgroup (
+    id integer PRIMARY KEY AUTOINCREMENT,
+    type workgroup_type NOT NULL,
+    name text NOT NULL UNIQUE,
+    description text,
+    created datetime NOT NULL 
 )
 `

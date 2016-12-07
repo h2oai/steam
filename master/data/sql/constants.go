@@ -1,5 +1,26 @@
 package sql
 
+const (
+	// --- History ---
+	CreateOp  = "create"
+	UpdateOp  = "update"
+	DeleteOp  = "delete"
+	EnableOp  = "enable"
+	DisableOp = "disable"
+	ShareOp   = "share"
+	UnshareOp = "unshare"
+	LinkOp    = "link"
+	UnlinkOp  = "unlink"
+
+	// --- Privilege ---
+	Owns = "owns"
+	Edit = "edit"
+	View = "view"
+
+	// --- Role ---
+	Superuser = "superuser"
+)
+
 var CLUSTER_TYPES = []string{
 	"external",
 	"yarn",
@@ -10,7 +31,7 @@ type clusterTypeKeys struct {
 	Yarn     int64
 }
 
-func newClusterTypeKeys(clusterTypes []ClusterType) clusterTypeKeys {
+func newClusterTypeKeys(clusterTypes []clusterType) clusterTypeKeys {
 	m := make(map[string]int64)
 	for _, c := range clusterTypes {
 		m[c.Name] = c.Id
@@ -19,6 +40,59 @@ func newClusterTypeKeys(clusterTypes []ClusterType) clusterTypeKeys {
 	return clusterTypeKeys{
 		External: m["external"],
 		Yarn:     m["yarn"],
+	}
+}
+
+var ENTITY_TYPES = []string{
+	"cluster",
+	"engine",
+	"identity",
+	"permission",
+	"privilege",
+	"project",
+	"role",
+	"service",
+	"workgroup",
+}
+
+type entityTypeKeys struct {
+	Cluster           int64
+	ClusterYarnDetail int64
+	Engine            int64
+	Identity          int64
+	Permission        int64
+	Privilege         int64
+	Project           int64
+	Role              int64
+	Service           int64
+	Workgroup         int64
+}
+
+func toEntityTypeMap(entityTypes []entityType) map[int64]string {
+	m := make(map[int64]string)
+	for _, e := range entityTypes {
+		m[e.Id] = e.Name
+	}
+	return m
+}
+
+func newEntityTypeKeys(entityTypes []entityType) entityTypeKeys {
+	m := make(map[string]int64)
+	for _, e := range entityTypes {
+		m[e.Name] = e.Id
+	}
+
+	return entityTypeKeys{
+		Cluster:           m["cluster"],
+		ClusterYarnDetail: m["clusterYarnDetail"],
+		Engine:            m["engine"],
+		Identity:          m["identity"],
+		Permission:        m["permission"],
+		Privilege:         m["privilege"],
+		Project:           m["project"],
+		Role:              m["role"],
+		Service:           m["service"],
+		Workgroup:         m["workgroup"],
 	}
 }
 
@@ -70,6 +144,14 @@ type permissionKeys struct {
 	ViewLabel        int64
 	ManageService    int64
 	ViewService      int64
+}
+
+func toPermissionMap(permissions []Permission) map[int64]string {
+	m := make(map[int64]string)
+	for _, p := range permissions {
+		m[p.Id] = p.Description
+	}
+	return m
 }
 
 func newPermissionKeys(permissions []Permission) permissionKeys {
@@ -132,7 +214,7 @@ type stateKeys struct {
 	Completed    int64
 }
 
-func newStateKeys(states []State) stateKeys {
+func newStateKeys(states []state) stateKeys {
 	m := make(map[string]int64)
 	for _, s := range states {
 		m[s.Name] = s.Id

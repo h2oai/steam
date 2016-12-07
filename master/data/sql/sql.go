@@ -15,8 +15,15 @@ const (
 type metadata map[string]string
 
 type Datastore struct {
-	db          *goqu.Database
+	db *goqu.Database
+
+	// Internal mapping for printing
+	entityTypeMap map[int64]string
+	permissionMap map[int64]string
+
+	// Enum References in Database
 	ClusterType clusterTypeKeys
+	EntityType  entityTypeKeys
 	State       stateKeys
 	Permission  permissionKeys
 }
@@ -94,6 +101,9 @@ func prime(db *goqu.Database) error {
 		if err := primePermissions(tx, PERMISSIONS...); err != nil {
 			return errors.Wrap(err, "initializing permissions")
 		}
+		if err := primeEntityTypes(tx, ENTITY_TYPES...); err != nil {
+			return errors.Wrap(err, "initializing entity types")
+		}
 		return nil
 	})
 	return errors.Wrap(err, "committing transaction")
@@ -131,6 +141,15 @@ func primePermissions(tx *goqu.TxDatabase, perms ...struct{ code, desc string })
 	return nil
 }
 
+func primeEntityTypes(tx *goqu.TxDatabase, entityTyes ...string) error {
+	for _, et := range entityTyes {
+		if _, err := createEntityType(tx, et); err != nil {
+			return errors.Wrapf(err, "creating entity type %s", et)
+		}
+	}
+	return nil
+}
+
 func initDatastore(db *goqu.Database) (*Datastore, error) {
 	tx, err := db.Begin()
 	if err != nil {
@@ -138,8 +157,9 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 	}
 
 	var (
-		clusterTypes []ClusterType
-		states       []State
+		clusterTypes []clusterType
+		entityTypes  []entityType
+		states       []state
 		permissions  []Permission
 	)
 	if err := tx.Wrap(func() error {
@@ -148,22 +168,28 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 		if err != nil {
 			return errors.Wrap(err, "reading cluster types")
 		}
+		entityTypes, err = readEntityTypes(tx)
+		if err != nil {
+			return errors.Wrap(err, "reading entity types")
+		}
 		states, err = readStates(tx)
 		if err != nil {
 			return errors.Wrap(err, "reading states")
 		}
 		permissions, err = readPermissions(tx)
-		if err != nil {
-			return errors.Wrap(err, "reading permissions")
-		}
-		return nil
+		return errors.Wrap(err, "reading permissions")
 	}); err != nil {
 		return nil, errors.Wrap(err, "committing transaction")
 	}
 
 	return &Datastore{
-		db:          db,
+		db: db,
+
+		entityTypeMap: toEntityTypeMap(entityTypes),
+		permissionMap: toPermissionMap(permissions),
+
 		ClusterType: newClusterTypeKeys(clusterTypes),
+		EntityType:  newEntityTypeKeys(entityTypes),
 		State:       newStateKeys(states),
 		Permission:  newPermissionKeys(permissions),
 	}, nil
