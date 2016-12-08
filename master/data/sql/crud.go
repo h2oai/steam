@@ -171,8 +171,9 @@ func (ds *Datastore) UpdateCluster(clusterId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = clusterId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -203,17 +204,16 @@ func (ds *Datastore) DeleteCluster(clusterId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = clusterId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -596,8 +596,9 @@ func (ds *Datastore) UpdateClusterYarnDetail(clusterYarnDetailId int64, options 
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = clusterYarnDetailId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -628,17 +629,16 @@ func (ds *Datastore) DeleteClusterYarnDetail(clusterYarnDetailId int64, options 
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = clusterYarnDetailId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -909,8 +909,9 @@ func (ds *Datastore) UpdateEngine(engineId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = engineId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -941,17 +942,16 @@ func (ds *Datastore) DeleteEngine(engineId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = engineId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -1446,8 +1446,9 @@ func (ds *Datastore) UpdateIdentity(identityId int64, options ...QueryOpt) error
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = identityId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -1478,17 +1479,16 @@ func (ds *Datastore) DeleteIdentity(identityId int64, options ...QueryOpt) error
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = identityId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -1677,7 +1677,7 @@ func readIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) (identityRole, b
 	return ret_identityRole, exists, err
 }
 
-func updateIdentityRole(tx *goqu.TxDatabase, identityRoleId int64, options ...QueryOpt) error {
+func updateIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "identity_role", tx.From("identity_role"))
 	for _, option := range options {
@@ -1693,7 +1693,7 @@ func updateIdentityRole(tx *goqu.TxDatabase, identityRoleId int64, options ...Qu
 	return errors.Wrap(err, "executing query")
 }
 
-func deleteIdentityRole(tx *goqu.TxDatabase, identityRoleId int64, options ...QueryOpt) error {
+func deleteIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "identity_role", tx.From("identity_role"))
 	for _, option := range options {
@@ -1789,7 +1789,7 @@ func readIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (identityWo
 	return ret_identityWorkgroup, exists, err
 }
 
-func updateIdentityWorkgroup(tx *goqu.TxDatabase, identityWorkgroupId int64, options ...QueryOpt) error {
+func updateIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "identity_workgroup", tx.From("identity_workgroup"))
 	for _, option := range options {
@@ -1805,7 +1805,7 @@ func updateIdentityWorkgroup(tx *goqu.TxDatabase, identityWorkgroupId int64, opt
 	return errors.Wrap(err, "executing query")
 }
 
-func deleteIdentityWorkgroup(tx *goqu.TxDatabase, identityWorkgroupId int64, options ...QueryOpt) error {
+func deleteIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "identity_workgroup", tx.From("identity_workgroup"))
 	for _, option := range options {
@@ -2088,8 +2088,9 @@ func (ds *Datastore) UpdatePermission(permissionId int64, options ...QueryOpt) e
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = permissionId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -2120,17 +2121,16 @@ func (ds *Datastore) DeletePermission(permissionId int64, options ...QueryOpt) e
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = permissionId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -2243,209 +2243,10 @@ func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 
 // ---------- --------- ----------
 // ---------- --------- ----------
-// ---------- Privilege ----------
+// ---------- privilege ----------
 // ---------- --------- ----------
 // ---------- --------- ----------
 
-func (ds *Datastore) CreatePrivilege(typ string, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return 0, errors.Wrap(err, "beginning transaction")
-	}
-
-	var id int64
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "privilege", tx.From("privilege"))
-		// Default insert fields
-		privilege := goqu.Record{
-			"privilege_type": typ,
-			"workgroup_id":   workgroupId,
-			"entity_type_id": entityType,
-			"entity_id":      entityId,
-		}
-		q.AddFields(privilege)
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToInsertSql(q.fields))
-		}
-		// Execute query
-		res, err := q.dataset.Insert(q.fields).Exec()
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		id, err = res.LastInsertId()
-		if err != nil {
-			return errors.Wrap(err, "retrieving id")
-		}
-		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.Privilege, CreateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return id, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadPrivileges(options ...QueryOpt) ([]Privilege, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return []Privilege{}, errors.Wrap(err, "beginning transaction")
-	}
-
-	var privileges []Privilege
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "privilege", tx.From("privilege"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		rows, err := getRows(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		defer rows.Close()
-		privileges, err = ScanPrivileges(rows)
-
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return privileges, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadPrivilege(options ...QueryOpt) (Privilege, bool, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return Privilege{}, false, errors.Wrap(err, "beginning transaction")
-	}
-
-	var privilege Privilege
-	var exists bool
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "privilege", tx.From("privilege"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		row, err := getRow(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		privilege, err = ScanPrivilege(row)
-		if err == sql.ErrNoRows {
-			return nil
-		} else if err == nil {
-			exists = true
-		}
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return privilege, exists, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) UpdatePrivilege(privilegeId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "privilege", tx.From("privilege").Where(goqu.I("id").Eq(privilegeId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToUpdateSql(q.fields))
-		}
-		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
-		q.entityId, q.audit = privilegeId, UpdateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		return nil
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) DeletePrivilege(privilegeId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "privilege", tx.From("privilege").Where(goqu.I("id").Eq(privilegeId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToDeleteSql())
-		}
-		// Execute query
-		_, err := q.dataset.Delete().Exec()
-		q.entityId, q.audit = privilegeId, DeleteOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
 func createPrivilege(tx *goqu.TxDatabase, typ string, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "privilege", tx.From("privilege"))
@@ -2473,12 +2274,12 @@ func createPrivilege(tx *goqu.TxDatabase, typ string, workgroupId, entityType, e
 	return res.LastInsertId()
 }
 
-func readPrivileges(tx *goqu.TxDatabase, options ...QueryOpt) ([]Privilege, error) {
+func readPrivileges(tx *goqu.TxDatabase, options ...QueryOpt) ([]privilege, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "privilege", tx.From("privilege"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return []Privilege{}, errors.Wrap(err, "setting up query options")
+			return []privilege{}, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -2487,21 +2288,21 @@ func readPrivileges(tx *goqu.TxDatabase, options ...QueryOpt) ([]Privilege, erro
 	// Execute query
 	rows, err := getRows(tx, q.dataset)
 	if err != nil {
-		return []Privilege{}, err
+		return []privilege{}, err
 	}
 	defer rows.Close()
 
-	// Scan rows to Privileges
+	// Scan rows to privileges
 	return ScanPrivileges(rows)
 }
 
-func readPrivilege(tx *goqu.TxDatabase, options ...QueryOpt) (Privilege, bool, error) {
+func readPrivilege(tx *goqu.TxDatabase, options ...QueryOpt) (privilege, bool, error) {
 	var exists bool
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "privilege", tx.From("privilege"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return Privilege{}, exists, errors.Wrap(err, "setting up query options")
+			return privilege{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -2510,21 +2311,21 @@ func readPrivilege(tx *goqu.TxDatabase, options ...QueryOpt) (Privilege, bool, e
 	// Execute query
 	row, err := getRow(tx, q.dataset)
 	if err != nil {
-		return Privilege{}, false, err
+		return privilege{}, false, err
 	}
 	ret_privilege, err := ScanPrivilege(row)
 	if err == sql.ErrNoRows {
-		return Privilege{}, exists, nil
+		return privilege{}, exists, nil
 	} else if err == nil {
 		exists = true
 	}
-	// Scan row to Privilege
+	// Scan row to privilege
 	return ret_privilege, exists, err
 }
 
-func updatePrivilege(tx *goqu.TxDatabase, privilegeId int64, options ...QueryOpt) error {
+func updatePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
-	q := NewQueryConfig(nil, tx, "privilege", tx.From("privilege").Where(goqu.I("id").Eq(privilegeId)))
+	q := NewQueryConfig(nil, tx, "privilege", tx.From("privilege"))
 	for _, option := range options {
 		if err := option(q); err != nil {
 			return errors.Wrap(err, "setting up query options")
@@ -2538,9 +2339,9 @@ func updatePrivilege(tx *goqu.TxDatabase, privilegeId int64, options ...QueryOpt
 	return errors.Wrap(err, "executing query")
 }
 
-func deletePrivilege(tx *goqu.TxDatabase, privilegeId int64, options ...QueryOpt) error {
+func deletePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
-	q := NewQueryConfig(nil, tx, "privilege", tx.From("privilege").Where(goqu.I("id").Eq(privilegeId)))
+	q := NewQueryConfig(nil, tx, "privilege", tx.From("privilege"))
 	for _, option := range options {
 		if err := option(q); err != nil {
 			return errors.Wrap(err, "setting up query options")
@@ -2712,8 +2513,9 @@ func (ds *Datastore) UpdateProject(projectId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = projectId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -2744,17 +2546,16 @@ func (ds *Datastore) DeleteProject(projectId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = projectId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -3023,8 +2824,9 @@ func (ds *Datastore) UpdateRole(roleId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = roleId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -3055,17 +2857,16 @@ func (ds *Datastore) DeleteRole(roleId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = roleId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -3256,7 +3057,7 @@ func readRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) (rolePermissio
 	return ret_rolePermission, exists, err
 }
 
-func updateRolePermission(tx *goqu.TxDatabase, rolePermissionId int64, options ...QueryOpt) error {
+func updateRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "role_permission", tx.From("role_permission"))
 	for _, option := range options {
@@ -3272,7 +3073,7 @@ func updateRolePermission(tx *goqu.TxDatabase, rolePermissionId int64, options .
 	return errors.Wrap(err, "executing query")
 }
 
-func deleteRolePermission(tx *goqu.TxDatabase, rolePermissionId int64, options ...QueryOpt) error {
+func deleteRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "role_permission", tx.From("role_permission"))
 	for _, option := range options {
@@ -3558,8 +3359,9 @@ func (ds *Datastore) UpdateService(serviceId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = serviceId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -3590,17 +3392,16 @@ func (ds *Datastore) DeleteService(serviceId int64, options ...QueryOpt) error {
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = serviceId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -3871,8 +3672,9 @@ func (ds *Datastore) UpdateWorkgroup(workgroupId int64, options ...QueryOpt) err
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 		}
 		// Execute query
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = workgroupId, UpdateOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -3903,17 +3705,16 @@ func (ds *Datastore) DeleteWorkgroup(workgroupId int64, options ...QueryOpt) err
 			log.Println(q.dataset.ToDeleteSql())
 		}
 		// Execute query
-		_, err := q.dataset.Delete().Exec()
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 		q.entityId, q.audit = workgroupId, DeleteOp
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		return nil
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")

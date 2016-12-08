@@ -378,27 +378,25 @@ func ScanPermissions(rs *sql.Rows) ([]Permission, error) {
 	return structs, nil
 }
 
-func ScanPrivilege(r *sql.Row) (Privilege, error) {
-	var s Privilege
+func ScanPrivilege(r *sql.Row) (privilege, error) {
+	var s privilege
 	if err := r.Scan(
-		&s.Id,
 		&s.Type,
 		&s.WorkgroupId,
 		&s.EntityType,
 		&s.EntityId,
 	); err != nil {
-		return Privilege{}, err
+		return privilege{}, err
 	}
 	return s, nil
 }
 
-func ScanPrivileges(rs *sql.Rows) ([]Privilege, error) {
-	structs := make([]Privilege, 0, 16)
+func ScanPrivileges(rs *sql.Rows) ([]privilege, error) {
+	structs := make([]privilege, 0, 16)
 	var err error
 	for rs.Next() {
-		var s Privilege
+		var s privilege
 		if err = rs.Scan(
-			&s.Id,
 			&s.Type,
 			&s.WorkgroupId,
 			&s.EntityType,

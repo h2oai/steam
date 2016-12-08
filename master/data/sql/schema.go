@@ -140,15 +140,14 @@ CREATE TABLE permission (
 
 var createTablePrivilege = `
 CREATE TABLE privilege (
-    id integer PRIMARY KEY AUTOINCREMENT,
     privilege_type text NOT NULL,
     workgroup_id integer NOT NULL,
     entity_type_id integer NOT NULL,
     entity_id integer NOT NULL,
 
-    UNIQUE (privilege_type, workgroup_id, entity_type_id, entity_id),
-    CONSTRAINT entity_type_id FOREIGN KEY (entity_type_id) REFERENCES entity_type(id),
-    CONSTRAINT workgroup_id FOREIGN KEY (workgroup_id) REFERENCES workgroup(id)
+    PRIMARY KEY (privilege_type, workgroup_id, entity_type_id, entity_id),
+    FOREIGN KEY (entity_type_id) REFERENCES entity_type(id),
+    FOREIGN KEY (workgroup_id) REFERENCES workgroup(id) ON DELETE CASCADE
 )
 `
 

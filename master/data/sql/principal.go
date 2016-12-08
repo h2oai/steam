@@ -19,6 +19,8 @@ package sql
 
 import (
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 // --- Datastore-backed Principal Impl ---
@@ -79,13 +81,22 @@ func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivileg
 	canEdit := false
 	canView := false
 
-	privileges, err := pz.ds.ReadPrivileges(
-		ById(pz.Identity.Id),
-		ByEntityTypeId(entityTypeId),
-		ByEntityId(entityId),
-	)
+	tx, err := pz.ds.db.Begin()
 	if err != nil {
-		return false, err
+		return false, errors.Wrap(err, "beginning transaction")
+	}
+
+	var privileges []privilege
+	if err := tx.Wrap(func() error {
+		var err error
+		privileges, err = readPrivileges(tx,
+			ById(pz.Identity.Id),
+			ByEntityTypeId(entityTypeId),
+			ByEntityId(entityId),
+		)
+		return errors.Wrap(err, "reading privileges from database")
+	}); err != nil {
+		return false, errors.Wrap(err, "committing transaction")
 	}
 
 	if len(privileges) == 0 {
