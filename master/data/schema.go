@@ -1,4 +1,44 @@
-package sql
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package data
+
+import (
+	"database/sql"
+
+	"github.com/pkg/errors"
+)
+
+func createSQLiteDB(db *sql.DB) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "beginning transaction")
+	}
+	defer tx.Rollback()
+
+	for tbl, query := range schema {
+		_, err := tx.Exec(query)
+		if err != nil {
+			return errors.Wrapf(err, "initializing %s", tbl)
+		}
+	}
+
+	return errors.Wrap(tx.Commit(), "committing transaction")
+}
 
 var schema = map[string]string{
 	"cluster":             createTableCluster,
@@ -26,12 +66,12 @@ CREATE TABLE cluster (
     type_id integer NOT NULL,
     detail_id integer,
     address text UNIQUE,
-    state integer NOT NULL,
+    state string NOT NULL,
     created datetime NOT NULL,
 
     CONSTRAINT type_id FOREIGN KEY (type_id) REFERENCES cluster_type(id),
     CONSTRAINT detail_id FOREIGN KEY (detail_id) REFERENCES cluster_yarn_detail(id),
-    CONSTRAINT state FOREIGN KEY (state) REFERENCES state(id)
+    CONSTRAINT state FOREIGN KEY (state) REFERENCES state(name)
 )
 `
 
@@ -165,7 +205,7 @@ var createTableRole = `
 CREATE TABLE role (
     id integer NOT NULL,
     name text NOT NULL UNIQUE,
-    description text NOT NULL,
+    description text,
     created datetime NOT NULL,
 
     PRIMARY KEY (id)
@@ -203,7 +243,7 @@ CREATE TABLE service (
 var createTableState = `
 CREATE TABLE state (
     id integer NOT NULL,
-    name text NOT NULL,
+    name text NOT NULL UNIQUE,
 
     PRIMARY KEY (id)
 )

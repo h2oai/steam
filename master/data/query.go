@@ -1,4 +1,21 @@
-package sql
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package data
 
 import (
 	"encoding/json"
@@ -142,10 +159,15 @@ func ByEntityTypeId(entityTypeId int64) QueryOpt {
 	}
 }
 
-// WithExternal adds a type_id of external
+// WithExternal adds a type_id value of type external
 func WithExternal(q *QueryConfig) (err error) {
 	q.fields["type_id"] = q.clusterTypes.External
 	return
+}
+
+// WithIdentityId adds an identity_id value to the query
+func WithIdentityId(identityId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["identity_id"] = identityId; return }
 }
 
 // ById queries the database for matching id columns
@@ -191,12 +213,21 @@ func WithLimit(limit uint) QueryOpt {
 
 // ByName queries the database for matching name columns
 func ByName(name string) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(goqu.I("id").Eq(name)); return }
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(goqu.I("name").Eq(name)); return }
 }
 
 // WithOffset adds a offset value to the query
 func WithOffset(offset uint) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Offset(offset); return }
+}
+
+func WithPassword(password string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["password"] = password; return }
+}
+
+// WithRoleId adds an role_id value to the query
+func WithRoleId(roleId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["role_id"] = roleId; return }
 }
 
 // WithSize adds a size value to the query
@@ -210,7 +241,7 @@ func ByState(state int64) QueryOpt {
 }
 
 // WithState adds a state value to the query
-func WithState(state int64) QueryOpt {
+func WithState(state string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["state"] = state; return }
 }
 

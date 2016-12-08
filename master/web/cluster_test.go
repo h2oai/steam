@@ -1,46 +1,24 @@
-/*
-  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
-  License, or (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package web
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
-func TestGetClusterDatasets(tt *testing.T) {
-	t := newTest(tt)
+func TestExternalClusterCRUD(t *testing.T) {
+	svc, pz, temp := testSetup("cluster", "sqlite3")
+	defer os.RemoveAll(temp)
 
-	id, err := t.svc.RegisterCluster(t.su, ClusterAddress)
-	t.nil(err)
+	clusterId, err := svc.RegisterCluster(pz, "localhost:54321")
+	if err != nil {
+		t.Errorf("registering cluster: %+v", err)
+		t.FailNow()
+	}
+	t.Log("Registered cluster with ID:", clusterId)
 
-	datasets, err := t.svc.GetDatasetsFromCluster(t.su, id)
-	t.nil(err)
-
-	// VERIFY INFORMATION IN DATASETS HERE (INTEGRATION)
-	t.log("Datasets", datasets)
-}
-
-func TestGetClusterModels(tt *testing.T) {
-	t := newTest(tt)
-
-	id, err := t.svc.RegisterCluster(t.su, ClusterAddress)
-	t.nil(err)
-
-	models, err := t.svc.GetModelsFromCluster(t.su, id, h2oFrames[0].name)
-	t.nil(err)
-
-	// VERIFY INFORMATION HERE
-	t.log("Models", models)
+	if err = svc.UnregisterCluster(pz, clusterId); err != nil {
+		t.Errorf("unregistering cluster: %+v", err)
+		t.FailNow()
+	}
+	t.Log("Unregistreed clsuter with ID:", clusterId)
 }

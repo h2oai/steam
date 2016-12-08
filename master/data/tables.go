@@ -1,7 +1,24 @@
 //go:generate crudr $GOFILE
 //go:generate scaneo $GOFILE
 
-package sql
+/*
+  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package data
 
 import (
 	"database/sql"
@@ -14,7 +31,7 @@ type Cluster struct {
 	ClusterTypeId int64          `db:"type_id,arg"`
 	DetailId      sql.NullInt64  `db:"detail_id"`
 	Address       sql.NullString `db:"address"`
-	State         int64          `db:"state,def=q.state.Starting"`
+	State         string         `db:"state,def=q.state.Starting"`
 	Created       time.Time      `db:"created,def=time.Now()"`
 }
 
@@ -29,6 +46,7 @@ type ClusterYarnDetail struct {
 	Size          int64  `db:"size,arg"`
 	ApplicationId string `db:"application_id,arg"`
 	Memory        string `db:"memory,arg"`
+	Username      string `db:"username"`
 	OutputDir     string `db:"output_dir,arg"`
 }
 
@@ -125,7 +143,7 @@ type Service struct {
 	Host      sql.NullString `db:"host"`
 	Port      sql.NullString `db:"port"`
 	ProcessId sql.NullInt64  `db:"process_id"`
-	State     int64          `db:"state,def=q.state.Starting"`
+	State     string         `db:"state,def=q.state.Starting"`
 	Created   time.Time      `db:"created,def=time.Now()"`
 }
 
