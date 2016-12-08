@@ -99,7 +99,7 @@ func TestSqliteDB(t *testing.T) {
 	}
 
 	t.Run("Sqlite_Cluster", func(t *testing.T) { testClusterCRUD(t, ds) })
-	t.Run("Sqlite_Identity", func(t *testing.T) { testIdentityCRUD(t, ds) })
+	// t.Run("Sqlite_Identity", func(t *testing.T) { testIdentityCRUD(t, ds) })
 
 	if clean {
 		os.RemoveAll(dir)
@@ -117,7 +117,7 @@ func testClusterCRUD(t *testing.T, ds *Datastore) {
 	// Create
 	clusterIds := make([]int64, 0)
 	for _, cluster := range clustersTable {
-		clusterId, err := ds.CreateCluster(cluster.Name, cluster.ClusterTypeId, WithState(ds.State.Started))
+		clusterId, err := ds.CreateCluster(cluster.Name, cluster.ClusterTypeId, WithState(States.Started))
 		clusterIds = append(clusterIds, clusterId)
 		FatalErr(t, err, "creating cluster")
 	}
@@ -134,7 +134,7 @@ func testClusterCRUD(t *testing.T, ds *Datastore) {
 	Check(t, clustersTable[0].Name, cluster.Name, "cluster returned by name")
 
 	// Update
-	Err(t, ds.UpdateCluster(clusterIds[0], WithAddress("1.1.1.1"), WithState(ds.State.Started)), "updating cluster")
+	Err(t, ds.UpdateCluster(clusterIds[0], WithAddress("1.1.1.1"), WithState(States.Started)), "updating cluster")
 	cluster, ok, err = ds.ReadCluster(ById(clusterIds[0]))
 	Err(t, err, "reading cluster")
 

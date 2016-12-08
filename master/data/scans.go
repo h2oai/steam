@@ -82,6 +82,7 @@ func ScanClusterYarnDetail(r *sql.Row) (ClusterYarnDetail, error) {
 		&s.Size,
 		&s.ApplicationId,
 		&s.Memory,
+		&s.Username,
 		&s.OutputDir,
 	); err != nil {
 		return ClusterYarnDetail{}, err
@@ -100,6 +101,7 @@ func ScanClusterYarnDetails(rs *sql.Rows) ([]ClusterYarnDetail, error) {
 			&s.Size,
 			&s.ApplicationId,
 			&s.Memory,
+			&s.Username,
 			&s.OutputDir,
 		); err != nil {
 			return nil, err

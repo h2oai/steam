@@ -39,7 +39,6 @@ type QueryConfig struct {
 	audit        string
 	// Enum references
 	clusterTypes clusterTypeKeys
-	state        stateKeys
 	permissions  permissionKeys
 	entityTypes  entityTypeKeys
 }
@@ -47,13 +46,11 @@ type QueryConfig struct {
 func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, table string, data *goqu.Dataset) *QueryConfig {
 	var (
 		clusterTypes clusterTypeKeys
-		states       stateKeys
 		permissions  permissionKeys
 		entityTypes  entityTypeKeys
 	)
 	if ds != nil {
 		clusterTypes = ds.ClusterType
-		states = ds.State
 		permissions = ds.Permission
 		entityTypes = ds.EntityType
 	}
@@ -73,7 +70,6 @@ func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, table string, data *goqu
 		entityTypeId: entityTypeId,
 
 		clusterTypes: clusterTypes,
-		state:        states,
 		permissions:  permissions,
 		entityTypes:  entityTypes,
 	}
@@ -159,12 +155,6 @@ func ByEntityTypeId(entityTypeId int64) QueryOpt {
 	}
 }
 
-// WithExternal adds a type_id value of type external
-func WithExternal(q *QueryConfig) (err error) {
-	q.fields["type_id"] = q.clusterTypes.External
-	return
-}
-
 // WithIdentityId adds an identity_id value to the query
 func WithIdentityId(identityId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["identity_id"] = identityId; return }
@@ -248,12 +238,14 @@ func WithState(state string) QueryOpt {
 // WithYarnDetail adds a type_id of yarn and provides the corresponding detail
 func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir string) QueryOpt {
 	return func(q *QueryConfig) error {
+		if q.fields["type_id"] != q.clusterTypes.Yarn {
+			return errors.New("cannot add yarn details for a non-yarn cluster")
+		}
 		yarnId, err := createClusterYarnDetail(q.tx, engineId, size, applicationId, memory, outputDir)
 		if err != nil {
 			return errors.Wrap(err, "WithYarnDetail: creating cluster yarn details in database")
 		}
 
-		q.fields["type_id"] = q.clusterTypes.Yarn
 		q.fields["detail_id"] = yarnId
 		return nil
 	}

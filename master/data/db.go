@@ -62,7 +62,7 @@ func init() {
 
 func NewDatastore(driver, dbOpts string) (*Datastore, error) {
 	// Connect to db
-	db, err := Open(driver, dbOpts)
+	db, err := open(driver, dbOpts)
 	if err != nil {
 		return nil, errors.Wrap(err, "connecting to database")
 	}
@@ -83,7 +83,7 @@ func NewDatastore(driver, dbOpts string) (*Datastore, error) {
 	return ds, nil
 }
 
-func Open(driver, dbOpts string) (*goqu.Database, error) {
+func open(driver, dbOpts string) (*goqu.Database, error) {
 	// Open connection
 	db, err := sql.Open(driver, dbOpts)
 	if err != nil {
@@ -124,16 +124,16 @@ func prime(db *goqu.Database) error {
 		if err := primeMetadata(tx, "version", VERSION); err != nil {
 			return errors.Wrap(err, "initializing metadata")
 		}
-		if err := primeClusterTypes(tx, CLUSTER_TYPES...); err != nil {
+		if err := primeClusterTypes(tx, cluster_types_list...); err != nil {
 			return errors.Wrap(err, "initializing cluster types")
 		}
-		if err := primeStates(tx, STATES...); err != nil {
+		if err := primeStates(tx, states_list...); err != nil {
 			return errors.Wrap(err, "initializing states")
 		}
-		if err := primePermissions(tx, PERMISSIONS...); err != nil {
+		if err := primePermissions(tx, permissions_list...); err != nil {
 			return errors.Wrap(err, "initializing permissions")
 		}
-		if err := primeEntityTypes(tx, ENTITY_TYPES...); err != nil {
+		if err := primeEntityTypes(tx, entity_types_list...); err != nil {
 			return errors.Wrap(err, "initializing entity types")
 		}
 		return nil

@@ -31,7 +31,7 @@ type Cluster struct {
 	ClusterTypeId int64          `db:"type_id,arg"`
 	DetailId      sql.NullInt64  `db:"detail_id"`
 	Address       sql.NullString `db:"address"`
-	State         string         `db:"state,def=q.state.Starting"`
+	State         string         `db:"state,def=States.Starting"`
 	Created       time.Time      `db:"created,def=time.Now()"`
 }
 
@@ -143,7 +143,7 @@ type Service struct {
 	Host      sql.NullString `db:"host"`
 	Port      sql.NullString `db:"port"`
 	ProcessId sql.NullInt64  `db:"process_id"`
-	State     string         `db:"state,def=q.state.Starting"`
+	State     string         `db:"state,def=States.Starting"`
 	Created   time.Time      `db:"created,def=time.Now()"`
 }
 

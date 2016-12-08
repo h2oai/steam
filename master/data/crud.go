@@ -33,7 +33,7 @@ func (ds *Datastore) CreateCluster(name string, clusterTypeId int64, options ...
 		cluster := goqu.Record{
 			"name":    name,
 			"type_id": clusterTypeId,
-			"state":   q.state.Starting,
+			"state":   States.Starting,
 			"created": time.Now(),
 		}
 		q.AddFields(cluster)
@@ -225,7 +225,7 @@ func createCluster(tx *goqu.TxDatabase, name string, clusterTypeId int64, option
 	cluster := goqu.Record{
 		"name":    name,
 		"type_id": clusterTypeId,
-		"state":   q.state.Starting,
+		"state":   States.Starting,
 		"created": time.Now(),
 	}
 	q.AddFields(cluster)
@@ -3221,7 +3221,7 @@ func (ds *Datastore) CreateService(projectId, modelId int64, name string, option
 			"project_id": projectId,
 			"model_id":   modelId,
 			"name":       name,
-			"state":      q.state.Starting,
+			"state":      States.Starting,
 			"created":    time.Now(),
 		}
 		q.AddFields(service)
@@ -3414,7 +3414,7 @@ func createService(tx *goqu.TxDatabase, projectId, modelId int64, name string, o
 		"project_id": projectId,
 		"model_id":   modelId,
 		"name":       name,
-		"state":      q.state.Starting,
+		"state":      States.Starting,
 		"created":    time.Now(),
 	}
 	q.AddFields(service)

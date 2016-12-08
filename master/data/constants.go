@@ -38,7 +38,7 @@ const (
 	SuperuserRN = "superuser"
 )
 
-var CLUSTER_TYPES = []string{
+var cluster_types_list = []string{
 	"external",
 	"yarn",
 }
@@ -60,7 +60,7 @@ func newClusterTypeKeys(clusterTypes []clusterType) clusterTypeKeys {
 	}
 }
 
-var ENTITY_TYPES = []string{
+var entity_types_list = []string{
 	"cluster",
 	"engine",
 	"identity",
@@ -137,7 +137,7 @@ func newEntityTypeKeys(entityTypes []entityType) entityTypeKeys {
 	}
 }
 
-var PERMISSIONS = []struct{ code, desc string }{
+var permissions_list = []struct{ code, desc string }{
 	struct{ code, desc string }{"ManageRole", "Manage role"},
 	struct{ code, desc string }{"ViewRole", "View role"},
 	struct{ code, desc string }{"ManageWorkgroup", "Manage workgroup"},
@@ -227,7 +227,7 @@ func newPermissionKeys(permissions []Permission) permissionKeys {
 	}
 }
 
-var STATES = []string{
+var states_list = []string{
 	"idle",
 	"starting",
 	"started",
