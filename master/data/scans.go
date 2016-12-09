@@ -4,6 +4,44 @@ package data
 
 import "database/sql"
 
+func ScanBinomialModel(r *sql.Row) (BinomialModel, error) {
+	var s BinomialModel
+	if err := r.Scan(
+		&s.ModelId,
+		&s.Mse,
+		&s.RSquared,
+		&s.Logloss,
+		&s.Auc,
+		&s.Gini,
+	); err != nil {
+		return BinomialModel{}, err
+	}
+	return s, nil
+}
+
+func ScanBinomialModels(rs *sql.Rows) ([]BinomialModel, error) {
+	structs := make([]BinomialModel, 0, 16)
+	var err error
+	for rs.Next() {
+		var s BinomialModel
+		if err = rs.Scan(
+			&s.ModelId,
+			&s.Mse,
+			&s.RSquared,
+			&s.Logloss,
+			&s.Auc,
+			&s.Gini,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanCluster(r *sql.Row) (Cluster, error) {
 	var s Cluster
 	if err := r.Scan(

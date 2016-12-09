@@ -25,6 +25,15 @@ import (
 	"time"
 )
 
+type BinomialModel struct {
+	ModelId  int64   `db:"model_id,arg"`
+	Mse      float64 `db:"mse,arg"`
+	RSquared float64 `db:"r_squared,arg"`
+	Logloss  float64 `db:"logloss,arg"`
+	Auc      float64 `db:"auc,arg"`
+	Gini     float64 `db:"gini,arg"`
+}
+
 type Cluster struct {
 	Id            int64          `db:"id,pk"`
 	Name          string         `db:"name,arg"`
@@ -105,7 +114,7 @@ type Model struct {
 	ModelKey        string         `db:"model_key,arg"`
 	Algorithm       string         `db:"algorithm,arg"`
 	ModelCategory   string         `db:"model_category,arg"`
-	DatasetName     string         `db:"dataset_name,arg"`
+	DatasetName     sql.NullString `db:"dataset_name"`
 	ResponseColumn  string         `db:"response_column_name,arg"`
 	LogicalName     sql.NullString `db:"logical_name"`
 	Location        sql.NullString `db:"location"`

@@ -101,6 +101,24 @@ func WithAddress(address string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["address"] = address; return }
 }
 
+// WithBinomial model creates an entry in the binomial_metrics table and links it to the model
+func WithBinomialModel(modelId int64, mse, rSquared, logloss, auc, gini float64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Model {
+			return errors.Wrap(err, "WithBinomialModel: entity must be of type 'Model'")
+		}
+		q.AddPostFunc(func(c *QueryConfig) error {
+			_, err := createBinomialModel(c.tx, c.entityId, mse, rSquared, logloss, auc, gini)
+			return errors.Wrap(err, "WithBinomialModel: creating binomial model")
+		})
+	}
+}
+
+// WithClusterId adds a cluster_id value to the query
+func WithClusterId(clusterId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["cluster_id"] = clusterId; return }
+}
+
 // WithDefaultIdentityWorkgroup creates and links a default workgroup for an identity
 func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 	// Fetch identity name
@@ -220,6 +238,20 @@ func WithPassword(password string) QueryOpt {
 func ByProjectId(projectId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) {
 		q.dataset = q.dataset.Where(goqu.I("project_id").Eq(projectId))
+		return
+	}
+}
+
+// WithProjectId adds a project_id value to the query
+func WithProjectId(projectId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["project_id"] = projectId; return }
+}
+
+// WithRawSchema adds schema and schema_version values to the query
+func WithRawSchema(schema, schemaVersion string) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.fields["schema"] = schema
+		q.fields["schema_version"] = schemaVersion
 		return
 	}
 }

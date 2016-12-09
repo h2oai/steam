@@ -61,6 +61,20 @@ var schema = map[string]string{
 	"workgroup":           createTableWorkgroup,
 }
 
+var createTableBinomialModel = `
+CREATE TABLE binomial_model (
+    model_id integer NOT NULL,
+    mse double precision,
+    r_squared double precision,
+    logloss double precision,
+    auc double precision,
+    gini double precision, 
+
+    PRIMARY KEY (model_id),
+    FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
+)
+`
+
 var createTableCluster = `
 CREATE TABLE cluster (
     id integer PRIMARY KEY AUTOINCREMENT,

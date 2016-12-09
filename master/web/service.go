@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/yarn"
 	"github.com/h2oai/steam/master/az"
@@ -400,6 +401,55 @@ func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
 	}
 
 	return s.ds.DeleteProject(projectId, data.WithAudit(pz))
+}
+
+// --- ----- ---
+// --- ----- ---
+// --- Model ---
+// --- ----- ---
+// --- ----- ---
+
+func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId int64, modelKey, modelName string) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageModel); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
+	}
+	// Fetch cluster and project
+	cluster, err := s.viewCluster(pz, clusterId)
+	if err != nil {
+		return 0, err
+	}
+	if _, err := s.viewProject(pz, projectId); err != nil {
+		return 0, err
+	}
+	// Get model from cloud
+	h2o := h2ov3.NewClient(cluster.Address.String)
+	rawModel, r, err := h2o.GetModelsFetch(modelKey)
+	if err != nil {
+		return 0, errors.Wrap(err, "fetching model from H2O")
+	}
+	m := r.Models[0]
+	metricsFunc, err := createMetrics(string(m.Output.ModelCategory), m.Output.TrainingMetrics)
+	// Create Model
+	modelId, err := s.ds.CreateModel(modelName, modelKey, m.AlgoFullName,
+		string(m.Output.ModelCategory), m.ResponseColumnName,
+		data.WithProjectId(projectId), data.WithClusterId(clusterId),
+		data.WithRawSchema(string(rawModel), "1"), metricsFunc,
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+	)
+	return modelId, errors.Wrap(err, "creating model in database")
+}
+
+func createMetrics(category string, metrics *bindings.ModelMetrics) (data.QueryOpt, error) {
+	switch category {
+	case "Binomial":
+		return data.WithBinomialModel()
+	case "Multinomial":
+		return data.WithMultinomialModel()
+	case "Regression":
+		return data.WithRegressionModel()
+	}
+	return errors.New("unsupported model category:", category)
 }
 
 // Helper function to convert from int to bytes
