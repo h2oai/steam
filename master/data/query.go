@@ -102,15 +102,16 @@ func WithAddress(address string) QueryOpt {
 }
 
 // WithBinomial model creates an entry in the binomial_metrics table and links it to the model
-func WithBinomialModel(modelId int64, mse, rSquared, logloss, auc, gini float64) QueryOpt {
+func WithBinomialModel(mse, rSquared, logloss, auc, gini float64) QueryOpt {
 	return func(q *QueryConfig) error {
 		if q.entityTypeId != q.entityTypes.Model {
-			return errors.Wrap(err, "WithBinomialModel: entity must be of type 'Model'")
+			return errors.New("WithBinomialModel: entity must be of type 'Model'")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
 			_, err := createBinomialModel(c.tx, c.entityId, mse, rSquared, logloss, auc, gini)
 			return errors.Wrap(err, "WithBinomialModel: creating binomial model")
 		})
+		return nil
 	}
 }
 
@@ -219,6 +220,19 @@ func WithLimit(limit uint) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Limit(limit); return }
 }
 
+func WithMultinomialModel(mse, rSquared, logloss float64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Model {
+			return errors.New("WithMultinomialModel: entity must of type model")
+		}
+		q.AddPostFunc(func(c *QueryConfig) error {
+			_, err := createMultinomialModel(c.tx, c.entityId, mse, rSquared, logloss)
+			return errors.Wrap(err, "WithMultinomialModel: creating multinomial model")
+		})
+		return nil
+	}
+}
+
 // ByName queries the database for matching name columns
 func ByName(name string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(goqu.I("name").Eq(name)); return }
@@ -253,6 +267,20 @@ func WithRawSchema(schema, schemaVersion string) QueryOpt {
 		q.fields["schema"] = schema
 		q.fields["schema_version"] = schemaVersion
 		return
+	}
+}
+
+func WithRegressionModel(mse, rSquared, meanResidualDeviance float64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Model {
+			return errors.New("WithRegressionModel: entity must of type model")
+		}
+
+		q.AddPostFunc(func(c *QueryConfig) error {
+			_, err := createRegressionModel(c.tx, c.entityId, mse, rSquared, meanResidualDeviance)
+			return errors.Wrap(err, "WithRegressionModel: creating regression model")
+		})
+		return nil
 	}
 }
 

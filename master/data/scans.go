@@ -446,6 +446,40 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 	return structs, nil
 }
 
+func ScanMultinomialModel(r *sql.Row) (MultinomialModel, error) {
+	var s MultinomialModel
+	if err := r.Scan(
+		&s.ModelId,
+		&s.Mse,
+		&s.RSquared,
+		&s.Logloss,
+	); err != nil {
+		return MultinomialModel{}, err
+	}
+	return s, nil
+}
+
+func ScanMultinomialModels(rs *sql.Rows) ([]MultinomialModel, error) {
+	structs := make([]MultinomialModel, 0, 16)
+	var err error
+	for rs.Next() {
+		var s MultinomialModel
+		if err = rs.Scan(
+			&s.ModelId,
+			&s.Mse,
+			&s.RSquared,
+			&s.Logloss,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanPermission(r *sql.Row) (Permission, error) {
 	var s Permission
 	if err := r.Scan(
@@ -537,6 +571,40 @@ func ScanProjects(rs *sql.Rows) ([]Project, error) {
 			&s.Description,
 			&s.ModelCategory,
 			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func ScanRegressionModel(r *sql.Row) (RegressionModel, error) {
+	var s RegressionModel
+	if err := r.Scan(
+		&s.ModelId,
+		&s.Mse,
+		&s.RSquared,
+		&s.MeanResidualDeviance,
+	); err != nil {
+		return RegressionModel{}, err
+	}
+	return s, nil
+}
+
+func ScanRegressionModels(rs *sql.Rows) ([]RegressionModel, error) {
+	structs := make([]RegressionModel, 0, 16)
+	var err error
+	for rs.Next() {
+		var s RegressionModel
+		if err = rs.Scan(
+			&s.ModelId,
+			&s.Mse,
+			&s.RSquared,
+			&s.MeanResidualDeviance,
 		); err != nil {
 			return nil, err
 		}

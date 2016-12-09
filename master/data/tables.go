@@ -26,7 +26,7 @@ import (
 )
 
 type BinomialModel struct {
-	ModelId  int64   `db:"model_id,arg"`
+	ModelId  int64   `db:"model_id,arg,pk"`
 	Mse      float64 `db:"mse,arg"`
 	RSquared float64 `db:"r_squared,arg"`
 	Logloss  float64 `db:"logloss,arg"`
@@ -126,6 +126,13 @@ type Model struct {
 	Created         time.Time      `db:"created,def=time.Now()"`
 }
 
+type MultinomialModel struct {
+	ModelId  int64   `db:"model_id,arg,pk"`
+	Mse      float64 `db:"mse,arg"`
+	RSquared float64 `db:"r_squared,arg"`
+	Logloss  float64 `db:"logloss,arg"`
+}
+
 type Permission struct {
 	Id          int64  `db:"id,pk"`
 	Code        string `db:"code,arg"`
@@ -145,6 +152,13 @@ type Project struct {
 	Description   string    `db:"description,arg"`
 	ModelCategory string    `db:"model_category,arg"`
 	Created       time.Time `db:"created,def=time.Now()"`
+}
+
+type RegressionModel struct {
+	ModelId              int64   `db:"model_id,arg,pk"`
+	Mse                  float64 `db:"mse,arg"`
+	RSquared             float64 `db:"r_squared,arg"`
+	MeanResidualDeviance float64 `db:"mean_residual_deviance,arg"`
 }
 
 type Role struct {

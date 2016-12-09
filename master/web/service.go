@@ -443,13 +443,13 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 func createMetrics(category string, metrics *bindings.ModelMetrics) (data.QueryOpt, error) {
 	switch category {
 	case "Binomial":
-		return data.WithBinomialModel()
+		return data.WithBinomialModel(metrics.Mse, metrics.R2, metrics.Logloss, metrics.Auc, metrics.Gini), nil
 	case "Multinomial":
-		return data.WithMultinomialModel()
+		return data.WithMultinomialModel(metrics.Mse, metrics.R2, metrics.Logloss), nil
 	case "Regression":
-		return data.WithRegressionModel()
+		return data.WithRegressionModel(metrics.Mse, metrics.R2, metrics.MeanResidualDeviance), nil
 	}
-	return errors.New("unsupported model category:", category)
+	return nil, fmt.Errorf("unsupported model category: %s", category)
 }
 
 // Helper function to convert from int to bytes

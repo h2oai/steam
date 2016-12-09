@@ -74,15 +74,18 @@ var entity_types_list = []string{
 }
 
 type entityTypeKeys struct {
+	BinomialModel     int64
 	Cluster           int64
 	ClusterYarnDetail int64
 	Engine            int64
 	Model             int64
+	MultinomialModel  int64
 	Identity          int64
 	Permission        int64
 	Privilege         int64
 	Project           int64
 	Role              int64
+	RegressionModel   int64
 	Service           int64
 	Workgroup         int64
 }
@@ -128,16 +131,14 @@ func newEntityTypeKeys(entityTypes []entityType) entityTypeKeys {
 	}
 
 	return entityTypeKeys{
-		Cluster:           m["cluster"],
-		ClusterYarnDetail: m["clusterYarnDetail"],
-		Engine:            m["engine"],
-		Identity:          m["identity"],
-		Permission:        m["permission"],
-		Privilege:         m["privilege"],
-		Project:           m["project"],
-		Role:              m["role"],
-		Service:           m["service"],
-		Workgroup:         m["workgroup"],
+		Cluster:   m["cluster"],
+		Engine:    m["engine"],
+		Model:     m["model"],
+		Identity:  m["identity"],
+		Project:   m["project"],
+		Role:      m["role"],
+		Service:   m["service"],
+		Workgroup: m["workgroup"],
 	}
 }
 

@@ -23,6 +23,8 @@ func TestExternalClusterCRUD(t *testing.T) {
 	}
 	t.Logf("Returned cluster with ID: %d and Name: %s", cluster.Id, cluster.Name)
 
+	t.Run("TestImportModel", testImportModelCRUD(pz, svc, clusterId))
+
 	clusterStat, err := svc.GetClusterStatus(pz, clusterId)
 	if err != nil {
 		t.Errorf("getting cluster status: %s", err)

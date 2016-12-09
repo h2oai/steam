@@ -41,6 +41,7 @@ func createSQLiteDB(db *sql.DB) error {
 }
 
 var schema = map[string]string{
+	"binomial_model":      createTableBinomialModel,
 	"cluster":             createTableCluster,
 	"cluster_type":        createTableClusterType,
 	"cluster_yarn_detail": createTableClusterYarnDetail,
@@ -52,9 +53,11 @@ var schema = map[string]string{
 	"history":             createTableHistory,
 	"meta":                createTableMeta,
 	"model":               createTableModel,
+	"multinomial_model":   createTableMultinomialModel,
 	"permission":          createTablePermission,
 	"privilege":           createTablePrivilege,
 	"project":             createTableProject,
+	"regression_model":    createTableRegressionModel,
 	"role":                createTableRole,
 	"role_permission":     createTableRolePermission,
 	"state":               createTableState,
@@ -218,6 +221,18 @@ CREATE TABLE model (
 // FOREIGN KEY (training_dataset_id) REFERENCES dataset(id),
 // FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id),
 
+var createTableMultinomialModel = `
+CREATE TABLE multinomial_model (
+    model_id integer NOT NULL,
+    mse double precision NOT NULL,
+    r_squared double precision NOT NULL,
+    logloss double precision NOT NULL,
+
+    PRIMARY KEY (model_id),
+    FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
+)
+`
+
 var createTablePermission = `
 CREATE TABLE permission (
     id integer PRIMARY KEY AUTOINCREMENT,
@@ -246,6 +261,18 @@ CREATE TABLE project (
     description text NOT NULL,
     model_category text NOT NULL,
     created datetime NOT NULL  
+)
+`
+
+var createTableRegressionModel = `
+CREATE TABLE regression_model (
+    model_id integer NOT NULL,
+    mse double precision,
+    r_squared double precision,
+    mean_residual_deviance double precision,
+
+    PRIMARY KEY (model_id),
+    FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
 )
 `
 
