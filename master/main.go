@@ -35,6 +35,7 @@ import (
 	"github.com/h2oai/steam/master/proxy"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
+	"github.com/gorilla/handlers"
 )
 
 const (
@@ -185,11 +186,11 @@ func Run(version, buildDate string, opts Opts) {
 	)
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 
-	webServeMux.Handle("/logout", authProvider.Logout())
-	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))
-	webServeMux.Handle("/upload", authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds)))
-	webServeMux.Handle("/download", authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)))
-	webServeMux.Handle("/", authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))))
+	webServeMux.Handle("/logout", handlers.CORS()(authProvider.Logout()))
+	webServeMux.Handle("/web", handlers.CORS()(authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl)))))
+	webServeMux.Handle("/upload", handlers.CORS()(authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds))))
+	webServeMux.Handle("/download", handlers.CORS()(authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress))))
+	webServeMux.Handle("/", handlers.CORS()(authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www"))))))
 
 	if opts.EnableProfiler {
 		// --- pprof registrations (no auth) ---
