@@ -211,8 +211,17 @@ func WithOffset(offset uint) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Offset(offset); return }
 }
 
+// WithPassword adds a password value to the query
 func WithPassword(password string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["password"] = password; return }
+}
+
+// ByProject queries the database for a matching state column
+func ByProjectId(projectId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.dataset = q.dataset.Where(goqu.I("project_id").Eq(projectId))
+		return
+	}
 }
 
 // WithRoleId adds an role_id value to the query

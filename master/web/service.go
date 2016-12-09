@@ -77,6 +77,12 @@ func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
 	}, nil
 }
 
+// --- ------- ---
+// --- ------- ---
+// --- Cluster ---
+// --- ------- ---
+// --- ------- ---
+
 func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ManageCluster); err != nil {
@@ -214,7 +220,7 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 		return errors.Wrap(err, "stopping cluster")
 	}
 	// Delete cluster
-	return errors.Wrap(s.ds.DeleteCluster(clusterId), "deleting cluster from database")
+	return errors.Wrap(s.ds.DeleteCluster(clusterId, data.WithAudit(pz)), "deleting cluster from database")
 }
 
 func (s *Service) viewCluster(pz az.Principal, clusterId int64) (data.Cluster, error) {
@@ -238,11 +244,7 @@ func (s *Service) viewCluster(pz az.Principal, clusterId int64) (data.Cluster, e
 func (s *Service) GetCluster(pz az.Principal, clusterId int64) (*web.Cluster, error) {
 	// Fetch cluster
 	cluster, err := s.viewCluster(pz, clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	return toCluster(cluster), nil
+	return toCluster(cluster), err
 }
 
 func (s *Service) GetClusterOnYarn(pz az.Principal, clusterId int64) (*web.YarnCluster, error) {
@@ -322,7 +324,82 @@ func (s *Service) DeleteCluster(pz az.Principal, clusterId int64) error {
 		return errors.New("cannot delete a running cluster")
 	}
 	// Delete clsuter
-	return errors.Wrap(s.ds.DeleteCluster(clusterId), "deleting cluster")
+	return errors.Wrap(s.ds.DeleteCluster(clusterId, data.WithAudit(pz)), "deleting cluster")
+}
+
+// --- ------- ---
+// --- ------- ---
+// --- Project ---
+// --- ------- ---
+// --- ------- ---
+
+func (s *Service) CreateProject(pz az.Principal, name, description, modelCategory string) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
+	}
+	// Create project
+	projectId, err := s.ds.CreateProject(name, description, modelCategory,
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+	)
+	return projectId, errors.Wrap(err, "creating project in database")
+}
+
+func (s *Service) GetProjects(pz az.Principal, offset, limit uint) ([]*web.Project, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch projects
+	projects, err := s.ds.ReadProjects(data.ByPrivilege(pz), data.WithOffset(offset), data.WithLimit(limit))
+	return toProjects(projects), errors.Wrap(err, "reading projects from database")
+}
+
+func (s *Service) viewProject(pz az.Principal, projectId int64) (data.Project, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return data.Project{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Project, projectId); err != nil {
+		return data.Project{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch project details
+	project, exists, err := s.ds.ReadProject(data.ById(projectId))
+	if err != nil {
+		return data.Project{}, errors.Wrap(err, "reading project from database")
+	} else if !exists {
+		return data.Project{}, errors.New("unable to locate project")
+	}
+	return project, nil
+}
+
+func (s *Service) GetProject(pz az.Principal, projectId int64) (*web.Project, error) {
+	// Fetch project
+	project, err := s.viewProject(pz, projectId)
+	return toProject(project), err
+}
+
+func (s *Service) DeleteProject(pz az.Principal, projectId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Project, projectId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// Checks before deletion
+	if _, exists, err := s.ds.ReadProject(data.ById(projectId)); err != nil {
+		return errors.Wrap(err, "reading project from database")
+	} else if !exists {
+		return errors.New("unable to locate project")
+	}
+	if _, exists, err := s.ds.ReadModel(data.ByProjectId(projectId)); err != nil {
+		return errors.Wrap(err, "reading model from database")
+	} else if exists {
+		return errors.New("unable to delete a project with models")
+	}
+
+	return s.ds.DeleteProject(projectId, data.WithAudit(pz))
 }
 
 // Helper function to convert from int to bytes
@@ -387,4 +464,22 @@ func toYarnCluster(c data.Cluster, y data.ClusterYarnDetail) *web.YarnCluster {
 		y.Memory,
 		y.Username,
 	}
+}
+
+func toProject(p data.Project) *web.Project {
+	return &web.Project{
+		p.Id,
+		p.Name,
+		p.Description,
+		p.ModelCategory,
+		toTimestamp(p.Created),
+	}
+}
+
+func toProjects(ps []data.Project) []*web.Project {
+	array := make([]*web.Project, len(ps))
+	for i, p := range ps {
+		array[i] = toProject(p)
+	}
+	return array
 }

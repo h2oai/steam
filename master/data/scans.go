@@ -348,6 +348,66 @@ func ScanModelCategorys(rs *sql.Rows) ([]modelCategory, error) {
 	return structs, nil
 }
 
+func ScanModel(r *sql.Row) (Model, error) {
+	var s Model
+	if err := r.Scan(
+		&s.Id,
+		&s.ProjectId,
+		&s.Name,
+		&s.ClusterId,
+		&s.ModelKey,
+		&s.Algorithm,
+		&s.ModelCategory,
+		&s.DatasetName,
+		&s.ResponseColumn,
+		&s.LogicalName,
+		&s.Location,
+		&s.ModelObjectType,
+		&s.MaxRunTime,
+		&s.Schema,
+		&s.SchemaVersion,
+		&s.LabelId,
+		&s.Created,
+	); err != nil {
+		return Model{}, err
+	}
+	return s, nil
+}
+
+func ScanModels(rs *sql.Rows) ([]Model, error) {
+	structs := make([]Model, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Model
+		if err = rs.Scan(
+			&s.Id,
+			&s.ProjectId,
+			&s.Name,
+			&s.ClusterId,
+			&s.ModelKey,
+			&s.Algorithm,
+			&s.ModelCategory,
+			&s.DatasetName,
+			&s.ResponseColumn,
+			&s.LogicalName,
+			&s.Location,
+			&s.ModelObjectType,
+			&s.MaxRunTime,
+			&s.Schema,
+			&s.SchemaVersion,
+			&s.LabelId,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanPermission(r *sql.Row) (Permission, error) {
 	var s Permission
 	if err := r.Scan(

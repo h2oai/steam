@@ -97,6 +97,26 @@ type modelCategory struct {
 	Name string `db:"name,arg"`
 }
 
+type Model struct {
+	Id              int64          `db:"id,pk"`
+	ProjectId       int64          `db:"project_id"`
+	Name            string         `db:"name,arg"`
+	ClusterId       int64          `db:"cluster_id"`
+	ModelKey        string         `db:"model_key,arg"`
+	Algorithm       string         `db:"algorithm,arg"`
+	ModelCategory   string         `db:"model_category,arg"`
+	DatasetName     string         `db:"dataset_name,arg"`
+	ResponseColumn  string         `db:"response_column_name,arg"`
+	LogicalName     sql.NullString `db:"logical_name"`
+	Location        sql.NullString `db:"location"`
+	ModelObjectType sql.NullString `db:"model_object_type"`
+	MaxRunTime      sql.NullInt64  `db:"max_run_time"`
+	Schema          sql.NullString `db:"schema"`
+	SchemaVersion   sql.NullString `db:"schema_version"`
+	LabelId         sql.NullInt64  `db:"label_id"`
+	Created         time.Time      `db:"created,def=time.Now()"`
+}
+
 type Permission struct {
 	Id          int64  `db:"id,pk"`
 	Code        string `db:"code,arg"`

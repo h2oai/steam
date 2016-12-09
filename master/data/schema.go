@@ -51,8 +51,10 @@ var schema = map[string]string{
 	"identity_role":       createTableIdentityRole,
 	"history":             createTableHistory,
 	"meta":                createTableMeta,
+	"model":               createTableModel,
 	"permission":          createTablePermission,
 	"privilege":           createTablePrivilege,
+	"project":             createTableProject,
 	"role":                createTableRole,
 	"role_permission":     createTableRolePermission,
 	"state":               createTableState,
@@ -169,6 +171,38 @@ CREATE TABLE meta (
     PRIMARY KEY (id)
 )
 `
+
+var createTableModel = `
+CREATE TABLE model (
+    id integer PRIMARY KEY AUTOINCREMENT,
+    project_id integer NOT NULL,
+    training_dataset_id integer,
+    validation_dataset_id integer,
+    name text NOT NULL,
+    cluster_id integer,
+    cluster_name text,
+    model_key text NOT NULL,
+    algorithm text NOT NULL,
+    model_category text NOT NULL,
+    dataset_name text,
+    response_column_name text NOT NULL,
+    logical_name text,
+    location text,
+    model_object_type text,
+    max_run_time integer,
+    schema text NOT NULL,
+    schema_version text NOT NULL,
+    label_id integer,
+    created datetime NOT NULL,
+
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
+    FOREIGN KEY (cluster_id) REFERENCES cluster(id) ON DELETE SET NULL
+
+)
+`
+
+// FOREIGN KEY (training_dataset_id) REFERENCES dataset(id),
+// FOREIGN KEY (validation_dataset_id) REFERENCES dataset(id),
 
 var createTablePermission = `
 CREATE TABLE permission (

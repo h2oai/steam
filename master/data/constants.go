@@ -64,6 +64,7 @@ var entity_types_list = []string{
 	"cluster",
 	"engine",
 	"identity",
+	"model",
 	"permission",
 	"privilege",
 	"project",
@@ -76,6 +77,7 @@ type entityTypeKeys struct {
 	Cluster           int64
 	ClusterYarnDetail int64
 	Engine            int64
+	Model             int64
 	Identity          int64
 	Permission        int64
 	Privilege         int64
@@ -91,6 +93,8 @@ func toEntityId(ds *Datastore, name string) int64 {
 		return ds.EntityType.Cluster
 	case "engine":
 		return ds.EntityType.Engine
+	case "model":
+		return ds.EntityType.Model
 	case "identity":
 		return ds.EntityType.Identity
 	case "permission":
