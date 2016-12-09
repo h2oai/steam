@@ -89,6 +89,10 @@ var DEBUG bool
 	if err != nil {
 		return errors.Wrap(err, "retrieving id")
 	}
+	q.entityId, q.audit = id, CreateOp
+	{{template "postFunc"}}
+	
+	return nil
 	{{- end}}
 {{- end}}
 
@@ -205,10 +209,6 @@ func (ds *Datastore) Create{{title .Name}}({{toArgs .Cols}}options ...QueryOpt) 
 		{{template "fields" .}}
 		{{template "options"}}
 		{{template "insertSql"}}
-		q.entityId, q.entityTypeId, q.audit = id, ds.EntityType.{{title .Name}}, CreateOp
-		{{template "postFunc"}}
-
-		return nil
 	})
 
 	return id, errors.Wrap(err, "committing transaction")
