@@ -15,211 +15,10 @@ var DEBUG bool
 
 // ---------- ------------- ----------
 // ---------- ------------- ----------
-// ---------- BinomialModel ----------
+// ---------- binomialModel ----------
 // ---------- ------------- ----------
 // ---------- ------------- ----------
 
-func (ds *Datastore) CreateBinomialModel(modelId int64, mse, rSquared, logloss, auc, gini float64, options ...QueryOpt) (int64, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return 0, errors.Wrap(err, "beginning transaction")
-	}
-
-	var id int64
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "binomial_model", tx.From("binomial_model"))
-		// Default insert fields
-		binomialModel := goqu.Record{
-			"model_id":  modelId,
-			"mse":       mse,
-			"r_squared": rSquared,
-			"logloss":   logloss,
-			"auc":       auc,
-			"gini":      gini,
-		}
-		q.AddFields(binomialModel)
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToInsertSql(q.fields))
-		}
-		// Execute query
-		res, err := q.dataset.Insert(q.fields).Exec()
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		id, err = res.LastInsertId()
-		if err != nil {
-			return errors.Wrap(err, "retrieving id")
-		}
-		q.entityId, q.audit = id, CreateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return id, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadBinomialModels(options ...QueryOpt) ([]BinomialModel, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return []BinomialModel{}, errors.Wrap(err, "beginning transaction")
-	}
-
-	var binomialModels []BinomialModel
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "binomial_model", tx.From("binomial_model"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		rows, err := getRows(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		defer rows.Close()
-		binomialModels, err = ScanBinomialModels(rows)
-
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return binomialModels, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadBinomialModel(options ...QueryOpt) (BinomialModel, bool, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return BinomialModel{}, false, errors.Wrap(err, "beginning transaction")
-	}
-
-	var binomialModel BinomialModel
-	var exists bool
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "binomial_model", tx.From("binomial_model"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		row, err := getRow(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		binomialModel, err = ScanBinomialModel(row)
-		if err == sql.ErrNoRows {
-			return nil
-		} else if err == nil {
-			exists = true
-		}
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return binomialModel, exists, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) UpdateBinomialModel(binomialModelId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "binomial_model", tx.From("binomial_model").Where(goqu.I("model_id").Eq(binomialModelId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToUpdateSql(q.fields))
-		}
-		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		q.entityId, q.audit = binomialModelId, UpdateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		return nil
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) DeleteBinomialModel(binomialModelId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "binomial_model", tx.From("binomial_model").Where(goqu.I("model_id").Eq(binomialModelId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToDeleteSql())
-		}
-		// Execute query
-		if _, err := q.dataset.Delete().Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		q.entityId, q.audit = binomialModelId, DeleteOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
 func createBinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, logloss, auc, gini float64, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "binomial_model", tx.From("binomial_model"))
@@ -249,12 +48,12 @@ func createBinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, logl
 	return res.LastInsertId()
 }
 
-func readBinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]BinomialModel, error) {
+func readBinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]binomialModel, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "binomial_model", tx.From("binomial_model"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return []BinomialModel{}, errors.Wrap(err, "setting up query options")
+			return []binomialModel{}, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -263,21 +62,21 @@ func readBinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]BinomialMod
 	// Execute query
 	rows, err := getRows(tx, q.dataset)
 	if err != nil {
-		return []BinomialModel{}, err
+		return []binomialModel{}, err
 	}
 	defer rows.Close()
 
-	// Scan rows to BinomialModels
+	// Scan rows to binomialModels
 	return ScanBinomialModels(rows)
 }
 
-func readBinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (BinomialModel, bool, error) {
+func readBinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (binomialModel, bool, error) {
 	var exists bool
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "binomial_model", tx.From("binomial_model"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return BinomialModel{}, exists, errors.Wrap(err, "setting up query options")
+			return binomialModel{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -286,15 +85,15 @@ func readBinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (BinomialModel,
 	// Execute query
 	row, err := getRow(tx, q.dataset)
 	if err != nil {
-		return BinomialModel{}, false, err
+		return binomialModel{}, false, err
 	}
 	ret_binomialModel, err := ScanBinomialModel(row)
 	if err == sql.ErrNoRows {
-		return BinomialModel{}, exists, nil
+		return binomialModel{}, exists, nil
 	} else if err == nil {
 		exists = true
 	}
-	// Scan row to BinomialModel
+	// Scan row to binomialModel
 	return ret_binomialModel, exists, err
 }
 
@@ -2138,6 +1937,319 @@ func deleteIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	return errors.Wrap(err, "executing query")
 }
 
+// ---------- ----- ----------
+// ---------- ----- ----------
+// ---------- Label ----------
+// ---------- ----- ----------
+// ---------- ----- ----------
+
+func (ds *Datastore) CreateLabel(projectId int64, name, description string, options ...QueryOpt) (int64, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return 0, errors.Wrap(err, "beginning transaction")
+	}
+
+	var id int64
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "label", tx.From("label"))
+		// Default insert fields
+		label := goqu.Record{
+			"project_id":  projectId,
+			"name":        name,
+			"description": description,
+			"created":     time.Now(),
+		}
+		q.AddFields(label)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToInsertSql(q.fields))
+		}
+		// Execute query
+		res, err := q.dataset.Insert(q.fields).Exec()
+		if err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+		id, err = res.LastInsertId()
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId, q.audit = id, CreateOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return id, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) ReadLabels(options ...QueryOpt) ([]Label, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return []Label{}, errors.Wrap(err, "beginning transaction")
+	}
+
+	var labels []Label
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "label", tx.From("label"))
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToSql())
+		}
+		// Execute query
+		rows, err := getRows(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		labels, err = ScanLabels(rows)
+
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return labels, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) ReadLabel(options ...QueryOpt) (Label, bool, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return Label{}, false, errors.Wrap(err, "beginning transaction")
+	}
+
+	var label Label
+	var exists bool
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "label", tx.From("label"))
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToSql())
+		}
+		// Execute query
+		row, err := getRow(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		label, err = ScanLabel(row)
+		if err == sql.ErrNoRows {
+			return nil
+		} else if err == nil {
+			exists = true
+		}
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return label, exists, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) UpdateLabel(labelId int64, options ...QueryOpt) error {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "beginning transaction")
+	}
+
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "label", tx.From("label").Where(goqu.I("id").Eq(labelId)))
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToUpdateSql(q.fields))
+		}
+		// Execute query
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+		q.entityId, q.audit = labelId, UpdateOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+		return nil
+	})
+
+	return errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) DeleteLabel(labelId int64, options ...QueryOpt) error {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "beginning transaction")
+	}
+
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "label", tx.From("label").Where(goqu.I("id").Eq(labelId)))
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToDeleteSql())
+		}
+		// Execute query
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+		q.entityId, q.audit = labelId, DeleteOp
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+	})
+
+	return errors.Wrap(err, "committing transaction")
+}
+func createLabel(tx *goqu.TxDatabase, projectId int64, name, description string, options ...QueryOpt) (int64, error) {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "label", tx.From("label"))
+	// Default insert fields
+	label := goqu.Record{
+		"project_id":  projectId,
+		"name":        name,
+		"description": description,
+		"created":     time.Now(),
+	}
+	q.AddFields(label)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return 0, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if DEBUG {
+		log.Println(q.dataset.ToInsertSql(q.fields))
+	}
+	// Execute query
+	res, err := q.dataset.Insert(q.fields).Exec()
+	if err != nil {
+		return 0, errors.Wrap(err, "executing query")
+	}
+	return res.LastInsertId()
+}
+
+func readLabels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Label, error) {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "label", tx.From("label"))
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return []Label{}, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if DEBUG {
+		log.Println(q.dataset.ToSql())
+	}
+	// Execute query
+	rows, err := getRows(tx, q.dataset)
+	if err != nil {
+		return []Label{}, err
+	}
+	defer rows.Close()
+
+	// Scan rows to Labels
+	return ScanLabels(rows)
+}
+
+func readLabel(tx *goqu.TxDatabase, options ...QueryOpt) (Label, bool, error) {
+	var exists bool
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "label", tx.From("label"))
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return Label{}, exists, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if DEBUG {
+		log.Println(q.dataset.ToSql())
+	}
+	// Execute query
+	row, err := getRow(tx, q.dataset)
+	if err != nil {
+		return Label{}, false, err
+	}
+	ret_label, err := ScanLabel(row)
+	if err == sql.ErrNoRows {
+		return Label{}, exists, nil
+	} else if err == nil {
+		exists = true
+	}
+	// Scan row to Label
+	return ret_label, exists, err
+}
+
+func updateLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "label", tx.From("label").Where(goqu.I("id").Eq(labelId)))
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return errors.Wrap(err, "setting up query options")
+		}
+	}
+	if DEBUG {
+		log.Println(q.dataset.ToUpdateSql(q.fields))
+	}
+	// Execute query
+	_, err := q.dataset.Update(q.fields).Exec()
+	return errors.Wrap(err, "executing query")
+}
+
+func deleteLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "label", tx.From("label").Where(goqu.I("id").Eq(labelId)))
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return errors.Wrap(err, "setting up query options")
+		}
+	}
+	if DEBUG {
+		log.Println(q.dataset.ToDeleteSql())
+	}
+	// Execute query
+	_, err := q.dataset.Delete().Exec()
+	return errors.Wrap(err, "executing query")
+}
+
 // ---------- ------------- ----------
 // ---------- ------------- ----------
 // ---------- modelCategory ----------
@@ -2568,209 +2680,10 @@ func deleteModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 
 // ---------- ---------------- ----------
 // ---------- ---------------- ----------
-// ---------- MultinomialModel ----------
+// ---------- multinomialModel ----------
 // ---------- ---------------- ----------
 // ---------- ---------------- ----------
 
-func (ds *Datastore) CreateMultinomialModel(modelId int64, mse, rSquared, logloss float64, options ...QueryOpt) (int64, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return 0, errors.Wrap(err, "beginning transaction")
-	}
-
-	var id int64
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "multinomial_model", tx.From("multinomial_model"))
-		// Default insert fields
-		multinomialModel := goqu.Record{
-			"model_id":  modelId,
-			"mse":       mse,
-			"r_squared": rSquared,
-			"logloss":   logloss,
-		}
-		q.AddFields(multinomialModel)
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToInsertSql(q.fields))
-		}
-		// Execute query
-		res, err := q.dataset.Insert(q.fields).Exec()
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		id, err = res.LastInsertId()
-		if err != nil {
-			return errors.Wrap(err, "retrieving id")
-		}
-		q.entityId, q.audit = id, CreateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return id, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadMultinomialModels(options ...QueryOpt) ([]MultinomialModel, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return []MultinomialModel{}, errors.Wrap(err, "beginning transaction")
-	}
-
-	var multinomialModels []MultinomialModel
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "multinomial_model", tx.From("multinomial_model"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		rows, err := getRows(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		defer rows.Close()
-		multinomialModels, err = ScanMultinomialModels(rows)
-
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return multinomialModels, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadMultinomialModel(options ...QueryOpt) (MultinomialModel, bool, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return MultinomialModel{}, false, errors.Wrap(err, "beginning transaction")
-	}
-
-	var multinomialModel MultinomialModel
-	var exists bool
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "multinomial_model", tx.From("multinomial_model"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		row, err := getRow(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		multinomialModel, err = ScanMultinomialModel(row)
-		if err == sql.ErrNoRows {
-			return nil
-		} else if err == nil {
-			exists = true
-		}
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return multinomialModel, exists, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) UpdateMultinomialModel(multinomialModelId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "multinomial_model", tx.From("multinomial_model").Where(goqu.I("model_id").Eq(multinomialModelId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToUpdateSql(q.fields))
-		}
-		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		q.entityId, q.audit = multinomialModelId, UpdateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		return nil
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) DeleteMultinomialModel(multinomialModelId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "multinomial_model", tx.From("multinomial_model").Where(goqu.I("model_id").Eq(multinomialModelId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToDeleteSql())
-		}
-		// Execute query
-		if _, err := q.dataset.Delete().Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		q.entityId, q.audit = multinomialModelId, DeleteOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
 func createMultinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, logloss float64, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "multinomial_model", tx.From("multinomial_model"))
@@ -2798,12 +2711,12 @@ func createMultinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, l
 	return res.LastInsertId()
 }
 
-func readMultinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]MultinomialModel, error) {
+func readMultinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]multinomialModel, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "multinomial_model", tx.From("multinomial_model"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return []MultinomialModel{}, errors.Wrap(err, "setting up query options")
+			return []multinomialModel{}, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -2812,21 +2725,21 @@ func readMultinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Multinom
 	// Execute query
 	rows, err := getRows(tx, q.dataset)
 	if err != nil {
-		return []MultinomialModel{}, err
+		return []multinomialModel{}, err
 	}
 	defer rows.Close()
 
-	// Scan rows to MultinomialModels
+	// Scan rows to multinomialModels
 	return ScanMultinomialModels(rows)
 }
 
-func readMultinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (MultinomialModel, bool, error) {
+func readMultinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (multinomialModel, bool, error) {
 	var exists bool
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "multinomial_model", tx.From("multinomial_model"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return MultinomialModel{}, exists, errors.Wrap(err, "setting up query options")
+			return multinomialModel{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -2835,15 +2748,15 @@ func readMultinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (Multinomial
 	// Execute query
 	row, err := getRow(tx, q.dataset)
 	if err != nil {
-		return MultinomialModel{}, false, err
+		return multinomialModel{}, false, err
 	}
 	ret_multinomialModel, err := ScanMultinomialModel(row)
 	if err == sql.ErrNoRows {
-		return MultinomialModel{}, exists, nil
+		return multinomialModel{}, exists, nil
 	} else if err == nil {
 		exists = true
 	}
-	// Scan row to MultinomialModel
+	// Scan row to multinomialModel
 	return ret_multinomialModel, exists, err
 }
 
@@ -3617,209 +3530,10 @@ func deleteProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 
 // ---------- --------------- ----------
 // ---------- --------------- ----------
-// ---------- RegressionModel ----------
+// ---------- regressionModel ----------
 // ---------- --------------- ----------
 // ---------- --------------- ----------
 
-func (ds *Datastore) CreateRegressionModel(modelId int64, mse, rSquared, meanResidualDeviance float64, options ...QueryOpt) (int64, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return 0, errors.Wrap(err, "beginning transaction")
-	}
-
-	var id int64
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "regression_model", tx.From("regression_model"))
-		// Default insert fields
-		regressionModel := goqu.Record{
-			"model_id":               modelId,
-			"mse":                    mse,
-			"r_squared":              rSquared,
-			"mean_residual_deviance": meanResidualDeviance,
-		}
-		q.AddFields(regressionModel)
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToInsertSql(q.fields))
-		}
-		// Execute query
-		res, err := q.dataset.Insert(q.fields).Exec()
-		if err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		id, err = res.LastInsertId()
-		if err != nil {
-			return errors.Wrap(err, "retrieving id")
-		}
-		q.entityId, q.audit = id, CreateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return id, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadRegressionModels(options ...QueryOpt) ([]RegressionModel, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return []RegressionModel{}, errors.Wrap(err, "beginning transaction")
-	}
-
-	var regressionModels []RegressionModel
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "regression_model", tx.From("regression_model"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		rows, err := getRows(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		defer rows.Close()
-		regressionModels, err = ScanRegressionModels(rows)
-
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return regressionModels, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) ReadRegressionModel(options ...QueryOpt) (RegressionModel, bool, error) {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return RegressionModel{}, false, errors.Wrap(err, "beginning transaction")
-	}
-
-	var regressionModel RegressionModel
-	var exists bool
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "regression_model", tx.From("regression_model"))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToSql())
-		}
-		// Execute query
-		row, err := getRow(tx, q.dataset)
-		if err != nil {
-			return err
-		}
-		regressionModel, err = ScanRegressionModel(row)
-		if err == sql.ErrNoRows {
-			return nil
-		} else if err == nil {
-			exists = true
-		}
-		if err != nil {
-			return err
-		}
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-
-		return nil
-	})
-
-	return regressionModel, exists, errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) UpdateRegressionModel(regressionModelId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "regression_model", tx.From("regression_model").Where(goqu.I("model_id").Eq(regressionModelId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToUpdateSql(q.fields))
-		}
-		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		q.entityId, q.audit = regressionModelId, UpdateOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		return nil
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
-
-func (ds *Datastore) DeleteRegressionModel(regressionModelId int64, options ...QueryOpt) error {
-	tx, err := ds.db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "beginning transaction")
-	}
-
-	err = tx.Wrap(func() error {
-		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "regression_model", tx.From("regression_model").Where(goqu.I("model_id").Eq(regressionModelId)))
-		for _, option := range options {
-			if err := option(q); err != nil {
-				return errors.Wrap(err, "setting up query options")
-			}
-		}
-		if DEBUG {
-			log.Println(q.dataset.ToDeleteSql())
-		}
-		// Execute query
-		if _, err := q.dataset.Delete().Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
-		}
-		q.entityId, q.audit = regressionModelId, DeleteOp
-		for _, post := range q.postFunc {
-			if err := post(q); err != nil {
-				return errors.Wrap(err, "running post functions")
-			}
-		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
-	})
-
-	return errors.Wrap(err, "committing transaction")
-}
 func createRegressionModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, meanResidualDeviance float64, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "regression_model", tx.From("regression_model"))
@@ -3847,12 +3561,12 @@ func createRegressionModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, me
 	return res.LastInsertId()
 }
 
-func readRegressionModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]RegressionModel, error) {
+func readRegressionModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]regressionModel, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "regression_model", tx.From("regression_model"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return []RegressionModel{}, errors.Wrap(err, "setting up query options")
+			return []regressionModel{}, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -3861,21 +3575,21 @@ func readRegressionModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Regressio
 	// Execute query
 	rows, err := getRows(tx, q.dataset)
 	if err != nil {
-		return []RegressionModel{}, err
+		return []regressionModel{}, err
 	}
 	defer rows.Close()
 
-	// Scan rows to RegressionModels
+	// Scan rows to regressionModels
 	return ScanRegressionModels(rows)
 }
 
-func readRegressionModel(tx *goqu.TxDatabase, options ...QueryOpt) (RegressionModel, bool, error) {
+func readRegressionModel(tx *goqu.TxDatabase, options ...QueryOpt) (regressionModel, bool, error) {
 	var exists bool
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "regression_model", tx.From("regression_model"))
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return RegressionModel{}, exists, errors.Wrap(err, "setting up query options")
+			return regressionModel{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if DEBUG {
@@ -3884,15 +3598,15 @@ func readRegressionModel(tx *goqu.TxDatabase, options ...QueryOpt) (RegressionMo
 	// Execute query
 	row, err := getRow(tx, q.dataset)
 	if err != nil {
-		return RegressionModel{}, false, err
+		return regressionModel{}, false, err
 	}
 	ret_regressionModel, err := ScanRegressionModel(row)
 	if err == sql.ErrNoRows {
-		return RegressionModel{}, exists, nil
+		return regressionModel{}, exists, nil
 	} else if err == nil {
 		exists = true
 	}
-	// Scan row to RegressionModel
+	// Scan row to regressionModel
 	return ret_regressionModel, exists, err
 }
 

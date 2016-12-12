@@ -20,6 +20,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/h2oai/steam/master/az"
 	"github.com/pkg/errors"
@@ -85,6 +86,10 @@ func (q *QueryConfig) AddPostFunc(opt QueryOpt) {
 	q.postFunc = append(q.postFunc, opt)
 }
 
+func (q *QueryConfig) I(column string) goqu.IdentifierExpression {
+	return goqu.I(q.table + "." + column)
+}
+
 type QueryOpt func(*QueryConfig) error
 
 // ------------- ------------- -------------
@@ -93,7 +98,7 @@ type QueryOpt func(*QueryConfig) error
 
 // ByAddress queries the database for matching address columns
 func ByAddress(address string) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(goqu.I("address").Eq(address)); return }
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("address").Eq(address)); return }
 }
 
 // WithAddress adds an address value to the query
@@ -112,6 +117,15 @@ func WithBinomialModel(mse, rSquared, logloss, auc, gini float64) QueryOpt {
 			return errors.Wrap(err, "WithBinomialModel: creating binomial model")
 		})
 		return nil
+	}
+}
+
+// WithCluster adds cluster_id and cluster_name values to the query
+func WithCluster(clusterId int64, clusterName string) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.fields["cluster_id"] = clusterId
+		q.fields["cluster_name"] = clusterName
+		return
 	}
 }
 
@@ -161,7 +175,7 @@ func WithDescription(description string) QueryOpt {
 // ByEntityId queries the database for matching entity_id columns
 func ByEntityId(entityId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) {
-		q.dataset = q.dataset.Where(goqu.I("entity_id").Eq(entityId))
+		q.dataset = q.dataset.Where(q.I("entity_id").Eq(entityId))
 		return
 	}
 }
@@ -169,7 +183,14 @@ func ByEntityId(entityId int64) QueryOpt {
 // ByEntityTypeId queries the database for matching entity_type_id columns
 func ByEntityTypeId(entityTypeId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) {
-		q.dataset = q.dataset.Where(goqu.I("entity_type_id").Eq(entityTypeId))
+		q.dataset = q.dataset.Where(q.I("entity_type_id").Eq(entityTypeId))
+		return
+	}
+}
+
+func WithFilterByName(filter string) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.dataset = q.dataset.Where(q.I("name").Like("%" + filter + "%"))
 		return
 	}
 }
@@ -181,7 +202,7 @@ func WithIdentityId(identityId int64) QueryOpt {
 
 // ById queries the database for matching id columns
 func ById(id int64) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(goqu.I("id").Eq(id)); return }
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("id").Eq(id)); return }
 }
 
 // ForIdentity queries an identity relation table
@@ -215,9 +236,26 @@ func ForIdentity(identityId int64) QueryOpt {
 	}
 }
 
+func ForModel(modelId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("model_id").Eq(modelId)); return }
+}
+
 // WithLimit adds a limit value to the query
 func WithLimit(limit uint) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Limit(limit); return }
+}
+
+func WithLocation(modelId int64, logicalName string) QueryOpt {
+	location := strconv.FormatInt(modelId, 10)
+	return func(q *QueryConfig) (err error) {
+		q.fields["location"] = location
+		q.fields["logical_name"] = logicalName
+		return
+	}
+}
+
+func WithModelObjectType(typ string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["model_object_type"] = typ; return }
 }
 
 func WithMultinomialModel(mse, rSquared, logloss float64) QueryOpt {
@@ -235,12 +273,23 @@ func WithMultinomialModel(mse, rSquared, logloss float64) QueryOpt {
 
 // ByName queries the database for matching name columns
 func ByName(name string) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(goqu.I("name").Eq(name)); return }
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("name").Eq(name)); return }
 }
 
 // WithOffset adds a offset value to the query
 func WithOffset(offset uint) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Offset(offset); return }
+}
+
+func WithOrderBy(column string, asc bool) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		if asc {
+			q.dataset = q.dataset.Order(goqu.I(column).Asc())
+			return
+		}
+		q.dataset = q.dataset.Order(goqu.I(column).Desc())
+		return
+	}
 }
 
 // WithPassword adds a password value to the query
@@ -251,7 +300,8 @@ func WithPassword(password string) QueryOpt {
 // ByProject queries the database for a matching state column
 func ByProjectId(projectId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) {
-		q.dataset = q.dataset.Where(goqu.I("project_id").Eq(projectId))
+		// FIXME: all change to (q *QueryConfig) FOO(string) goqu.IdentifierExpression{}
+		q.dataset = q.dataset.Where(q.I("project_id").Eq(projectId))
 		return
 	}
 }
@@ -296,7 +346,7 @@ func WithSize(size string) QueryOpt {
 
 // ByState queries the database for a matching state column
 func ByState(state int64) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(goqu.I("state").Eq(state)); return }
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("state").Eq(state)); return }
 }
 
 // WithState adds a state value to the query

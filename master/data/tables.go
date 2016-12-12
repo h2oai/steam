@@ -25,7 +25,7 @@ import (
 	"time"
 )
 
-type BinomialModel struct {
+type binomialModel struct {
 	ModelId  int64   `db:"model_id,arg,pk"`
 	Mse      float64 `db:"mse,arg"`
 	RSquared float64 `db:"r_squared,arg"`
@@ -101,6 +101,15 @@ type identityWorkgroup struct {
 	WorkgroupId int64 `db:"workgroup_id,arg"`
 }
 
+type Label struct {
+	Id          sql.NullInt64  `db:"id,pk"`
+	ProjectId   sql.NullInt64  `db:"project_id,arg"`
+	ModelId     sql.NullInt64  `db:"model_id"`
+	Name        sql.NullString `db:"name,arg"`
+	Description sql.NullString `db:"description,arg"`
+	Created     sql.NullInt64  `db:"created,def=time.Now()"`
+}
+
 type modelCategory struct {
 	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`
@@ -111,6 +120,7 @@ type Model struct {
 	ProjectId       int64          `db:"project_id"`
 	Name            string         `db:"name,arg"`
 	ClusterId       int64          `db:"cluster_id"`
+	ClusterName     string         `db:"cluster_name"`
 	ModelKey        string         `db:"model_key,arg"`
 	Algorithm       string         `db:"algorithm,arg"`
 	ModelCategory   string         `db:"model_category,arg"`
@@ -122,11 +132,10 @@ type Model struct {
 	MaxRunTime      sql.NullInt64  `db:"max_run_time"`
 	Schema          sql.NullString `db:"schema"`
 	SchemaVersion   sql.NullString `db:"schema_version"`
-	LabelId         sql.NullInt64  `db:"label_id"`
 	Created         time.Time      `db:"created,def=time.Now()"`
 }
 
-type MultinomialModel struct {
+type multinomialModel struct {
 	ModelId  int64   `db:"model_id,arg,pk"`
 	Mse      float64 `db:"mse,arg"`
 	RSquared float64 `db:"r_squared,arg"`
@@ -154,7 +163,7 @@ type Project struct {
 	Created       time.Time `db:"created,def=time.Now()"`
 }
 
-type RegressionModel struct {
+type regressionModel struct {
 	ModelId              int64   `db:"model_id,arg,pk"`
 	Mse                  float64 `db:"mse,arg"`
 	RSquared             float64 `db:"r_squared,arg"`

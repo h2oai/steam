@@ -51,6 +51,7 @@ var schema = map[string]string{
 	"identity_workgroup":  createTableIdentityWorkgroup,
 	"identity_role":       createTableIdentityRole,
 	"history":             createTableHistory,
+	"label":               createTableLabel,
 	"meta":                createTableMeta,
 	"model":               createTableModel,
 	"multinomial_model":   createTableMultinomialModel,
@@ -60,6 +61,7 @@ var schema = map[string]string{
 	"regression_model":    createTableRegressionModel,
 	"role":                createTableRole,
 	"role_permission":     createTableRolePermission,
+	"service":             createTableService,
 	"state":               createTableState,
 	"workgroup":           createTableWorkgroup,
 }
@@ -179,6 +181,20 @@ CREATE TABLE identity_workgroup (
 )
 `
 
+var createTableLabel = `
+CREATE TABLE label (
+    id integer PRIMARY KEY AUTOINCREMENT,
+    project_id integer NOT NULL,
+    model_id integer,
+    name text NOT NULL,
+    description text NOT NULL,
+    created datetime NOT NULL,
+
+    FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE SET NULL,
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
+)
+`
+
 var createTableMeta = `
 CREATE TABLE meta (
     id integer NOT NULL,
@@ -193,8 +209,6 @@ var createTableModel = `
 CREATE TABLE model (
     id integer PRIMARY KEY AUTOINCREMENT,
     project_id integer NOT NULL,
-    training_dataset_id integer,
-    validation_dataset_id integer,
     name text NOT NULL,
     cluster_id integer,
     cluster_name text,
@@ -209,7 +223,6 @@ CREATE TABLE model (
     max_run_time integer,
     schema text NOT NULL,
     schema_version text NOT NULL,
-    label_id integer,
     created datetime NOT NULL,
 
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,

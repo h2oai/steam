@@ -20,6 +20,7 @@ package data
 import (
 	"database/sql"
 	"flag"
+	"log"
 	"os"
 
 	"github.com/h2oai/steam/master/auth"
@@ -296,4 +297,40 @@ func (ds *Datastore) CreateSuperuser(username, password string) (int64, error) {
 	})
 
 	return id, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) Count(table string, options ...QueryOpt) (int64, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return 0, errors.Wrap(err, "beginning transaction")
+	}
+
+	var ct int64
+	err = tx.Wrap(func() error {
+		q := NewQueryConfig(ds, tx, table, tx.From(table).Select(goqu.COUNT("*")))
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToSql())
+		}
+		// Execute query
+		row, err := getRow(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		if err := row.Scan(&ct); err != nil {
+			return errors.Wrap(err, "scanning count")
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+	return ct, errors.Wrap(err, "committing transaction")
 }

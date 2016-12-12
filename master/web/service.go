@@ -17,6 +17,7 @@
 package web
 
 import (
+	"database/sql"
 	"fmt"
 	"path"
 	"strconv"
@@ -325,7 +326,7 @@ func (s *Service) DeleteCluster(pz az.Principal, clusterId int64) error {
 		return errors.New("cannot delete a running cluster")
 	}
 	// Delete clsuter
-	return errors.Wrap(s.ds.DeleteCluster(clusterId, data.WithAudit(pz)), "deleting cluster")
+	return errors.Wrap(s.ds.DeleteCluster(clusterId, data.WithAudit(pz)), "deleting cluster from database")
 }
 
 // --- ------- ---
@@ -429,18 +430,21 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return 0, errors.Wrap(err, "fetching model from H2O")
 	}
 	m := r.Models[0]
-	metricsFunc, err := createMetrics(string(m.Output.ModelCategory), m.Output.TrainingMetrics)
+	metricsFunc, err := setMetrics(string(m.Output.ModelCategory), m.Output.TrainingMetrics)
+	if err != nil {
+		return 0, errors.Wrap(err, "setting model metrics type")
+	}
 	// Create Model
 	modelId, err := s.ds.CreateModel(modelName, modelKey, m.AlgoFullName,
 		string(m.Output.ModelCategory), m.ResponseColumnName,
-		data.WithProjectId(projectId), data.WithClusterId(clusterId),
+		data.WithProjectId(projectId), data.WithCluster(clusterId, cluster.Name),
 		data.WithRawSchema(string(rawModel), "1"), metricsFunc,
 		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
 	)
 	return modelId, errors.Wrap(err, "creating model in database")
 }
 
-func createMetrics(category string, metrics *bindings.ModelMetrics) (data.QueryOpt, error) {
+func setMetrics(category string, metrics *bindings.ModelMetrics) (data.QueryOpt, error) {
 	switch category {
 	case "Binomial":
 		return data.WithBinomialModel(metrics.Mse, metrics.R2, metrics.Logloss, metrics.Auc, metrics.Gini), nil
@@ -450,6 +454,311 @@ func createMetrics(category string, metrics *bindings.ModelMetrics) (data.QueryO
 		return data.WithRegressionModel(metrics.Mse, metrics.R2, metrics.MeanResidualDeviance), nil
 	}
 	return nil, fmt.Errorf("unsupported model category: %s", category)
+}
+
+func (s *Service) CheckMojo(pz az.Principal, algo string) (bool, error) {
+	switch algo {
+	case "Gradient Boosting Method", "Distributed Random Forest", "Deep Water":
+		return true, nil
+	}
+	return false, nil
+}
+
+func (s *Service) viewModel(pz az.Principal, modelId int64) (data.Model, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageModel); err != nil {
+		return data.Model{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Model, modelId); err != nil {
+		return data.Model{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch model details
+	model, exists, err := s.ds.ReadModel(data.ById(modelId))
+	if err != nil {
+		return data.Model{}, errors.Wrap(err, "reading model from database")
+	} else if !exists {
+		return data.Model{}, errors.New("unable to locate model")
+	}
+	return model, nil
+}
+
+func (s *Service) GetModel(pz az.Principal, modelId int64) (*web.Model, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Model, modelId); err != nil {
+		return nil, errors.Wrap(err, "checking privileges")
+	}
+	// Fetch model
+	model, exists, err := s.ds.ReadLabelModel(data.ById(modelId))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading model from database")
+	} else if !exists {
+		return nil, errors.New("unable to locate model")
+	}
+	return toModel(model), nil
+}
+
+// FIXME: should be GetModelsByProject
+func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit uint) ([]*web.Model, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch models
+	models, err := s.ds.ReadLabelModels(data.ByPrivilege(pz), data.ByProjectId(projectId),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toModels(models), errors.Wrap(err, "reading models from database")
+}
+
+func (s *Service) FindModelsCount(pz az.Principal, projectId int64) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Project, projectId); err != nil {
+		return 0, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch models count
+	count, err := s.ds.Count("model", data.ByProjectId(projectId))
+	return count, errors.Wrap(err, "reading models from database")
+}
+
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllBinomialSortCriteria(pz az.Principal) ([]string, error) {
+	return []string{"mse", "r_squared", "logloss", "auc", "gini"}, nil
+}
+
+func (s *Service) FindModelsBinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit uint) ([]*web.BinomialModel, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch project details
+	if _, err := s.viewProject(pz, projectId); err != nil {
+		return nil, errors.Wrap(err, "checking view privilege")
+	}
+	// Fetch Binomial Models
+	models, err := s.ds.ReadBinomialModels(data.ByPrivilege(pz), data.ByProjectId(projectId),
+		data.WithFilterByName(namePart), data.WithOrderBy(sortBy, ascending),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toBinomialModels(models), errors.Wrap(err, "reading binomial models from database")
+}
+
+func (s *Service) GetModelBinomial(pz az.Principal, modelId int64) (*web.BinomialModel, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Model, modelId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch Binomial Model
+	model, exists, err := s.ds.ReadBinomialModel(data.ById(modelId))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading binomial model from database")
+	} else if !exists {
+		return nil, errors.New("unable to locate binomial model")
+	}
+	return toBinomialModel(model), nil
+}
+
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllMultinomialSortCriteria(pz az.Principal) ([]string, error) {
+	return []string{"mse", "r_squared", "logloss"}, nil
+}
+
+func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit uint) ([]*web.MultinomialModel, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch project details
+	if _, err := s.viewProject(pz, projectId); err != nil {
+		return nil, errors.Wrap(err, "checking view privilege")
+	}
+	// Fetch Multinomial Models
+	models, err := s.ds.ReadMultinomialModels(data.ByPrivilege(pz), data.ByProjectId(projectId),
+		data.WithFilterByName(namePart), data.WithOrderBy(sortBy, ascending),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toMultinomialModels(models), errors.Wrap(err, "reading binomial models from database")
+}
+
+func (s *Service) GetModelMultinomial(pz az.Principal, modelId int64) (*web.MultinomialModel, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Model, modelId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch Multinomial Model
+	model, exists, err := s.ds.ReadMultinomialModel(data.ById(modelId))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading binomial model from database")
+	} else if !exists {
+		return nil, errors.New("unable to locate binomial model")
+	}
+	return toMultinomialModel(model), nil
+}
+
+func (s *Service) FindModelsRegression(pz az.Principal, projectId int64, namePart, sortBy string, ascending bool, offset, limit uint) ([]*web.RegressionModel, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch project details
+	if _, err := s.viewProject(pz, projectId); err != nil {
+		return nil, errors.Wrap(err, "checking view privilege")
+	}
+	// Fetch Regression Models
+	models, err := s.ds.ReadRegressionModels(data.ByPrivilege(pz), data.ByProjectId(projectId),
+		data.WithFilterByName(namePart), data.WithOrderBy(sortBy, ascending),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toRegressionModels(models), errors.Wrap(err, "reading binomial models from database")
+}
+
+// TODO: hardcoded; should be determined by h2o metrics
+func (s *Service) GetAllRegressionSortCriteria(pz az.Principal) ([]string, error) {
+	return []string{"mse", "r_squared", "mean_residual_deviance"}, nil
+}
+
+func (s *Service) GetModelRegression(pz az.Principal, modelId int64) (*web.RegressionModel, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewModel); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Model, modelId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch Regression Model
+	model, exists, err := s.ds.ReadRegressionModel(data.ById(modelId))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading binomial model from database")
+	} else if !exists {
+		return nil, errors.New("unable to locate binomial model")
+	}
+	return toRegressionModel(model), nil
+}
+
+func (s *Service) ImportModelPojo(pz az.Principal, modelId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageModel); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Model, modelId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Fetch model details
+	model, exists, err := s.ds.ReadModel(data.ById(modelId))
+	if err != nil {
+		return errors.Wrap(err, "reading model from database")
+	} else if !exists {
+		return errors.New("unable to locate model")
+	}
+	// Fetch cluster details
+	cluster, err := s.viewCluster(pz, model.ClusterId)
+	if err != nil {
+		return err
+	}
+	// Get Pojo from H2O
+	h2o := h2ov3.NewClient(cluster.Address.String)
+	modelPath := fs.GetModelPath(s.workingDir, modelId)
+	javaModelPath, err := h2o.ExportJavaModel(model.ModelKey, modelPath)
+	if err != nil {
+		return errors.Wrap(err, "exporting java model from H2O")
+	}
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return errors.Wrap(err, "exporting java dependency from H2O")
+	}
+	opts := []data.QueryOpt{data.WithModelObjectType("pojo"), data.WithAudit(pz)}
+	if !model.LogicalName.Valid {
+		opts = append(opts, data.WithLocation(modelId, fs.GetBasenameWithoutExt(javaModelPath)))
+	}
+	return errors.Wrap(s.ds.UpdateModel(modelId, opts...), "updating model in database")
+}
+
+func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageModel); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Model, modelId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Fetch model details
+	model, exists, err := s.ds.ReadModel(data.ById(modelId))
+	if err != nil {
+		return errors.Wrap(err, "reading model from database")
+	} else if !exists {
+		return errors.New("unable to locate model")
+	}
+	// Verify model CanMojo
+	if ok, _ := s.CheckMojo(pz, model.Algorithm); !ok {
+		return fmt.Errorf("unable to import mojo from model of type '%s'", model.Algorithm)
+	}
+	// Fetch cluster details
+	cluster, err := s.viewCluster(pz, model.ClusterId)
+	if err != nil {
+		return err
+	}
+	// Get Pojo from H2O
+	h2o := h2ov3.NewClient(cluster.Address.String)
+	modelPath := fs.GetModelPath(s.workingDir, modelId)
+	javaModelPath, err := h2o.ExportMOJO(model.ModelKey, modelPath)
+	if err != nil {
+		return errors.Wrap(err, "exporting MOJO from H2O")
+	}
+	if _, err := h2o.ExportGenModel(modelPath); err != nil {
+		return errors.Wrap(err, "exporting java dependency from H2O")
+	}
+	// External checks for DeepWater
+	if model.Algorithm == "Deep Water" {
+		if _, err := h2o.ExportDeepWaterAll(modelPath); err != nil {
+			return errors.Wrap(err, "exporting Deep Water dependency")
+		}
+	}
+	opts := []data.QueryOpt{data.WithModelObjectType("mojo"), data.WithAudit(pz)}
+	if !model.LogicalName.Valid {
+		opts = append(opts, data.WithLocation(modelId, fs.GetBasenameWithoutExt(javaModelPath)))
+	}
+	return errors.Wrap(s.ds.UpdateModel(modelId, opts...), "updating model in database")
+}
+
+func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageModel); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Model, modelId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// FIXME delete assets from disk
+	// Fetch model details
+	_, exists, err := s.ds.ReadModel(data.ById(modelId))
+	if err != nil {
+		return errors.Wrap(err, "reading model from database")
+	} else if !exists {
+		return errors.New("unable to locate model")
+	}
+
+	services, err := s.ds.ReadServices(data.ForModel(modelId))
+	if err != nil {
+		return errors.Wrap(err, "reading services from database")
+	}
+	for _, service := range services {
+		switch service.State {
+		case data.States.Stopped: //FIXME: allow for other states other that started/stopped
+			return errors.New("unable to delete a model with at least one prediction service")
+		}
+	}
+
+	return errors.Wrap(s.ds.DeleteModel(modelId, data.WithAudit(pz)), "deleting model from database")
 }
 
 // Helper function to convert from int to bytes
@@ -527,9 +836,151 @@ func toProject(p data.Project) *web.Project {
 }
 
 func toProjects(ps []data.Project) []*web.Project {
-	array := make([]*web.Project, len(ps))
+	ar := make([]*web.Project, len(ps))
 	for i, p := range ps {
-		array[i] = toProject(p)
+		ar[i] = toProject(p)
 	}
-	return array
+	return ar
+}
+
+func nullToInt64(nullable sql.NullInt64) int64 {
+	if nullable.Valid {
+		return nullable.Int64
+	}
+	return -1
+}
+
+func toModel(m data.LabelModel) *web.Model {
+	return &web.Model{
+		m.Id,
+		0,
+		0,
+		m.Name,
+		m.ClusterName,
+		m.ModelKey,
+		m.Algorithm,
+		m.ModelCategory,
+		m.DatasetName.String,
+		m.ResponseColumn,
+		m.LogicalName.String,
+		m.Location.String,
+		m.ModelObjectType.String,
+		int(m.MaxRunTime.Int64),
+		m.Schema.String,
+		toTimestamp(m.Created),
+		nullToInt64(m.Label.Id),
+		m.Label.Name.String,
+	}
+}
+
+func toModels(ms []data.LabelModel) []*web.Model {
+	ar := make([]*web.Model, len(ms))
+	for i, m := range ms {
+		ar[i] = toModel(m)
+	}
+	return ar
+}
+
+func toBinomialModel(m data.BinomialModel) *web.BinomialModel {
+	return &web.BinomialModel{
+		m.Id,
+		0,
+		0,
+		m.Name,
+		m.ClusterName,
+		m.ModelKey,
+		m.Algorithm,
+		m.ModelCategory,
+		m.DatasetName.String,
+		m.ResponseColumn,
+		m.LogicalName.String,
+		m.Location.String,
+		m.ModelObjectType.String,
+		int(m.MaxRunTime.Int64),
+		m.Schema.String,
+		toTimestamp(m.Created),
+		nullToInt64(m.Label.Id),
+		m.Label.Name.String,
+		m.Binomial.Mse,
+		m.Binomial.RSquared,
+		m.Binomial.Logloss,
+		m.Binomial.Auc,
+		m.Binomial.Gini,
+	}
+}
+
+func toBinomialModels(ms []data.BinomialModel) []*web.BinomialModel {
+	ar := make([]*web.BinomialModel, len(ms))
+	for i, m := range ms {
+		ar[i] = toBinomialModel(m)
+	}
+	return ar
+}
+
+func toMultinomialModel(m data.MultinomialModel) *web.MultinomialModel {
+	return &web.MultinomialModel{
+		m.Id,
+		0,
+		0,
+		m.Name,
+		m.ClusterName,
+		m.ModelKey,
+		m.Algorithm,
+		m.ModelCategory,
+		m.DatasetName.String,
+		m.ResponseColumn,
+		m.LogicalName.String,
+		m.Location.String,
+		m.ModelObjectType.String,
+		int(m.MaxRunTime.Int64),
+		m.Schema.String,
+		toTimestamp(m.Created),
+		nullToInt64(m.Label.Id),
+		m.Label.Name.String,
+		m.Multinomial.Mse,
+		m.Multinomial.RSquared,
+		m.Multinomial.Logloss,
+	}
+}
+
+func toMultinomialModels(ms []data.MultinomialModel) []*web.MultinomialModel {
+	ar := make([]*web.MultinomialModel, len(ms))
+	for i, m := range ms {
+		ar[i] = toMultinomialModel(m)
+	}
+	return ar
+}
+
+func toRegressionModel(m data.RegressionModel) *web.RegressionModel {
+	return &web.RegressionModel{
+		m.Id,
+		0,
+		0,
+		m.Name,
+		m.ClusterName,
+		m.ModelKey,
+		m.Algorithm,
+		m.ModelCategory,
+		m.DatasetName.String,
+		m.ResponseColumn,
+		m.LogicalName.String,
+		m.Location.String,
+		m.ModelObjectType.String,
+		int(m.MaxRunTime.Int64),
+		m.Schema.String,
+		toTimestamp(m.Created),
+		nullToInt64(m.Label.Id),
+		m.Label.Name.String,
+		m.Regression.Mse,
+		m.Regression.RSquared,
+		m.Regression.MeanResidualDeviance,
+	}
+}
+
+func toRegressionModels(ms []data.RegressionModel) []*web.RegressionModel {
+	ar := make([]*web.RegressionModel, len(ms))
+	for i, m := range ms {
+		ar[i] = toRegressionModel(m)
+	}
+	return ar
 }

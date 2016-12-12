@@ -4,8 +4,8 @@ package data
 
 import "database/sql"
 
-func ScanBinomialModel(r *sql.Row) (BinomialModel, error) {
-	var s BinomialModel
+func ScanBinomialModel(r *sql.Row) (binomialModel, error) {
+	var s binomialModel
 	if err := r.Scan(
 		&s.ModelId,
 		&s.Mse,
@@ -14,16 +14,16 @@ func ScanBinomialModel(r *sql.Row) (BinomialModel, error) {
 		&s.Auc,
 		&s.Gini,
 	); err != nil {
-		return BinomialModel{}, err
+		return binomialModel{}, err
 	}
 	return s, nil
 }
 
-func ScanBinomialModels(rs *sql.Rows) ([]BinomialModel, error) {
-	structs := make([]BinomialModel, 0, 16)
+func ScanBinomialModels(rs *sql.Rows) ([]binomialModel, error) {
+	structs := make([]binomialModel, 0, 16)
 	var err error
 	for rs.Next() {
-		var s BinomialModel
+		var s binomialModel
 		if err = rs.Scan(
 			&s.ModelId,
 			&s.Mse,
@@ -356,6 +356,44 @@ func ScanIdentityWorkgroups(rs *sql.Rows) ([]identityWorkgroup, error) {
 	return structs, nil
 }
 
+func ScanLabel(r *sql.Row) (Label, error) {
+	var s Label
+	if err := r.Scan(
+		&s.Id,
+		&s.ProjectId,
+		&s.ModelId,
+		&s.Name,
+		&s.Description,
+		&s.Created,
+	); err != nil {
+		return Label{}, err
+	}
+	return s, nil
+}
+
+func ScanLabels(rs *sql.Rows) ([]Label, error) {
+	structs := make([]Label, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Label
+		if err = rs.Scan(
+			&s.Id,
+			&s.ProjectId,
+			&s.ModelId,
+			&s.Name,
+			&s.Description,
+			&s.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanModelCategory(r *sql.Row) (modelCategory, error) {
 	var s modelCategory
 	if err := r.Scan(
@@ -393,6 +431,7 @@ func ScanModel(r *sql.Row) (Model, error) {
 		&s.ProjectId,
 		&s.Name,
 		&s.ClusterId,
+		&s.ClusterName,
 		&s.ModelKey,
 		&s.Algorithm,
 		&s.ModelCategory,
@@ -404,7 +443,6 @@ func ScanModel(r *sql.Row) (Model, error) {
 		&s.MaxRunTime,
 		&s.Schema,
 		&s.SchemaVersion,
-		&s.LabelId,
 		&s.Created,
 	); err != nil {
 		return Model{}, err
@@ -422,6 +460,7 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.ProjectId,
 			&s.Name,
 			&s.ClusterId,
+			&s.ClusterName,
 			&s.ModelKey,
 			&s.Algorithm,
 			&s.ModelCategory,
@@ -433,7 +472,6 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 			&s.MaxRunTime,
 			&s.Schema,
 			&s.SchemaVersion,
-			&s.LabelId,
 			&s.Created,
 		); err != nil {
 			return nil, err
@@ -446,24 +484,24 @@ func ScanModels(rs *sql.Rows) ([]Model, error) {
 	return structs, nil
 }
 
-func ScanMultinomialModel(r *sql.Row) (MultinomialModel, error) {
-	var s MultinomialModel
+func ScanMultinomialModel(r *sql.Row) (multinomialModel, error) {
+	var s multinomialModel
 	if err := r.Scan(
 		&s.ModelId,
 		&s.Mse,
 		&s.RSquared,
 		&s.Logloss,
 	); err != nil {
-		return MultinomialModel{}, err
+		return multinomialModel{}, err
 	}
 	return s, nil
 }
 
-func ScanMultinomialModels(rs *sql.Rows) ([]MultinomialModel, error) {
-	structs := make([]MultinomialModel, 0, 16)
+func ScanMultinomialModels(rs *sql.Rows) ([]multinomialModel, error) {
+	structs := make([]multinomialModel, 0, 16)
 	var err error
 	for rs.Next() {
-		var s MultinomialModel
+		var s multinomialModel
 		if err = rs.Scan(
 			&s.ModelId,
 			&s.Mse,
@@ -582,24 +620,24 @@ func ScanProjects(rs *sql.Rows) ([]Project, error) {
 	return structs, nil
 }
 
-func ScanRegressionModel(r *sql.Row) (RegressionModel, error) {
-	var s RegressionModel
+func ScanRegressionModel(r *sql.Row) (regressionModel, error) {
+	var s regressionModel
 	if err := r.Scan(
 		&s.ModelId,
 		&s.Mse,
 		&s.RSquared,
 		&s.MeanResidualDeviance,
 	); err != nil {
-		return RegressionModel{}, err
+		return regressionModel{}, err
 	}
 	return s, nil
 }
 
-func ScanRegressionModels(rs *sql.Rows) ([]RegressionModel, error) {
-	structs := make([]RegressionModel, 0, 16)
+func ScanRegressionModels(rs *sql.Rows) ([]regressionModel, error) {
+	structs := make([]regressionModel, 0, 16)
 	var err error
 	for rs.Next() {
-		var s RegressionModel
+		var s regressionModel
 		if err = rs.Scan(
 			&s.ModelId,
 			&s.Mse,
