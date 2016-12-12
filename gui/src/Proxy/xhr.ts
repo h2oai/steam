@@ -77,7 +77,7 @@ function invoke(method: string, param: any, headers: any, go: (error: Error, dat
   };
 
   const settings: JQueryAjaxSettings = {
-    url: "/web",
+    url: "http://localhost:9000/web",
     type: "POST",
     data: JSON.stringify(req),
     contentType: "application/json; charset=utf-8",

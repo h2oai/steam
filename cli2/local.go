@@ -163,6 +163,7 @@ func serveMaster(c *context) *cobra.Command {
 		dbSSLRootCertPath            string
 		superuserName                string
 		superuserPassword            string
+		corsOrigins		     string
 	)
 
 	opts := master.DefaultOpts
@@ -218,6 +219,7 @@ func serveMaster(c *context) *cobra.Command {
 				superuserName,
 				superuserPassword,
 			},
+			corsOrigins,
 		})
 	})
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
@@ -248,6 +250,7 @@ func serveMaster(c *context) *cobra.Command {
 	// cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DB.Connection.SSLRootCert, "Database connection SSL root certificate path (optional)")
 	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DB.SuperuserName, "Set superuser username (required for first-time-use only)")
 	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DB.SuperuserPassword, "Set superuser password (required for first-time-use only)")
+	cmd.Flags().StringVar(&corsOrigins, "cors-origins", opts.CorsOrigins, "Comma deliimited list of allowable origins")
 
 	return cmd
 

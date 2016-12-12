@@ -72,6 +72,7 @@ type Opts struct {
 	EnableProfiler            bool
 	Yarn                      YarnOpts
 	DB                        DBOpts
+	CorsOrigins		  string
 }
 
 var DefaultConnection = data.Connection{
@@ -101,11 +102,18 @@ var DefaultOpts = &Opts{
 	false,
 	YarnOpts{false},
 	DBOpts{DefaultConnection, "", ""},
+	"",
 }
 
 type AuthProvider interface {
 	Secure(handler http.Handler) http.Handler
 	Logout() http.Handler
+}
+
+func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
+	origins := strings.Split(opts.CorsOrigins, ",")
+	log.Println(origins)
+	return handlers.CORS(handlers.AllowedOrigins(origins), handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Language", "Origin", "Content-Type"}))(handler)
 }
 
 func Run(version, buildDate string, opts Opts) {
@@ -147,18 +155,17 @@ func Run(version, buildDate string, opts Opts) {
 	var authProvider AuthProvider
 	switch opts.AuthProvider {
 	case "digest":
-		authProvider = newDigestAuthProvider(defaultAz, webAddress)
+		authProvider = newDigestAuthProvider(defaultAz, opts.CorsOrigins)
 	case "basic-ldap":
 		conn, err := ldap.FromConfig(opts.AuthConfig)
 		if err != nil {
 			log.Fatalln("Please provide a valid ldap configuration file", err)
 		}
 
-		authProvider = NewBasicLdapAuthProvider(webAddress, conn)
+		authProvider = NewBasicLdapAuthProvider(opts.CorsOrigins, conn)
 	default: // "basic"
-		authProvider = newBasicAuthProvider(defaultAz, webAddress)
+		authProvider = newBasicAuthProvider(defaultAz, opts.CorsOrigins)
 	}
-
 	// --- set up prediction service launch host
 
 	var predictionServiceHost string
@@ -186,11 +193,11 @@ func Run(version, buildDate string, opts Opts) {
 	)
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 
-	webServeMux.Handle("/logout", handlers.CORS()(authProvider.Logout()))
-	webServeMux.Handle("/web", handlers.CORS()(authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl)))))
-	webServeMux.Handle("/upload", handlers.CORS()(authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds))))
-	webServeMux.Handle("/download", handlers.CORS()(authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress))))
-	webServeMux.Handle("/", handlers.CORS()(authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www"))))))
+	webServeMux.Handle("/logout", handlerStrategy(authProvider.Logout(), opts))
+	webServeMux.Handle("/web", handlerStrategy(authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))), opts))
+	webServeMux.Handle("/upload", handlerStrategy(authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds)), opts))
+	webServeMux.Handle("/download", handlerStrategy(authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)), opts))
+	webServeMux.Handle("/", authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))))
 
 	if opts.EnableProfiler {
 		// --- pprof registrations (no auth) ---
@@ -218,12 +225,12 @@ func Run(version, buildDate string, opts Opts) {
 		}
 		if enableTLS {
 			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(handlerStrategy(webServeMux, opts))); err != nil {
 				serverFailChan <- err
 			}
 		} else {
 			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
-			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServe(webAddress, context.ClearHandler(handlerStrategy(webServeMux, opts))); err != nil {
 				serverFailChan <- err
 			}
 		}
