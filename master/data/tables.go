@@ -23,6 +23,8 @@ package data
 import (
 	"database/sql"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type binomialModel struct {
@@ -107,7 +109,7 @@ type Label struct {
 	ModelId     sql.NullInt64  `db:"model_id"`
 	Name        sql.NullString `db:"name,arg"`
 	Description sql.NullString `db:"description,arg"`
-	Created     sql.NullInt64  `db:"created,def=time.Now()"`
+	Created     pq.NullTime    `db:"created,def=time.Now()"`
 }
 
 type modelCategory struct {
@@ -193,7 +195,7 @@ type Service struct {
 	ModelId   int64          `db:"model_id,arg"`
 	Name      string         `db:"name,arg"`
 	Host      sql.NullString `db:"host"`
-	Port      sql.NullString `db:"port"`
+	Port      sql.NullInt64  `db:"port"`
 	ProcessId sql.NullInt64  `db:"process_id"`
 	State     string         `db:"state,def=States.Starting"`
 	Created   time.Time      `db:"created,def=time.Now()"`

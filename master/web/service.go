@@ -19,15 +19,20 @@ package web
 import (
 	"database/sql"
 	"fmt"
+	"math/rand"
+	"net"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/lib/svc"
 	"github.com/h2oai/steam/lib/yarn"
 	"github.com/h2oai/steam/master/az"
 	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/srv/compiler"
 	"github.com/h2oai/steam/srv/h2ov3"
 	"github.com/h2oai/steam/srv/web"
 	"github.com/pkg/errors"
@@ -513,6 +518,27 @@ func (s *Service) GetModels(pz az.Principal, projectId int64, offset, limit uint
 	return toModels(models), errors.Wrap(err, "reading models from database")
 }
 
+func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*web.Model, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewCluster); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.Permission.ViewCluster, clusterId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch cluster details
+	cluster, exists, err := s.ds.ReadCluster(data.ById(clusterId))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading cluster from database")
+	} else if !exists {
+		return nil, errors.New("unable to locate cluster")
+	}
+	// H2O connection for models
+	h2o := h2ov3.NewClient(cluster.Address.String)
+	_, frame, err := h2o.GetFramesFetch(frameKey, true)
+	return h2oToModels(frame.CompatibleModels), errors.Wrap(err, "fetching H2O frame")
+}
+
 func (s *Service) FindModelsCount(pz az.Principal, projectId int64) (int64, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
@@ -747,7 +773,7 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 		return errors.New("unable to locate model")
 	}
 
-	services, err := s.ds.ReadServices(data.ForModel(modelId))
+	services, err := s.ds.ReadServices(data.ByModelId(modelId))
 	if err != nil {
 		return errors.Wrap(err, "reading services from database")
 	}
@@ -759,6 +785,325 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	}
 
 	return errors.Wrap(s.ds.DeleteModel(modelId, data.WithAudit(pz)), "deleting model from database")
+}
+
+func (s *Service) CreateLabel(pz az.Principal, projectId int64, name, description string) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageLabel); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
+	}
+	// Pre-add checks
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return 0, errors.New("label name cannot be empty")
+	}
+	if _, exists, err := s.ds.ReadLabel(data.ByProjectId(projectId), data.ByName(name)); err != nil {
+		return 0, errors.Wrap(err, "reading label from project")
+	} else if exists {
+		return 0, fmt.Errorf("a label named %q is alread associated with this project", name)
+	}
+	// Create label
+	labelId, err := s.ds.CreateLabel(projectId, name, description,
+		data.WithAudit(pz), data.WithPrivilege(pz, data.Owns),
+	)
+	return labelId, errors.Wrap(err, "creating label in database")
+}
+
+func (s *Service) UpdateLabel(pz az.Principal, labelId int64, name, description string) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageLabel); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Label, labelId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Fetch label details
+	label, exists, err := s.ds.ReadLabel(data.ById(labelId))
+	if err != nil {
+		return errors.Wrap(err, "reading label from project")
+	} else if !exists {
+		return errors.New("unable to locate label")
+	}
+	// Pre-updatechecks
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return errors.New("label name cannot be empty")
+	}
+	if _, exists, err := s.ds.ReadLabel(data.ByProjectId(label.ProjectId.Int64), data.ByName(name)); err != nil {
+		return errors.Wrap(err, "reading label from project")
+	} else if exists {
+		return fmt.Errorf("a label named %q is alread associated with this project", name)
+	}
+	// Update label
+	err = s.ds.UpdateLabel(labelId, data.WithName(name), data.WithDescription(description),
+		data.WithAudit(pz),
+	)
+	return errors.Wrap(err, "updating label in database")
+}
+
+func (s *Service) DeleteLabel(pz az.Principal, labelId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageLabel); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Label, labelId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// Fetch label details
+	if _, exists, err := s.ds.ReadLabel(data.ById(labelId)); err != nil {
+		return errors.Wrap(err, "reading label from database")
+	} else if !exists {
+		return errors.New("unable to locate label")
+	}
+	return errors.Wrap(s.ds.DeleteLabel(labelId, data.WithAudit(pz)), "deleting label from database")
+}
+
+func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageLabel); err != nil {
+		return errors.Wrap(err, "checking label permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ManageModel); err != nil {
+		return errors.Wrap(err, "checking model permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Model, modelId); err != nil {
+		return errors.Wrap(err, "checking model edit privileges")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Label, labelId); err != nil {
+		return errors.Wrap(err, "checking label edit privileges")
+	}
+	// Check pre-link details details
+	if _, err := s.viewModel(pz, modelId); err != nil {
+		return err
+	}
+	if _, exists, err := s.ds.ReadLabel(data.ByModelId(modelId)); err != nil {
+		return errors.Wrap(err, "reading label from database")
+	} else if exists {
+		if err := s.ds.UpdateLabel(labelId, data.WithNil("model_id"), data.WithUnlinkAudit(pz)); err != nil {
+			return errors.Wrap(err, "unlinking label and model in database")
+		}
+	}
+	err := s.ds.UpdateLabel(labelId, data.WithModelId(modelId),
+		data.WithLinkAudit(pz),
+	)
+	return errors.Wrap(err, "linking label and mode in database")
+}
+
+func (s *Service) UnlinkLabelFromModel(pz az.Principal, labelId, modelId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageLabel); err != nil {
+		return errors.Wrap(err, "checking label permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ManageModel); err != nil {
+		return errors.Wrap(err, "checking model permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Model, modelId); err != nil {
+		return errors.Wrap(err, "checking model edit privileges")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Label, labelId); err != nil {
+		return errors.Wrap(err, "checking label edit privileges")
+	}
+	// Fetch label details
+	if _, exists, err := s.ds.ReadLabel(data.ByModelId(modelId)); err != nil {
+		return errors.Wrap(err, "reading label from database")
+	} else if !exists {
+		return errors.New("unable to locate label")
+	}
+	if _, err := s.viewModel(pz, modelId); err != nil {
+		return err
+	}
+	err := s.ds.UpdateLabel(labelId, data.WithModelId(modelId), data.WithUnlinkAudit(pz))
+	return errors.Wrap(err, "unlinking label and model in database")
+}
+
+func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.Label, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewLabel); err != nil {
+		return nil, errors.Wrap(err, "checking label permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return nil, errors.Wrap(err, "checking project permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Project, projectId); err != nil {
+		return nil, errors.Wrap(err, "checking label view privileges")
+	}
+	// Fetch label details
+	labels, err := s.ds.ReadLabels(data.ByProjectId(projectId))
+	return toLabels(labels), errors.Wrap(err, "reading labels in database")
+}
+
+// Service helper funcs
+func isPortOpen(port int) bool {
+	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+func (s *Service) assignPort() (int, error) {
+	randPort := rand.New(rand.NewSource(time.Now().UnixNano()))
+	portRange := s.scoringServicePortMax - (s.scoringServicePortMin + 1)
+
+	for i := s.scoringServicePortMin; i < s.scoringServicePortMax; i++ {
+		port := randPort.Intn(portRange) + s.scoringServicePortMin + 1
+		if isPortOpen(port) {
+			return port, nil
+		}
+	}
+	return 0, fmt.Errorf("no open port found within range %d:%d", s.scoringServicePortMin, s.scoringServicePortMax)
+}
+
+func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName string) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageService); err != nil {
+		return 0, errors.Wrap(err, "checking service permission")
+	}
+	// Fetch model details
+	model, err := s.viewModel(pz, modelId)
+	if err != nil {
+		return 0, err
+	}
+	// Start service
+	artifact := compiler.ArtifactWar
+	if len(packageName) > 0 {
+		artifact = compiler.ArtifactPythonWar
+	}
+	warFilePath, err := compiler.CompileModel(s.compilationServiceAddress, s.workingDir,
+		model.ProjectId, model.Id, model.LogicalName.String, model.ModelObjectType.String,
+		model.Algorithm, artifact, packageName,
+	)
+	if err != nil {
+		return 0, errors.Wrap(err, "compiling model")
+	}
+	port, err := s.assignPort()
+	if err != nil {
+		return 0, errors.Wrap(err, "assigning port")
+	}
+	pid, err := svc.Start(warFilePath, fs.GetAssetsPath(s.workingDir, "jetty-runner.jar"),
+		port, name, pz.Name(),
+	)
+	if err != nil {
+		return 0, errors.Wrap(err, "starting service")
+	}
+	// Create service
+	serviceId, err := s.ds.CreateService(model.ProjectId, model.Id, name,
+		data.WithAddress(s.scoringServiceAddress), data.WithPort(port),
+		data.WithProcessId(pid), data.WithState(data.States.Started),
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+	)
+	return serviceId, errors.Wrap(err, "creating service in database")
+}
+
+func (s *Service) StopService(pz az.Principal, serviceId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageService); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Service, serviceId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// Fetch cluster detail
+	service, exists, err := s.ds.ReadService(data.ById(serviceId))
+	if err != nil {
+		return errors.Wrap(err, "reading service from database")
+	} else if !exists {
+		return errors.New("unable to locate service")
+	}
+	if service.State != data.States.Stopped {
+		if err := svc.Stop(int(service.ProcessId.Int64)); err != nil {
+			return errors.Wrap(err, "stopping service")
+		}
+	}
+	// Delete cluster
+	err = s.ds.DeleteService(serviceId, data.WithAudit(pz))
+	return errors.Wrap(err, "deleting service from database")
+}
+
+func (s *Service) viewService(pz az.Principal, serviceId int64) (data.Service, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewService); err != nil {
+		return data.Service{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Service, serviceId); err != nil {
+		return data.Service{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch service details
+	service, exists, err := s.ds.ReadService(data.ById(serviceId))
+	if err != err {
+		return data.Service{}, errors.Wrap(err, "reading service from database")
+	} else if !exists {
+		return data.Service{}, errors.New("unable to locate service")
+	}
+	return service, nil
+}
+
+func (s *Service) GetService(pz az.Principal, serviceId int64) (*web.ScoringService, error) {
+	// Fetch cluster
+	service, err := s.viewService(pz, serviceId)
+	return toService(service), err
+}
+
+func (s *Service) GetServices(pz az.Principal, offset, limit uint) ([]*web.ScoringService, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewService); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch services
+	services, err := s.ds.ReadServices(data.ByPrivilege(pz),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toServices(services), errors.Wrap(err, "reading services from database")
+}
+
+func (s *Service) GetServicesForProject(pz az.Principal, projectId, offset, limit int64) ([]*web.ScoringService, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewService); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch project and service details
+	if _, err := s.viewProject(pz, projectId); err != nil {
+		return nil, err
+	}
+	services, err := s.ds.ReadServices(data.ByProjectId(projectId),
+		data.ByPrivilege(pz),
+	)
+	return toServices(services), errors.Wrap(err, "reading services from database")
+}
+
+func (s *Service) GetServicesForModel(pz az.Principal, modelId, offset, limit int64) ([]*web.ScoringService, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewService); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch model and service details
+	if _, err := s.viewModel(pz, modelId); err != nil {
+		return nil, err
+	}
+	services, err := s.ds.ReadServices(data.ByModelId(modelId))
+	return toServices(services), errors.Wrap(err, "reading services from database")
+}
+
+func (s *Service) DeleteService(pz az.Principal, serviceId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageService); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Service, serviceId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// Fetch service
+	service, exists, err := s.ds.ReadService(data.ById(serviceId))
+	if err != nil {
+		return errors.Wrap(err, "reading service from database")
+	} else if !exists {
+		return errors.New("unable to locate service")
+	}
+	if service.State == data.States.Started {
+		return errors.New("unable to delete a running service")
+	}
+	err = s.ds.DeleteService(serviceId, data.WithAudit(pz))
+	return errors.Wrap(err, "deleting service from database")
 }
 
 // Helper function to convert from int to bytes
@@ -850,6 +1195,13 @@ func nullToInt64(nullable sql.NullInt64) int64 {
 	return -1
 }
 
+func fromFrameKey(key *bindings.FrameKeyV3) string {
+	if key != nil {
+		return key.Name
+	}
+	return ""
+}
+
 func toModel(m data.LabelModel) *web.Model {
 	return &web.Model{
 		m.Id,
@@ -877,6 +1229,26 @@ func toModels(ms []data.LabelModel) []*web.Model {
 	ar := make([]*web.Model, len(ms))
 	for i, m := range ms {
 		ar[i] = toModel(m)
+	}
+	return ar
+}
+
+func h2oToModel(m *bindings.ModelSchema) *web.Model {
+	return &web.Model{
+		Name:               m.ModelId.Name,
+		ModelKey:           m.ModelId.Name,
+		Algorithm:          m.AlgoFullName,
+		ModelCategory:      string(m.Output.ModelCategory),
+		DatasetName:        fromFrameKey(m.DataFrame),
+		ResponseColumnName: m.ResponseColumnName,
+		CreatedAt:          toTimestamp(time.Now()),
+	}
+}
+
+func h2oToModels(ms []*bindings.ModelSchema) []*web.Model {
+	ar := make([]*web.Model, len(ms))
+	for i, m := range ms {
+		ar[i] = h2oToModel(m)
 	}
 	return ar
 }
@@ -981,6 +1353,46 @@ func toRegressionModels(ms []data.RegressionModel) []*web.RegressionModel {
 	ar := make([]*web.RegressionModel, len(ms))
 	for i, m := range ms {
 		ar[i] = toRegressionModel(m)
+	}
+	return ar
+}
+
+func toLabel(l data.Label) *web.Label {
+	return &web.Label{
+		l.Id.Int64,
+		l.ProjectId.Int64,
+		nullToInt64(l.ModelId),
+		l.Name.String,
+		l.Description.String,
+		toTimestamp(l.Created.Time),
+	}
+}
+
+func toLabels(ls []data.Label) []*web.Label {
+	ar := make([]*web.Label, len(ls))
+	for i, l := range ls {
+		ar[i] = toLabel(l)
+	}
+	return ar
+}
+
+func toService(s data.Service) *web.ScoringService {
+	return &web.ScoringService{
+		s.Id,
+		s.ModelId,
+		s.Name,
+		s.Host.String,
+		int(s.Port.Int64),
+		int(s.ProcessId.Int64),
+		s.State,
+		toTimestamp(s.Created),
+	}
+}
+
+func toServices(ss []data.Service) []*web.ScoringService {
+	ar := make([]*web.ScoringService, len(ss))
+	for i, s := range ss {
+		ar[i] = toService(s)
 	}
 	return ar
 }

@@ -236,10 +236,6 @@ func ForIdentity(identityId int64) QueryOpt {
 	}
 }
 
-func ForModel(modelId int64) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("model_id").Eq(modelId)); return }
-}
-
 // WithLimit adds a limit value to the query
 func WithLimit(limit uint) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Limit(limit); return }
@@ -252,6 +248,15 @@ func WithLocation(modelId int64, logicalName string) QueryOpt {
 		q.fields["logical_name"] = logicalName
 		return
 	}
+}
+
+func ByModelId(modelId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("model_id").Eq(modelId)); return }
+}
+
+func WithModelId(modelId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["model_id"] = modelId; return }
+
 }
 
 func WithModelObjectType(typ string) QueryOpt {
@@ -274,6 +279,14 @@ func WithMultinomialModel(mse, rSquared, logloss float64) QueryOpt {
 // ByName queries the database for matching name columns
 func ByName(name string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("name").Eq(name)); return }
+}
+
+func WithName(name string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["name"] = name; return }
+}
+
+func WithNil(column string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields[column] = nil; return }
 }
 
 // WithOffset adds a offset value to the query
@@ -306,9 +319,17 @@ func ByProjectId(projectId int64) QueryOpt {
 	}
 }
 
+func WithPort(port int) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["port"] = port; return }
+}
+
 // WithProjectId adds a project_id value to the query
 func WithProjectId(projectId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["project_id"] = projectId; return }
+}
+
+func WithProcessId(processId int) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["process_id"] = processId; return }
 }
 
 // WithRawSchema adds schema and schema_version values to the query
@@ -386,6 +407,44 @@ func WithAudit(pz az.Principal) QueryOpt {
 				return errors.Wrap(err, "WithAudit: serializing metadata")
 			}
 			_, err = createHistory(c.tx, c.audit, pz.Id(), c.entityTypeId, c.entityId,
+				WithDescription(string(json)),
+			)
+			return errors.Wrap(err, "WithAudit: creating audit entry")
+		})
+		return nil
+	}
+}
+
+func WithLinkAudit(pz az.Principal) QueryOpt {
+	return func(q *QueryConfig) error {
+		q.AddPostFunc(func(c *QueryConfig) error {
+			if pz == nil {
+				return errors.New("WithAudit: no principal provided")
+			}
+			json, err := json.Marshal(c.fields)
+			if err != nil {
+				return errors.Wrap(err, "WithAudit: serializing metadata")
+			}
+			_, err = createHistory(c.tx, LinkOp, pz.Id(), c.entityTypeId, c.entityId,
+				WithDescription(string(json)),
+			)
+			return errors.Wrap(err, "WithAudit: creating audit entry")
+		})
+		return nil
+	}
+}
+
+func WithUnlinkAudit(pz az.Principal) QueryOpt {
+	return func(q *QueryConfig) error {
+		q.AddPostFunc(func(c *QueryConfig) error {
+			if pz == nil {
+				return errors.New("WithAudit: no principal provided")
+			}
+			json, err := json.Marshal(c.fields)
+			if err != nil {
+				return errors.Wrap(err, "WithAudit: serializing metadata")
+			}
+			_, err = createHistory(c.tx, UnlinkOp, pz.Id(), c.entityTypeId, c.entityId,
 				WithDescription(string(json)),
 			)
 			return errors.Wrap(err, "WithAudit: creating audit entry")
