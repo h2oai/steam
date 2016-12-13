@@ -34,9 +34,11 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 	}
 
 	for _, c := range clusters {
-		config += "backend " + c.Name + "\n" +
-			"    http-request set-header Authorization \"Basic %[req.cook(" + c.Name + ")]\"\n" +
-			"    server " + c.Name + " " + c.Address + "\n\n"
+		config += "backend " + c.Name + "\n"
+		if c.Token != "" {
+			config += "    http-request set-header Authorization \"Basic %[req.cook(" + c.Name + ")]\"\n"
+		}
+		config += "    server " + c.Name + " " + c.Address + "\n\n"
 	}
 
 	if err := ioutil.WriteFile("haproxy.conf",
@@ -45,6 +47,10 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 	}
 
 	pids, _ := ioutil.ReadFile("haproxy.pid")
+	if pids == nil {
+		pids = []byte{}
+	}
+
 	args := []string{
 		"-f", "haproxy.conf",
 		"-p", "haproxy.pid",

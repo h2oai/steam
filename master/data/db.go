@@ -2435,7 +2435,7 @@ func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, state
 	return id, err
 }
 
-func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, token, state string, cluster YarnCluster) (int64, error) {
+func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, contextPath, address, token, state string, cluster YarnCluster) (int64, error) {
 	var clusterId int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		var yarnClusterId int64
@@ -2464,10 +2464,10 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, token, st
 		res, err := tx.Exec(`
 			INSERT INTO
 				cluster
-				(name, type_id, detail_id, address, token, state, created)
+				(name, context_path, type_id, detail_id, address, token, state, created)
 			VALUES
-				($1,   $2,      $3,        $4,      $5,      $6,    datetime('now'))
-			`, name, ds.ClusterTypes.Yarn, yarnClusterId, address, token, state)
+				($1,   $2,      $3,        $4,      $5,      $6,      $7,    datetime('now'))
+			`, name, contextPath, ds.ClusterTypes.Yarn, yarnClusterId, address, token, state)
 		if err != nil {
 			return err
 		}
@@ -2488,6 +2488,7 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, token, st
 
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Cluster, clusterId, metadata{
 			"name":            name,
+			"contextPath":     contextPath,
 			"type":            ClusterYarn,
 			"address":         address,
 			"token": 	   token,
@@ -2510,7 +2511,7 @@ func (ds *Datastore) ReadClusterTypes(pz az.Principal) []ClusterType {
 func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Cluster, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, token, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2549,7 +2550,7 @@ func (ds *Datastore) ReadCluster(pz az.Principal, clusterId int64) (Cluster, err
 	}
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, type_id, detail_id, address, token, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2563,7 +2564,7 @@ func (ds *Datastore) ReadClusterByAddress(pz az.Principal, address string) (Clus
 	var cluster Cluster
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, token, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2582,7 +2583,7 @@ func (ds *Datastore) ReadClusterByName(pz az.Principal, name string) (Cluster, b
 	var cluster Cluster
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, token, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2599,7 +2600,7 @@ func (ds *Datastore) ReadClusterByName(pz az.Principal, name string) (Cluster, b
 func (ds *Datastore) ReadAllClusters(pz az.Principal) ([]Cluster, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, token, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		`)

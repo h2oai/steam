@@ -33,11 +33,18 @@ import (
 ///////////////////
 
 // GetCloudStatus Determine the status of the nodes in the H2O cloud.
-func (h *H2O) GetCloudStatus() (*bindings.CloudV3, error) {
+func (h *H2O) GetCloudStatus(token, contextPath string) (*bindings.CloudV3, error) {
 	//@GET
-	u := h.url("/3/Cloud")
+	u := h.url(contextPath + "/3/Cloud")
 
-	res, err := http.Get(u)
+	req, _ := http.NewRequest("GET", u, nil)
+	if token != "" {
+		req.Header.Set("Authorization", "Basic "+token)
+	}
+
+	client := &http.Client {}
+	res, err := client.Do(req)
+
 	if err != nil {
 		return nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
 	}

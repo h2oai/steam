@@ -118,14 +118,15 @@ type ClusterType struct {
 }
 
 type Cluster struct {
-	Id       int64
-	Name     string
-	TypeId   int64
-	DetailId int64
-	Address  string
-	State    string
-	Token    string
-	Created  time.Time
+	Id       	int64
+	Name     	string
+	ContextPath	string
+	TypeId   	int64
+	DetailId 	int64
+	Address  	string
+	State    	string
+	Token    	string
+	Created  	time.Time
 }
 
 type YarnCluster struct {
