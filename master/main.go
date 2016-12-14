@@ -72,7 +72,7 @@ type Opts struct {
 	EnableProfiler            bool
 	Yarn                      YarnOpts
 	DB                        DBOpts
-	CorsOrigins		  string
+	Dev		          bool
 }
 
 var DefaultConnection = data.Connection{
@@ -102,7 +102,7 @@ var DefaultOpts = &Opts{
 	false,
 	YarnOpts{false},
 	DBOpts{DefaultConnection, "", ""},
-	"",
+	false,
 }
 
 type AuthProvider interface {
@@ -111,9 +111,10 @@ type AuthProvider interface {
 }
 
 func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
-	origins := strings.Split(opts.CorsOrigins, ",")
-	log.Println(origins)
-	return handlers.CORS(handlers.AllowedOrigins(origins), handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Language", "Origin", "Content-Type"}))(handler)
+	if (opts.Dev) {
+		return handlers.CORS(handlers.IgnoreOptions(), handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}))(handler)
+	}
+	return handler
 }
 
 func Run(version, buildDate string, opts Opts) {
@@ -155,16 +156,16 @@ func Run(version, buildDate string, opts Opts) {
 	var authProvider AuthProvider
 	switch opts.AuthProvider {
 	case "digest":
-		authProvider = newDigestAuthProvider(defaultAz, opts.CorsOrigins)
+		authProvider = newDigestAuthProvider(defaultAz, webAddress)
 	case "basic-ldap":
 		conn, err := ldap.FromConfig(opts.AuthConfig)
 		if err != nil {
 			log.Fatalln("Please provide a valid ldap configuration file", err)
 		}
 
-		authProvider = NewBasicLdapAuthProvider(opts.CorsOrigins, conn)
+		authProvider = NewBasicLdapAuthProvider(webAddress, conn)
 	default: // "basic"
-		authProvider = newBasicAuthProvider(defaultAz, opts.CorsOrigins)
+		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}
 	// --- set up prediction service launch host
 
@@ -197,7 +198,7 @@ func Run(version, buildDate string, opts Opts) {
 	webServeMux.Handle("/web", handlerStrategy(authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))), opts))
 	webServeMux.Handle("/upload", handlerStrategy(authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds)), opts))
 	webServeMux.Handle("/download", handlerStrategy(authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)), opts))
-	webServeMux.Handle("/", authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))))
+	webServeMux.Handle("/", handlerStrategy(authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))), opts))
 
 	if opts.EnableProfiler {
 		// --- pprof registrations (no auth) ---
