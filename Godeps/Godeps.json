@@ -1,9 +1,9 @@
 {
 	"ImportPath": "github.com/h2oai/steam",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v74",
+	"GodepVersion": "v75",
 	"Packages": [
-		"./..."
+		"./...."
 	],
 	"Deps": [
 		{
@@ -29,6 +29,11 @@
 		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
+		},
+		{
+			"ImportPath": "github.com/gorilla/handlers",
+			"Comment": "v1.1-14-g3a5767c",
+			"Rev": "3a5767ca75ece5f7f1440b1d16975247f8d8b221"
 		},
 		{
 			"ImportPath": "github.com/gorilla/rpc",
@@ -74,10 +79,6 @@
 			"ImportPath": "github.com/russross/blackfriday",
 			"Comment": "v1.3-34-g18432fc",
 			"Rev": "18432fc942c4ea4846063a269f339ede7630bd71"
-		},
-		{
-			"ImportPath": "github.com/serenize/snaker",
-			"Rev": "d88cc11617e4f179fa2c821a60908d5fabd7bdad"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
