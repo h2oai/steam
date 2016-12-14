@@ -36,7 +36,7 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 	for _, c := range clusters {
 		config += "backend " + c.Name + "\n"
 		if c.Token != "" {
-			config += "    http-request set-header Authorization \"Basic %[req.cook(" + c.Name + ")]\"\n"
+			config += "    http-request set-header Authorization Basic\\ %[req.cook(" + c.Name + ")]\n"
 		}
 		config += "    server " + c.Name + " " + c.Address + "\n\n"
 	}
@@ -46,16 +46,15 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 		return err
 	}
 
-	pids, _ := ioutil.ReadFile("haproxy.pid")
-	if pids == nil {
-		pids = []byte{}
-	}
-
 	args := []string{
 		"-f", "haproxy.conf",
 		"-p", "haproxy.pid",
 		"-d", "-D",
-		"-sf", string(pids),
+	}
+
+	pids, _ := ioutil.ReadFile("haproxy.pid")
+	if pids != nil {
+		args = append(args, "-sf", string(pids))
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
