@@ -112,7 +112,7 @@ type AuthProvider interface {
 
 func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
 	if (opts.Dev) {
-		return handlers.CORS(handlers.IgnoreOptions(), handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}))(handler)
+		return handlers.CORS(handlers.IgnoreOptions())(handler)
 	}
 	return handler
 }
