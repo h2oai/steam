@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/h2oai/steam/master/auth"
+
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/svc"
@@ -1316,7 +1318,9 @@ func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, descrip
 		return errors.New("unable to locate role")
 	}
 	// Update role
-	err := s.ds.UpdateRole(roleId, data.WithName(name), data.WithDescription(description))
+	err := s.ds.UpdateRole(roleId, data.WithName(name), data.WithDescription(description),
+		data.WithAudit(pz),
+	)
 	return errors.Wrap(err, "updating role in database")
 }
 
@@ -1393,6 +1397,206 @@ func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
 	return errors.Wrap(err, "deleting role from database")
 }
 
+func (s *Service) CreateWorkgroup(pz az.Principal, name string, description string) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageWorkgroup); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
+	}
+	// Pre-add checks
+	if _, exists, err := s.ds.ReadWorkgroup(data.ByName(name)); err != nil {
+		return 0, errors.Wrap(err, "reading workgroup from database")
+	} else if exists {
+		return 0, fmt.Errorf("another workgroup with the name '%s' alredy exists", name)
+	}
+	// Create workgroup
+	id, err := s.ds.CreateWorkgroup("workgroup", name, data.WithDescription(description),
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+	)
+	return id, errors.Wrap(err, "creating workgroup in database")
+}
+
+func (s *Service) GetWorkgroups(pz az.Principal, offset, limit uint) ([]*web.Workgroup, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewWorkgroup); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetching workgroup details
+	workgroups, err := s.ds.ReadWorkgroups(data.ByPrivilege(pz),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toWorkgroups(workgroups), errors.Wrap(err, "reading workgroups from database")
+}
+
+func (s *Service) GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*web.Workgroup, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewWorkgroup); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetching identity/workgroup details (using internal wrapper)
+	if _, err := s.viewIdentity(pz, identityId); err != nil {
+		return nil, err
+	}
+	workgroups, err := s.ds.ReadWorkgroups(data.ByPrivilege(pz), data.ForIdentity(identityId))
+	return toWorkgroups(workgroups), errors.Wrap(err, "reading workgroups from database")
+}
+
+func (s *Service) viewWorkgroup(pz az.Principal, workgroupId int64) (data.Workgroup, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewWorkgroup); err != nil {
+		return data.Workgroup{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Workgroup, workgroupId); err != nil {
+		return data.Workgroup{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetching workgroup details
+	workgroup, exists, err := s.ds.ReadWorkgroup(data.ById(workgroupId))
+	if err != nil {
+		return data.Workgroup{}, errors.Wrap(err, "reading workgroup from datbase")
+	} else if !exists {
+		return data.Workgroup{}, errors.New("unable to locate workgroup")
+	}
+	return workgroup, nil
+}
+
+func (s *Service) GetWorkgroup(pz az.Principal, workgroupId int64) (*web.Workgroup, error) {
+	// Fetching using wrapper
+	workgroup, err := s.viewWorkgroup(pz, workgroupId)
+	return toWorkgroup(workgroup), errors.Wrap(err, "reading workgroup from database")
+}
+
+func (s *Service) GetWorkgroupByName(pz az.Principal, name string) (*web.Workgroup, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewWorkgroup); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetching workgroup details
+	workgroup, exists, err := s.ds.ReadWorkgroup(data.ByName(name))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading workgroup from databse")
+	} else if !exists {
+		return nil, errors.New("unable to locate workgroup")
+	}
+	// checking privileges
+	err = pz.CheckView(s.ds.EntityType.Workgroup, workgroup.Id)
+	return toWorkgroup(workgroup), errors.Wrap(err, "checking view privileges")
+}
+
+func (s *Service) UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageWorkgroup); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Workgroup, workgroupId); err != nil {
+		return errors.Wrap(err, "checking edit priviliges")
+	}
+	// Pre update checks
+	if workgroup, exists, err := s.ds.ReadWorkgroup(data.ByName(name)); err != nil {
+		return errors.Wrap(err, "reading workgroup from databse")
+	} else if exists && workgroup.Id != workgroupId {
+		return fmt.Errorf("another workgroup with the name '%s' already exists", name)
+	}
+	_, exists, err := s.ds.ReadWorkgroup(data.ByName(name))
+	if err != nil {
+		return errors.Wrap(err, "reading workgroup from databse")
+	} else if !exists {
+		return errors.New("unable to locate workgroup")
+	}
+	// Update workgroup
+	err = s.ds.UpdateWorkgroup(workgroupId, data.WithName(name), data.WithDescription(description),
+		data.WithAudit(pz),
+	)
+	return errors.Wrap(err, "updating workgroup in database")
+}
+
+func (s *Service) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageWorkgroup); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Workgroup, workgroupId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// Pre-delete checks
+	if _, exists, err := s.ds.ReadWorkgroup(data.ById(workgroupId)); err != nil {
+		return errors.Wrap(err, "reading workgroup from databse")
+	} else if !exists {
+		return errors.New("unable to locate workgroup")
+	}
+	// Deleting workgroup
+	err := s.ds.DeleteWorkgroup(workgroupId, data.WithAudit(pz))
+	return errors.Wrap(err, "deleting workgroup from database")
+}
+
+func (s *Service) CreateIdentity(pz az.Principal, name string, password string) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
+	}
+	// Prep Identity
+	hash, err := auth.HashPassword(password)
+	if err != nil {
+		return 0, errors.Wrap(err, "hashing password")
+	}
+	// Create identity
+	id, err := s.ds.CreateIdentity(name, data.WithPassword(hash), data.WithDefaultIdentityWorkgroup,
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+	)
+	return id, errors.Wrap(err, "creating identity in database")
+}
+
+func (s *Service) GetIdentities(pz az.Principal, offset, limit uint) ([]*web.Identity, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch identity details
+	identities, err := s.ds.ReadIdentities(data.ByPrivilege(pz),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toIdentities(identities), errors.Wrap(err, "reading identities from database")
+}
+
+func (s *Service) GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*web.Identity, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Validate workgroup using view wrapper
+	if _, err := s.viewWorkgroup(pz, workgroupId); err != nil {
+		return nil, err
+	}
+	// Fetch identity details
+	identities, err := s.ds.ReadIdentities(data.ByPrivilege(pz), data.ForWorkgroup(workgroupId))
+	return toIdentities(identities), errors.Wrap(err, "reading identites from database")
+}
+
+func (s *Service) GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*web.Identity, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Validate role using view wrapper
+	if _, err := s.viewRole(pz, roleId); err != nil {
+		return nil, err
+	}
+	// Fetch identity details
+	identities, err := s.ds.ReadIdentities(data.ByPrivilege(pz), data.ForRole(roleId))
+	return toIdentities(identities), errors.Wrap(err, "reading identites from database")
+}
+
+// // TODO FIX THIS
+// func (s *Service) GetIdentitiesForEntity(pz az.Principal, entityTypeId, entityId int64) ([]*web.UserRole, error) {
+// 	// Check permission/privileges
+// 	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+// 		return errors.Wrap(err, "checking permission")
+// 	}
+// 	if err := pz.CheckView(entityTypeId, entityId); err != nil {
+// 		return errors.Wrap(err, "checking view privileges")
+// 	}
+// 	// TODO: validate that entity exists
+// 	identities, err := s.ds.ReadIdentities(data.ByPrivilege(pz), data.ForEntity(entityTypeId, entity))
+// }
+
 func (s *Service) viewIdentity(pz az.Principal, identityId int64) (data.Identity, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
@@ -1409,6 +1613,208 @@ func (s *Service) viewIdentity(pz az.Principal, identityId int64) (data.Identity
 		return data.Identity{}, errors.New("unable to locate identity")
 	}
 	return identity, nil
+}
+
+func (s *Service) GetIdentity(pz az.Principal, identityId int64) (*web.Identity, error) {
+	// Fetch identity using view wrapper
+	identity, err := s.viewIdentity(pz, identityId)
+	return toIdentity(identity), err
+}
+
+func (s *Service) GetIdentityByName(pz az.Principal, name string) (*web.Identity, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch identity details
+	identity, exists, err := s.ds.ReadIdentity(data.ByName(name))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading identity from datbase")
+	} else if !exists {
+		return nil, errors.New("unable to locate identity")
+	}
+	// Check privilege
+	err = pz.CheckView(s.ds.EntityType.Identity, identity.Id)
+	return toIdentity(identity), errors.Wrap(err, "checking view privileges")
+}
+
+func (s *Service) LinkIdentityWithWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ManageWorkgroup); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Identity, identityId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Workgroup, workgroupId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Validate entities
+	if _, exists, err := s.ds.ReadIdentity(data.ById(identityId)); err != nil {
+		return errors.Wrap(err, "reading identity from datbase")
+	} else if !exists {
+		return errors.New("unable to locate identity")
+	}
+	if _, exists, err := s.ds.ReadWorkgroup(data.ById(workgroupId)); err != nil {
+		return errors.Wrap(err, "reading workgroup from datbase")
+	} else if !exists {
+		return errors.New("unable to locate workgroup")
+	}
+	// Link workgroup to identity
+	err := s.ds.UpdateIdentity(identityId, data.LinkWorkgroup(workgroupId),
+		data.WithLinkAudit(pz),
+	)
+	return errors.Wrap(err, "updating identity in database")
+}
+
+func (s *Service) UnlinkIdentityFromWorkgroup(pz az.Principal, identityId int64, workgroupId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ManageWorkgroup); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Identity, identityId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Workgroup, workgroupId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Validate entities
+	if _, exists, err := s.ds.ReadIdentity(data.ById(identityId)); err != nil {
+		return errors.Wrap(err, "reading identity from datbase")
+	} else if !exists {
+		return errors.New("unable to locate identity")
+	}
+	if _, exists, err := s.ds.ReadWorkgroup(data.ById(workgroupId)); err != nil {
+		return errors.Wrap(err, "reading workgroup from datbase")
+	} else if !exists {
+		return errors.New("unable to locate workgroup")
+	}
+	// Unlink workgroup to identity
+	err := s.ds.UpdateIdentity(identityId, data.UnlinkWorkgroup(workgroupId),
+		data.WithUnlinkAudit(pz),
+	)
+	return errors.Wrap(err, "updating identity in database")
+}
+
+func (s *Service) LinkIdentityWithRole(pz az.Principal, identityId int64, roleId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Identity, identityId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Role, roleId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Validate entities
+	if _, exists, err := s.ds.ReadIdentity(data.ById(identityId)); err != nil {
+		return errors.Wrap(err, "reading identity from datbase")
+	} else if !exists {
+		return errors.New("unable to locate identity")
+	}
+	if _, exists, err := s.ds.ReadRole(data.ById(roleId)); err != nil {
+		return errors.Wrap(err, "reading role from datbase")
+	} else if !exists {
+		return errors.New("unable to locate role")
+	}
+	// Link role to identity
+	err := s.ds.UpdateIdentity(identityId, data.LinkRole(roleId),
+		data.WithLinkAudit(pz),
+	)
+	return errors.Wrap(err, "updating identity in database")
+}
+
+func (s *Service) UnlinkIdentityFromRole(pz az.Principal, identityId int64, roleId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Identity, identityId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Role, roleId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Validate entities
+	if _, exists, err := s.ds.ReadIdentity(data.ById(identityId)); err != nil {
+		return errors.Wrap(err, "reading identity from datbase")
+	} else if !exists {
+		return errors.New("unable to locate identity")
+	}
+	if _, exists, err := s.ds.ReadRole(data.ById(roleId)); err != nil {
+		return errors.Wrap(err, "reading role from datbase")
+	} else if !exists {
+		return errors.New("unable to locate role")
+	}
+	// Unlink role to identity
+	err := s.ds.UpdateIdentity(identityId, data.UnlinkRole(roleId),
+		data.WithUnlinkAudit(pz),
+	)
+	return errors.Wrap(err, "updating identity in database")
+}
+
+func (s *Service) UpdateIdentity(pz az.Principal, identityId int64, password string) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Identity, identityId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Validate entities
+	if _, exists, err := s.ds.ReadIdentity(data.ById(identityId)); err != nil {
+		return errors.Wrap(err, "reading identity from datbase")
+	} else if !exists {
+		return errors.New("unable to locate identity")
+	}
+	// Hash password
+	hash, err := auth.HashPassword(password)
+	if err != nil {
+		return errors.Wrap(err, "hashing password")
+	}
+	// Update identity
+	err = s.ds.UpdateIdentity(identityId, data.WithPassword(hash))
+	return errors.Wrap(err, "updating identity in database")
+}
+
+func (s *Service) ActivateIdentity(pz az.Principal, identityId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Identity, identityId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Update identity
+	err := s.ds.UpdateIdentity(identityId, data.WithActivity(true))
+	return errors.Wrap(err, "updating identity in database")
+}
+
+func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageIdentity); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Identity, identityId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Update identity
+	err := s.ds.UpdateIdentity(identityId, data.WithActivity(false))
+	return errors.Wrap(err, "updating identity in database")
+
 }
 
 // Helper function to convert from int to bytes
@@ -1748,6 +2154,41 @@ func toRoles(rs []data.Role) []*web.Role {
 	ar := make([]*web.Role, len(rs))
 	for i, r := range rs {
 		ar[i] = toRole(r)
+	}
+	return ar
+}
+
+func toWorkgroup(w data.Workgroup) *web.Workgroup {
+	return &web.Workgroup{
+		w.Id,
+		w.Name,
+		w.Description.String,
+		toTimestamp(w.Created),
+	}
+}
+
+func toWorkgroups(ws []data.Workgroup) []*web.Workgroup {
+	ar := make([]*web.Workgroup, len(ws))
+	for i, w := range ws {
+		ar[i] = toWorkgroup(w)
+	}
+	return ar
+}
+
+func toIdentity(i data.Identity) *web.Identity {
+	return &web.Identity{
+		i.Id,
+		i.Name,
+		i.IsActive,
+		toTimestamp(i.LastLogin.Time),
+		toTimestamp(i.Created),
+	}
+}
+
+func toIdentities(is []data.Identity) []*web.Identity {
+	ar := make([]*web.Identity, len(is))
+	for i, iy := range is {
+		ar[i] = toIdentity(iy)
 	}
 	return ar
 }

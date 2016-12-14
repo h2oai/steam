@@ -96,6 +96,10 @@ type QueryOpt func(*QueryConfig) error
 // ------------- Query Options -------------
 // ------------- ------------- -------------
 
+func WithActivity(activate bool) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["is_active"] = activate; return }
+}
+
 // ByAddress queries the database for matching address columns
 func ByAddress(address string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("address").Eq(address)); return }
@@ -172,6 +176,12 @@ func WithDescription(description string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["description"] = description; return }
 }
 
+func ForEntity(entityTypeId, entityId int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		return nil
+	}
+}
+
 // ByEntityId queries the database for matching entity_id columns
 func ByEntityId(entityId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) {
@@ -203,6 +213,13 @@ func WithIdentityId(identityId int64) QueryOpt {
 // ById queries the database for matching id columns
 func ById(id int64) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("id").Eq(id)); return }
+}
+
+func ByIdentityId(identityId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.dataset = q.dataset.Where(q.I("identity_id").Eq(identityId))
+		return
+	}
 }
 
 // ForIdentity queries an identity relation table
@@ -416,11 +433,37 @@ func ForRole(roleId int64) QueryOpt {
 		default:
 			return fmt.Errorf("ForRole: unable to search %s for roles", q.table)
 		}
-
+		// Create relational dataset
 		ds := q.tx.From(crossTbl).SelectDistinct(crossCol).Where(
 			goqu.I("role_id").Eq(roleId),
 		)
 		q.dataset = q.dataset.Where(goqu.I("id").Eq(ds))
+		return nil
+	}
+}
+
+func LinkRole(roleId int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Identity {
+			return errors.New("LinkRole: roles may only be linked with identities")
+		}
+		q.AddPostFunc(func(c *QueryConfig) error {
+			_, err := createIdentityRole(c.tx, WithIdentityId(c.entityId), WithRoleId(roleId))
+			return errors.Wrap(err, "creating identity role in database")
+		})
+		return nil
+	}
+}
+
+func UnlinkRole(roleId int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Identity {
+			return errors.New("UnlinkRole: roles may only be unlinked with identities")
+		}
+		q.AddPostFunc(func(c *QueryConfig) error {
+			err := deleteIdentityRole(c.tx, ByIdentityId(c.entityId), ByRoleId(roleId))
+			return errors.Wrap(err, "creating identity role in database")
+		})
 		return nil
 	}
 }
@@ -443,6 +486,55 @@ func ByState(state int64) QueryOpt {
 // WithState adds a state value to the query
 func WithState(state string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["state"] = state; return }
+}
+
+func ByWorkgroupId(workgroupId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.dataset = q.dataset.Where(q.I("workgroup_id").Eq(workgroupId))
+		return
+	}
+}
+
+func ForWorkgroup(workgroupId int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Identity {
+			errors.New("ForWorkgroup: workgroups can only be searched from identities")
+		}
+		// Create relational dataset
+		ds := q.tx.From("identity_workgroup").SelectDistinct("identity_id").Where(
+			goqu.I("workgroup_id").Eq(workgroupId),
+		)
+		q.dataset = q.dataset.Where(goqu.I("identity_id").Eq(ds))
+		return nil
+	}
+}
+
+func LinkWorkgroup(workgroupId int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Identity {
+			return errors.New("LinkWorkgroup: workgroups can only be linked to identities")
+		}
+		// Insert into relation
+		q.AddPostFunc(func(c *QueryConfig) error {
+			_, err := createIdentityWorkgroup(c.tx, c.entityId, workgroupId)
+			return errors.Wrap(err, "creating identity workgroup in database")
+		})
+		return nil
+	}
+}
+
+func UnlinkWorkgroup(workgroupId int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Identity {
+			return errors.New("LinkWorkgroup: workgroups can only be linked to identities")
+		}
+		// Insert into relation
+		q.AddPostFunc(func(c *QueryConfig) error {
+			err := deleteIdentityWorkgroup(c.tx, ByIdentityId(c.entityId), ByWorkgroupId(workgroupId))
+			return errors.Wrap(err, "creating identity workgroup in database")
+		})
+		return nil
+	}
 }
 
 // WithYarnDetail adds a type_id of yarn and provides the corresponding detail

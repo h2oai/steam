@@ -89,7 +89,7 @@ type Identity struct {
 	Password    sql.NullString `db:"password"`
 	WorkgroupId sql.NullInt64  `db:"workgroup_id"`
 	IsActive    bool           `db:"is_active,def=1"`
-	LastLogin   sql.NullInt64  `db:"last_login"`
+	LastLogin   pq.NullTime    `db:"last_login"`
 	Created     time.Time      `db:"created,def=time.Now()"`
 }
 
