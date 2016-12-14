@@ -310,10 +310,55 @@ func WithPassword(password string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["password"] = password; return }
 }
 
+func ByPermissionId(permissionId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.dataset = q.dataset.Where(q.I("permission_id").Eq(permissionId))
+		return
+	}
+}
+
+func LinkPermissions(reset bool, permissionIds ...int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Role {
+			return errors.New("LinkPermission: permission can only be linked to a role")
+		}
+		q.AddPostFunc(func(c *QueryConfig) error {
+			if reset {
+				if err := deleteRolePermission(c.tx, ByRoleId(c.entityId)); err != nil {
+					return errors.Wrap(err, "LinkPermission: deleting role permission")
+				}
+			}
+			for _, permissionId := range permissionIds {
+				if _, err := createRolePermission(c.tx, c.entityId, permissionId); err != nil {
+					return errors.Wrap(err, "LinkPermission: creating role permission")
+				}
+			}
+			return nil
+		})
+		return nil
+	}
+}
+
+func UnlinkPermissions(permissionIds ...int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		if q.entityTypeId != q.entityTypes.Role {
+			return errors.New("UnlinkPermission: permission can only be unlinked from a role")
+		}
+		q.AddPostFunc(func(c *QueryConfig) error {
+			for _, permissionId := range permissionIds {
+				if err := deleteRolePermission(c.tx, ByRoleId(c.entityId), ByPermissionId(permissionId)); err != nil {
+					return errors.Wrap(err, "UnlinkPermission: deleting role permission")
+				}
+			}
+			return nil
+		})
+		return nil
+	}
+}
+
 // ByProject queries the database for a matching state column
 func ByProjectId(projectId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) {
-		// FIXME: all change to (q *QueryConfig) FOO(string) goqu.IdentifierExpression{}
 		q.dataset = q.dataset.Where(q.I("project_id").Eq(projectId))
 		return
 	}
@@ -351,6 +396,31 @@ func WithRegressionModel(mse, rSquared, meanResidualDeviance float64) QueryOpt {
 			_, err := createRegressionModel(c.tx, c.entityId, mse, rSquared, meanResidualDeviance)
 			return errors.Wrap(err, "WithRegressionModel: creating regression model")
 		})
+		return nil
+	}
+}
+
+func ByRoleId(roleId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("role_id").Eq(roleId)); return }
+}
+
+func ForRole(roleId int64) QueryOpt {
+	return func(q *QueryConfig) error {
+		crossCol := q.table + "_id"
+		var crossTbl string
+		switch q.table {
+		case "identity":
+			crossTbl = "identity_role"
+		case "permission":
+			crossTbl = "role_permission"
+		default:
+			return fmt.Errorf("ForRole: unable to search %s for roles", q.table)
+		}
+
+		ds := q.tx.From(crossTbl).SelectDistinct(crossCol).Where(
+			goqu.I("role_id").Eq(roleId),
+		)
+		q.dataset = q.dataset.Where(goqu.I("id").Eq(ds))
 		return nil
 	}
 }

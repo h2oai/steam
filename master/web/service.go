@@ -1106,6 +1106,311 @@ func (s *Service) DeleteService(pz az.Principal, serviceId int64) error {
 	return errors.Wrap(err, "deleting service from database")
 }
 
+// viewEngine is a small wrapper around the perm/fetch db calls that returns an
+// engine in view only scenarios
+func (s *Service) viewEngine(pz az.Principal, engineId int64) (data.Engine, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
+		return data.Engine{}, errors.Wrap(err, "reading permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Engine, engineId); err != nil {
+		return data.Engine{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch engine
+	engine, exists, err := s.ds.ReadEngine(data.ById(engineId))
+	if err != nil {
+		return data.Engine{}, errors.Wrap(err, "reading engine from database")
+	} else if !exists {
+		return data.Engine{}, errors.New("unable to locate engine")
+	}
+	return engine, nil
+}
+
+func (s *Service) GetEngine(pz az.Principal, engineId int64) (*web.Engine, error) {
+	// Fetch engine using view wrapper
+	engine, err := s.viewEngine(pz, engineId)
+	return toEngine(engine), err
+}
+
+func (s *Service) GetEngines(pz az.Principal) ([]*web.Engine, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
+		return nil, errors.Wrap(err, "reading permission")
+	}
+	// Fetch clusters with privilege
+	engines, err := s.ds.ReadEngines(data.ByPrivilege(pz))
+	return toEngines(engines), errors.Wrap(err, "reading engines from database")
+}
+
+func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageEngine); err != nil {
+		return errors.Wrap(err, "reading permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Engine, engineId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// Fetch engine details
+	_, exists, err := s.ds.ReadEngine(data.ById(engineId))
+	if err != nil {
+		return errors.Wrap(err, "reading engine fromd database")
+	} else if !exists {
+		return errors.New("unable to locate engine")
+	}
+	// Delete engine
+	err = s.ds.DeleteEngine(engineId, data.WithAudit(pz))
+	return errors.Wrap(err, "deleting engine from database")
+}
+
+// func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
+
+// 	// No permission checks required
+
+// 	return toClusterTypes(s.ds.ClusterType)
+// }
+
+// func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+
+// 	// No permission checks required
+
+// 	return toEntityTypes(s.ds.EntityType)
+// }
+
+// // func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
+
+// // 	// No permission checks required
+
+// // 	return toPermissions(s.ds.Permission)
+// }
+
+func (s *Service) GetPermissionsForRole(pz az.Principal, roleId int64) ([]*web.Permission, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewRole); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Role, roleId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch permissions
+	permissions, err := s.ds.ReadPermissions(data.ForRole(roleId))
+	return toPermissions(permissions), errors.Wrap(err, "reading permissions from database")
+}
+
+func (s *Service) GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*web.Permission, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch identity via wrapper
+	if _, err := s.viewIdentity(pz, identityId); err != nil {
+		return nil, err
+	}
+	// Fetch permissions
+	permissions, err := s.ds.ReadPermissions(data.ForIdentity(identityId))
+	return toPermissions(permissions), errors.Wrap(err, "reading permissions from database")
+}
+
+func (s *Service) CreateRole(pz az.Principal, name string, description string) (int64, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
+	}
+	// Pre-add checks
+	_, exists, err := s.ds.ReadRole(data.ByName(name))
+	if err != nil {
+		return 0, errors.Wrap(err, "reading roles from database")
+	} else if exists {
+		return 0, fmt.Errorf("a role with the name '%s' already exists.", name)
+	}
+	// Create Role
+	id, err := s.ds.CreateRole(name, data.WithDescription(description),
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+	)
+	return id, errors.Wrap(err, "creating role in database")
+}
+
+func (s *Service) GetRoles(pz az.Principal, offset, limit uint) ([]*web.Role, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewRole); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch roles
+	roles, err := s.ds.ReadRoles(data.ByPrivilege(pz),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toRoles(roles), errors.Wrap(err, "reading roles from database")
+}
+
+func (s *Service) GetRolesForIdentity(pz az.Principal, identityId int64) ([]*web.Role, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewRole); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if _, err := s.viewIdentity(pz, identityId); err != nil {
+		return nil, err
+	}
+	roles, err := s.ds.ReadRoles(data.ForIdentity(identityId), data.ByPrivilege(pz))
+	return toRoles(roles), errors.Wrap(err, "reading roles from database")
+}
+
+func (s *Service) viewRole(pz az.Principal, roleId int64) (data.Role, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewRole); err != nil {
+		return data.Role{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Role, roleId); err != nil {
+		return data.Role{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch role
+	role, exists, err := s.ds.ReadRole(data.ById(roleId))
+	if err != nil {
+		return data.Role{}, errors.Wrap(err, "reading roles from database")
+	} else if !exists {
+		return data.Role{}, errors.New("unable to locate role")
+	}
+	return role, nil
+}
+
+func (s *Service) GetRole(pz az.Principal, roleId int64) (*web.Role, error) {
+	// Fetch using interal wrapper
+	role, err := s.viewRole(pz, roleId)
+	return toRole(role), err
+}
+
+func (s *Service) GetRoleByName(pz az.Principal, name string) (*web.Role, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewRole); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch role
+	role, exists, err := s.ds.ReadRole(data.ByName(name))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading role from database")
+	} else if !exists {
+		return nil, errors.New("unable to locate role")
+	}
+	// Checking privileges
+	if err := pz.CheckView(s.ds.EntityType.Role, role.Id); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	return toRole(role), nil
+}
+
+func (s *Service) UpdateRole(pz az.Principal, roleId int64, name string, description string) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Role, roleId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Pre-add checks
+	if role, exists, err := s.ds.ReadRole(data.ByName(name)); err != nil {
+		return errors.Wrap(err, "reading role from database")
+	} else if exists && role.Id != roleId {
+		return fmt.Errorf("another role with the name '%s' already exists", name)
+	}
+	if _, exists, err := s.ds.ReadRole(data.ById(roleId)); err != nil {
+		return errors.Wrap(err, "reading role from database")
+	} else if !exists {
+		return errors.New("unable to locate role")
+	}
+	// Update role
+	err := s.ds.UpdateRole(roleId, data.WithName(name), data.WithDescription(description))
+	return errors.Wrap(err, "updating role in database")
+}
+
+func (s *Service) LinkRoleWithPermissions(pz az.Principal, roleId int64, permissionIds []int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Role, roleId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	if _, exists, err := s.ds.ReadRole(data.ById(roleId)); err != nil {
+		return errors.Wrap(err, "reading role from database")
+	} else if !exists {
+		return errors.New("unable to locate role")
+	}
+	// Linking role permissions
+	err := s.ds.UpdateRole(roleId, data.LinkPermissions(true, permissionIds...), data.WithLinkAudit(pz))
+	return errors.Wrap(err, "updating role in database")
+}
+
+func (s *Service) LinkRoleWithPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Role, roleId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	if _, exists, err := s.ds.ReadRole(data.ById(roleId)); err != nil {
+		return errors.Wrap(err, "reading role from database")
+	} else if !exists {
+		return errors.New("unable to locate role")
+	}
+	// Linking role permission
+	err := s.ds.UpdateRole(roleId, data.LinkPermissions(false, permissionId), data.WithLinkAudit(pz))
+	return errors.Wrap(err, "updating role in database")
+}
+
+func (s *Service) UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Role, roleId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	if _, exists, err := s.ds.ReadRole(data.ById(roleId)); err != nil {
+		return errors.Wrap(err, "reading role from database")
+	} else if !exists {
+		return errors.New("unable to locate role")
+	}
+	// Uninking role permission
+	err := s.ds.UpdateRole(roleId, data.UnlinkPermissions(permissionId), data.WithUnlinkAudit(pz))
+	return errors.Wrap(err, "updating role in database")
+}
+
+func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageRole); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(s.ds.EntityType.Role, roleId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	// Fetch role details
+	if _, exists, err := s.ds.ReadRole(data.ById(roleId)); err != nil {
+		return errors.Wrap(err, "reading role from database")
+	} else if !exists {
+		return errors.New("unable to locate role")
+	}
+	// Delete role
+	err := s.ds.DeleteRole(roleId, data.WithAudit(pz))
+	return errors.Wrap(err, "deleting role from database")
+}
+
+func (s *Service) viewIdentity(pz az.Principal, identityId int64) (data.Identity, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+		return data.Identity{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, identityId); err != nil {
+		return data.Identity{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch identity details
+	identity, exists, err := s.ds.ReadIdentity(data.ById(identityId))
+	if err != nil {
+		return data.Identity{}, errors.Wrap(err, "reading identity from cluster")
+	} else if !exists {
+		return data.Identity{}, errors.New("unable to locate identity")
+	}
+	return identity, nil
+}
+
 // Helper function to convert from int to bytes
 func toSizeBytes(i int64) string {
 	f := float64(i)
@@ -1393,6 +1698,56 @@ func toServices(ss []data.Service) []*web.ScoringService {
 	ar := make([]*web.ScoringService, len(ss))
 	for i, s := range ss {
 		ar[i] = toService(s)
+	}
+	return ar
+}
+
+func toEngine(e data.Engine) *web.Engine {
+	return &web.Engine{
+		e.Id,
+		e.Name,
+		e.Location,
+		toTimestamp(e.Created),
+	}
+}
+
+func toEngines(es []data.Engine) []*web.Engine {
+	ar := make([]*web.Engine, len(es))
+	for i, e := range es {
+		ar[i] = toEngine(e)
+	}
+	return ar
+}
+
+func toPermission(p data.Permission) *web.Permission {
+	return &web.Permission{
+		p.Id,
+		p.Code,
+		p.Description,
+	}
+}
+
+func toPermissions(ps []data.Permission) []*web.Permission {
+	ar := make([]*web.Permission, len(ps))
+	for i, p := range ps {
+		ar[i] = toPermission(p)
+	}
+	return ar
+}
+
+func toRole(r data.Role) *web.Role {
+	return &web.Role{
+		r.Id,
+		r.Name,
+		r.Description.String,
+		toTimestamp(r.Created),
+	}
+}
+
+func toRoles(rs []data.Role) []*web.Role {
+	ar := make([]*web.Role, len(rs))
+	for i, r := range rs {
+		ar[i] = toRole(r)
 	}
 	return ar
 }

@@ -22,7 +22,6 @@ import (
 	"flag"
 	"log"
 	"os"
-	"time"
 
 	"github.com/h2oai/steam/master/auth"
 	_ "github.com/mattn/go-sqlite3"
@@ -334,9 +333,4 @@ func (ds *Datastore) Count(table string, options ...QueryOpt) (int64, error) {
 		return nil
 	})
 	return ct, errors.Wrap(err, "committing transaction")
-}
-
-type NullTime struct {
-	Time  time.Time
-	Valid bool
 }
