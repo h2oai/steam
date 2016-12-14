@@ -72,7 +72,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
 
   goProxy(cluster) {
     document.cookie = cluster.name + "=" + cluster.token;
-    let url = "http://" + window.location.hostname + ":9999/" + cluster.name + "/";
+    let url = "http://" + window.location.hostname + ":9999" + cluster.context_path;
     window.open(url, "_blank");
   }
 
@@ -164,7 +164,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address + '/' + cluster.name + '/'} target="_blank"
+                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address + cluster.context_path} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
                   <span className="remove-cluster">
                     <button className="remove-cluster-button test" onClick={this.goProxy.bind(this, cluster)}>
