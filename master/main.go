@@ -35,7 +35,7 @@ import (
 	"github.com/h2oai/steam/master/proxy"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
-	"github.com/gorilla/handlers"
+	"github.com/rs/cors"
 )
 
 const (
@@ -112,7 +112,13 @@ type AuthProvider interface {
 
 func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
 	if (opts.Dev) {
-		return handlers.CORS(handlers.IgnoreOptions())(handler)
+		c := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{"POST", "OPTIONS", "GET"},
+			AllowCredentials: true,
+			Debug: true,
+		})
+		return c.Handler(handler)
 	}
 	return handler
 }
@@ -195,7 +201,7 @@ func Run(version, buildDate string, opts Opts) {
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 
 	webServeMux.Handle("/logout", handlerStrategy(authProvider.Logout(), opts))
-	webServeMux.Handle("/web", handlerStrategy(authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))), opts))
+	webServeMux.Handle("/web", authProvider.Secure(handlerStrategy(rpc.NewServer(rpc.NewService("web", webServiceImpl)), opts)))
 	webServeMux.Handle("/upload", handlerStrategy(authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds)), opts))
 	webServeMux.Handle("/download", handlerStrategy(authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)), opts))
 	webServeMux.Handle("/", handlerStrategy(authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))), opts))
