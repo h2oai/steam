@@ -116,7 +116,6 @@ func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
 			AllowedOrigins: []string{"*"},
 			AllowedMethods: []string{"POST", "OPTIONS", "GET"},
 			AllowCredentials: true,
-			Debug: true,
 		})
 		return c.Handler(handler)
 	}
