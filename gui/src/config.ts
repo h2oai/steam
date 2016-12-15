@@ -4,5 +4,5 @@
 
 export class Config {
   public static environment: 'development' | 'production' = 'development';
-  public static API_HOST: string = 'http://localhost:9000'
+  public static API_HOST: string = 'http://localhost:9000';
 }

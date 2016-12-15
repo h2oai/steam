@@ -18,10 +18,10 @@
 'use strict';
 
 import * as $ from 'jquery';
-import { Config } from '../config'
+import { Config } from '../config';
 var _rpcId: number = 0;
 
-const HOST = Config.environment == 'development' ? Config.API_HOST : "http://localhost:9000";
+const HOST = Config.environment === 'development' ? Config.API_HOST : "http://localhost:9000";
 
 function nextId(): number {
   return ++_rpcId;
