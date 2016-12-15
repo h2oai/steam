@@ -47,8 +47,8 @@ type (
 		db *goqu.Database
 
 		// Internal mapping for printing
-		entityTypeMap map[int64]string
-		permissionMap map[int64]string
+		EntityTypeMap map[int64]string
+		PermissionMap map[int64]permission_map
 
 		// Enum References in Database
 		ClusterType clusterTypeKeys
@@ -59,6 +59,7 @@ type (
 		ViewPermission   map[int64]int64
 		ManagePermission map[int64]int64
 	}
+
 	DBOpts struct {
 		Path      string
 		SuperName string
@@ -211,10 +212,10 @@ func primeStates(tx *goqu.TxDatabase, names ...string) error {
 	return nil
 }
 
-func primePermissions(tx *goqu.TxDatabase, perms ...struct{ code, desc string }) error {
+func primePermissions(tx *goqu.TxDatabase, perms ...permission_map) error {
 	for _, perm := range perms {
-		if _, err := createPermission(tx, perm.code, perm.desc); err != nil {
-			return errors.Wrapf(err, "creating permission %s", perm.code)
+		if _, err := createPermission(tx, perm.Code, perm.Desc); err != nil {
+			return errors.Wrapf(err, "creating permission %s", perm.Code)
 		}
 	}
 	return nil
@@ -264,8 +265,8 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 	return &Datastore{
 		db: db,
 
-		entityTypeMap: toEntityTypeMap(entityTypes),
-		permissionMap: toPermissionMap(permissions),
+		EntityTypeMap: toEntityTypeMap(entityTypes),
+		PermissionMap: toPermissionMap(permissions),
 
 		ClusterType: newClusterTypeKeys(clusterTypes),
 		EntityType:  newEntityTypeKeys(entityTypes),

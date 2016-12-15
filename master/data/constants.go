@@ -147,29 +147,34 @@ func newEntityTypeKeys(entityTypes []entityType) entityTypeKeys {
 	}
 }
 
-var permissions_list = []struct{ code, desc string }{
-	struct{ code, desc string }{"ManageRole", "Manage role"},
-	struct{ code, desc string }{"ViewRole", "View role"},
-	struct{ code, desc string }{"ManageWorkgroup", "Manage workgroup"},
-	struct{ code, desc string }{"ViewWorkgroup", "View workgroup"},
-	struct{ code, desc string }{"ManageIdentity", "Manage identity"},
-	struct{ code, desc string }{"ViewIdentity", "View identity"},
-	struct{ code, desc string }{"ManageEngine", "Manage engine"},
-	struct{ code, desc string }{"ViewEngine", "View engine"},
-	struct{ code, desc string }{"ManageCluster", "Manage cluster"},
-	struct{ code, desc string }{"ViewCluster", "View cluster"},
-	struct{ code, desc string }{"ManageProject", "Manage project"},
-	struct{ code, desc string }{"ViewProject", "View project"},
-	struct{ code, desc string }{"ManageDatasource", "Manage datasource"},
-	struct{ code, desc string }{"ViewDatasource", "View datasource"},
-	struct{ code, desc string }{"ManageDataset", "Manage dataset"},
-	struct{ code, desc string }{"ViewDataset", "View dataset"},
-	struct{ code, desc string }{"ManageModel", "Manage model"},
-	struct{ code, desc string }{"ViewModel", "View model"},
-	struct{ code, desc string }{"ManageLabel", "Manage label"},
-	struct{ code, desc string }{"ViewLabel", "View label"},
-	struct{ code, desc string }{"ManageService", "Manage service"},
-	struct{ code, desc string }{"ViewService", "View service"},
+type permission_map struct {
+	Code string
+	Desc string
+}
+
+var permissions_list = []permission_map{
+	permission_map{"ManageRole", "Manage role"},
+	permission_map{"ViewRole", "View role"},
+	permission_map{"ManageWorkgroup", "Manage workgroup"},
+	permission_map{"ViewWorkgroup", "View workgroup"},
+	permission_map{"ManageIdentity", "Manage identity"},
+	permission_map{"ViewIdentity", "View identity"},
+	permission_map{"ManageEngine", "Manage engine"},
+	permission_map{"ViewEngine", "View engine"},
+	permission_map{"ManageCluster", "Manage cluster"},
+	permission_map{"ViewCluster", "View cluster"},
+	permission_map{"ManageProject", "Manage project"},
+	permission_map{"ViewProject", "View project"},
+	permission_map{"ManageDatasource", "Manage datasource"},
+	permission_map{"ViewDatasource", "View datasource"},
+	permission_map{"ManageDataset", "Manage dataset"},
+	permission_map{"ViewDataset", "View dataset"},
+	permission_map{"ManageModel", "Manage model"},
+	permission_map{"ViewModel", "View model"},
+	permission_map{"ManageLabel", "Manage label"},
+	permission_map{"ViewLabel", "View label"},
+	permission_map{"ManageService", "Manage service"},
+	permission_map{"ViewService", "View service"},
 }
 
 type permissionKeys struct {
@@ -197,10 +202,11 @@ type permissionKeys struct {
 	ViewService      int64
 }
 
-func toPermissionMap(permissions []Permission) map[int64]string {
-	m := make(map[int64]string)
+func toPermissionMap(permissions []Permission) map[int64]permission_map {
+	m := make(map[int64]permission_map)
 	for _, p := range permissions {
-		m[p.Id] = p.Description
+		pm := permission_map{Code: p.Code, Desc: p.Description}
+		m[p.Id] = pm
 	}
 	return m
 }

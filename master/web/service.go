@@ -1168,6 +1168,24 @@ func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
 	return errors.Wrap(err, "deleting engine from database")
 }
 
+func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+	ar := make([]*web.EntityType, 0, len(s.ds.EntityTypeMap))
+	for id, name := range s.ds.EntityTypeMap {
+		et := web.EntityType{Id: id, Name: name}
+		ar = append(ar, &et)
+	}
+	return ar, nil
+}
+
+func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
+	ar := make([]*web.Permission, 0, len(s.ds.PermissionMap))
+	for id, pm := range s.ds.PermissionMap {
+		p := web.Permission{Id: id, Code: pm.Code, Description: pm.Desc}
+		ar = append(ar, &p)
+	}
+	return ar, nil
+}
+
 // func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
 
 // 	// No permission checks required
@@ -1993,14 +2011,6 @@ func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
 }
 
 func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
-	return nil, nil
-}
-
-func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
-	return nil, nil
-}
-
-func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
 	return nil, nil
 }
 
