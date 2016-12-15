@@ -18,6 +18,8 @@
 package data
 
 import (
+	"log"
+
 	"github.com/h2oai/steam/master/az"
 	"github.com/pkg/errors"
 )
@@ -26,10 +28,12 @@ import (
 
 func (ds *Datastore) Lookup(name string) (az.Principal, error) {
 	// Fetch identity
+	log.Println("looking for ident")
 	identity, ok, err := ds.ReadIdentity(ByName(name))
 	if err != nil {
 		return nil, errors.Wrap(err, "reading identity")
 	}
+	log.Println(ok)
 	if !ok {
 		return nil, nil
 	}

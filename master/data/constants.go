@@ -117,7 +117,7 @@ func toEntityId(ds *Datastore, name string) int64 {
 	case "workgroup":
 		return ds.EntityType.Workgroup
 	}
-	return 0
+	return -1
 }
 
 func toEntityTypeMap(entityTypes []entityType) map[int64]string {

@@ -18,12 +18,19 @@
 package data
 
 import (
+	"bufio"
 	"database/sql"
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"strings"
+	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/h2oai/steam/master/auth"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"gopkg.in/doug-martin/goqu.v3"
@@ -35,19 +42,29 @@ const (
 
 type metadata map[string]string
 
-type Datastore struct {
-	db *goqu.Database
+type (
+	Datastore struct {
+		db *goqu.Database
 
-	// Internal mapping for printing
-	entityTypeMap map[int64]string
-	permissionMap map[int64]string
+		// Internal mapping for printing
+		entityTypeMap map[int64]string
+		permissionMap map[int64]string
 
-	// Enum References in Database
-	ClusterType clusterTypeKeys
-	EntityType  entityTypeKeys
-	State       stateKeys
-	Permission  permissionKeys
-}
+		// Enum References in Database
+		ClusterType clusterTypeKeys
+		EntityType  entityTypeKeys
+		State       stateKeys
+		Permission  permissionKeys
+		// Permission checks
+		ViewPermission   map[int64]int64
+		ManagePermission map[int64]int64
+	}
+	DBOpts struct {
+		Path      string
+		SuperName string
+		SuperPass string
+	}
+)
 
 // --- Enums ---
 var (
@@ -58,17 +75,22 @@ func init() {
 	flag.BoolVar(&DEBUG, "debug", false, "Set to enable debug mode")
 	flag.Parse()
 
+	if flag.Parsed() {
+		flag.Set("debug", "true")
+		log.Println(flag.Lookup("debug"))
+	}
 	States = initState()
 }
 
-func NewDatastore(driver, dbOpts string) (*Datastore, error) {
+func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	// Connect to db
-	db, err := open(driver, dbOpts)
+	db, err := open(driver, dbOpts.Path)
 	if err != nil {
 		return nil, errors.Wrap(err, "connecting to database")
 	}
 
-	if primed, err := IsPrimed(db); err != nil {
+	primed, err := IsPrimed(db)
+	if err != nil {
 		return nil, errors.Wrap(err, "checking if database is primed")
 	} else if !primed {
 		if err := prime(db); err != nil {
@@ -79,6 +101,30 @@ func NewDatastore(driver, dbOpts string) (*Datastore, error) {
 	ds, err := initDatastore(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "initializing datastore")
+	}
+
+	if !primed {
+		if strings.TrimSpace(dbOpts.SuperName) == "" {
+			r := bufio.NewReader(os.Stdin)
+			fmt.Print("Superuser name: ")
+			name, err := r.ReadString('\n')
+			if err != nil {
+				return nil, err
+			}
+			dbOpts.SuperName = strings.TrimSpace(name)
+		}
+		if strings.TrimSpace(dbOpts.SuperPass) == "" {
+			fmt.Print("Superuser password: ")
+			passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				return nil, err
+			}
+			dbOpts.SuperPass = strings.TrimSpace(string(passBytes))
+			fmt.Println()
+		}
+		if _, err := ds.createSuperuser(dbOpts.SuperName, dbOpts.SuperPass); err != nil {
+			return nil, err
+		}
 	}
 
 	return ds, nil
@@ -266,7 +312,7 @@ func (ds *Datastore) getRow(dataset *goqu.Dataset) (*sql.Row, error) {
 	return ds.db.QueryRow(sql, args...), nil
 }
 
-func (ds *Datastore) CreateSuperuser(username, password string) (int64, error) {
+func (ds *Datastore) createSuperuser(username, password string) (int64, error) {
 	hashPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return 0, errors.Wrap(err, "hasing password")
@@ -307,7 +353,8 @@ func (ds *Datastore) Count(table string, options ...QueryOpt) (int64, error) {
 
 	var ct int64
 	err = tx.Wrap(func() error {
-		q := NewQueryConfig(ds, tx, table, tx.From(table).Select(goqu.COUNT("*")))
+		q := NewQueryConfig(ds, tx, "", table, nil)
+		q.dataset = q.dataset.Select(goqu.COUNT("*"))
 		for _, option := range options {
 			if err := option(q); err != nil {
 				return errors.Wrap(err, "setting up query options")

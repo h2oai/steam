@@ -97,6 +97,12 @@ func toArgs(cols []Col) string {
 	var args, curType string
 	for _, col := range cols {
 		if col.IsArg {
+			switch {
+			case strings.HasPrefix(col.Type, "sql.Null"):
+				col.Type = lowerFirst(col.Type[8:])
+			case col.Type == "pq.NullTime":
+				col.Type = "time.Time"
+			}
 			change := curType != col.Type
 			if change && args != "" {
 				args += " " + curType

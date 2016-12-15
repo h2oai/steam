@@ -44,7 +44,7 @@ type QueryConfig struct {
 	entityTypes  entityTypeKeys
 }
 
-func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, table string, data *goqu.Dataset) *QueryConfig {
+func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, op string, table string, entityId interface{}) *QueryConfig {
 	var (
 		clusterTypes clusterTypeKeys
 		permissions  permissionKeys
@@ -61,14 +61,26 @@ func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, table string, data *goqu
 		entityTypeId = toEntityId(ds, table)
 	}
 
+	dataset := tx.From(table)
+	var id int64
+	switch val := entityId.(type) {
+	case int64:
+		id = val
+		dataset = dataset.Where(goqu.I("id").Eq(id))
+	default:
+		id = -1
+
+	}
+
 	return &QueryConfig{
 		tx:       tx,
 		table:    table,
-		dataset:  data,
+		dataset:  dataset,
 		fields:   make(map[string]interface{}),
 		postFunc: make([]QueryOpt, 0),
 
 		entityTypeId: entityTypeId,
+		audit:        op,
 
 		clusterTypes: clusterTypes,
 		permissions:  permissions,
@@ -385,6 +397,13 @@ func WithPort(port int) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["port"] = port; return }
 }
 
+func ByPrivilegeType(privilegeType string) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		q.dataset = q.dataset.Where(q.I("privilege_type").Eq(privilegeType))
+		return
+	}
+}
+
 // WithProjectId adds a project_id value to the query
 func WithProjectId(projectId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["project_id"] = projectId; return }
@@ -581,16 +600,16 @@ func WithLinkAudit(pz az.Principal) QueryOpt {
 	return func(q *QueryConfig) error {
 		q.AddPostFunc(func(c *QueryConfig) error {
 			if pz == nil {
-				return errors.New("WithAudit: no principal provided")
+				return errors.New("WithLinkAudit: no principal provided")
 			}
 			json, err := json.Marshal(c.fields)
 			if err != nil {
-				return errors.Wrap(err, "WithAudit: serializing metadata")
+				return errors.Wrap(err, "WithLinkAudit: serializing metadata")
 			}
 			_, err = createHistory(c.tx, LinkOp, pz.Id(), c.entityTypeId, c.entityId,
 				WithDescription(string(json)),
 			)
-			return errors.Wrap(err, "WithAudit: creating audit entry")
+			return errors.Wrap(err, "WithLinkAudit: creating audit entry")
 		})
 		return nil
 	}
@@ -600,16 +619,54 @@ func WithUnlinkAudit(pz az.Principal) QueryOpt {
 	return func(q *QueryConfig) error {
 		q.AddPostFunc(func(c *QueryConfig) error {
 			if pz == nil {
-				return errors.New("WithAudit: no principal provided")
+				return errors.New("WithUnlinkAudit: no principal provided")
 			}
 			json, err := json.Marshal(c.fields)
 			if err != nil {
-				return errors.Wrap(err, "WithAudit: serializing metadata")
+				return errors.Wrap(err, "WithUnlinkAudit: serializing metadata")
 			}
 			_, err = createHistory(c.tx, UnlinkOp, pz.Id(), c.entityTypeId, c.entityId,
 				WithDescription(string(json)),
 			)
-			return errors.Wrap(err, "WithAudit: creating audit entry")
+			return errors.Wrap(err, "WithUnlinkAudit: creating audit entry")
+		})
+		return nil
+	}
+}
+
+func WithShareAudit(pz az.Principal) QueryOpt {
+	return func(q *QueryConfig) error {
+		q.AddPostFunc(func(c *QueryConfig) error {
+			if pz == nil {
+				return errors.New("WithShareAudit: no principal provided")
+			}
+			json, err := json.Marshal(c.fields)
+			if err != nil {
+				return errors.Wrap(err, "WithShareAudit: serializing metadata")
+			}
+			_, err = createHistory(c.tx, ShareOp, pz.Id(), c.entityTypeId, c.entityId,
+				WithDescription(string(json)),
+			)
+			return errors.Wrap(err, "WithShareAudit: creating audit entry")
+		})
+		return nil
+	}
+}
+
+func WithUnshareAudit(pz az.Principal) QueryOpt {
+	return func(q *QueryConfig) error {
+		q.AddPostFunc(func(c *QueryConfig) error {
+			if pz == nil {
+				return errors.New("WithUnshareAudit: no principal provided")
+			}
+			json, err := json.Marshal(c.fields)
+			if err != nil {
+				return errors.Wrap(err, "WithUnshareAudit: serializing metadata")
+			}
+			_, err = createHistory(c.tx, UnshareOp, pz.Id(), c.entityTypeId, c.entityId,
+				WithDescription(string(json)),
+			)
+			return errors.Wrap(err, "WithUnshareAudit: creating audit entry")
 		})
 		return nil
 	}

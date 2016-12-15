@@ -216,8 +216,8 @@ func ScanEntityTypes(rs *sql.Rows) ([]entityType, error) {
 	return structs, nil
 }
 
-func ScanHistory(r *sql.Row) (history, error) {
-	var s history
+func ScanHistory(r *sql.Row) (History, error) {
+	var s History
 	if err := r.Scan(
 		&s.Id,
 		&s.Action,
@@ -227,16 +227,16 @@ func ScanHistory(r *sql.Row) (history, error) {
 		&s.Description,
 		&s.Created,
 	); err != nil {
-		return history{}, err
+		return History{}, err
 	}
 	return s, nil
 }
 
-func ScanHistorys(rs *sql.Rows) ([]history, error) {
-	structs := make([]history, 0, 16)
+func ScanHistorys(rs *sql.Rows) ([]History, error) {
+	structs := make([]History, 0, 16)
 	var err error
 	for rs.Next() {
-		var s history
+		var s History
 		if err = rs.Scan(
 			&s.Id,
 			&s.Action,
@@ -550,24 +550,24 @@ func ScanPermissions(rs *sql.Rows) ([]Permission, error) {
 	return structs, nil
 }
 
-func ScanPrivilege(r *sql.Row) (privilege, error) {
-	var s privilege
+func ScanPrivilege(r *sql.Row) (Privilege, error) {
+	var s Privilege
 	if err := r.Scan(
 		&s.Type,
 		&s.WorkgroupId,
 		&s.EntityType,
 		&s.EntityId,
 	); err != nil {
-		return privilege{}, err
+		return Privilege{}, err
 	}
 	return s, nil
 }
 
-func ScanPrivileges(rs *sql.Rows) ([]privilege, error) {
-	structs := make([]privilege, 0, 16)
+func ScanPrivileges(rs *sql.Rows) ([]Privilege, error) {
+	structs := make([]Privilege, 0, 16)
 	var err error
 	for rs.Next() {
-		var s privilege
+		var s Privilege
 		if err = rs.Scan(
 			&s.Type,
 			&s.WorkgroupId,

@@ -28,6 +28,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var debug bool
+
 const (
 	steam = "steam"
 )
@@ -109,6 +111,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		},
 	}
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+	cmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Set this to debug")
 
 	cmd.AddCommand(
 		login(c),

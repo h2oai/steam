@@ -1058,7 +1058,7 @@ func (s *Service) GetServices(pz az.Principal, offset, limit uint) ([]*web.Scori
 	return toServices(services), errors.Wrap(err, "reading services from database")
 }
 
-func (s *Service) GetServicesForProject(pz az.Principal, projectId, offset, limit int64) ([]*web.ScoringService, error) {
+func (s *Service) GetServicesForProject(pz az.Principal, projectId int64, offset, limit uint) ([]*web.ScoringService, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ViewService); err != nil {
 		return nil, errors.Wrap(err, "checking permission")
@@ -1068,12 +1068,13 @@ func (s *Service) GetServicesForProject(pz az.Principal, projectId, offset, limi
 		return nil, err
 	}
 	services, err := s.ds.ReadServices(data.ByProjectId(projectId),
+		data.WithOffset(offset), data.WithLimit(limit),
 		data.ByPrivilege(pz),
 	)
 	return toServices(services), errors.Wrap(err, "reading services from database")
 }
 
-func (s *Service) GetServicesForModel(pz az.Principal, modelId, offset, limit int64) ([]*web.ScoringService, error) {
+func (s *Service) GetServicesForModel(pz az.Principal, modelId int64, offset, limit uint) ([]*web.ScoringService, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ViewService); err != nil {
 		return nil, errors.Wrap(err, "checking permission")
@@ -1082,7 +1083,10 @@ func (s *Service) GetServicesForModel(pz az.Principal, modelId, offset, limit in
 	if _, err := s.viewModel(pz, modelId); err != nil {
 		return nil, err
 	}
-	services, err := s.ds.ReadServices(data.ByModelId(modelId))
+	services, err := s.ds.ReadServices(data.ByModelId(modelId),
+		data.WithOffset(offset), data.WithLimit(limit),
+		data.ByPrivilege(pz),
+	)
 	return toServices(services), errors.Wrap(err, "reading services from database")
 }
 
@@ -1585,7 +1589,10 @@ func (s *Service) GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*web.Id
 }
 
 // // TODO FIX THIS
-// func (s *Service) GetIdentitiesForEntity(pz az.Principal, entityTypeId, entityId int64) ([]*web.UserRole, error) {
+func (s *Service) GetIdentitiesForEntity(pz az.Principal, entityTypeId, entityId int64) ([]*web.UserRole, error) {
+	return nil, nil
+}
+
 // 	// Check permission/privileges
 // 	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
 // 		return errors.Wrap(err, "checking permission")
@@ -1814,7 +1821,195 @@ func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
 	// Update identity
 	err := s.ds.UpdateIdentity(identityId, data.WithActivity(false))
 	return errors.Wrap(err, "updating identity in database")
+}
 
+func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityTypeId, entityId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.ManagePermission[entityTypeId]); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ViewWorkgroup); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckOwns(entityTypeId, entityId); err != nil {
+		return errors.Wrap(err, "checking ownership")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Workgroup, workgroupId); err != nil {
+		return errors.Wrap(err, "checking view privileges")
+	}
+	// Create privilege/sharing
+	_, err := s.ds.CreatePrivilege(kind, workgroupId, entityTypeId, entityId,
+		data.WithAudit(pz),
+	)
+	return errors.Wrap(err, "creating privilege in database")
+}
+
+func (s *Service) GetPrivileges(pz az.Principal, entityTypeId, entityId int64) ([]*web.EntityPrivilege, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.ViewPermission[entityTypeId]); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ViewWorkgroup); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(entityTypeId, entityId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Read privileges
+	entityPrivileges, err := s.ds.ReadEntityPrivileges(
+		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+	)
+	return toEntityPrivileges(entityPrivileges), errors.Wrap(err, "reading entity privileges from database")
+}
+
+func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entityTypeId, entityId int64) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.ManagePermission[entityTypeId]); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckPermission(s.ds.Permission.ViewWorkgroup); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(entityTypeId, entityId); err != nil {
+		return errors.Wrap(err, "checking view privileges")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Workgroup, workgroupId); err != nil {
+		return errors.Wrap(err, "checking view privileges")
+	}
+	// Delete privileges
+	err := s.ds.DeletePrivilege(data.ByPrivilegeType(kind), data.ByWorkgroupId(workgroupId),
+		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.WithUnshareAudit(pz),
+	)
+	return errors.Wrap(err, "deleting privilege from database")
+}
+
+func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offset, limit uint) ([]*web.EntityHistory, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.ViewPermission[entityTypeId]); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(entityTypeId, entityId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch history details
+	history, err := s.ds.ReadHistories(
+		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.WithOffset(offset), data.WithLimit(limit),
+	)
+	return toEntityHistories(history), errors.Wrap(err, "reading history from database")
+}
+
+func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) error {
+	return nil
+}
+
+func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
+	return nil, nil
+}
+
+func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	return nil, nil
+}
+
+func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	return nil, nil
+}
+
+func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) error {
+	return nil
+}
+
+func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	return nil
+}
+
+func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	return nil
+}
+
+func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error {
+	return nil
+}
+
+func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error) {
+	return "", nil
+}
+
+func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
+	return 0, nil
+}
+
+func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
+	return nil, nil
+}
+
+func (s *Service) CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name, description string, responseColumnName string) (int64, error) {
+	return 0, nil
+}
+
+func (s *Service) GetDatasets(pz az.Principal, datasourceId int64, offset, limit uint) ([]*web.Dataset, error) {
+	return nil, nil
+}
+
+func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, error) {
+	return nil, nil
+}
+
+func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*web.Dataset, error) {
+	return nil, nil
+}
+
+func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
+	return nil
+}
+
+func (s *Service) SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error) {
+	return nil, nil
+}
+
+func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
+	return nil
+}
+
+func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, filePath string) (int64, error) {
+	return 0, nil
+}
+
+func (s *Service) GetDatasources(pz az.Principal, projectId int64, offset, limit uint) ([]*web.Datasource, error) {
+	return nil, nil
+}
+
+func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datasource, error) {
+	return nil, nil
+}
+
+func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, filePath string) error {
+	return nil
+}
+
+func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
+	return nil
+}
+
+func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
+	return nil, nil
+}
+
+func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+	return nil, nil
+}
+
+func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
+	return nil, nil
+}
+
+func (s *Service) GetJob(pz az.Principal, clusterId int64, jobName string) (*web.Job, error) {
+	return nil, nil
+}
+
+func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) {
+	return nil, nil
 }
 
 // Helper function to convert from int to bytes
@@ -2189,6 +2384,40 @@ func toIdentities(is []data.Identity) []*web.Identity {
 	ar := make([]*web.Identity, len(is))
 	for i, iy := range is {
 		ar[i] = toIdentity(iy)
+	}
+	return ar
+}
+
+func toEntityPrivilege(e data.EntityPrivilege) *web.EntityPrivilege {
+	return &web.EntityPrivilege{
+		e.Type,
+		e.WorkgroupId,
+		e.Workgroup.Name,
+		e.Workgroup.Description.String,
+	}
+}
+
+func toEntityPrivileges(es []data.EntityPrivilege) []*web.EntityPrivilege {
+	ar := make([]*web.EntityPrivilege, len(es))
+	for i, e := range es {
+		ar[i] = toEntityPrivilege(e)
+	}
+	return ar
+}
+
+func toEntityHistory(h data.History) *web.EntityHistory {
+	return &web.EntityHistory{
+		h.IdentityId,
+		h.Action,
+		h.Description.String,
+		toTimestamp(h.Created),
+	}
+}
+
+func toEntityHistories(es []data.History) []*web.EntityHistory {
+	ar := make([]*web.EntityHistory, len(es))
+	for i, e := range es {
+		ar[i] = toEntityHistory(e)
 	}
 	return ar
 }

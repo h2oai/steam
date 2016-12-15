@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -42,16 +43,14 @@ const (
 	defaultClusterProxyAddress          = ":9001"
 	defaultCompilationAddress           = ":8080"
 	defaultPredictionServiceHost        = ""
-	DefaultPredictionServicePortsString = "1025:65535"
+	defaultPredictionServicePortsString = "1025:65535"
 )
 
 var defaultPredictionServicePorts = [...]int{1025, 65535}
 
-type DBOpts struct {
-	Connection        data.Connection
-	SuperuserName     string
-	SuperuserPassword string
-}
+const (
+	defaultDriver = "sqlite3"
+)
 
 type YarnOpts struct {
 	KerberosEnabled bool
@@ -70,21 +69,21 @@ type Opts struct {
 	PredictionServicePorts    [2]int
 	EnableProfiler            bool
 	Yarn                      YarnOpts
-	DB                        DBOpts
+	DBOpts                    data.DBOpts
 }
 
-var DefaultConnection = data.Connection{
-	"steam",
-	"steam",
-	"",
-	"",
-	"",
-	"",
-	"disable",
-	"",
-	"",
-	"",
-}
+// var DefaultConnection = data.Connection{
+// 	"steam",
+// 	"steam",
+// 	"",
+// 	"",
+// 	"",
+// 	"",
+// 	"disable",
+// 	"",
+// 	"",
+// 	"",
+// }
 
 var DefaultOpts = &Opts{
 	defaultWebAddress,
@@ -99,7 +98,9 @@ var DefaultOpts = &Opts{
 	defaultPredictionServicePorts,
 	false,
 	YarnOpts{false},
-	DBOpts{DefaultConnection, "", ""},
+	data.DBOpts{
+		Path: filepath.Join(".", fs.VarDir, "master", fs.DbDir, "steam.db"),
+	},
 }
 
 type AuthProvider interface {
@@ -130,13 +131,14 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- init storage ---
 
-	ds, err := data.Create(
-		path.Join(wd, fs.DbDir, "steam.db"),
-		// opts.DB.Connection,
-		opts.DB.SuperuserName,
-		opts.DB.SuperuserPassword,
-	)
-
+	opts.DBOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
+	ds, err := data.NewDatastore(defaultDriver, opts.DBOpts)
+	// ds, err := data.Create(
+	// 	path.Join(wd, fs.DbDir, "steam.db"),
+	// 	// opts.DB.Connection,
+	// 	opts.DB.SuperuserName,
+	// 	opts.DB.SuperuserPassword,
+	// )
 	if err != nil {
 		log.Fatalln(err)
 	}

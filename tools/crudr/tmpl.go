@@ -89,7 +89,7 @@ var DEBUG bool
 	if err != nil {
 		return errors.Wrap(err, "retrieving id")
 	}
-	q.entityId, q.audit = id, CreateOp
+	q.entityId = id
 	{{template "postFunc"}}
 	
 	return nil
@@ -161,7 +161,6 @@ var DEBUG bool
 	if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
 		return errors.Wrap(err, "executing query")
 	}
-	q.entityId, q.audit = {{lowerFirst .Name}}Id, UpdateOp
 	{{template "postFunc"}}
 	return nil
 	{{- else}}
@@ -179,7 +178,6 @@ var DEBUG bool
 	if _, err := q.dataset.Delete().Exec(); err != nil {
 		return errors.Wrap(err, "executing query")
 	}
-	q.entityId, q.audit = {{lowerFirst .Name}}Id, DeleteOp
 	{{template "postFunc"}}
 	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 	{{- else}} 
@@ -205,7 +203,7 @@ func (ds *Datastore) Create{{title .Name}}({{toArgs .Cols}}options ...QueryOpt) 
 	var id int64
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+		q := NewQueryConfig(ds, tx, CreateOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 		{{template "fields" .}}
 		{{template "options"}}
 		{{template "insertSql"}}
@@ -221,7 +219,7 @@ func (ds *Datastore) Read{{title ( toPluralName .Name)}}s(options ...QueryOpt) (
 	var {{lowerFirst ( toPluralName .Name)}}s []{{.Name}}
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+		q := NewQueryConfig(ds, tx, "", "{{lowerFirst (camelToSnake .Name)}}", nil)
 		{{template "options"}}
 		{{template "toSql"}}
 		{{template "getRows"}}
@@ -240,7 +238,7 @@ func (ds *Datastore) Read{{title .Name}}(options ...QueryOpt) ({{.Name}}, bool, 
 	var exists bool
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+		q := NewQueryConfig(ds, tx, "", "{{lowerFirst (camelToSnake .Name)}}", nil)
 		{{template "options"}}
 		{{template "toSql"}}
 		{{template "getRow"}}
@@ -258,9 +256,9 @@ func (ds *Datastore) Update{{title .Name}}({{if .Key}}{{lowerFirst .Name}}Id int
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
 		{{- if .Key}}
-		q := NewQueryConfig(ds, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}").Where(goqu.I("{{.Key}}").Eq({{lowerFirst .Name}}Id)))
+		q := NewQueryConfig(ds, tx, UpdateOp, "{{lowerFirst (camelToSnake .Name)}}", {{lowerFirst .Name}}Id)
 		{{- else}}
-		q := NewQueryConfig(ds, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+		q := NewQueryConfig(ds, tx, UpdateOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 		{{- end}}
 		{{template "options"}}
 		{{template "updateSql" .}}
@@ -276,9 +274,9 @@ func (ds *Datastore) Delete{{title .Name}}({{if .Key}}{{lowerFirst .Name}}Id int
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
 		{{- if .Key}}
-		q := NewQueryConfig(ds, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}").Where(goqu.I("{{.Key}}").Eq({{lowerFirst .Name}}Id)))
+		q := NewQueryConfig(ds, tx, DeleteOp, "{{lowerFirst (camelToSnake .Name)}}", {{lowerFirst .Name}}Id)
 		{{- else}}
-		q := NewQueryConfig(ds, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+		q := NewQueryConfig(ds, tx, DeleteOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 		{{- end}}
 		{{template "options"}}
 		{{template "deleteSql" .}}
@@ -301,7 +299,7 @@ func (ds *Datastore) Delete{{title .Name}}({{if .Key}}{{lowerFirst .Name}}Id int
 {{- /* CREATE PRIVATE */ -}}
 func create{{title .Name}}(tx *goqu.TxDatabase, {{toArgs .Cols}}options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
-	q := NewQueryConfig(nil, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+	q := NewQueryConfig(nil, tx, CreateOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 	{{template "fields" .}}
 	{{with "0"}}{{template "options" .}}{{end}}
 	{{with "0"}}{{template "insertSql" .}}{{end}}
@@ -310,7 +308,7 @@ func create{{title .Name}}(tx *goqu.TxDatabase, {{toArgs .Cols}}options ...Query
 {{/* READ MULTI PRIVATE */ -}}
 func read{{title ( toPluralName .Name)}}s(tx *goqu.TxDatabase, options ...QueryOpt) ([]{{.Name}}, error) {
 	// Setup query with optional parameters
-	q := NewQueryConfig(nil, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+	q := NewQueryConfig(nil, tx, "", "{{lowerFirst (camelToSnake .Name)}}", nil)
 	{{with printf "[]%s{}" .Name}}{{template "options" .}}{{end}}
 	{{template "toSql"}}
 	{{template "getRows" .}}
@@ -321,7 +319,7 @@ func read{{title ( toPluralName .Name)}}s(tx *goqu.TxDatabase, options ...QueryO
 func read{{title .Name}}(tx *goqu.TxDatabase, options ...QueryOpt) ({{.Name}}, bool, error) {
 	var exists bool
 	// Setup query with optional parameters
-	q := NewQueryConfig(nil, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+	q := NewQueryConfig(nil, tx, "", "{{lowerFirst (camelToSnake .Name)}}", nil)
 	{{with printf "%s{}, exists" .Name}}{{template "options" .}}{{end}}
 	{{template "toSql"}}
 	{{template "getRow" .}}
@@ -333,9 +331,9 @@ func read{{title .Name}}(tx *goqu.TxDatabase, options ...QueryOpt) ({{.Name}}, b
 func update{{title .Name}}(tx *goqu.TxDatabase, {{if .Key}}{{lowerFirst .Name}}Id int64, {{end}}options ...QueryOpt) error {
 	// Setup query with optional parameters
 	{{- if .Key}}
-	q := NewQueryConfig(nil, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}").Where(goqu.I("{{.Key}}").Eq({{lowerFirst .Name}}Id)))
+	q := NewQueryConfig(nil, tx, UpdateOp, "{{lowerFirst (camelToSnake .Name)}}", {{lowerFirst .Name}}Id)
 	{{- else}}
-	q := NewQueryConfig(nil, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+	q := NewQueryConfig(nil, tx, UpdateOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 	{{- end}}
 	{{template "options"}}
 	{{template "updateSql"}}
@@ -345,9 +343,9 @@ func update{{title .Name}}(tx *goqu.TxDatabase, {{if .Key}}{{lowerFirst .Name}}I
 func delete{{title .Name}}(tx *goqu.TxDatabase, {{if .Key}}{{lowerFirst .Name}}Id int64, {{end}}options ...QueryOpt) error {
 	// Setup query with optional parameters
 	{{- if .Key}}
-	q := NewQueryConfig(nil, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}").Where(goqu.I("{{.Key}}").Eq({{lowerFirst .Name}}Id)))
+	q := NewQueryConfig(nil, tx, DeleteOp, "{{lowerFirst (camelToSnake .Name)}}", {{lowerFirst .Name}}Id)
 	{{- else}}
-	q := NewQueryConfig(nil, tx, "{{lowerFirst (camelToSnake .Name)}}", tx.From("{{lowerFirst (camelToSnake .Name)}}"))
+	q := NewQueryConfig(nil, tx, DeleteOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 	{{- end}}
 	{{template "options"}}
 	{{template "deleteSql"}}

@@ -86,7 +86,7 @@ func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivileg
 		return false, errors.Wrap(err, "beginning transaction")
 	}
 
-	var privileges []privilege
+	var privileges []Privilege
 	if err := tx.Wrap(func() error {
 		var err error
 		privileges, err = readPrivileges(tx,

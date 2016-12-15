@@ -63,10 +63,13 @@ func setupWD(testType string) (string, string) {
 }
 
 func setupDS(driver, wd string) *data.Datastore {
-	var dbOpts string
+	dbOpts := data.DBOpts{
+		SuperName: superuser,
+		SuperPass: superuser,
+	}
 	switch driver {
 	case "sqlite3":
-		dbOpts = filepath.Join(wd, fs.DbDir, "steam.db")
+		dbOpts.Opts = filepath.Join(wd, fs.DbDir, "steam.db")
 	}
 
 	ds, err := data.NewDatastore(driver, dbOpts)
@@ -77,11 +80,6 @@ func setupDS(driver, wd string) *data.Datastore {
 }
 
 func setupPz(ds *data.Datastore) az.Principal {
-	_, err := ds.CreateSuperuser(superuser, superuser)
-	if err != nil {
-		log.Fatalf("Creating superuser: %+v", err)
-	}
-
 	pz, err := ds.Lookup(superuser)
 	if err != nil {
 		log.Fatalf("Looking up principal", err)

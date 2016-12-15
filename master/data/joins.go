@@ -98,7 +98,7 @@ func (ds *Datastore) ReadLabelModels(options ...QueryOpt) ([]LabelModel, error) 
 	var labelModels []LabelModel
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		))
@@ -141,7 +141,7 @@ func (ds *Datastore) ReadLabelModel(options ...QueryOpt) (LabelModel, bool, erro
 	var exists bool
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		))
@@ -277,7 +277,7 @@ func (ds *Datastore) ReadBinomialModels(options ...QueryOpt) ([]BinomialModel, e
 	var binomialModels []BinomialModel
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		)).InnerJoin(goqu.I("binomial_model"), goqu.On(
@@ -322,7 +322,7 @@ func (ds *Datastore) ReadBinomialModel(options ...QueryOpt) (BinomialModel, bool
 	var exists bool
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		)).InnerJoin(goqu.I("binomial_model"), goqu.On(
@@ -456,7 +456,7 @@ func (ds *Datastore) ReadMultinomialModels(options ...QueryOpt) ([]MultinomialMo
 	var multinomialModels []MultinomialModel
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		)).InnerJoin(goqu.I("multinomial_model"), goqu.On(
@@ -501,7 +501,7 @@ func (ds *Datastore) ReadMultinomialModel(options ...QueryOpt) (MultinomialModel
 	var exists bool
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		)).InnerJoin(goqu.I("multinomial_model"), goqu.On(
@@ -634,7 +634,7 @@ func (ds *Datastore) ReadRegressionModels(options ...QueryOpt) ([]RegressionMode
 	var regressionModels []RegressionModel
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		)).InnerJoin(goqu.I("regression_model"), goqu.On(
@@ -679,7 +679,7 @@ func (ds *Datastore) ReadRegressionModel(options ...QueryOpt) (RegressionModel, 
 	var exists bool
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "model", tx.From("model"))
+		q := NewQueryConfig(ds, tx, "", "model", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("label").As("label"), goqu.On(
 			goqu.I("model.id").Eq(goqu.I("label.model_id")),
 		)).InnerJoin(goqu.I("regression_model"), goqu.On(
@@ -717,4 +717,143 @@ func (ds *Datastore) ReadRegressionModel(options ...QueryOpt) (RegressionModel, 
 	})
 
 	return regressionModel, exists, errors.Wrap(err, "committing transaction")
+}
+
+type EntityPrivilege struct {
+	Privilege
+	Workgroup Workgroup
+}
+
+func scanEntityPrivilege(r *sql.Row) (EntityPrivilege, error) {
+	var s EntityPrivilege
+	if err := r.Scan(
+		&s.Type,
+		&s.WorkgroupId,
+		&s.EntityType,
+		&s.EntityId,
+		&s.Workgroup.Id,
+		&s.Workgroup.Type,
+		&s.Workgroup.Name,
+		&s.Workgroup.Description,
+		&s.Workgroup.Created,
+	); err != nil {
+		return EntityPrivilege{}, err
+	}
+	return s, nil
+}
+
+func scanEntityPrivileges(rs *sql.Rows) ([]EntityPrivilege, error) {
+	structs := make([]EntityPrivilege, 0, 16)
+	var err error
+	for rs.Next() {
+		var s EntityPrivilege
+		if err = rs.Scan(
+			&s.Type,
+			&s.WorkgroupId,
+			&s.EntityType,
+			&s.EntityId,
+			&s.Workgroup.Id,
+			&s.Workgroup.Type,
+			&s.Workgroup.Name,
+			&s.Workgroup.Description,
+			&s.Workgroup.Created,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
+func (ds *Datastore) ReadEntityPrivileges(options ...QueryOpt) ([]EntityPrivilege, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return []EntityPrivilege{}, errors.Wrap(err, "beginning transaction")
+	}
+
+	var entityPrivileges []EntityPrivilege
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "", "workgroup", nil)
+		q.dataset = q.dataset.LeftOuterJoin(goqu.I("workgroup"), goqu.On(
+			goqu.I("privilege.workgroup_id").Eq(goqu.I("workgroup.id")),
+		))
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToSql())
+		}
+		// Execute query
+
+		rows, err := getRows(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		entityPrivileges, err = scanEntityPrivileges(rows)
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+		return nil
+	})
+	return entityPrivileges, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) ReadEntityPrivilege(options ...QueryOpt) (EntityPrivilege, bool, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return EntityPrivilege{}, false, errors.Wrap(err, "beginning transaction")
+	}
+
+	var entityPrivilege EntityPrivilege
+	var exists bool
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "", "privilege", nil)
+		q.dataset = q.dataset.LeftOuterJoin(goqu.I("workgroup"), goqu.On(
+			goqu.I("privilege.workgroup_id").Eq(goqu.I("workgroup.id")),
+		))
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if DEBUG {
+			log.Println(q.dataset.ToSql())
+		}
+		// Execute query
+		row, err := getRow(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		entityPrivilege, err = scanEntityPrivilege(row)
+		if err == sql.ErrNoRows {
+			return nil
+		} else if err == nil {
+			exists = true
+		}
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return entityPrivilege, exists, errors.Wrap(err, "committing transaction")
 }

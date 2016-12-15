@@ -23,8 +23,9 @@ package cli2
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"log"
+
+	"github.com/spf13/cobra"
 )
 
 // registerGeneratedCommands appends generated commands to the
@@ -1109,9 +1110,9 @@ func findModels(c *context) *cobra.Command {
 	var multinomial bool // Switch for FindModelsMultinomial()
 	var regression bool  // Switch for FindModelsRegression()
 	var ascending bool   // No description available
-	var limit int64      // No description available
+	var limit uint       // No description available
 	var namePart string  // No description available
-	var offset int64     // No description available
+	var offset uint      // No description available
 	var projectId int64  // No description available
 	var sortBy string    // No description available
 
@@ -1269,9 +1270,9 @@ func findModels(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&regression, "regression", regression, "List regression models")
 
 	cmd.Flags().BoolVar(&ascending, "ascending", ascending, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "No description available")
 	cmd.Flags().StringVar(&namePart, "name-part", namePart, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().UintVar(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	cmd.Flags().StringVar(&sortBy, "sort-by", sortBy, "No description available")
 	return cmd
@@ -1627,8 +1628,8 @@ Examples:
 `
 
 func getClusters(c *context) *cobra.Command {
-	var limit int64  // No description available
-	var offset int64 // No description available
+	var limit uint  // No description available
+	var offset uint // No description available
 
 	cmd := newCmd(c, getClustersHelp, func(c *context, args []string) {
 
@@ -1657,8 +1658,8 @@ func getClusters(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "No description available")
+	cmd.Flags().UintVar(&offset, "offset", offset, "No description available")
 	return cmd
 }
 
@@ -1754,8 +1755,8 @@ func getDatasets(c *context) *cobra.Command {
 	var fromCluster bool   // Switch for GetDatasetsFromCluster()
 	var clusterId int64    // No description available
 	var datasourceId int64 // No description available
-	var limit int64        // No description available
-	var offset int64       // No description available
+	var limit uint         // No description available
+	var offset uint        // No description available
 
 	cmd := newCmd(c, getDatasetsHelp, func(c *context, args []string) {
 		if fromCluster { // GetDatasetsFromCluster
@@ -1817,8 +1818,8 @@ func getDatasets(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
 	cmd.Flags().Int64Var(&datasourceId, "datasource-id", datasourceId, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "No description available")
+	cmd.Flags().UintVar(&offset, "offset", offset, "No description available")
 	return cmd
 }
 
@@ -1876,8 +1877,8 @@ Examples:
 `
 
 func getDatasources(c *context) *cobra.Command {
-	var limit int64     // No description available
-	var offset int64    // No description available
+	var limit uint      // No description available
+	var offset uint     // No description available
 	var projectId int64 // No description available
 
 	cmd := newCmd(c, getDatasourcesHelp, func(c *context, args []string) {
@@ -1908,8 +1909,8 @@ func getDatasources(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "No description available")
+	cmd.Flags().UintVar(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
 }
@@ -2004,8 +2005,8 @@ Examples:
 func getHistory(c *context) *cobra.Command {
 	var entityId int64     // Integer ID for an entity in Steam.
 	var entityTypeId int64 // Integer ID for the type of entity.
-	var limit int64        // The maximum returned objects.
-	var offset int64       // An offset to start the search on.
+	var limit uint         // The maximum uint objects.
+	var offset uint        // An offset uint start the search on.
 
 	cmd := newCmd(c, getHistoryHelp, func(c *context, args []string) {
 
@@ -2013,8 +2014,8 @@ func getHistory(c *context) *cobra.Command {
 		history, err := c.remote.GetHistory(
 			entityTypeId, // Integer ID for the type of entity.
 			entityId,     // Integer ID for an entity in Steam.
-			offset,       // An offset to start the search on.
-			limit,        // The maximum returned objects.
+			offset,       // An offset uint start the search on.
+			limit,        // The maximum uint objects.
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -2035,8 +2036,8 @@ func getHistory(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "Integer ID for an entity in Steam.")
 	cmd.Flags().Int64Var(&entityTypeId, "entity-type-id", entityTypeId, "Integer ID for the type of entity.")
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "The maximum uint objects.")
+	cmd.Flags().UintVar(&offset, "offset", offset, "An offset uint start the search on.")
 	return cmd
 }
 
@@ -2071,8 +2072,8 @@ func getIdentities(c *context) *cobra.Command {
 	var forEntity bool    // Switch for GetIdentitiesForEntity()
 	var entityId int64    // An entity ID.
 	var entityType int64  // An entity type ID.
-	var limit int64       // The maximum returned objects.
-	var offset int64      // An offset to start the search on.
+	var limit uint        // The maximum uint objects.
+	var offset uint       // An offset uint start the search on.
 	var roleId int64      // Integer ID of a role in Steam.
 	var workgroupId int64 // Integer ID of a workgroup in Steam.
 
@@ -2151,8 +2152,8 @@ func getIdentities(c *context) *cobra.Command {
 
 			// List identities
 			identities, err := c.remote.GetIdentities(
-				offset, // An offset to start the search on.
-				limit,  // The maximum returned objects.
+				offset, // An offset uint start the search on.
+				limit,  // The maximum uint objects.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -2178,8 +2179,8 @@ func getIdentities(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&entityId, "entity-id", entityId, "An entity ID.")
 	cmd.Flags().Int64Var(&entityType, "entity-type", entityType, "An entity type ID.")
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "The maximum uint objects.")
+	cmd.Flags().UintVar(&offset, "offset", offset, "An offset uint start the search on.")
 	cmd.Flags().Int64Var(&roleId, "role-id", roleId, "Integer ID of a role in Steam.")
 	cmd.Flags().Int64Var(&workgroupId, "workgroup-id", workgroupId, "Integer ID of a workgroup in Steam.")
 	return cmd
@@ -2585,8 +2586,8 @@ func getModels(c *context) *cobra.Command {
 	var fromCluster bool // Switch for GetModelsFromCluster()
 	var clusterId int64  // No description available
 	var frameKey string  // No description available
-	var limit int64      // No description available
-	var offset int64     // No description available
+	var limit uint       // No description available
+	var offset uint      // No description available
 	var projectId int64  // No description available
 
 	cmd := newCmd(c, getModelsHelp, func(c *context, args []string) {
@@ -2670,8 +2671,8 @@ func getModels(c *context) *cobra.Command {
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
 	cmd.Flags().StringVar(&frameKey, "frame-key", frameKey, "No description available")
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "No description available")
+	cmd.Flags().UintVar(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
 }
@@ -2941,8 +2942,8 @@ Examples:
 `
 
 func getProjects(c *context) *cobra.Command {
-	var limit int64  // No description available
-	var offset int64 // No description available
+	var limit uint  // No description available
+	var offset uint // No description available
 
 	cmd := newCmd(c, getProjectsHelp, func(c *context, args []string) {
 
@@ -2969,8 +2970,8 @@ func getProjects(c *context) *cobra.Command {
 		return
 	})
 
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "No description available")
+	cmd.Flags().UintVar(&offset, "offset", offset, "No description available")
 	return cmd
 }
 
@@ -3058,8 +3059,8 @@ Examples:
 func getRoles(c *context) *cobra.Command {
 	var forIdentity bool // Switch for GetRolesForIdentity()
 	var identityId int64 // Integer ID of an identity in Steam.
-	var limit int64      // The maximum returned objects.
-	var offset int64     // An offset to start the search on.
+	var limit uint       // The maximum uint objects.
+	var offset uint      // An offset uint start the search on.
 
 	cmd := newCmd(c, getRolesHelp, func(c *context, args []string) {
 		if forIdentity { // GetRolesForIdentity
@@ -3088,8 +3089,8 @@ func getRoles(c *context) *cobra.Command {
 
 			// List roles
 			roles, err := c.remote.GetRoles(
-				offset, // An offset to start the search on.
-				limit,  // The maximum returned objects.
+				offset, // An offset uint start the search on.
+				limit,  // The maximum uint objects.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3111,8 +3112,8 @@ func getRoles(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List roles for an identity")
 
 	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "The maximum uint objects.")
+	cmd.Flags().UintVar(&offset, "offset", offset, "An offset uint start the search on.")
 	return cmd
 }
 
@@ -3184,9 +3185,9 @@ Examples:
 func getServices(c *context) *cobra.Command {
 	var forProject bool // Switch for GetServicesForProject()
 	var forModel bool   // Switch for GetServicesForModel()
-	var limit int64     // No description available
+	var limit uint      // No description available
 	var modelId int64   // No description available
-	var offset int64    // No description available
+	var offset uint     // No description available
 	var projectId int64 // No description available
 
 	cmd := newCmd(c, getServicesHelp, func(c *context, args []string) {
@@ -3277,9 +3278,9 @@ func getServices(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forProject, "for-project", forProject, "List services for a project")
 	cmd.Flags().BoolVar(&forModel, "for-model", forModel, "List services for a model")
 
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "No description available")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "No description available")
 	cmd.Flags().Int64Var(&modelId, "model-id", modelId, "No description available")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "No description available")
+	cmd.Flags().UintVar(&offset, "offset", offset, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
 	return cmd
 }
@@ -3368,8 +3369,8 @@ Examples:
 func getWorkgroups(c *context) *cobra.Command {
 	var forIdentity bool // Switch for GetWorkgroupsForIdentity()
 	var identityId int64 // Integer ID of an identity in Steam.
-	var limit int64      // The maximum returned objects.
-	var offset int64     // An offset to start the search on.
+	var limit uint       // The maximum uint objects.
+	var offset uint      // An offset uint start the search on.
 
 	cmd := newCmd(c, getWorkgroupsHelp, func(c *context, args []string) {
 		if forIdentity { // GetWorkgroupsForIdentity
@@ -3398,8 +3399,8 @@ func getWorkgroups(c *context) *cobra.Command {
 
 			// List workgroups
 			workgroups, err := c.remote.GetWorkgroups(
-				offset, // An offset to start the search on.
-				limit,  // The maximum returned objects.
+				offset, // An offset uint start the search on.
+				limit,  // The maximum uint objects.
 			)
 			if err != nil {
 				log.Fatalln(err)
@@ -3421,8 +3422,8 @@ func getWorkgroups(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forIdentity, "for-identity", forIdentity, "List workgroups for an identity")
 
 	cmd.Flags().Int64Var(&identityId, "identity-id", identityId, "Integer ID of an identity in Steam.")
-	cmd.Flags().Int64Var(&limit, "limit", 10000, "The maximum returned objects.")
-	cmd.Flags().Int64Var(&offset, "offset", offset, "An offset to start the search on.")
+	cmd.Flags().UintVar(&limit, "limit", 10000, "The maximum uint objects.")
+	cmd.Flags().UintVar(&offset, "offset", offset, "An offset uint start the search on.")
 	return cmd
 }
 

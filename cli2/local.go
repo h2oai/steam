@@ -151,18 +151,19 @@ func serveMaster(c *context) *cobra.Command {
 		predictionServicePortsString string
 		enableProfiler               bool
 		yarnEnableKerberos           bool
-		dbName                       string
-		dbUserName                   string
-		dbPassword                   string
-		dbHost                       string
-		dbPort                       string
-		dbConnectionTimeout          string
-		dbSSLMode                    string
-		dbSSLCertPath                string
-		dbSSLKeyPath                 string
-		dbSSLRootCertPath            string
-		superuserName                string
-		superuserPassword            string
+		// dbName                       string
+		// dbUserName                   string
+		// dbPassword                   string
+		// dbHost                       string
+		// dbPort                       string
+		// dbConnectionTimeout          string
+		// dbSSLMode                    string
+		// dbSSLCertPath                string
+		// dbSSLKeyPath                 string
+		// dbSSLRootCertPath            string
+		dbPath            string
+		superuserName     string
+		superuserPassword string
 	)
 
 	opts := master.DefaultOpts
@@ -202,19 +203,20 @@ func serveMaster(c *context) *cobra.Command {
 			master.YarnOpts{
 				yarnEnableKerberos,
 			},
-			master.DBOpts{
-				data.Connection{
-					dbName,
-					dbUserName,
-					dbPassword,
-					dbHost,
-					dbPort,
-					dbConnectionTimeout,
-					dbSSLMode,
-					dbSSLCertPath,
-					dbSSLKeyPath,
-					dbSSLRootCertPath,
-				},
+			data.DBOpts{
+				dbPath,
+				// data.Connection{
+				// 	dbName,
+				// 	dbUserName,
+				// 	dbPassword,
+				// 	dbHost,
+				// 	dbPort,
+				// 	dbConnectionTimeout,
+				// 	dbSSLMode,
+				// 	dbSSLCertPath,
+				// 	dbSSLKeyPath,
+				// 	dbSSLRootCertPath,
+				// },
 				superuserName,
 				superuserPassword,
 			},
@@ -246,8 +248,9 @@ func serveMaster(c *context) *cobra.Command {
 	// cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DB.Connection.SSLCert, "Database connection SSL certificate path (optional)")
 	// cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DB.Connection.SSLKey, "Database connection SSL key path (optional)")
 	// cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DB.Connection.SSLRootCert, "Database connection SSL root certificate path (optional)")
-	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DB.SuperuserName, "Set superuser username (required for first-time-use only)")
-	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DB.SuperuserPassword, "Set superuser password (required for first-time-use only)")
+	cmd.Flags().StringVar(&dbPath, "db-path", opts.DBOpts.Path, "Set the path to a local database")
+	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DBOpts.SuperName, "Set superuser username (required for first-time-use only)")
+	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DBOpts.SuperPass, "Set superuser password (required for first-time-use only)")
 
 	return cmd
 

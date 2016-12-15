@@ -298,22 +298,22 @@ type Service interface {
 	StopClusterOnYarn(pz az.Principal, clusterId int64, keytab string) error
 	GetCluster(pz az.Principal, clusterId int64) (*Cluster, error)
 	GetClusterOnYarn(pz az.Principal, clusterId int64) (*YarnCluster, error)
-	GetClusters(pz az.Principal, offset int64, limit int64) ([]*Cluster, error)
+	GetClusters(pz az.Principal, offset uint, limit uint) ([]*Cluster, error)
 	GetClusterStatus(pz az.Principal, clusterId int64) (*ClusterStatus, error)
 	DeleteCluster(pz az.Principal, clusterId int64) error
 	GetJob(pz az.Principal, clusterId int64, jobName string) (*Job, error)
 	GetJobs(pz az.Principal, clusterId int64) ([]*Job, error)
 	CreateProject(pz az.Principal, name string, description string, modelCategory string) (int64, error)
-	GetProjects(pz az.Principal, offset int64, limit int64) ([]*Project, error)
+	GetProjects(pz az.Principal, offset uint, limit uint) ([]*Project, error)
 	GetProject(pz az.Principal, projectId int64) (*Project, error)
 	DeleteProject(pz az.Principal, projectId int64) error
 	CreateDatasource(pz az.Principal, projectId int64, name string, description string, path string) (int64, error)
-	GetDatasources(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Datasource, error)
+	GetDatasources(pz az.Principal, projectId int64, offset uint, limit uint) ([]*Datasource, error)
 	GetDatasource(pz az.Principal, datasourceId int64) (*Datasource, error)
 	UpdateDatasource(pz az.Principal, datasourceId int64, name string, description string, path string) error
 	DeleteDatasource(pz az.Principal, datasourceId int64) error
 	CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error)
-	GetDatasets(pz az.Principal, datasourceId int64, offset int64, limit int64) ([]*Dataset, error)
+	GetDatasets(pz az.Principal, datasourceId int64, offset uint, limit uint) ([]*Dataset, error)
 	GetDataset(pz az.Principal, datasetId int64) (*Dataset, error)
 	GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*Dataset, error)
 	UpdateDataset(pz az.Principal, datasetId int64, name string, description string, responseColumnName string) error
@@ -322,17 +322,17 @@ type Service interface {
 	BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error)
 	BuildModelAuto(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
 	GetModel(pz az.Principal, modelId int64) (*Model, error)
-	GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
+	GetModels(pz az.Principal, projectId int64, offset uint, limit uint) ([]*Model, error)
 	GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*Model, error)
 	FindModelsCount(pz az.Principal, projectId int64) (int64, error)
 	GetAllBinomialSortCriteria(pz az.Principal) ([]string, error)
-	FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error)
+	FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*BinomialModel, error)
 	GetModelBinomial(pz az.Principal, modelId int64) (*BinomialModel, error)
 	GetAllMultinomialSortCriteria(pz az.Principal) ([]string, error)
-	FindModelsMultinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error)
+	FindModelsMultinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*MultinomialModel, error)
 	GetModelMultinomial(pz az.Principal, modelId int64) (*MultinomialModel, error)
 	GetAllRegressionSortCriteria(pz az.Principal) ([]string, error)
-	FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error)
+	FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*RegressionModel, error)
 	GetModelRegression(pz az.Principal, modelId int64) (*RegressionModel, error)
 	ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
 	CheckMojo(pz az.Principal, algo string) (bool, error)
@@ -348,9 +348,9 @@ type Service interface {
 	StartService(pz az.Principal, modelId int64, name string, packageName string) (int64, error)
 	StopService(pz az.Principal, serviceId int64) error
 	GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
-	GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
-	GetServicesForProject(pz az.Principal, projectId int64, offset int64, limit int64) ([]*ScoringService, error)
-	GetServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
+	GetServices(pz az.Principal, offset uint, limit uint) ([]*ScoringService, error)
+	GetServicesForProject(pz az.Principal, projectId int64, offset uint, limit uint) ([]*ScoringService, error)
+	GetServicesForModel(pz az.Principal, modelId int64, offset uint, limit uint) ([]*ScoringService, error)
 	DeleteService(pz az.Principal, serviceId int64) error
 	GetEngine(pz az.Principal, engineId int64) (*Engine, error)
 	GetEngines(pz az.Principal) ([]*Engine, error)
@@ -361,7 +361,7 @@ type Service interface {
 	GetPermissionsForRole(pz az.Principal, roleId int64) ([]*Permission, error)
 	GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*Permission, error)
 	CreateRole(pz az.Principal, name string, description string) (int64, error)
-	GetRoles(pz az.Principal, offset int64, limit int64) ([]*Role, error)
+	GetRoles(pz az.Principal, offset uint, limit uint) ([]*Role, error)
 	GetRolesForIdentity(pz az.Principal, identityId int64) ([]*Role, error)
 	GetRole(pz az.Principal, roleId int64) (*Role, error)
 	GetRoleByName(pz az.Principal, name string) (*Role, error)
@@ -371,14 +371,14 @@ type Service interface {
 	UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error
 	DeleteRole(pz az.Principal, roleId int64) error
 	CreateWorkgroup(pz az.Principal, name string, description string) (int64, error)
-	GetWorkgroups(pz az.Principal, offset int64, limit int64) ([]*Workgroup, error)
+	GetWorkgroups(pz az.Principal, offset uint, limit uint) ([]*Workgroup, error)
 	GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*Workgroup, error)
 	GetWorkgroup(pz az.Principal, workgroupId int64) (*Workgroup, error)
 	GetWorkgroupByName(pz az.Principal, name string) (*Workgroup, error)
 	UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) error
 	DeleteWorkgroup(pz az.Principal, workgroupId int64) error
 	CreateIdentity(pz az.Principal, name string, password string) (int64, error)
-	GetIdentities(pz az.Principal, offset int64, limit int64) ([]*Identity, error)
+	GetIdentities(pz az.Principal, offset uint, limit uint) ([]*Identity, error)
 	GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*Identity, error)
 	GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*Identity, error)
 	GetIdentitiesForEntity(pz az.Principal, entityType int64, entityId int64) ([]*UserRole, error)
@@ -394,7 +394,7 @@ type Service interface {
 	ShareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) error
 	GetPrivileges(pz az.Principal, entityTypeId int64, entityId int64) ([]*EntityPrivilege, error)
 	UnshareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) error
-	GetHistory(pz az.Principal, entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error)
+	GetHistory(pz az.Principal, entityTypeId int64, entityId int64, offset uint, limit uint) ([]*EntityHistory, error)
 	CreatePackage(pz az.Principal, projectId int64, name string) error
 	GetPackages(pz az.Principal, projectId int64) ([]string, error)
 	GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error)
@@ -474,8 +474,8 @@ type GetClusterOnYarnOut struct {
 }
 
 type GetClustersIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetClustersOut struct {
@@ -525,8 +525,8 @@ type CreateProjectOut struct {
 }
 
 type GetProjectsIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetProjectsOut struct {
@@ -561,8 +561,8 @@ type CreateDatasourceOut struct {
 
 type GetDatasourcesIn struct {
 	ProjectId int64 `json:"project_id"`
-	Offset    int64 `json:"offset"`
-	Limit     int64 `json:"limit"`
+	Offset    uint  `json:"offset"`
+	Limit     uint  `json:"limit"`
 }
 
 type GetDatasourcesOut struct {
@@ -608,8 +608,8 @@ type CreateDatasetOut struct {
 
 type GetDatasetsIn struct {
 	DatasourceId int64 `json:"datasource_id"`
-	Offset       int64 `json:"offset"`
-	Limit        int64 `json:"limit"`
+	Offset       uint  `json:"offset"`
+	Limit        uint  `json:"limit"`
 }
 
 type GetDatasetsOut struct {
@@ -690,8 +690,8 @@ type GetModelOut struct {
 
 type GetModelsIn struct {
 	ProjectId int64 `json:"project_id"`
-	Offset    int64 `json:"offset"`
-	Limit     int64 `json:"limit"`
+	Offset    uint  `json:"offset"`
+	Limit     uint  `json:"limit"`
 }
 
 type GetModelsOut struct {
@@ -727,8 +727,8 @@ type FindModelsBinomialIn struct {
 	NamePart  string `json:"name_part"`
 	SortBy    string `json:"sort_by"`
 	Ascending bool   `json:"ascending"`
-	Offset    int64  `json:"offset"`
-	Limit     int64  `json:"limit"`
+	Offset    uint   `json:"offset"`
+	Limit     uint   `json:"limit"`
 }
 
 type FindModelsBinomialOut struct {
@@ -755,8 +755,8 @@ type FindModelsMultinomialIn struct {
 	NamePart  string `json:"name_part"`
 	SortBy    string `json:"sort_by"`
 	Ascending bool   `json:"ascending"`
-	Offset    int64  `json:"offset"`
-	Limit     int64  `json:"limit"`
+	Offset    uint   `json:"offset"`
+	Limit     uint   `json:"limit"`
 }
 
 type FindModelsMultinomialOut struct {
@@ -783,8 +783,8 @@ type FindModelsRegressionIn struct {
 	NamePart  string `json:"name_part"`
 	SortBy    string `json:"sort_by"`
 	Ascending bool   `json:"ascending"`
-	Offset    int64  `json:"offset"`
-	Limit     int64  `json:"limit"`
+	Offset    uint   `json:"offset"`
+	Limit     uint   `json:"limit"`
 }
 
 type FindModelsRegressionOut struct {
@@ -915,8 +915,8 @@ type GetServiceOut struct {
 }
 
 type GetServicesIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetServicesOut struct {
@@ -925,8 +925,8 @@ type GetServicesOut struct {
 
 type GetServicesForProjectIn struct {
 	ProjectId int64 `json:"project_id"`
-	Offset    int64 `json:"offset"`
-	Limit     int64 `json:"limit"`
+	Offset    uint  `json:"offset"`
+	Limit     uint  `json:"limit"`
 }
 
 type GetServicesForProjectOut struct {
@@ -935,8 +935,8 @@ type GetServicesForProjectOut struct {
 
 type GetServicesForModelIn struct {
 	ModelId int64 `json:"model_id"`
-	Offset  int64 `json:"offset"`
-	Limit   int64 `json:"limit"`
+	Offset  uint  `json:"offset"`
+	Limit   uint  `json:"limit"`
 }
 
 type GetServicesForModelOut struct {
@@ -1019,8 +1019,8 @@ type CreateRoleOut struct {
 }
 
 type GetRolesIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetRolesOut struct {
@@ -1101,8 +1101,8 @@ type CreateWorkgroupOut struct {
 }
 
 type GetWorkgroupsIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetWorkgroupsOut struct {
@@ -1159,8 +1159,8 @@ type CreateIdentityOut struct {
 }
 
 type GetIdentitiesIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetIdentitiesOut struct {
@@ -1294,8 +1294,8 @@ type UnshareEntityOut struct {
 type GetHistoryIn struct {
 	EntityTypeId int64 `json:"entity_type_id"`
 	EntityId     int64 `json:"entity_id"`
-	Offset       int64 `json:"offset"`
-	Limit        int64 `json:"limit"`
+	Offset       uint  `json:"offset"`
+	Limit        uint  `json:"limit"`
 }
 
 type GetHistoryOut struct {
@@ -1472,7 +1472,7 @@ func (this *Remote) GetClusterOnYarn(clusterId int64) (*YarnCluster, error) {
 	return out.Cluster, nil
 }
 
-func (this *Remote) GetClusters(offset int64, limit int64) ([]*Cluster, error) {
+func (this *Remote) GetClusters(offset uint, limit uint) ([]*Cluster, error) {
 	in := GetClustersIn{offset, limit}
 	var out GetClustersOut
 	err := this.Proc.Call("GetClusters", &in, &out)
@@ -1532,7 +1532,7 @@ func (this *Remote) CreateProject(name string, description string, modelCategory
 	return out.ProjectId, nil
 }
 
-func (this *Remote) GetProjects(offset int64, limit int64) ([]*Project, error) {
+func (this *Remote) GetProjects(offset uint, limit uint) ([]*Project, error) {
 	in := GetProjectsIn{offset, limit}
 	var out GetProjectsOut
 	err := this.Proc.Call("GetProjects", &in, &out)
@@ -1572,7 +1572,7 @@ func (this *Remote) CreateDatasource(projectId int64, name string, description s
 	return out.DatasourceId, nil
 }
 
-func (this *Remote) GetDatasources(projectId int64, offset int64, limit int64) ([]*Datasource, error) {
+func (this *Remote) GetDatasources(projectId int64, offset uint, limit uint) ([]*Datasource, error) {
 	in := GetDatasourcesIn{projectId, offset, limit}
 	var out GetDatasourcesOut
 	err := this.Proc.Call("GetDatasources", &in, &out)
@@ -1622,7 +1622,7 @@ func (this *Remote) CreateDataset(clusterId int64, datasourceId int64, name stri
 	return out.DatasetId, nil
 }
 
-func (this *Remote) GetDatasets(datasourceId int64, offset int64, limit int64) ([]*Dataset, error) {
+func (this *Remote) GetDatasets(datasourceId int64, offset uint, limit uint) ([]*Dataset, error) {
 	in := GetDatasetsIn{datasourceId, offset, limit}
 	var out GetDatasetsOut
 	err := this.Proc.Call("GetDatasets", &in, &out)
@@ -1712,7 +1712,7 @@ func (this *Remote) GetModel(modelId int64) (*Model, error) {
 	return out.Model, nil
 }
 
-func (this *Remote) GetModels(projectId int64, offset int64, limit int64) ([]*Model, error) {
+func (this *Remote) GetModels(projectId int64, offset uint, limit uint) ([]*Model, error) {
 	in := GetModelsIn{projectId, offset, limit}
 	var out GetModelsOut
 	err := this.Proc.Call("GetModels", &in, &out)
@@ -1752,7 +1752,7 @@ func (this *Remote) GetAllBinomialSortCriteria() ([]string, error) {
 	return out.Criteria, nil
 }
 
-func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error) {
+func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*BinomialModel, error) {
 	in := FindModelsBinomialIn{projectId, namePart, sortBy, ascending, offset, limit}
 	var out FindModelsBinomialOut
 	err := this.Proc.Call("FindModelsBinomial", &in, &out)
@@ -1782,7 +1782,7 @@ func (this *Remote) GetAllMultinomialSortCriteria() ([]string, error) {
 	return out.Criteria, nil
 }
 
-func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error) {
+func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*MultinomialModel, error) {
 	in := FindModelsMultinomialIn{projectId, namePart, sortBy, ascending, offset, limit}
 	var out FindModelsMultinomialOut
 	err := this.Proc.Call("FindModelsMultinomial", &in, &out)
@@ -1812,7 +1812,7 @@ func (this *Remote) GetAllRegressionSortCriteria() ([]string, error) {
 	return out.Criteria, nil
 }
 
-func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error) {
+func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*RegressionModel, error) {
 	in := FindModelsRegressionIn{projectId, namePart, sortBy, ascending, offset, limit}
 	var out FindModelsRegressionOut
 	err := this.Proc.Call("FindModelsRegression", &in, &out)
@@ -1972,7 +1972,7 @@ func (this *Remote) GetService(serviceId int64) (*ScoringService, error) {
 	return out.Service, nil
 }
 
-func (this *Remote) GetServices(offset int64, limit int64) ([]*ScoringService, error) {
+func (this *Remote) GetServices(offset uint, limit uint) ([]*ScoringService, error) {
 	in := GetServicesIn{offset, limit}
 	var out GetServicesOut
 	err := this.Proc.Call("GetServices", &in, &out)
@@ -1982,7 +1982,7 @@ func (this *Remote) GetServices(offset int64, limit int64) ([]*ScoringService, e
 	return out.Services, nil
 }
 
-func (this *Remote) GetServicesForProject(projectId int64, offset int64, limit int64) ([]*ScoringService, error) {
+func (this *Remote) GetServicesForProject(projectId int64, offset uint, limit uint) ([]*ScoringService, error) {
 	in := GetServicesForProjectIn{projectId, offset, limit}
 	var out GetServicesForProjectOut
 	err := this.Proc.Call("GetServicesForProject", &in, &out)
@@ -1992,7 +1992,7 @@ func (this *Remote) GetServicesForProject(projectId int64, offset int64, limit i
 	return out.Services, nil
 }
 
-func (this *Remote) GetServicesForModel(modelId int64, offset int64, limit int64) ([]*ScoringService, error) {
+func (this *Remote) GetServicesForModel(modelId int64, offset uint, limit uint) ([]*ScoringService, error) {
 	in := GetServicesForModelIn{modelId, offset, limit}
 	var out GetServicesForModelOut
 	err := this.Proc.Call("GetServicesForModel", &in, &out)
@@ -2102,7 +2102,7 @@ func (this *Remote) CreateRole(name string, description string) (int64, error) {
 	return out.RoleId, nil
 }
 
-func (this *Remote) GetRoles(offset int64, limit int64) ([]*Role, error) {
+func (this *Remote) GetRoles(offset uint, limit uint) ([]*Role, error) {
 	in := GetRolesIn{offset, limit}
 	var out GetRolesOut
 	err := this.Proc.Call("GetRoles", &in, &out)
@@ -2202,7 +2202,7 @@ func (this *Remote) CreateWorkgroup(name string, description string) (int64, err
 	return out.WorkgroupId, nil
 }
 
-func (this *Remote) GetWorkgroups(offset int64, limit int64) ([]*Workgroup, error) {
+func (this *Remote) GetWorkgroups(offset uint, limit uint) ([]*Workgroup, error) {
 	in := GetWorkgroupsIn{offset, limit}
 	var out GetWorkgroupsOut
 	err := this.Proc.Call("GetWorkgroups", &in, &out)
@@ -2272,7 +2272,7 @@ func (this *Remote) CreateIdentity(name string, password string) (int64, error) 
 	return out.IdentityId, nil
 }
 
-func (this *Remote) GetIdentities(offset int64, limit int64) ([]*Identity, error) {
+func (this *Remote) GetIdentities(offset uint, limit uint) ([]*Identity, error) {
 	in := GetIdentitiesIn{offset, limit}
 	var out GetIdentitiesOut
 	err := this.Proc.Call("GetIdentities", &in, &out)
@@ -2432,7 +2432,7 @@ func (this *Remote) UnshareEntity(kind string, workgroupId int64, entityTypeId i
 	return nil
 }
 
-func (this *Remote) GetHistory(entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error) {
+func (this *Remote) GetHistory(entityTypeId int64, entityId int64, offset uint, limit uint) ([]*EntityHistory, error) {
 	in := GetHistoryIn{entityTypeId, entityId, offset, limit}
 	var out GetHistoryOut
 	err := this.Proc.Call("GetHistory", &in, &out)

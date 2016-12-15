@@ -223,8 +223,8 @@ class RPCClient:
 		List clusters
 
 		Parameters:
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		clusters: No description available (Cluster)
@@ -326,8 +326,8 @@ class RPCClient:
 		List projects
 
 		Parameters:
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		projects: No description available (Project)
@@ -398,8 +398,8 @@ class RPCClient:
 
 		Parameters:
 		project_id: No description available (int64)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		datasources: No description available (Datasource)
@@ -494,8 +494,8 @@ class RPCClient:
 
 		Parameters:
 		datasource_id: No description available (int64)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		datasets: No description available (Dataset)
@@ -660,8 +660,8 @@ class RPCClient:
 
 		Parameters:
 		project_id: No description available (int64)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		models: No description available (Model)
@@ -731,8 +731,8 @@ class RPCClient:
 		name_part: No description available (string)
 		sort_by: No description available (string)
 		ascending: No description available (bool)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		models: No description available (BinomialModel)
@@ -787,8 +787,8 @@ class RPCClient:
 		name_part: No description available (string)
 		sort_by: No description available (string)
 		ascending: No description available (bool)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		models: No description available (MultinomialModel)
@@ -843,8 +843,8 @@ class RPCClient:
 		name_part: No description available (string)
 		sort_by: No description available (string)
 		ascending: No description available (bool)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		models: No description available (RegressionModel)
@@ -1119,8 +1119,8 @@ class RPCClient:
 		List all services
 
 		Parameters:
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		services: No description available (ScoringService)
@@ -1138,8 +1138,8 @@ class RPCClient:
 
 		Parameters:
 		project_id: No description available (int64)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		services: No description available (ScoringService)
@@ -1158,8 +1158,8 @@ class RPCClient:
 
 		Parameters:
 		model_id: No description available (int64)
-		offset: No description available (int64)
-		limit: No description available (int64)
+		offset: No description available (uint)
+		limit: No description available (uint)
 
 		Returns:
 		services: No description available (ScoringService)
@@ -1329,8 +1329,8 @@ class RPCClient:
 		List roles
 
 		Parameters:
-		offset: An offset to start the search on. (int64)
-		limit: The maximum returned objects. (int64)
+		offset: An offset uint start the search on. (uint)
+		limit: The maximum uint objects. (uint)
 
 		Returns:
 		roles: A list of Steam roles. (Role)
@@ -1498,8 +1498,8 @@ class RPCClient:
 		List workgroups
 
 		Parameters:
-		offset: An offset to start the search on. (int64)
-		limit: The maximum returned objects. (int64)
+		offset: An offset uint start the search on. (uint)
+		limit: The maximum uint objects. (uint)
 
 		Returns:
 		workgroups: A list of workgroups in Steam. (Workgroup)
@@ -1616,8 +1616,8 @@ class RPCClient:
 		List identities
 
 		Parameters:
-		offset: An offset to start the search on. (int64)
-		limit: The maximum returned objects. (int64)
+		offset: An offset uint start the search on. (uint)
+		limit: The maximum uint objects. (uint)
 
 		Returns:
 		identities: A list of identities in Steam. (Identity)
@@ -1893,8 +1893,8 @@ class RPCClient:
 		Parameters:
 		entity_type_id: Integer ID for the type of entity. (int64)
 		entity_id: Integer ID for an entity in Steam. (int64)
-		offset: An offset to start the search on. (int64)
-		limit: The maximum returned objects. (int64)
+		offset: An offset uint start the search on. (uint)
+		limit: The maximum uint objects. (uint)
 
 		Returns:
 		history: A list of actions performed on the entity. (EntityHistory)
