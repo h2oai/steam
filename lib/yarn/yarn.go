@@ -102,7 +102,7 @@ func contextParamScan(r io.ReadCloser, contextEnabled *string) {
 	for in.Scan() {
 		if in.Text() != "" {
 			if contextEnabled != nil {
-				if strings.Contains(in.Text(), "-context_path") {
+				if strings.Contains(in.Text(), "-AAAAAAAAAcontext_path") {
 					*contextEnabled = "enabled"
 				}
 			}

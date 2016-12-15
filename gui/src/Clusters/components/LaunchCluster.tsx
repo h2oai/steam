@@ -72,7 +72,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     let keytab = _.get((this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement), 'value', '');
     let secure = (this.refs.clusterForm.querySelector('input[name="secure"]') as HTMLInputElement).checked;
 
-    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', keytab);
     this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', secure, keytab);
   }
 
