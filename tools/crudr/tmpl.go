@@ -11,6 +11,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"gopkg.in/doug-martin/goqu.v3"
 )
@@ -75,7 +76,9 @@ var DEBUG bool
 
 {{define "insertSql" -}} {{/* ARG OPTIONAL */ -}}
 	if DEBUG {
+		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
+		color.Unset()
 	}
 	// Execute query
 	res, err := q.dataset.Insert(q.fields).Exec()
@@ -98,7 +101,9 @@ var DEBUG bool
 
 {{define "toSql" -}}
 	if DEBUG {
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToSql())
+		color.Unset()
 	}
 {{- end}}
 
@@ -154,7 +159,9 @@ var DEBUG bool
 
 {{define "updateSql" -}} {{/* ARG OPTIONAL for exported */ -}}
 	if DEBUG {
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
+		color.Unset()
 	}
 	// Execute query
 	{{- if .}}{{/* Case for exported */}}
@@ -171,7 +178,9 @@ var DEBUG bool
 
 {{define "deleteSql" -}} {{/* ARG REQUIRED for exported */ -}}
 	if DEBUG {
+		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
+		color.Unset()
 	}
 	// Execute query
 	{{- if .}}{{/* Case for exported */}}
