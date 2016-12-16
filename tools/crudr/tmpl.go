@@ -101,7 +101,7 @@ var DEBUG bool
 
 {{define "toSql" -}}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -159,7 +159,7 @@ var DEBUG bool
 
 {{define "updateSql" -}} {{/* ARG OPTIONAL for exported */ -}}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}

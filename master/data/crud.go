@@ -60,7 +60,7 @@ func readBinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]binomialMod
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -85,7 +85,7 @@ func readBinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (binomialModel,
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -113,7 +113,7 @@ func updateBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -215,7 +215,7 @@ func (ds *Datastore) ReadClusters(options ...QueryOpt) ([]Cluster, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -259,7 +259,7 @@ func (ds *Datastore) ReadCluster(options ...QueryOpt) (Cluster, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -304,7 +304,7 @@ func (ds *Datastore) UpdateCluster(clusterId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -396,7 +396,7 @@ func readClusters(tx *goqu.TxDatabase, options ...QueryOpt) ([]Cluster, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -421,7 +421,7 @@ func readCluster(tx *goqu.TxDatabase, options ...QueryOpt) (Cluster, bool, error
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -449,7 +449,7 @@ func updateCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -520,7 +520,7 @@ func readClusterTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]clusterType, 
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -545,7 +545,7 @@ func readClusterType(tx *goqu.TxDatabase, options ...QueryOpt) (clusterType, boo
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -573,7 +573,7 @@ func updateClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -676,7 +676,7 @@ func (ds *Datastore) ReadClusterYarnDetails(options ...QueryOpt) ([]ClusterYarnD
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -720,7 +720,7 @@ func (ds *Datastore) ReadClusterYarnDetail(options ...QueryOpt) (ClusterYarnDeta
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -765,7 +765,7 @@ func (ds *Datastore) UpdateClusterYarnDetail(clusterYarnDetailId int64, options 
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -858,7 +858,7 @@ func readClusterYarnDetails(tx *goqu.TxDatabase, options ...QueryOpt) ([]Cluster
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -883,7 +883,7 @@ func readClusterYarnDetail(tx *goqu.TxDatabase, options ...QueryOpt) (ClusterYar
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -911,7 +911,7 @@ func updateClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -1012,7 +1012,7 @@ func (ds *Datastore) ReadEngines(options ...QueryOpt) ([]Engine, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -1056,7 +1056,7 @@ func (ds *Datastore) ReadEngine(options ...QueryOpt) (Engine, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -1101,7 +1101,7 @@ func (ds *Datastore) UpdateEngine(engineId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -1192,7 +1192,7 @@ func readEngines(tx *goqu.TxDatabase, options ...QueryOpt) ([]Engine, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -1217,7 +1217,7 @@ func readEngine(tx *goqu.TxDatabase, options ...QueryOpt) (Engine, bool, error) 
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -1245,7 +1245,7 @@ func updateEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -1316,7 +1316,7 @@ func readEntityTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]entityType, er
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -1341,7 +1341,7 @@ func readEntityType(tx *goqu.TxDatabase, options ...QueryOpt) (entityType, bool,
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -1369,7 +1369,7 @@ func updateEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -1472,7 +1472,7 @@ func (ds *Datastore) ReadHistories(options ...QueryOpt) ([]History, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -1516,7 +1516,7 @@ func (ds *Datastore) ReadHistory(options ...QueryOpt) (History, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -1561,7 +1561,7 @@ func (ds *Datastore) UpdateHistory(historyId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -1654,7 +1654,7 @@ func readHistories(tx *goqu.TxDatabase, options ...QueryOpt) ([]History, error) 
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -1679,7 +1679,7 @@ func readHistory(tx *goqu.TxDatabase, options ...QueryOpt) (History, bool, error
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -1707,7 +1707,7 @@ func updateHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -1808,7 +1808,7 @@ func (ds *Datastore) ReadIdentities(options ...QueryOpt) ([]Identity, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -1852,7 +1852,7 @@ func (ds *Datastore) ReadIdentity(options ...QueryOpt) (Identity, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -1897,7 +1897,7 @@ func (ds *Datastore) UpdateIdentity(identityId int64, options ...QueryOpt) error
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -1988,7 +1988,7 @@ func readIdentities(tx *goqu.TxDatabase, options ...QueryOpt) ([]Identity, error
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2013,7 +2013,7 @@ func readIdentity(tx *goqu.TxDatabase, options ...QueryOpt) (Identity, bool, err
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2041,7 +2041,7 @@ func updateIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -2110,7 +2110,7 @@ func readIdentityRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]identityRole
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2135,7 +2135,7 @@ func readIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) (identityRole, b
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2163,7 +2163,7 @@ func updateIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -2235,7 +2235,7 @@ func readIdentityWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]identit
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2260,7 +2260,7 @@ func readIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (identityWo
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2288,7 +2288,7 @@ func updateIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -2390,7 +2390,7 @@ func (ds *Datastore) ReadLabels(options ...QueryOpt) ([]Label, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -2434,7 +2434,7 @@ func (ds *Datastore) ReadLabel(options ...QueryOpt) (Label, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -2479,7 +2479,7 @@ func (ds *Datastore) UpdateLabel(labelId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -2571,7 +2571,7 @@ func readLabels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Label, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2596,7 +2596,7 @@ func readLabel(tx *goqu.TxDatabase, options ...QueryOpt) (Label, bool, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2624,7 +2624,7 @@ func updateLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -2695,7 +2695,7 @@ func readModelCategories(tx *goqu.TxDatabase, options ...QueryOpt) ([]modelCateg
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2720,7 +2720,7 @@ func readModelCategory(tx *goqu.TxDatabase, options ...QueryOpt) (modelCategory,
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -2748,7 +2748,7 @@ func updateModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -2852,7 +2852,7 @@ func (ds *Datastore) ReadModels(options ...QueryOpt) ([]Model, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -2896,7 +2896,7 @@ func (ds *Datastore) ReadModel(options ...QueryOpt) (Model, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -2941,7 +2941,7 @@ func (ds *Datastore) UpdateModel(modelId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -3035,7 +3035,7 @@ func readModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Model, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3060,7 +3060,7 @@ func readModel(tx *goqu.TxDatabase, options ...QueryOpt) (Model, bool, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3088,7 +3088,7 @@ func updateModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -3162,7 +3162,7 @@ func readMultinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]multinom
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3187,7 +3187,7 @@ func readMultinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (multinomial
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3215,7 +3215,7 @@ func updateMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, optio
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -3315,7 +3315,7 @@ func (ds *Datastore) ReadPermissions(options ...QueryOpt) ([]Permission, error) 
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -3359,7 +3359,7 @@ func (ds *Datastore) ReadPermission(options ...QueryOpt) (Permission, bool, erro
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -3404,7 +3404,7 @@ func (ds *Datastore) UpdatePermission(permissionId int64, options ...QueryOpt) e
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -3494,7 +3494,7 @@ func readPermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]Permission, er
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3519,7 +3519,7 @@ func readPermission(tx *goqu.TxDatabase, options ...QueryOpt) (Permission, bool,
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3547,7 +3547,7 @@ func updatePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -3649,7 +3649,7 @@ func (ds *Datastore) ReadPrivileges(options ...QueryOpt) ([]Privilege, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -3693,7 +3693,7 @@ func (ds *Datastore) ReadPrivilege(options ...QueryOpt) (Privilege, bool, error)
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -3738,7 +3738,7 @@ func (ds *Datastore) UpdatePrivilege(options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -3830,7 +3830,7 @@ func readPrivileges(tx *goqu.TxDatabase, options ...QueryOpt) ([]Privilege, erro
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3855,7 +3855,7 @@ func readPrivilege(tx *goqu.TxDatabase, options ...QueryOpt) (Privilege, bool, e
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -3883,7 +3883,7 @@ func updatePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -3985,7 +3985,7 @@ func (ds *Datastore) ReadProjects(options ...QueryOpt) ([]Project, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -4029,7 +4029,7 @@ func (ds *Datastore) ReadProject(options ...QueryOpt) (Project, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -4074,7 +4074,7 @@ func (ds *Datastore) UpdateProject(projectId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -4166,7 +4166,7 @@ func readProjects(tx *goqu.TxDatabase, options ...QueryOpt) ([]Project, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4191,7 +4191,7 @@ func readProject(tx *goqu.TxDatabase, options ...QueryOpt) (Project, bool, error
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4219,7 +4219,7 @@ func updateProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -4293,7 +4293,7 @@ func readRegressionModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]regressio
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4318,7 +4318,7 @@ func readRegressionModel(tx *goqu.TxDatabase, options ...QueryOpt) (regressionMo
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4346,7 +4346,7 @@ func updateRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -4446,7 +4446,7 @@ func (ds *Datastore) ReadRoles(options ...QueryOpt) ([]Role, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -4490,7 +4490,7 @@ func (ds *Datastore) ReadRole(options ...QueryOpt) (Role, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -4535,7 +4535,7 @@ func (ds *Datastore) UpdateRole(roleId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -4625,7 +4625,7 @@ func readRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]Role, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4650,7 +4650,7 @@ func readRole(tx *goqu.TxDatabase, options ...QueryOpt) (Role, bool, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4678,7 +4678,7 @@ func updateRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -4750,7 +4750,7 @@ func readRolePermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]rolePermis
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4775,7 +4775,7 @@ func readRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) (rolePermissio
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4803,7 +4803,7 @@ func updateRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -4874,7 +4874,7 @@ func readStates(tx *goqu.TxDatabase, options ...QueryOpt) ([]state, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4899,7 +4899,7 @@ func readState(tx *goqu.TxDatabase, options ...QueryOpt) (state, bool, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -4927,7 +4927,7 @@ func updateState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -5030,7 +5030,7 @@ func (ds *Datastore) ReadServices(options ...QueryOpt) ([]Service, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -5074,7 +5074,7 @@ func (ds *Datastore) ReadService(options ...QueryOpt) (Service, bool, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -5119,7 +5119,7 @@ func (ds *Datastore) UpdateService(serviceId int64, options ...QueryOpt) error {
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -5212,7 +5212,7 @@ func readServices(tx *goqu.TxDatabase, options ...QueryOpt) ([]Service, error) {
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -5237,7 +5237,7 @@ func readService(tx *goqu.TxDatabase, options ...QueryOpt) (Service, bool, error
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -5265,7 +5265,7 @@ func updateService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
@@ -5366,7 +5366,7 @@ func (ds *Datastore) ReadWorkgroups(options ...QueryOpt) ([]Workgroup, error) {
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -5410,7 +5410,7 @@ func (ds *Datastore) ReadWorkgroup(options ...QueryOpt) (Workgroup, bool, error)
 			}
 		}
 		if DEBUG {
-			color.Set(color.FgYellow)
+			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
 		}
@@ -5455,7 +5455,7 @@ func (ds *Datastore) UpdateWorkgroup(workgroupId int64, options ...QueryOpt) err
 			}
 		}
 		if DEBUG && len(q.fields) > 0 {
-			color.Set(color.FgBlue)
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
@@ -5546,7 +5546,7 @@ func readWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]Workgroup, erro
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -5571,7 +5571,7 @@ func readWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (Workgroup, bool, e
 		}
 	}
 	if DEBUG {
-		color.Set(color.FgYellow)
+		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
 	}
@@ -5599,7 +5599,7 @@ func updateWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 		}
 	}
 	if DEBUG && len(q.fields) > 0 {
-		color.Set(color.FgBlue)
+		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
