@@ -885,10 +885,10 @@ func (s *Service) LinkLabelWithModel(pz az.Principal, labelId, modelId int64) er
 	if _, err := s.viewModel(pz, modelId); err != nil {
 		return err
 	}
-	if _, exists, err := s.ds.ReadLabel(data.ByModelId(modelId)); err != nil {
+	if label, exists, err := s.ds.ReadLabel(data.ByModelId(modelId)); err != nil {
 		return errors.Wrap(err, "reading label from database")
 	} else if exists {
-		if err := s.ds.UpdateLabel(labelId, data.WithNil("model_id"), data.WithUnlinkAudit(pz)); err != nil {
+		if err := s.ds.UpdateLabel(label.Id.Int64, data.WithNil("model_id"), data.WithUnlinkAudit(pz)); err != nil {
 			return errors.Wrap(err, "unlinking label and model in database")
 		}
 	}
