@@ -79,6 +79,7 @@ func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, op string, table string,
 		fields:   make(map[string]interface{}),
 		postFunc: make([]QueryOpt, 0),
 
+		entityId:     id,
 		entityTypeId: entityTypeId,
 		audit:        op,
 
