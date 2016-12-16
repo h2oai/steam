@@ -213,7 +213,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		"-disown",
 	}
 
-	contextPath := "/"
+	contextPath := ""
 	cpe := contextPathEnabledEngine(enginePath, uid, gid)
 	if cpe {
 		contextPathArgs := []string{"-J", "-context_path", "-J", "/" + name}
@@ -236,7 +236,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		return "", "", "", "", "", errors.Wrap(err, "failed executing command")
 	}
 
-	return appID, address, out, token, contextPath, nil
+	return appID, address, out, token, contextPath + "/", nil
 }
 
 func contextPathEnabledEngine(enginePath string, uid, gid uint32) bool {

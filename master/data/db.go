@@ -2399,13 +2399,14 @@ func (ds *Datastore) DeleteEngine(pz az.Principal, engineId int64) error {
 func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, state string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
+		// TODO we might want to allow the user to pass the context_path from the UI
 		res, err := tx.Exec(`
 			INSERT INTO
 				cluster
-				(name, type_id, detail_id, address, token, state, created)
+				(name, context_path, type_id, detail_id, address, token, state, created)
 			VALUES
-				($1,   $2,      0,         $3,      $4,      $5,    datetime('now'))
-			`, name, ds.ClusterTypes.External, address, "", state)
+				($1,   $2,      $3,      0,      $4,      $5,      $6,    datetime('now'))
+			`, name, "/", ds.ClusterTypes.External, address, "", state)
 		// TODO add token?!
 		if err != nil {
 			return err

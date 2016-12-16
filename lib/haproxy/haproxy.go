@@ -28,17 +28,21 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 		"    bind *:9999\n"
 
 	for _, c := range clusters {
-		config +=
-			"    acl cluster_" + c.Name + " path_beg /" + c.Name + "/\n" +
-			"    use_backend " + c.Name + " if " + "cluster_" + c.Name + "\n\n"
+		if c.ContextPath != "/" {
+			config +=
+				"    acl cluster_" + c.Name + " path_beg " + c.ContextPath + "/\n" +
+				"    use_backend " + c.Name + " if " + "cluster_" + c.Name + "\n\n"
+		}
 	}
 
 	for _, c := range clusters {
-		config += "backend " + c.Name + "\n"
-		if c.Token != "" {
-			config += "    http-request set-header Authorization Basic\\ %[req.cook(" + c.Name + ")]\n"
+		if c.ContextPath != "/" {
+			config += "backend " + c.Name + "\n"
+			if c.Token != "" {
+				config += "    http-request set-header Authorization Basic\\ %[req.cook(" + c.Name + ")]\n"
+			}
+			config += "    server " + c.Name + " " + c.Address + "\n\n"
 		}
-		config += "    server " + c.Name + " " + c.Address + "\n\n"
 	}
 
 	if err := ioutil.WriteFile("haproxy.conf",

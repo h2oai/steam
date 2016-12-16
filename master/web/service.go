@@ -96,8 +96,8 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 		return 0, err
 	}
 
-	h := h2ov3.NewClient(address)
-	cloud, err := h.GetCloudStatus("", "")
+	h := h2ov3.NewClient(address, "/", "")
+	cloud, err := h.GetCloudStatus("")
 	if err != nil {
 		return 0, fmt.Errorf("Could not communicate with an h2o cluster at %s", address)
 	}
@@ -317,14 +317,9 @@ func (s *Service) GetClusterStatus(pz az.Principal, cloudId int64) (*web.Cluster
 		return nil, err
 	}
 
-	h2o := h2ov3.NewClient(cluster.Address)
+	h2o := h2ov3.NewClient(cluster.Address, cluster.ContextPath, cluster.Token)
 
-	cp := cluster.ContextPath
-	if strings.HasSuffix(cluster.ContextPath, "/") {
-		cp = strings.TrimRight(cluster.ContextPath, "/")
-	}
-
-	stat, err := h2o.GetCloudStatus(cluster.Token, cp)
+	stat, err := h2o.GetCloudStatus(cluster.Token)
 	if err != nil {
 		return &web.ClusterStatus{Status: "Unknown"}, nil
 	}
@@ -407,7 +402,7 @@ func (s *Service) GetJob(pz az.Principal, clusterId int64, jobName string) (*web
 		return nil, err
 	}
 
-	h := h2ov3.NewClient(cluster.Address)
+	h := h2ov3.NewClient(cluster.Address, cluster.ContextPath, cluster.Token)
 
 	j, err := h.GetJobsFetch(jobName)
 	if err != nil {
@@ -428,7 +423,7 @@ func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) 
 		return nil, err
 	}
 
-	h := h2ov3.NewClient(cluster.Address)
+	h := h2ov3.NewClient(cluster.Address, cluster.ContextPath, cluster.Token)
 
 	j, err := h.GetJobsList()
 	if err != nil {
@@ -649,8 +644,8 @@ func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
 
 // --- Dataset ---
 
-func (s *Service) importDataset(name, configuration, address string) ([]byte, string, error) {
-	h2o := h2ov3.NewClient(address)
+func (s *Service) importDataset(name, configuration, address, contextPath, token string) ([]byte, string, error) {
+	h2o := h2ov3.NewClient(address, contextPath, token)
 
 	// Translate json to string path
 	rawJson := make(map[string]string)
@@ -706,7 +701,7 @@ func (s *Service) CreateDataset(pz az.Principal, clusterId int64, datasourceId i
 		return 0, err
 	}
 
-	properties, frameName, err := s.importDataset(name, datasource.Configuration, cluster.Address)
+	properties, frameName, err := s.importDataset(name, datasource.Configuration, cluster.Address, cluster.ContextPath, cluster.Token)
 	if err != nil {
 		return 0, err
 	}
@@ -793,7 +788,7 @@ func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*w
 	}
 
 	// Start h2o communication
-	h2o := h2ov3.NewClient(cluster.Address)
+	h2o := h2ov3.NewClient(cluster.Address, cluster.ContextPath, cluster.Token)
 	frames, err := h2o.GetFramesList()
 	if err != nil {
 		return nil, err
@@ -887,7 +882,7 @@ func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targ
 		return nil, fmt.Errorf("Cluster is not running")
 	}
 
-	h2o := h2ov3.NewClient(cluster.Address)
+	h2o := h2ov3.NewClient(cluster.Address, cluster.ContextPath, cluster.Token)
 
 	modelKey, err := h2o.AutoML(dataset, targetName, maxRunTime) // TODO: can be a goroutine
 	if err != nil {
@@ -1013,7 +1008,7 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKe
 	}
 
 	// Connect to h2o
-	h2o := h2ov3.NewClient(cluster.Address)
+	h2o := h2ov3.NewClient(cluster.Address, cluster.ContextPath, cluster.Token)
 	_, frame, err := h2o.GetFramesFetch(frameKey, true)
 	if err != nil {
 		return nil, err
@@ -1165,7 +1160,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 	}
 
 	// get model from the cloud
-	h2o := h2ov3.NewClient(cluster.Address)
+	h2o := h2ov3.NewClient(cluster.Address, cluster.ContextPath, cluster.Token)
 	rawModel, r, err := h2o.GetModelsFetch(modelKey)
 	if err != nil {
 		return 0, err
@@ -1297,7 +1292,7 @@ func (s *Service) ImportModelPojo(pz az.Principal, modelId int64) error {
 	if err != nil {
 		return errors.Wrap(err, "failed reading cluster from database")
 	}
-	h2o := h2ov3.NewClient(c.Address)
+	h2o := h2ov3.NewClient(c.Address, c.ContextPath, c.Token)
 
 	modelPath := fs.GetModelPath(s.workingDir, modelId)
 	javaModelPath, err := h2o.ExportJavaModel(m.ModelKey, modelPath)
@@ -1334,7 +1329,7 @@ func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
 	if err != nil {
 		return errors.Wrap(err, "failed reading cluster from database")
 	}
-	h2o := h2ov3.NewClient(c.Address)
+	h2o := h2ov3.NewClient(c.Address, c.ContextPath, c.Token)
 
 	modelPath := fs.GetModelPath(s.workingDir, modelId)
 	mojoPath, err := h2o.ExportMOJO(m.ModelKey, modelPath)
