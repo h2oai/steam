@@ -151,19 +151,20 @@ func serveMaster(c *context) *cobra.Command {
 		predictionServicePortsString string
 		enableProfiler               bool
 		yarnEnableKerberos           bool
-		// dbName                       string
-		// dbUserName                   string
-		// dbPassword                   string
-		// dbHost                       string
-		// dbPort                       string
-		// dbConnectionTimeout          string
-		// dbSSLMode                    string
-		// dbSSLCertPath                string
-		// dbSSLKeyPath                 string
-		// dbSSLRootCertPath            string
-		dbPath            string
-		superuserName     string
-		superuserPassword string
+		dbDriver                     string
+		dbPath                       string
+		dbName                       string
+		dbUserName                   string
+		dbPassword                   string
+		dbHost                       string
+		dbPort                       string
+		dbConnectionTimeout          string
+		dbSSLMode                    string
+		dbSSLCertPath                string
+		dbSSLKeyPath                 string
+		dbSSLRootCertPath            string
+		superuserName                string
+		superuserPassword            string
 	)
 
 	opts := master.DefaultOpts
@@ -204,21 +205,23 @@ func serveMaster(c *context) *cobra.Command {
 				yarnEnableKerberos,
 			},
 			data.DBOpts{
-				dbPath,
-				// data.Connection{
-				// 	dbName,
-				// 	dbUserName,
-				// 	dbPassword,
-				// 	dbHost,
-				// 	dbPort,
-				// 	dbConnectionTimeout,
-				// 	dbSSLMode,
-				// 	dbSSLCertPath,
-				// 	dbSSLKeyPath,
-				// 	dbSSLRootCertPath,
-				// },
-				superuserName,
-				superuserPassword,
+				Driver: dbDriver,
+
+				Path: dbPath,
+
+				Name:              dbName,
+				User:              dbUserName,
+				Pass:              dbPassword,
+				Host:              dbHost,
+				Port:              dbPort,
+				ConnectionTimeout: dbConnectionTimeout,
+				SSLMode:           dbSSLMode,
+				SSLCert:           dbSSLCertPath,
+				SSLKey:            dbSSLKeyPath,
+				SSLRootCert:       dbSSLRootCertPath,
+
+				SuperName: superuserName,
+				SuperPass: superuserPassword,
 			},
 		})
 	})
@@ -238,17 +241,20 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&predictionServicePortsString, "prediction-service-port-range", "1025:65535", "Specified port range to create prediction services on. (\"<from>:<to>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
-	// cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Connection.DbName, "Database name to use for application data storage (required)")
-	// cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Connection.User, "Database username (required)")
-	// cmd.Flags().StringVar(&dbPassword, "db-password", opts.DB.Connection.Password, "Database password (optional)")
-	// cmd.Flags().StringVar(&dbHost, "db-host", opts.DB.Connection.Host, "Database host (optional, defaults to localhost")
-	// cmd.Flags().StringVar(&dbPort, "db-port", opts.DB.Connection.Port, "Database port (optional, defaults to 5432)")
-	// cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DB.Connection.ConnectionTimeout, "Database connection timeout (optional)")
-	// cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.Connection.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
-	// cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DB.Connection.SSLCert, "Database connection SSL certificate path (optional)")
-	// cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DB.Connection.SSLKey, "Database connection SSL key path (optional)")
-	// cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DB.Connection.SSLRootCert, "Database connection SSL root certificate path (optional)")
+
+	// DB OPTS
+	cmd.Flags().StringVar(&dbDriver, "db-driver", opts.DBOpts.Driver, "Driver for sql implementation. (Supported types are \"sqlite3\" or \"postgres\")")
 	cmd.Flags().StringVar(&dbPath, "db-path", opts.DBOpts.Path, "Set the path to a local database")
+	cmd.Flags().StringVar(&dbName, "db-name", opts.DBOpts.Name, "Database name to use for application data storage (required)")
+	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DBOpts.User, "Database username (required)")
+	cmd.Flags().StringVar(&dbPassword, "db-password", opts.DBOpts.Pass, "Database password (optional)")
+	cmd.Flags().StringVar(&dbHost, "db-host", opts.DBOpts.Host, "Database host (optional, defaults to localhost")
+	cmd.Flags().StringVar(&dbPort, "db-port", opts.DBOpts.Port, "Database port (optional, defaults to 5432)")
+	cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DBOpts.ConnectionTimeout, "Database connection timeout (optional)")
+	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DBOpts.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DBOpts.SSLCert, "Database connection SSL certificate path (optional)")
+	cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DBOpts.SSLKey, "Database connection SSL key path (optional)")
+	cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DBOpts.SSLRootCert, "Database connection SSL root certificate path (optional)")
 	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DBOpts.SuperName, "Set superuser username (required for first-time-use only)")
 	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DBOpts.SuperPass, "Set superuser password (required for first-time-use only)")
 

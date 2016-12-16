@@ -99,7 +99,15 @@ var DefaultOpts = &Opts{
 	false,
 	YarnOpts{false},
 	data.DBOpts{
+		Driver: "sqilte3",
+
 		Path: filepath.Join(".", fs.VarDir, "master", fs.DbDir, "steam.db"),
+
+		Name:    "steam",
+		Pass:    "steam",
+		Host:    "localhost",
+		Port:    "5432",
+		SSLMode: "disable",
 	},
 }
 

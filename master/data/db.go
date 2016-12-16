@@ -63,7 +63,24 @@ type (
 	}
 
 	DBOpts struct {
-		Path      string
+		Driver string
+
+		// SQLite Flags
+		Path string
+
+		// Postgres Flags
+		Name              string
+		User              string
+		Pass              string
+		Host              string
+		Port              string
+		ConnectionTimeout string
+		SSLMode           string
+		SSLCert           string
+		SSLKey            string
+		SSLRootCert       string
+
+		// Auth Flags
 		SuperName string
 		SuperPass string
 	}
@@ -87,7 +104,7 @@ func init() {
 
 func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	// Connect to db
-	db, err := open(driver, dbOpts.Path)
+	db, err := open(driver, dbOpts)
 	if err != nil {
 		return nil, errors.Wrap(err, "connecting to database")
 	}
@@ -133,7 +150,19 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	return ds, nil
 }
 
-func open(driver, dbOpts string) (*goqu.Database, error) {
+func open(driver string, opts DBOpts) (*goqu.Database, error) {
+	// Set connection opts
+	var dbOpts string
+	switch driver {
+	case "sqlite3":
+		dbOpts = opts.Path
+	case "postgres":
+		dbOpts = toPostgresOpts(opts)
+	default:
+		return nil, errors.New("unsupported database")
+
+	}
+
 	// Open connection
 	db, err := sql.Open(driver, dbOpts)
 	if err != nil {
@@ -157,6 +186,30 @@ func open(driver, dbOpts string) (*goqu.Database, error) {
 	}
 
 	return goqu.New(driver, db), nil
+}
+
+func toPostgresOpts(o DBOpts) string {
+	s := fmt.Sprintf("dbname=%s", o.Name)
+
+	m := map[string]string{
+		"user":            o.User,
+		"password":        o.Pass,
+		"host":            o.Host,
+		"port":            o.Port,
+		"connect_timeout": o.ConnectionTimeout,
+		"sslmode":         o.SSLMode,
+		"sslcert":         o.SSLCert,
+		"sslkey":          o.SSLKey,
+		"sslrootcert":     o.SSLRootCert,
+	}
+
+	for k, v := range m {
+		if v != "" {
+			s = fmt.Sprintf("%s %s=%s", s, k, v)
+		}
+	}
+
+	return s
 }
 
 func IsPrimed(db *goqu.Database) (bool, error) {
