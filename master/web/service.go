@@ -1003,7 +1003,7 @@ func (s *Service) StartService(pz az.Principal, modelId int64, name, packageName
 	}
 	// Create service
 	serviceId, err := s.ds.CreateService(model.ProjectId, model.Id, name,
-		data.WithAddress(s.scoringServiceAddress), data.WithPort(port),
+		data.WithHost(s.scoringServiceAddress), data.WithPort(port),
 		data.WithProcessId(pid), data.WithState(data.States.Started),
 		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
 	)

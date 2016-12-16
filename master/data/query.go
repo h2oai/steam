@@ -218,6 +218,10 @@ func WithFilterByName(filter string) QueryOpt {
 	}
 }
 
+func WithHost(host string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["host"] = host; return }
+}
+
 // WithIdentityId adds an identity_id value to the query
 func WithIdentityId(identityId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["identity_id"] = identityId; return }
