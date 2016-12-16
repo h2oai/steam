@@ -30,7 +30,7 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 	for _, c := range clusters {
 		if c.ContextPath != "/" {
 			config +=
-				"    acl cluster_" + c.Name + " path_beg " + c.ContextPath + "/\n" +
+				"    acl cluster_" + c.Name + " path_beg " + c.ContextPath + "\n" +
 				"    use_backend " + c.Name + " if " + "cluster_" + c.Name + "\n\n"
 		}
 	}
