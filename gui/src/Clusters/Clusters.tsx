@@ -171,7 +171,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   <div className="flexcolumn">
                     <div className="info-header">STATUS</div>
                     <div className="flexrow mar-right-71">
-                      { cluster.status.status === "healthy" ?
+                      { cluster.status.status === "Healthy" ?
                         <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Healthy</div>
                         : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.status.status}</div>
                       }
