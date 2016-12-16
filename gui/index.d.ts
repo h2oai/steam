@@ -23,5 +23,6 @@ declare function require(string): string;
 
 interface Window {
   devToolsExtension: any
-  ga: any
+  ga: any,
+  API_HOST: string
 }
