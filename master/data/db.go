@@ -27,6 +27,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/fatih/color"
+
 	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/h2oai/steam/master/auth"
@@ -362,7 +364,9 @@ func (ds *Datastore) Count(table string, options ...QueryOpt) (int64, error) {
 			}
 		}
 		if DEBUG {
+			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToSql())
+			color.Unset()
 		}
 		// Execute query
 		row, err := getRow(tx, q.dataset)
