@@ -22,6 +22,7 @@ import (
 	"math/rand"
 	"net"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -2029,18 +2030,32 @@ func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*w
 }
 
 func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+	order := make([]int, 0, len(s.ds.EntityTypeMap))
+	for id, _ := range s.ds.EntityTypeMap {
+		order = append(order, int(id))
+	}
+	sort.Ints(order)
+
 	ar := make([]*web.EntityType, 0, len(s.ds.EntityTypeMap))
-	for id, name := range s.ds.EntityTypeMap {
-		et := web.EntityType{Id: id, Name: name}
+	for _, i := range order {
+		name := s.ds.EntityTypeMap[int64(i)]
+		et := web.EntityType{Id: int64(i), Name: name}
 		ar = append(ar, &et)
 	}
 	return ar, nil
 }
 
 func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
+	order := make([]int, 0, len(s.ds.PermissionMap))
+	for id, _ := range s.ds.PermissionMap {
+		order = append(order, int(id))
+	}
+	sort.Ints(order)
+
 	ar := make([]*web.Permission, 0, len(s.ds.PermissionMap))
-	for id, pm := range s.ds.PermissionMap {
-		p := web.Permission{Id: id, Code: pm.Code, Description: pm.Desc}
+	for _, i := range order {
+		pm := s.ds.PermissionMap[int64(i)]
+		p := web.Permission{Id: int64(i), Code: pm.Code, Description: pm.Desc}
 		ar = append(ar, &p)
 	}
 	return ar, nil
