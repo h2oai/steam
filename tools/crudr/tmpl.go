@@ -158,22 +158,25 @@ var DEBUG bool
 {{- end}}
 
 {{define "updateSql" -}} {{/* ARG OPTIONAL for exported */ -}}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
+	if len(q.fields) > 0 {
 	{{- if .}}{{/* Case for exported */}}
-	if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
 	}
 	{{template "postFunc"}}
-	return nil
 	{{- else}}
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
 	{{- end}}
+	return nil
 {{- end}}
 
 {{define "deleteSql" -}} {{/* ARG REQUIRED for exported */ -}}

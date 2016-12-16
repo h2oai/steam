@@ -112,14 +112,17 @@ func updateBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...QueryOpt) error {
@@ -300,14 +303,16 @@ func (ds *Datastore) UpdateCluster(clusterId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -443,14 +448,17 @@ func updateCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) error {
@@ -564,14 +572,17 @@ func updateClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...QueryOpt) error {
@@ -753,14 +764,16 @@ func (ds *Datastore) UpdateClusterYarnDetail(clusterYarnDetailId int64, options 
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -897,14 +910,17 @@ func updateClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, options ...QueryOpt) error {
@@ -1084,14 +1100,16 @@ func (ds *Datastore) UpdateEngine(engineId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -1226,14 +1244,17 @@ func updateEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) error {
@@ -1347,14 +1368,17 @@ func updateEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryOpt) error {
@@ -1536,14 +1560,16 @@ func (ds *Datastore) UpdateHistory(historyId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -1680,14 +1706,17 @@ func updateHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) error {
@@ -1867,14 +1896,16 @@ func (ds *Datastore) UpdateIdentity(identityId int64, options ...QueryOpt) error
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -2009,14 +2040,17 @@ func updateIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) error {
@@ -2128,14 +2162,17 @@ func updateIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -2250,14 +2287,17 @@ func updateIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -2438,14 +2478,16 @@ func (ds *Datastore) UpdateLabel(labelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -2581,14 +2623,17 @@ func updateLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error {
@@ -2702,14 +2747,17 @@ func updateModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...QueryOpt) error {
@@ -2892,14 +2940,16 @@ func (ds *Datastore) UpdateModel(modelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -3037,14 +3087,17 @@ func updateModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error {
@@ -3161,14 +3214,17 @@ func updateMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, optio
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, options ...QueryOpt) error {
@@ -3347,14 +3403,16 @@ func (ds *Datastore) UpdatePermission(permissionId int64, options ...QueryOpt) e
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -3488,14 +3546,17 @@ func updatePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryOpt) error {
@@ -3676,14 +3737,16 @@ func (ds *Datastore) UpdatePrivilege(options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -3819,14 +3882,17 @@ func updatePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deletePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -4007,14 +4073,16 @@ func (ds *Datastore) UpdateProject(projectId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -4150,14 +4218,17 @@ func updateProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) error {
@@ -4274,14 +4345,17 @@ func updateRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options ...QueryOpt) error {
@@ -4460,14 +4534,16 @@ func (ds *Datastore) UpdateRole(roleId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -4601,14 +4677,17 @@ func updateRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
@@ -4723,14 +4802,17 @@ func updateRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -4844,14 +4926,17 @@ func updateState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error {
@@ -5033,14 +5118,16 @@ func (ds *Datastore) UpdateService(serviceId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -5177,14 +5264,17 @@ func updateService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) error {
@@ -5364,14 +5454,16 @@ func (ds *Datastore) UpdateWorkgroup(workgroupId int64, options ...QueryOpt) err
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if DEBUG && len(q.fields) > 0 {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
 		}
 		// Execute query
-		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
-			return errors.Wrap(err, "executing query")
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
 		}
 		for _, post := range q.postFunc {
 			if err := post(q); err != nil {
@@ -5506,14 +5598,17 @@ func updateWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if DEBUG && len(q.fields) > 0 {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Update(q.fields).Exec()
-	return errors.Wrap(err, "executing query")
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
 }
 
 func deleteWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt) error {
