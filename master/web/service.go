@@ -789,6 +789,12 @@ func (s *Service) DeleteModel(pz az.Principal, modelId int64) error {
 	return errors.Wrap(s.ds.DeleteModel(modelId, data.WithAudit(pz)), "deleting model from database")
 }
 
+// --- ----- ---
+// --- ----- ---
+// --- Label ---
+// --- ----- ---
+// --- ----- ---
+
 func (s *Service) CreateLabel(pz az.Principal, projectId int64, name, description string) (int64, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ManageLabel); err != nil {
@@ -933,6 +939,12 @@ func (s *Service) GetLabelsForProject(pz az.Principal, projectId int64) ([]*web.
 	labels, err := s.ds.ReadLabels(data.ByProjectId(projectId))
 	return toLabels(labels), errors.Wrap(err, "reading labels in database")
 }
+
+// --- ------- ---
+// --- ------- ---
+// --- Service ---
+// --- ------- ---
+// --- ------- ---
 
 // Service helper funcs
 func isPortOpen(port int) bool {
@@ -1112,6 +1124,12 @@ func (s *Service) DeleteService(pz az.Principal, serviceId int64) error {
 	return errors.Wrap(err, "deleting service from database")
 }
 
+// --- ------ ---
+// --- ------ ---
+// --- Engine ---
+// --- ------ ---
+// --- ------ ---
+
 // viewEngine is a small wrapper around the perm/fetch db calls that returns an
 // engine in view only scenarios
 func (s *Service) viewEngine(pz az.Principal, engineId int64) (data.Engine, error) {
@@ -1168,71 +1186,11 @@ func (s *Service) DeleteEngine(pz az.Principal, engineId int64) error {
 	return errors.Wrap(err, "deleting engine from database")
 }
 
-func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
-	ar := make([]*web.EntityType, 0, len(s.ds.EntityTypeMap))
-	for id, name := range s.ds.EntityTypeMap {
-		et := web.EntityType{Id: id, Name: name}
-		ar = append(ar, &et)
-	}
-	return ar, nil
-}
-
-func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
-	ar := make([]*web.Permission, 0, len(s.ds.PermissionMap))
-	for id, pm := range s.ds.PermissionMap {
-		p := web.Permission{Id: id, Code: pm.Code, Description: pm.Desc}
-		ar = append(ar, &p)
-	}
-	return ar, nil
-}
-
-// func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
-
-// 	// No permission checks required
-
-// 	return toClusterTypes(s.ds.ClusterType)
-// }
-
-// func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
-
-// 	// No permission checks required
-
-// 	return toEntityTypes(s.ds.EntityType)
-// }
-
-// // func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
-
-// // 	// No permission checks required
-
-// // 	return toPermissions(s.ds.Permission)
-// }
-
-func (s *Service) GetPermissionsForRole(pz az.Principal, roleId int64) ([]*web.Permission, error) {
-	// Check permissions/privileges
-	if err := pz.CheckPermission(s.ds.Permission.ViewRole); err != nil {
-		return nil, errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckView(s.ds.EntityType.Role, roleId); err != nil {
-		return nil, errors.Wrap(err, "checking view privileges")
-	}
-	// Fetch permissions
-	permissions, err := s.ds.ReadPermissions(data.ForRole(roleId))
-	return toPermissions(permissions), errors.Wrap(err, "reading permissions from database")
-}
-
-func (s *Service) GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*web.Permission, error) {
-	// Check permissions/privileges
-	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
-		return nil, errors.Wrap(err, "checking permission")
-	}
-	// Fetch identity via wrapper
-	if _, err := s.viewIdentity(pz, identityId); err != nil {
-		return nil, err
-	}
-	// Fetch permissions
-	permissions, err := s.ds.ReadPermissions(data.ForIdentity(identityId))
-	return toPermissions(permissions), errors.Wrap(err, "reading permissions from database")
-}
+// --- ---- ---
+// --- ---- ---
+// --- Role ---
+// --- ---- ---
+// --- ---- ---
 
 func (s *Service) CreateRole(pz az.Principal, name string, description string) (int64, error) {
 	// Check permissions/privileges
@@ -1419,6 +1377,12 @@ func (s *Service) DeleteRole(pz az.Principal, roleId int64) error {
 	return errors.Wrap(err, "deleting role from database")
 }
 
+// --- --------- ---
+// --- --------- ---
+// --- Workgroup ---
+// --- --------- ---
+// --- --------- ---
+
 func (s *Service) CreateWorkgroup(pz az.Principal, name string, description string) (int64, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ManageWorkgroup); err != nil {
@@ -1548,6 +1512,12 @@ func (s *Service) DeleteWorkgroup(pz az.Principal, workgroupId int64) error {
 	err := s.ds.DeleteWorkgroup(workgroupId, data.WithAudit(pz))
 	return errors.Wrap(err, "deleting workgroup from database")
 }
+
+// --- -------- ---
+// --- -------- ---
+// --- Identity ---
+// --- -------- ---
+// --- -------- ---
 
 func (s *Service) CreateIdentity(pz az.Principal, name string, password string) (int64, error) {
 	// Check permissions/privileges
@@ -1841,6 +1811,247 @@ func (s *Service) DeactivateIdentity(pz az.Principal, identityId int64) error {
 	return errors.Wrap(err, "updating identity in database")
 }
 
+// --- ------- ---
+// --- ------- ---
+// --- Package ---
+// --- ------- ---
+// --- ------- ---
+
+func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Project, projectId); err != nil {
+		return errors.Wrap(err, "checking edit privileges")
+	}
+	// Pre-add Checks
+	if err := fs.ValidateName(name); err != nil {
+		return errors.Wrap(err, "validating package name")
+	}
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if fs.DirExists(packagePath) {
+		return fmt.Errorf("failed creating package directory: %s already exists", name)
+	}
+	// Create package directory
+	return errors.Wrap(fs.Mkdir(packagePath), "creating package directory")
+}
+
+func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Project, projectId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch project path
+	projectPath := fs.GetProjectPath(s.workingDir, projectId)
+	if !fs.DirExists(projectPath) {
+		return []string{}, nil
+	}
+	dirs, err := fs.ListDirs(projectPath)
+	return dirs, errors.Wrap(err, "listing package directories")
+}
+
+func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Project, projectId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetching pack directories
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("package %s does not exist")
+	}
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, errors.Wrap(err, "geting relative package path")
+	}
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+	// Fetching directories
+	dirs, err := fs.ListDirs(packageDirPath)
+	return dirs, errors.Wrap(err, "listing package directories")
+}
+
+func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Project, projectId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetching package paths
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return nil, fmt.Errorf("package %s does not exist", packageName)
+	}
+	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting relative package path")
+	}
+	if !fs.DirExists(packageDirPath) {
+		return []string{}, nil
+	}
+	// Fetching files
+	files, err := fs.ListFiles(packageDirPath)
+	return files, errors.Wrap(err, "listing package files")
+}
+
+func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Project, projectId); err != nil {
+		return errors.Wrap(err, "check edit privileges")
+	}
+	// Fetching package path
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("package %s does not exist", name)
+	}
+	// Delete Package
+	return errors.Wrap(fs.Rmdir(packagePath), "deleting package")
+}
+
+func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Project, projectId); err != nil {
+		return errors.Wrap(err, "check edit privileges")
+	}
+	// Fetching package paths
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("package %s does not exist", packageName)
+	}
+	dirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return errors.Wrap(err, "fetching relative package path")
+	}
+	if !fs.DirExists(dirPath) {
+		return fmt.Errorf("invalid path %s in package %s", relativePath, packageName)
+	}
+	// Deleting directory
+	return errors.Wrap(fs.Rmdir(dirPath), "deleting director")
+}
+
+func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Project, projectId); err != nil {
+		return errors.Wrap(err, "check edit privileges")
+	}
+	// Fetching package paths
+	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
+	if !fs.DirExists(packagePath) {
+		return fmt.Errorf("package %s does not exist", packageName)
+	}
+	filePath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
+	if err != nil {
+		return errors.Wrap(err, "fetching relative package path")
+	}
+	if !fs.FileExists(filePath) {
+		return fmt.Errorf("invalid path %s in package %s", relativePath, packageName)
+	}
+	// Deleting file
+	return errors.Wrap(fs.Rm(filePath), "deleting file")
+}
+
+func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckEdit(s.ds.EntityType.Project, projectId); err != nil {
+		return errors.Wrap(err, "check edit privileges")
+	}
+	// Setting attributes
+	err := fs.SetPackageAttributes(s.workingDir, projectId, packageName, []byte(attributes))
+	return errors.Wrap(err, "setting package attributes")
+}
+
+func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error) {
+	// Check permission/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewProject); err != nil {
+		return "", errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Project, projectId); err != nil {
+		return "", errors.Wrap(err, "checking view privileges")
+	}
+	// Fetching package attributes
+	b, err := fs.GetPackageAttributes(s.workingDir, projectId, packageName)
+	return string(b), errors.Wrap(err, "getting package attributes")
+}
+
+// --- ---- ---
+// --- ---- ---
+// --- Misc ---
+// --- ---- ---
+// --- ---- ---
+
+func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
+	ar := make([]*web.EntityType, 0, len(s.ds.EntityTypeMap))
+	for id, name := range s.ds.EntityTypeMap {
+		et := web.EntityType{Id: id, Name: name}
+		ar = append(ar, &et)
+	}
+	return ar, nil
+}
+
+func (s *Service) GetAllPermissions(pz az.Principal) ([]*web.Permission, error) {
+	ar := make([]*web.Permission, 0, len(s.ds.PermissionMap))
+	for id, pm := range s.ds.PermissionMap {
+		p := web.Permission{Id: id, Code: pm.Code, Description: pm.Desc}
+		ar = append(ar, &p)
+	}
+	return ar, nil
+}
+
+// func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
+
+// 	// No permission checks required
+
+// 	return toClusterTypes(s.ds.ClusterType)
+// }
+
+func (s *Service) GetPermissionsForRole(pz az.Principal, roleId int64) ([]*web.Permission, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewRole); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Role, roleId); err != nil {
+		return nil, errors.Wrap(err, "checking view privileges")
+	}
+	// Fetch permissions
+	permissions, err := s.ds.ReadPermissions(data.ForRole(roleId))
+	return toPermissions(permissions), errors.Wrap(err, "reading permissions from database")
+}
+
+func (s *Service) GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*web.Permission, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewIdentity); err != nil {
+		return nil, errors.Wrap(err, "checking permission")
+	}
+	// Fetch identity via wrapper
+	if _, err := s.viewIdentity(pz, identityId); err != nil {
+		return nil, err
+	}
+	// Fetch permissions
+	permissions, err := s.ds.ReadPermissions(data.ForIdentity(identityId))
+	return toPermissions(permissions), errors.Wrap(err, "reading permissions from database")
+}
+
 func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityTypeId, entityId int64) error {
 	// Check permission/privileges
 	if err := pz.CheckPermission(s.ds.ManagePermission[entityTypeId]); err != nil {
@@ -1918,182 +2129,11 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 	return toEntityHistories(history), errors.Wrap(err, "reading history from database")
 }
 
-func (s *Service) CreatePackage(pz az.Principal, projectId int64, name string) error {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
-		return errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
-		return errors.Wrap(err, "checking edit privileges")
-	}
-	// Pre-add Checks
-	if err := fs.ValidateName(name); err != nil {
-		return errors.Wrap(err, "validating package name")
-	}
-	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
-	if fs.DirExists(packagePath) {
-		return fmt.Errorf("failed creating package directory: %s already exists", name)
-	}
-	// Create package directory
-	return errors.Wrap(fs.Mkdir(packagePath), "creating package directory")
-}
-
-func (s *Service) GetPackages(pz az.Principal, projectId int64) ([]string, error) {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
-		return nil, errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
-		return nil, errors.Wrap(err, "checking view privileges")
-	}
-	// Fetch project path
-	projectPath := fs.GetProjectPath(s.workingDir, projectId)
-	if !fs.DirExists(projectPath) {
-		return []string{}, nil
-	}
-	dirs, err := fs.ListDirs(projectPath)
-	return dirs, errors.Wrap(err, "listing package directories")
-}
-
-func (s *Service) GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
-		return nil, errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
-		return nil, errors.Wrap(err, "checking view privileges")
-	}
-	// Fetching pack directories
-	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
-	if !fs.DirExists(packagePath) {
-		return nil, fmt.Errorf("package %s does not exist")
-	}
-	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
-	if err != nil {
-		return nil, errors.Wrap(err, "geting relative package path")
-	}
-	if !fs.DirExists(packageDirPath) {
-		return []string{}, nil
-	}
-	// Fetching directories
-	dirs, err := fs.ListDirs(packageDirPath)
-	return dirs, errors.Wrap("listing package directories", message)
-}
-
-func (s *Service) GetPackageFiles(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error) {
-	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
-		return nil, errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
-		return nil, errors.Wrap(err, "checking view privileges")
-	}
-	// Fetching package paths
-	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
-	if !fs.DirExists(packagePath) {
-		return nil, fmt.Errorf("package %s does not exist", name)
-	}
-	packageDirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
-	if err != nil {
-		return nil, errors.Wrap(err, "getting relative package path")
-	}
-	if !fs.DirExists(packageDirPath) {
-		return []string{}, nil
-	}
-	// Fetching files
-	files, err := fs.ListFiles(packageDirPath)
-	return files, errors.Wrap(err, "listing package files")
-}
-
-func (s *Service) DeletePackage(pz az.Principal, projectId int64, name string) error {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
-		return errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
-		return errors.Wrap(err, "check edit privileges")
-	}
-	// Fetching package path
-	packagePath := fs.GetPackagePath(s.workingDir, projectId, name)
-	if !fs.DirExists(packagePath) {
-		return fmt.Errorf("package %s does not exist", name)
-	}
-	// Delete Package
-	return errors.Wrap(fs.Rmdir(packagePath), "deleting package")
-}
-
-func (s *Service) DeletePackageDirectory(pz az.Principal, projectId int64, packageName string, relativePath string) error {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
-		return errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
-		return errors.Wrap(err, "check edit privileges")
-	}
-	// Fetching package paths
-	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
-	if !fs.DirExists(packagePath) {
-		return fmt.Errorf("package %s does not exist", name)
-	}
-	dirPath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
-	if err != nil {
-		return errors.Wrap(err, "fetching relative package path")
-	}
-	if !fs.DirExists(dirPath) {
-		return fmt.Errorf("invalid path %s in package %s", relativePath, packageName)
-	}
-	// Deleting directory
-	return errors.Wrap(fs.Rmdir(dirPath), "deleting director")
-}
-
-func (s *Service) DeletePackageFile(pz az.Principal, projectId int64, packageName string, relativePath string) error {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
-		return errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
-		return errors.Wrap(err, "check edit privileges")
-	}
-	// Fetching package paths
-	packagePath := fs.GetPackagePath(s.workingDir, projectId, packageName)
-	if !fs.DirExists(packagePath) {
-		return fmt.Errorf("package %s does not exist", packageName)
-	}
-	filePath, err := fs.GetPackageRelativePath(s.workingDir, projectId, packageName, relativePath)
-	if err != nil {
-		return errors.Wrap(err, "fetching relative package path")
-	}
-	if !fs.FileExists(filePath) {
-		return fmt.Errorf("invalid path %s in package %s", relativePath, packageName)
-	}
-	// Deleting file
-	return errors.Wrap(fs.Rm(filePath), "deleting file")
-}
-
-func (s *Service) SetAttributesForPackage(pz az.Principal, projectId int64, packageName string, attributes string) error {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
-		return errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
-		return errors.Wrap(err, "check edit privileges")
-	}
-	// Setting attributes
-	err := fs.SetPackageAttributes(s.workingDir, projectId, packageName, []byte(attributes))
-	return errors.Wrap(err, "setting package attributes")
-}
-
-func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, packageName string) (string, error) {
-	// Check permission/privileges
-	if err := pz.CheckPermission(s.ds.Permissions.ViewProject); err != nil {
-		return "", errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckView(s.ds.EntityTypes.Project, projectId); err != nil {
-		return "", errors.Wrap(err, "checking view privileges")
-	}
-	// Fetching package attributes
-	b, err := fs.GetPackageAttributes(s.workingDir, projectId, packageName)
-	return string(b), errors.Wrap(err, "getting package attributes")
-}
+// --- ---------- ---
+// --- ---------- ---
+// --- Deprecated ---
+// --- ---------- ---
+// --- ---------- ---
 
 func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
 	return 0, nil
