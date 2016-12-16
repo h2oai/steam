@@ -2000,6 +2000,34 @@ func (s *Service) GetAttributesForPackage(pz az.Principal, projectId int64, pack
 // --- ---- ---
 // --- ---- ---
 
+func h2oToDataset(f *bindings.FrameBase) *web.Dataset {
+	return &web.Dataset{
+		Name:      f.FrameId.Name,
+		FrameName: f.FrameId.Name,
+		CreatedAt: toTimestamp(time.Now()),
+	}
+}
+
+func h2oToDatasets(fs *bindings.FramesV3) []*web.Dataset {
+	ar := make([]*web.Dataset, len(fs.Frames))
+	for i, f := range fs.Frames {
+		ar[i] = h2oToDataset(f)
+	}
+	return ar
+}
+
+func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*web.Dataset, error) {
+	// View cluster using wrapper
+	cluster, err := s.viewCluster(pz, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	// Start h2o communication
+	h2o := h2ov3.NewClient(cluster.Address.String)
+	frames, err := h2o.GetFramesList()
+	return h2oToDatasets(frames), errors.Wrap(err, "fetching frames from H2O")
+}
+
 func (s *Service) GetAllEntityTypes(pz az.Principal) ([]*web.EntityType, error) {
 	ar := make([]*web.EntityType, 0, len(s.ds.EntityTypeMap))
 	for id, name := range s.ds.EntityTypeMap {
@@ -2152,10 +2180,6 @@ func (s *Service) GetDatasets(pz az.Principal, datasourceId int64, offset, limit
 }
 
 func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, error) {
-	return nil, nil
-}
-
-func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*web.Dataset, error) {
 	return nil, nil
 }
 
