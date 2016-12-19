@@ -230,8 +230,9 @@ an existing model.
    Click on the folder link to browse for this file.
 3. Specify additional files that may be dependencies of the main Python
    preprocessing file.
-4. Enter a name for this new package.
-5. Click **Upload** when you are finished.
+4. If you are running in a conda environment, you can select a .yaml file that defines the environment. 
+5. Enter a name for this new package.
+6. Click **Upload** when you are finished.
 
 Upon successful completion, the new preprocessing package will display
 on the Packages tab of the Deployment page. This file can then be
