@@ -394,6 +394,38 @@ func ScanLabels(rs *sql.Rows) ([]Label, error) {
 	return structs, nil
 }
 
+func ScanMeta(r *sql.Row) (meta, error) {
+	var s meta
+	if err := r.Scan(
+		&s.Id,
+		&s.Key,
+		&s.Value,
+	); err != nil {
+		return meta{}, err
+	}
+	return s, nil
+}
+
+func ScanMetas(rs *sql.Rows) ([]meta, error) {
+	structs := make([]meta, 0, 16)
+	var err error
+	for rs.Next() {
+		var s meta
+		if err = rs.Scan(
+			&s.Id,
+			&s.Key,
+			&s.Value,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanModelCategory(r *sql.Row) (modelCategory, error) {
 	var s modelCategory
 	if err := r.Scan(

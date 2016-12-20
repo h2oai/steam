@@ -270,6 +270,10 @@ func ForIdentity(identityId int64) QueryOpt {
 	}
 }
 
+func ByKey(key string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("key").Eq(key)); return }
+}
+
 // WithLimit adds a limit value to the query
 func WithLimit(limit uint) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Limit(limit); return }

@@ -83,7 +83,14 @@ type (
 		// Auth Flags
 		SuperName string
 		SuperPass string
+
+		Flags uint
 	}
+)
+
+// --- Flags ---
+const (
+	Debug uint = 1 << iota
 )
 
 // --- Enums ---
@@ -92,17 +99,17 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&DEBUG, "debug", false, "Set to enable debug mode")
+	flag.BoolVar(&debug, "debug", false, "Set to enable debug mode")
 	flag.Parse()
 
-	if flag.Parsed() {
-		flag.Set("debug", "true")
-		log.Println(flag.Lookup("debug"))
-	}
 	States = initState()
 }
 
 func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
+	if dbOpts.Flags&Debug != 0 {
+		debug = true
+	}
+
 	// Connect to db
 	db, err := open(driver, dbOpts)
 	if err != nil {
@@ -416,7 +423,7 @@ func (ds *Datastore) Count(table string, options ...QueryOpt) (int64, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToSql())
 			color.Unset()

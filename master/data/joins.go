@@ -107,7 +107,7 @@ func (ds *Datastore) ReadLabelModels(options ...QueryOpt) ([]LabelModel, error) 
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -150,7 +150,7 @@ func (ds *Datastore) ReadLabelModel(options ...QueryOpt) (LabelModel, bool, erro
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -288,7 +288,7 @@ func (ds *Datastore) ReadBinomialModels(options ...QueryOpt) ([]BinomialModel, e
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -333,7 +333,7 @@ func (ds *Datastore) ReadBinomialModel(options ...QueryOpt) (BinomialModel, bool
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -467,7 +467,7 @@ func (ds *Datastore) ReadMultinomialModels(options ...QueryOpt) ([]MultinomialMo
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -512,7 +512,7 @@ func (ds *Datastore) ReadMultinomialModel(options ...QueryOpt) (MultinomialModel
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -645,7 +645,7 @@ func (ds *Datastore) ReadRegressionModels(options ...QueryOpt) ([]RegressionMode
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -690,7 +690,7 @@ func (ds *Datastore) ReadRegressionModel(options ...QueryOpt) (RegressionModel, 
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -786,7 +786,7 @@ func (ds *Datastore) ReadEntityPrivileges(options ...QueryOpt) ([]EntityPrivileg
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query
@@ -829,7 +829,7 @@ func (ds *Datastore) ReadEntityPrivilege(options ...QueryOpt) (EntityPrivilege, 
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			log.Println(q.dataset.ToSql())
 		}
 		// Execute query

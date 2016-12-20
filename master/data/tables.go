@@ -112,6 +112,12 @@ type Label struct {
 	Created     pq.NullTime    `db:"created,def=time.Now()"`
 }
 
+type meta struct {
+	Id    int64  `db:"id,pk"`
+	Key   string `db:"key,arg"`
+	Value string `db:"value"`
+}
+
 type modelCategory struct {
 	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`

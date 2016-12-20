@@ -12,7 +12,7 @@ import (
 	"gopkg.in/doug-martin/goqu.v3"
 )
 
-var DEBUG bool
+var debug bool
 
 // ---------- ------------- ----------
 // ---------- ------------- ----------
@@ -38,7 +38,7 @@ func createBinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, logl
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -59,7 +59,7 @@ func readBinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]binomialMod
 			return []binomialModel{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -84,7 +84,7 @@ func readBinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (binomialModel,
 			return binomialModel{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -112,7 +112,7 @@ func updateBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -133,7 +133,7 @@ func deleteBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -172,7 +172,7 @@ func (ds *Datastore) CreateCluster(name string, clusterTypeId int64, options ...
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -214,7 +214,7 @@ func (ds *Datastore) ReadClusters(options ...QueryOpt) ([]Cluster, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -258,7 +258,7 @@ func (ds *Datastore) ReadCluster(options ...QueryOpt) (Cluster, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -303,7 +303,7 @@ func (ds *Datastore) UpdateCluster(clusterId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -339,7 +339,7 @@ func (ds *Datastore) DeleteCluster(clusterId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -374,7 +374,7 @@ func createCluster(tx *goqu.TxDatabase, name string, clusterTypeId int64, option
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -395,7 +395,7 @@ func readClusters(tx *goqu.TxDatabase, options ...QueryOpt) ([]Cluster, error) {
 			return []Cluster{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -420,7 +420,7 @@ func readCluster(tx *goqu.TxDatabase, options ...QueryOpt) (Cluster, bool, error
 			return Cluster{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -448,7 +448,7 @@ func updateCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -469,7 +469,7 @@ func deleteCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -498,7 +498,7 @@ func createClusterType(tx *goqu.TxDatabase, name string, options ...QueryOpt) (i
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -519,7 +519,7 @@ func readClusterTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]clusterType, 
 			return []clusterType{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -544,7 +544,7 @@ func readClusterType(tx *goqu.TxDatabase, options ...QueryOpt) (clusterType, boo
 			return clusterType{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -572,7 +572,7 @@ func updateClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -593,7 +593,7 @@ func deleteClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -633,7 +633,7 @@ func (ds *Datastore) CreateClusterYarnDetail(engineId, size int64, applicationId
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -675,7 +675,7 @@ func (ds *Datastore) ReadClusterYarnDetails(options ...QueryOpt) ([]ClusterYarnD
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -719,7 +719,7 @@ func (ds *Datastore) ReadClusterYarnDetail(options ...QueryOpt) (ClusterYarnDeta
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -764,7 +764,7 @@ func (ds *Datastore) UpdateClusterYarnDetail(clusterYarnDetailId int64, options 
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -800,7 +800,7 @@ func (ds *Datastore) DeleteClusterYarnDetail(clusterYarnDetailId int64, options 
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -836,7 +836,7 @@ func createClusterYarnDetail(tx *goqu.TxDatabase, engineId, size int64, applicat
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -857,7 +857,7 @@ func readClusterYarnDetails(tx *goqu.TxDatabase, options ...QueryOpt) ([]Cluster
 			return []ClusterYarnDetail{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -882,7 +882,7 @@ func readClusterYarnDetail(tx *goqu.TxDatabase, options ...QueryOpt) (ClusterYar
 			return ClusterYarnDetail{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -910,7 +910,7 @@ func updateClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -931,7 +931,7 @@ func deleteClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -969,7 +969,7 @@ func (ds *Datastore) CreateEngine(name, location string, options ...QueryOpt) (i
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -1011,7 +1011,7 @@ func (ds *Datastore) ReadEngines(options ...QueryOpt) ([]Engine, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -1055,7 +1055,7 @@ func (ds *Datastore) ReadEngine(options ...QueryOpt) (Engine, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -1100,7 +1100,7 @@ func (ds *Datastore) UpdateEngine(engineId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -1136,7 +1136,7 @@ func (ds *Datastore) DeleteEngine(engineId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -1170,7 +1170,7 @@ func createEngine(tx *goqu.TxDatabase, name, location string, options ...QueryOp
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -1191,7 +1191,7 @@ func readEngines(tx *goqu.TxDatabase, options ...QueryOpt) ([]Engine, error) {
 			return []Engine{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -1216,7 +1216,7 @@ func readEngine(tx *goqu.TxDatabase, options ...QueryOpt) (Engine, bool, error) 
 			return Engine{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -1244,7 +1244,7 @@ func updateEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -1265,7 +1265,7 @@ func deleteEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -1294,7 +1294,7 @@ func createEntityType(tx *goqu.TxDatabase, name string, options ...QueryOpt) (in
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -1315,7 +1315,7 @@ func readEntityTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]entityType, er
 			return []entityType{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -1340,7 +1340,7 @@ func readEntityType(tx *goqu.TxDatabase, options ...QueryOpt) (entityType, bool,
 			return entityType{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -1368,7 +1368,7 @@ func updateEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -1389,7 +1389,7 @@ func deleteEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -1429,7 +1429,7 @@ func (ds *Datastore) CreateHistory(action string, identityId, entityTypeId, enti
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -1471,7 +1471,7 @@ func (ds *Datastore) ReadHistories(options ...QueryOpt) ([]History, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -1515,7 +1515,7 @@ func (ds *Datastore) ReadHistory(options ...QueryOpt) (History, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -1560,7 +1560,7 @@ func (ds *Datastore) UpdateHistory(historyId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -1596,7 +1596,7 @@ func (ds *Datastore) DeleteHistory(historyId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -1632,7 +1632,7 @@ func createHistory(tx *goqu.TxDatabase, action string, identityId, entityTypeId,
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -1653,7 +1653,7 @@ func readHistories(tx *goqu.TxDatabase, options ...QueryOpt) ([]History, error) 
 			return []History{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -1678,7 +1678,7 @@ func readHistory(tx *goqu.TxDatabase, options ...QueryOpt) (History, bool, error
 			return History{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -1706,7 +1706,7 @@ func updateHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -1727,7 +1727,7 @@ func deleteHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -1765,7 +1765,7 @@ func (ds *Datastore) CreateIdentity(name string, options ...QueryOpt) (int64, er
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -1807,7 +1807,7 @@ func (ds *Datastore) ReadIdentities(options ...QueryOpt) ([]Identity, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -1851,7 +1851,7 @@ func (ds *Datastore) ReadIdentity(options ...QueryOpt) (Identity, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -1896,7 +1896,7 @@ func (ds *Datastore) UpdateIdentity(identityId int64, options ...QueryOpt) error
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -1932,7 +1932,7 @@ func (ds *Datastore) DeleteIdentity(identityId int64, options ...QueryOpt) error
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -1966,7 +1966,7 @@ func createIdentity(tx *goqu.TxDatabase, name string, options ...QueryOpt) (int6
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -1987,7 +1987,7 @@ func readIdentities(tx *goqu.TxDatabase, options ...QueryOpt) ([]Identity, error
 			return []Identity{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2012,7 +2012,7 @@ func readIdentity(tx *goqu.TxDatabase, options ...QueryOpt) (Identity, bool, err
 			return Identity{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2040,7 +2040,7 @@ func updateIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -2061,7 +2061,7 @@ func deleteIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -2088,7 +2088,7 @@ func createIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) (int64, error)
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -2109,7 +2109,7 @@ func readIdentityRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]identityRole
 			return []identityRole{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2134,7 +2134,7 @@ func readIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) (identityRole, b
 			return identityRole{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2162,7 +2162,7 @@ func updateIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -2183,7 +2183,7 @@ func deleteIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -2213,7 +2213,7 @@ func createIdentityWorkgroup(tx *goqu.TxDatabase, identityId, workgroupId int64,
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -2234,7 +2234,7 @@ func readIdentityWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]identit
 			return []identityWorkgroup{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2259,7 +2259,7 @@ func readIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (identityWo
 			return identityWorkgroup{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2287,7 +2287,7 @@ func updateIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -2308,7 +2308,7 @@ func deleteIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -2347,7 +2347,7 @@ func (ds *Datastore) CreateLabel(projectId int64, name, description string, opti
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -2389,7 +2389,7 @@ func (ds *Datastore) ReadLabels(options ...QueryOpt) ([]Label, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -2433,7 +2433,7 @@ func (ds *Datastore) ReadLabel(options ...QueryOpt) (Label, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -2478,7 +2478,7 @@ func (ds *Datastore) UpdateLabel(labelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -2514,7 +2514,7 @@ func (ds *Datastore) DeleteLabel(labelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -2549,7 +2549,7 @@ func createLabel(tx *goqu.TxDatabase, projectId int64, name, description string,
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -2570,7 +2570,7 @@ func readLabels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Label, error) {
 			return []Label{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2595,7 +2595,7 @@ func readLabel(tx *goqu.TxDatabase, options ...QueryOpt) (Label, bool, error) {
 			return Label{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2623,7 +2623,7 @@ func updateLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -2644,7 +2644,131 @@ func deleteLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
+		color.Set(color.FgRed)
+		log.Println(q.dataset.ToDeleteSql())
+		color.Unset()
+	}
+	// Execute query
+	_, err := q.dataset.Delete().Exec()
+	return errors.Wrap(err, "executing query")
+}
+
+// ---------- ---- ----------
+// ---------- ---- ----------
+// ---------- meta ----------
+// ---------- ---- ----------
+// ---------- ---- ----------
+
+func createMeta(tx *goqu.TxDatabase, key string, options ...QueryOpt) (int64, error) {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, CreateOp, "meta", nil)
+	// Default insert fields
+	meta := goqu.Record{
+		"key": key,
+	}
+	q.AddFields(meta)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return 0, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
+		color.Set(color.FgGreen)
+		log.Println(q.dataset.ToInsertSql(q.fields))
+		color.Unset()
+	}
+	// Execute query
+	res, err := q.dataset.Insert(q.fields).Exec()
+	if err != nil {
+		return 0, errors.Wrap(err, "executing query")
+	}
+	return res.LastInsertId()
+}
+
+func readMetas(tx *goqu.TxDatabase, options ...QueryOpt) ([]meta, error) {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "", "meta", nil)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return []meta{}, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
+		color.Set(color.FgBlue)
+		log.Println(q.dataset.ToSql())
+		color.Unset()
+	}
+	// Execute query
+	rows, err := getRows(tx, q.dataset)
+	if err != nil {
+		return []meta{}, err
+	}
+	defer rows.Close()
+
+	// Scan rows to metas
+	return ScanMetas(rows)
+}
+
+func readMeta(tx *goqu.TxDatabase, options ...QueryOpt) (meta, bool, error) {
+	var exists bool
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "", "meta", nil)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return meta{}, exists, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
+		color.Set(color.FgBlue)
+		log.Println(q.dataset.ToSql())
+		color.Unset()
+	}
+	// Execute query
+	row, err := getRow(tx, q.dataset)
+	if err != nil {
+		return meta{}, false, err
+	}
+	ret_meta, err := ScanMeta(row)
+	if err == sql.ErrNoRows {
+		return meta{}, exists, nil
+	} else if err == nil {
+		exists = true
+	}
+	// Scan row to meta
+	return ret_meta, exists, err
+}
+
+func updateMeta(tx *goqu.TxDatabase, metaId int64, options ...QueryOpt) error {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, UpdateOp, "meta", metaId)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug && len(q.fields) > 0 {
+		color.Set(color.FgYellow)
+		log.Println(q.dataset.ToUpdateSql(q.fields))
+		color.Unset()
+	}
+	// Execute query
+	if len(q.fields) > 0 {
+		_, err := q.dataset.Update(q.fields).Exec()
+		return errors.Wrap(err, "executing query")
+	}
+	return nil
+}
+
+func deleteMeta(tx *goqu.TxDatabase, metaId int64, options ...QueryOpt) error {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, DeleteOp, "meta", metaId)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -2673,7 +2797,7 @@ func createModelCategory(tx *goqu.TxDatabase, name string, options ...QueryOpt) 
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -2694,7 +2818,7 @@ func readModelCategories(tx *goqu.TxDatabase, options ...QueryOpt) ([]modelCateg
 			return []modelCategory{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2719,7 +2843,7 @@ func readModelCategory(tx *goqu.TxDatabase, options ...QueryOpt) (modelCategory,
 			return modelCategory{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -2747,7 +2871,7 @@ func updateModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -2768,7 +2892,7 @@ func deleteModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -2809,7 +2933,7 @@ func (ds *Datastore) CreateModel(name, modelKey, algorithm, modelCategory, respo
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -2851,7 +2975,7 @@ func (ds *Datastore) ReadModels(options ...QueryOpt) ([]Model, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -2895,7 +3019,7 @@ func (ds *Datastore) ReadModel(options ...QueryOpt) (Model, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -2940,7 +3064,7 @@ func (ds *Datastore) UpdateModel(modelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -2976,7 +3100,7 @@ func (ds *Datastore) DeleteModel(modelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -3013,7 +3137,7 @@ func createModel(tx *goqu.TxDatabase, name, modelKey, algorithm, modelCategory, 
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -3034,7 +3158,7 @@ func readModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Model, error) {
 			return []Model{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3059,7 +3183,7 @@ func readModel(tx *goqu.TxDatabase, options ...QueryOpt) (Model, bool, error) {
 			return Model{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3087,7 +3211,7 @@ func updateModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -3108,7 +3232,7 @@ func deleteModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -3140,7 +3264,7 @@ func createMultinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, l
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -3161,7 +3285,7 @@ func readMultinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]multinom
 			return []multinomialModel{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3186,7 +3310,7 @@ func readMultinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (multinomial
 			return multinomialModel{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3214,7 +3338,7 @@ func updateMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, optio
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -3235,7 +3359,7 @@ func deleteMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, optio
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -3272,7 +3396,7 @@ func (ds *Datastore) CreatePermission(code, description string, options ...Query
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -3314,7 +3438,7 @@ func (ds *Datastore) ReadPermissions(options ...QueryOpt) ([]Permission, error) 
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -3358,7 +3482,7 @@ func (ds *Datastore) ReadPermission(options ...QueryOpt) (Permission, bool, erro
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -3403,7 +3527,7 @@ func (ds *Datastore) UpdatePermission(permissionId int64, options ...QueryOpt) e
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -3439,7 +3563,7 @@ func (ds *Datastore) DeletePermission(permissionId int64, options ...QueryOpt) e
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -3472,7 +3596,7 @@ func createPermission(tx *goqu.TxDatabase, code, description string, options ...
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -3493,7 +3617,7 @@ func readPermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]Permission, er
 			return []Permission{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3518,7 +3642,7 @@ func readPermission(tx *goqu.TxDatabase, options ...QueryOpt) (Permission, bool,
 			return Permission{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3546,7 +3670,7 @@ func updatePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -3567,7 +3691,7 @@ func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -3606,7 +3730,7 @@ func (ds *Datastore) CreatePrivilege(typ string, workgroupId, entityType, entity
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -3648,7 +3772,7 @@ func (ds *Datastore) ReadPrivileges(options ...QueryOpt) ([]Privilege, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -3692,7 +3816,7 @@ func (ds *Datastore) ReadPrivilege(options ...QueryOpt) (Privilege, bool, error)
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -3737,7 +3861,7 @@ func (ds *Datastore) UpdatePrivilege(options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -3773,7 +3897,7 @@ func (ds *Datastore) DeletePrivilege(options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -3808,7 +3932,7 @@ func createPrivilege(tx *goqu.TxDatabase, typ string, workgroupId, entityType, e
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -3829,7 +3953,7 @@ func readPrivileges(tx *goqu.TxDatabase, options ...QueryOpt) ([]Privilege, erro
 			return []Privilege{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3854,7 +3978,7 @@ func readPrivilege(tx *goqu.TxDatabase, options ...QueryOpt) (Privilege, bool, e
 			return Privilege{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -3882,7 +4006,7 @@ func updatePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -3903,7 +4027,7 @@ func deletePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -3942,7 +4066,7 @@ func (ds *Datastore) CreateProject(name, description, modelCategory string, opti
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -3984,7 +4108,7 @@ func (ds *Datastore) ReadProjects(options ...QueryOpt) ([]Project, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -4028,7 +4152,7 @@ func (ds *Datastore) ReadProject(options ...QueryOpt) (Project, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -4073,7 +4197,7 @@ func (ds *Datastore) UpdateProject(projectId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -4109,7 +4233,7 @@ func (ds *Datastore) DeleteProject(projectId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -4144,7 +4268,7 @@ func createProject(tx *goqu.TxDatabase, name, description, modelCategory string,
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -4165,7 +4289,7 @@ func readProjects(tx *goqu.TxDatabase, options ...QueryOpt) ([]Project, error) {
 			return []Project{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4190,7 +4314,7 @@ func readProject(tx *goqu.TxDatabase, options ...QueryOpt) (Project, bool, error
 			return Project{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4218,7 +4342,7 @@ func updateProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -4239,7 +4363,7 @@ func deleteProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -4271,7 +4395,7 @@ func createRegressionModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, me
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -4292,7 +4416,7 @@ func readRegressionModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]regressio
 			return []regressionModel{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4317,7 +4441,7 @@ func readRegressionModel(tx *goqu.TxDatabase, options ...QueryOpt) (regressionMo
 			return regressionModel{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4345,7 +4469,7 @@ func updateRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -4366,7 +4490,7 @@ func deleteRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -4403,7 +4527,7 @@ func (ds *Datastore) CreateRole(name string, options ...QueryOpt) (int64, error)
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -4445,7 +4569,7 @@ func (ds *Datastore) ReadRoles(options ...QueryOpt) ([]Role, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -4489,7 +4613,7 @@ func (ds *Datastore) ReadRole(options ...QueryOpt) (Role, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -4534,7 +4658,7 @@ func (ds *Datastore) UpdateRole(roleId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -4570,7 +4694,7 @@ func (ds *Datastore) DeleteRole(roleId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -4603,7 +4727,7 @@ func createRole(tx *goqu.TxDatabase, name string, options ...QueryOpt) (int64, e
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -4624,7 +4748,7 @@ func readRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]Role, error) {
 			return []Role{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4649,7 +4773,7 @@ func readRole(tx *goqu.TxDatabase, options ...QueryOpt) (Role, bool, error) {
 			return Role{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4677,7 +4801,7 @@ func updateRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -4698,7 +4822,7 @@ func deleteRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -4728,7 +4852,7 @@ func createRolePermission(tx *goqu.TxDatabase, roleId, permissionId int64, optio
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -4749,7 +4873,7 @@ func readRolePermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]rolePermis
 			return []rolePermission{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4774,7 +4898,7 @@ func readRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) (rolePermissio
 			return rolePermission{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4802,7 +4926,7 @@ func updateRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -4823,7 +4947,7 @@ func deleteRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -4852,7 +4976,7 @@ func createState(tx *goqu.TxDatabase, name string, options ...QueryOpt) (int64, 
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -4873,7 +4997,7 @@ func readStates(tx *goqu.TxDatabase, options ...QueryOpt) ([]state, error) {
 			return []state{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4898,7 +5022,7 @@ func readState(tx *goqu.TxDatabase, options ...QueryOpt) (state, bool, error) {
 			return state{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -4926,7 +5050,7 @@ func updateState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -4947,7 +5071,7 @@ func deleteState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -4987,7 +5111,7 @@ func (ds *Datastore) CreateService(projectId, modelId int64, name string, option
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -5029,7 +5153,7 @@ func (ds *Datastore) ReadServices(options ...QueryOpt) ([]Service, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -5073,7 +5197,7 @@ func (ds *Datastore) ReadService(options ...QueryOpt) (Service, bool, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -5118,7 +5242,7 @@ func (ds *Datastore) UpdateService(serviceId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -5154,7 +5278,7 @@ func (ds *Datastore) DeleteService(serviceId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -5190,7 +5314,7 @@ func createService(tx *goqu.TxDatabase, projectId, modelId int64, name string, o
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -5211,7 +5335,7 @@ func readServices(tx *goqu.TxDatabase, options ...QueryOpt) ([]Service, error) {
 			return []Service{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -5236,7 +5360,7 @@ func readService(tx *goqu.TxDatabase, options ...QueryOpt) (Service, bool, error
 			return Service{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -5264,7 +5388,7 @@ func updateService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -5285,7 +5409,7 @@ func deleteService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
@@ -5323,7 +5447,7 @@ func (ds *Datastore) CreateWorkgroup(typ, name string, options ...QueryOpt) (int
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgGreen)
 			log.Println(q.dataset.ToInsertSql(q.fields))
 			color.Unset()
@@ -5365,7 +5489,7 @@ func (ds *Datastore) ReadWorkgroups(options ...QueryOpt) ([]Workgroup, error) {
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -5409,7 +5533,7 @@ func (ds *Datastore) ReadWorkgroup(options ...QueryOpt) (Workgroup, bool, error)
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgBlue)
 			log.Println(q.dataset.ToSql())
 			color.Unset()
@@ -5454,7 +5578,7 @@ func (ds *Datastore) UpdateWorkgroup(workgroupId int64, options ...QueryOpt) err
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG && len(q.fields) > 0 {
+		if debug && len(q.fields) > 0 {
 			color.Set(color.FgYellow)
 			log.Println(q.dataset.ToUpdateSql(q.fields))
 			color.Unset()
@@ -5490,7 +5614,7 @@ func (ds *Datastore) DeleteWorkgroup(workgroupId int64, options ...QueryOpt) err
 				return errors.Wrap(err, "setting up query options")
 			}
 		}
-		if DEBUG {
+		if debug {
 			color.Set(color.FgRed)
 			log.Println(q.dataset.ToDeleteSql())
 			color.Unset()
@@ -5524,7 +5648,7 @@ func createWorkgroup(tx *goqu.TxDatabase, typ, name string, options ...QueryOpt)
 			return 0, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -5545,7 +5669,7 @@ func readWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]Workgroup, erro
 			return []Workgroup{}, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -5570,7 +5694,7 @@ func readWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (Workgroup, bool, e
 			return Workgroup{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -5598,7 +5722,7 @@ func updateWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -5619,7 +5743,7 @@ func deleteWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 			return errors.Wrap(err, "setting up query options")
 		}
 	}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()

@@ -16,7 +16,7 @@ import (
 	"gopkg.in/doug-martin/goqu.v3"
 )
 
-var DEBUG bool
+var debug bool
 
 {{range .Tables -}}
 // ---------- {{range strLen .Name}}-{{end}} ----------
@@ -75,7 +75,7 @@ var DEBUG bool
 {{- end}}
 
 {{define "insertSql" -}} {{/* ARG OPTIONAL */ -}}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgGreen)
 		log.Println(q.dataset.ToInsertSql(q.fields))
 		color.Unset()
@@ -100,7 +100,7 @@ var DEBUG bool
 {{- end}}
 
 {{define "toSql" -}}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgBlue)
 		log.Println(q.dataset.ToSql())
 		color.Unset()
@@ -158,7 +158,7 @@ var DEBUG bool
 {{- end}}
 
 {{define "updateSql" -}} {{/* ARG OPTIONAL for exported */ -}}
-	if DEBUG && len(q.fields) > 0 {
+	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
 		color.Unset()
@@ -180,7 +180,7 @@ var DEBUG bool
 {{- end}}
 
 {{define "deleteSql" -}} {{/* ARG REQUIRED for exported */ -}}
-	if DEBUG {
+	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()

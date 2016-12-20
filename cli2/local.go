@@ -189,6 +189,11 @@ func serveMaster(c *context) *cobra.Command {
 			log.Fatalln("Invalid port range.")
 		}
 
+		var flag uint
+		if debug {
+			flag = flag | data.Debug
+		}
+
 		master.Run(c.version, c.buildDate, master.Opts{
 			webAddress,
 			webTLSCertPath,
@@ -222,6 +227,7 @@ func serveMaster(c *context) *cobra.Command {
 
 				SuperName: superuserName,
 				SuperPass: superuserPassword,
+				Flags:     flag,
 			},
 		})
 	})
