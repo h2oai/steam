@@ -23,9 +23,8 @@ package cli2
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/spf13/cobra"
+	"log"
 )
 
 // registerGeneratedCommands appends generated commands to the
