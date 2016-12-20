@@ -71,7 +71,8 @@ generate:
 	piping
 	go fmt ./srv/web/service.go
 	go fmt ./cli2/cli.go
-	# cd ./master/data && go generate && go fmt scans.go
+	cd ./tools/crudr && go build && go install
+	cd ./master/data && go generate && go fmt scans.go && go fmt crud.go
 
 cli-markdown:
 	cd ./tools/cli-md && go build && go install
