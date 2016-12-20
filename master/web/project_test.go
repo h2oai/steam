@@ -1,31 +1,156 @@
 package web
 
 import (
+	"errors"
 	"os"
 	"testing"
+
+	"github.com/h2oai/steam/master/az"
 )
 
-func TestProjectCRUD(t *testing.T) {
+type projectIn struct {
+	name   string
+	desc   string
+	modCat string
+}
+
+var projectTests = []struct {
+	in   projectIn
+	out  int64
+	pass bool
+	err  error
+}{
+	// Basic Implementation
+	{in: projectIn{name: "project1", desc: "test project"}, out: 1, pass: true},
+	// Duplicate description
+	{in: projectIn{name: "project2", desc: "test project"}, out: 2, pass: true},
+	// No description
+	{in: projectIn{name: "project3"}, out: 3, pass: true},
+	// With model category
+	{in: projectIn{name: "project4", modCat: "Binomial"}, out: 4, pass: true},
+	// Duplicate name
+	{in: projectIn{name: "project1", desc: "test project"}, pass: false,
+		err: errors.New("creating project in database: committing transaction: executing query: UNIQUE constraint failed: project.name"),
+	},
+}
+
+var readProjectsTests = []struct {
+	offset uint
+	limit  uint
+}{
+	{0, 10},
+	{2, 2},
+	{1, 5},
+}
+
+func TestSQLiteProject(t *testing.T) {
 	svc, pz, temp := testSetup("project", "sqlite3")
 	defer os.RemoveAll(temp)
 
-	projectId, err := svc.CreateProject(pz, "project1", "project1", "binomial")
-	if err != nil {
-		t.Errorf("creating project: %v", err)
+	// -- C --
+	if ok := t.Run("Create", testProjectCreate(pz, svc)); !ok {
 		t.FailNow()
 	}
-	t.Log("Created project with ID:", projectId)
 
-	project, err := svc.GetProject(pz, projectId)
-	if err != nil {
-		t.Errorf("getting project: %v", err)
+	// -- R --
+	if ok := t.Run("Read", testProjectRead(pz, svc)); !ok {
 		t.FailNow()
 	}
-	t.Logf("Returned project with ID: %d and Name: %s", project.Id, project.Name)
 
-	if err := svc.DeleteProject(pz, projectId); err != nil {
-		t.Errorf("deleting project: %v", err)
+	// -- U --
+
+	//FIXME: TODO
+
+	// -- D --
+	if ok := t.Run("Delete", testProjectDelete(pz, svc)); !ok {
 		t.FailNow()
 	}
-	t.Log("Deleted project with ID:", projectId)
+}
+
+func testProjectCreate(pz az.Principal, svc *Service) func(*testing.T) {
+	return func(t *testing.T) {
+		for _, project := range projectTests {
+			in, out := project.in, project.out
+			id, err := svc.CreateProject(pz, in.name, in.desc, in.modCat)
+			if project.pass {
+				if err != nil {
+					t.Errorf("Create(%+v): unexpected error creating project: %+v", in, err)
+				} else if id != out {
+					t.Errorf("Create(%+v): incorrect project id: expected %d, got %d", in, out, id)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Create(%+v): expected error", in)
+				} else if err.Error() != project.err.Error() {
+					t.Errorf("Create(%+v): incorrect error: expected %q, got %q", in, project.err, err)
+				}
+			}
+		}
+	}
+}
+
+func testProjectRead(pz az.Principal, svc *Service) func(*testing.T) {
+	return func(t *testing.T) {
+		var totPass uint
+		for _, projectTest := range projectTests {
+			in, out := projectTest.in, projectTest.out
+			project, err := svc.GetProject(pz, out)
+			if projectTest.pass {
+				if err != nil {
+					t.Errorf("Read(%+v): unexpected error reading project: %+v", out, err)
+				} else if project.Name != in.name {
+					t.Errorf("Read(%+v): incorrect name: expected %s, got %s", in, in.name, project.Name)
+				} else if project.Description != in.desc {
+					t.Errorf("Read(%+v): incorrect description: expected %s, got %s", in, in.desc, project.Description)
+				} else if project.ModelCategory != in.modCat {
+					t.Errorf("Read(%+v): incorrect model category: expected %s, got %s", in, in.modCat, project.ModelCategory)
+				}
+				totPass++
+			} else {
+				if err == nil {
+					t.Errorf("Read(%+v): expected error", projectTest)
+				}
+			}
+		}
+
+		for _, get := range readProjectsTests {
+			var count int
+			if totPass-get.offset < get.limit {
+				count = int(totPass - get.offset)
+			} else {
+				count = int(get.limit)
+			}
+			projects, err := svc.GetProjects(pz, get.offset, get.limit)
+			if err != nil {
+				t.Errorf("Reads(%+v): unexpected error reading projects: %+v", get, err)
+			} else if len(projects) != count {
+				t.Errorf("Reads(%+v): incorrect number of projects read: expected %d, got %d", get, count, len(projects))
+			} else if projects[0].Id-1 != int64(get.offset) {
+				t.Errorf("Reads(%+v): incorrect offset: expected %d, got %d", get, get.offset, projects[0].Id-1)
+			}
+		}
+	}
+}
+
+func testProjectDelete(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		for _, project := range projectTests {
+			out := project.out
+			err := svc.DeleteProject(pz, out)
+			if project.pass {
+				if err != nil {
+					t.Errorf("Delete(%+v): unexpected error deleting project: %+v", out, err)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Delete(%+v): expected error deleting project", out)
+				}
+			}
+		}
+
+		projects, _ := svc.GetProjects(pz, 0, 1)
+		if len(projects) > 1 {
+			t.Error("Delete: at least one project was not deleted")
+		}
+	}
 }
