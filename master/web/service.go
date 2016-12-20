@@ -2179,67 +2179,67 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 // --- ---------- ---
 
 func (s *Service) BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error) {
-	return 0, nil
+	return 0, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) BuildModelAuto(pz az.Principal, clusterId int64, dataset, targetName string, maxRunTime int) (*web.Model, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name, description string, responseColumnName string) (int64, error) {
-	return 0, nil
+	return 0, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) GetDatasets(pz az.Principal, datasourceId int64, offset, limit uint) ([]*web.Dataset, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) GetDataset(pz az.Principal, datasetId int64) (*web.Dataset, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) UpdateDataset(pz az.Principal, datasetId int64, name, description, responseColumnName string) error {
-	return nil
+	return errors.New("This API call has been deprecated")
 }
 
 func (s *Service) SplitDataset(pz az.Principal, datasetId int64, ratio1 int, ratio2 int) ([]int64, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) DeleteDataset(pz az.Principal, datasetId int64) error {
-	return nil
+	return errors.New("This API call has been deprecated")
 }
 
 func (s *Service) CreateDatasource(pz az.Principal, projectId int64, name, description, filePath string) (int64, error) {
-	return 0, nil
+	return 0, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) GetDatasources(pz az.Principal, projectId int64, offset, limit uint) ([]*web.Datasource, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) GetDatasource(pz az.Principal, datasourceId int64) (*web.Datasource, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) UpdateDatasource(pz az.Principal, datasourceId int64, name, description, filePath string) error {
-	return nil
+	return errors.New("This API call has been deprecated")
 }
 
 func (s *Service) DeleteDatasource(pz az.Principal, datasourceId int64) error {
-	return nil
+	return errors.New("This API call has been deprecated")
 }
 
 func (s *Service) GetAllClusterTypes(pz az.Principal) ([]*web.ClusterType, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) GetJob(pz az.Principal, clusterId int64, jobName string) (*web.Job, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 func (s *Service) GetJobs(pz az.Principal, clusterId int64) ([]*web.Job, error) {
-	return nil, nil
+	return nil, errors.New("This API call has been deprecated")
 }
 
 // Helper function to convert from int to bytes
