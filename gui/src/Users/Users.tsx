@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import TabNavigation from '../Projects/components/TabNavigation';
-import {Identity, Permission, Project} from '../Proxy/Proxy';
+import {Identity, Permission} from '../Proxy/Proxy';
 import UserAccess from './components/UserAccess';
 import RolePermissions from './components/RolePermissions';
 import './styles/users.scss';
@@ -28,6 +28,7 @@ import CreateRole from "./components/CreateRole";
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {enterNewUser, enterNewRole, exitNewRole, exitNewUser} from "./actions/users.actions";
+import {UserAuthentication} from "./components/UserAuthentication";
 
 
 interface Props {
@@ -59,6 +60,12 @@ export class Users extends React.Component<Props & DispatchProps, any> {
           isSelected: false,
           onClick: this.clickHandler.bind(this),
           component: <RolePermissions />
+        },
+        authentication: {
+          label: 'USER AUTHENTICATION',
+          isSelected: false,
+          onClick: this.clickHandler.bind(this),
+          component: <UserAuthentication />
         }
       },
       isSelected: 'users'
@@ -79,7 +86,13 @@ export class Users extends React.Component<Props & DispatchProps, any> {
           isSelected: false,
           onClick: this.clickHandler.bind(this),
           component: <RolePermissions />
-        }
+        },
+        authentication: {
+          label: 'AUTHENTICATION',
+          isSelected: false,
+          onClick: this.clickHandler.bind(this),
+          component: <UserAuthentication />
+        },
       }
     });
   }
@@ -146,6 +159,8 @@ export class Users extends React.Component<Props & DispatchProps, any> {
               <UserAccess /> : null}
             {this.state.tabs.roles.isSelected === true ?
               <RolePermissions /> : null}
+            {this.state.tabs.authentication.isSelected === true ?
+              <UserAuthentication /> : null}
           </div>
         </div>
       );
