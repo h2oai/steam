@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
@@ -25,6 +26,8 @@ var (
 	test_h2o                       bool
 )
 
+var cluster_url string
+
 func init() {
 	flag.StringVar(&test_compilationServiceAddress, "compilation-service-address", ":8080", "Where to find the compilation service")
 	flag.BoolVar(&test_compilationService, "test-compilation-service", true, "Set to false to skip compilation service tests")
@@ -34,6 +37,7 @@ func init() {
 
 func TestMain(m *testing.M) {
 	flag.Parse()
+	cluster_url = (&url.URL{Scheme: "http", Host: test_h2oAddress}).String()
 
 	os.Exit(m.Run())
 }

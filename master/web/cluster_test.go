@@ -2,14 +2,11 @@ package web
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"testing"
 
 	"github.com/h2oai/steam/master/az"
 )
-
-var u = (&url.URL{Scheme: "http", Host: "localhost:54321"}).String()
 
 var clusterTests = []struct {
 	in   string
@@ -33,31 +30,31 @@ func TestSQLiteExternalCluster(t *testing.T) {
 	defer os.RemoveAll(temp)
 
 	if !test_h2o {
-		t.Skip("Skipping tests requiring h2o")
-	} else if !pingExternal(u) {
-		t.Fatal("unable reach h2o")
+		t.Skip("skipping cluster tests: requires h2o")
+	} else if !pingExternal(cluster_url) {
+		t.Fatal("unable to reach h2o")
 	}
 
 	t.Logf("Testing %d case(s)", len(clusterTests))
 	// -- C --
-	if ok := t.Run("Create", testingExternalClusterCreate(pz, svc)); !ok {
+	if ok := t.Run("Create", testExternalClusterCreate(pz, svc)); !ok {
 		t.FailNow()
 	}
 
 	// -- R --
-	if ok := t.Run("Read", testingClusterRead(pz, svc)); !ok {
+	if ok := t.Run("Read", testClusterRead(pz, svc)); !ok {
 		t.FailNow()
 	}
 	// -- U --
 
 	// -- D --
-	if ok := t.Run("Delete", testingExternalClusterDelete(pz, svc)); !ok {
+	if ok := t.Run("Delete", testExternalClusterDelete(pz, svc)); !ok {
 		t.FailNow()
 	}
 
 }
 
-func testingExternalClusterCreate(pz az.Principal, svc *Service) func(t *testing.T) {
+func testExternalClusterCreate(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
 		for _, test := range clusterTests {
 			in, out := test.in, test.out
@@ -79,7 +76,7 @@ func testingExternalClusterCreate(pz az.Principal, svc *Service) func(t *testing
 	}
 }
 
-func testingYarnClusterCreate(pz az.Principal, svc *Service) func(t *testing.T) {
+func testYarnClusterCreate(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
 		for _, test := range clusterTests {
 			fmt.Println(test)
@@ -89,7 +86,7 @@ func testingYarnClusterCreate(pz az.Principal, svc *Service) func(t *testing.T) 
 	}
 }
 
-func testingClusterRead(pz az.Principal, svc *Service) func(t *testing.T) {
+func testClusterRead(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
 		var totPass uint
 		for _, test := range clusterTests {
@@ -128,12 +125,12 @@ func testingClusterRead(pz az.Principal, svc *Service) func(t *testing.T) {
 	}
 }
 
-func testingClusterUpdate(pz az.Principal, svc *Service) func(t *testing.T) {
+func testClusterUpdate(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
 	}
 }
 
-func testingExternalClusterDelete(pz az.Principal, svc *Service) func(t *testing.T) {
+func testExternalClusterDelete(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
 		for _, test := range clusterTests {
 			out := test.out
