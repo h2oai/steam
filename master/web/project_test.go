@@ -47,6 +47,7 @@ func TestSQLiteProject(t *testing.T) {
 	svc, pz, temp := testSetup("project", "sqlite3")
 	defer os.RemoveAll(temp)
 
+	t.Logf("Testing %d case(s)", len(projectTests))
 	// -- C --
 	if ok := t.Run("Create", testProjectCreate(pz, svc)); !ok {
 		t.FailNow()
@@ -69,10 +70,10 @@ func TestSQLiteProject(t *testing.T) {
 
 func testProjectCreate(pz az.Principal, svc *Service) func(*testing.T) {
 	return func(t *testing.T) {
-		for _, project := range projectTests {
-			in, out := project.in, project.out
+		for _, test := range projectTests {
+			in, out := test.in, test.out
 			id, err := svc.CreateProject(pz, in.name, in.desc, in.modCat)
-			if project.pass {
+			if test.pass {
 				if err != nil {
 					t.Errorf("Create(%+v): unexpected error creating project: %+v", in, err)
 				} else if id != out {
@@ -81,8 +82,8 @@ func testProjectCreate(pz az.Principal, svc *Service) func(*testing.T) {
 			} else {
 				if err == nil {
 					t.Errorf("Create(%+v): expected error", in)
-				} else if err.Error() != project.err.Error() {
-					t.Errorf("Create(%+v): incorrect error: expected %q, got %q", in, project.err, err)
+				} else if err.Error() != test.err.Error() {
+					t.Errorf("Create(%+v): incorrect error: expected %q, got %q", in, test.err, err)
 				}
 			}
 		}
@@ -92,23 +93,23 @@ func testProjectCreate(pz az.Principal, svc *Service) func(*testing.T) {
 func testProjectRead(pz az.Principal, svc *Service) func(*testing.T) {
 	return func(t *testing.T) {
 		var totPass uint
-		for _, projectTest := range projectTests {
-			in, out := projectTest.in, projectTest.out
+		for _, test := range projectTests {
+			in, out := test.in, test.out
 			project, err := svc.GetProject(pz, out)
-			if projectTest.pass {
+			if test.pass {
 				if err != nil {
 					t.Errorf("Read(%+v): unexpected error reading project: %+v", out, err)
 				} else if project.Name != in.name {
-					t.Errorf("Read(%+v): incorrect name: expected %s, got %s", in, in.name, project.Name)
+					t.Errorf("Read(%+v): incorrect name: expected %s, got %s", out, in.name, project.Name)
 				} else if project.Description != in.desc {
-					t.Errorf("Read(%+v): incorrect description: expected %s, got %s", in, in.desc, project.Description)
+					t.Errorf("Read(%+v): incorrect description: expected %s, got %s", out, in.desc, project.Description)
 				} else if project.ModelCategory != in.modCat {
-					t.Errorf("Read(%+v): incorrect model category: expected %s, got %s", in, in.modCat, project.ModelCategory)
+					t.Errorf("Read(%+v): incorrect model category: expected %s, got %s", out, in.modCat, project.ModelCategory)
 				}
 				totPass++
 			} else {
 				if err == nil {
-					t.Errorf("Read(%+v): expected error", projectTest)
+					t.Errorf("Read(%+v): expected error", out)
 				}
 			}
 		}
@@ -125,7 +126,7 @@ func testProjectRead(pz az.Principal, svc *Service) func(*testing.T) {
 				t.Errorf("Reads(%+v): unexpected error reading projects: %+v", get, err)
 			} else if len(projects) != count {
 				t.Errorf("Reads(%+v): incorrect number of projects read: expected %d, got %d", get, count, len(projects))
-			} else if projects[0].Id-1 != int64(get.offset) {
+			} else if len(projects) > 1 && projects[0].Id-1 != int64(get.offset) {
 				t.Errorf("Reads(%+v): incorrect offset: expected %d, got %d", get, get.offset, projects[0].Id-1)
 			}
 		}
@@ -134,10 +135,10 @@ func testProjectRead(pz az.Principal, svc *Service) func(*testing.T) {
 
 func testProjectDelete(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
-		for _, project := range projectTests {
-			out := project.out
+		for _, test := range projectTests {
+			out := test.out
 			err := svc.DeleteProject(pz, out)
-			if project.pass {
+			if test.pass {
 				if err != nil {
 					t.Errorf("Delete(%+v): unexpected error deleting project: %+v", out, err)
 				}

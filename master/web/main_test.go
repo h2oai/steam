@@ -4,6 +4,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -19,10 +20,16 @@ const (
 
 var (
 	test_compilationServiceAddress string
+	test_compilationService        bool
+	test_h2oAddress                string
+	test_h2o                       bool
 )
 
 func init() {
 	flag.StringVar(&test_compilationServiceAddress, "compilation-service-address", ":8080", "Where to find the compilation service")
+	flag.BoolVar(&test_compilationService, "test-compilation-service", true, "Set to false to skip compilation service tests")
+	flag.StringVar(&test_h2oAddress, "h2o-address", "localhost:54321", "Where to locate the H2O instance")
+	flag.BoolVar(&test_h2o, "test-h2o", true, "Set to false to skip H2O tests")
 }
 
 func TestMain(m *testing.M) {
@@ -69,7 +76,7 @@ func setupDS(driver, wd string) *data.Datastore {
 	}
 	switch driver {
 	case "sqlite3":
-		dbOpts.Opts = filepath.Join(wd, fs.DbDir, "steam.db")
+		dbOpts.Path = filepath.Join(wd, fs.DbDir, "steam.db")
 	}
 
 	ds, err := data.NewDatastore(driver, dbOpts)
@@ -86,4 +93,12 @@ func setupPz(ds *data.Datastore) az.Principal {
 	}
 
 	return pz
+}
+
+func pingExternal(u string) bool {
+	_, err := http.Get(u)
+	if err != nil {
+		return false
+	}
+	return true
 }
