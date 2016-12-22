@@ -43,8 +43,6 @@ func TestSQLiteModel(t *testing.T) {
 
 	if !test_h2o {
 		t.Skip("skipping model tests: requires h2o")
-	} else if !pingExternal(cluster_url) {
-		t.Fatalf("unable to reach h2o at %s", cluster_url)
 	}
 	projectId, err := svc.CreateProject(pz, "proj1", "desc", "")
 	if err != nil {

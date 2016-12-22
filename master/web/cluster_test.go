@@ -31,8 +31,6 @@ func TestSQLiteExternalCluster(t *testing.T) {
 
 	if !test_h2o {
 		t.Skip("skipping cluster tests: requires h2o")
-	} else if !pingExternal(cluster_url) {
-		t.Fatal("unable to reach h2o")
 	}
 
 	t.Logf("Testing %d case(s)", len(clusterTests))

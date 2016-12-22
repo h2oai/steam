@@ -26,7 +26,7 @@ var (
 	test_h2o                       bool
 )
 
-var cluster_url string
+var cluster_url, compilation_service_url string
 
 func init() {
 	flag.StringVar(&test_compilationServiceAddress, "compilation-service-address", ":8080", "Where to find the compilation service")
@@ -38,6 +38,13 @@ func init() {
 func TestMain(m *testing.M) {
 	flag.Parse()
 	cluster_url = (&url.URL{Scheme: "http", Host: test_h2oAddress}).String()
+	compilation_service_url = (&url.URL{Scheme: "http", Host: test_compilationServiceAddress}).String()
+	if test_h2o && !pingExternal(cluster_url) {
+		log.Fatalf("unable to reach h2o at %s", cluster_url)
+	}
+	if test_compilationService && !pingExternal(compilation_service_url) {
+		log.Fatalf("unable to reach compilation service at %s", compilation_service_url)
+	}
 
 	os.Exit(m.Run())
 }
