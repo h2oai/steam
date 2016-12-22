@@ -181,10 +181,6 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                     <i className="fa fa-question-circle-o orange tooltip-launcher" aria-hidden="true" onMouseEnter={this.onMainTooltipOver} onMouseLeave={this.onMainTooltipOut}>
                       {this.state.showTooltipMain ?
                         <div className="tooltip tooltip-question">
-                          <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                            <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                            <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                          </svg>
                           The output from this Python file should be one of row of an H2O data form that your model is expecting.
                         </div>
                         : null }
@@ -214,11 +210,6 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                     <i className="fa fa-question-circle-o orange tooltip-launcher tooltip-launcher-libraries" aria-hidden="true" onMouseEnter={this.onLibraryTooltipOver} onMouseLeave={this.onLibraryTooltipOut}>
                       {this.state.showTooltipLibrary ?
                         <div className="tooltip tooltip-question tooltip-libraries">
-                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                          <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                          <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                        </svg>
-
                           Any non-standard libraries called here should be installed into your deployment environment prior to launching services
                       </div>
                         : null }
@@ -251,10 +242,6 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                     <i className="fa fa-question-circle-o orange tooltip-launcher tooltip-launcher-conda" aria-hidden="true" onMouseEnter={this.onCondaTooltipOver} onMouseLeave={this.onCondaTooltipOut}>
                       {this.state.showTooltipConda ?
                       <div className="tooltip tooltip-question tooltip-conda">
-                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                          <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                          <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                        </svg>
                         you can get this file by doing this in your commandline of conda environment
                         <p>$ conda env export > mypackage.yaml</p>
                       </div>
@@ -284,11 +271,6 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                   <div>Pick a name for this pre-processing package.&nbsp;
                     <i className="fa fa-question-circle-o orange tooltip-launcher tooltip-launcher-name" aria-hidden="true" onMouseEnter={this.onNameTooltipOver} onMouseLeave={this.onNameTooltipOut}>
                       { this.state.showTooltipName ? <div className="tooltip tooltip-name tooltip-question">
-                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                          <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                          <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                        </svg>
-
                         You will use it as a reference when deploying models.
                       </div>
                         : null }

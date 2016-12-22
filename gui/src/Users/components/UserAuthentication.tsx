@@ -23,6 +23,8 @@ import Cell from '../../Projects/components/Cell';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
+import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
+import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 
 interface Props {
 }
@@ -34,16 +36,29 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   constructor(params) {
     super(params);
     this.state = {
+      isLDAPConnectionSettingsOpen: true
     };
   }
 
   componentWillMount() {
   }
 
+  onShowLDAPConnectionSettingsClicked = () => {
+    this.setState({
+      isLDAPConnectionSettingsOpen: !this.state.isLDAPConnectionSettingsOpen
+    });
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="user-authentication">
         User Authentication
+        <Button onClick={this.onShowLDAPConnectionSettingsClicked}>
+          {this.state.isOpen ? "Hide" : "Show"}
+        </Button>
+        <Collapse isOpen={true}>
+          LDAP Connection Settings
+        </Collapse>
       </div>
     );
   }

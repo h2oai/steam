@@ -21,9 +21,10 @@
 
 import { IFetchStrategy } from './IFetchStrategy';
 import { IFetchStrategyConfig } from './IFetchStrategyConfig';
+import {Dispatch} from "react-redux";
 
 export class MockFetchStrategy implements IFetchStrategy {
-  request(dispatch: Redux.Dispatch, config: IFetchStrategyConfig): void {
+  request(dispatch: Dispatch<any>, config: IFetchStrategyConfig): void {
     setTimeout(() => {
       dispatch(config.callback(config.data));
     }, 100);

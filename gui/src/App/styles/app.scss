@@ -1,4 +1,6 @@
 @import '../../variables.scss';
+@import "~@blueprintjs/core/dist/blueprint.css";
+@import "~@blueprintjs/core/dist/variables";
 
 html, body, .app-container, #app {
   height: 100%;

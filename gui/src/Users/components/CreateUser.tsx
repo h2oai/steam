@@ -165,7 +165,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
     ));
   };
 
-  onCancelClicked = (e: React.MouseEvent) => {
+  onCancelClicked = (e: React.MouseEvent<any>) => {
     this.props.cancelHandler();
   };
 
