@@ -304,3 +304,14 @@ input[type="text"], textarea {
   stroke:#FFFFFF;
   stroke-miterlimit:10;
 }
+
+.colapse-header {
+  font-weight: bold;
+  border-bottom-style: solid;
+  border-bottom-color: $h2o-soft-grey;
+  border-bottom-width: thin;
+  padding-bottom: 8px;
+}
+.steam-tooltip-launcher {
+  color: $h2o-orange-prime;
+}

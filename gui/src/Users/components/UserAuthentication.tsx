@@ -25,6 +25,7 @@ import { connect } from 'react-redux';
 import '../styles/users.scss';
 import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
 import { Button } from '@blueprintjs/core/dist/components/button/buttons';
+import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 
 interface Props {
 }
@@ -44,21 +45,87 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   }
 
   onShowLDAPConnectionSettingsClicked = () => {
+    console.log("flipping");
     this.setState({
       isLDAPConnectionSettingsOpen: !this.state.isLDAPConnectionSettingsOpen
     });
   };
 
+  onTestConfigClicked = () => {
+
+  };
+  onResetClicked = () => {
+
+  };
+  onSaveConfigClicked = () => {
+
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     return (
       <div className="user-authentication">
-        User Authentication
-        <Button onClick={this.onShowLDAPConnectionSettingsClicked}>
-          {this.state.isOpen ? "Hide" : "Show"}
-        </Button>
-        <Collapse isOpen={true}>
+        <div className="space-20">User DB Connection Settings</div>
+        <table className="space-20">
+          <tbody>
+            <tr className="auth-row">
+              <td className="auth-left">User DB Type</td>
+              <td className="auth-right">
+                <select>
+                  <option>LDAP</option>
+                  <option>Steam DB</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="colapse-header">
+          <Button onClick={this.onShowLDAPConnectionSettingsClicked}>
+            {this.state.isLDAPConnectionSettingsOpen ?
+              <i className="fa fa-minus" aria-hidden="true"></i> :
+              <i className="fa fa-plus" aria-hidden="true"></i> }
+          </Button> &nbsp;
           LDAP Connection Settings
+        </div>
+
+        <Collapse isOpen={this.state.isLDAPConnectionSettingsOpen} className="space-20">
+          <table>
+            <tbody>
+              <tr className="auth-row">
+                <td className="auth-left">HOST &nbsp; <Tooltip className="steam-tooltip-launcher" content="LDAP host server address">
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text">
+
+                  </input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">PORT &nbsp; <Tooltip className="steam-tooltip-launcher" content="The LDAP server port">
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">SSL-ENABLED</td>
+                <td className="auth-right">
+                  <input type="checkbox"></input>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
         </Collapse>
+
+        <div id="actionButtonsContainer" className="space-20">
+          <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
+          <div className="button-secondary" onClick={this.onResetClicked}>Reset</div>
+          <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
+        </div>
+
       </div>
     );
   }
