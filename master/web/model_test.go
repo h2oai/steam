@@ -7,8 +7,6 @@ import (
 	"github.com/h2oai/steam/master/az"
 )
 
-var modelKey = "bin_gbm"
-
 type modelIn struct {
 	key  string
 	name string
@@ -40,7 +38,7 @@ var readModelTests = []struct {
 }
 
 func TestSQLiteModel(t *testing.T) {
-	svc, pz, temp := testSetup("cluster", "sqlite3")
+	svc, pz, temp := testSetup("model", "sqlite3")
 	defer os.RemoveAll(temp)
 
 	if !test_h2o {
@@ -153,11 +151,12 @@ func testModelDelete(pz az.Principal, svc *Service, projectId int64) func(t *tes
 					t.Errorf("Delete(%+v): expected error deleting model", out)
 				}
 			}
+		}
 
-			models, _ := svc.GetModels(pz, projectId, 0, 1)
-			if len(models) > 1 {
-				t.Errorf("Delete: at least one model was not deleted")
-			}
+		models, _ := svc.GetModels(pz, projectId, 0, 1)
+		if len(models) > 0 {
+			t.Errorf("Delete: at least one model was not deleted")
+
 		}
 	}
 }

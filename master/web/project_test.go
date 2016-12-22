@@ -150,7 +150,7 @@ func testProjectDelete(pz az.Principal, svc *Service) func(t *testing.T) {
 		}
 
 		projects, _ := svc.GetProjects(pz, 0, 1)
-		if len(projects) > 1 {
+		if len(projects) > 0 {
 			t.Error("Delete: at least one project was not deleted")
 		}
 	}

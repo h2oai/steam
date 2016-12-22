@@ -144,11 +144,10 @@ func testExternalClusterDelete(pz az.Principal, svc *Service) func(t *testing.T)
 					t.Errorf("Delete(%+v): expected error deleting cluster", out)
 				}
 			}
-
-			clusters, _ := svc.GetClusters(pz, 0, 1)
-			if len(clusters) > 1 {
-				t.Errorf("Delete: at least one cluster was not deleted")
-			}
+		}
+		clusters, _ := svc.GetClusters(pz, 0, 1)
+		if len(clusters) > 0 {
+			t.Errorf("Delete: at least one cluster was not deleted")
 		}
 	}
 }
