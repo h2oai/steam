@@ -1482,7 +1482,7 @@ func (s *Service) UpdateWorkgroup(pz az.Principal, workgroupId int64, name strin
 	} else if exists && workgroup.Id != workgroupId {
 		return fmt.Errorf("another workgroup with the name '%s' already exists", name)
 	}
-	_, exists, err := s.ds.ReadWorkgroup(data.ByName(name))
+	_, exists, err := s.ds.ReadWorkgroup(data.ById(workgroupId))
 	if err != nil {
 		return errors.Wrap(err, "reading workgroup from databse")
 	} else if !exists {
