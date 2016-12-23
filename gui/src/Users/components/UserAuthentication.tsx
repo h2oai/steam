@@ -45,7 +45,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   }
 
   onShowLDAPConnectionSettingsClicked = () => {
-    console.log("flipping");
     this.setState({
       isLDAPConnectionSettingsOpen: !this.state.isLDAPConnectionSettingsOpen
     });
