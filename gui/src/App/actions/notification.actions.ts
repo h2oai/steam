@@ -19,7 +19,9 @@
  * Created by justin on 8/8/16.
  */
 
+import { Intent } from '@blueprintjs/core';
 import { NotificationType } from '../components/Notification';
+import { toastManager } from '../components/ToastManager';
 
 export const OPEN_NOTIFICATION = 'OPEN_NOTIFICATION';
 export const CLOSE_NOTIFICATION = 'CLOSE_NOTIFICATION';
@@ -45,11 +47,39 @@ export function openNotification(notificationType: NotificationType, header: str
 
 function _openNotification(notificationType: NotificationType, header: string, detail, actions, state) {
   let index = state.notification.allNotifications.length;
+  let intent;
+  switch (notificationType) {
+    case NotificationType.Confirm:
+      intent = Intent.PRIMARY;
+      break;
+    case NotificationType.Error:
+      intent = Intent.DANGER;
+      break;
+    case NotificationType.Info:
+      intent = Intent.SUCCESS;
+      break;
+    case NotificationType.Warning:
+      intent = Intent.WARNING;
+    default :
+      console.log("ERROR: Unexpected notification type");
+  }
+  let timeout = 5000;
+  if (intent === Intent.DANGER) {
+    timeout = 0;
+  }
+
+  console.log(intent);
+  toastManager.show({
+    message: detail,
+    intent,
+    timeout
+  });
+
   return {
     type: OPEN_NOTIFICATION,
     notificationData: {
-      isActive: true,
-      isAlive: true,
+      isActive: false,
+      isAlive: false,
       notificationType,
       header,
       detail,
