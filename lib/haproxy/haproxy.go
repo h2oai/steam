@@ -25,7 +25,8 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 		"    timeout client  50000ms\n" +
 		"    timeout server  50000ms\n\n" +
 		"frontend h2o-clusters\n" +
-		"    bind *:9999\n"
+		"    bind *:9999\n" +
+		"    capture request header origin len 128\n"
 
 	for _, c := range clusters {
 		if c.ContextPath != "/" {
@@ -39,6 +40,8 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 		if c.ContextPath != "/" {
 			config += "backend " + c.Name + "\n"
 			if c.Token != "" {
+				config += "    http-response add-header Access-Control-Allow-Origin %[capture.req.hdr(0)] if { capture.req.hdr(0) -m found }\n"
+				config += "    rspadd Access-Control-Allow-Headers:\\ Origin,\\ X-Requested-With,\\ Content-Type,\\ Accept  if { capture.req.hdr(0) -m found }\n"
 				config += "    http-request set-header Authorization Basic\\ %[req.cook(" + c.Name + ")]\n"
 			}
 			config += "    server " + c.Name + " " + c.Address + "\n\n"
