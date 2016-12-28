@@ -18,8 +18,10 @@ import (
 func Reload(clusters []data.Cluster, uid, gid uint32) error {
 	config :=
 		"global\n" +
-		"    daemon\n\n" +
+		"    daemon\n" +
+		"    log 127.0.0.1 local0\n\n" +
 		"defaults\n" +
+		"    log global\n" +
 		"    mode http\n" +
 		"    timeout connect 5000ms\n" +
 		"    timeout client  50000ms\n" +
