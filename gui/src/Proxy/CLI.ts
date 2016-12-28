@@ -56,8 +56,8 @@ export function unregisterCluster(clusterId: number): void {
   Proxy.Call("UnregisterCluster", req, print);
 }
 
-export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, keytab: string): void {
-  const req: any = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, keytab: keytab };
+export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, secure: boolean, keytab: string): void {
+  const req: any = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, secure: secure, keytab: keytab };
   Proxy.Call("StartClusterOnYarn", req, print);
 }
 

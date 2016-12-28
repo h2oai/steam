@@ -422,6 +422,7 @@ type StartClusterOnYarn struct {
 	EngineId    int64
 	Size        int
 	Memory      string
+	Secure      bool
 	Keytab      string
 	_           int
 	ClusterId   int64

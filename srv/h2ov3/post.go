@@ -25,7 +25,25 @@ import (
 	"strconv"
 
 	"github.com/h2oai/steam/bindings"
+	"strings"
 )
+
+func (h *H2O) PostForm(url string, data url.Values) (resp *http.Response, err error) {
+	bodyType := "application/x-www-form-urlencoded"
+	body := strings.NewReader(data.Encode())
+
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", bodyType)
+
+	if h.Token != "" {
+		req.Header.Set("Authorization", "Basic "+h.Token)
+	}
+
+	return h.Client.Do(req)
+}
 
 /////////////////////////
 /////////////////////////
@@ -36,14 +54,14 @@ import (
 // PostImportFilesImportfiles Import raw data files into a single-column H2O Frame. */
 func (h *H2O) PostImportFilesImportfiles(path string) (*bindings.ImportFilesV3, error) {
 	//@POST
-	u := h.url("/3/ImportFiles")
+	u := h.url("3/ImportFiles")
 
 	// FIXME: remaining URL values req'd
 	v := url.Values{
 		"path": {path},
 	}
 
-	res, err := http.PostForm(u, v)
+	res, err := h.PostForm(u, v)
 	if err != nil {
 		return nil, fmt.Errorf("H2O post request failed: %s: %s", u, err)
 	}
@@ -69,7 +87,7 @@ func (h *H2O) PostImportFilesImportfiles(path string) (*bindings.ImportFilesV3, 
 // PostParseParse Parse a raw byte-oriented Frame into a useful columnar data Frame. */
 func (h *H2O) PostParseParse(in *bindings.ParseV3) (*bindings.ParseV3, error) {
 	//@POST
-	u := h.url("/3/Parse")
+	u := h.url("3/Parse")
 
 	defaultParse := bindings.NewParseV3()
 
@@ -119,7 +137,7 @@ func (h *H2O) PostParseParse(in *bindings.ParseV3) (*bindings.ParseV3, error) {
 		v["_exclude_fields"] = []string{}
 	}
 
-	res, err := http.PostForm(u, v)
+	res, err := h.PostForm(u, v)
 	if err != nil {
 		return nil, err
 	}
@@ -145,14 +163,14 @@ func (h *H2O) PostParseParse(in *bindings.ParseV3) (*bindings.ParseV3, error) {
 // PostParseSetupGuesssetup Guess the parameters for parsing raw byte-oriented data into an H2O Frame. */
 func (h *H2O) PostParseSetupGuesssetup(sourceFrames []string) (*bindings.ParseSetupV3, error) {
 	//@POST
-	u := h.url("/3/ParseSetup")
+	u := h.url("3/ParseSetup")
 
 	// FIXME: remaining URL values req'd
 	v := url.Values{
 		"source_frames": sourceFrames,
 	}
 
-	res, err := http.PostForm(u, v)
+	res, err := h.PostForm(u, v)
 	if err != nil {
 		return nil, err
 	}
