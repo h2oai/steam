@@ -141,5 +141,3 @@ func testClusterCRUD(t *testing.T, ds *Datastore) {
 	// Delete
 	for _, clusterId := range clusterIds {
 		Err(t, ds.DeleteCluster(clusterId), "deleting cluster")
-	}
-}

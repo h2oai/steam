@@ -145,7 +145,7 @@ class RPCClient:
 		response = self.connection.call("UnregisterCluster", request)
 		return 
 	
-	def start_cluster_on_yarn(self, cluster_name, engine_id, size, memory, keytab):
+	def start_cluster_on_yarn(self, cluster_name, engine_id, size, memory, secure, keytab):
 		"""
 		Start a cluster using Yarn
 
@@ -154,6 +154,7 @@ class RPCClient:
 		engine_id: No description available (int64)
 		size: No description available (int)
 		memory: No description available (string)
+		secure: No description available (bool)
 		keytab: No description available (string)
 
 		Returns:
@@ -164,6 +165,7 @@ class RPCClient:
 			'engine_id': engine_id,
 			'size': size,
 			'memory': memory,
+			'secure': secure,
 			'keytab': keytab
 		}
 		response = self.connection.call("StartClusterOnYarn", request)

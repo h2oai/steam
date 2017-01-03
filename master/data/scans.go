@@ -47,10 +47,12 @@ func ScanCluster(r *sql.Row) (Cluster, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
+		&s.ContextPath,
 		&s.ClusterTypeId,
 		&s.DetailId,
 		&s.Address,
 		&s.State,
+		&s.Token,
 		&s.Created,
 	); err != nil {
 		return Cluster{}, err
@@ -66,10 +68,12 @@ func ScanClusters(rs *sql.Rows) ([]Cluster, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
+			&s.ContextPath,
 			&s.ClusterTypeId,
 			&s.DetailId,
 			&s.Address,
 			&s.State,
+			&s.Token,
 			&s.Created,
 		); err != nil {
 			return nil, err
@@ -859,4 +863,3 @@ func ScanWorkgroups(rs *sql.Rows) ([]Workgroup, error) {
 	}
 	return structs, nil
 }
-

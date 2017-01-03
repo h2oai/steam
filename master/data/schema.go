@@ -84,10 +84,12 @@ var createTableCluster = `
 CREATE TABLE cluster (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL,
+    context_path string,
     type_id integer NOT NULL,
     detail_id integer,
     address text UNIQUE,
     state string NOT NULL,
+    token string,
     created datetime NOT NULL,
 
     CONSTRAINT type_id FOREIGN KEY (type_id) REFERENCES cluster_type(id),

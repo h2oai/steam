@@ -70,6 +70,12 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     this.props.getConfig();
   }
 
+  goProxy(cluster) {
+    document.cookie = cluster.name + "=" + cluster.token;
+    let url = "http://" + window.location.hostname + ":9999" + cluster.context_path + "flow/index.html";
+    window.open(url, "_blank");
+  }
+
   openYarnClusterModal() {
     this.setState({
       yarnClusterModalOpen: true
@@ -158,11 +164,18 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address} target="_blank"
+                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address + cluster.context_path} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
+                  { cluster.context_path != "/" ?
+                    <span className="remove-cluster">
+                      <button className="remove-cluster-button test" onClick={this.goProxy.bind(this, cluster)}>
+                        <i className="fa fa-arrow-circle-o-right no-margin"/>
+                      </button>
+                    </span>
+                    : null
+                  }
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
-
                     <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
                       className="fa fa-trash no-margin"/></button>
                   </span>

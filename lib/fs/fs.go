@@ -25,7 +25,6 @@ import (
 	"io/ioutil"
 	"mime"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -38,6 +37,7 @@ import (
 
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 const (
@@ -462,8 +462,21 @@ func GetExternalHost() (string, error) {
 	return "", fmt.Errorf("Failed determining external IP address.")
 }
 
-func Download(p, u string, preserveFilename bool) (int64, string, error) {
-	res, err := http.Get(u)
+func Get(url, token string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if token != "" {
+		req.Header.Set("Authorization", "Basic "+token)
+	}
+
+	return http.DefaultClient.Do(req)
+}
+
+func Download(token, p, u string, preserveFilename bool) (int64, string, error) {
+	res, err := Get(u, token)
 	if err != nil {
 		return 0, "", fmt.Errorf("File download failed: %s: %v", u, err)
 	}

@@ -19,6 +19,7 @@ package web
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"path"
@@ -31,6 +32,7 @@ import (
 
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/lib/haproxy"
 	"github.com/h2oai/steam/lib/svc"
 	"github.com/h2oai/steam/lib/yarn"
 	"github.com/h2oai/steam/master/az"
@@ -99,8 +101,8 @@ func (s *Service) RegisterCluster(pz az.Principal, address string) (int64, error
 		return 0, errors.Wrap(err, "checking permission")
 	}
 	// Getting cluster information
-	h := h2ov3.NewClient(address)
-	cloud, err := h.GetCloudStatus()
+	h := h2ov3.NewClient(address, "/", "")
+	cloud, err := h.GetCloudStatus("")
 	if err != nil {
 		return 0, errors.Wrap(err, "communicating with cluster")
 	}
@@ -144,7 +146,19 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 	return errors.Wrap(s.ds.DeleteCluster(clusterId, data.WithAudit(pz)), "deleting cluster from database")
 }
 
-func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory, keytab string) (int64, error) {
+func (s Service) reloadProxyConf(name string) {
+	clusters, err := s.ds.ReadClusters()
+	if err != nil {
+		log.Println("Failed to read clusters.")
+	}
+
+	uid, gid, err := yarn.GetUser(name)
+	if err := haproxy.Reload(clusters, uid, gid); err != nil {
+		log.Println("Failed to reload proxy configuration.")
+	}
+}
+
+func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ManageCluster); err != nil {
 		return 0, errors.Wrap(err, "checking permission")
@@ -176,17 +190,18 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	// FIXME implement keytab generation on the fly
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
 	// Start cluster in yarn
-	appId, address, out, err := yarn.StartCloud(size, s.kerberosEnabled, memory, clusterName,
-		engine.Location, identity.Name, keytabPath)
+	appId, address, out, token, contextPath, err := yarn.StartCloud(size, s.kerberosEnabled, memory,
+		clusterName, engine.Location, identity.Name, keytabPath, secure)
 	if err != nil {
 		return 0, errors.Wrap(err, "starting yarn cluster")
 	}
 	// Create cluster
 	clusterId, err := s.ds.CreateCluster(clusterName, s.ds.ClusterType.Yarn,
-		data.WithYarnDetail(engineId, int64(size), appId, memory, out),
+		data.WithYarnDetail(engineId, int64(size), appId, memory, out, contextPath, token),
 		data.WithAddress(address), data.WithState(data.States.Started),
 		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
 	)
+	s.reloadProxyConf(identity.Name)
 	return clusterId, errors.Wrap(err, "creating cluster in database")
 }
 
@@ -230,7 +245,9 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 		return errors.Wrap(err, "stopping cluster")
 	}
 	// Delete cluster
-	return errors.Wrap(s.ds.DeleteCluster(clusterId, data.WithAudit(pz)), "deleting cluster from database")
+	err = s.ds.DeleteCluster(clusterId, data.WithAudit(pz))
+	s.reloadProxyConf(identity.Name)
+	return errors.Wrap(err, "deleting cluster from database")
 }
 
 func (s *Service) viewCluster(pz az.Principal, clusterId int64) (data.Cluster, error) {
@@ -295,8 +312,8 @@ func (s *Service) GetClusterStatus(pz az.Principal, clusterId int64) (*web.Clust
 		return nil, err
 	}
 	// Fetch from h2o
-	h2o := h2ov3.NewClient(cluster.Address.String)
-	status, err := h2o.GetCloudStatus()
+	h2o := h2ov3.NewClient(cluster.Address.String, cluster.ContextPath.String, cluster.Token.String)
+	status, err := h2o.GetCloudStatus(cluster.Token.String)
 	if err != nil { // Do not bail out, report Unknown status instead
 		return &web.ClusterStatus{Status: "Unknown"}, nil
 	}
@@ -432,7 +449,7 @@ func (s *Service) ImportModelFromCluster(pz az.Principal, clusterId, projectId i
 		return 0, err
 	}
 	// Get model from cloud
-	h2o := h2ov3.NewClient(cluster.Address.String)
+	h2o := h2ov3.NewClient(cluster.Address.String, cluster.ContextPath.String, cluster.Token.String)
 	rawModel, r, err := h2o.GetModelsFetch(modelKey)
 	if err != nil {
 		return 0, errors.Wrap(err, "fetching model from H2O")
@@ -537,7 +554,7 @@ func (s *Service) GetModelsFromCluster(pz az.Principal, clusterId int64, frameKe
 		return nil, errors.New("unable to locate cluster")
 	}
 	// H2O connection for models
-	h2o := h2ov3.NewClient(cluster.Address.String)
+	h2o := h2ov3.NewClient(cluster.Address.String, cluster.ContextPath.String, cluster.Token.String)
 	_, frame, err := h2o.GetFramesFetch(frameKey, true)
 	return h2oToModels(frame.CompatibleModels), errors.Wrap(err, "fetching H2O frame")
 }
@@ -696,7 +713,7 @@ func (s *Service) ImportModelPojo(pz az.Principal, modelId int64) error {
 		return err
 	}
 	// Get Pojo from H2O
-	h2o := h2ov3.NewClient(cluster.Address.String)
+	h2o := h2ov3.NewClient(cluster.Address.String, cluster.ContextPath.String, cluster.Token.String)
 	modelPath := fs.GetModelPath(s.workingDir, modelId)
 	javaModelPath, err := h2o.ExportJavaModel(model.ModelKey, modelPath)
 	if err != nil {
@@ -737,7 +754,7 @@ func (s *Service) ImportModelMojo(pz az.Principal, modelId int64) error {
 		return err
 	}
 	// Get Pojo from H2O
-	h2o := h2ov3.NewClient(cluster.Address.String)
+	h2o := h2ov3.NewClient(cluster.Address.String, cluster.ContextPath.String, cluster.Token.String)
 	modelPath := fs.GetModelPath(s.workingDir, modelId)
 	javaModelPath, err := h2o.ExportMOJO(model.ModelKey, modelPath)
 	if err != nil {
@@ -956,6 +973,7 @@ func isPortOpen(port int) bool {
 	conn.Close()
 	return true
 }
+
 func (s *Service) assignPort() (int, error) {
 	randPort := rand.New(rand.NewSource(time.Now().UnixNano()))
 	portRange := s.scoringServicePortMax - (s.scoringServicePortMin + 1)
@@ -2024,7 +2042,7 @@ func (s *Service) GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*w
 		return nil, err
 	}
 	// Start h2o communication
-	h2o := h2ov3.NewClient(cluster.Address.String)
+	h2o := h2ov3.NewClient(cluster.Address.String, cluster.ContextPath.String, cluster.Token.String)
 	frames, err := h2o.GetFramesList()
 	return h2oToDatasets(frames), errors.Wrap(err, "fetching frames from H2O")
 }
@@ -2279,9 +2297,11 @@ func toCluster(c data.Cluster) *web.Cluster {
 	return &web.Cluster{
 		c.Id,
 		c.Name,
+		c.ContextPath.String,
 		c.ClusterTypeId,
 		c.DetailId.Int64,
 		c.Address.String,
+		c.Token.String,
 		c.State,
 		toTimestamp(c.Created),
 	}
