@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'H2O Steam'
-copyright = u'2016 H2O, Inc'
+copyright = u'2016-2017 H2O, Inc'
 author = u'h2o'
 
 # The version info for the project you're documenting, acts as replacement for
