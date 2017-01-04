@@ -59,13 +59,15 @@ type BinomialModel struct {
 }
 
 type Cluster struct {
-	Id        int64  `json:"id"`
-	Name      string `json:"name"`
-	TypeId    int64  `json:"type_id"`
-	DetailId  int64  `json:"detail_id"`
-	Address   string `json:"address"`
-	State     string `json:"state"`
-	CreatedAt int64  `json:"created_at"`
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	ContextPath string `json:"context_path"`
+	TypeId      int64  `json:"type_id"`
+	DetailId    int64  `json:"detail_id"`
+	Address     string `json:"address"`
+	Token       string `json:"token"`
+	State       string `json:"state"`
+	CreatedAt   int64  `json:"created_at"`
 }
 
 type ClusterStatus struct {

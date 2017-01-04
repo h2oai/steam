@@ -1595,13 +1595,15 @@ func getCluster(c *context) *cobra.Command {
 				log.Fatalln(err)
 			}
 			lines := []string{
-				fmt.Sprintf("Id:\t%v\t", cluster.Id),               // No description available
-				fmt.Sprintf("Name:\t%v\t", cluster.Name),           // No description available
-				fmt.Sprintf("TypeId:\t%v\t", cluster.TypeId),       // No description available
-				fmt.Sprintf("DetailId:\t%v\t", cluster.DetailId),   // No description available
-				fmt.Sprintf("Address:\t%v\t", cluster.Address),     // No description available
-				fmt.Sprintf("State:\t%v\t", cluster.State),         // No description available
-				fmt.Sprintf("CreatedAt:\t%v\t", cluster.CreatedAt), // No description available
+				fmt.Sprintf("Id:\t%v\t", cluster.Id),                   // No description available
+				fmt.Sprintf("Name:\t%v\t", cluster.Name),               // No description available
+				fmt.Sprintf("ContextPath:\t%v\t", cluster.ContextPath), // No description available
+				fmt.Sprintf("TypeId:\t%v\t", cluster.TypeId),           // No description available
+				fmt.Sprintf("DetailId:\t%v\t", cluster.DetailId),       // No description available
+				fmt.Sprintf("Address:\t%v\t", cluster.Address),         // No description available
+				fmt.Sprintf("Token:\t%v\t", cluster.Token),             // No description available
+				fmt.Sprintf("State:\t%v\t", cluster.State),             // No description available
+				fmt.Sprintf("CreatedAt:\t%v\t", cluster.CreatedAt),     // No description available
 			}
 			c.printt("Attribute\tValue\t", lines)
 			return
@@ -1643,17 +1645,19 @@ func getClusters(c *context) *cobra.Command {
 		lines := make([]string, len(clusters))
 		for i, e := range clusters {
 			lines[i] = fmt.Sprintf(
-				"%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
-				e.Id,        // No description available
-				e.Name,      // No description available
-				e.TypeId,    // No description available
-				e.DetailId,  // No description available
-				e.Address,   // No description available
-				e.State,     // No description available
-				e.CreatedAt, // No description available
+				"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t",
+				e.Id,          // No description available
+				e.Name,        // No description available
+				e.ContextPath, // No description available
+				e.TypeId,      // No description available
+				e.DetailId,    // No description available
+				e.Address,     // No description available
+				e.Token,       // No description available
+				e.State,       // No description available
+				e.CreatedAt,   // No description available
 			)
 		}
-		c.printt("Id\tName\tTypeId\tDetailId\tAddress\tState\tCreatedAt\t", lines)
+		c.printt("Id\tName\tContextPath\tTypeId\tDetailId\tAddress\tToken\tState\tCreatedAt\t", lines)
 		return
 	})
 

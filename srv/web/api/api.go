@@ -25,13 +25,15 @@ type Config struct {
 }
 
 type Cluster struct {
-	Id        int64
-	Name      string
-	TypeId    int64
-	DetailId  int64
-	Address   string
-	State     string
-	CreatedAt int64
+	Id          int64
+	Name        string
+	ContextPath string
+	TypeId      int64
+	DetailId    int64
+	Address     string
+	Token       string
+	State       string
+	CreatedAt   int64
 }
 
 type YarnCluster struct {

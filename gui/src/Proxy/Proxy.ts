@@ -82,11 +82,15 @@ export interface Cluster {
   
   name: string
   
+  context_path: string
+  
   type_id: number
   
   detail_id: number
   
   address: string
+  
+  token: string
   
   state: string
   
