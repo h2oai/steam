@@ -127,7 +127,7 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 			if err != nil {
 				return nil, err
 			}
-			dbOpts.SuperName = strings.TrimSpace(name)
+			dbOpts.SuperName = strings.Trim(name, "\n")
 		}
 		if strings.TrimSpace(dbOpts.SuperPass) == "" {
 			fmt.Print("Superuser password: ")
@@ -135,7 +135,7 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 			if err != nil {
 				return nil, err
 			}
-			dbOpts.SuperPass = strings.TrimSpace(string(passBytes))
+			dbOpts.SuperPass = strings.Trim(string(passBytes), "\n")
 			fmt.Println()
 		}
 		if err := auth.ValidateUsername(dbOpts.SuperName); err != nil {
