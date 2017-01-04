@@ -59,7 +59,6 @@ type ClusterYarnDetail struct {
 	Size          int64  `db:"size,arg"`
 	ApplicationId string `db:"application_id,arg"`
 	Memory        string `db:"memory,arg"`
-	Username      string `db:"username"`
 	OutputDir     string `db:"output_dir,arg"`
 }
 
