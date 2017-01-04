@@ -120,17 +120,6 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "checking if database is primed")
 	} else if !primed {
-		if err := prime(db); err != nil {
-			return nil, errors.Wrap(err, "priming database")
-		}
-	}
-
-	ds, err := initDatastore(db)
-	if err != nil {
-		return nil, errors.Wrap(err, "initializing datastore")
-	}
-
-	if !primed {
 		if strings.TrimSpace(dbOpts.SuperName) == "" {
 			r := bufio.NewReader(os.Stdin)
 			fmt.Print("Superuser name: ")
@@ -149,6 +138,24 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 			dbOpts.SuperPass = strings.TrimSpace(string(passBytes))
 			fmt.Println()
 		}
+		if err := auth.ValidateUsername(dbOpts.SuperName); err != nil {
+			return nil, errors.Wrap(err, "validating username")
+		}
+		if err := auth.ValidatePassword(dbOpts.SuperPass); err != nil {
+			return nil, errors.Wrap(err, "validating password")
+		}
+
+		if err := prime(db); err != nil {
+			return nil, errors.Wrap(err, "priming database")
+		}
+	}
+
+	ds, err := initDatastore(db)
+	if err != nil {
+		return nil, errors.Wrap(err, "initializing datastore")
+	}
+
+	if !primed {
 		if _, err := ds.createSuperuser(dbOpts.SuperName, dbOpts.SuperPass); err != nil {
 			return nil, err
 		}
