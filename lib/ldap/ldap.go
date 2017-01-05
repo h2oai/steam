@@ -100,7 +100,7 @@ func NewLdap(
 
 func FromConfig(workingDir string) (*Ldap, error) {
 	A := struct {
-		Hostname        string
+		Host            string
 		Port            int
 		BindDn          string
 		BindPassword    string
@@ -127,7 +127,7 @@ func FromConfig(workingDir string) (*Ldap, error) {
 	}
 
 	return NewLdap(
-		fmt.Sprintf("%s:%d", A.Hostname, A.Port),
+		fmt.Sprintf("%s:%d", A.Host, A.Port),
 		A.BindDn, A.BindPassword,
 		A.UserBaseDn, A.UserRNAttribute, A.UserBaseFilter,
 
