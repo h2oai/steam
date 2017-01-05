@@ -21,6 +21,7 @@ import '../styles/users.scss';
 import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
 import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
+import findDOMNode = ReactDOM.findDOMNode;
 
 interface Props {
 }
@@ -48,8 +49,12 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   onResetClicked = () => {
 
   };
-  onSaveConfigClicked = () => {
-
+  onSaveConfigClicked = (e) => {
+    e.preventDefault();
+    console.log(findDOMNode(this.refs["hostInput"])["value"]);
+  };
+  onDBChanged = (e) => {
+    console.log(e);
   };
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -61,7 +66,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
             <tr className="auth-row">
               <td className="auth-left">User DB Type</td>
               <td className="auth-right">
-                <select>
+                <select ref="dbSelect" onChange={this.onDBChanged}>
                   <option>LDAP</option>
                   <option>Steam Local DB</option>
                 </select>
@@ -87,7 +92,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                 </Tooltip></td>
                 <td className="auth-right">
-                  <input type="text"></input>
+                  <input type="text" ref="hostInput"></input>
                 </td>
               </tr>
               <tr className="auth-row">
