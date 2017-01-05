@@ -43,8 +43,8 @@ type Cluster struct {
 	ClusterTypeId int64          `db:"type_id,arg"`
 	DetailId      sql.NullInt64  `db:"detail_id"`
 	Address       sql.NullString `db:"address"`
-	State         string         `db:"state,def=States.Starting"`
 	Token         sql.NullString `db:"token"`
+	State         string         `db:"state,def=States.Starting"`
 	Created       time.Time      `db:"created,def=time.Now()"`
 }
 

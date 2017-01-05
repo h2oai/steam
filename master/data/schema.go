@@ -84,12 +84,12 @@ var createTableCluster = `
 CREATE TABLE cluster (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL,
-    context_path string,
+    context_path text,
     type_id integer NOT NULL,
     detail_id integer,
     address text UNIQUE,
-    state string NOT NULL,
-    token string,
+    token text,
+    state text NOT NULL,
     created datetime NOT NULL,
 
     CONSTRAINT type_id FOREIGN KEY (type_id) REFERENCES cluster_type(id),
@@ -166,9 +166,9 @@ CREATE TABLE identity_role (
     identity_id integer NOT NULL,
     role_id integer NOT NULL,
 
-    PRIMARY KEY (identity_id, role_id),
     FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
+    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE,
+    PRIMARY KEY (identity_id, role_id)
 )
 `
 
@@ -293,12 +293,10 @@ CREATE TABLE regression_model (
 
 var createTableRole = `
 CREATE TABLE role (
-    id integer NOT NULL,
+    id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
     description text,
-    created datetime NOT NULL,
-
-    PRIMARY KEY (id)
+    created datetime NOT NULL  
 )
 `
 
@@ -308,8 +306,8 @@ CREATE TABLE role_permission (
     permission_id integer NOT NULL,
 
     PRIMARY KEY (role_id, permission_id),
-    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE,
-    FOREIGN KEY (permission_id) REFERENCES permission(id) ON DELETE CASCADE
+    FOREIGN KEY (permission_id) REFERENCES permission(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
 )
 `
 
