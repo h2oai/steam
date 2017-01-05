@@ -166,7 +166,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                 <header>
                   <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address + cluster.context_path} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
-                  { cluster.context_path != "/" ?
+                  { cluster.context_path !== "/" ?
                     <span className="remove-cluster">
                       <button className="remove-cluster-button test" onClick={this.goProxy.bind(this, cluster)}>
                         <i className="fa fa-arrow-circle-o-right no-margin"/>

@@ -16,11 +16,6 @@
 */
 
 import * as React from 'react';
-import * as _ from 'lodash';
-import Table from '../../Projects/components/Table';
-import Row from '../../Projects/components/Row';
-import Cell from '../../Projects/components/Cell';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
 import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
@@ -50,9 +45,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     });
   };
 
-  onTestConfigClicked = () => {
-
-  };
   onResetClicked = () => {
 
   };
@@ -71,7 +63,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
               <td className="auth-right">
                 <select>
                   <option>LDAP</option>
-                  <option>Steam DB</option>
+                  <option>Steam Local DB</option>
                 </select>
               </td>
             </tr>
@@ -95,9 +87,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                 </Tooltip></td>
                 <td className="auth-right">
-                  <input type="text">
-
-                  </input>
+                  <input type="text"></input>
                 </td>
               </tr>
               <tr className="auth-row">
@@ -105,13 +95,75 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                 </Tooltip></td>
                 <td className="auth-right">
-                  <input type="text"></input>
+                  <input type="text" value="689"></input>
                 </td>
               </tr>
               <tr className="auth-row">
                 <td className="auth-left">SSL-ENABLED</td>
                 <td className="auth-right">
-                  <input type="checkbox"></input>
+                  <input type="checkbox" defaultChecked={true}></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">CONNECTION ORDER &nbsp; <Tooltip className="steam-tooltip-launcher" content="The order in which Steam will query this LDAP server (among other enabled servers)">
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text" value="1"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">BIND DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>'Distinguished name' used to bind to LDAP server if extended access is needed.<br /> Leave this blank if anonymous bind is sufficient.</div>}>
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">BIND DN PASSWORD &nbsp; <Tooltip className="steam-tooltip-launcher" content="Password for the Bind DN user">
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="password"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">CONFIRM PASSWORD</td>
+                <td className="auth-right">
+                  <input type="password"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">USER BASE DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP users, specified by the DN of your user subtree.<br/> If necessary, you can specify several DNs separated by semicolons.</div>}>
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">USER BASE FILTER &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The LDAP search filter used to filter users.<br/> Highly recommended if you have a large amount of user entries under your user base DN.<br/> For example, '(department=IT)'</div>}>
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">USER NAME ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The user attribute that contains the username.<br/> Note that this attribute's value should be case insensitive.<br/> Set to 'uid' for most configurations. In Active Directory (AD), this should be set to 'sAMAccountName'.</div>}>
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text"></input>
+                </td>
+              </tr>
+              <tr className="auth-row">
+                <td className="auth-left">REAL NAME ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The user attribute that contains a human readable name.<br/> This is typically 'cn' (common name) or 'displayName'.</div>}>
+                  <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </Tooltip></td>
+                <td className="auth-right">
+                  <input type="text" value="cn"></input>
                 </td>
               </tr>
             </tbody>
@@ -120,8 +172,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         </Collapse>
 
         <div id="actionButtonsContainer" className="space-20">
-          <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
-          <div className="button-secondary" onClick={this.onResetClicked}>Reset</div>
           <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
         </div>
 
