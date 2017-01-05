@@ -18,8 +18,11 @@ package ldap
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/h2oai/steam/lib/fs"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-ldap/ldap"
@@ -98,7 +101,7 @@ func NewLdap(
 	}
 }
 
-func FromConfig(fileName string) (*Ldap, error) {
+func FromConfig(workingDir string) (*Ldap, error) {
 	A := struct {
 		Hostname        string
 		Port            int
@@ -114,7 +117,11 @@ func FromConfig(fileName string) (*Ldap, error) {
 		MaxTime   time.Duration
 	}{}
 
-	f, err := filepath.Abs(fileName)
+	if _, err := os.Stat(fs.GetDBPath(workingDir, "ldap.conf")); os.IsNotExist(err) {
+		return nil, errors.New("no LDAP config file provided. Please set up LDAP settings in local client login mode")
+	}
+
+	f, err := filepath.Abs(fs.GetDBPath(workingDir, "ldap.conf"))
 	if err != nil {
 		return nil, errors.Wrap(err, "getting absolute path")
 	}
