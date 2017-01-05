@@ -69,9 +69,14 @@ func FatalCheck(t *testing.T, expected, actual interface{}, message string) {
 	}
 }
 
-func setupSqlite() (string, string, error) {
+func setupSqlite() (string, DBOpts, error) {
 	dir, err := setup()
-	return dir, filepath.Join(dir, "sl.db"), err
+	return dir, DBOpts{
+		Driver:    "sqlite3",
+		Path:      filepath.Join(dir, "sl.db"),
+		SuperName: SuperuserRN,
+		SuperPass: SuperuserRN,
+	}, err
 }
 
 func TestMain(m *testing.M) {
@@ -141,3 +146,5 @@ func testClusterCRUD(t *testing.T, ds *Datastore) {
 	// Delete
 	for _, clusterId := range clusterIds {
 		Err(t, ds.DeleteCluster(clusterId), "deleting cluster")
+	}
+}

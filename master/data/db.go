@@ -100,7 +100,6 @@ var (
 
 func init() {
 	flag.BoolVar(&debug, "debug", false, "Set to enable debug mode")
-	flag.Parse()
 
 	States = initState()
 }
