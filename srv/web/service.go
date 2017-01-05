@@ -161,6 +161,18 @@ type Label struct {
 	CreatedAt   int64  `json:"created_at"`
 }
 
+type LdapConfig struct {
+	Host              string `json:"host"`
+	Port              int    `json:"port"`
+	Ldaps             bool   `json:"ldaps"`
+	BindDn            string `json:"bind_dn"`
+	BindPassword      string `json:"bind_password"`
+	UserBaseDn        string `json:"user_base_dn"`
+	UserBaseFilter    string `json:"user_base_filter"`
+	UserNameAttribute string `json:"user_name_attribute"`
+	ForceBind         bool   `json:"force_bind"`
+}
+
 type Model struct {
 	Id                  int64  `json:"id"`
 	TrainingDatasetId   int64  `json:"training_dataset_id"`
@@ -294,6 +306,7 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
+	SetLdap(pz az.Principal, config *LdapConfig) error
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
@@ -422,6 +435,13 @@ type GetConfigIn struct {
 
 type GetConfigOut struct {
 	Config *Config `json:"config"`
+}
+
+type SetLdapIn struct {
+	Config *LdapConfig `json:"config"`
+}
+
+type SetLdapOut struct {
 }
 
 type RegisterClusterIn struct {
@@ -1413,6 +1433,16 @@ func (this *Remote) GetConfig() (*Config, error) {
 		return nil, err
 	}
 	return out.Config, nil
+}
+
+func (this *Remote) SetLdap(config *LdapConfig) error {
+	in := SetLdapIn{config}
+	var out SetLdapOut
+	err := this.Proc.Call("SetLdap", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *Remote) RegisterCluster(address string) (int64, error) {
@@ -2601,6 +2631,39 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 	}
 
 	out.Config = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) SetLdap(r *http.Request, in *SetLdapIn, out *SetLdapOut) error {
+	const name = "SetLdap"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.SetLdap(pz, in.Config)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

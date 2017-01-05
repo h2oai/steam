@@ -102,7 +102,7 @@ class RPCClient:
 	
 	def get_config(self):
 		"""
-		No description available
+		Get Steam start up configurations
 
 		Parameters:
 
@@ -113,6 +113,21 @@ class RPCClient:
 		}
 		response = self.connection.call("GetConfig", request)
 		return response['config']
+	
+	def set_ldap(self, config):
+		"""
+		Something
+
+		Parameters:
+		config: No description available (LdapConfig)
+
+		Returns:None
+		"""
+		request = {
+			'config': config
+		}
+		response = self.connection.call("SetLdap", request)
+		return 
 	
 	def register_cluster(self, address):
 		"""

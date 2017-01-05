@@ -29,7 +29,7 @@ import * as Proxy from './xhr';
 export interface {{.Name}} {
   {{range .Fields }}
   {{snake .Name}}: {{template "typeOf" .}}
-  {{ end}}
+  {{- end}}
 }
 {{end}}
 

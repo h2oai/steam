@@ -17,16 +17,20 @@
 package web
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/BurntSushi/toml"
 
 	"github.com/h2oai/steam/master/auth"
 
@@ -2188,6 +2192,24 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 		data.WithOffset(offset), data.WithLimit(limit),
 	)
 	return toEntityHistories(history), errors.Wrap(err, "reading history from database")
+}
+
+func (s *Service) SetLdap(pz az.Principal, config *web.LdapConfig) error {
+	if !pz.IsSuperuser() {
+		return errors.New("only superusers can edit LDAP settings")
+	}
+
+	f, err := os.Create(fs.GetDBPath(s.workingDir, "ldap.conf"))
+	if err != nil {
+		return errors.Wrap(err, "creating file")
+	}
+
+	buf := new(bytes.Buffer)
+	enc := toml.NewEncoder(buf)
+	enc.Encode(config)
+
+	_, err = f.Write(buf.Bytes())
+	return errors.Wrap(err, "Writing to file")
 }
 
 // --- ---------- ---

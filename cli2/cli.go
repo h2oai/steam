@@ -1671,7 +1671,7 @@ config [?]
 Get Config
 Examples:
 
-    No description available
+    Get Steam start up configurations
     $ steam get config
 
 `
@@ -1680,7 +1680,7 @@ func getConfig(c *context) *cobra.Command {
 
 	cmd := newCmd(c, getConfigHelp, func(c *context, args []string) {
 
-		// No description available
+		// Get Steam start up configurations
 		config, err := c.remote.GetConfig()
 		if err != nil {
 			log.Fatalln(err)

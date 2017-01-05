@@ -46,6 +46,11 @@ export function getConfig(): void {
   Proxy.Call("GetConfig", req, print);
 }
 
+export function setLdap(config: LdapConfig): void {
+  const req: any = { config: config };
+  Proxy.Call("SetLdap", req, print);
+}
+
 export function registerCluster(address: string): void {
   const req: any = { address: address };
   Proxy.Call("RegisterCluster", req, print);
