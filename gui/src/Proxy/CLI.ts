@@ -26,6 +26,7 @@
 // --- CLI Stub ---
 
 import * as Proxy from './xhr';
+import {LdapConfig} from './Proxy';
 
 function print(error: Error, data: any): void {
   if (error) {
@@ -46,8 +47,8 @@ export function getConfig(): void {
   Proxy.Call("GetConfig", req, print);
 }
 
-export function setLdap(config: LdapConfig): void {
-  const req: any = { config: config };
+export function setLdap(config: LdapConfig, encrypt: boolean): void {
+  const req: any = { config: config, encrypt: encrypt };
   Proxy.Call("SetLdap", req, print);
 }
 

@@ -2194,7 +2194,7 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 	return toEntityHistories(history), errors.Wrap(err, "reading history from database")
 }
 
-func (s *Service) SetLdap(pz az.Principal, config *web.LdapConfig) error {
+func (s *Service) SetLdap(pz az.Principal, config *web.LdapConfig, encrypt bool) error {
 	if !pz.IsSuperuser() {
 		return errors.New("only superusers can edit LDAP settings")
 	}
@@ -2207,6 +2207,10 @@ func (s *Service) SetLdap(pz az.Principal, config *web.LdapConfig) error {
 	buf := new(bytes.Buffer)
 	enc := toml.NewEncoder(buf)
 	enc.Encode(config)
+
+	if encrypt {
+		// FIXME: DO encryption here
+	}
 
 	_, err = f.Write(buf.Bytes())
 	return errors.Wrap(err, "Writing to file")

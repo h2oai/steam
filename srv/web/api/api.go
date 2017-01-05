@@ -425,7 +425,8 @@ type GetConfig struct {
 	Config Config `help:"An object containing Steam startup configurations"`
 }
 type SetLdap struct {
-	Config LdapConfig
+	Config  LdapConfig
+	Encrypt bool `help:"Set to encypt the file"`
 }
 type RegisterCluster struct {
 	Address   string

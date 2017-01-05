@@ -114,17 +114,19 @@ class RPCClient:
 		response = self.connection.call("GetConfig", request)
 		return response['config']
 	
-	def set_ldap(self, config):
+	def set_ldap(self, config, encrypt):
 		"""
 		Something
 
 		Parameters:
 		config: No description available (LdapConfig)
+		encrypt: Set to encypt the file (bool)
 
 		Returns:None
 		"""
 		request = {
-			'config': config
+			'config': config,
+			'encrypt': encrypt
 		}
 		response = self.connection.call("SetLdap", request)
 		return 

@@ -330,7 +330,7 @@ export interface Service {
   getConfig: (go: (error: Error, config: Config) => void) => void
   
   // Something
-  setLdap: (config: LdapConfig, go: (error: Error) => void) => void
+  setLdap: (config: LdapConfig, encrypt: boolean, go: (error: Error) => void) => void
   
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
@@ -697,6 +697,8 @@ interface GetConfigOut {
 interface SetLdapIn {
   
   config: LdapConfig
+  
+  encrypt: boolean
   
 }
 
@@ -2207,8 +2209,8 @@ export function getConfig(go: (error: Error, config: Config) => void): void {
   });
 }
 
-export function setLdap(config: LdapConfig, go: (error: Error) => void): void {
-  const req: SetLdapIn = { config: config };
+export function setLdap(config: LdapConfig, encrypt: boolean, go: (error: Error) => void): void {
+  const req: SetLdapIn = { config: config, encrypt: encrypt };
   Proxy.Call("SetLdap", req, function(error, data) {
     if (error) {
       return go(error);

@@ -306,7 +306,7 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
-	SetLdap(pz az.Principal, config *LdapConfig) error
+	SetLdap(pz az.Principal, config *LdapConfig, encrypt bool) error
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
@@ -438,7 +438,8 @@ type GetConfigOut struct {
 }
 
 type SetLdapIn struct {
-	Config *LdapConfig `json:"config"`
+	Config  *LdapConfig `json:"config"`
+	Encrypt bool        `json:"encrypt"`
 }
 
 type SetLdapOut struct {
@@ -1435,8 +1436,8 @@ func (this *Remote) GetConfig() (*Config, error) {
 	return out.Config, nil
 }
 
-func (this *Remote) SetLdap(config *LdapConfig) error {
-	in := SetLdapIn{config}
+func (this *Remote) SetLdap(config *LdapConfig, encrypt bool) error {
+	in := SetLdapIn{config, encrypt}
 	var out SetLdapOut
 	err := this.Proc.Call("SetLdap", &in, &out)
 	if err != nil {
@@ -2659,7 +2660,7 @@ func (this *Impl) SetLdap(r *http.Request, in *SetLdapIn, out *SetLdapOut) error
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	err := this.Service.SetLdap(pz, in.Config)
+	err := this.Service.SetLdap(pz, in.Config, in.Encrypt)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
