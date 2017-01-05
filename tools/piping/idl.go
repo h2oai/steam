@@ -135,6 +135,7 @@ func toStruct(s interface{}) (*Struct, error) {
 			reflect.Struct,
 			reflect.Bool,
 			reflect.Int,
+			reflect.Uint,
 			reflect.Int64,
 			reflect.Float32,
 			reflect.Float64,

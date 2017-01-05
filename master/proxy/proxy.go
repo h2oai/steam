@@ -109,23 +109,31 @@ func (pm *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Check if principal is allowed to use clusters
 
-	if err := pz.CheckPermission(pm.ds.Permissions.ViewCluster); err != nil {
+	if err := pz.CheckPermission(pm.ds.Permission.ViewCluster); err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
 	// Read cluster from database.
 	// This also checks if the principal has privileges to view this specific cluster.
+	if err := pz.CheckView(pm.ds.EntityType.Cluster, clusterId); err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
-	cluster, err := pm.ds.ReadCluster(pz, clusterId)
+	cluster, exists, err := pm.ds.ReadCluster(data.ById(clusterId))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	} else if !exists {
+		// FIXME: IS THE RIGHT?
+		http.Error(w, err.Error(), http.StatusGone)
 		return
 	}
 
 	// Get existing proxy, or create one if missing.
 
-	rp := pm.getOrCreateReverseProxy(clusterId, cluster.Address)
+	rp := pm.getOrCreateReverseProxy(clusterId, cluster.Address.String)
 
 	// Forward
 

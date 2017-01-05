@@ -24,6 +24,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"os"
 	"os/exec"
 	"os/user"
 	"regexp"
@@ -32,9 +33,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/h2oai/steam/lib/haproxy"
-	"os"
+
+	"github.com/pkg/errors"
 )
 
 func kInit(username, keytab string, uid, gid uint32) error {
@@ -177,7 +178,7 @@ func yarnCommand(uid, gid uint32, name, username string, args ...string) (string
 
 	// Execute command
 	if err := cmd.Run(); err != nil {
-		return "", "", errors.Wrapf(err, "failed running command %s: %v", cmd.Args, cmdErr)
+		return "", "", errors.Wrapf(err, "failed running command %s: %v", strings.Join(cmd.Args, " "), cmdErr)
 	}
 
 	return appID, address, nil
@@ -226,7 +227,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		passwd := randStr(10)
 		token, _ = haproxy.GenRealmFile(username, passwd)
 		defer os.Remove(token + "_realm.properties")
-		securityArgs := []string{"-hash_login", "-login_conf", token+"_realm.properties"}
+		securityArgs := []string{"-hash_login", "-login_conf", token + "_realm.properties"}
 		cmdArgs = append(cmdArgs, securityArgs...)
 	}
 
