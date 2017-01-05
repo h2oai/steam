@@ -178,7 +178,7 @@ export interface LdapConfig {
   bind_password: string
   user_base_dn: string
   user_base_filter: string
-  user_name_attribute: string
+  user_rn_attribute: string
   force_bind: boolean
 }
 
