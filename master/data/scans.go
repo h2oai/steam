@@ -451,9 +451,11 @@ func ScanCluster(r *sql.Row) (Cluster, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
+		&s.ContextPath,
 		&s.TypeId,
 		&s.DetailId,
 		&s.Address,
+		&s.Token,
 		&s.State,
 		&s.Created,
 	); err != nil {
@@ -470,9 +472,11 @@ func ScanClusters(rs *sql.Rows) ([]Cluster, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
+			&s.ContextPath,
 			&s.TypeId,
 			&s.DetailId,
 			&s.Address,
+			&s.Token,
 			&s.State,
 			&s.Created,
 		); err != nil {

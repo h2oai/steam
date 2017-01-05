@@ -39,6 +39,7 @@ func startCluster(c *context) *cobra.Command {
 	var (
 		size   int
 		memory string
+		secure bool
 	)
 
 	cmd := newCmd(c, startClusterHelp, func(c *context, args []string) {
@@ -55,7 +56,7 @@ func startCluster(c *context) *cobra.Command {
 		// --- add additional args here ---
 
 		log.Println("Attempting to start cluster...")
-		clusterId, err := c.remote.StartYarnCluster(clusterName, engineId, size, memory, "")
+		clusterId, err := c.remote.StartYarnCluster(clusterName, engineId, size, memory, secure, "")
 		if err != nil {
 			log.Fatalln(err)
 		}

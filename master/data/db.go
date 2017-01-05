@@ -2399,13 +2399,15 @@ func (ds *Datastore) DeleteEngine(pz az.Principal, engineId int64) error {
 func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, state string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
+		// TODO we might want to allow the user to pass the context_path from the UI
 		res, err := tx.Exec(`
 			INSERT INTO
 				cluster
-				(name, type_id, detail_id, address, state, created)
+				(name, context_path, type_id, detail_id, address, token, state, created)
 			VALUES
-				($1,   $2,      0,         $3,      $4,    datetime('now'))
-			`, name, ds.ClusterTypes.External, address, state)
+				($1,   $2,      $3,      0,      $4,      $5,      $6,    datetime('now'))
+			`, name, "/", ds.ClusterTypes.External, address, "", state)
+		// TODO add token?!
 		if err != nil {
 			return err
 		}
@@ -2434,7 +2436,7 @@ func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, state
 	return id, err
 }
 
-func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state string, cluster YarnCluster) (int64, error) {
+func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, contextPath, address, token, state string, cluster YarnCluster) (int64, error) {
 	var clusterId int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		var yarnClusterId int64
@@ -2463,10 +2465,10 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 		res, err := tx.Exec(`
 			INSERT INTO
 				cluster
-				(name, type_id, detail_id, address, state, created)
+				(name, context_path, type_id, detail_id, address, token, state, created)
 			VALUES
-				($1,   $2,      $3,        $4,      $5,    datetime('now'))
-			`, name, ds.ClusterTypes.Yarn, yarnClusterId, address, state)
+				($1,   $2,      $3,        $4,      $5,      $6,      $7,    datetime('now'))
+			`, name, contextPath, ds.ClusterTypes.Yarn, yarnClusterId, address, token, state)
 		if err != nil {
 			return err
 		}
@@ -2487,8 +2489,10 @@ func (ds *Datastore) CreateYarnCluster(pz az.Principal, name, address, state str
 
 		return ds.audit(pz, tx, CreateOp, ds.EntityTypes.Cluster, clusterId, metadata{
 			"name":            name,
+			"contextPath":     contextPath,
 			"type":            ClusterYarn,
 			"address":         address,
+			"token": 	   token,
 			"state":           state,
 			"engineId":        strconv.FormatInt(cluster.EngineId, 10),
 			"size":            strconv.FormatInt(cluster.Size, 10),
@@ -2508,7 +2512,7 @@ func (ds *Datastore) ReadClusterTypes(pz az.Principal) []ClusterType {
 func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Cluster, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2547,7 +2551,7 @@ func (ds *Datastore) ReadCluster(pz az.Principal, clusterId int64) (Cluster, err
 	}
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2561,7 +2565,7 @@ func (ds *Datastore) ReadClusterByAddress(pz az.Principal, address string) (Clus
 	var cluster Cluster
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2580,7 +2584,7 @@ func (ds *Datastore) ReadClusterByName(pz az.Principal, name string) (Cluster, b
 	var cluster Cluster
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, context_path, type_id, detail_id, address, token, state, created
 		FROM
 			cluster
 		WHERE
@@ -2592,6 +2596,22 @@ func (ds *Datastore) ReadClusterByName(pz az.Principal, name string) (Cluster, b
 	defer rows.Close()
 
 	return scanCluster(rows)
+}
+
+func (ds *Datastore) ReadAllClusters(pz az.Principal) ([]Cluster, error) {
+	rows, err := ds.db.Query(`
+		SELECT
+			id, name, context_path, type_id, detail_id, address, token, state, created
+		FROM
+			cluster
+		`)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return ScanClusters(rows)
 }
 
 func scanCluster(rows *sql.Rows) (Cluster, bool, error) {

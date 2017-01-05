@@ -27,459 +27,459 @@
 import * as Proxy from './xhr';
 
 export interface BinomialModel {
-  
+
   id: number
-  
+
   training_dataset_id: number
-  
+
   validation_dataset_id: number
-  
+
   name: string
-  
+
   cluster_name: string
-  
+
   model_key: string
-  
+
   algorithm: string
-  
+
   model_category: string
-  
+
   dataset_name: string
-  
+
   response_column_name: string
-  
+
   logical_name: string
-  
+
   location: string
-  
+
   model_object_type: string
-  
+
   max_runtime: number
-  
+
   json_metrics: string
-  
+
   created_at: number
-  
+
   label_id: number
-  
+
   label_name: string
-  
+
   mse: number
-  
+
   r_squared: number
-  
+
   logloss: number
-  
+
   auc: number
-  
+
   gini: number
-  
+
 }
 
 export interface Cluster {
-  
+
   id: number
-  
+
   name: string
-  
+
   type_id: number
-  
+
   detail_id: number
-  
+
   address: string
-  
+
   state: string
-  
+
   created_at: number
-  
+
 }
 
 export interface ClusterStatus {
-  
+
   version: string
-  
+
   status: string
-  
+
   max_memory: string
-  
+
   total_cpu_count: number
-  
+
   total_allowed_cpu_count: number
-  
+
 }
 
 export interface ClusterType {
-  
+
   id: number
-  
+
   name: string
-  
+
 }
 
 export interface Config {
-  
+
   kerberos_enabled: boolean
-  
+
   cluster_proxy_address: string
-  
+
 }
 
 export interface Dataset {
-  
+
   id: number
-  
+
   datasource_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   frame_name: string
-  
+
   response_column_name: string
-  
+
   json_properties: string
-  
+
   created_at: number
-  
+
 }
 
 export interface Datasource {
-  
+
   id: number
-  
+
   project_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   kind: string
-  
+
   configuration: string
-  
+
   created_at: number
-  
+
 }
 
 export interface Engine {
-  
+
   id: number
-  
+
   name: string
-  
+
   location: string
-  
+
   created_at: number
-  
+
 }
 
 export interface EntityHistory {
-  
+
   identity_id: number
-  
+
   action: string
-  
+
   description: string
-  
+
   created_at: number
-  
+
 }
 
 export interface EntityPrivilege {
-  
+
   kind: string
-  
+
   workgroup_id: number
-  
+
   workgroup_name: string
-  
+
   workgroup_description: string
-  
+
 }
 
 export interface EntityType {
-  
+
   id: number
-  
+
   name: string
-  
+
 }
 
 export interface Identity {
-  
+
   id: number
-  
+
   name: string
-  
+
   is_active: boolean
-  
+
   last_login: number
-  
+
   created: number
-  
+
 }
 
 export interface Job {
-  
+
   name: string
-  
+
   cluster_name: string
-  
+
   description: string
-  
+
   progress: string
-  
+
   started_at: number
-  
+
   completed_at: number
-  
+
 }
 
 export interface Label {
-  
+
   id: number
-  
+
   project_id: number
-  
+
   model_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   created_at: number
-  
+
 }
 
 export interface Model {
-  
+
   id: number
-  
+
   training_dataset_id: number
-  
+
   validation_dataset_id: number
-  
+
   name: string
-  
+
   cluster_name: string
-  
+
   model_key: string
-  
+
   algorithm: string
-  
+
   model_category: string
-  
+
   dataset_name: string
-  
+
   response_column_name: string
-  
+
   logical_name: string
-  
+
   location: string
-  
+
   model_object_type: string
-  
+
   max_runtime: number
-  
+
   json_metrics: string
-  
+
   created_at: number
-  
+
   label_id: number
-  
+
   label_name: string
-  
+
 }
 
 export interface MultinomialModel {
-  
+
   id: number
-  
+
   training_dataset_id: number
-  
+
   validation_dataset_id: number
-  
+
   name: string
-  
+
   cluster_name: string
-  
+
   model_key: string
-  
+
   algorithm: string
-  
+
   model_category: string
-  
+
   dataset_name: string
-  
+
   response_column_name: string
-  
+
   logical_name: string
-  
+
   location: string
-  
+
   model_object_type: string
-  
+
   max_runtime: number
-  
+
   json_metrics: string
-  
+
   created_at: number
-  
+
   label_id: number
-  
+
   label_name: string
-  
+
   mse: number
-  
+
   r_squared: number
-  
+
   logloss: number
-  
+
 }
 
 export interface Permission {
-  
+
   id: number
-  
+
   code: string
-  
+
   description: string
-  
+
 }
 
 export interface Project {
-  
+
   id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   model_category: string
-  
+
   created_at: number
-  
+
 }
 
 export interface RegressionModel {
-  
+
   id: number
-  
+
   training_dataset_id: number
-  
+
   validation_dataset_id: number
-  
+
   name: string
-  
+
   cluster_name: string
-  
+
   model_key: string
-  
+
   algorithm: string
-  
+
   model_category: string
-  
+
   dataset_name: string
-  
+
   response_column_name: string
-  
+
   logical_name: string
-  
+
   location: string
-  
+
   model_object_type: string
-  
+
   max_runtime: number
-  
+
   json_metrics: string
-  
+
   created_at: number
-  
+
   label_id: number
-  
+
   label_name: string
-  
+
   mse: number
-  
+
   r_squared: number
-  
+
   mean_residual_deviance: number
-  
+
 }
 
 export interface Role {
-  
+
   id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   created: number
-  
+
 }
 
 export interface ScoringService {
-  
+
   id: number
-  
+
   model_id: number
-  
+
   name: string
-  
+
   address: string
-  
+
   port: number
-  
+
   process_id: number
-  
+
   state: string
-  
+
   created_at: number
-  
+
 }
 
 export interface UserRole {
-  
+
   kind: string
-  
+
   identity_id: number
-  
+
   identity_name: string
-  
+
   role_id: number
-  
+
   role_name: string
-  
+
 }
 
 export interface Workgroup {
-  
+
   id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   created: number
-  
+
 }
 
 export interface YarnCluster {
-  
+
   id: number
-  
+
   engine_id: number
-  
+
   size: number
-  
+
   application_id: string
-  
+
   memory: string
-  
+
   username: string
-  
+
 }
 
 
@@ -487,1845 +487,1847 @@ export interface YarnCluster {
 
 
 export interface Service {
-  
+
   // Ping the Steam server
   pingServer: (input: string, go: (error: Error, output: string) => void) => void
-  
+
   // No description available
   getConfig: (go: (error: Error, config: Config) => void) => void
-  
+
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
-  
+
   // Disconnect from a cluster
   unregisterCluster: (clusterId: number, go: (error: Error) => void) => void
-  
+
   // Start a cluster using Yarn
-  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void) => void
-  
+  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, secure: boolean, keytab: string, go: (error: Error, clusterId: number) => void) => void
+
   // Stop a cluster using Yarn
   stopClusterOnYarn: (clusterId: number, keytab: string, go: (error: Error) => void) => void
-  
+
   // Get cluster details
   getCluster: (clusterId: number, go: (error: Error, cluster: Cluster) => void) => void
-  
+
   // Get cluster details (Yarn only)
   getClusterOnYarn: (clusterId: number, go: (error: Error, cluster: YarnCluster) => void) => void
-  
+
   // List clusters
   getClusters: (offset: number, limit: number, go: (error: Error, clusters: Cluster[]) => void) => void
-  
+
   // Get cluster status
   getClusterStatus: (clusterId: number, go: (error: Error, clusterStatus: ClusterStatus) => void) => void
-  
+
   // Delete a cluster
   deleteCluster: (clusterId: number, go: (error: Error) => void) => void
-  
+
   // Get job details
   getJob: (clusterId: number, jobName: string, go: (error: Error, job: Job) => void) => void
-  
+
   // List jobs
   getJobs: (clusterId: number, go: (error: Error, jobs: Job[]) => void) => void
-  
+
   // Create a project
   createProject: (name: string, description: string, modelCategory: string, go: (error: Error, projectId: number) => void) => void
-  
+
   // List projects
   getProjects: (offset: number, limit: number, go: (error: Error, projects: Project[]) => void) => void
-  
+
   // Get project details
   getProject: (projectId: number, go: (error: Error, project: Project) => void) => void
-  
+
   // Delete a project
   deleteProject: (projectId: number, go: (error: Error) => void) => void
-  
+
   // Create a datasource
   createDatasource: (projectId: number, name: string, description: string, path: string, go: (error: Error, datasourceId: number) => void) => void
-  
+
   // List datasources
   getDatasources: (projectId: number, offset: number, limit: number, go: (error: Error, datasources: Datasource[]) => void) => void
-  
+
   // Get datasource details
   getDatasource: (datasourceId: number, go: (error: Error, datasource: Datasource) => void) => void
-  
+
   // Update a datasource
   updateDatasource: (datasourceId: number, name: string, description: string, path: string, go: (error: Error) => void) => void
-  
+
   // Delete a datasource
   deleteDatasource: (datasourceId: number, go: (error: Error) => void) => void
-  
+
   // Create a dataset
   createDataset: (clusterId: number, datasourceId: number, name: string, description: string, responseColumnName: string, go: (error: Error, datasetId: number) => void) => void
-  
+
   // List datasets
   getDatasets: (datasourceId: number, offset: number, limit: number, go: (error: Error, datasets: Dataset[]) => void) => void
-  
+
   // Get dataset details
   getDataset: (datasetId: number, go: (error: Error, dataset: Dataset) => void) => void
-  
+
   // Get a list of datasets on a cluster
   getDatasetsFromCluster: (clusterId: number, go: (error: Error, dataset: Dataset[]) => void) => void
-  
+
   // Update a dataset
   updateDataset: (datasetId: number, name: string, description: string, responseColumnName: string, go: (error: Error) => void) => void
-  
+
   // Split a dataset
   splitDataset: (datasetId: number, ratio1: number, ratio2: number, go: (error: Error, datasetIds: number[]) => void) => void
-  
+
   // Delete a dataset
   deleteDataset: (datasetId: number, go: (error: Error) => void) => void
-  
+
   // Build a model
   buildModel: (clusterId: number, datasetId: number, algorithm: string, go: (error: Error, modelId: number) => void) => void
-  
+
   // Build an AutoML model
   buildModelAuto: (clusterId: number, dataset: string, targetName: string, maxRunTime: number, go: (error: Error, model: Model) => void) => void
-  
+
   // Get model details
   getModel: (modelId: number, go: (error: Error, model: Model) => void) => void
-  
+
   // List models
   getModels: (projectId: number, offset: number, limit: number, go: (error: Error, models: Model[]) => void) => void
-  
+
   // List models from a cluster
   getModelsFromCluster: (clusterId: number, frameKey: string, go: (error: Error, models: Model[]) => void) => void
-  
+
   // Get a count models in a project
   findModelsCount: (projectId: number, go: (error: Error, count: number) => void) => void
-  
+
   // List sort criteria for a binomial models
   getAllBinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
-  
+
   // List binomial models
   findModelsBinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: BinomialModel[]) => void) => void
-  
+
   // View a binomial model
   getModelBinomial: (modelId: number, go: (error: Error, model: BinomialModel) => void) => void
-  
+
   // List sort criteria for a multinomial models
   getAllMultinomialSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
-  
+
   // List multinomial models
   findModelsMultinomial: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: MultinomialModel[]) => void) => void
-  
+
   // View a binomial model
   getModelMultinomial: (modelId: number, go: (error: Error, model: MultinomialModel) => void) => void
-  
+
   // List sort criteria for a regression models
   getAllRegressionSortCriteria: (go: (error: Error, criteria: string[]) => void) => void
-  
+
   // List regression models
   findModelsRegression: (projectId: number, namePart: string, sortBy: string, ascending: boolean, offset: number, limit: number, go: (error: Error, models: RegressionModel[]) => void) => void
-  
+
   // View a binomial model
   getModelRegression: (modelId: number, go: (error: Error, model: RegressionModel) => void) => void
-  
+
   // Import models from a cluster
   importModelFromCluster: (clusterId: number, projectId: number, modelKey: string, modelName: string, go: (error: Error, modelId: number) => void) => void
-  
+
   // Check if a model category can generate MOJOs
   checkMojo: (algo: string, go: (error: Error, canMojo: boolean) => void) => void
-  
+
   // Import a model's POJO from a cluster
   importModelPojo: (modelId: number, go: (error: Error) => void) => void
-  
+
   // Import a model's MOJO from a cluster
   importModelMojo: (modelId: number, go: (error: Error) => void) => void
-  
+
   // Delete a model
   deleteModel: (modelId: number, go: (error: Error) => void) => void
-  
+
   // Create a label
   createLabel: (projectId: number, name: string, description: string, go: (error: Error, labelId: number) => void) => void
-  
+
   // Update a label
   updateLabel: (labelId: number, name: string, description: string, go: (error: Error) => void) => void
-  
+
   // Delete a label
   deleteLabel: (labelId: number, go: (error: Error) => void) => void
-  
+
   // Label a model
   linkLabelWithModel: (labelId: number, modelId: number, go: (error: Error) => void) => void
-  
+
   // Remove a label from a model
   unlinkLabelFromModel: (labelId: number, modelId: number, go: (error: Error) => void) => void
-  
+
   // List labels for a project, with corresponding models, if any
   getLabelsForProject: (projectId: number, go: (error: Error, labels: Label[]) => void) => void
-  
+
   // Start a service
   startService: (modelId: number, name: string, packageName: string, go: (error: Error, serviceId: number) => void) => void
-  
+
   // Stop a service
   stopService: (serviceId: number, go: (error: Error) => void) => void
-  
+
   // Get service details
   getService: (serviceId: number, go: (error: Error, service: ScoringService) => void) => void
-  
+
   // List all services
   getServices: (offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
-  
+
   // List services for a project
   getServicesForProject: (projectId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
-  
+
   // List services for a model
   getServicesForModel: (modelId: number, offset: number, limit: number, go: (error: Error, services: ScoringService[]) => void) => void
-  
+
   // Delete a service
   deleteService: (serviceId: number, go: (error: Error) => void) => void
-  
+
   // Get engine details
   getEngine: (engineId: number, go: (error: Error, engine: Engine) => void) => void
-  
+
   // List engines
   getEngines: (go: (error: Error, engines: Engine[]) => void) => void
-  
+
   // Delete an engine
   deleteEngine: (engineId: number, go: (error: Error) => void) => void
-  
+
   // List all entity types
   getAllEntityTypes: (go: (error: Error, entityTypes: EntityType[]) => void) => void
-  
+
   // List all permissions
   getAllPermissions: (go: (error: Error, permissions: Permission[]) => void) => void
-  
+
   // List all cluster types
   getAllClusterTypes: (go: (error: Error, clusterTypes: ClusterType[]) => void) => void
-  
+
   // List permissions for a role
   getPermissionsForRole: (roleId: number, go: (error: Error, permissions: Permission[]) => void) => void
-  
+
   // List permissions for an identity
   getPermissionsForIdentity: (identityId: number, go: (error: Error, permissions: Permission[]) => void) => void
-  
+
   // Create a role
   createRole: (name: string, description: string, go: (error: Error, roleId: number) => void) => void
-  
+
   // List roles
   getRoles: (offset: number, limit: number, go: (error: Error, roles: Role[]) => void) => void
-  
+
   // List roles for an identity
   getRolesForIdentity: (identityId: number, go: (error: Error, roles: Role[]) => void) => void
-  
+
   // Get role details
   getRole: (roleId: number, go: (error: Error, role: Role) => void) => void
-  
+
   // Get role details by name
   getRoleByName: (name: string, go: (error: Error, role: Role) => void) => void
-  
+
   // Update a role
   updateRole: (roleId: number, name: string, description: string, go: (error: Error) => void) => void
-  
+
   // Link a role with permissions
   linkRoleWithPermissions: (roleId: number, permissionIds: number[], go: (error: Error) => void) => void
-  
+
   // Link a role with a permission
   linkRoleWithPermission: (roleId: number, permissionId: number, go: (error: Error) => void) => void
-  
+
   // Unlink a role from a permission
   unlinkRoleFromPermission: (roleId: number, permissionId: number, go: (error: Error) => void) => void
-  
+
   // Delete a role
   deleteRole: (roleId: number, go: (error: Error) => void) => void
-  
+
   // Create a workgroup
   createWorkgroup: (name: string, description: string, go: (error: Error, workgroupId: number) => void) => void
-  
+
   // List workgroups
   getWorkgroups: (offset: number, limit: number, go: (error: Error, workgroups: Workgroup[]) => void) => void
-  
+
   // List workgroups for an identity
   getWorkgroupsForIdentity: (identityId: number, go: (error: Error, workgroups: Workgroup[]) => void) => void
-  
+
   // Get workgroup details
   getWorkgroup: (workgroupId: number, go: (error: Error, workgroup: Workgroup) => void) => void
-  
+
   // Get workgroup details by name
   getWorkgroupByName: (name: string, go: (error: Error, workgroup: Workgroup) => void) => void
-  
+
   // Update a workgroup
   updateWorkgroup: (workgroupId: number, name: string, description: string, go: (error: Error) => void) => void
-  
+
   // Delete a workgroup
   deleteWorkgroup: (workgroupId: number, go: (error: Error) => void) => void
-  
+
   // Create an identity
   createIdentity: (name: string, password: string, go: (error: Error, identityId: number) => void) => void
-  
+
   // List identities
   getIdentities: (offset: number, limit: number, go: (error: Error, identities: Identity[]) => void) => void
-  
+
   // List identities for a workgroup
   getIdentitiesForWorkgroup: (workgroupId: number, go: (error: Error, identities: Identity[]) => void) => void
-  
+
   // List identities for a role
   getIdentitiesForRole: (roleId: number, go: (error: Error, identities: Identity[]) => void) => void
-  
+
   // Get a list of identities and roles with access to an entity
   getIdentitiesForEntity: (entityType: number, entityId: number, go: (error: Error, users: UserRole[]) => void) => void
-  
+
   // Get identity details
   getIdentity: (identityId: number, go: (error: Error, identity: Identity) => void) => void
-  
+
   // Get identity details by name
   getIdentityByName: (name: string, go: (error: Error, identity: Identity) => void) => void
-  
+
   // Link an identity with a workgroup
   linkIdentityWithWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
-  
+
   // Unlink an identity from a workgroup
   unlinkIdentityFromWorkgroup: (identityId: number, workgroupId: number, go: (error: Error) => void) => void
-  
+
   // Link an identity with a role
   linkIdentityWithRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
-  
+
   // Unlink an identity from a role
   unlinkIdentityFromRole: (identityId: number, roleId: number, go: (error: Error) => void) => void
-  
+
   // Update an identity
   updateIdentity: (identityId: number, password: string, go: (error: Error) => void) => void
-  
+
   // Activate an identity
   activateIdentity: (identityId: number, go: (error: Error) => void) => void
-  
+
   // Deactivate an identity
   deactivateIdentity: (identityId: number, go: (error: Error) => void) => void
-  
+
   // Share an entity with a workgroup
   shareEntity: (kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void) => void
-  
+
   // List privileges for an entity
   getPrivileges: (entityTypeId: number, entityId: number, go: (error: Error, privileges: EntityPrivilege[]) => void) => void
-  
+
   // Unshare an entity
   unshareEntity: (kind: string, workgroupId: number, entityTypeId: number, entityId: number, go: (error: Error) => void) => void
-  
+
   // List audit trail records for an entity
   getHistory: (entityTypeId: number, entityId: number, offset: number, limit: number, go: (error: Error, history: EntityHistory[]) => void) => void
-  
+
   // Create a package for a project
   createPackage: (projectId: number, name: string, go: (error: Error) => void) => void
-  
-  // List packages for a project 
+
+  // List packages for a project
   getPackages: (projectId: number, go: (error: Error, packages: string[]) => void) => void
-  
+
   // List directories in a project package
   getPackageDirectories: (projectId: number, packageName: string, relativePath: string, go: (error: Error, directories: string[]) => void) => void
-  
+
   // List files in a project package
   getPackageFiles: (projectId: number, packageName: string, relativePath: string, go: (error: Error, files: string[]) => void) => void
-  
+
   // Delete a project package
   deletePackage: (projectId: number, name: string, go: (error: Error) => void) => void
-  
+
   // Delete a directory in a project package
   deletePackageDirectory: (projectId: number, packageName: string, relativePath: string, go: (error: Error) => void) => void
-  
+
   // Delete a file in a project package
   deletePackageFile: (projectId: number, packageName: string, relativePath: string, go: (error: Error) => void) => void
-  
+
   // Set attributes on a project package
   setAttributesForPackage: (projectId: number, packageName: string, attributes: string, go: (error: Error) => void) => void
-  
+
   // List attributes for a project package
   getAttributesForPackage: (projectId: number, packageName: string, go: (error: Error, attributes: string) => void) => void
-  
+
 }
 
 // --- Messages ---
 
 interface PingServerIn {
-  
+
   input: string
-  
+
 }
 
 interface PingServerOut {
-  
+
   output: string
-  
+
 }
 
 interface GetConfigIn {
-  
+
 }
 
 interface GetConfigOut {
-  
+
   config: Config
-  
+
 }
 
 interface RegisterClusterIn {
-  
+
   address: string
-  
+
 }
 
 interface RegisterClusterOut {
-  
+
   cluster_id: number
-  
+
 }
 
 interface UnregisterClusterIn {
-  
+
   cluster_id: number
-  
+
 }
 
 interface UnregisterClusterOut {
-  
+
 }
 
 interface StartClusterOnYarnIn {
-  
+
   cluster_name: string
-  
+
   engine_id: number
-  
+
   size: number
-  
+
   memory: string
-  
+
+  secure: boolean
+
   keytab: string
-  
+
 }
 
 interface StartClusterOnYarnOut {
-  
+
   cluster_id: number
-  
+
 }
 
 interface StopClusterOnYarnIn {
-  
+
   cluster_id: number
-  
+
   keytab: string
-  
+
 }
 
 interface StopClusterOnYarnOut {
-  
+
 }
 
 interface GetClusterIn {
-  
+
   cluster_id: number
-  
+
 }
 
 interface GetClusterOut {
-  
+
   cluster: Cluster
-  
+
 }
 
 interface GetClusterOnYarnIn {
-  
+
   cluster_id: number
-  
+
 }
 
 interface GetClusterOnYarnOut {
-  
+
   cluster: YarnCluster
-  
+
 }
 
 interface GetClustersIn {
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetClustersOut {
-  
+
   clusters: Cluster[]
-  
+
 }
 
 interface GetClusterStatusIn {
-  
+
   cluster_id: number
-  
+
 }
 
 interface GetClusterStatusOut {
-  
+
   cluster_status: ClusterStatus
-  
+
 }
 
 interface DeleteClusterIn {
-  
+
   cluster_id: number
-  
+
 }
 
 interface DeleteClusterOut {
-  
+
 }
 
 interface GetJobIn {
-  
+
   cluster_id: number
-  
+
   job_name: string
-  
+
 }
 
 interface GetJobOut {
-  
+
   job: Job
-  
+
 }
 
 interface GetJobsIn {
-  
+
   cluster_id: number
-  
+
 }
 
 interface GetJobsOut {
-  
+
   jobs: Job[]
-  
+
 }
 
 interface CreateProjectIn {
-  
+
   name: string
-  
+
   description: string
-  
+
   model_category: string
-  
+
 }
 
 interface CreateProjectOut {
-  
+
   project_id: number
-  
+
 }
 
 interface GetProjectsIn {
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetProjectsOut {
-  
+
   projects: Project[]
-  
+
 }
 
 interface GetProjectIn {
-  
+
   project_id: number
-  
+
 }
 
 interface GetProjectOut {
-  
+
   project: Project
-  
+
 }
 
 interface DeleteProjectIn {
-  
+
   project_id: number
-  
+
 }
 
 interface DeleteProjectOut {
-  
+
 }
 
 interface CreateDatasourceIn {
-  
+
   project_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   path: string
-  
+
 }
 
 interface CreateDatasourceOut {
-  
+
   datasource_id: number
-  
+
 }
 
 interface GetDatasourcesIn {
-  
+
   project_id: number
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetDatasourcesOut {
-  
+
   datasources: Datasource[]
-  
+
 }
 
 interface GetDatasourceIn {
-  
+
   datasource_id: number
-  
+
 }
 
 interface GetDatasourceOut {
-  
+
   datasource: Datasource
-  
+
 }
 
 interface UpdateDatasourceIn {
-  
+
   datasource_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   path: string
-  
+
 }
 
 interface UpdateDatasourceOut {
-  
+
 }
 
 interface DeleteDatasourceIn {
-  
+
   datasource_id: number
-  
+
 }
 
 interface DeleteDatasourceOut {
-  
+
 }
 
 interface CreateDatasetIn {
-  
+
   cluster_id: number
-  
+
   datasource_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   response_column_name: string
-  
+
 }
 
 interface CreateDatasetOut {
-  
+
   dataset_id: number
-  
+
 }
 
 interface GetDatasetsIn {
-  
+
   datasource_id: number
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetDatasetsOut {
-  
+
   datasets: Dataset[]
-  
+
 }
 
 interface GetDatasetIn {
-  
+
   dataset_id: number
-  
+
 }
 
 interface GetDatasetOut {
-  
+
   dataset: Dataset
-  
+
 }
 
 interface GetDatasetsFromClusterIn {
-  
+
   cluster_id: number
-  
+
 }
 
 interface GetDatasetsFromClusterOut {
-  
+
   dataset: Dataset[]
-  
+
 }
 
 interface UpdateDatasetIn {
-  
+
   dataset_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
   response_column_name: string
-  
+
 }
 
 interface UpdateDatasetOut {
-  
+
 }
 
 interface SplitDatasetIn {
-  
+
   dataset_id: number
-  
+
   ratio1: number
-  
+
   ratio2: number
-  
+
 }
 
 interface SplitDatasetOut {
-  
+
   dataset_ids: number[]
-  
+
 }
 
 interface DeleteDatasetIn {
-  
+
   dataset_id: number
-  
+
 }
 
 interface DeleteDatasetOut {
-  
+
 }
 
 interface BuildModelIn {
-  
+
   cluster_id: number
-  
+
   dataset_id: number
-  
+
   algorithm: string
-  
+
 }
 
 interface BuildModelOut {
-  
+
   model_id: number
-  
+
 }
 
 interface BuildModelAutoIn {
-  
+
   cluster_id: number
-  
+
   dataset: string
-  
+
   target_name: string
-  
+
   max_run_time: number
-  
+
 }
 
 interface BuildModelAutoOut {
-  
+
   model: Model
-  
+
 }
 
 interface GetModelIn {
-  
+
   model_id: number
-  
+
 }
 
 interface GetModelOut {
-  
+
   model: Model
-  
+
 }
 
 interface GetModelsIn {
-  
+
   project_id: number
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetModelsOut {
-  
+
   models: Model[]
-  
+
 }
 
 interface GetModelsFromClusterIn {
-  
+
   cluster_id: number
-  
+
   frame_key: string
-  
+
 }
 
 interface GetModelsFromClusterOut {
-  
+
   models: Model[]
-  
+
 }
 
 interface FindModelsCountIn {
-  
+
   project_id: number
-  
+
 }
 
 interface FindModelsCountOut {
-  
+
   count: number
-  
+
 }
 
 interface GetAllBinomialSortCriteriaIn {
-  
+
 }
 
 interface GetAllBinomialSortCriteriaOut {
-  
+
   criteria: string[]
-  
+
 }
 
 interface FindModelsBinomialIn {
-  
+
   project_id: number
-  
+
   name_part: string
-  
+
   sort_by: string
-  
+
   ascending: boolean
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface FindModelsBinomialOut {
-  
+
   models: BinomialModel[]
-  
+
 }
 
 interface GetModelBinomialIn {
-  
+
   model_id: number
-  
+
 }
 
 interface GetModelBinomialOut {
-  
+
   model: BinomialModel
-  
+
 }
 
 interface GetAllMultinomialSortCriteriaIn {
-  
+
 }
 
 interface GetAllMultinomialSortCriteriaOut {
-  
+
   criteria: string[]
-  
+
 }
 
 interface FindModelsMultinomialIn {
-  
+
   project_id: number
-  
+
   name_part: string
-  
+
   sort_by: string
-  
+
   ascending: boolean
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface FindModelsMultinomialOut {
-  
+
   models: MultinomialModel[]
-  
+
 }
 
 interface GetModelMultinomialIn {
-  
+
   model_id: number
-  
+
 }
 
 interface GetModelMultinomialOut {
-  
+
   model: MultinomialModel
-  
+
 }
 
 interface GetAllRegressionSortCriteriaIn {
-  
+
 }
 
 interface GetAllRegressionSortCriteriaOut {
-  
+
   criteria: string[]
-  
+
 }
 
 interface FindModelsRegressionIn {
-  
+
   project_id: number
-  
+
   name_part: string
-  
+
   sort_by: string
-  
+
   ascending: boolean
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface FindModelsRegressionOut {
-  
+
   models: RegressionModel[]
-  
+
 }
 
 interface GetModelRegressionIn {
-  
+
   model_id: number
-  
+
 }
 
 interface GetModelRegressionOut {
-  
+
   model: RegressionModel
-  
+
 }
 
 interface ImportModelFromClusterIn {
-  
+
   cluster_id: number
-  
+
   project_id: number
-  
+
   model_key: string
-  
+
   model_name: string
-  
+
 }
 
 interface ImportModelFromClusterOut {
-  
+
   model_id: number
-  
+
 }
 
 interface CheckMojoIn {
-  
+
   algo: string
-  
+
 }
 
 interface CheckMojoOut {
-  
+
   can_mojo: boolean
-  
+
 }
 
 interface ImportModelPojoIn {
-  
+
   model_id: number
-  
+
 }
 
 interface ImportModelPojoOut {
-  
+
 }
 
 interface ImportModelMojoIn {
-  
+
   model_id: number
-  
+
 }
 
 interface ImportModelMojoOut {
-  
+
 }
 
 interface DeleteModelIn {
-  
+
   model_id: number
-  
+
 }
 
 interface DeleteModelOut {
-  
+
 }
 
 interface CreateLabelIn {
-  
+
   project_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
 }
 
 interface CreateLabelOut {
-  
+
   label_id: number
-  
+
 }
 
 interface UpdateLabelIn {
-  
+
   label_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
 }
 
 interface UpdateLabelOut {
-  
+
 }
 
 interface DeleteLabelIn {
-  
+
   label_id: number
-  
+
 }
 
 interface DeleteLabelOut {
-  
+
 }
 
 interface LinkLabelWithModelIn {
-  
+
   label_id: number
-  
+
   model_id: number
-  
+
 }
 
 interface LinkLabelWithModelOut {
-  
+
 }
 
 interface UnlinkLabelFromModelIn {
-  
+
   label_id: number
-  
+
   model_id: number
-  
+
 }
 
 interface UnlinkLabelFromModelOut {
-  
+
 }
 
 interface GetLabelsForProjectIn {
-  
+
   project_id: number
-  
+
 }
 
 interface GetLabelsForProjectOut {
-  
+
   labels: Label[]
-  
+
 }
 
 interface StartServiceIn {
-  
+
   model_id: number
-  
+
   name: string
-  
+
   package_name: string
-  
+
 }
 
 interface StartServiceOut {
-  
+
   service_id: number
-  
+
 }
 
 interface StopServiceIn {
-  
+
   service_id: number
-  
+
 }
 
 interface StopServiceOut {
-  
+
 }
 
 interface GetServiceIn {
-  
+
   service_id: number
-  
+
 }
 
 interface GetServiceOut {
-  
+
   service: ScoringService
-  
+
 }
 
 interface GetServicesIn {
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetServicesOut {
-  
+
   services: ScoringService[]
-  
+
 }
 
 interface GetServicesForProjectIn {
-  
+
   project_id: number
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetServicesForProjectOut {
-  
+
   services: ScoringService[]
-  
+
 }
 
 interface GetServicesForModelIn {
-  
+
   model_id: number
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetServicesForModelOut {
-  
+
   services: ScoringService[]
-  
+
 }
 
 interface DeleteServiceIn {
-  
+
   service_id: number
-  
+
 }
 
 interface DeleteServiceOut {
-  
+
 }
 
 interface GetEngineIn {
-  
+
   engine_id: number
-  
+
 }
 
 interface GetEngineOut {
-  
+
   engine: Engine
-  
+
 }
 
 interface GetEnginesIn {
-  
+
 }
 
 interface GetEnginesOut {
-  
+
   engines: Engine[]
-  
+
 }
 
 interface DeleteEngineIn {
-  
+
   engine_id: number
-  
+
 }
 
 interface DeleteEngineOut {
-  
+
 }
 
 interface GetAllEntityTypesIn {
-  
+
 }
 
 interface GetAllEntityTypesOut {
-  
+
   entity_types: EntityType[]
-  
+
 }
 
 interface GetAllPermissionsIn {
-  
+
 }
 
 interface GetAllPermissionsOut {
-  
+
   permissions: Permission[]
-  
+
 }
 
 interface GetAllClusterTypesIn {
-  
+
 }
 
 interface GetAllClusterTypesOut {
-  
+
   cluster_types: ClusterType[]
-  
+
 }
 
 interface GetPermissionsForRoleIn {
-  
+
   role_id: number
-  
+
 }
 
 interface GetPermissionsForRoleOut {
-  
+
   permissions: Permission[]
-  
+
 }
 
 interface GetPermissionsForIdentityIn {
-  
+
   identity_id: number
-  
+
 }
 
 interface GetPermissionsForIdentityOut {
-  
+
   permissions: Permission[]
-  
+
 }
 
 interface CreateRoleIn {
-  
+
   name: string
-  
+
   description: string
-  
+
 }
 
 interface CreateRoleOut {
-  
+
   role_id: number
-  
+
 }
 
 interface GetRolesIn {
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetRolesOut {
-  
+
   roles: Role[]
-  
+
 }
 
 interface GetRolesForIdentityIn {
-  
+
   identity_id: number
-  
+
 }
 
 interface GetRolesForIdentityOut {
-  
+
   roles: Role[]
-  
+
 }
 
 interface GetRoleIn {
-  
+
   role_id: number
-  
+
 }
 
 interface GetRoleOut {
-  
+
   role: Role
-  
+
 }
 
 interface GetRoleByNameIn {
-  
+
   name: string
-  
+
 }
 
 interface GetRoleByNameOut {
-  
+
   role: Role
-  
+
 }
 
 interface UpdateRoleIn {
-  
+
   role_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
 }
 
 interface UpdateRoleOut {
-  
+
 }
 
 interface LinkRoleWithPermissionsIn {
-  
+
   role_id: number
-  
+
   permission_ids: number[]
-  
+
 }
 
 interface LinkRoleWithPermissionsOut {
-  
+
 }
 
 interface LinkRoleWithPermissionIn {
-  
+
   role_id: number
-  
+
   permission_id: number
-  
+
 }
 
 interface LinkRoleWithPermissionOut {
-  
+
 }
 
 interface UnlinkRoleFromPermissionIn {
-  
+
   role_id: number
-  
+
   permission_id: number
-  
+
 }
 
 interface UnlinkRoleFromPermissionOut {
-  
+
 }
 
 interface DeleteRoleIn {
-  
+
   role_id: number
-  
+
 }
 
 interface DeleteRoleOut {
-  
+
 }
 
 interface CreateWorkgroupIn {
-  
+
   name: string
-  
+
   description: string
-  
+
 }
 
 interface CreateWorkgroupOut {
-  
+
   workgroup_id: number
-  
+
 }
 
 interface GetWorkgroupsIn {
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetWorkgroupsOut {
-  
+
   workgroups: Workgroup[]
-  
+
 }
 
 interface GetWorkgroupsForIdentityIn {
-  
+
   identity_id: number
-  
+
 }
 
 interface GetWorkgroupsForIdentityOut {
-  
+
   workgroups: Workgroup[]
-  
+
 }
 
 interface GetWorkgroupIn {
-  
+
   workgroup_id: number
-  
+
 }
 
 interface GetWorkgroupOut {
-  
+
   workgroup: Workgroup
-  
+
 }
 
 interface GetWorkgroupByNameIn {
-  
+
   name: string
-  
+
 }
 
 interface GetWorkgroupByNameOut {
-  
+
   workgroup: Workgroup
-  
+
 }
 
 interface UpdateWorkgroupIn {
-  
+
   workgroup_id: number
-  
+
   name: string
-  
+
   description: string
-  
+
 }
 
 interface UpdateWorkgroupOut {
-  
+
 }
 
 interface DeleteWorkgroupIn {
-  
+
   workgroup_id: number
-  
+
 }
 
 interface DeleteWorkgroupOut {
-  
+
 }
 
 interface CreateIdentityIn {
-  
+
   name: string
-  
+
   password: string
-  
+
 }
 
 interface CreateIdentityOut {
-  
+
   identity_id: number
-  
+
 }
 
 interface GetIdentitiesIn {
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetIdentitiesOut {
-  
+
   identities: Identity[]
-  
+
 }
 
 interface GetIdentitiesForWorkgroupIn {
-  
+
   workgroup_id: number
-  
+
 }
 
 interface GetIdentitiesForWorkgroupOut {
-  
+
   identities: Identity[]
-  
+
 }
 
 interface GetIdentitiesForRoleIn {
-  
+
   role_id: number
-  
+
 }
 
 interface GetIdentitiesForRoleOut {
-  
+
   identities: Identity[]
-  
+
 }
 
 interface GetIdentitiesForEntityIn {
-  
+
   entity_type: number
-  
+
   entity_id: number
-  
+
 }
 
 interface GetIdentitiesForEntityOut {
-  
+
   users: UserRole[]
-  
+
 }
 
 interface GetIdentityIn {
-  
+
   identity_id: number
-  
+
 }
 
 interface GetIdentityOut {
-  
+
   identity: Identity
-  
+
 }
 
 interface GetIdentityByNameIn {
-  
+
   name: string
-  
+
 }
 
 interface GetIdentityByNameOut {
-  
+
   identity: Identity
-  
+
 }
 
 interface LinkIdentityWithWorkgroupIn {
-  
+
   identity_id: number
-  
+
   workgroup_id: number
-  
+
 }
 
 interface LinkIdentityWithWorkgroupOut {
-  
+
 }
 
 interface UnlinkIdentityFromWorkgroupIn {
-  
+
   identity_id: number
-  
+
   workgroup_id: number
-  
+
 }
 
 interface UnlinkIdentityFromWorkgroupOut {
-  
+
 }
 
 interface LinkIdentityWithRoleIn {
-  
+
   identity_id: number
-  
+
   role_id: number
-  
+
 }
 
 interface LinkIdentityWithRoleOut {
-  
+
 }
 
 interface UnlinkIdentityFromRoleIn {
-  
+
   identity_id: number
-  
+
   role_id: number
-  
+
 }
 
 interface UnlinkIdentityFromRoleOut {
-  
+
 }
 
 interface UpdateIdentityIn {
-  
+
   identity_id: number
-  
+
   password: string
-  
+
 }
 
 interface UpdateIdentityOut {
-  
+
 }
 
 interface ActivateIdentityIn {
-  
+
   identity_id: number
-  
+
 }
 
 interface ActivateIdentityOut {
-  
+
 }
 
 interface DeactivateIdentityIn {
-  
+
   identity_id: number
-  
+
 }
 
 interface DeactivateIdentityOut {
-  
+
 }
 
 interface ShareEntityIn {
-  
+
   kind: string
-  
+
   workgroup_id: number
-  
+
   entity_type_id: number
-  
+
   entity_id: number
-  
+
 }
 
 interface ShareEntityOut {
-  
+
 }
 
 interface GetPrivilegesIn {
-  
+
   entity_type_id: number
-  
+
   entity_id: number
-  
+
 }
 
 interface GetPrivilegesOut {
-  
+
   privileges: EntityPrivilege[]
-  
+
 }
 
 interface UnshareEntityIn {
-  
+
   kind: string
-  
+
   workgroup_id: number
-  
+
   entity_type_id: number
-  
+
   entity_id: number
-  
+
 }
 
 interface UnshareEntityOut {
-  
+
 }
 
 interface GetHistoryIn {
-  
+
   entity_type_id: number
-  
+
   entity_id: number
-  
+
   offset: number
-  
+
   limit: number
-  
+
 }
 
 interface GetHistoryOut {
-  
+
   history: EntityHistory[]
-  
+
 }
 
 interface CreatePackageIn {
-  
+
   project_id: number
-  
+
   name: string
-  
+
 }
 
 interface CreatePackageOut {
-  
+
 }
 
 interface GetPackagesIn {
-  
+
   project_id: number
-  
+
 }
 
 interface GetPackagesOut {
-  
+
   packages: string[]
-  
+
 }
 
 interface GetPackageDirectoriesIn {
-  
+
   project_id: number
-  
+
   package_name: string
-  
+
   relative_path: string
-  
+
 }
 
 interface GetPackageDirectoriesOut {
-  
+
   directories: string[]
-  
+
 }
 
 interface GetPackageFilesIn {
-  
+
   project_id: number
-  
+
   package_name: string
-  
+
   relative_path: string
-  
+
 }
 
 interface GetPackageFilesOut {
-  
+
   files: string[]
-  
+
 }
 
 interface DeletePackageIn {
-  
+
   project_id: number
-  
+
   name: string
-  
+
 }
 
 interface DeletePackageOut {
-  
+
 }
 
 interface DeletePackageDirectoryIn {
-  
+
   project_id: number
-  
+
   package_name: string
-  
+
   relative_path: string
-  
+
 }
 
 interface DeletePackageDirectoryOut {
-  
+
 }
 
 interface DeletePackageFileIn {
-  
+
   project_id: number
-  
+
   package_name: string
-  
+
   relative_path: string
-  
+
 }
 
 interface DeletePackageFileOut {
-  
+
 }
 
 interface SetAttributesForPackageIn {
-  
+
   project_id: number
-  
+
   package_name: string
-  
+
   attributes: string
-  
+
 }
 
 interface SetAttributesForPackageOut {
-  
+
 }
 
 interface GetAttributesForPackageIn {
-  
+
   project_id: number
-  
+
   package_name: string
-  
+
 }
 
 interface GetAttributesForPackageOut {
-  
+
   attributes: string
-  
+
 }
 
 
@@ -2381,8 +2383,8 @@ export function unregisterCluster(clusterId: number, go: (error: Error) => void)
   });
 }
 
-export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void): void {
-  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, keytab: keytab };
+export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, secure: boolean, keytab: string, go: (error: Error, clusterId: number) => void): void {
+  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, secure: secure, keytab: keytab };
   Proxy.Call("StartClusterOnYarn", req, function(error, data) {
     if (error) {
       return go(error, null);
