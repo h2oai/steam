@@ -2322,7 +2322,7 @@ func toYarnCluster(c data.Cluster, y data.ClusterYarnDetail) *web.YarnCluster {
 		int(y.Size),
 		y.ApplicationId,
 		y.Memory,
-		y.Username,
+		"",
 	}
 }
 
