@@ -25,15 +25,15 @@ type Config struct {
 }
 
 type LdapConfig struct {
-	Host              string
-	Port              int
-	Ldaps             bool
-	BindDn            string
-	BindPassword      string
-	UserBaseDn        string
-	UserBaseFilter    string
-	UserNameAttribute string
-	ForceBind         bool
+	Host            string
+	Port            int
+	Ldaps           bool
+	BindDn          string
+	BindPassword    string
+	UserBaseDn      string
+	UserBaseFilter  string
+	UserRnAttribute string
+	ForceBind       bool
 }
 
 type Cluster struct {

@@ -35,8 +35,8 @@ type Ldap struct {
 	BindPass string `toml:"bindPassword"`
 
 	UserBaseDn      string
-	UserIdAttribute string
-	UserObjectClass string
+	UserBaseFilter  string
+	UserRNAttribute string
 
 	// TODO implement TLS case
 	isTLS     bool
@@ -60,13 +60,10 @@ func (l *Ldap) CheckBind(user, password string) error {
 	// Search request for userDN
 	req := ldap.NewSearchRequest(
 		l.UserBaseDn,
-		ldap.ScopeWholeSubtree,
-		ldap.NeverDerefAliases,
-		0,
-		0,
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0,
 		false,
-		fmt.Sprintf("(&(objectClass=%s)(%s=%s))",
-			l.UserObjectClass, l.UserIdAttribute, user),
+		fmt.Sprintf("(&%s(%s=%s))",
+			l.UserBaseFilter, l.UserRNAttribute, user),
 		nil,
 		nil,
 	)
@@ -87,14 +84,14 @@ func (l *Ldap) CheckBind(user, password string) error {
 
 func NewLdap(
 	address, bindDn, bindPass string,
-	userBaseDn, userIdAttribute, userObjectClass string,
+	userBaseDn, userRNAttribute, userBaseFilter string,
 	forceBind bool,
 	idleTime, maxTime time.Duration) *Ldap {
 	return &Ldap{
 		// Base LDAP settings
 		Address: address, BindDN: bindDn, BindPass: bindPass,
 		// User filter settings
-		UserBaseDn: userBaseDn, UserIdAttribute: userIdAttribute, UserObjectClass: userObjectClass,
+		UserBaseDn: userBaseDn, UserRNAttribute: userRNAttribute, UserBaseFilter: userBaseFilter,
 		// Additional Configs
 		ForceBind: forceBind,
 		Users:     NewLdapUser(idleTime, maxTime),
@@ -103,15 +100,15 @@ func NewLdap(
 
 func FromConfig(workingDir string) (*Ldap, error) {
 	A := struct {
-		Hostname        string
+		Host            string
 		Port            int
 		BindDn          string
 		BindPassword    string
 		UserBaseDn      string
-		UserIdAttribute string
-		UserObjectClass string
+		UserRNAttribute string
+		UserBaseFilter  string
 
-		IsTLS     bool `toml:"useLdaps"`
+		IsTLS     bool `toml:"Ldaps"`
 		ForceBind bool
 		IdleTime  time.Duration
 		MaxTime   time.Duration
@@ -130,9 +127,9 @@ func FromConfig(workingDir string) (*Ldap, error) {
 	}
 
 	return NewLdap(
-		fmt.Sprintf("%s:%d", A.Hostname, A.Port),
+		fmt.Sprintf("%s:%d", A.Host, A.Port),
 		A.BindDn, A.BindPassword,
-		A.UserBaseDn, A.UserIdAttribute, A.UserObjectClass,
+		A.UserBaseDn, A.UserRNAttribute, A.UserBaseFilter,
 
-		A.ForceBind, time.Minute*A.IdleTime, time.Minute*A.MaxTime), nil
+		A.ForceBind, time.Minute*A.IdleTime, 60*A.MaxTime), nil
 }

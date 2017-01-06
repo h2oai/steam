@@ -162,15 +162,15 @@ type Label struct {
 }
 
 type LdapConfig struct {
-	Host              string `json:"host"`
-	Port              int    `json:"port"`
-	Ldaps             bool   `json:"ldaps"`
-	BindDn            string `json:"bind_dn"`
-	BindPassword      string `json:"bind_password"`
-	UserBaseDn        string `json:"user_base_dn"`
-	UserBaseFilter    string `json:"user_base_filter"`
-	UserNameAttribute string `json:"user_name_attribute"`
-	ForceBind         bool   `json:"force_bind"`
+	Host            string `json:"host"`
+	Port            int    `json:"port"`
+	Ldaps           bool   `json:"ldaps"`
+	BindDn          string `json:"bind_dn"`
+	BindPassword    string `json:"bind_password"`
+	UserBaseDn      string `json:"user_base_dn"`
+	UserBaseFilter  string `json:"user_base_filter"`
+	UserRnAttribute string `json:"user_rn_attribute"`
+	ForceBind       bool   `json:"force_bind"`
 }
 
 type Model struct {
