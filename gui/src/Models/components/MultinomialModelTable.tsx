@@ -128,7 +128,7 @@ export default class MultinomialModelTable extends React.Component<Props, any> {
                   </li>
                   <li onClick={this.props.openDeploy.bind(this, model)}><span><i className="fa fa-arrow-up"></i></span>
                     <span>deploy model</span></li>
-                  <span><i className="fa fa-trash" onClick={() => this.props.deleteModel(model.id, this.props.fetchLeaderboard)}></i> delete model</span>
+                  <span class="delete-model"><i className="fa fa-trash" onClick={() => this.props.deleteModel(model.id, this.props.fetchLeaderboard)}></i> delete model</span>
                 </ul>
               </Cell>
             </Row>
