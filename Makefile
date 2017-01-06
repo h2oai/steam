@@ -58,9 +58,6 @@ ssb:
 	cp $(SSB)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
 
-db:
-	rm var/master/db/steam.db
-
 launcher:
 	cd $(SLA) && go build
 
