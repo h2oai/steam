@@ -631,7 +631,7 @@ func (s *Service) FindModelsMultinomial(pz az.Principal, projectId int64, namePa
 		data.WithFilterByName(namePart), data.WithOrderBy(sortBy, ascending),
 		data.WithOffset(offset), data.WithLimit(limit),
 	)
-	return toMultinomialModels(models), errors.Wrap(err, "reading binomial models from database")
+	return toMultinomialModels(models), errors.Wrap(err, "reading multinomial models from database")
 }
 
 func (s *Service) GetModelMultinomial(pz az.Principal, modelId int64) (*web.MultinomialModel, error) {
@@ -645,9 +645,9 @@ func (s *Service) GetModelMultinomial(pz az.Principal, modelId int64) (*web.Mult
 	// Fetch Multinomial Model
 	model, exists, err := s.ds.ReadMultinomialModel(data.ById(modelId))
 	if err != nil {
-		return nil, errors.Wrap(err, "reading binomial model from database")
+		return nil, errors.Wrap(err, "reading multinomial model from database")
 	} else if !exists {
-		return nil, errors.New("unable to locate binomial model")
+		return nil, errors.New("unable to locate multinomial model")
 	}
 	return toMultinomialModel(model), nil
 }
@@ -666,7 +666,7 @@ func (s *Service) FindModelsRegression(pz az.Principal, projectId int64, namePar
 		data.WithFilterByName(namePart), data.WithOrderBy(sortBy, ascending),
 		data.WithOffset(offset), data.WithLimit(limit),
 	)
-	return toRegressionModels(models), errors.Wrap(err, "reading binomial models from database")
+	return toRegressionModels(models), errors.Wrap(err, "reading regression models from database")
 }
 
 // TODO: hardcoded; should be determined by h2o metrics
@@ -685,9 +685,9 @@ func (s *Service) GetModelRegression(pz az.Principal, modelId int64) (*web.Regre
 	// Fetch Regression Model
 	model, exists, err := s.ds.ReadRegressionModel(data.ById(modelId))
 	if err != nil {
-		return nil, errors.Wrap(err, "reading binomial model from database")
+		return nil, errors.Wrap(err, "reading regression model from database")
 	} else if !exists {
-		return nil, errors.New("unable to locate binomial model")
+		return nil, errors.New("unable to locate regression model")
 	}
 	return toRegressionModel(model), nil
 }

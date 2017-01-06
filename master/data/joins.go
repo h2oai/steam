@@ -574,6 +574,7 @@ func scanRegressionModel(r *sql.Row) (RegressionModel, error) {
 		&s.Label.Created,
 		&s.Regression.ModelId,
 		&s.Regression.Mse,
+		&s.Regression.RSquared,
 		&s.Regression.MeanResidualDeviance,
 	); err != nil {
 		return RegressionModel{}, err
