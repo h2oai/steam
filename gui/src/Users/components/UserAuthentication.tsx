@@ -44,59 +44,58 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   usernameAttributeInput: HTMLInputElement;
   realNameAttributeInput: HTMLInputElement;
 
-  hostInputValid: boolean;
-  portInputValid: boolean;
-  connectionOrderInputValid: boolean;
-  passwordInputValid: boolean;
-  userbaseFilterInputValid: boolean;
-  usernameAttributeInputValid: boolean;
-  realNameAttributeInputValid: boolean;
-
   constructor(params) {
     super(params);
     this.state = {
       isLDAPConnectionSettingsOpen: true,
-      showDBOptions: true
+      showDBOptions: true,
+      hostInputValid: true,
+      portInputValid: true,
+      connectionOrderInputValid: true,
+      passwordInputValid: true,
+      userbaseFilterInputValid: true,
+      usernameAttributeInputValid: true,
+      realNameAttributeInputValid: true
     };
   }
 
   validateAll = () => {
     if (this.hostInput.value.length > 3) {
-      this.hostInputValid = true;
+      this.setState({ hostInputValid: true });
     } else {
-      this.hostInputValid = false;
+      this.setState({ hostInputValid: false });
     }
 
     if (this.portInput.value.length > 0) {
-      this.portInputValid = true;
+      this.setState({ portInputValid: true });
     } else {
-      this.portInputValid = false;
+      this.setState({ portInputValid: false });
     }
 
     if (this.connectionOrderInput.value.length > 0) {
-      this.connectionOrderInputValid = true;
+      this.setState({ connectionOrderInputValid: true });
     } else {
-      this.connectionOrderInputValid = false;
+      this.setState({ connectionOrderInputValid: false });
     }
 
     this.validatePasswords();
 
     if (this.userbaseFilterInput.value.length > 0) {
-      this.userbaseFilterInputValid = true;
+      this.setState({ userbaseFilterInput: true });
     } else {
-      this.userbaseFilterInputValid = false;
+      this.setState({ userbaseFilterInputValid: false});
     }
 
     if (this.usernameAttributeInput.value.length > 0) {
-      this.usernameAttributeInputValid = true;
+      this.setState({ usernameAttributeInputValid: true });
     } else {
-      this.usernameAttributeInputValid = false;
+      this.setState({ usernameAttributeInputValid: false });
     }
 
     if (this.realNameAttributeInput.value.length > 0) {
-      this.realNameAttributeInputValid = true;
+      this.setState({ realNameAttributeInputValid: true });
     } else {
-      this.realNameAttributeInputValid = false;
+      this.setState({ realNameAttributeInputValid: false });
     }
 
   };
@@ -104,16 +103,16 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   validatePasswords = () => {
     if (this.confirmPasswordInput.value.length > 0) {
       if (this.bindDnPasswordInput.value.length < 2) {
-        this.passwordInputValid = false;
+        this.state.passwordInputValid = false;
       } else {
         if (this.bindDnPasswordInput.value === this.confirmPasswordInput.value) {
-          this.passwordInputValid = true;
+          this.state.passwordInputValid = true;
         } else {
-          this.passwordInputValid = false;
+          this.state.passwordInputValid = false;
         }
       }
     } else {
-      this.passwordInputValid = null;
+      this.state.passwordInputValid = null;
     }
   };
 
@@ -165,6 +164,8 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   };
 
   render(): React.ReactElement<HTMLDivElement> {
+    console.log(this.state.hostInputValid);
+
     return (
       <div className="user-authentication">
         <div className="space-20">User DB Connection Settings</div>
@@ -208,7 +209,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    {this.hostInputValid ?
+                    {this.state.hostInputValid ?
                       <input type="text" className="pt-input" ref={(ref) => this.hostInput = ref}></input> :
                       <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.hostInput = ref}></input>}
                   </td>
@@ -218,7 +219,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    {this.portInputValid ?
+                    {this.state.portInputValid ?
                       <input type="text" className="pt-input" ref={(ref) => this.portInput = ref} defaultValue="689"></input> :
                       <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.portInput = ref} defaultValue="689"></input> }
                   </td>
@@ -237,7 +238,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    {this.connectionOrderInputValid ?
+                    {this.state.connectionOrderInputValid ?
                     <input type="text" className="pt-input" ref={(ref) => this.connectionOrderInput = ref} defaultValue="1"></input> :
                     <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.connectionOrderInput = ref} defaultValue="1"></input>}
                   </td>
@@ -255,7 +256,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    {this.passwordInputValid ?
+                    {this.state.passwordInputValid ?
                       <input type="password" className="pt-input" ref={(ref) => this.bindDnPasswordInput = ref}></input> :
                       <input type="password" className="pt-input pt-intent-danger" ref={(ref) => this.bindDnPasswordInput = ref}></input>}
                   </td>
@@ -263,7 +264,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                 <tr className="auth-row">
                   <td className="auth-left">CONFIRM PASSWORD</td>
                   <td className="auth-right">
-                    {this.passwordInputValid ?
+                    {this.state.passwordInputValid ?
                     <input type="password" className="pt-input" ref={(ref) => this.confirmPasswordInput = ref}></input> :
                     <input type="password" className="pt-input pt-intent-danger" ref={(ref) => this.confirmPasswordInput = ref}></input>}
                   </td>
@@ -281,7 +282,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    {this.userbaseFilterInputValid ?
+                    {this.state.userbaseFilterInputValid ?
                     <input type="text" className="pt-input" ref={(ref) => this.userbaseFilterInput = ref}></input> :
                     <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.userbaseFilterInput = ref}></input> }
                   </td>
@@ -291,7 +292,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    {this.usernameAttributeInputValid ?
+                    {this.state.usernameAttributeInputValid ?
                     <input type="text" className="pt-input" ref={(ref) => this.usernameAttributeInput = ref}></input> :
                     <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.usernameAttributeInput = ref}></input> }
                   </td>
@@ -302,7 +303,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   </Tooltip></td>
                   <td className="auth-right">
 
-                    {this.realNameAttributeInputValid ?
+                    {this.state.realNameAttributeInputValid ?
                     <input type="text" className="pt-input" ref={(ref) => this.realNameAttributeInput = ref} defaultValue="cn"></input> :
                     <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.realNameAttributeInput = ref} defaultValue="cn"></input>}
                   </td>
