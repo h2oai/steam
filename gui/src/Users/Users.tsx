@@ -112,6 +112,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     let newState = _.cloneDeep(this.state);
     newState.tabs.roles.isSelected = false;
     newState.tabs.users.isSelected = true;
+    newState.tabs.authentication.isSelected = false;
     newState.isSelected = "users";
     this.setState(newState);
     this.props.enterNewUser();
@@ -121,6 +122,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     let newState = _.cloneDeep(this.state);
     newState.tabs.roles.isSelected = true;
     newState.tabs.users.isSelected = false;
+    newState.tabs.authentication.isSelected = false;
     newState.isSelected = "roles";
     this.setState(newState);
     this.props.enterNewRole();
