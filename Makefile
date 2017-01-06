@@ -94,7 +94,7 @@ pretest: lint vet fmtcheck
 test:
 	cd tests && ./goh2orunner.sh
 
-reset: db
+reset:
 	rm -rf var/master/model
 	rm -rf var/master/project
 
@@ -136,5 +136,5 @@ darwin: gui
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: ssb db launcher linux
+release: ssb launcher linux
 
