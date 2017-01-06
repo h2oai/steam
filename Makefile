@@ -59,9 +59,7 @@ ssb:
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
 
 db:
-	sqlite3 steam.db < $(SCRIPTS)/database/create-schema.sql
-	mkdir -p $(DB)
-	mv steam.db $(DB)
+	rm var/master/db/steam.db
 
 launcher:
 	cd $(SLA) && go build
