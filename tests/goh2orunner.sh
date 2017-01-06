@@ -23,7 +23,7 @@ SSBPID=$!
 echo "Started scoring service builder with pid ${SSBPID}"
 
 # Run GO tests here
-go test ../master/web --working-directory="../../" --cluster-address="${ADDRESS}" --compilation-service-address=":8181" -v -coverprofile=masterweb.cov
+go test ../master/web -h2o-address="${ADDRESS}" -compilation-service-address=":8181" -v -coverprofile=masterweb.cov
 t1=$?
 
 kill $H2OPID

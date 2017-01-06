@@ -1,47 +1,48 @@
 package haproxy
 
 import (
-	"github.com/h2oai/steam/master/data"
-	"os/exec"
-	"crypto/md5"
-	"encoding/hex"
-	"encoding/base64"
-	"syscall"
 	"context"
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/hex"
+	"os/exec"
+	"syscall"
+
+	"github.com/h2oai/steam/master/data"
 
 	"github.com/pkg/errors"
 
-	"os"
 	"io/ioutil"
+	"os"
 )
 
 func Reload(clusters []data.Cluster, uid, gid uint32) error {
 	config :=
 		"global\n" +
-		"    daemon\n\n" +
-		"defaults\n" +
-		"    mode http\n" +
-		"    timeout connect 5000ms\n" +
-		"    timeout client  50000ms\n" +
-		"    timeout server  50000ms\n\n" +
-		"frontend h2o-clusters\n" +
-		"    bind *:9999\n"
+			"    daemon\n\n" +
+			"defaults\n" +
+			"    mode http\n" +
+			"    timeout connect 5000ms\n" +
+			"    timeout client  50000ms\n" +
+			"    timeout server  50000ms\n\n" +
+			"frontend h2o-clusters\n" +
+			"    bind *:9999\n"
 
 	for _, c := range clusters {
-		if c.ContextPath != "/" {
+		if c.ContextPath.String != "/" {
 			config +=
-				"    acl cluster_" + c.Name + " path_beg " + c.ContextPath + "\n" +
-				"    use_backend " + c.Name + " if " + "cluster_" + c.Name + "\n\n"
+				"    acl cluster_" + c.Name + " path_beg " + c.ContextPath.String + "\n" +
+					"    use_backend " + c.Name + " if " + "cluster_" + c.Name + "\n\n"
 		}
 	}
 
 	for _, c := range clusters {
-		if c.ContextPath != "/" {
+		if c.ContextPath.String != "/" {
 			config += "backend " + c.Name + "\n"
-			if c.Token != "" {
+			if c.Token.String != "" {
 				config += "    http-request set-header Authorization Basic\\ %[req.cook(" + c.Name + ")]\n"
 			}
-			config += "    server " + c.Name + " " + c.Address + "\n\n"
+			config += "    server " + c.Name + " " + c.Address.String + "\n\n"
 		}
 	}
 
@@ -82,12 +83,11 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 func GenRealmFile(username, passwd string) (string, error) {
 	entry := username + ": MD5:" + GetMD5Hash(passwd)
 	token := base64.StdEncoding.EncodeToString([]byte(username + ":" + passwd))
-	if err := ioutil.WriteFile(token + "_realm.properties", []byte(entry), 0644); err != nil {
+	if err := ioutil.WriteFile(token+"_realm.properties", []byte(entry), 0644); err != nil {
 		return "", err
 	}
 	return token, nil
 }
-
 
 func GetMD5Hash(text string) string {
 	hasher := md5.New()

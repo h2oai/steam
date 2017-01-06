@@ -19,35 +19,37 @@ package data
 
 import (
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 // --- Datastore-backed Principal Impl ---
 
 type Principal struct {
 	ds          *Datastore
-	identity    *IdentityAndPassword
+	Identity    *Identity
 	permissions map[int64]bool
 	isSuperuser bool
 }
 
 func (pz *Principal) Id() int64 {
-	return pz.identity.Id
+	return pz.Identity.Id
 }
 
 func (pz *Principal) WorkgroupId() int64 {
-	return pz.identity.WorkgroupId
+	return pz.Identity.WorkgroupId.Int64
 }
 
 func (pz *Principal) Name() string {
-	return pz.identity.Name
+	return pz.Identity.Name
 }
 
 func (pz *Principal) Password() string {
-	return pz.identity.Password
+	return pz.Identity.Password.String
 }
 
 func (pz *Principal) IsActive() bool {
-	return pz.identity.IsActive
+	return pz.Identity.IsActive
 }
 
 func (pz *Principal) IsSuperuser() bool {
@@ -66,7 +68,7 @@ func (pz *Principal) CheckPermission(code int64) error {
 	if pz.HasPermission(code) {
 		return nil
 	}
-	return fmt.Errorf("Identity %s does not have permission '%s' to perform this operation", pz.Name(), pz.ds.permissionMap[code].Description)
+	return fmt.Errorf("identity %s does not have permission '%s' to perform this operation", pz.Name(), pz.ds.PermissionMap[code])
 }
 
 // TODO use bitwise ops to simplify this
@@ -79,9 +81,22 @@ func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivileg
 	canEdit := false
 	canView := false
 
-	privileges, err := pz.ds.readPrivileges(pz.identity.Id, entityTypeId, entityId)
+	tx, err := pz.ds.db.Begin()
 	if err != nil {
-		return false, err
+		return false, errors.Wrap(err, "beginning transaction")
+	}
+
+	var privileges []Privilege
+	if err := tx.Wrap(func() error {
+		var err error
+		privileges, err = readPrivileges(tx,
+			ById(pz.Identity.Id),
+			ByEntityTypeId(entityTypeId),
+			ByEntityId(entityId),
+		)
+		return errors.Wrap(err, "reading privileges from database")
+	}); err != nil {
+		return false, errors.Wrap(err, "committing transaction")
 	}
 
 	if len(privileges) == 0 {
@@ -89,15 +104,15 @@ func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivileg
 	}
 
 	for _, p := range privileges {
-		switch p {
+		switch p.Type {
 		case Owns:
 			owns = true
 			canEdit = true
 			canView = true
-		case CanEdit:
+		case Edit:
 			canEdit = true
 			canView = true
-		case CanView:
+		case View:
 			canView = true
 		}
 
@@ -106,11 +121,11 @@ func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivileg
 			if owns {
 				return true, nil
 			}
-		case CanEdit:
+		case Edit:
 			if owns || canEdit {
 				return true, nil
 			}
-		case CanView:
+		case View:
 			if owns || canEdit || canView {
 				return true, nil
 			}
@@ -125,7 +140,7 @@ func (pz *Principal) checkPrivilege(entityTypeId, entityId int64, expectedPrivil
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("Identity %s does not have privilege '%s' on the entity %s:%d", pz.Name(), expectedPrivilege, pz.ds.entityTypeMap[entityTypeId].Name, entityId)
+		return fmt.Errorf("identity %s does not have privilege '%s' on the entity %s:%d", pz.Name(), expectedPrivilege, pz.ds.EntityTypeMap[entityTypeId], entityId)
 	}
 	return nil
 }
@@ -135,11 +150,11 @@ func (pz *Principal) Owns(entityTypeId, entityId int64) (bool, error) {
 }
 
 func (pz *Principal) CanEdit(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityTypeId, entityId, CanEdit)
+	return pz.hasPrivilege(entityTypeId, entityId, Edit)
 }
 
 func (pz *Principal) CanView(entityTypeId, entityId int64) (bool, error) {
-	return pz.hasPrivilege(entityTypeId, entityId, CanView)
+	return pz.hasPrivilege(entityTypeId, entityId, View)
 }
 
 func (pz *Principal) CheckOwns(entityTypeId, entityId int64) error {
@@ -147,11 +162,11 @@ func (pz *Principal) CheckOwns(entityTypeId, entityId int64) error {
 }
 
 func (pz *Principal) CheckEdit(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityTypeId, entityId, CanEdit)
+	return pz.checkPrivilege(entityTypeId, entityId, Edit)
 }
 
 func (pz *Principal) CheckView(entityTypeId, entityId int64) error {
-	return pz.checkPrivilege(entityTypeId, entityId, CanView)
+	return pz.checkPrivilege(entityTypeId, entityId, View)
 }
 
 func (pz *Principal) String() string {

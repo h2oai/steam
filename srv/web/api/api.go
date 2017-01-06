@@ -25,13 +25,15 @@ type Config struct {
 }
 
 type Cluster struct {
-	Id        int64
-	Name      string
-	TypeId    int64
-	DetailId  int64
-	Address   string
-	State     string
-	CreatedAt int64
+	Id          int64
+	Name        string
+	ContextPath string
+	TypeId      int64
+	DetailId    int64
+	Address     string
+	Token       string
+	State       string
+	CreatedAt   int64
 }
 
 type YarnCluster struct {
@@ -442,8 +444,8 @@ type GetClusterOnYarn struct {
 	Cluster   YarnCluster
 }
 type GetClusters struct {
-	Offset   int64
-	Limit    int64
+	Offset   uint
+	Limit    uint
 	_        int
 	Clusters []Cluster
 }
@@ -474,8 +476,8 @@ type CreateProject struct {
 	ProjectId     int64
 }
 type GetProjects struct {
-	Offset   int64
-	Limit    int64
+	Offset   uint
+	Limit    uint
 	_        int
 	Projects []Project
 }
@@ -497,8 +499,8 @@ type CreateDatasource struct {
 }
 type GetDatasources struct {
 	ProjectId   int64
-	Offset      int64
-	Limit       int64
+	Offset      uint
+	Limit       uint
 	_           int
 	Datasources []Datasource
 }
@@ -527,8 +529,8 @@ type CreateDataset struct {
 }
 type GetDatasets struct {
 	DatasourceId int64
-	Offset       int64
-	Limit        int64
+	Offset       uint
+	Limit        uint
 	_            int
 	Datasets     []Dataset
 }
@@ -580,8 +582,8 @@ type GetModel struct {
 }
 type GetModels struct {
 	ProjectId int64
-	Offset    int64
-	Limit     int64
+	Offset    uint
+	Limit     uint
 	_         int
 	Models    []Model
 }
@@ -605,8 +607,8 @@ type FindModelsBinomial struct {
 	NamePart  string
 	SortBy    string
 	Ascending bool
-	Offset    int64
-	Limit     int64
+	Offset    uint
+	Limit     uint
 	_         int
 	Models    []BinomialModel
 }
@@ -624,8 +626,8 @@ type FindModelsMultinomial struct {
 	NamePart  string
 	SortBy    string
 	Ascending bool
-	Offset    int64
-	Limit     int64
+	Offset    uint
+	Limit     uint
 	_         int
 	Models    []MultinomialModel
 }
@@ -643,8 +645,8 @@ type FindModelsRegression struct {
 	NamePart  string
 	SortBy    string
 	Ascending bool
-	Offset    int64
-	Limit     int64
+	Offset    uint
+	Limit     uint
 	_         int
 	Models    []RegressionModel
 }
@@ -721,22 +723,22 @@ type GetService struct {
 	Service   ScoringService
 }
 type GetServices struct {
-	Offset   int64
-	Limit    int64
+	Offset   uint
+	Limit    uint
 	_        int
 	Services []ScoringService
 }
 type GetServicesForProject struct {
 	ProjectId int64
-	Offset    int64
-	Limit     int64
+	Offset    uint
+	Limit     uint
 	_         int
 	Services  []ScoringService
 }
 type GetServicesForModel struct {
 	ModelId  int64
-	Offset   int64
-	Limit    int64
+	Offset   uint
+	Limit    uint
 	_        int
 	Services []ScoringService
 }
@@ -784,8 +786,8 @@ type CreateRole struct {
 	RoleId      int64 `help:"Integer ID of the role in Steam."`
 }
 type GetRoles struct {
-	Offset int64 `help:"An offset to start the search on."`
-	Limit  int64 `help:"The maximum returned objects."`
+	Offset uint `help:"An offset uint start the search on."`
+	Limit  uint `help:"The maximum uint objects."`
 	_      int
 	Roles  []Role `help:"A list of Steam roles."`
 }
@@ -831,8 +833,8 @@ type CreateWorkgroup struct {
 	WorkgroupId int64 `help:"Integer ID of the workgroup in Steam."`
 }
 type GetWorkgroups struct {
-	Offset     int64 `help:"An offset to start the search on."`
-	Limit      int64 `help:"The maximum returned objects."`
+	Offset     uint `help:"An offset uint start the search on."`
+	Limit      uint `help:"The maximum uint objects."`
 	_          int
 	Workgroups []Workgroup `help:"A list of workgroups in Steam."`
 }
@@ -866,8 +868,8 @@ type CreateIdentity struct {
 	IdentityId int64 `help:"Integer ID of the identity in Steam."`
 }
 type GetIdentities struct {
-	Offset     int64 `help:"An offset to start the search on."`
-	Limit      int64 `help:"The maximum returned objects."`
+	Offset     uint `help:"An offset uint start the search on."`
+	Limit      uint `help:"The maximum uint objects."`
 	_          int
 	Identities []Identity `help:"A list of identities in Steam."`
 }
@@ -944,8 +946,8 @@ type UnshareEntity struct {
 type GetHistory struct {
 	EntityTypeId int64 `help:"Integer ID for the type of entity."`
 	EntityId     int64 `help:"Integer ID for an entity in Steam."`
-	Offset       int64 `help:"An offset to start the search on."`
-	Limit        int64 `help:"The maximum returned objects."`
+	Offset       uint  `help:"An offset uint start the search on."`
+	Limit        uint  `help:"The maximum uint objects."`
 	_            int
 	History      []EntityHistory `help:"A list of actions performed on the entity."`
 }
