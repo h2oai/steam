@@ -30,7 +30,6 @@ interface DispatchProps {
 
 export class UserAuthentication extends React.Component<Props & DispatchProps, any> {
 
-  encryptInput: HTMLInputElement;
   dbSelectInput: HTMLSelectElement;
   hostInput: HTMLInputElement;
   portInput: HTMLInputElement;
@@ -169,12 +168,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     return (
       <div className="user-authentication">
         <div className="space-20">User DB Connection Settings</div>
-
-        <label className="pt-control pt-switch .modifier">
-          <input type="checkbox" defaultChecked={true} ref={(ref) => this.encryptInput = ref} />
-          <span className="pt-control-indicator"></span>
-            Encrypt
-        </label>
 
         <table className="space-20">
           <tbody>
