@@ -79,6 +79,9 @@
       margin-right: $xsmall / 2;
     }
   }
+  .delete-model {
+    cursor: pointer;
+  }
   .filter {
     width: 30%;
     margin-bottom: $xsmall;
