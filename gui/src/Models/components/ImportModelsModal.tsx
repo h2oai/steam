@@ -89,6 +89,22 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
   }
 
   render() {
+    let filtered;
+    if (this.props.models) {
+      filtered = this.props.models.filter((model) => {
+        return model.model_category === this.props.project.model_category;
+      }).map((model, i) => {
+        return (
+          <Row key={i}>
+            <Cell>{model.name}</Cell>
+            <Cell>{model.dataset_name}</Cell>
+            <Cell>{model.response_column_name}</Cell>
+            <Cell><input type="checkbox" value={model.model_key}/></Cell>
+          </Row>
+        );
+      });
+    }
+
     return (
       <DefaultModal className="import-modal" open={this.props.open}>
         <PageHeader>IMPORT MODELS</PageHeader>
@@ -127,18 +143,7 @@ export class ImportModelsModal extends React.Component<Props & DispatchProps, an
                     <Cell>RESPONSE COLUMN</Cell>
                     <Cell/>
                   </Row>
-                  {this.props.models.filter((model) => {
-                    return model.model_category === this.props.project.model_category;
-                  }).map((model, i) => {
-                    return (
-                      <Row key={i}>
-                        <Cell>{model.name}</Cell>
-                        <Cell>{model.dataset_name}</Cell>
-                        <Cell>{model.response_column_name}</Cell>
-                        <Cell><input type="checkbox" value={model.model_key}/></Cell>
-                      </Row>
-                    );
-                  })}
+                  { filtered ? filtered : null }
                 </Table>
               </Cell>
             </Row>
