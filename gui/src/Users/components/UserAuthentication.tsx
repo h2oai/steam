@@ -21,7 +21,7 @@ import '../styles/users.scss';
 import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
 import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
-import {setLdap, LdapConfig} from "../../Proxy/Proxy";
+import {setLdapConfig, LdapConfig} from "../../Proxy/Proxy";
 
 interface Props {
 }
