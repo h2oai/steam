@@ -128,27 +128,35 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     e.preventDefault();
     this.validateAll();
 
-    console.log(this);
-    let ldapConfig: LdapConfig = {
-      host: this.hostInput.value,
-      port: parseInt(this.portInput.value, 10),
-      ldaps: true,
-      bind_dn: this.bindDnInput.value,
-      bind_password: this.bindDnPasswordInput.value,
-      user_base_dn: this.userbaseDnInput.value,
-      user_base_filter: this.userbaseFilterInput.value,
-      user_rn_attribute: this.usernameRNInput.value,
-      force_bind: true
-    };
-    let encrypt = true;
+    if (
+      this.state.hostInputValid &&
+      this.state.portInputValid &&
+      this.state.connectionOrderInputValid &&
+      this.state.passwordInputValid &&
+      this.state.userbaseFilterInputValid &&
+      this.state.usernameRNInputValid &&
+      this.state.realNameAttributeInputValid
+    ) {
+      let ldapConfig: LdapConfig = {
+        host: this.hostInput.value,
+        port: parseInt(this.portInput.value, 10),
+        ldaps: true,
+        bind_dn: this.bindDnInput.value,
+        bind_password: this.bindDnPasswordInput.value,
+        user_base_dn: this.userbaseDnInput.value,
+        user_base_filter: this.userbaseFilterInput.value,
+        user_rn_attribute: this.usernameRNInput.value,
+        force_bind: true
+      };
 
-    setLdap(ldapConfig, encrypt, (error: Error) => {
-      if (error) {
-        console.log("ERROR", error);
-      } else {
-        console.log("success");
-      }
-    });
+      setLdapConfig(ldapConfig, (error: Error) => {
+        if (error) {
+          console.log("ERROR", error);
+        } else {
+          console.log("success");
+        }
+      });
+    }
   };
   onDBChanged = (e) => {
     if (this.dbSelectInput.selectedIndex === 0) { //LDAP
