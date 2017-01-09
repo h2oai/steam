@@ -40,7 +40,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   confirmPasswordInput: HTMLInputElement;
   userbaseDnInput: HTMLInputElement;
   userbaseFilterInput: HTMLInputElement;
-  usernameAttributeInput: HTMLInputElement;
+  usernameRNInput: HTMLInputElement;
   realNameAttributeInput: HTMLInputElement;
 
   constructor(params) {
@@ -53,7 +53,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       connectionOrderInputValid: true,
       passwordInputValid: true,
       userbaseFilterInputValid: true,
-      usernameAttributeInputValid: true,
+      usernameRNInputValid: true,
       realNameAttributeInputValid: true
     };
   }
@@ -85,10 +85,10 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       this.setState({ userbaseFilterInputValid: false});
     }
 
-    if (this.usernameAttributeInput.value.length > 0) {
-      this.setState({ usernameAttributeInputValid: true });
+    if (this.usernameRNInput.value.length > 0) {
+      this.setState({ usernameRNInputValid: true });
     } else {
-      this.setState({ usernameAttributeInputValid: false });
+      this.setState({ usernameRNInputValid: false });
     }
 
     if (this.realNameAttributeInput.value.length > 0) {
@@ -129,7 +129,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     this.validateAll();
 
     console.log(this);
-    /*let ldapConfig: LdapConfig = {
+    let ldapConfig: LdapConfig = {
       host: this.hostInput.value,
       port: parseInt(this.portInput.value, 10),
       ldaps: true,
@@ -137,7 +137,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       bind_password: this.bindDnPasswordInput.value,
       user_base_dn: this.userbaseDnInput.value,
       user_base_filter: this.userbaseFilterInput.value,
-      user_name_attribute: this.usernameAttributeInput.value,
+      user_rn_attribute: this.usernameRNInput.value,
       force_bind: true
     };
     let encrypt = true;
@@ -148,7 +148,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       } else {
         console.log("success");
       }
-    });*/
+    });
   };
   onDBChanged = (e) => {
     if (this.dbSelectInput.selectedIndex === 0) { //LDAP
@@ -285,9 +285,9 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    {this.state.usernameAttributeInputValid ?
-                    <input type="text" className="pt-input" ref={(ref) => this.usernameAttributeInput = ref}></input> :
-                    <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.usernameAttributeInput = ref}></input> }
+                    {this.state.usernameRNInputValid ?
+                    <input type="text" className="pt-input" ref={(ref) => this.usernameRNInput = ref}></input> :
+                    <input type="text" className="pt-input pt-intent-danger" ref={(ref) => this.usernameRNInput = ref}></input> }
                   </td>
                 </tr>
                 <tr className="auth-row">
