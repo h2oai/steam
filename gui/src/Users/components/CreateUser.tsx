@@ -215,7 +215,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               <div>
                 {this.props.roles.map((role: Role, index, array) => {
                     return <div key={index}>
-                        <input type="checkbox" ref={(input) => this.registerRoleInput(input, role)} /> {role.description}
+                        <input type="checkbox" ref={(input) => this.registerRoleInput(input, role)} /> {role.name}
                       </div>;
                   })
                 }
