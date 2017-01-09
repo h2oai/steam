@@ -583,6 +583,10 @@ func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir, cont
 	}
 }
 
+func WithValue(value string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["value"] = value; return }
+}
+
 // --------- --------- ---------
 // --------- Principal ---------
 // --------- --------- ---------

@@ -17,14 +17,14 @@
 package ldap
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
+	"strings"
 	"time"
 
-	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/master/data"
 
-	"github.com/BurntSushi/toml"
 	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
 )
@@ -32,7 +32,7 @@ import (
 type Ldap struct {
 	Address  string
 	BindDN   string
-	BindPass string `toml:"bindPassword"`
+	BindPass string
 
 	UserBaseDn      string
 	UserBaseFilter  string
@@ -98,38 +98,36 @@ func NewLdap(
 	}
 }
 
-func FromConfig(workingDir string) (*Ldap, error) {
-	A := struct {
-		Host            string
-		Port            int
-		BindDn          string
-		BindPassword    string
-		UserBaseDn      string
-		UserRNAttribute string
-		UserBaseFilter  string
-
-		IsTLS     bool `toml:"Ldaps"`
-		ForceBind bool
-		IdleTime  time.Duration
-		MaxTime   time.Duration
-	}{}
-
-	if _, err := os.Stat(fs.GetDBPath(workingDir, "ldap.conf")); os.IsNotExist(err) {
-		return nil, errors.New("no LDAP config file provided. Please set up LDAP settings in local client login mode")
-	}
-
-	f, err := filepath.Abs(fs.GetDBPath(workingDir, "ldap.conf"))
+func FromConfig(ds *data.Datastore) (*Ldap, error) {
+	config, exists, err := ds.ReadSecurity(data.ByKey("ldap"))
 	if err != nil {
-		return nil, errors.Wrap(err, "getting absolute path")
+		return nil, errors.Wrap(err, "reading security config from database")
+	} else if !exists {
+		return nil, errors.New("no valid LDAP configurations. Please set LDAP configurations prior to starting steam with LDAP")
 	}
-	if _, err := toml.DecodeFile(f, &A); err != nil {
-		return nil, errors.Wrap(err, "decoding config file")
+
+	aux := struct {
+		Bind string
+		Ldap
+	}{}
+	if err := json.Unmarshal([]byte(config.Value), &aux); err != nil {
+		return nil, errors.Wrap(err, "deserializing config")
 	}
+
+	b, err := base64.StdEncoding.DecodeString(aux.Bind)
+	if err != nil {
+		return nil, errors.Wrap(err, "decoding bind")
+	}
+
+	decrypt := strings.Split(string(b), ":")
+	aux.Ldap.BindDN, aux.Ldap.BindPass = decrypt[0], decrypt[1]
+
+	a := aux.Ldap
 
 	return NewLdap(
-		fmt.Sprintf("%s:%d", A.Host, A.Port),
-		A.BindDn, A.BindPassword,
-		A.UserBaseDn, A.UserRNAttribute, A.UserBaseFilter,
+		a.Address,
+		a.BindDN, a.BindPass,
+		a.UserBaseDn, a.UserRNAttribute, a.UserBaseFilter,
 
-		A.ForceBind, time.Minute*A.IdleTime, 60*A.MaxTime), nil
+		a.ForceBind, time.Minute*1, 60*2*time.Minute), nil
 }

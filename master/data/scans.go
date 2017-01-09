@@ -782,6 +782,38 @@ func ScanStates(rs *sql.Rows) ([]state, error) {
 	return structs, nil
 }
 
+func ScanSecurity(r *sql.Row) (Security, error) {
+	var s Security
+	if err := r.Scan(
+		&s.Id,
+		&s.Key,
+		&s.Value,
+	); err != nil {
+		return Security{}, err
+	}
+	return s, nil
+}
+
+func ScanSecuritys(rs *sql.Rows) ([]Security, error) {
+	structs := make([]Security, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Security
+		if err = rs.Scan(
+			&s.Id,
+			&s.Key,
+			&s.Value,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanService(r *sql.Row) (Service, error) {
 	var s Service
 	if err := r.Scan(

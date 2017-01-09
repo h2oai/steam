@@ -329,8 +329,11 @@ export interface Service {
   // Get Steam start up configurations
   getConfig: (go: (error: Error, config: Config) => void) => void
   
-  // Something
-  setLdap: (config: LdapConfig, encrypt: boolean, go: (error: Error) => void) => void
+  // Set LDAP security configuration
+  setLdapConfig: (config: LdapConfig, go: (error: Error) => void) => void
+  
+  // Get LDAP security configurations
+  getLdapConfig: (go: (error: Error, config: LdapConfig, exists: boolean) => void) => void
   
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
@@ -694,15 +697,25 @@ interface GetConfigOut {
   
 }
 
-interface SetLdapIn {
+interface SetLdapConfigIn {
   
   config: LdapConfig
   
-  encrypt: boolean
+}
+
+interface SetLdapConfigOut {
   
 }
 
-interface SetLdapOut {
+interface GetLdapConfigIn {
+  
+}
+
+interface GetLdapConfigOut {
+  
+  config: LdapConfig
+  
+  exists: boolean
   
 }
 
@@ -2209,14 +2222,26 @@ export function getConfig(go: (error: Error, config: Config) => void): void {
   });
 }
 
-export function setLdap(config: LdapConfig, encrypt: boolean, go: (error: Error) => void): void {
-  const req: SetLdapIn = { config: config, encrypt: encrypt };
-  Proxy.Call("SetLdap", req, function(error, data) {
+export function setLdapConfig(config: LdapConfig, go: (error: Error) => void): void {
+  const req: SetLdapConfigIn = { config: config };
+  Proxy.Call("SetLdapConfig", req, function(error, data) {
     if (error) {
       return go(error);
     } else {
-      const d: SetLdapOut = <SetLdapOut> data;
+      const d: SetLdapConfigOut = <SetLdapConfigOut> data;
       return go(null);
+    }
+  });
+}
+
+export function getLdapConfig(go: (error: Error, config: LdapConfig, exists: boolean) => void): void {
+  const req: GetLdapConfigIn = {  };
+  Proxy.Call("GetLdapConfig", req, function(error, data) {
+    if (error) {
+      return go(error, null, null);
+    } else {
+      const d: GetLdapConfigOut = <GetLdapConfigOut> data;
+      return go(null, d.config, d.exists);
     }
   });
 }

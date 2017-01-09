@@ -1299,6 +1299,7 @@ Commands:
     $ steam get job ...
     $ steam get jobs ...
     $ steam get labels ...
+    $ steam get ldap ...
     $ steam get model ...
     $ steam get models ...
     $ steam get package ...
@@ -1335,6 +1336,7 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getJob(c))
 	cmd.AddCommand(getJobs(c))
 	cmd.AddCommand(getLabels(c))
+	cmd.AddCommand(getLdap(c))
 	cmd.AddCommand(getModel(c))
 	cmd.AddCommand(getModels(c))
 	cmd.AddCommand(getPackage(c))
@@ -2386,6 +2388,48 @@ func getLabels(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forProject, "for-project", forProject, "List labels for a project, with corresponding models, if any")
 
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+	return cmd
+}
+
+var getLdapHelp = `
+ldap [?]
+Get Ldap
+Examples:
+
+    Get LDAP security configurations
+    $ steam get ldap --config
+
+`
+
+func getLdap(c *context) *cobra.Command {
+	var config bool // Switch for GetLdapConfig()
+
+	cmd := newCmd(c, getLdapHelp, func(c *context, args []string) {
+		if config { // GetLdapConfig
+
+			// Get LDAP security configurations
+			config, exists, err := c.remote.GetLdapConfig()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := []string{
+				fmt.Sprintf("Host:\t%v\t", config.Host),                       // No description available
+				fmt.Sprintf("Port:\t%v\t", config.Port),                       // No description available
+				fmt.Sprintf("Ldaps:\t%v\t", config.Ldaps),                     // No description available
+				fmt.Sprintf("BindDn:\t%v\t", config.BindDn),                   // No description available
+				fmt.Sprintf("BindPassword:\t%v\t", config.BindPassword),       // No description available
+				fmt.Sprintf("UserBaseDn:\t%v\t", config.UserBaseDn),           // No description available
+				fmt.Sprintf("UserBaseFilter:\t%v\t", config.UserBaseFilter),   // No description available
+				fmt.Sprintf("UserRnAttribute:\t%v\t", config.UserRnAttribute), // No description available
+				fmt.Sprintf("ForceBind:\t%v\t", config.ForceBind),             // No description available
+			}
+			c.printt("Attribute\tValue\t", lines)
+			fmt.Printf("Exists:\t%v\n", exists)
+			return
+		}
+	})
+	cmd.Flags().BoolVar(&config, "config", config, "Get LDAP security configurations")
+
 	return cmd
 }
 

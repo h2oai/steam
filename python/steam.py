@@ -114,22 +114,35 @@ class RPCClient:
 		response = self.connection.call("GetConfig", request)
 		return response['config']
 	
-	def set_ldap(self, config, encrypt):
+	def set_ldap_config(self, config):
 		"""
-		Something
+		Set LDAP security configuration
 
 		Parameters:
 		config: No description available (LdapConfig)
-		encrypt: Set to encypt the file (bool)
 
 		Returns:None
 		"""
 		request = {
-			'config': config,
-			'encrypt': encrypt
+			'config': config
 		}
-		response = self.connection.call("SetLdap", request)
+		response = self.connection.call("SetLdapConfig", request)
 		return 
+	
+	def get_ldap_config(self):
+		"""
+		Get LDAP security configurations
+
+		Parameters:
+
+		Returns:
+		config: No description available (LdapConfig)
+		exists: No description available (bool)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetLdapConfig", request)
+		return response['config'], response['exists']
 	
 	def register_cluster(self, address):
 		"""
