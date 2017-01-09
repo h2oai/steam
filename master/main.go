@@ -158,9 +158,9 @@ func Run(version, buildDate string, opts Opts) {
 	case "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
 	case "basic-ldap":
-		conn, err := ldap.FromConfig(opts.WorkingDirectory)
+		conn, err := ldap.FromConfig(ds)
 		if err != nil {
-			log.Fatalln("Invalid configurations:", err)
+			log.Fatalln("Invalid configuration:", err)
 		}
 
 		authProvider = NewBasicLdapAuthProvider(webAddress, conn)

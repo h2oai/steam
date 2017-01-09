@@ -24,10 +24,11 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/h2oai/steam/master/az"
-	"github.com/rs/xid"
 	"log"
 	"net/http"
+
+	"github.com/h2oai/steam/master/az"
+	"github.com/rs/xid"
 )
 
 // --- Types ---
@@ -306,7 +307,8 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
-	SetLdap(pz az.Principal, config *LdapConfig, encrypt bool) error
+	SetLdapConfig(pz az.Principal, config *LdapConfig) error
+	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
@@ -437,12 +439,19 @@ type GetConfigOut struct {
 	Config *Config `json:"config"`
 }
 
-type SetLdapIn struct {
-	Config  *LdapConfig `json:"config"`
-	Encrypt bool        `json:"encrypt"`
+type SetLdapConfigIn struct {
+	Config *LdapConfig `json:"config"`
 }
 
-type SetLdapOut struct {
+type SetLdapConfigOut struct {
+}
+
+type GetLdapConfigIn struct {
+}
+
+type GetLdapConfigOut struct {
+	Config *LdapConfig `json:"config"`
+	Exists bool        `json:"exists"`
 }
 
 type RegisterClusterIn struct {
@@ -1436,14 +1445,24 @@ func (this *Remote) GetConfig() (*Config, error) {
 	return out.Config, nil
 }
 
-func (this *Remote) SetLdap(config *LdapConfig, encrypt bool) error {
-	in := SetLdapIn{config, encrypt}
-	var out SetLdapOut
-	err := this.Proc.Call("SetLdap", &in, &out)
+func (this *Remote) SetLdapConfig(config *LdapConfig) error {
+	in := SetLdapConfigIn{config}
+	var out SetLdapConfigOut
+	err := this.Proc.Call("SetLdapConfig", &in, &out)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (this *Remote) GetLdapConfig() (*LdapConfig, bool, error) {
+	in := GetLdapConfigIn{}
+	var out GetLdapConfigOut
+	err := this.Proc.Call("GetLdapConfig", &in, &out)
+	if err != nil {
+		return nil, false, err
+	}
+	return out.Config, out.Exists, nil
 }
 
 func (this *Remote) RegisterCluster(address string) (int64, error) {
@@ -2643,8 +2662,8 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 	return nil
 }
 
-func (this *Impl) SetLdap(r *http.Request, in *SetLdapIn, out *SetLdapOut) error {
-	const name = "SetLdap"
+func (this *Impl) SetLdapConfig(r *http.Request, in *SetLdapConfigIn, out *SetLdapConfigOut) error {
+	const name = "SetLdapConfig"
 
 	guid := xid.New().String()
 
@@ -2660,11 +2679,48 @@ func (this *Impl) SetLdap(r *http.Request, in *SetLdapIn, out *SetLdapOut) error
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	err := this.Service.SetLdap(pz, in.Config, in.Encrypt)
+	err := this.Service.SetLdapConfig(pz, in.Config)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetLdapConfig(r *http.Request, in *GetLdapConfigIn, out *GetLdapConfigOut) error {
+	const name = "GetLdapConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, val1, err := this.Service.GetLdapConfig(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Config = val0
+
+	out.Exists = val1
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

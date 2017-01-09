@@ -47,9 +47,14 @@ export function getConfig(): void {
   Proxy.Call("GetConfig", req, print);
 }
 
-export function setLdap(config: LdapConfig, encrypt: boolean): void {
-  const req: any = { config: config, encrypt: encrypt };
-  Proxy.Call("SetLdap", req, print);
+export function setLdapConfig(config: LdapConfig): void {
+  const req: any = { config: config };
+  Proxy.Call("SetLdapConfig", req, print);
+}
+
+export function getLdapConfig(): void {
+  const req: any = {  };
+  Proxy.Call("GetLdapConfig", req, print);
 }
 
 export function registerCluster(address: string): void {
