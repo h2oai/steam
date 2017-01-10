@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"os/exec"
-	"syscall"
 
 	"github.com/h2oai/steam/master/data"
 
@@ -66,8 +65,8 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "haproxy", args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+	//cmd.SysProcAttr = &syscall.SysProcAttr{}
+	//cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
