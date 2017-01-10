@@ -26,7 +26,7 @@
 // --- CLI Stub ---
 
 import * as Proxy from './xhr';
-import {LdapConfig} from './Proxy';
+import { LdapConfig } from './Proxy';
 
 function print(error: Error, data: any): void {
   if (error) {
@@ -35,7 +35,6 @@ function print(error: Error, data: any): void {
     console.log(data);
   }
 }
-
 
 export function pingServer(input: string): void {
   const req: any = { input: input };
