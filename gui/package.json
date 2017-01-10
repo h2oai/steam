@@ -38,7 +38,7 @@
     "vis-components": "^0.2.0"
   },
   "devDependencies": {
-    "webpack-fail-plugin": "^1.0.5",
+    "bourbon": "^4.2.7",
     "browser-sync": "^2.13.0",
     "browser-sync-webpack-plugin": "^1.0.3",
     "css-loader": "^0.23.1",
@@ -56,7 +56,8 @@
     "typescript": "^2.1.4",
     "typings": "^1.3.0",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.1",
+    "webpack-fail-plugin": "^1.0.5"
   },
   "scripts": {
     "postinstall": "typings prune && typings install",

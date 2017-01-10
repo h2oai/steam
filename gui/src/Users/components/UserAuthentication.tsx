@@ -22,6 +22,7 @@ import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
 import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 import {setLdapConfig, LdapConfig} from "../../Proxy/Proxy";
+import { FocusStyleManager } from "@blueprintjs/core";
 
 interface Props {
 }
@@ -116,6 +117,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   };
 
   componentWillMount() {
+    FocusStyleManager.onlyShowFocusOnTabs();
   }
 
   onShowLDAPConnectionSettingsClicked = () => {

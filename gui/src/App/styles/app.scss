@@ -1,6 +1,4 @@
 @import '../../variables.scss';
-@import "~@blueprintjs/core/dist/blueprint.css";
-@import "~@blueprintjs/core/dist/variables";
 
 html, body, .app-container, #app {
   height: 100%;
@@ -258,8 +256,6 @@ input[type="text"], textarea {
   margin-bottom: 7px;
 }
 
-@import '../../variables.scss';
-
 .tooltip-launcher {
   position: relative;
 }
@@ -315,4 +311,16 @@ input[type="text"], textarea {
 }
 .steam-tooltip-launcher {
   color: $h2o-orange-prime;
+}
+
+@import "~@blueprintjs/core/src/blueprint.scss";
+
+.pt-toast.pt-intent-danger {
+  color: black;
+}
+.pt-toast.pt-intent-primary {
+  color: black;
+}
+.pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
+  color: rgba(0, 0, 0, 0.7) !important;
 }
