@@ -114,6 +114,20 @@ class RPCClient:
 		response = self.connection.call("GetConfig", request)
 		return response['config']
 	
+	def check_superuser(self):
+		"""
+		Check if an identity has superuser privileges
+
+		Parameters:
+
+		Returns:
+		is_superuser: No description available (bool)
+		"""
+		request = {
+		}
+		response = self.connection.call("CheckSuperuser", request)
+		return response['is_superuser']
+	
 	def set_ldap_config(self, config):
 		"""
 		Set LDAP security configuration

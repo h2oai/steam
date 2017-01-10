@@ -329,6 +329,9 @@ export interface Service {
   // Get Steam start up configurations
   getConfig: (go: (error: Error, config: Config) => void) => void
   
+  // Check if an identity has superuser privileges
+  checkSuperuser: (go: (error: Error, isSuperuser: boolean) => void) => void
+  
   // Set LDAP security configuration
   setLdapConfig: (config: LdapConfig, go: (error: Error) => void) => void
   
@@ -694,6 +697,16 @@ interface GetConfigIn {
 interface GetConfigOut {
   
   config: Config
+  
+}
+
+interface CheckSuperuserIn {
+  
+}
+
+interface CheckSuperuserOut {
+  
+  is_superuser: boolean
   
 }
 
@@ -2218,6 +2231,18 @@ export function getConfig(go: (error: Error, config: Config) => void): void {
     } else {
       const d: GetConfigOut = <GetConfigOut> data;
       return go(null, d.config);
+    }
+  });
+}
+
+export function checkSuperuser(go: (error: Error, isSuperuser: boolean) => void): void {
+  const req: CheckSuperuserIn = {  };
+  Proxy.Call("CheckSuperuser", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: CheckSuperuserOut = <CheckSuperuserOut> data;
+      return go(null, d.is_superuser);
     }
   });
 }

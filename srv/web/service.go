@@ -307,6 +307,7 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
+	CheckSuperuser(pz az.Principal) (bool, error)
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
 	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
@@ -437,6 +438,13 @@ type GetConfigIn struct {
 
 type GetConfigOut struct {
 	Config *Config `json:"config"`
+}
+
+type CheckSuperuserIn struct {
+}
+
+type CheckSuperuserOut struct {
+	IsSuperuser bool `json:"is_superuser"`
 }
 
 type SetLdapConfigIn struct {
@@ -1443,6 +1451,16 @@ func (this *Remote) GetConfig() (*Config, error) {
 		return nil, err
 	}
 	return out.Config, nil
+}
+
+func (this *Remote) CheckSuperuser() (bool, error) {
+	in := CheckSuperuserIn{}
+	var out CheckSuperuserOut
+	err := this.Proc.Call("CheckSuperuser", &in, &out)
+	if err != nil {
+		return false, err
+	}
+	return out.IsSuperuser, nil
 }
 
 func (this *Remote) SetLdapConfig(config *LdapConfig) error {
@@ -2651,6 +2669,41 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 	}
 
 	out.Config = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) CheckSuperuser(r *http.Request, in *CheckSuperuserIn, out *CheckSuperuserOut) error {
+	const name = "CheckSuperuser"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.CheckSuperuser(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.IsSuperuser = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {
