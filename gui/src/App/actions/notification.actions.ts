@@ -18,10 +18,11 @@
 /**
  * Created by justin on 8/8/16.
  */
-
+import * as React from 'react';
 import { Intent } from '@blueprintjs/core';
 import { NotificationType } from '../components/Notification';
 import { toastManager } from '../components/ToastManager';
+
 
 export const OPEN_NOTIFICATION = 'OPEN_NOTIFICATION';
 export const CLOSE_NOTIFICATION = 'CLOSE_NOTIFICATION';
@@ -47,6 +48,16 @@ export function openNotification(notificationType: NotificationType, header: str
 
 function _openNotification(notificationType: NotificationType, header: string, detail, actions, state) {
   let index = state.notification.allNotifications.length;
+  let message = React.createElement(
+    'div',
+    null,
+    React.createElement('div', { className: 'notification-indicator' }),
+    React.createElement(
+      'div',
+      { className: 'notification-content' },
+      detail
+    )
+  );
   let intent;
   switch (notificationType) {
     case NotificationType.Confirm:
@@ -60,6 +71,7 @@ function _openNotification(notificationType: NotificationType, header: string, d
       break;
     case NotificationType.Warning:
       intent = Intent.WARNING;
+      break;
     default :
       console.log("ERROR: Unexpected notification type");
   }
@@ -68,10 +80,10 @@ function _openNotification(notificationType: NotificationType, header: string, d
     timeout = 0;
   }
 
-  console.log(intent);
   toastManager.show({
-    message: detail,
+    message,
     intent,
+    className: "steam-notification",
     timeout
   });
 

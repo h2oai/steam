@@ -18,5 +18,5 @@ import { Position, Toaster } from "@blueprintjs/core";
 
 export const toastManager = Toaster.create({
   className: "toast-manager",
-  position: Position.TOP_RIGHT,
+  position: Position.TOP
 });
