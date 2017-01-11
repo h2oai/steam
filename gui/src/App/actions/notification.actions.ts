@@ -61,31 +61,55 @@ function _openNotification(notificationType: NotificationType, header: string, d
   let intent;
   switch (notificationType) {
     case NotificationType.Confirm:
-      intent = Intent.PRIMARY;
+      intent = Intent.DANGER;
       break;
     case NotificationType.Error:
       intent = Intent.DANGER;
       break;
     case NotificationType.Info:
-      intent = Intent.SUCCESS;
+      intent = Intent.DANGER;
       break;
     case NotificationType.Warning:
-      intent = Intent.WARNING;
+      intent = Intent.DANGER;
       break;
     default :
       console.log("ERROR: Unexpected notification type");
   }
   let timeout = 5000;
-  if (intent === Intent.DANGER) {
+  if (notificationType === NotificationType.Confirm) {
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-confirm",
+      timeout
+    });
+  }
+  if (notificationType === NotificationType.Info) {
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-info",
+      timeout
+    });
+  }
+  if (notificationType === NotificationType.Warning) {
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-warning",
+      timeout
+    });
+  }
+  if (notificationType === NotificationType.Error) {
     timeout = 0;
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-error",
+      timeout
+    });
   }
 
-  toastManager.show({
-    message,
-    intent,
-    className: "steam-notification",
-    timeout
-  });
 
   return {
     type: OPEN_NOTIFICATION,

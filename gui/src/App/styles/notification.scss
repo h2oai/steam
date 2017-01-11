@@ -94,7 +94,19 @@
   border-bottom: 0px;
   border-right: 0px;
   border-style: solid;
-  border-color: red;
+}
+
+.pt-toast-message + .steam-notification-confirm {
+  border-color: #5fae08;
+}
+.pt-toast-message + .steam-notification-info {
+  border-color: #9b9b9b;
+}
+.pt-toast-message + .steam-notification-warning {
+  border-color: #f69d00;
+}
+.pt-toast-message + .steam-notification-error {
+  border-color: #fd7372;
 }
 /*.pt-button::before {
   color: black !important;

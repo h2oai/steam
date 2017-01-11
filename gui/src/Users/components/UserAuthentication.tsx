@@ -18,15 +18,23 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
+import { bindActionCreators } from 'redux';
 import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
 import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 import {setLdapConfig, LdapConfig} from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
+import {fetchLdapConfig, saveLdapConfig} from "../actions/users.actions";
+import {openNotification} from "../../App/actions/notification.actions";
+import {NotificationType} from "../../App/components/Notification";
 
 interface Props {
+  doesLdapExist: boolean,
+  ldapConfig: LdapConfig
 }
 interface DispatchProps {
+  fetchLdapConfig: Function,
+  saveLdapConfig: Function
 }
 
 export class UserAuthentication extends React.Component<Props & DispatchProps, any> {
@@ -118,6 +126,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
   componentWillMount() {
     FocusStyleManager.onlyShowFocusOnTabs();
+    this.props.fetchLdapConfig();
   }
 
   onShowLDAPConnectionSettingsClicked = () => {
@@ -150,14 +159,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         user_rn_attribute: this.usernameRNInput.value,
         force_bind: true
       };
-
-      setLdapConfig(ldapConfig, (error: Error) => {
-        if (error) {
-          console.log("ERROR", error);
-        } else {
-          console.log("success");
-        }
-      });
+      this.props.saveLdapConfig(ldapConfig);
     }
   };
   onDBChanged = (e) => {
@@ -177,9 +179,9 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
     return (
       <div className="user-authentication">
-        <div className="space-20">User DB Connection Settings</div>
 
-        <table className="space-20">
+        <p>&nbsp;</p>
+        {!this.props.doesLdapExist ? <table className="space-20">
           <tbody>
             <tr className="auth-row">
               <td className="auth-left">User DB Type</td>
@@ -191,7 +193,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
               </td>
             </tr>
           </tbody>
-        </table>
+        </table> : null }
 
         {this.state.showDBOptions ?
         <div>
@@ -326,13 +328,17 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state): any {
   return {
+    ldapConfig: state.users.ldapConfig,
+    doesLdapExist: state.users.ldapExists
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch): DispatchProps {
   return {
+    fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch),
+    saveLdapConfig: bindActionCreators(saveLdapConfig, dispatch)
   };
 }
 

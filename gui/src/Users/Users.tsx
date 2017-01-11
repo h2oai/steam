@@ -27,8 +27,8 @@ import CreateUser from "./components/CreateUser";
 import CreateRole from "./components/CreateRole";
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {enterNewUser, enterNewRole, exitNewRole, exitNewUser} from "./actions/users.actions";
-import {UserAuthentication} from "./components/UserAuthentication";
+import {enterNewUser, enterNewRole, exitNewRole, exitNewUser, fetchLdapConfig} from "./actions/users.actions";
+import UserAuthentication from "./components/UserAuthentication";
 
 
 interface Props {
@@ -42,6 +42,7 @@ interface DispatchProps {
   enterNewRole: Function
   exitNewUser: Function
   exitNewRole: Function
+  fetchLdapConfig: Function
 }
 export class Users extends React.Component<Props & DispatchProps, any> {
 
@@ -182,7 +183,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     enterNewUser: bindActionCreators(enterNewUser, dispatch),
     enterNewRole: bindActionCreators(enterNewRole, dispatch),
     exitNewUser: bindActionCreators(exitNewUser, dispatch),
-    exitNewRole: bindActionCreators(exitNewRole, dispatch)
+    exitNewRole: bindActionCreators(exitNewRole, dispatch),
+    fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch)
   };
 }
 
