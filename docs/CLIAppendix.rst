@@ -7,7 +7,7 @@ This document describes the CLI commands available in Steam. In addition to this
 
 ::
 
-    ./steam login <yarn_edge_node>:<port> --username=superuser --password=superuser
+    ./steam login <yarn_edge_node>:<port> --username=admin --password=admin012
 
 ----- 
 
@@ -999,7 +999,7 @@ the database.
     Id    NAME        IsActive  LastLogin     Created          
      2    bob         true      -62135596804  1473883790
      3    jim         false     -62135596746  1474323838
-     1    superuser   true      -62135596800  1476306094
+     1    admin   true      -62135596800  1476306094
 
 --------------
 
@@ -1255,7 +1255,7 @@ the database.
 
     ./steam get roles --limit=10
     Id    Name        Description                 Created
-    1     Superuser   Superuser                   1473874053
+    1     Admin   Admin                   1473874053
     2     datascience a default data science role 1473893347  
 
 --------------

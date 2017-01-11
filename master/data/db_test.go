@@ -74,8 +74,8 @@ func setupSqlite() (string, DBOpts, error) {
 	return dir, DBOpts{
 		Driver:    "sqlite3",
 		Path:      filepath.Join(dir, "sl.db"),
-		SuperName: SuperuserRN,
-		SuperPass: SuperuserRN,
+		AdminName: AdminRN,
+		AdminPass: AdminRN,
 	}, err
 }
 

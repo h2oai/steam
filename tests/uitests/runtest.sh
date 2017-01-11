@@ -13,7 +13,7 @@ then
 	num=$1
 fi
 
-./steam/steam login localhost:9000 --username superuser --password superuser
+./steam/steam login localhost:9000 --username admin --password admin012
 
 
 for dir in `ls -d *-test`; do

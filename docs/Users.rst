@@ -1,7 +1,7 @@
 Users
 =====
 
-The Users page includes a list of all users are have been added to the Steam database along with the user's role. From this page, Steam superusers can add, edit, and deactivate users and roles. 
+The Users page includes a list of all users are have been added to the Steam database along with the user's role. From this page, Steam admins can add, edit, and deactivate users and roles.
 
 .. figure:: images/users.png
    :alt: Users page
@@ -44,7 +44,7 @@ On the Roles tab, scroll down to the bottom of the page, and click the trashcan 
 Adding Users
 ------------
 
-Superusers can add users directly from within the UI. 
+Admins can add users directly from within the UI.
 
 **Note**: Users must be assigned to a role. Because of that, roles must be created before new users can be added. 
 
@@ -84,7 +84,7 @@ On the Users tab, click the **Deactivate User** link beside the user whose Steam
 Changing Permissions
 --------------------
 
-Superusers can add or remove permissions for each role directly on this page. Select the checkbox for the correspoding permission and role that you want to change, then click **Review Changes** at the bottom of the page. A popup displays, providing you with a summary of the changes.
+Admins can add or remove permissions for each role directly on this page. Select the checkbox for the correspoding permission and role that you want to change, then click **Review Changes** at the bottom of the page. A popup displays, providing you with a summary of the changes.
 
 .. figure:: images/update_permissions_confirm.png
    :alt: Confirm changes

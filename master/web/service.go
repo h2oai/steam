@@ -2239,8 +2239,8 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 }
 
 func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
-	if !pz.IsSuperuser() {
-		return errors.New("only superusers can edit LDAP settings")
+	if !pz.IsAdmin() {
+		return errors.New("only admins can edit LDAP settings")
 	}
 	if strings.TrimSpace(config.BindPassword) == "" {
 		return errors.New("bind password cannot be blank")
@@ -2264,8 +2264,8 @@ func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 }
 
 func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) {
-	if !pz.IsSuperuser() {
-		return nil, false, errors.New("only superusers can view LDAP settings")
+	if !pz.IsAdmin() {
+		return nil, false, errors.New("only admins can view LDAP settings")
 	}
 
 	security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap"))
@@ -2284,11 +2284,13 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	return config, exists, err
 }
 
+
 func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 	return ldap.FromConfig(config).Test()
 }
 
-func (s *Service) CheckSuperuser(pz az.Principal) (bool, error) { return pz.IsSuperuser(), nil }
+func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
+
 
 // --- ---------- ---
 // --- ---------- ---

@@ -212,14 +212,14 @@ Check entities
 Commands:
 
     $ steam check mojo ...
-    $ steam check superuser ...
+    $ steam check admin ...
 `
 
 func check(c *context) *cobra.Command {
 	cmd := newCmd(c, checkHelp, nil)
 
 	cmd.AddCommand(checkMojo(c))
-	cmd.AddCommand(checkSuperuser(c))
+	cmd.AddCommand(checkAdmin(c))
 	return cmd
 }
 
@@ -254,26 +254,26 @@ func checkMojo(c *context) *cobra.Command {
 	return cmd
 }
 
-var checkSuperuserHelp = `
-superuser [?]
-Check Superuser
+var checkAdminHelp = `
+admin [?]
+Check Admin
 Examples:
 
-    Check if an identity has superuser privileges
-    $ steam check superuser
+    Check if an identity has admin privileges
+    $ steam check admin
 
 `
 
-func checkSuperuser(c *context) *cobra.Command {
+func checkAdmin(c *context) *cobra.Command {
 
-	cmd := newCmd(c, checkSuperuserHelp, func(c *context, args []string) {
+	cmd := newCmd(c, checkAdminHelp, func(c *context, args []string) {
 
-		// Check if an identity has superuser privileges
-		isSuperuser, err := c.remote.CheckSuperuser()
+		// Check if an identity has admin privileges
+		isAdmin, err := c.remote.CheckAdmin()
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Printf("IsSuperuser:\t%v\n", isSuperuser)
+		fmt.Printf("IsAdmin:\t%v\n", isAdmin)
 		return
 	})
 

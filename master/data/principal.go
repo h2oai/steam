@@ -29,7 +29,7 @@ type Principal struct {
 	ds          *Datastore
 	Identity    *Identity
 	permissions map[int64]bool
-	isSuperuser bool
+	isAdmin bool
 }
 
 func (pz *Principal) Id() int64 {
@@ -52,12 +52,12 @@ func (pz *Principal) IsActive() bool {
 	return pz.Identity.IsActive
 }
 
-func (pz *Principal) IsSuperuser() bool {
-	return pz.isSuperuser
+func (pz *Principal) IsAdmin() bool {
+	return pz.isAdmin
 }
 
 func (pz *Principal) HasPermission(code int64) bool {
-	if pz.IsSuperuser() {
+	if pz.IsAdmin() {
 		return true
 	}
 	_, ok := pz.permissions[code]
@@ -73,7 +73,7 @@ func (pz *Principal) CheckPermission(code int64) error {
 
 // TODO use bitwise ops to simplify this
 func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivilege string) (bool, error) {
-	if pz.IsSuperuser() {
+	if pz.IsAdmin() {
 		return true, nil
 	}
 
