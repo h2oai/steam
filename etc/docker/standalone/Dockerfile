@@ -46,4 +46,4 @@ EXPOSE 8080
 EXPOSE 9000
 EXPOSE 9001
 
-CMD ./steam serve master --superuser-name docker --superuser-password superuser
+CMD ./steam serve master --admin-name docker --admin-password admin012

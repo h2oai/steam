@@ -39,10 +39,10 @@ func (ds *Datastore) Lookup(name string) (az.Principal, error) {
 		return nil, errors.Wrap(err, "reading roles")
 	}
 
-	isSuperuser := false
+	isAdmin := false
 	for _, role := range roles {
-		if role.Name == SuperuserRN {
-			isSuperuser = true
+		if role.Name == AdminRN {
+			isAdmin = true
 			break
 		}
 	}
@@ -59,5 +59,5 @@ func (ds *Datastore) Lookup(name string) (az.Principal, error) {
 		permissions[perm.Id] = true
 	}
 
-	return &Principal{ds, &identity, permissions, isSuperuser}, nil
+	return &Principal{ds, &identity, permissions, isAdmin}, nil
 }

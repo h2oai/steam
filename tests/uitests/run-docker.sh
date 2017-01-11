@@ -5,10 +5,10 @@ tar xvf steam-develop-linux-amd64.tar.gz
 mv steam-develop-linux-amd64 steam
 rm steam-develop-linux-amd64.tar.gz
 cd steam
-./steam serve master --compilation-service-address "localhost:55000" --superuser-name superuser --superuser-password superuser > /dev/null 2>&1 &
+./steam serve master --compilation-service-address "localhost:55000" --admin-name admin --admin-password admin > /dev/null 2>&1 &
 STEAM_PID=$!
 disown
-./steam login localhost:9000 --username=superuser --password=superuser
+./steam login localhost:9000 --username=admin --password=admin012
 cd ..
 
 curl -O http://download.h2o.ai/versions/h2o-3.10.0.7.zip

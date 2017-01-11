@@ -707,8 +707,8 @@ func ByPrivilege(pz az.Principal) QueryOpt {
 		if pz == nil {
 			return errors.New("CheckPrivilege: no principal provided")
 		}
-		// Noop if isSuperuser
-		if pz.IsSuperuser() {
+		// Noop if isAdmin
+		if pz.IsAdmin() {
 			return nil
 		}
 		x := q.tx.From("identity_workgroup").Select("workgroup_id").Where(

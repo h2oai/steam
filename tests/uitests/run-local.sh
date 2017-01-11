@@ -14,7 +14,7 @@ rm h2o.zip
 
 export H2O_PATH=$H2O_DIR/h2o.jar
 
-./steam serve master --superuser-name=superuser --superuser-password=superuser --compilation-service-address=":55000" > \
+./steam serve master --admin-name=admin --admin-password=admin012 --compilation-service-address=":55000" > \
 	$TESTS_DIR/steam.log 2>&1 &
 
 STEAM_PID=$!
@@ -35,7 +35,7 @@ JETTY_PID=$!
 disown
 
 sleep 5
-$STEAM_DIR/steam login localhost:9000 --username=superuser --password=superuser > /dev/null
+$STEAM_DIR/steam login localhost:9000 --username=admin --password=admin012 > /dev/null
 $STEAM_DIR/steam register cluster --address="localhost:54535"
 
 cd $TESTS_DIR

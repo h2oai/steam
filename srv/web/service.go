@@ -308,7 +308,7 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
-	CheckSuperuser(pz az.Principal) (bool, error)
+	CheckAdmin(pz az.Principal) (bool, error)
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
 	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
@@ -441,11 +441,11 @@ type GetConfigOut struct {
 	Config *Config `json:"config"`
 }
 
-type CheckSuperuserIn struct {
+type CheckAdminIn struct {
 }
 
-type CheckSuperuserOut struct {
-	IsSuperuser bool `json:"is_superuser"`
+type CheckAdminOut struct {
+	IsAdmin bool `json:"is_admin"`
 }
 
 type SetLdapConfigIn struct {
@@ -1454,14 +1454,14 @@ func (this *Remote) GetConfig() (*Config, error) {
 	return out.Config, nil
 }
 
-func (this *Remote) CheckSuperuser() (bool, error) {
-	in := CheckSuperuserIn{}
-	var out CheckSuperuserOut
-	err := this.Proc.Call("CheckSuperuser", &in, &out)
+func (this *Remote) CheckAdmin() (bool, error) {
+	in := CheckAdminIn{}
+	var out CheckAdminOut
+	err := this.Proc.Call("CheckAdmin", &in, &out)
 	if err != nil {
 		return false, err
 	}
-	return out.IsSuperuser, nil
+	return out.IsAdmin, nil
 }
 
 func (this *Remote) SetLdapConfig(config *LdapConfig) error {
@@ -2681,8 +2681,8 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 	return nil
 }
 
-func (this *Impl) CheckSuperuser(r *http.Request, in *CheckSuperuserIn, out *CheckSuperuserOut) error {
-	const name = "CheckSuperuser"
+func (this *Impl) CheckAdmin(r *http.Request, in *CheckAdminIn, out *CheckAdminOut) error {
+	const name = "CheckAdmin"
 
 	guid := xid.New().String()
 
@@ -2698,13 +2698,13 @@ func (this *Impl) CheckSuperuser(r *http.Request, in *CheckSuperuserIn, out *Che
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.CheckSuperuser(pz)
+	val0, err := this.Service.CheckAdmin(pz)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
 
-	out.IsSuperuser = val0
+	out.IsAdmin = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {
