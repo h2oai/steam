@@ -44,6 +44,7 @@ import (
 )
 
 type Service struct {
+	version                   string
 	workingDir                string
 	ds                        *data.Datastore
 	compilationServiceAddress string
@@ -55,14 +56,14 @@ type Service struct {
 }
 
 func NewService(
-	workingDir string,
+	version, workingDir string,
 	ds *data.Datastore,
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
 	kerberos bool,
 ) *Service {
 	return &Service{
-		workingDir,
+		version, workingDir,
 		ds,
 		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
 		scoringServicePortsRange[0], scoringServicePortsRange[1],
@@ -84,6 +85,7 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 
 func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
 	return &web.Config{
+		Version:             s.version,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
 	}, nil

@@ -122,6 +122,7 @@ export interface ClusterType {
 
 export interface Config {
   
+  version: string
   kerberos_enabled: boolean
   
   cluster_proxy_address: string

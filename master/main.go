@@ -185,6 +185,7 @@ func Run(version, buildDate string, opts Opts) {
 
 	webServeMux := http.NewServeMux()
 	webService := web.NewService(
+		version,
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
