@@ -20,6 +20,7 @@ import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
 import { Permission, Role, Identity, Workgroup } from "../../Proxy/Proxy";
+import {LdapConfig} from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -55,7 +56,41 @@ export const REQUEST_UPDATE_USER_WORKGROUPS = 'REQUEST_UPDATE_USER_WORKGROUPS';
 export const RECEIVE_UPDATE_USER_WORKGROUPS = 'RECEIVE_UPDATE_USER_WORKGROUPS';
 export const REQUEST_UPDATE_USER_ROLES = 'REQUEST_UPDATE_USER_ROLES';
 export const RECEIVE_UPDATE_USER_ROLES = 'RECEIVE_UPDATE_USER_ROLES';
+export const REQUEST_LDAP_CONFIG = 'REQUEST_LDAP_CONFIG';
+export const RECEIVE_LDAP_CONFIG = 'RECEIVE_LDAP_CONFIG';
+export const REQUEST_SAVE_LDAP = 'REQUEST_SAVE_LDAP';
+export const RECEIVE_SAVE_LDAP = 'RECEIVE_SAVE_LDAP';
 
+export function requestSaveLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_SAVE_LDAP
+    });
+  };
+};
+export function receiveSaveLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_SAVE_LDAP
+    });
+  };
+};
+export function requestLdapConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_LDAP_CONFIG
+    });
+  };
+};
+export function receiveLdapConfig(config: LdapConfig, exists: boolean) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_LDAP_CONFIG,
+      config,
+      exists
+    });
+  };
+};
 export function requestUpdateUserRoles() {
   return (dispatch) => {
     dispatch({
@@ -740,6 +775,20 @@ export function updateUserWorkgroups(userId: number, requestedEnabledWorkgroupId
   };
 }
 
+export function fetchLdapConfig() {
+  return (dispatch, getState) => {
+    dispatch(requestLdapConfig());
+
+    Remote.getLdapConfig((error, config, exists) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP ERROR", error.toString(), null));
+        return;
+      }
+      dispatch(receiveLdapConfig(config, exists));
+    });
+  };
+}
+
 /***
  * @param userId
  * @param requestedEnabledRoleIds Role ids to be enabled for given user ID. Role ids not included will be disabled for given userID
@@ -813,6 +862,22 @@ export function updateUserRoles(userId: number, requestedEnabledRoleIds: Array<n
     Promise.all(updatePromises).then((response) => {
       dispatch(receiveUpdateUserRoles());
       dispatch(fetchUsersWithRolesAndProjects());
+    });
+  };
+}
+
+export function saveLdapConfig(ldapConfig: LdapConfig) {
+  return (dispatch, getState) => {
+    dispatch(requestSaveLdap());
+    Remote.setLdapConfig(ldapConfig, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP ERROR", error.toString(), null));
+        return;
+      } else {
+        dispatch(receiveSaveLdap());
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Updated", null));
+        fetchLdapConfig();
+      }
     });
   };
 }

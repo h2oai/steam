@@ -27,6 +27,7 @@ import Table from '../../Projects/components/Table';
 import Row from '../../Projects/components/Row';
 import Cell from '../../Projects/components/Cell';
 import '../styles/uploadpreprocessingmodal.scss';
+import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 
 
 interface Props {
@@ -49,11 +50,7 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
       libraryFiles: [],
       condaFiles: [],
       missingPackageNameError: false,
-      packageNamed: false,
-      showTooltipMain: false,
-      showTooltipLibrary: false,
-      showTooltipConfig: false,
-      showTooltipName: false
+      packageNamed: false
     };
   }
 
@@ -109,54 +106,6 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
     }
   };
 
-  onMainTooltipOver = () => {
-    this.setState({
-      showTooltipMain: true
-    });
-  };
-
-  onMainTooltipOut = () => {
-    this.setState({
-      showTooltipMain: false
-    });
-  };
-
-  onLibraryTooltipOver = () => {
-    this.setState({
-      showTooltipLibrary: true
-    });
-  };
-
-  onLibraryTooltipOut = () => {
-    this.setState({
-      showTooltipLibrary: false
-    });
-  };
-
-  onCondaTooltipOver = () => {
-    this.setState({
-      showTooltipConda: true
-    });
-  };
-
-  onCondaTooltipOut = () => {
-    this.setState({
-      showTooltipConda: false
-    });
-  };
-
-  onNameTooltipOver = () => {
-    this.setState({
-      showTooltipName: true
-    });
-  };
-
-  onNameTooltipOut = () => {
-    this.setState({
-      showTooltipName: false
-    });
-  };
-
   render(): React.ReactElement<DefaultModal> {
     let disableSubmit = false;
     if (this.state.libraryFiles.length < 1 || !this.state.mainFiles || !this.state.packageNamed) {
@@ -178,17 +127,9 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <Cell>
                   <div>
                     Select a main Python file for pre-processing.&nbsp;
-                    <i className="fa fa-question-circle-o orange tooltip-launcher" aria-hidden="true" onMouseEnter={this.onMainTooltipOver} onMouseLeave={this.onMainTooltipOut}>
-                      {this.state.showTooltipMain ?
-                        <div className="tooltip tooltip-question">
-                          <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                            <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                            <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                          </svg>
-                          The output from this Python file should be one of row of an H2O data form that your model is expecting.
-                        </div>
-                        : null }
-                    </i>
+                    <Tooltip className="steam-tooltip-launcher" content="The output from this Python file should be one of row of an H2O data form that your model is expecting.">
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip>
                   </div>
                   <div className="upload">
                     <div className="upload-info" onClick={this.selectMain.bind(this)}>
@@ -211,18 +152,9 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <Cell>
                   <div>
                     Select a one or more Python files for your library.&nbsp;
-                    <i className="fa fa-question-circle-o orange tooltip-launcher tooltip-launcher-libraries" aria-hidden="true" onMouseEnter={this.onLibraryTooltipOver} onMouseLeave={this.onLibraryTooltipOut}>
-                      {this.state.showTooltipLibrary ?
-                        <div className="tooltip tooltip-question tooltip-libraries">
-                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                          <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                          <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                        </svg>
-
-                          Any non-standard libraries called here should be installed into your deployment environment prior to launching services
-                      </div>
-                        : null }
-                    </i>
+                    <Tooltip className="steam-tooltip-launcher" content="Any non-standard libraries called here should be installed into your deployment environment prior to launching services">
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip>
                   </div>
                   <div className="upload">
                     <div className="upload-info" onClick={this.selectLibraries.bind(this)}>
@@ -248,18 +180,10 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 <Cell>
                   <div>
                     Pick a .yaml file that defines your conda environment.&nbsp;
-                    <i className="fa fa-question-circle-o orange tooltip-launcher tooltip-launcher-conda" aria-hidden="true" onMouseEnter={this.onCondaTooltipOver} onMouseLeave={this.onCondaTooltipOut}>
-                      {this.state.showTooltipConda ?
-                      <div className="tooltip tooltip-question tooltip-conda">
-                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                          <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                          <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                        </svg>
-                        you can get this file by doing this in your commandline of conda environment
-                        <p>$ conda env export > mypackage.yaml</p>
-                      </div>
-                        : null }
-                    </i>
+                    <Tooltip className="steam-tooltip-launcher" content={<div>you can get this file by doing this in your commandline of conda environment
+                    <p>$ conda env export > mypackage.yaml</p></div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip>
                   </div>
                   <div className="upload">
                     <div className="upload-info" onClick={this.selectConda.bind(this)}>
@@ -282,17 +206,9 @@ export default class UploadPreProcessingModal extends React.Component<Props, any
                 </Cell>
                 <Cell>
                   <div>Pick a name for this pre-processing package.&nbsp;
-                    <i className="fa fa-question-circle-o orange tooltip-launcher tooltip-launcher-name" aria-hidden="true" onMouseEnter={this.onNameTooltipOver} onMouseLeave={this.onNameTooltipOut}>
-                      { this.state.showTooltipName ? <div className="tooltip tooltip-name tooltip-question">
-                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-                          <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-                          <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-                        </svg>
-
-                        You will use it as a reference when deploying models.
-                      </div>
-                        : null }
-                    </i>
+                    <Tooltip className="steam-tooltip-launcher" content="You will use it as a reference when deploying models.">
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip>
                   </div>
                   <div className="package-name-label muted">Package name</div>
                   <input ref="packageName" type="text" className={classNames('package-name', {error: this.state.missingPackageNameError})} onChange={this.onPackageNameChanged} />

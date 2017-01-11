@@ -199,36 +199,20 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
               <Row header={true}>
                 <Cell>
                   ROLES<br/>
-                  <div className="bulk-select">
-                    {numRolesSelected === 0 ?
-                    <div>
-                      <input type="radio" name="roleBulkSelect" onChange={this.onSelectNoneClicked} checked={true}></input>
-                      Select None<br/>
-                    </div>
-                    : <div>
-                        <input type="radio" name="roleBulkSelect" onChange={this.onSelectNoneClicked} checked={false}></input>
-                        Select None<br/>
-                    </div> }
 
-                    {this.props.selectedRoles && numRolesSelected > 0 && numRolesSelected < this.props.selectedRoles.length ?
-                      <div>
-                        <input type="radio" name="roleBulkSelect" checked={true}></input>Select Some<br/>
-                      </div>
-                      : <div>
-                        <input type="radio" name="roleBulkSelect" checked={false}></input>Select Some<br/>
-                      </div>
-                    }
+                  {this.props.selectedRoles ?
+                    <input type="checkbox"
+                           checked={numRolesSelected > 0}
+                           ref={input => {
+                             if (input) {
+                              input.indeterminate = this.props.selectedRoles && numRolesSelected > 0 && numRolesSelected < this.props.selectedRoles.length;
+                             }
+                           }}
+                           onChange={(e) => numRolesSelected === this.props.selectedRoles.length ? this.onSelectNoneClicked() : this.onSelectAllClicked() } />
+                    : null
+                  }
+                  {this.props.selectedRoles && numRolesSelected === this.props.selectedRoles.length ? <span>Select None</span> : <span>Select All</span>}
 
-                    {this.props.selectedRoles && numRolesSelected === this.props.selectedRoles.length ?
-                      <div>
-                        <input type="radio" name="roleBulkSelect" onChange={this.onSelectAllClicked} checked={true}></input>Select All
-                      </div>
-                      :<div>
-                        <input type="radio" name="roleBulkSelect" onChange={this.onSelectAllClicked} checked={false}></input>Select All
-                      </div>
-                    }
-
-                  </div>
                 </Cell>
               </Row>
               {this.props.roles ?

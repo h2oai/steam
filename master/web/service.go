@@ -18,6 +18,8 @@ package web
 
 import (
 	"database/sql"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -2189,6 +2191,94 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 	)
 	return toEntityHistories(history), errors.Wrap(err, "reading history from database")
 }
+
+type ldapSerialized struct {
+	Address         string
+	Bind            string
+	UserBaseDn      string
+	UserBaseFilter  string
+	UserRnAttribute string
+
+	ForceBind bool
+	Ldaps     bool
+}
+
+func configToSerialized(config *web.LdapConfig) ldapSerialized {
+	bind := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", config.BindDn, config.BindPassword)))
+	return ldapSerialized{
+		fmt.Sprintf("%s:%d", config.Host, config.Port),
+		bind,
+		config.UserBaseDn,
+		config.UserBaseFilter,
+		config.UserRnAttribute,
+		config.ForceBind,
+		config.Ldaps,
+	}
+}
+
+func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
+	address := strings.Split(config.Address, ":")
+	host := address[0]
+	port, err := strconv.Atoi(address[1])
+	if err != nil {
+		return nil, errors.Wrap(err, "converint port to integer")
+	}
+
+	return &web.LdapConfig{
+		Host: host, Port: port,
+		Ldaps:           config.Ldaps,
+		UserBaseDn:      config.UserBaseDn,
+		UserBaseFilter:  config.UserBaseFilter,
+		UserRnAttribute: config.UserRnAttribute,
+		ForceBind:       config.ForceBind,
+	}, nil
+}
+
+func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
+	if !pz.IsSuperuser() {
+		return errors.New("only superusers can edit LDAP settings")
+	}
+	if strings.TrimSpace(config.BindPassword) == "" {
+		return errors.New("bind password cannot be blank")
+	}
+
+	raw := configToSerialized(config)
+	meta, err := json.Marshal(raw)
+	if err != nil {
+		return errors.Wrap(err, "serializing config metadata")
+	}
+
+	if security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap")); err != nil {
+		return errors.Wrap(err, "reading security config from database")
+	} else if exists {
+		err := s.ds.UpdateSecurity(security.Id, data.WithValue(string(meta)))
+		return errors.Wrap(err, "updating security config in database")
+	}
+
+	_, err = s.ds.CreateSecurity("ldap", string(meta))
+	return errors.Wrap(err, "creating security config in database")
+}
+
+func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) {
+	if !pz.IsSuperuser() {
+		return nil, false, errors.New("only superusers can view LDAP settings")
+	}
+
+	security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap"))
+	if err != nil {
+		return nil, false, errors.Wrap(err, "reading security config from database")
+	}
+
+	var deserial ldapSerialized
+	if err := json.Unmarshal([]byte(security.Value), &deserial); err != nil {
+		return nil, false, errors.Wrap(err, "deserializing config metadata")
+	}
+
+	config, err := serializedToConfig(deserial)
+	return config, exists, err
+}
+
+func (s *Service) CheckSuperuser(pz az.Principal) (bool, error) { return pz.IsSuperuser(), nil }
 
 // --- ---------- ---
 // --- ---------- ---

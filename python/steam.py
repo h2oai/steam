@@ -102,7 +102,7 @@ class RPCClient:
 	
 	def get_config(self):
 		"""
-		No description available
+		Get Steam start up configurations
 
 		Parameters:
 
@@ -113,6 +113,50 @@ class RPCClient:
 		}
 		response = self.connection.call("GetConfig", request)
 		return response['config']
+	
+	def check_superuser(self):
+		"""
+		Check if an identity has superuser privileges
+
+		Parameters:
+
+		Returns:
+		is_superuser: No description available (bool)
+		"""
+		request = {
+		}
+		response = self.connection.call("CheckSuperuser", request)
+		return response['is_superuser']
+	
+	def set_ldap_config(self, config):
+		"""
+		Set LDAP security configuration
+
+		Parameters:
+		config: No description available (LdapConfig)
+
+		Returns:None
+		"""
+		request = {
+			'config': config
+		}
+		response = self.connection.call("SetLdapConfig", request)
+		return 
+	
+	def get_ldap_config(self):
+		"""
+		Get LDAP security configurations
+
+		Parameters:
+
+		Returns:
+		config: No description available (LdapConfig)
+		exists: No description available (bool)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetLdapConfig", request)
+		return response['config'], response['exists']
 	
 	def register_cluster(self, address):
 		"""

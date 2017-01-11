@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import TabNavigation from '../Projects/components/TabNavigation';
-import {Identity, Permission, Project} from '../Proxy/Proxy';
+import {Identity, Permission} from '../Proxy/Proxy';
 import UserAccess from './components/UserAccess';
 import RolePermissions from './components/RolePermissions';
 import './styles/users.scss';
@@ -27,7 +27,8 @@ import CreateUser from "./components/CreateUser";
 import CreateRole from "./components/CreateRole";
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {enterNewUser, enterNewRole, exitNewRole, exitNewUser} from "./actions/users.actions";
+import {enterNewUser, enterNewRole, exitNewRole, exitNewUser, fetchLdapConfig} from "./actions/users.actions";
+import UserAuthentication from "./components/UserAuthentication";
 
 
 interface Props {
@@ -41,6 +42,7 @@ interface DispatchProps {
   enterNewRole: Function
   exitNewUser: Function
   exitNewRole: Function
+  fetchLdapConfig: Function
 }
 export class Users extends React.Component<Props & DispatchProps, any> {
 
@@ -59,6 +61,12 @@ export class Users extends React.Component<Props & DispatchProps, any> {
           isSelected: false,
           onClick: this.clickHandler.bind(this),
           component: <RolePermissions />
+        },
+        authentication: {
+          label: 'USER AUTHENTICATION',
+          isSelected: false,
+          onClick: this.clickHandler.bind(this),
+          component: <UserAuthentication />
         }
       },
       isSelected: 'users'
@@ -79,7 +87,13 @@ export class Users extends React.Component<Props & DispatchProps, any> {
           isSelected: false,
           onClick: this.clickHandler.bind(this),
           component: <RolePermissions />
-        }
+        },
+        authentication: {
+          label: 'AUTHENTICATION',
+          isSelected: false,
+          onClick: this.clickHandler.bind(this),
+          component: <UserAuthentication />
+        },
       }
     });
   }
@@ -99,6 +113,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     let newState = _.cloneDeep(this.state);
     newState.tabs.roles.isSelected = false;
     newState.tabs.users.isSelected = true;
+    newState.tabs.authentication.isSelected = false;
     newState.isSelected = "users";
     this.setState(newState);
     this.props.enterNewUser();
@@ -108,6 +123,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     let newState = _.cloneDeep(this.state);
     newState.tabs.roles.isSelected = true;
     newState.tabs.users.isSelected = false;
+    newState.tabs.authentication.isSelected = false;
     newState.isSelected = "roles";
     this.setState(newState);
     this.props.enterNewRole();
@@ -146,6 +162,8 @@ export class Users extends React.Component<Props & DispatchProps, any> {
               <UserAccess /> : null}
             {this.state.tabs.roles.isSelected === true ?
               <RolePermissions /> : null}
+            {this.state.tabs.authentication.isSelected === true ?
+              <UserAuthentication /> : null}
           </div>
         </div>
       );
@@ -165,7 +183,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     enterNewUser: bindActionCreators(enterNewUser, dispatch),
     enterNewRole: bindActionCreators(enterNewRole, dispatch),
     exitNewUser: bindActionCreators(exitNewUser, dispatch),
-    exitNewRole: bindActionCreators(exitNewRole, dispatch)
+    exitNewRole: bindActionCreators(exitNewRole, dispatch),
+    fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch)
   };
 }
 

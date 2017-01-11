@@ -18,8 +18,9 @@
 import * as _ from 'lodash';
 import {
   RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
-  RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE, ENTER_NEW_USER,
-  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY
+  RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE,
+  ENTER_NEW_USER,
+  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG
 } from '../actions/users.actions';
 
 let initialState = {
@@ -28,11 +29,20 @@ let initialState = {
   projects: [],
   updates: [],
   createNewUserIsEntered: false,
-  createNewRoleIsEntered: false
+  createNewRoleIsEntered: false,
+  ldapExists: false,
+  ldapConfig: null
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case RECEIVE_LDAP_CONFIG : {
+      console.log(action.exists, action.config);
+      return _.assign({}, state, {
+        ldapExists: action.exists,
+        ldapConfig: action.config
+      });
+    }
     case RECEIVE_WORKGROUPS_FOR_IDENTITY : {
       return _.assign({}, state, {
         userWithWorkgroups: {

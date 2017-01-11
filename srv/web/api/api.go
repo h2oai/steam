@@ -24,6 +24,18 @@ type Config struct {
 	ClusterProxyAddress string
 }
 
+type LdapConfig struct {
+	Host            string
+	Port            int
+	Ldaps           bool
+	BindDn          string
+	BindPassword    string
+	UserBaseDn      string
+	UserBaseFilter  string
+	UserRnAttribute string
+	ForceBind       bool
+}
+
 type Cluster struct {
 	Id          int64
 	Name        string
@@ -282,7 +294,10 @@ type Workgroup struct {
 
 type Service struct {
 	PingServer                    PingServer                    `help:"Ping the Steam server"`
-	GetConfig                     GetConfig                     `help:Get Steam start up configurations`
+	GetConfig                     GetConfig                     `help:"Get Steam start up configurations"`
+	CheckSuperuser                CheckSuperuser                `help:"Check if an identity has superuser privileges"`
+	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
+	GetLdapConfig                 GetLdapConfig                 `help:"Get LDAP security configurations"`
 	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
 	UnregisterCluster             UnregisterCluster             `help:"Disconnect from a cluster"`
 	StartClusterOnYarn            StartClusterOnYarn            `help:"Start a cluster using Yarn"`
@@ -410,6 +425,18 @@ type PingServer struct {
 type GetConfig struct {
 	_      int
 	Config Config `help:"An object containing Steam startup configurations"`
+}
+type CheckSuperuser struct {
+	_           int
+	IsSuperuser bool
+}
+type SetLdapConfig struct {
+	Config LdapConfig
+}
+type GetLdapConfig struct {
+	_      int
+	Config LdapConfig
+	Exists bool
 }
 type RegisterCluster struct {
 	Address   string

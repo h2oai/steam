@@ -17,6 +17,8 @@
 
 import * as React from 'react';
 import '../styles/mojopojo.scss';
+import { Position } from '@blueprintjs/core';
+import { Popover, PopoverInteractionKind } from '@blueprintjs/core/dist/components/popover/popover';
 
 export default class MojoPojoSelector extends React.Component<any, any> {
 
@@ -37,41 +39,54 @@ export default class MojoPojoSelector extends React.Component<any, any> {
     localStorage.setItem("mojoPojoSelection", "mojo");
   }
 
-  onMouseOver() {
-    this.setState({showMenu: true});
-  }
-  onMouseLeave() {
-    this.setState({showMenu: false});
-  }
-
   render(): React.ReactElement<HTMLSpanElement> {
     let mojoPojoSelection = localStorage.getItem("mojoPojoSelection");
     if (mojoPojoSelection !== "auto" && mojoPojoSelection !== "pojo" && mojoPojoSelection !== "mojo") {
       mojoPojoSelection = "auto";
     }
 
-    return (
-      <span className="mojo-select-launcher tooltip-launcher" onMouseEnter={this.onMouseOver.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
-        { this.state.showMenu ?
-        <div className="mojo-select tooltip">
-          <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 200.6 200.1" className="caret">
-            <polygon className="caret-triangle" points="100.3,3.4 200.6,200.1 0,200.1 "/>
-            <rect x="0" y="196" className="caret-cover" width="200" height="20"/>
-          </svg>
+    let autoInput;
+    let preferPojoInput;
+    let preferMojoInput;
+    if (mojoPojoSelection === "auto") {
+      autoInput = <input type="radio" name="format" value="auto" onClick={this.onAutoSelected} defaultChecked />;
+    } else {
+      autoInput = <input type="radio" name="format" value="auto" onClick={this.onAutoSelected} />;
+    }
+    if (mojoPojoSelection === "pojo") {
+      preferPojoInput = <input type="radio" name="format" value="pojo" onClick={this.onPojoSelected} defaultChecked/>;
+    } else {
+      preferPojoInput = <input type="radio" name="format" value="pojo" onClick={this.onPojoSelected} />;
+    }
+    if (mojoPojoSelection === "mojo") {
+      preferMojoInput = <input type="radio" name="format" value="mojo" onClick={this.onMojoSelected} defaultChecked />;
+    } else {
+      preferMojoInput = <input type="radio" name="format" value="mojo" onClick={this.onMojoSelected} />;
+    }
 
-          <h2>Choose Format</h2>
-          <div className="format-select">{mojoPojoSelection === "auto" ? <input type="radio" name="format" value="auto" onClick={this.onAutoSelected} defaultChecked /> : <input type="radio" name="format" onClick={this.onAutoSelected} value="auto"/> }
-            Auto Select
-          </div>
-          <div className="format-select">{mojoPojoSelection === "pojo" ? <input type="radio" name="format" value="pojo" onClick={this.onPojoSelected} defaultChecked/> : <input type="radio" name="format" onClick={this.onPojoSelected} value="pojo"/> }
-            Prefer Pojo
-          </div>
-          <div className="format-select">{mojoPojoSelection === "mojo" ? <input type="radio" name="format" value="mojo" onClick={this.onMojoSelected} defaultChecked /> : <input type="radio" name="format" onClick={this.onMojoSelected} value="mojo"/> }
-            Prefer Mojo
-          </div>
-        </div> : null}
-        <span className="link">here</span>
-      </span>
+    let popoverContent =
+      <div>
+        <h2>Choose Format</h2>
+        <div>
+          {autoInput} Auto Select
+        </div>
+        <div>
+          { preferPojoInput} Prefer Pojo
+        </div>
+        <div>
+          { preferMojoInput } Prefer Mojo
+        </div>
+      </div>;
+
+    return (
+    <Popover content={popoverContent}
+             inline={true}
+             interactionKind={PopoverInteractionKind.HOVER}
+             popoverClassName="pt-popover-content-sizing"
+             position={Position.BOTTOM}
+             useSmartPositioning={false}>
+      <span className="link">here</span>
+    </Popover>
     );
   }
 }

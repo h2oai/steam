@@ -29,6 +29,7 @@ h2 {
   text-transform: capitalize;
   color: $h2o-charcoal-grey;
   line-height: 1.1;
+  padding-top: 12px;
 }
 
 /*Lede text, i.e. primary paragraphs of text on a page that serves introductory purposes.*/
@@ -255,8 +256,6 @@ input[type="text"], textarea {
   margin-bottom: 7px;
 }
 
-@import '../../variables.scss';
-
 .tooltip-launcher {
   position: relative;
 }
@@ -301,4 +300,27 @@ input[type="text"], textarea {
   fill:#FFFFFF;
   stroke:#FFFFFF;
   stroke-miterlimit:10;
+}
+
+.colapse-header {
+  font-weight: bold;
+  border-bottom-style: solid;
+  border-bottom-color: $h2o-soft-grey;
+  border-bottom-width: thin;
+  padding-bottom: 8px;
+}
+.steam-tooltip-launcher {
+  color: $h2o-orange-prime;
+}
+
+@import "~@blueprintjs/core/src/blueprint.scss";
+
+.pt-toast.pt-intent-danger {
+  color: black;
+}
+.pt-toast.pt-intent-primary {
+  color: black;
+}
+.pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
+  color: rgba(0, 0, 0, 0.7) !important;
 }
