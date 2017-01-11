@@ -132,11 +132,11 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 			dbOpts.AdminName = strings.Trim(name, "\n")
 		}
 
-		if err := auth.ValidateUsername(dbOpts.SuperName); err != nil {
+		if err := auth.ValidateUsername(dbOpts.AdminName); err != nil {
 			return nil, errors.Wrap(err, "validating username")
 		}
 
-		if strings.TrimSpace(dbOpts.SuperPass) == "" {
+		if strings.TrimSpace(dbOpts.AdminPass) == "" {
 			fmt.Print("Steam local admin password: ")
 
 			passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -160,7 +160,7 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 				return nil, errors.New("password mismatch")
 			}
 			fmt.Println()
-			dbOpts.SuperPass = strings.Trim(string(passBytes), "\n")
+			dbOpts.AdminPass = strings.Trim(string(passBytes), "\n")
 
 		}
 
