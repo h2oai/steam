@@ -583,6 +583,10 @@ func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir, cont
 	}
 }
 
+func WithValue(value string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["value"] = value; return }
+}
+
 // --------- --------- ---------
 // --------- Principal ---------
 // --------- --------- ---------
@@ -703,8 +707,8 @@ func ByPrivilege(pz az.Principal) QueryOpt {
 		if pz == nil {
 			return errors.New("CheckPrivilege: no principal provided")
 		}
-		// Noop if isSuperuser
-		if pz.IsSuperuser() {
+		// Noop if isAdmin
+		if pz.IsAdmin() {
 			return nil
 		}
 		x := q.tx.From("identity_workgroup").Select("workgroup_id").Where(

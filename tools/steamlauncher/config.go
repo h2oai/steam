@@ -19,14 +19,14 @@ package main
 
 type tomlConfig struct {
 	Title             string
-	Superuser         superuser
+	Admin             admin
 	Steam             steam
 	DefaultRoles      map[string]role `toml:"roles"`
 	PredictionBuilder predictionBuilderConfig
 	PredictionService predictionServiceConfig
 }
 
-type superuser struct {
+type admin struct {
 	Name string
 	Pass string `toml:"password"`
 }

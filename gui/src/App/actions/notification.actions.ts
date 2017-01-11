@@ -18,8 +18,11 @@
 /**
  * Created by justin on 8/8/16.
  */
-
+import * as React from 'react';
+import { Intent } from '@blueprintjs/core';
 import { NotificationType } from '../components/Notification';
+import { toastManager } from '../components/ToastManager';
+
 
 export const OPEN_NOTIFICATION = 'OPEN_NOTIFICATION';
 export const CLOSE_NOTIFICATION = 'CLOSE_NOTIFICATION';
@@ -45,11 +48,74 @@ export function openNotification(notificationType: NotificationType, header: str
 
 function _openNotification(notificationType: NotificationType, header: string, detail, actions, state) {
   let index = state.notification.allNotifications.length;
+  let message = React.createElement(
+    'div',
+    null,
+    React.createElement('div', { className: 'notification-indicator' }),
+    React.createElement(
+      'div',
+      { className: 'notification-content' },
+      detail
+    )
+  );
+  let intent;
+  switch (notificationType) {
+    case NotificationType.Confirm:
+      intent = Intent.DANGER;
+      break;
+    case NotificationType.Error:
+      intent = Intent.DANGER;
+      break;
+    case NotificationType.Info:
+      intent = Intent.DANGER;
+      break;
+    case NotificationType.Warning:
+      intent = Intent.DANGER;
+      break;
+    default :
+      console.log("ERROR: Unexpected notification type");
+  }
+  let timeout = 5000;
+  if (notificationType === NotificationType.Confirm) {
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-confirm",
+      timeout
+    });
+  }
+  if (notificationType === NotificationType.Info) {
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-info",
+      timeout
+    });
+  }
+  if (notificationType === NotificationType.Warning) {
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-warning",
+      timeout
+    });
+  }
+  if (notificationType === NotificationType.Error) {
+    timeout = 0;
+    toastManager.show({
+      message,
+      intent,
+      className: "steam-notification steam-notification-error",
+      timeout
+    });
+  }
+
+
   return {
     type: OPEN_NOTIFICATION,
     notificationData: {
-      isActive: true,
-      isAlive: true,
+      isActive: false,
+      isAlive: false,
       notificationType,
       header,
       detail,

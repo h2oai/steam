@@ -96,7 +96,7 @@ def importMultiTest(driver):
 def main():
 	failcount = 0
 	d = tu.newtest()
-	d.get("http://superuser:superuser@localhost:9000")
+	d.get("http://admin:admin012@localhost:9000")
 	if not createProjectTest(d):
 		print "createproj"
 		failcount += 1

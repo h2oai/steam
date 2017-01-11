@@ -21,9 +21,10 @@
 
 import { IFetchStrategy } from './IFetchStrategy';
 import { IFetchStrategyConfig } from './IFetchStrategyConfig';
+import {Dispatch} from "react-redux";
 
 export class AjaxStrategy implements IFetchStrategy {
-  request(dispatch: Redux.Dispatch, config: IFetchStrategyConfig): Promise<any> {
+  request(dispatch: Dispatch<any>, config: IFetchStrategyConfig): Promise<any> {
     return fetch(config.url)
       .then(response => response.json())
       .then(json => {

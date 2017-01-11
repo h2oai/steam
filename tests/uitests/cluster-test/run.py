@@ -45,7 +45,7 @@ def dataframeTest(driver):
 def main():
 	failcount = 0
 	d = tu.newtest()
-	d.get("http://superuser:superuser@localhost:9000")
+	d.get("http://admin:admin012@localhost:9000")
 	if not connectTest(d):
 		failcount += 1
 	if not deleteClusterTest(d):

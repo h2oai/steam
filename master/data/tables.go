@@ -196,6 +196,12 @@ type state struct {
 	Name string `db:"name,arg"`
 }
 
+type Security struct {
+	Id    int64  `db:"id,pk"`
+	Key   string `db:"key,arg"`
+	Value string `db:"value,arg"`
+}
+
 type Service struct {
 	Id        int64          `db:"id,pk"`
 	ProjectId int64          `db:"project_id,arg"`

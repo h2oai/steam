@@ -144,8 +144,8 @@ func Run(version, buildDate string, opts Opts) {
 	// ds, err := data.Create(
 	// 	path.Join(wd, fs.DbDir, "steam.db"),
 	// 	// opts.DB.Connection,
-	// 	opts.DB.SuperuserName,
-	// 	opts.DB.SuperuserPassword,
+	// 	opts.DB.Admin,
+	// 	opts.DB.AdminPassword,
 	// )
 	if err != nil {
 		log.Fatalln(err)
@@ -158,9 +158,9 @@ func Run(version, buildDate string, opts Opts) {
 	case "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
 	case "basic-ldap":
-		conn, err := ldap.FromConfig(opts.AuthConfig)
+		conn, err := ldap.FromConfig(ds)
 		if err != nil {
-			log.Fatalln("Please provide a valid ldap configuration file", err)
+			log.Fatalln("Invalid configuration:", err)
 		}
 
 		authProvider = NewBasicLdapAuthProvider(webAddress, conn)
@@ -185,6 +185,7 @@ func Run(version, buildDate string, opts Opts) {
 
 	webServeMux := http.NewServeMux()
 	webService := web.NewService(
+		version,
 		wd,
 		ds,
 		opts.CompilationServiceAddress,

@@ -212,12 +212,14 @@ Check entities
 Commands:
 
     $ steam check mojo ...
+    $ steam check admin ...
 `
 
 func check(c *context) *cobra.Command {
 	cmd := newCmd(c, checkHelp, nil)
 
 	cmd.AddCommand(checkMojo(c))
+	cmd.AddCommand(checkAdmin(c))
 	return cmd
 }
 
@@ -249,6 +251,32 @@ func checkMojo(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().StringVar(&algo, "algo", algo, "No description available")
+	return cmd
+}
+
+var checkAdminHelp = `
+admin [?]
+Check Admin
+Examples:
+
+    Check if an identity has admin privileges
+    $ steam check admin
+
+`
+
+func checkAdmin(c *context) *cobra.Command {
+
+	cmd := newCmd(c, checkAdminHelp, func(c *context, args []string) {
+
+		// Check if an identity has admin privileges
+		isAdmin, err := c.remote.CheckAdmin()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("IsAdmin:\t%v\n", isAdmin)
+		return
+	})
+
 	return cmd
 }
 
@@ -1299,6 +1327,7 @@ Commands:
     $ steam get job ...
     $ steam get jobs ...
     $ steam get labels ...
+    $ steam get ldap ...
     $ steam get model ...
     $ steam get models ...
     $ steam get package ...
@@ -1335,6 +1364,7 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getJob(c))
 	cmd.AddCommand(getJobs(c))
 	cmd.AddCommand(getLabels(c))
+	cmd.AddCommand(getLdap(c))
 	cmd.AddCommand(getModel(c))
 	cmd.AddCommand(getModels(c))
 	cmd.AddCommand(getPackage(c))
@@ -1671,7 +1701,7 @@ config [?]
 Get Config
 Examples:
 
-    No description available
+    Get Steam start up configurations
     $ steam get config
 
 `
@@ -1680,12 +1710,13 @@ func getConfig(c *context) *cobra.Command {
 
 	cmd := newCmd(c, getConfigHelp, func(c *context, args []string) {
 
-		// No description available
+		// Get Steam start up configurations
 		config, err := c.remote.GetConfig()
 		if err != nil {
 			log.Fatalln(err)
 		}
 		lines := []string{
+			fmt.Sprintf("Version:\t%v\t", config.Version),                         // No description available
 			fmt.Sprintf("KerberosEnabled:\t%v\t", config.KerberosEnabled),         // No description available
 			fmt.Sprintf("ClusterProxyAddress:\t%v\t", config.ClusterProxyAddress), // No description available
 		}
@@ -2386,6 +2417,48 @@ func getLabels(c *context) *cobra.Command {
 	cmd.Flags().BoolVar(&forProject, "for-project", forProject, "List labels for a project, with corresponding models, if any")
 
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+	return cmd
+}
+
+var getLdapHelp = `
+ldap [?]
+Get Ldap
+Examples:
+
+    Get LDAP security configurations
+    $ steam get ldap --config
+
+`
+
+func getLdap(c *context) *cobra.Command {
+	var config bool // Switch for GetLdapConfig()
+
+	cmd := newCmd(c, getLdapHelp, func(c *context, args []string) {
+		if config { // GetLdapConfig
+
+			// Get LDAP security configurations
+			config, exists, err := c.remote.GetLdapConfig()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := []string{
+				fmt.Sprintf("Host:\t%v\t", config.Host),                       // No description available
+				fmt.Sprintf("Port:\t%v\t", config.Port),                       // No description available
+				fmt.Sprintf("Ldaps:\t%v\t", config.Ldaps),                     // No description available
+				fmt.Sprintf("BindDn:\t%v\t", config.BindDn),                   // No description available
+				fmt.Sprintf("BindPassword:\t%v\t", config.BindPassword),       // No description available
+				fmt.Sprintf("UserBaseDn:\t%v\t", config.UserBaseDn),           // No description available
+				fmt.Sprintf("UserBaseFilter:\t%v\t", config.UserBaseFilter),   // No description available
+				fmt.Sprintf("UserRnAttribute:\t%v\t", config.UserRnAttribute), // No description available
+				fmt.Sprintf("ForceBind:\t%v\t", config.ForceBind),             // No description available
+			}
+			c.printt("Attribute\tValue\t", lines)
+			fmt.Printf("Exists:\t%v\n", exists)
+			return
+		}
+	})
+	cmd.Flags().BoolVar(&config, "config", config, "Get LDAP security configurations")
+
 	return cmd
 }
 

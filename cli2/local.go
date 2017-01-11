@@ -163,8 +163,8 @@ func serveMaster(c *context) *cobra.Command {
 		dbSSLCertPath                string
 		dbSSLKeyPath                 string
 		dbSSLRootCertPath            string
-		superuserName                string
-		superuserPassword            string
+		adminName                string
+		adminPassword            string
 	)
 
 	opts := master.DefaultOpts
@@ -225,8 +225,8 @@ func serveMaster(c *context) *cobra.Command {
 				SSLKey:            dbSSLKeyPath,
 				SSLRootCert:       dbSSLRootCertPath,
 
-				SuperName: superuserName,
-				SuperPass: superuserPassword,
+				AdminName: adminName,
+				AdminPass: adminPassword,
 				Flags:     flag,
 			},
 		})
@@ -234,8 +234,8 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
 	cmd.Flags().StringVar(&webTLSCertPath, "web-tls-cert-path", opts.WebTLSCertPath, "Web server TLS certificate file path (optional).")
 	cmd.Flags().StringVar(&webTLSKeyPath, "web-tls-key-path", opts.WebTLSKeyPath, "Web server TLS key file path (optional).")
-	cmd.Flags().StringVar(&authProvider, "authentication-provider", opts.AuthProvider, "Authentication mechanism for client logins (one of \"basic\", \"digest\"), or \"basic-ldap\"")
-	cmd.Flags().StringVar(&authConfig, "authentication-config", opts.AuthConfig, "Configuration file for authentication (used in \"basic-ldap\")")
+	cmd.Flags().StringVar(&authProvider, "authentication-provider", opts.AuthProvider, "Authentication mechanism for client logins (local: \"basic\" or \"digest\"; ldap: \"basic-ldap\"")
+	// cmd.Flags().StringVar(&authConfig, "authentication-config", opts.AuthConfig, "Configuration file for authentication (used in \"basic-ldap\")")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
@@ -261,8 +261,8 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DBOpts.SSLCert, "Database connection SSL certificate path (optional)")
 	cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DBOpts.SSLKey, "Database connection SSL key path (optional)")
 	cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DBOpts.SSLRootCert, "Database connection SSL root certificate path (optional)")
-	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DBOpts.SuperName, "Set superuser username (required for first-time-use only)")
-	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DBOpts.SuperPass, "Set superuser password (required for first-time-use only)")
+	cmd.Flags().StringVar(&adminName, "admin-name", opts.DBOpts.AdminName, "Set admin username (required for first-time-use only)")
+	cmd.Flags().StringVar(&adminPassword, "admin-password", opts.DBOpts.AdminPass, "Set admin password (required for first-time-use only)")
 
 	return cmd
 

@@ -36,6 +36,7 @@ func main() {
 		"lower":      lower,
 		"snake":      snaker.CamelToSnake,
 		"startswith": strings.HasPrefix,
+		"cleanJSON":  cleanJSON,
 	})
 	generate(ix, "srv/web/api/typescript.template", "gui/src/Proxy/Proxy.ts", map[string]interface{}{
 		"lower":   lower,

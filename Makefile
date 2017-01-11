@@ -118,7 +118,6 @@ linux: gui
 	cp $(SLA)/config.toml ./dist/$(DIST_LINUX)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/
-	cp -r $(DB) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_LINUX)/var/master/
 	tar czfC ./dist/$(DIST_LINUX).tar.gz dist $(DIST_LINUX)
 
@@ -132,7 +131,6 @@ darwin: gui
 	cp $(SLA)/config.toml ./dist/$(DIST_DARWIN)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
-	cp -r $(DB) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 

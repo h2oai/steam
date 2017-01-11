@@ -61,6 +61,7 @@ var schema = map[string]string{
 	"regression_model":    createTableRegressionModel,
 	"role":                createTableRole,
 	"role_permission":     createTableRolePermission,
+	"security":            createTableSecurity,
 	"service":             createTableService,
 	"state":               createTableState,
 	"workgroup":           createTableWorkgroup,
@@ -308,6 +309,14 @@ CREATE TABLE role_permission (
     PRIMARY KEY (role_id, permission_id),
     FOREIGN KEY (permission_id) REFERENCES permission(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
+)
+`
+
+var createTableSecurity = `
+CREATE TABLE security (
+    id integer PRIMARY KEY AUTOINCREMENT,
+    key text NOT NULL UNIQUE,
+    value texts NOT NULL
 )
 `
 
