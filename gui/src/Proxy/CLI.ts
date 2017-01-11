@@ -26,7 +26,7 @@
 // --- CLI Stub ---
 
 import * as Proxy from './xhr';
-import {LdapConfig} from './Proxy';
+import { LdapConfig } from './Proxy';
 
 function print(error: Error, data: any): void {
   if (error) {
@@ -36,7 +36,6 @@ function print(error: Error, data: any): void {
   }
 }
 
-
 export function pingServer(input: string): void {
   const req: any = { input: input };
   Proxy.Call("PingServer", req, print);
@@ -45,6 +44,11 @@ export function pingServer(input: string): void {
 export function getConfig(): void {
   const req: any = {  };
   Proxy.Call("GetConfig", req, print);
+}
+
+export function checkSuperuser(): void {
+  const req: any = {  };
+  Proxy.Call("CheckSuperuser", req, print);
 }
 
 export function setLdapConfig(config: LdapConfig): void {

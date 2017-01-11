@@ -24,8 +24,9 @@
 {{define "signature"}}({{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{lower .Name}}: {{template "typeOf" .}}{{end}}){{end}}
 
 // --- CLI Stub ---
-
+{{ with .Facade}}
 import * as Proxy from './xhr';
+{{if .Imports}}import { {{range $index, $i := .Imports}}{{if $index}}, {{end}}{{$i.Name}}{{end}} } from './Proxy';{{end}}
 
 function print(error: Error, data: any): void {
   if (error) {
@@ -34,7 +35,6 @@ function print(error: Error, data: any): void {
     console.log(data);
   }
 }
-{{with .Facade}}
 {{range .Methods}}
 export function {{lower .Name}}{{template "signature" .}}: void {
   const req: any = { {{range $i, $e := .Inputs}}{{if $i}}, {{end}}{{snake .Name}}: {{lower .Name}}{{end}} };

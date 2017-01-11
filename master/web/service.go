@@ -2238,7 +2238,7 @@ func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 	if !pz.IsSuperuser() {
 		return errors.New("only superusers can edit LDAP settings")
 	}
-	if config.BindPassword == "" {
+	if strings.TrimSpace(config.BindPassword) == "" {
 		return errors.New("bind password cannot be blank")
 	}
 
@@ -2277,6 +2277,8 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	config, err := serializedToConfig(deserial)
 	return config, exists, err
 }
+
+func (s *Service) CheckSuperuser(pz az.Principal) (bool, error) { return pz.IsSuperuser(), nil }
 
 // --- ---------- ---
 // --- ---------- ---

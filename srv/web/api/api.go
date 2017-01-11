@@ -295,6 +295,7 @@ type Workgroup struct {
 type Service struct {
 	PingServer                    PingServer                    `help:"Ping the Steam server"`
 	GetConfig                     GetConfig                     `help:"Get Steam start up configurations"`
+	CheckSuperuser                CheckSuperuser                `help:"Check if an identity has superuser privileges"`
 	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
 	GetLdapConfig                 GetLdapConfig                 `help:"Get LDAP security configurations"`
 	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
@@ -424,6 +425,10 @@ type PingServer struct {
 type GetConfig struct {
 	_      int
 	Config Config `help:"An object containing Steam startup configurations"`
+}
+type CheckSuperuser struct {
+	_           int
+	IsSuperuser bool
 }
 type SetLdapConfig struct {
 	Config LdapConfig
