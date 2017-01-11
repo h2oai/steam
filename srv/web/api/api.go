@@ -299,6 +299,7 @@ type Service struct {
 	CheckSuperuser                CheckSuperuser                `help:"Check if an identity has superuser privileges"`
 	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
 	GetLdapConfig                 GetLdapConfig                 `help:"Get LDAP security configurations"`
+	TestLdapConfig                TestLdapConfig                `help:"Test LDAP security configurations"`
 	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
 	UnregisterCluster             UnregisterCluster             `help:"Disconnect from a cluster"`
 	StartClusterOnYarn            StartClusterOnYarn            `help:"Start a cluster using Yarn"`
@@ -438,6 +439,10 @@ type GetLdapConfig struct {
 	_      int
 	Config LdapConfig
 	Exists bool
+}
+type TestLdapConfig struct {
+	Config LdapConfig
+	_      int
 }
 type RegisterCluster struct {
 	Address   string

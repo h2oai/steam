@@ -311,6 +311,7 @@ type Service interface {
 	CheckSuperuser(pz az.Principal) (bool, error)
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
 	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
+	TestLdapConfig(pz az.Principal, config *LdapConfig) error
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
@@ -461,6 +462,13 @@ type GetLdapConfigIn struct {
 type GetLdapConfigOut struct {
 	Config *LdapConfig `json:"config"`
 	Exists bool        `json:"exists"`
+}
+
+type TestLdapConfigIn struct {
+	Config *LdapConfig `json:"config"`
+}
+
+type TestLdapConfigOut struct {
 }
 
 type RegisterClusterIn struct {
@@ -1482,6 +1490,16 @@ func (this *Remote) GetLdapConfig() (*LdapConfig, bool, error) {
 		return nil, false, err
 	}
 	return out.Config, out.Exists, nil
+}
+
+func (this *Remote) TestLdapConfig(config *LdapConfig) error {
+	in := TestLdapConfigIn{config}
+	var out TestLdapConfigOut
+	err := this.Proc.Call("TestLdapConfig", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *Remote) RegisterCluster(address string) (int64, error) {
@@ -2775,6 +2793,39 @@ func (this *Impl) GetLdapConfig(r *http.Request, in *GetLdapConfigIn, out *GetLd
 	out.Config = val0
 
 	out.Exists = val1
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *TestLdapConfigOut) error {
+	const name = "TestLdapConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.TestLdapConfig(pz, in.Config)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

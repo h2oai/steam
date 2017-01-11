@@ -30,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/h2oai/steam/lib/ldap"
+
 	"github.com/h2oai/steam/master/auth"
 
 	"github.com/h2oai/steam/bindings"
@@ -2280,6 +2282,10 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 
 	config, err := serializedToConfig(deserial)
 	return config, exists, err
+}
+
+func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) error {
+	return ldap.FromConfig(config).Test()
 }
 
 func (s *Service) CheckSuperuser(pz az.Principal) (bool, error) { return pz.IsSuperuser(), nil }
