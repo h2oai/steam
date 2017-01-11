@@ -96,18 +96,23 @@
   border-style: solid;
 }
 
-.pt-toast-message + .steam-notification-confirm {
-  border-color: #5fae08;
+.steam-notification-error {
+  .pt-toast-message {
+    border-color: #fd7372;
+  }
 }
-.pt-toast-message + .steam-notification-info {
-  border-color: #9b9b9b;
+.steam-notification-confirm {
+  .pt-toast-message {
+    border-color: #5fae08;
+  }
 }
-.pt-toast-message + .steam-notification-warning {
-  border-color: #f69d00;
+.steam-notification-info {
+  .pt-toast-message {
+    border-color: #9b9b9b;
+  }
 }
-.pt-toast-message + .steam-notification-error {
-  border-color: #fd7372;
+.steam-notification-warning {
+  .pt-toast-message {
+    border-color: #f69d00;
+  }
 }
-/*.pt-button::before {
-  color: black !important;
-}*/

@@ -30,6 +30,56 @@ export const KILL_ALL_INACTIVE_NOTIFICATIONS = 'KILL_ALL_INACTIVE_NOTIFICATIONS'
 export const DISMISS_NOTIFICATION = 'DISMISS_NOTIFICATION';
 export const CLOSE_NOTIFICATION_MANAGER = 'CLOSE_NOTIFICATION_MANAGER';
 
+class ToastData {
+  constructor(public message, public intent, public className, public timeout) { };
+}
+class ToastDataFactory {
+
+  constructor() { };
+
+  static create(notificationType: NotificationType, text: string) {
+    let message = React.createElement(
+      'div',
+      null,
+      React.createElement('div', { className: 'notification-indicator' }),
+      React.createElement(
+        'div',
+        { className: 'notification-content' },
+        text
+      )
+    );
+
+    let intent = Intent.DANGER;
+    let className;
+    let timeout = 5000;
+    switch (notificationType) {
+      case NotificationType.Confirm:
+        className = "steam-notification steam-notification-confirm";
+        break;
+      case NotificationType.Error:
+        timeout = 0;
+        className = "steam-notification steam-notification-error";
+        break;
+      case NotificationType.Info:
+        className = "steam-notification steam-notification-info";
+        break;
+      case NotificationType.Warning:
+        className = "steam-notification steam-notification-warning";
+        break;
+      default :
+        console.log("ERROR: Unexpected notification type");
+    }
+
+    return new ToastData(
+      message,
+      intent,
+      className,
+      timeout
+    );
+  }
+
+}
+
 export interface NotificationData {
   isActive: Boolean;
   isAlive: Boolean;
@@ -48,68 +98,7 @@ export function openNotification(notificationType: NotificationType, header: str
 
 function _openNotification(notificationType: NotificationType, header: string, detail, actions, state) {
   let index = state.notification.allNotifications.length;
-  let message = React.createElement(
-    'div',
-    null,
-    React.createElement('div', { className: 'notification-indicator' }),
-    React.createElement(
-      'div',
-      { className: 'notification-content' },
-      detail
-    )
-  );
-  let intent;
-  switch (notificationType) {
-    case NotificationType.Confirm:
-      intent = Intent.DANGER;
-      break;
-    case NotificationType.Error:
-      intent = Intent.DANGER;
-      break;
-    case NotificationType.Info:
-      intent = Intent.DANGER;
-      break;
-    case NotificationType.Warning:
-      intent = Intent.DANGER;
-      break;
-    default :
-      console.log("ERROR: Unexpected notification type");
-  }
-  let timeout = 5000;
-  if (notificationType === NotificationType.Confirm) {
-    toastManager.show({
-      message,
-      intent,
-      className: "steam-notification steam-notification-confirm",
-      timeout
-    });
-  }
-  if (notificationType === NotificationType.Info) {
-    toastManager.show({
-      message,
-      intent,
-      className: "steam-notification steam-notification-info",
-      timeout
-    });
-  }
-  if (notificationType === NotificationType.Warning) {
-    toastManager.show({
-      message,
-      intent,
-      className: "steam-notification steam-notification-warning",
-      timeout
-    });
-  }
-  if (notificationType === NotificationType.Error) {
-    timeout = 0;
-    toastManager.show({
-      message,
-      intent,
-      className: "steam-notification steam-notification-error",
-      timeout
-    });
-  }
-
+  toastManager.show(ToastDataFactory.create(notificationType, detail));
 
   return {
     type: OPEN_NOTIFICATION,
