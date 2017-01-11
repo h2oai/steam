@@ -54,6 +54,7 @@ func testSetup(testType, driver string) (*Service, az.Principal, string) {
 	pz := setupPz(ds)
 
 	svc := NewService(
+		"test",
 		wd,
 		ds,
 		test_compilationServiceAddress,
