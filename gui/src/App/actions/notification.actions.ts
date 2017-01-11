@@ -49,7 +49,7 @@ class ToastDataFactory {
       )
     );
 
-    let intent = Intent.DANGER;
+    let intent = Intent.NONE;
     let className;
     let timeout = 5000;
     switch (notificationType) {
