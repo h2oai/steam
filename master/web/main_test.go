@@ -82,7 +82,7 @@ func setupWD(testType string) (string, string) {
 func setupDS(driver, wd string) *data.Datastore {
 	dbOpts := data.DBOpts{
 		AdminName: admin,
-		AdminPass: admin012,
+		AdminPass: "admin012",
 	}
 	switch driver {
 	case "sqlite3":
