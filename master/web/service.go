@@ -2269,6 +2269,8 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap"))
 	if err != nil {
 		return nil, false, errors.Wrap(err, "reading security config from database")
+	} else if !exists {
+		return nil, false, nil
 	}
 
 	var deserial ldapSerialized
