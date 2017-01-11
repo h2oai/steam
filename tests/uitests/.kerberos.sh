@@ -10,5 +10,5 @@ tar xvf steamY-develop-linux-amd64.tar.gz
 cd steam-develop-linux-amd64
 mkdir var/master/kt
 cp ../patrick.keytab var/master/kt/patrick.keytab
-./steam serve master --superuser-name patrick --superuser-password superuser --yarn-enable-kerberos
+./steam serve master --admin-name patrick --admin-password admin012 --yarn-enable-kerberos
 

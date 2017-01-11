@@ -19,8 +19,8 @@ This vagrant creates a CentOS 6.8 box with YARN and PostgreSQL set ready for Ste
     ```
     sudo env PATH=$PATH:/usr/local/hadoop/bin \
     ./steam serve master \
-    --superuser-name=vagrant \
-    --superuser-password=superuser
+    --admin-name=vagrant \
+    --admin-password=admin012
     ```
 
 

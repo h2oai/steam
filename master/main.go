@@ -144,8 +144,8 @@ func Run(version, buildDate string, opts Opts) {
 	// ds, err := data.Create(
 	// 	path.Join(wd, fs.DbDir, "steam.db"),
 	// 	// opts.DB.Connection,
-	// 	opts.DB.SuperuserName,
-	// 	opts.DB.SuperuserPassword,
+	// 	opts.DB.Admin,
+	// 	opts.DB.AdminPassword,
 	// )
 	if err != nil {
 		log.Fatalln(err)

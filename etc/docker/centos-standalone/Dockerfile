@@ -45,5 +45,5 @@ EXPOSE 9000
 EXPOSE 9001
 
 # Run Steam
-CMD ./steam serve master --superuser-name root --superuser-password superuser
+CMD ./steam serve master --admin-name root --admin-password admin012
 

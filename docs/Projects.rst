@@ -270,7 +270,7 @@ Making Predictions
 Configurations
 --------------
 
-When maintaining and storing models in Steam, it is useful to know whether the version of a model that you're viewing is used for testing, development, production, etc. Steam allows admins/superusers to set labels (or versioning) for models and to apply permissions for those models using the labels. The Steam admin/superuser is responsible for creating new Steam users and setting roles and workgroups for those users. When setting Steam project configurations, labels can be created that allow, for example, only users in a Production workgroup to label a model as a Deployment model.
+When maintaining and storing models in Steam, it is useful to know whether the version of a model that you're viewing is used for testing, development, production, etc. Steam allows admins to set labels (or versioning) for models and to apply permissions for those models using the labels. The Steam admin is responsible for creating new Steam users and setting roles and workgroups for those users. When setting Steam project configurations, labels can be created that allow, for example, only users in a Production workgroup to label a model as a Deployment model.
 
 When a label is applied to a model, the Project Configurations page will show all models associated with a label.
 
@@ -306,7 +306,7 @@ and test.
 Collaborators
 -------------
 
-The Collaborators page shows the users who have been added to the Steam database as well as the Labels Access (permissions) assigned to each user. Currently, users can only be added by the Steam superuser using the CLI.
+The Collaborators page shows the users who have been added to the Steam database as well as the Labels Access (permissions) assigned to each user. Currently, users can only be added by the Steam admin using the CLI.
 
 .. figure:: images/collaborators.png
    :alt: Collaborators page

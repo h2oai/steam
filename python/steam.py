@@ -114,7 +114,7 @@ class RPCClient:
 		response = self.connection.call("GetConfig", request)
 		return response['config']
 	
-	def check_superuser(self):
+	def check_admin(self):
 		"""
 		Check if an identity has superuser privileges
 
