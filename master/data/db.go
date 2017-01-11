@@ -121,32 +121,46 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	} else if !primed {
 		if strings.TrimSpace(dbOpts.SuperName) == "" {
 			r := bufio.NewReader(os.Stdin)
-			fmt.Print("Superuser name: ")
+			fmt.Print("Steam local admin username: ")
 			name, err := r.ReadString('\n')
 			if err != nil {
 				return nil, err
 			}
 			dbOpts.SuperName = strings.Trim(name, "\n")
 		}
-		if strings.TrimSpace(dbOpts.SuperPass) == "" {
-			fmt.Print("Superuser password: ")
-			passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
-			if err != nil {
-				return nil, err
-			}
-			dbOpts.SuperPass = strings.Trim(string(passBytes), "\n")
-			fmt.Println()
-		}
 		if err := auth.ValidateUsername(dbOpts.SuperName); err != nil {
 			return nil, errors.Wrap(err, "validating username")
 		}
-		if err := auth.ValidatePassword(dbOpts.SuperPass); err != nil {
-			return nil, errors.Wrap(err, "validating password")
+
+		if strings.TrimSpace(dbOpts.SuperPass) == "" {
+			fmt.Print("Steam local admin password: ")
+			passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				fmt.Println()
+				return nil, err
+			}
+			if err := auth.ValidatePassword(string(passBytes)); err != nil {
+				fmt.Println()
+				return nil, errors.Wrap(err, "validating password")
+			}
+			fmt.Print("\nValidate local admin password: ")
+			valiBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				fmt.Println()
+				return nil, err
+			}
+			if string(valiBytes) != string(passBytes) {
+				fmt.Println()
+				return nil, errors.New("password mismatch")
+			}
+			fmt.Println()
+			dbOpts.SuperPass = strings.Trim(string(passBytes), "\n")
 		}
 
-		if err := prime(db); err != nil {
-			return nil, errors.Wrap(err, "priming database")
-		}
+	}
+
+	if err := prime(db); err != nil {
+		return nil, errors.Wrap(err, "priming database")
 	}
 
 	ds, err := initDatastore(db)
