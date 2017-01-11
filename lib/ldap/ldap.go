@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/srv/web"
 
 	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
@@ -44,6 +45,11 @@ type Ldap struct {
 
 	// Users who are logged in
 	Users *LdapUser
+}
+
+func (l *Ldap) Test() error {
+	_, err := ldap.Dial("tcp", l.Address)
+	return errors.Wrap(err, "dialing ldap")
 }
 
 func (l *Ldap) CheckBind(user, password string) error {
@@ -98,7 +104,13 @@ func NewLdap(
 	}
 }
 
-func FromConfig(ds *data.Datastore) (*Ldap, error) {
+func FromConfig(config *web.LdapConfig) *Ldap {
+	return NewLdap(fmt.Sprintf("%s:%d", config.Host, config.Port), config.BindDn,
+		config.BindPassword, config.UserBaseDn, config.UserRnAttribute, config.UserBaseFilter,
+		config.ForceBind, time.Minute*1, 60*2*time.Minute)
+}
+
+func FromDatabase(ds *data.Datastore) (*Ldap, error) {
 	config, exists, err := ds.ReadSecurity(data.ByKey("ldap"))
 	if err != nil {
 		return nil, errors.Wrap(err, "reading security config from database")

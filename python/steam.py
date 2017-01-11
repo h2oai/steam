@@ -158,6 +158,21 @@ class RPCClient:
 		response = self.connection.call("GetLdapConfig", request)
 		return response['config'], response['exists']
 	
+	def test_ldap_config(self, config):
+		"""
+		Test LDAP security configurations
+
+		Parameters:
+		config: No description available (LdapConfig)
+
+		Returns:None
+		"""
+		request = {
+			'config': config
+		}
+		response = self.connection.call("TestLdapConfig", request)
+		return 
+	
 	def register_cluster(self, address):
 		"""
 		Connect to a cluster

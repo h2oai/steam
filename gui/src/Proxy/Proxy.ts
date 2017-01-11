@@ -338,6 +338,10 @@ export interface Service {
 
   // Get LDAP security configurations
   getLdapConfig: (go: (error: Error, config: LdapConfig, exists: boolean) => void) => void
+  
+  // Test LDAP security configurations
+  testLdapConfig: (config: LdapConfig, go: (error: Error) => void) => void
+  
 
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
@@ -731,6 +735,16 @@ interface GetLdapConfigOut {
 
   exists: boolean
 
+}
+
+interface TestLdapConfigIn {
+  
+  config: LdapConfig
+  
+}
+
+interface TestLdapConfigOut {
+  
 }
 
 interface RegisterClusterIn {
@@ -2268,6 +2282,18 @@ export function getLdapConfig(go: (error: Error, config: LdapConfig, exists: boo
     } else {
       const d: GetLdapConfigOut = <GetLdapConfigOut> data;
       return go(null, d.config, d.exists);
+    }
+  });
+}
+
+export function testLdapConfig(config: LdapConfig, go: (error: Error) => void): void {
+  const req: TestLdapConfigIn = { config: config };
+  Proxy.Call("TestLdapConfig", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: TestLdapConfigOut = <TestLdapConfigOut> data;
+      return go(null);
     }
   });
 }

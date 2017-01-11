@@ -30,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/h2oai/steam/lib/ldap"
+
 	"github.com/h2oai/steam/master/auth"
 
 	"github.com/h2oai/steam/bindings"
@@ -2269,6 +2271,8 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap"))
 	if err != nil {
 		return nil, false, errors.Wrap(err, "reading security config from database")
+	} else if !exists {
+		return nil, false, nil
 	}
 
 	var deserial ldapSerialized
@@ -2280,7 +2284,13 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	return config, exists, err
 }
 
+
+func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) error {
+	return ldap.FromConfig(config).Test()
+}
+
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
+
 
 // --- ---------- ---
 // --- ---------- ---
