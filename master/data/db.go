@@ -43,6 +43,8 @@ const (
 	VERSION = "1.1.0"
 )
 
+var STANDARD_USER_INIT_PERMISSIONS = []string{"manage_cluster", "view_cluster", "edit_cluster"}
+
 type metadata map[string]string
 
 type (
@@ -258,6 +260,37 @@ func prime(db *goqu.Database) error {
 	return errors.Wrap(err, "committing transaction")
 }
 
+func initRoles(tx *goqu.TxDatabase, permissions []Permission) error {
+	role, doesRoleExist, err := readRole(tx, ByName("standard user"));
+	if err != nil {
+		return errors.Wrapf(err, "error reading role %s", role)
+	}
+	if doesRoleExist {
+		if err := deleteRolePermission(tx, ByRoleId(role.Id)); err != nil {
+			return errors.Wrapf(err, "error deleting role permission %s", role.Id)
+		}
+		initRolePermissions(tx, role.Id, permissions)
+
+	} else {
+		roleId, err := createRole(tx, "standard user")
+		if err != nil {
+			return errors.Wrapf(err, "error creating role %s", role)
+		}
+		initRolePermissions(tx, roleId, permissions)
+	}
+	return err
+}
+
+func initRolePermissions(tx *goqu.TxDatabase, roleId int64, permissions []Permission) error {
+	for _, permission := range permissions {
+		_, err := createRolePermission(tx, roleId, permission.Id)
+		if err != nil {
+			return errors.Wrapf(err, "error creating permission %s for role %s", permission.Id, roleId)
+		}
+	}
+	return nil
+}
+
 func primeMetadata(tx *goqu.TxDatabase, key, value string) error {
 	_, err := tx.From("meta").Insert(goqu.Record{"key": key, "value": value}).Exec()
 	return errors.Wrap(err, "executing query")
@@ -326,7 +359,13 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 			return errors.Wrap(err, "reading states")
 		}
 		permissions, err = readPermissions(tx)
-		return errors.Wrap(err, "reading permissions")
+		if err != nil {
+			return errors.Wrap(err, "reading permissions")
+		}
+		if err := initRoles(tx, permissions); err != nil {
+			return errors.Wrap(err, "initialization roles")
+		}
+		return nil
 	}); err != nil {
 		return nil, errors.Wrap(err, "committing transaction")
 	}
