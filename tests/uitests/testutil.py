@@ -39,10 +39,15 @@ Perm id		Permission		Index
 """
 
 _steampath = os.getenv('STEAM_PATH', './steam/steam')
+fireprof = '/home/patrick/.mozilla/firefox/gq44c1v1.default'
 
 def cliLogin(name, pw):
-	ret = sp.check_output("{0} login localhost:9000 --username={1} --password={1}"\
+	ret = sp.check_output("{0} login localhost:9000 --username=\"{1}\" --password=\"{2}\""\
 		.format(_steampath, name, pw), shell=True)
+
+def uploadEngine(path):
+	ret = sp.check_output("{0} upload engine --file-path={1}".format(_steampath, path), shell=True)
+	print ret
 
 def createRole(role, desc, perm):
 	ret = sp.check_output("{0} create role --name {1} --description \"{2}\""\
@@ -270,7 +275,7 @@ def goClusters(driver):
 	except Exception as e:
 		print e
 		print "Failed to navigate to cluster page through navbar"
-		return False
+		raise e
 
 def goModels(driver):
 	try:
@@ -343,7 +348,7 @@ def selectCluster(driver, name):
 	if i >= len(clsts):
 		print "Failed to locate named cluster {0}".format(name)
 		return False
-	driver.find_elements_by_xpath("//div[@class='select-cluster']//button")[i].click()
+	driver.find_elements_by_xpath("//div[@class='select-cluster']//button[text()='Connect']")[i].click()
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	wait.until(lambda x: x.find_element_by_class_name("cluster-info"))
 
@@ -351,7 +356,7 @@ def deleteCluster(driver, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	wait.until(lambda x: x.find_element_by_xpath("//a[text()='{0}']".format(name)))
 	if len(driver.find_elements_by_xpath("//a[@rel='noopener']")) != \
-		len(driver.find_elements_by_class_name("remove-cluster-button")):
+		len(driver.find_elements_by_xpath("//i[@class='fa fa-trash no-margin']")):
 		print "failed to locate cluster names on page"
 		return False
 	i = 0
@@ -363,7 +368,12 @@ def deleteCluster(driver, name):
 	if i >= len(clsts):
 		print "failed to locate named cluster {0}".format(name)
 		return False
-	driver.find_elements_by_class_name("remove-cluster-button")[i].click()	
+	print "woah gonna delete the cluster {0}".format(i)
+	driver.find_elements_by_xpath("//i[@class='fa fa-trash no-margin']")[i].click()
+	time.sleep(2)	
+	wait.until(lambda x: x.find_element_by_xpath("//div[text()='Confirm']").is_displayed())
+	driver.find_element_by_xpath("//div[text()='Confirm']").click()
+	time.sleep(3)
 	wait.until(lambda x: len(x.find_elements_by_xpath("//a[@rel='noopener']")) < len(clsts))
 
 def serviceExists(driver, name):
@@ -468,6 +478,16 @@ def createProject(driver, name, cluster, data, kind, mods):
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='{0}']".format(mod)))
 
 
+def launchCluster(driver, name, node, mem, secure, engine):
+	driver.find_element_by_xpath("//input[@name='name']").send_keys(name)
+	driver.find_elements_by_class_name("numeric-input")[0].send_keys(node)
+	driver.find_elements_by_class_name("numeric-input")[1].send_keys(mem)
+	if secure:
+		driver.find_element_by_xpath("//input[@name='secure']").click()
+	sel = Select(driver.find_element_by_xpath("//select"))
+	sel.select_by_value(engine)
+	driver.find_element_by_xpath("//button[@type='submit']").click()
+
 def viewModel(driver, name):
 	wait = WebDriverWait(driver, timeout=5, poll_frequency=0.2)
 	print "getting ind"
@@ -490,7 +510,7 @@ def compareToModel(driver, name):
 def testAs(user, pw):
 	driver = None
 	if 'TEST_FIREFOX' in os.environ:
-		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		p = FirefoxProfile(fireprof)
 		driver = webdriver.Firefox(p)
 	else:
 		driver = webdriver.Chrome()
@@ -500,23 +520,23 @@ def testAs(user, pw):
 def newtest():
 	driver = None
 	if 'TEST_FIREFOX' in os.environ:
-		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		p = FirefoxProfile(fireprof)
 		driver = webdriver.Firefox(p)
 	else:
 		driver = webdriver.Chrome()
-	driver.get("http://admin:admin012@localhost:9000")
+	driver.get("http://patrick:superuser@localhost:9000")
 	return driver
 
 def newProxytest(proxy):
 	if 'TEST_FIREFOX' in os.environ:
-		p = FirefoxProfile('/home/creature/.mozilla/firefox/s1tpg123.default')
+		p = FirefoxProfile(fireprof)
 		p.set_proxy(proxy.selenium_proxy())
 		driver = webdriver.Firefox(p)
 	else:
 		o = Options()
 		o.add_argument("--proxy-server={0}".format(proxy.proxy))
 		driver = webdriver.Chrome(chrome_options=o)
-	driver.get("http://admin:admin012@localhost:9000")
+	driver.get("http://patrick:superuser@localhost:9000")
 	return driver
 
 def endtest(driver):

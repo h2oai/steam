@@ -38,8 +38,8 @@ failcount=0
 
 cd steam
 echo > $WD/.failures
-./steam login localhost:9000 --username=admin --password=admin012 > /dev/null
-./steam serve master --admin-name admin --admin-password admin012 --compilation-service-address=":55000" >> ../steam.log  2>&1 &
+./steam login localhost:9000 --username=superuser --password=superuser > /dev/null
+./steam serve master --superuser-name superuser --superuser-password superuser --compilation-service-address=":55000" >> ../steam.log  2>&1 &
 STEAM_PID=$!
 disown
 sleep 1
@@ -49,7 +49,7 @@ cd ..
 for dir in `ls -d *-test`; do
 	cd steam
 	sleep 1
-	#./steam serve master --admin-name admin --admin-password admin012 >> ../steam.log  2>&1 &
+	#./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
 	cd ..
 	cp testutil.py $dir/
 	sleep 1

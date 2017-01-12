@@ -160,6 +160,13 @@ $navigation-width: $base-grid-unit * 5;
   header {
     height: $xlarge;
     width: 100%;
+    display: flex;
+    color: $brand-white;
+    .username {
+      justify-content: center;
+      align-items: center;
+      display: flex;
+    }
     .header-navigation {
       height: $xlarge;
       font-size: 1.5em;

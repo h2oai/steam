@@ -178,6 +178,9 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                     <div>{this.props.config ? 'v' + this.props.config.version : null}</div>
                   </Link>
                 </div>
+                <div className="username">
+                  {this.props.config && this.props.config.username ? this.props.config.username : null}
+                </div>
               </header>
               <div className="header-content">
               </div>

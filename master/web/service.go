@@ -92,6 +92,7 @@ func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
 		Version:             s.version,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
+		Username: pz.Name(),
 	}, nil
 }
 
@@ -169,8 +170,8 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	if err := pz.CheckPermission(s.ds.Permission.ManageCluster); err != nil {
 		return 0, errors.Wrap(err, "checking permission")
 	}
-	if err := pz.CheckView(s.ds.EntityType.Engine, engineId); err != nil {
-		return 0, errors.Wrap(err, "checking view privileges")
+	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
+		return 0, errors.Wrap(err, "checking permission")
 	}
 	// Check that name is unique to user
 	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByPrivilege(pz))

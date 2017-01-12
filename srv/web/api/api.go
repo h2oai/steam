@@ -23,6 +23,7 @@ type Config struct {
 	Version             string
 	KerberosEnabled     bool
 	ClusterProxyAddress string
+	Username            string
 }
 
 type LdapConfig struct {
