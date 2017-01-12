@@ -43,7 +43,7 @@ const (
 	VERSION = "1.1.0"
 )
 
-var STANDARD_USER_INIT_PERMISSIONS = []string{"manage_cluster", "view_cluster", "edit_cluster"}
+var STANDARD_USER_INIT_PERMISSIONS = []string{"ManageCluster", "ViewCluster"}
 
 type metadata map[string]string
 
@@ -260,7 +260,7 @@ func prime(db *goqu.Database) error {
 	return errors.Wrap(err, "committing transaction")
 }
 
-func initRoles(tx *goqu.TxDatabase, permissions []Permission) error {
+func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd []Permission) error {
 	role, doesRoleExist, err := readRole(tx, ByName("standard user"));
 	if err != nil {
 		return errors.Wrapf(err, "error reading role %s", role)
@@ -269,14 +269,14 @@ func initRoles(tx *goqu.TxDatabase, permissions []Permission) error {
 		if err := deleteRolePermission(tx, ByRoleId(role.Id)); err != nil {
 			return errors.Wrapf(err, "error deleting role permission %s", role.Id)
 		}
-		initRolePermissions(tx, role.Id, permissions)
+		initRolePermissions(tx, role.Id, permissionsToAdd)
 
 	} else {
 		roleId, err := createRole(tx, "standard user")
 		if err != nil {
 			return errors.Wrapf(err, "error creating role %s", role)
 		}
-		initRolePermissions(tx, roleId, permissions)
+		initRolePermissions(tx, roleId, permissionsToAdd)
 	}
 	return err
 }
@@ -362,7 +362,8 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 		if err != nil {
 			return errors.Wrap(err, "reading permissions")
 		}
-		if err := initRoles(tx, permissions); err != nil {
+
+		if err := initRoles(tx, permissions, getPermissionsSubset(permissions, STANDARD_USER_INIT_PERMISSIONS)); err != nil {
 			return errors.Wrap(err, "initialization roles")
 		}
 		return nil
@@ -381,6 +382,17 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 		State:       newStateKeys(states),
 		Permission:  newPermissionKeys(permissions),
 	}, nil
+}
+func getPermissionsSubset(permissions []Permission, permissionCodes []string) []Permission {
+	var permissionsToAdd []Permission
+	for _, permission := range permissionCodes {
+		for _, globalPermission := range permissions {
+			if globalPermission.Code == permission {
+				permissionsToAdd = append(permissionsToAdd, globalPermission)
+			}
+		}
+	}
+	return permissionsToAdd
 }
 
 func getRows(tx *goqu.TxDatabase, dataset *goqu.Dataset) (*sql.Rows, error) {
