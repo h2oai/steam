@@ -716,7 +716,7 @@ func ByPrivilege(pz az.Principal) QueryOpt {
 		)
 		aux := q.tx.From("privilege").SelectDistinct("entity_id").Where(
 			goqu.I("workgroup_id").In(x),
-			goqu.I("entity_type").Eq(q.entityTypeId),
+			goqu.I("entity_type_id").Eq(q.entityTypeId),
 		)
 
 		q.dataset = q.dataset.Where(goqu.I("id").In(aux))
