@@ -17,6 +17,7 @@ def deployOneTest(driver):
 	try:
 		tu.selectModel(driver, "regress")
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("deptest")
+		time.sleep(2)
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='regress']"))
 	except:
@@ -61,6 +62,7 @@ def projectDeployTest(driver):
 		tu.selectModel(driver, "missin")
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("projtest")
 		#driver.find_element_by_xpath("//div").send_keys(Keys.F12)
+		time.sleep(2)
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()
 		time.sleep(2)
 		driver.refresh()
@@ -117,6 +119,7 @@ def multiDeployTest(driver):
 		tu.selectModelCategory(driver, "Regression")
 		tu.selectModel(driver, "linmiss")
 		driver.find_element_by_xpath("//div[@class='name-project']//input").send_keys("multidep")
+		time.sleep(2)
 		driver.find_element_by_xpath("//button[text()='Create Project']").click()
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='model-name' and text()='linmiss']"))
 		tu.deployModel(driver, "linmiss", "double")
@@ -145,7 +148,7 @@ def multiDeployTest(driver):
 	return True
 
 def main():
-	s = Server('/home/creature/browsermob/bin/browsermob-proxy', { 'port' : 1337})
+	s = Server('/home/patrick/browsermob/bin/browsermob-proxy', { 'port' : 1337})
 	s.start()
 	proxy = s.create_proxy({'port': 1338})
 	failcount = 0

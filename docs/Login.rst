@@ -2,7 +2,7 @@ Logging in to Steam
 -------------------
 
 In a Chrome web browser, navigate to the Steam web server using the
-login credentials provided by your admin and/or Steam superuser. This
+login credentials provided by your admin and/or Steam admin. This
 Steam web server is the server on which an admin has installed Steam
 (for example, http://192.16.2.182:9000). Contact your admin for the IP
 address and for credentials.

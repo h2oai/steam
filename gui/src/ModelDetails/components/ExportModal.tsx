@@ -70,7 +70,7 @@ export class ExportModal extends React.Component<Props & DispatchProps, any> {
     }
   }
 
-  onCancelClicked = (e: React.MouseEvent) => {
+  onCancelClicked = (e: React.MouseEvent<any>) => {
     this.props.onCancel();
   };
 

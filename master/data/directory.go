@@ -25,37 +25,39 @@ import (
 // --- Datastore-backed Directory Impl ---
 
 func (ds *Datastore) Lookup(name string) (az.Principal, error) {
-	identity, err := ds.readIdentityAndPassword(name)
+	// Fetch identity
+	identity, ok, err := ds.ReadIdentity(ByName(name))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed reading identity with password")
+		return nil, errors.Wrap(err, "reading identity")
 	}
-
-	if identity == nil {
+	if !ok {
 		return nil, nil
 	}
-
-	roleNames, err := ds.readRoleNamesForIdentity(identity.Id)
+	// Fetch roles
+	roles, err := ds.ReadRoles(ForIdentity(identity.Id))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "reading roles")
 	}
 
-	isSuperuser := false
-	for _, roleName := range roleNames {
-		if roleName == SuperuserRoleName {
-			isSuperuser = true
+	isAdmin := false
+	for _, role := range roles {
+		if role.Name == AdminRN {
+			isAdmin = true
 			break
 		}
 	}
 
-	permissionIds, err := ds.readPermissionsForIdentity(identity.Id)
+	perms, err := ds.ReadPermissions(
+		ForIdentity(identity.Id),
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	permissions := make(map[int64]bool)
-	for _, permissionId := range permissionIds {
-		permissions[permissionId] = true
+	for _, perm := range perms {
+		permissions[perm.Id] = true
 	}
 
-	return &Principal{ds, identity, permissions, isSuperuser}, nil
+	return &Principal{ds, &identity, permissions, isAdmin}, nil
 }

@@ -4,6 +4,7 @@
 
 var path = require('path');
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+var SRC_DIR = path.resolve(__dirname, 'src');
 
 module.exports = {
   entry: [
@@ -16,7 +17,10 @@ module.exports = {
     filename: 'bundle.js'
   },
   resolve: {
-    extensions: ['', '.ts', '.tsx', '.js', '.css']
+    extensions: ['', '.ts', '.tsx', '.js', '.css'],
+    alias: {
+      environment: process.env.NODE_ENV ? path.join(__dirname, 'environment.' + process.env.NODE_ENV + '.js') : path.join(__dirname, 'environment.production.js')
+    }
   },
   module: {
     preLoaders: [

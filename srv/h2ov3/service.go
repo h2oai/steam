@@ -34,12 +34,18 @@ import (
 )
 
 type H2O struct {
-	Address string
+	Address		string
+	ContextPath	string
+	Token		string
+	Client		*http.Client
 }
 
-func NewClient(address string) *H2O {
+func NewClient(address, contextPath, token string) *H2O {
 	return &H2O{
 		address,
+		contextPath,
+		token,
+		http.DefaultClient,
 	}
 }
 
@@ -67,7 +73,7 @@ func (h *H2O) url(path string, parms ...interface{}) string {
 		}
 	}
 
-	return (&url.URL{Scheme: "http", Host: h.Address, Path: path}).String()
+	return (&url.URL{Scheme: "http", Host: h.Address, Path: h.ContextPath + path}).String()
 }
 
 type H2OException struct {
@@ -102,7 +108,7 @@ func (h *H2O) handleResponse(res *http.Response, u string) ([]byte, error) {
 func (h *H2O) download(s, p string, preserveFilename bool) (string, error) {
 	u := h.url(s)
 
-	_, filepath, err := fs.Download(p, u, preserveFilename)
+	_, filepath, err := fs.Download(h.Token, p, u, preserveFilename)
 	if err != nil {
 		return "", err
 	}
@@ -182,7 +188,7 @@ func (h *H2O) AutoML(dataset, targetName string, maxTime int) (string, error) {
 }
 
 func (h *H2O) ExportJavaModel(modelID, p string) (string, error) {
-	f, err := h.download("/3/Models.java/"+modelID, p, true)
+	f, err := h.download("3/Models.java/"+modelID, p, true)
 	if err != nil {
 		return "", fmt.Errorf("Java model export failed: %s", err)
 	}
@@ -190,7 +196,7 @@ func (h *H2O) ExportJavaModel(modelID, p string) (string, error) {
 }
 
 func (h *H2O) ExportGenModel(p string) (string, error) {
-	f, err := h.download("/3/h2o-genmodel.jar", path.Join(p, "h2o-genmodel.jar"), false)
+	f, err := h.download("3/h2o-genmodel.jar", path.Join(p, "h2o-genmodel.jar"), false)
 	if err != nil {
 		return "", fmt.Errorf("Java genmodel jar export failed: %s", err)
 	}
@@ -199,7 +205,7 @@ func (h *H2O) ExportGenModel(p string) (string, error) {
 
 // FIXME: MUST BE H2O VERSION 3.10.0.7
 func (h *H2O) ExportMOJO(modelID, p string) (string, error) {
-	f, err := h.download("/3/Models/"+modelID+"/mojo", p, true)
+	f, err := h.download("3/Models/"+modelID+"/mojo", p, true)
 	if err != nil {
 		return "", errors.Wrap(err, "mojo export failed")
 	}
@@ -208,7 +214,7 @@ func (h *H2O) ExportMOJO(modelID, p string) (string, error) {
 
 // FIXME: MUST BE H2O VERSION WITH DEEPWATER
 func (h *H2O) ExportDeepWaterAll(p string) (string, error) {
-	f, err := h.download("/3/deepwater-all.jar", path.Join(p, "deepwater-all.jar"), false)
+	f, err := h.download("3/deepwater-all.jar", path.Join(p, "deepwater-all.jar"), false)
 
 	return f, errors.Wrap(err, "downloading Deepwater depencency")
 }

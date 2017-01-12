@@ -22,6 +22,11 @@
 			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
 		},
 		{
+			"ImportPath": "github.com/fatih/color",
+			"Comment": "v1.1.0-4-gbf82308",
+			"Rev": "bf82308e8c8546dc2b945157173eb8a959ae9505"
+		},
+		{
 			"ImportPath": "github.com/go-ldap/ldap",
 			"Comment": "v2.4.1",
 			"Rev": "d0a5ced67b4dc310b9158d63a2c6f9c5ec13f105"
@@ -56,6 +61,15 @@
 			"ImportPath": "github.com/lib/pq/oid",
 			"Comment": "go1.0-cutoff-96-gee1442b",
 			"Rev": "ee1442bda7bd1b6a84e913bdb421cb1874ec629d"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.6-9-gd228849",
+			"Rev": "d228849504861217f796da67fae4f6e347643f15"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "30a891c33c7cde7b02a981314b4228ec99380cca"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-sqlite3",
@@ -123,9 +137,18 @@
 			"Rev": "d7bf3545bb0dacf009c535b3d3fbf53ac0a339ab"
 		},
 		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "c200b10b5d5e122be351b67af224adc6128af5bf"
+		},
+		{
 			"ImportPath": "gopkg.in/asn1-ber.v1",
 			"Comment": "v1.1",
 			"Rev": "4e86f4367175e39f69d9358a5f17b4dda270378d"
+		},
+		{
+			"ImportPath": "gopkg.in/doug-martin/goqu.v3",
+			"Comment": "v3.3",
+			"Rev": "3fb96709c55732c801fed9abf32dad24c1090887"
 		}
 	]
 }

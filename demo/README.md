@@ -61,17 +61,17 @@ This section describes how to set up and start Steam and start the Steam CLI for
 		
  >***Note***: The Jetty server defaults to port 8080. You can optionally provide a `--port` value for **jetty-runner.jar**.
 		
-4. Open another terminal window. From within the **steam-master-darwin-amd64** folder, start the Steam compilation and scoring service. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on localhost:9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster.
+4. Open another terminal window. From within the **steam-master-darwin-amd64** folder, start the Steam compilation and scoring service. Be sure to include the ``--admin-name=admin`` and ``--admin-password=admin012`` flags. (Or provide a more secure password.) This starts Steam on localhost:9000 and creates a Steam admin. The Steam admin is responsible for creating roles, workgroups, and users and maintains the H2O cluster.
 
-        ./steam serve master --superuser-name=superuser --superuser-password=superuser
+        ./steam serve master --admin-name=admin --admin-password=admin
 
  This starts the Steam web service on `localhost:9000`, the compilation service on `localhost:8080` (same as the Jetty server), and the scoring service to the external IP address of `localhost`. You can change these using `--compilation-service-address=<ip_address:port>` and `--scoring-service-address=<ip_address>`. Use `./steam help serve master` or `./steam serve master -h` to view additional options.
  
  >***Note***: If you are demoing Steam and do not have an Internet connection, you can set the scoring service to point to localhost using `--scoring-service-address=localhost`. 
 
-5. Open another terminal window to run CLI commands. From within the Steam folder, log in to the machine running Steam (localhost:9000). Use the superuser login and password that you created in the previous step.
+5. Open another terminal window to run CLI commands. From within the Steam folder, log in to the machine running Steam (localhost:9000). Use the admin login and password that you created in the previous step.
 
-        ./steam login localhost:9000 --username=superuser --password=superuser
+        ./steam login localhost:9000 --username=admin --password=admin012
    <!-- -->
 
 6. Run the following to verify that the CLI is working correctly.
@@ -324,8 +324,9 @@ Preprocessing packages can be used to perform additional data munging on an exis
 1. To upload a new preprocessing package, click the **Upload New Package** button in the upper-right corner of the Deployment page.
 2. Specify the main Python file that will be used for preprocessing. Click on the folder link to browse for this file.
 3. Specify additional files that may be dependencies of the main Python preprocessing file.
-4. Enter a name for this new package.
-5. Click **Upload** when you are finished.
+4. If you are running in a conda environment, you can select a .yaml file that defines the environment.
+5. Enter a name for this new package.
+6. Click **Upload** when you are finished.
 
 Upon successful completion, the new preprocessing package will display on the Packages tab of the Deployment page. This file can then be specified when deploying or exporting models. (Refer to [Deploying a Model](#deploymodel) or [Exporting a Model](#exportmodel).)
 
@@ -345,7 +346,7 @@ Upon successful completion, the new preprocessing package will display on the Pa
 
 ## <a name="configurations"></a>Configurations
 
-Steam allows you to set labels for models (such as Production, Test, etc.) and apply permissions for using the labels. The Steam admin/superuser is responsible for creating new Steam users and setting roles and workgroups for those users. When setting Steam project configurations, labels can be created that allow, for example, only users in a Production workgroup to label a model as a production model. 
+Steam allows you to set labels for models (such as Production, Test, etc.) and apply permissions for using the labels. The Steam admin is responsible for creating new Steam users and setting roles and workgroups for those users. When setting Steam project configurations, labels can be created that allow, for example, only users in a Production workgroup to label a model as a production model. 
 
 When a label is applied to a model, the Project Configurations page will show all models associated with a label.
 
@@ -364,7 +365,7 @@ Upon successful completion, the new label will display on the Project Configurat
 <a name="collaborators"></a>
 ## Collaborators
 
-The Collaborators page shows the users who have been added to the Steam database as well as the Labels Access (permissions) assigned to each user. Currently, users can only be added by the Steam superuser using the CLI.
+The Collaborators page shows the users who have been added to the Steam database as well as the Labels Access (permissions) assigned to each user. Currently, users can only be added by the Steam admin using the CLI.
 
 ![Collaborators](images/collaborators.png)
    
@@ -393,7 +394,7 @@ You can connect to additional clusters that are running H2O by clicking the **La
 
 # Users
 
-The Users page includes a list of all users are have been added to the Steam database along with the user's role. From this page, Steam superusers can add, edit, and deactivate users and roles. 
+The Users page includes a list of all users are have been added to the Steam database along with the user's role. From this page, Steam admins can add, edit, and deactivate users and roles. 
 
 ![Users page](images/users.png)
 
@@ -419,7 +420,7 @@ On the Roles tab, scroll down to the bottom of the page, and click the trashcan 
 
 ## <a name="addusers"></a>Adding Users
 
-Superusers can add users directly from within the UI. 
+Admins can add users directly from within the UI. 
 
 **Note**: Users must be assigned to a role. Because of that, roles must be created before new users can be added. 
 
@@ -447,7 +448,7 @@ On the Users tab, click the **Deactivate User** link beside the user whose Steam
 
 ## <a name="changepermissions"></a>Changing Permissions
 
-Superusers can add or remove permissions for each role directly on this page. Select the checkbox for the correspoding permission and role that you want to change, then click **Review Changes** at the bottom of the page. A popup displays, providing you with a summary of the changes.
+Admins can add or remove permissions for each role directly on this page. Select the checkbox for the correspoding permission and role that you want to change, then click **Review Changes** at the bottom of the page. A popup displays, providing you with a summary of the changes.
 
 ![Confirm changes](images/update_permissions_confirm.png)
 
@@ -1370,7 +1371,7 @@ The following example retrieves a list of users that are available on the databa
     NAME        ID  LAST LOGIN          AGE
     bob         2   0000-12-31 16:00:00 -0800 PST   2016-07-15 09:32:32 -0700 PDT
     jim         3   0000-12-31 16:00:00 -0800 PST   2016-07-15 09:32:38 -0700 PDT
-    superuser   1   0000-12-31 16:00:00 -0800 PST   2016-07-15 09:21:58 -0700 PDT
+    admin   1   0000-12-31 16:00:00 -0800 PST   2016-07-15 09:21:58 -0700 PDT
 
 --------------
 
@@ -1590,7 +1591,7 @@ The following example retrieves a list of roles that are available on the databa
 
     ./steam get roles
     NAME        ID  DESCRIPTION                 CREATED
-    Superuser   1   Superuser                   1473874053
+    Admin   1   Admin                   1473874053
     datascience 2   a default data science role 1473893347  
 
 --------------

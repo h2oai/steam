@@ -17,11 +17,15 @@
 package ldap
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"path/filepath"
+	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
+	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/srv/web"
+
 	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
 )
@@ -29,11 +33,11 @@ import (
 type Ldap struct {
 	Address  string
 	BindDN   string
-	BindPass string `toml:"bindPassword"`
+	BindPass string
 
 	UserBaseDn      string
-	UserIdAttribute string
-	UserObjectClass string
+	UserBaseFilter  string
+	UserRNAttribute string
 
 	// TODO implement TLS case
 	isTLS     bool
@@ -41,6 +45,11 @@ type Ldap struct {
 
 	// Users who are logged in
 	Users *LdapUser
+}
+
+func (l *Ldap) Test() error {
+	_, err := ldap.Dial("tcp", l.Address)
+	return errors.Wrap(err, "dialing ldap")
 }
 
 func (l *Ldap) CheckBind(user, password string) error {
@@ -57,13 +66,10 @@ func (l *Ldap) CheckBind(user, password string) error {
 	// Search request for userDN
 	req := ldap.NewSearchRequest(
 		l.UserBaseDn,
-		ldap.ScopeWholeSubtree,
-		ldap.NeverDerefAliases,
-		0,
-		0,
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0,
 		false,
-		fmt.Sprintf("(&(objectClass=%s)(%s=%s))",
-			l.UserObjectClass, l.UserIdAttribute, user),
+		fmt.Sprintf("(&%s(%s=%s))",
+			l.UserBaseFilter, l.UserRNAttribute, user),
 		nil,
 		nil,
 	)
@@ -84,48 +90,56 @@ func (l *Ldap) CheckBind(user, password string) error {
 
 func NewLdap(
 	address, bindDn, bindPass string,
-	userBaseDn, userIdAttribute, userObjectClass string,
+	userBaseDn, userRNAttribute, userBaseFilter string,
 	forceBind bool,
 	idleTime, maxTime time.Duration) *Ldap {
 	return &Ldap{
 		// Base LDAP settings
 		Address: address, BindDN: bindDn, BindPass: bindPass,
 		// User filter settings
-		UserBaseDn: userBaseDn, UserIdAttribute: userIdAttribute, UserObjectClass: userObjectClass,
+		UserBaseDn: userBaseDn, UserRNAttribute: userRNAttribute, UserBaseFilter: userBaseFilter,
 		// Additional Configs
 		ForceBind: forceBind,
 		Users:     NewLdapUser(idleTime, maxTime),
 	}
 }
 
-func FromConfig(fileName string) (*Ldap, error) {
-	A := struct {
-		Hostname        string
-		Port            int
-		BindDn          string
-		BindPassword    string
-		UserBaseDn      string
-		UserIdAttribute string
-		UserObjectClass string
+func FromConfig(config *web.LdapConfig) *Ldap {
+	return NewLdap(fmt.Sprintf("%s:%d", config.Host, config.Port), config.BindDn,
+		config.BindPassword, config.UserBaseDn, config.UserRnAttribute, config.UserBaseFilter,
+		config.ForceBind, time.Minute*1, 60*2*time.Minute)
+}
 
-		IsTLS     bool `toml:"useLdaps"`
-		ForceBind bool
-		IdleTime  time.Duration
-		MaxTime   time.Duration
-	}{}
-
-	f, err := filepath.Abs(fileName)
+func FromDatabase(ds *data.Datastore) (*Ldap, error) {
+	config, exists, err := ds.ReadSecurity(data.ByKey("ldap"))
 	if err != nil {
-		return nil, errors.Wrap(err, "getting absolute path")
+		return nil, errors.Wrap(err, "reading security config from database")
+	} else if !exists {
+		return nil, errors.New("no valid LDAP configurations. Please set LDAP configurations prior to starting steam with LDAP")
 	}
-	if _, err := toml.DecodeFile(f, &A); err != nil {
-		return nil, errors.Wrap(err, "decoding config file")
+
+	aux := struct {
+		Bind string
+		Ldap
+	}{}
+	if err := json.Unmarshal([]byte(config.Value), &aux); err != nil {
+		return nil, errors.Wrap(err, "deserializing config")
 	}
+
+	b, err := base64.StdEncoding.DecodeString(aux.Bind)
+	if err != nil {
+		return nil, errors.Wrap(err, "decoding bind")
+	}
+
+	decrypt := strings.Split(string(b), ":")
+	aux.Ldap.BindDN, aux.Ldap.BindPass = decrypt[0], decrypt[1]
+
+	a := aux.Ldap
 
 	return NewLdap(
-		fmt.Sprintf("%s:%d", A.Hostname, A.Port),
-		A.BindDn, A.BindPassword,
-		A.UserBaseDn, A.UserIdAttribute, A.UserObjectClass,
+		a.Address,
+		a.BindDN, a.BindPass,
+		a.UserBaseDn, a.UserRNAttribute, a.UserBaseFilter,
 
-		A.ForceBind, time.Minute*A.IdleTime, time.Minute*A.MaxTime), nil
+		a.ForceBind, time.Minute*1, 60*2*time.Minute), nil
 }

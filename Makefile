@@ -58,11 +58,6 @@ ssb:
 	cp $(SSB)/$(JETTYRUNNER) $(ASSETS)/jetty-runner.jar
 	cp $(SSB)/build/libs/ROOT.war $(ASSETS)/
 
-db:
-	sqlite3 steam.db < $(SCRIPTS)/database/create-schema.sql
-	mkdir -p $(DB)
-	mv steam.db $(DB)
-
 launcher:
 	cd $(SLA) && go build
 
@@ -71,7 +66,8 @@ generate:
 	piping
 	go fmt ./srv/web/service.go
 	go fmt ./cli2/cli.go
-	cd ./master/data && go generate && go fmt scans.go
+	cd ./tools/crudr && go build && go install
+	cd ./master/data && go generate && go fmt scans.go && go fmt crud.go
 
 cli-markdown:
 	cd ./tools/cli-md && go build && go install
@@ -98,7 +94,7 @@ pretest: lint vet fmtcheck
 test:
 	cd tests && ./goh2orunner.sh
 
-reset: db
+reset:
 	rm -rf var/master/model
 	rm -rf var/master/project
 
@@ -122,7 +118,6 @@ linux: gui
 	cp $(SLA)/config.toml ./dist/$(DIST_LINUX)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_LINUX)/var/master/
-	cp -r $(DB) ./dist/$(DIST_LINUX)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_LINUX)/var/master/
 	tar czfC ./dist/$(DIST_LINUX).tar.gz dist $(DIST_LINUX)
 
@@ -136,9 +131,8 @@ darwin: gui
 	cp $(SLA)/config.toml ./dist/$(DIST_DARWIN)/config.toml
 	cp -r $(WWW) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
-	cp -r $(DB) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-release: ssb db launcher linux
+release: ssb launcher linux
 

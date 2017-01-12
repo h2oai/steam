@@ -116,7 +116,7 @@ export class CreateRole extends React.Component<Props & DispatchProps, any> {
     this.props.createRole(this.nameInput.value, this.descriptionInput.value, newRolePermissions);
   }
 
-  onCancelClicked = (e: React.MouseEvent) => {
+  onCancelClicked = (e: React.MouseEvent<any>) => {
     this.props.cancelHandler();
   };
 

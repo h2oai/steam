@@ -71,7 +71,7 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch typ {
 	case fs.KindEngine:
-		if err := pz.CheckPermission(s.ds.Permissions.ManageEngine); err != nil {
+		if err := pz.CheckPermission(s.ds.Permission.ManageEngine); err != nil {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
@@ -83,7 +83,7 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case fs.KindFile:
-		if err := pz.CheckPermission(s.ds.Permissions.ManageProject); err != nil {
+		if err := pz.CheckPermission(s.ds.Permission.ManageProject); err != nil {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
@@ -95,7 +95,7 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := pz.CheckEdit(s.ds.EntityTypes.Project, projectId); err != nil {
+		if err := pz.CheckEdit(s.ds.EntityType.Project, projectId); err != nil {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
@@ -202,7 +202,9 @@ func (s *UploadHandler) handleEngine(w http.ResponseWriter, pz az.Principal, fil
 	}
 
 	// Add Engine to datastore
-	if _, err := s.ds.CreateEngine(pz, dstBase, dstPath); err != nil {
+	if _, err := s.ds.CreateEngine(dstBase, dstPath,
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+	); err != nil {
 		http.Error(w, fmt.Sprintf("Error saving engine to datastore: %v", err), http.StatusInternalServerError)
 		return errors.Wrap(err, "failed saving engine to datastore")
 	}

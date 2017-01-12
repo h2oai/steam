@@ -1,150 +1,201 @@
-/*
-  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
-  License, or (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package web
 
-import "testing"
+import (
+	"os"
+	"testing"
 
-func TestRoleCRUD(tt *testing.T) {
-	t := newTest(tt)
+	"github.com/h2oai/steam/master/az"
+)
 
-	const name1 = "role1"
-	const description1 = "description1"
+// Define how many roles Steam initializes prior to running tests (DEFAULT ROLES)
+const init_roles uint = 2
 
-	id, err := t.svc.CreateRole(t.su, name1, description1)
-	t.nil(err)
-
-	role, err := t.svc.GetRole(t.su, id)
-	t.nil(err)
-
-	t.ok(name1 == role.Name, "name")
-	t.ok(description1 == role.Description, "description")
-
-	role, err = t.svc.GetRoleByName(t.su, name1)
-	t.nil(err)
-	t.ok(name1 == role.Name, "name")
-	t.ok(description1 == role.Description, "description")
-
-	roles, err := t.svc.GetRoles(t.su, 0, 1000)
-	t.nil(err)
-
-	t.ok(len(roles) == 1, "role count: expected 1, got %d", len(roles))
-
-	role = roles[0]
-	t.ok(name1 == role.Name, "name")
-	t.ok(description1 == role.Description, "description")
-
-	const name2 = "role2"
-	const description2 = "description2"
-
-	err = t.svc.UpdateRole(t.su, id, name2, description2)
-	t.nil(err)
-
-	role, err = t.svc.GetRole(t.su, id)
-	t.nil(err)
-
-	t.ok(name2 == role.Name, "name")
-	t.ok(description2 == role.Description, "description")
-
-	role, err = t.svc.GetRoleByName(t.su, name2)
-	t.nil(err)
-	t.ok(name2 == role.Name, "name")
-	t.ok(description2 == role.Description, "description")
-
-	roles, err = t.svc.GetRoles(t.su, 0, 2000)
-	t.nil(err)
-
-	t.ok(len(roles) == 1, "role count")
-
-	role = roles[0]
-	t.ok(name2 == role.Name, "name")
-	t.ok(description2 == role.Description, "description")
-
-	err = t.svc.DeleteRole(t.su, id)
-	t.nil(err)
+type roleIn struct {
+	name string
+	desc string
 }
 
-func TestRoleDeletion(tt *testing.T) {
-	t := newTest(tt)
-
-	const name1 = "role1"
-	const description1 = "description1"
-
-	id, err := t.svc.CreateRole(t.su, name1, description1)
-	t.nil(err)
-
-	err = t.svc.DeleteRole(t.su, id)
-	t.nil(err)
-
-	_, err = t.svc.GetRole(t.su, id)
-	t.notnil(err)
-
-	_, err = t.svc.GetRoleByName(t.su, name1)
-	t.notnil(err)
-
-	roles, err := t.svc.GetRoles(t.su, 0, 1000)
-	t.nil(err)
-	t.ok(len(roles) == 0, "role count")
-
-	// err = t.svc.DeleteRole(t.su, id) // should fail on a duplicate attempt
-	// t.notnil(err)
+var roleTests = []struct {
+	in   roleIn
+	out  int64
+	pass bool
+	err  error
+}{
+	{in: roleIn{name: "role1", desc: "test role"}, out: 3, pass: true},
+	{in: roleIn{name: "role2", desc: "test role"}, out: 4, pass: true},
 }
 
-func TestRolePermissionLinking(tt *testing.T) {
-	t := newTest(tt)
+var readRoleTests = []struct {
+	offset uint
+	limit  uint
+}{
+	{0, 10},
+}
 
-	roleId, err := t.svc.CreateRole(t.su, "name1", "description1")
-	t.nil(err)
+var updateRoleTests = map[int64][]struct {
+	in   roleIn
+	pass bool
+	err  error
+}{
+	2: {
+		{in: roleIn{name: "role1_rename", desc: "test role"}, pass: true},
+	},
+}
 
-	expected, err := t.svc.GetAllPermissions(t.su)
-	t.nil(err)
+func TestSQLiteRole(t *testing.T) {
+	svc, pz, temp := testSetup("role", "sqlite3")
+	defer os.RemoveAll(temp)
 
-	pids1 := make([]int64, len(expected))
-	for i, p := range expected {
-		pids1[i] = p.Id
+	t.Logf("Testing %d case(s)", len(roleTests))
+	// -- C --
+	if ok := t.Run("Create", testRoleCreate(pz, svc)); !ok {
+		t.FailNow()
 	}
 
-	err = t.svc.LinkRoleWithPermissions(t.su, roleId, pids1)
-	t.nil(err)
+	// -- R --
+	if ok := t.Run("Read", testRoleRead(pz, svc)); !ok {
+		t.FailNow()
+	}
 
-	actual, err := t.svc.GetPermissionsForRole(t.su, roleId)
-	t.nil(err)
+	// -- U --
+	if ok := t.Run("Update", testRoleUpdate(pz, svc)); !ok {
+		t.FailNow()
+	}
 
-	t.ok(len(expected) == len(actual), "permissions")
+	// -- D --
+	if ok := t.Run("Delete", testRoleDelete(pz, svc)); !ok {
+		t.FailNow()
+	}
+}
 
-	// change permissions
+func testRoleCreate(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		for _, test := range roleTests {
+			in, out := test.in, test.out
+			id, err := svc.CreateRole(pz, in.name, in.desc)
+			if test.pass {
+				if err != nil {
+					t.Errorf("Create(%+v): unexpected error creating role: %+v", in, err)
+				} else if id != out {
+					t.Errorf("Create(%+v): incorrect cluster id: expected %d, got %d", out, out, id)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Create(%+v): expected error creating role", in)
+				} else if err.Error() != test.err.Error() {
+					t.Errorf("Create(%+v): incorrect error: expected %q, got %q", in, test.err, err)
+				}
+			}
+		}
+	}
+}
 
-	pids2 := pids1[0:5]
+func testRoleRead(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		var totPass uint = init_roles
+		for _, test := range roleTests {
+			in, out := test.in, test.out
+			role, err := svc.GetRole(pz, out)
+			if test.pass {
+				if err != nil {
+					t.Errorf("Read(%+v): unexpected error reading role: %+v", out, err)
+				} else if in.name != role.Name {
+					t.Errorf("Read(%+v): incorrect role name: expected %s, got %s", out, in.name, role.Name)
+				} else if in.desc != role.Description {
+					t.Errorf("Read(%+v): incorrect role description: expected %s, got %s", out, in.desc, role.Description)
+				}
+				totPass++
+			} else {
+				if err == nil {
+					t.Errorf("Read(%+v): expected error reading role", out)
+				}
+			}
 
-	err = t.svc.LinkRoleWithPermissions(t.su, roleId, pids2)
-	t.nil(err)
+			role, err = svc.GetRoleByName(pz, in.name)
+			if test.pass {
+				if err != nil {
+					t.Errorf("Read(%+v): unexpected error reading role: %+v", in.name, err)
+				} else if out != role.Id {
+					t.Errorf("Read(%+v): incorrect role id: expected %s, got %s", in.name, out, role.Id)
+				} else if in.desc != role.Description {
+					t.Errorf("Read(%+v): incorrect role description: expected %s, got %s", in.name, in.desc, role.Description)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Read(%+v): expected error reading role", in.name)
+				}
+			}
 
-	actual, err = t.svc.GetPermissionsForRole(t.su, roleId)
-	t.nil(err)
+		}
 
-	t.ok(len(pids2) == len(actual), "permissions")
+		for _, get := range readRoleTests {
+			var count int
+			if totPass-get.offset < get.limit {
+				count = int(totPass - get.offset)
+			} else {
+				count = int(get.limit)
+			}
+			roles, err := svc.GetRoles(pz, get.offset, get.limit)
+			if err != nil {
+				t.Errorf("Read(%+v): unexpected error reading roles: %+v", get, err)
+			} else if len(roles) != count {
+				t.Errorf("Read(%+v): incorrect number of roles read: expected %d, got %d", get, count, len(roles))
+			} else if len(roles) > 0 && roles[0].Id-1 != int64(get.offset) {
+				t.Errorf("Read(%+v): incorrect offset: expected %d, got %d)", get, get.offset, roles[0].Id-1)
+			}
+		}
+	}
+}
 
-	// remove all permissions
+func testRoleUpdate(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		for id, upds := range updateRoleTests {
+			for _, test := range upds {
+				in := test.in
+				err := svc.UpdateRole(pz, id, in.name, in.desc)
+				if test.pass {
+					if err != nil {
+						t.Errorf("Update(%d:%+v): unexpected error updating role: %+v", id, in, err)
+					}
+					role, err := svc.GetRole(pz, id)
+					if err != nil {
+						t.Errorf("Update(%d:%+v): unexpected error reading role: %+v", id, in, err)
+					} else if in.name != role.Name {
+						t.Errorf("Update(%d:%+v): incorrect role name, expected %s, got %s", in.name, role.Name)
+					} else if in.desc != role.Description {
+						t.Errorf("Update(%d:%+v): incorrect role description, expected %s, got %s", in.desc, role.Description)
+					}
+				} else {
+					if err == nil {
+						t.Errorf("Update(%d:%+v): expected error updating role: %+v", id, in, err)
+					} else if err.Error() != test.err.Error() {
+						t.Errorf("Update(%d:%+v): incorrect error: expected %q, got %q", id, in, test.err, err)
+					}
+				}
+			}
+		}
+	}
+}
 
-	err = t.svc.LinkRoleWithPermissions(t.su, roleId, []int64{})
-	t.nil(err)
+func testRoleDelete(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		for _, test := range roleTests {
+			out := test.out
+			err := svc.DeleteRole(pz, out)
+			if test.pass {
+				if err != nil {
+					t.Errorf("Delete(%+v): unexpected error deleting role: %+v", out, err)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Delete(%+v): expected error deleting role", out)
+				}
+			}
+		}
 
-	actual, err = t.svc.GetPermissionsForRole(t.su, roleId)
-	t.nil(err)
-
-	t.ok(len(actual) == 0, "permissions")
+		roles, _ := svc.GetRoles(pz, 0, 2)
+		if len(roles) > int(init_roles) {
+			t.Errorf("Delete: at least one role was not deleted")
+		}
+	}
 }

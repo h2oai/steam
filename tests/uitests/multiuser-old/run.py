@@ -52,7 +52,7 @@ EntityType
 
 def superShareTest():
 	res = [True, True]
-	tu.cliLogin("superuser", "superuser")
+	tu.cliLogin("admin", "admin012")
 	wg = tu.createWorkgroup("supertest", "testin super share")
 	d = tu.newtest()
 	wait = WebDriverWait(d, timeout=5, poll_frequency=0.2)
@@ -90,7 +90,7 @@ def superShareTest():
 		tu.goProjects(d)
 		if tu.viewProject(d, "supertest"):
 			res[0] = False
-			print "User with no permissions is able to view entities shared by superuser"
+			print "User with no permissions is able to view entities shared by admin"
 	except:
 		res[0] = True
 	finally:
@@ -107,10 +107,10 @@ def superShareTest():
 		time.sleep(2)
 		if not tu.viewProject(d, "supertest"):
 			res[0] = False
-			print "User could not see project shared by superuser"
+			print "User could not see project shared by admin"
 	except:
 		res[1] = False
-		print "User with appropriate permissions is not able to view entities shared by superuser"
+		print "User with appropriate permissions is not able to view entities shared by admin"
 	finally:
 		tu.endtest(d)
 	return res[0] and res[1]
@@ -123,7 +123,7 @@ def userShareTest():
 	tu.cliLogin("setup", "setup")
 	wg = tu.createWorkgroup("clusterwg", "for sharing the cluster")
 	tu.assignWorkgroup(uid, wg)
-	tu.cliLogin("superuser", "superuser")
+	tu.cliLogin("admin", "admin012")
 	tu.shareEntity(5, 1, wg, 'edit')
 	tu.cliLogin("setup", "setup")
 	wg = tu.createWorkgroup("usertest", "testin user share")
@@ -149,7 +149,7 @@ def userShareTest():
 	tu.shareEntity(9, 2, wg, 'edit')
 
 	uid = tu.createIdentity("permless", "permless")
-	tu.cliLogin("superuser", "superuser")
+	tu.cliLogin("admin", "admin012")
 	tu.assignWorkgroup(uid, wg)
 	d = tu.testAs("permless", "permless")
 	try:
@@ -157,7 +157,7 @@ def userShareTest():
 		tu.goProjects(d)
 		if tu.viewProject(d, "averagetest"):
 			res[0] = False
-			print "User with no permissions is able to view entities shared by non-superuser"
+			print "User with no permissions is able to view entities shared by non-admin"
 	except:
 		res[0] = True
 	finally:
@@ -173,10 +173,10 @@ def userShareTest():
 		tu.goProjects(d)
 		if not tu.viewProject(d, "averagetest"):
 			res[0] = False
-			print "User could not see project shared by non-superuser"
+			print "User could not see project shared by non-admin"
 	except:
 		res[1] = False
-		print "User with appropriate permissions is not able to view entities shared by non-superuser"
+		print "User with appropriate permissions is not able to view entities shared by non-admin"
 	finally:
 		tu.endtest(d)
 	

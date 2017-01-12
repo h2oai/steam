@@ -70,6 +70,12 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     this.props.getConfig();
   }
 
+  goProxy(cluster) {
+    document.cookie = cluster.name + "=" + cluster.token;
+    let url = "http://" + window.location.hostname + ":9999" + cluster.context_path + "flow/index.html";
+    window.open(url, "_blank");
+  }
+
   openYarnClusterModal() {
     this.setState({
       yarnClusterModalOpen: true
@@ -158,11 +164,10 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes mar-bot-20"/> <a href={'http://' + cluster.address} target="_blank"
+                  <span><i className="fa fa-cubes mar-bot-20"/> <a onClick={cluster.context_path !== "" ? this.goProxy.bind(this, cluster) : null} href={cluster.context_path !== "" ? null : 'http://' + cluster.address + cluster.context_path} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
-
                     <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
                       className="fa fa-trash no-margin"/></button>
                   </span>
@@ -171,7 +176,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   <div className="flexcolumn">
                     <div className="info-header">STATUS</div>
                     <div className="flexrow mar-right-71">
-                      { cluster.status.status === "healthy" ?
+                      { cluster.status.status === "Healthy" ?
                         <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Healthy</div>
                         : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.status.status}</div>
                       }

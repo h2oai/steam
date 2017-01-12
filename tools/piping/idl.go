@@ -33,6 +33,7 @@ type Interface struct {
 
 type Facade struct {
 	Name    string
+	Imports []*Struct
 	Methods []*Method
 }
 
@@ -135,6 +136,7 @@ func toStruct(s interface{}) (*Struct, error) {
 			reflect.Struct,
 			reflect.Bool,
 			reflect.Int,
+			reflect.Uint,
 			reflect.Int64,
 			reflect.Float32,
 			reflect.Float64,
@@ -201,6 +203,7 @@ func toInterface(facadeName string, dict map[string]*Struct) (*Interface, error)
 		return nil, fmt.Errorf("Could not find facade definition %s", facadeName)
 	}
 
+	imports := make([]*Struct, 0)
 	methods := make([]*Method, 0)
 	structs := make(map[string]*Struct)
 
@@ -220,6 +223,15 @@ func toInterface(facadeName string, dict map[string]*Struct) (*Interface, error)
 				continue
 			}
 			if in {
+				if f.IsStruct {
+					if _, ok := structs[f.Type]; !ok {
+						s, ok := dict[f.Type]
+						if !ok {
+							return nil, fmt.Errorf("Could not find parameter definition %s", m.Type)
+						}
+						imports = append(imports, s)
+					}
+				}
 				inputs = append(inputs, f)
 			} else {
 				outputs = append(outputs, f)
@@ -263,7 +275,47 @@ func toInterface(facadeName string, dict map[string]*Struct) (*Interface, error)
 	}
 
 	return &Interface{
-		&Facade{facade.Name, methods},
+		&Facade{facade.Name, imports, methods},
 		types,
 	}, nil
+}
+
+func multiMarshal(typ, outputName, fieldName string) string {
+	return fmt.Sprintf(`aux := make([]%s, len(out.%s))
+for i, val := range out.%s {
+	aux[i] = *val
+	aux[i].%s = "JSON DATA OMITTED..."
+}
+
+res, merr := json.Marshal(aux)`, typ, outputName, outputName, fieldName)
+}
+
+func singlMarshal(output, field string) string {
+	return fmt.Sprintf(`aux := *out.%s
+aux.%s = "JSON DATA OMITTED..."
+
+res, merr := json.Marshal(aux)`, output, field)
+}
+
+func cleanJSON(outputs []*Field) string {
+	// Search outputs
+	for _, output := range outputs {
+		// Only structs contain JSON fields
+		if output.IsStruct {
+			// All JSON fields are prepended with the text `JSON`
+			for _, field := range output.Struct.Fields {
+				if strings.HasPrefix(field.Name, "JSON") {
+					// Handle arrays differently than values
+					if output.IsArray {
+						return multiMarshal(output.Type, output.Name, field.Name)
+					} else {
+						return singlMarshal(output.Name, field.Name)
+					}
+				}
+			}
+		}
+	}
+
+	// If all else fails, return default output
+	return `res, merr := json.Marshal(out)`
 }

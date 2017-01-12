@@ -34,11 +34,15 @@ import (
 // DeleteInitIDEndsession End a session. */
 func (h *H2O) DeleteInitIDEndsession() (*bindings.InitIDV3, error) {
 	//@DELETE
-	u := h.url("/3/InitID")
+	u := h.url("3/InitID")
 
 	req, err := http.NewRequest("DELETE", u, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error making delete request: %s: %s", u, err)
+	}
+
+	if h.Token != "" {
+		req.Header.Set("Authorization", "Basic "+h.Token)
 	}
 
 	res, err := http.DefaultClient.Do(req)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Start H2O and create a start log + store pid
-java -jar ../var/temp/h2o-$H2OVERSION/h2o.jar --name steam-$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1) > start.log 2>&1 &
+java -jar ../var/temp/h2o-3.10.2.1/h2o.jar --name steam-$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1) > start.log 2>&1 &
 H2OPID=$!
 echo "Started h2o with pid ${H2OPID}"
 
@@ -23,7 +23,7 @@ SSBPID=$!
 echo "Started scoring service builder with pid ${SSBPID}"
 
 # Run GO tests here
-go test ../master/web --working-directory="../../" --cluster-address="${ADDRESS}" --compilation-service-address=":8181" -v -coverprofile=masterweb.cov
+go test ../master/web -h2o-address="${ADDRESS}" -compilation-service-address=":8181" -v -coverprofile=masterweb.cov
 t1=$?
 
 kill $H2OPID

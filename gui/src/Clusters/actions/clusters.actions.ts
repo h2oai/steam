@@ -108,14 +108,14 @@ export function uploadEngine(file) {
   };
 }
 
-export function startYarnCluster(clusterName, engineId, size, memory, keytab) {
+export function startYarnCluster(clusterName, engineId, size, memory, secure, keytab) {
   if (!clusterName || !engineId || !size || !memory) {
     openNotification(NotificationType.Error, "Error", 'All fields are required', null);
   }
   return (dispatch) => {
     dispatch(startCluster());
     dispatch(openNotification(NotificationType.Info, "Update", 'Connecting to YARN...', null));
-    Remote.startClusterOnYarn(clusterName, engineId, size, memory, keytab, (error, clusterId) => {
+    Remote.startClusterOnYarn(clusterName, engineId, size, memory, secure, keytab, (error, clusterId) => {
       if (error) {
         dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
         dispatch(startClusterCompleted(error.toString()));
