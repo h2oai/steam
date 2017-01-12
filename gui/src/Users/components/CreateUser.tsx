@@ -222,23 +222,6 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               </div>
             </Cell>
           </Row>
-          <Row>
-            <Cell>
-              WORKGROUPS &nbsp;<Tooltip className="steam-tooltip-launcher" content="The workgroup(s) this user will have access to">
-                <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-              </Tooltip>
-            </Cell>
-            <Cell>
-              <div>
-                {this.props.workgroups ? this.props.workgroups.map((workgroup: Workgroup, index, array) => {
-                  return <div key={index}>
-                      <input type="checkbox" ref={(input) => this.registerWorkgroupInput(input, workgroup)} /> {workgroup.name}
-                    </div>;
-                }) : null
-                }
-              </div>
-            </Cell>
-          </Row>
         </Table>
         &nbsp;
         <br />
