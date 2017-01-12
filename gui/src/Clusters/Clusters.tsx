@@ -164,7 +164,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
             return (
               <Panel key={i}>
                 <header>
-                  <span><i className="fa fa-cubes mar-bot-20"/> <a onClick={cluster.context_path !== "/" ? this.goProxy.bind(this, cluster) : null} href={cluster.context_path !== "/" ? null : 'http://' + cluster.address + cluster.context_path} target="_blank"
+                  <span><i className="fa fa-cubes mar-bot-20"/> <a onClick={cluster.context_path !== "/" ? this.goProxy.bind(this, cluster) : null} href={cluster.context_path !== "/" ? 'javascript:void(0);' : 'http://' + cluster.address + cluster.context_path} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
