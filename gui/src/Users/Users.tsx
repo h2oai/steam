@@ -70,22 +70,47 @@ export class Users extends React.Component<Props & DispatchProps, any> {
   }
 
   componentWillMount(): void {
-    this.setState({
-      tabs: {
-        users: {
-          label: 'USERS',
-          isSelected: true,
-          onClick: this.clickHandler.bind(this),
-          component: <UserAccess />
-        },
-        roles: {
-          label: 'ROLES',
-          isSelected: false,
-          onClick: this.clickHandler.bind(this),
-          component: <RolePermissions />
+    if (!this.props.isAdmin) {
+      this.setState({
+        tabs: {
+          users: {
+            label: 'USERS',
+            isSelected: true,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAccess />
+          },
+          roles: {
+            label: 'ROLES',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <RolePermissions />
+          }
         }
-      }
-    });
+      });
+    } else {
+      this.setState({
+        tabs: {
+          users: {
+            label: 'USERS',
+            isSelected: true,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAccess />
+          },
+          roles: {
+            label: 'ROLES',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <RolePermissions />
+          },
+          authentication: {
+            label: 'AUTHENTICATION',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAuthentication />
+          }
+        }
+      });
+    }
     this.props.checkAdmin();
   }
 
