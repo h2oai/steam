@@ -180,7 +180,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
               <UserAccess /> : null}
             {this.state.tabs.roles.isSelected === true ?
               <RolePermissions /> : null}
-            {this.state.tabs.authentication.isSelected === true ?
+            {this.state.tabs.authentication && this.state.tabs.authentication.isSelected === true ?
               <UserAuthentication /> : null}
           </div>
         </div>

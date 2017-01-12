@@ -937,7 +937,6 @@ export function checkAdmin() {
         dispatch(openNotification(NotificationType.Error, "Superuser", "Unable to check admin status", null));
         return;
       }
-      console.log("is superuser", isSuperuser);
       dispatch(receiveAdminCheck(isSuperuser));
     });
   };

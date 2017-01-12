@@ -213,7 +213,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                      <input type="text" className={"pt-input " + (this.state.hostInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.hostInput = ref} defaultValue={this.props.ldapConfig.host}></input>
+                      <input type="text" className={"pt-input " + (this.state.hostInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.hostInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.host : ""}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -221,7 +221,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" className={"pt-input " + (this.state.portInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.portInput = ref} defaultValue={this.props.ldapConfig.port.toString()}></input>
+                    <input type="text" className={"pt-input " + (this.state.portInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.portInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.port.toString() : ""}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -238,7 +238,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig.bind_dn} className="pt-input" ref={(ref) => this.bindDnInput = ref}></input>
+                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.bind_dn : null} className="pt-input" ref={(ref) => this.bindDnInput = ref}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -260,7 +260,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig.user_base_dn} className={"pt-input " + (this.state.userbaseDnInputValid ? "" : "pt-intent-danger")} ref={(ref) => this.userbaseDnInput = ref}></input>
+                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_base_dn : ""} className={"pt-input " + (this.state.userbaseDnInputValid ? "" : "pt-intent-danger")} ref={(ref) => this.userbaseDnInput = ref}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -268,7 +268,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig.user_base_filter} className="pt-input" ref={(ref) => this.userbaseFilterInput = ref}></input>
+                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_base_filter : ""} className="pt-input" ref={(ref) => this.userbaseFilterInput = ref}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -284,7 +284,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig.user_rn_attribute} className="pt-input" ref={(ref) => this.realnameAttributeInput = ref}></input>
+                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_rn_attribute : ""} className="pt-input" ref={(ref) => this.realnameAttributeInput = ref}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">

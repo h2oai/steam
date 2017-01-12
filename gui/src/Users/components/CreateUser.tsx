@@ -184,7 +184,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               </Tooltip>
             </Cell>
             <Cell>
-              <input type="text" ref={(input) => this.nameInput = input} onChange={this.onNameChanged.bind(this)} />
+              <input type="text" className="pt-input" ref={(input) => this.nameInput = input} onChange={this.onNameChanged.bind(this)} />
             </Cell>
           </Row>
           <Row>
@@ -192,7 +192,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               PASSWORD
             </Cell>
             <Cell>
-              <input type="password" ref={(input) => this.passwordInput = input} onChange={this.onPasswordChanged.bind(this)} />
+              <input type="password" className="pt-input" ref={(input) => this.passwordInput = input} onChange={this.onPasswordChanged.bind(this)} />
             </Cell>
           </Row>
           <Row>
@@ -200,7 +200,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               CONFIRM PASSWORD
             </Cell>
             <Cell>
-              <input type="password" ref={(input) => this.passwordInputConfirm = input} onChange={this.onPasswordConfirmChanged.bind(this)} /><br />&nbsp;
+              <input type="password" className="pt-input" ref={(input) => this.passwordInputConfirm = input} onChange={this.onPasswordConfirmChanged.bind(this)} /><br />&nbsp;
               { this.state.invalidPasswordConfirmEntered ? <InputFeedback message="passwords do not match" type={FeedbackType.Error} /> : null }
               { this.state.validPasswordConfirmEntered ? <InputFeedback message="password confirmed" type={FeedbackType.Confirm} /> : null }
             </Cell>

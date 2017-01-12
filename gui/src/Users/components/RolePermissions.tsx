@@ -152,7 +152,6 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
 
     if (this.props.permissionsWithRoles) {
       permissionRows = this.props.permissionsWithRoles.map(function (permissionSet, permissionIndex) {
-        console.log(permissionSet, permissionIndex);
         return<Row key={permissionIndex}>
           <Cell className="right-table-bar" key={permissionSet.description}>{permissionSet.description}</Cell>
           {permissionSet.flags.map((flag: any, flagIndex) => {
