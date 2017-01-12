@@ -1187,7 +1187,7 @@ func (s *Service) GetEngines(pz az.Principal) ([]*web.Engine, error) {
 		return nil, errors.Wrap(err, "reading permission")
 	}
 	// Fetch clusters with privilege
-	engines, err := s.ds.ReadEngines(data.ByPrivilege(pz))
+	engines, err := s.ds.ReadEngines()
 	return toEngines(engines), errors.Wrap(err, "reading engines from database")
 }
 
@@ -2284,13 +2284,11 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	return config, exists, err
 }
 
-
 func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 	return ldap.FromConfig(config).Test()
 }
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
-
 
 // --- ---------- ---
 // --- ---------- ---
