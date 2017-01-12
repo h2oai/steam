@@ -41,7 +41,10 @@ import (
 
 const (
 	VERSION = "1.1.0"
+	standard_user = "standard user"
 )
+
+var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster"}
 
 type metadata map[string]string
 
@@ -278,6 +281,39 @@ func prime(db *goqu.Database) error {
 	return errors.Wrap(err, "committing transaction")
 }
 
+func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd []Permission) error {
+	role, doesRoleExist, err := readRole(tx, ByName(standard_user));
+	if err != nil {
+		return errors.Wrapf(err, "error reading role %s", role)
+	}
+	if doesRoleExist {
+		if err := deleteRolePermission(tx, ByRoleId(role.Id)); err != nil {
+			return errors.Wrapf(err, "error deleting role permission %s", role.Id)
+		}
+		initRolePermissions(tx, role.Id, permissionsToAdd)
+
+	} else {
+		roleId, err := createRole(tx, standard_user)
+		if err != nil {
+			return errors.Wrapf(err, "error creating role %s", role)
+		}
+		if err := initRolePermissions(tx, roleId, permissionsToAdd); err != nil {
+			return errors.Wrapf(err, "error initialization role permissions")
+		}
+	}
+	return err
+}
+
+func initRolePermissions(tx *goqu.TxDatabase, roleId int64, permissions []Permission) error {
+	for _, permission := range permissions {
+		_, err := createRolePermission(tx, roleId, permission.Id)
+		if err != nil {
+			return errors.Wrapf(err, "error creating permission %s for role %s", permission.Id, roleId)
+		}
+	}
+	return nil
+}
+
 func primeMetadata(tx *goqu.TxDatabase, key, value string) error {
 	_, err := tx.From("meta").Insert(goqu.Record{"key": key, "value": value}).Exec()
 	return errors.Wrap(err, "executing query")
@@ -346,7 +382,14 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 			return errors.Wrap(err, "reading states")
 		}
 		permissions, err = readPermissions(tx)
-		return errors.Wrap(err, "reading permissions")
+		if err != nil {
+			return errors.Wrap(err, "reading permissions")
+		}
+
+		if err := initRoles(tx, permissions, getPermissionsSubset(permissions, standard_user_init_permissions)); err != nil {
+			return errors.Wrap(err, "initialization roles")
+		}
+		return nil
 	}); err != nil {
 		return nil, errors.Wrap(err, "committing transaction")
 	}
@@ -362,6 +405,17 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 		State:       newStateKeys(states),
 		Permission:  newPermissionKeys(permissions),
 	}, nil
+}
+func getPermissionsSubset(permissions []Permission, permissionCodes []string) []Permission {
+	var permissionsToAdd []Permission
+	for _, permission := range permissionCodes {
+		for _, globalPermission := range permissions {
+			if globalPermission.Code == permission {
+				permissionsToAdd = append(permissionsToAdd, globalPermission)
+			}
+		}
+	}
+	return permissionsToAdd
 }
 
 func getRows(tx *goqu.TxDatabase, dataset *goqu.Dataset) (*sql.Rows, error) {

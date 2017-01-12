@@ -152,6 +152,11 @@ type permission_map struct {
 	Desc string
 }
 
+type permission_string_map struct {
+	Id int64
+	Desc string
+}
+
 var permissions_list = []permission_map{
 	permission_map{"ManageRole", "Manage role"},
 	permission_map{"ViewRole", "View role"},
@@ -207,6 +212,15 @@ func toPermissionMap(permissions []Permission) map[int64]permission_map {
 	for _, p := range permissions {
 		pm := permission_map{Code: p.Code, Desc: p.Description}
 		m[p.Id] = pm
+	}
+	return m
+}
+
+func toPermissionStringMap(permissions []Permission) map[string]permission_string_map {
+	m := make(map[string]permission_string_map)
+	for _, p := range permissions {
+		pm := permission_string_map{Id: p.Id, Desc: p.Description}
+		m[p.Code] = pm
 	}
 	return m
 }

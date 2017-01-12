@@ -7,6 +7,9 @@ import (
 	"github.com/h2oai/steam/master/az"
 )
 
+// Define how many roles Steam initializes prior to running tests (DEFAULT ROLES)
+const init_roles uint = 2
+
 type roleIn struct {
 	name string
 	desc string
@@ -18,8 +21,8 @@ var roleTests = []struct {
 	pass bool
 	err  error
 }{
-	{in: roleIn{name: "role1", desc: "test role"}, out: 2, pass: true},
-	{in: roleIn{name: "role2", desc: "test role"}, out: 3, pass: true},
+	{in: roleIn{name: "role1", desc: "test role"}, out: 3, pass: true},
+	{in: roleIn{name: "role2", desc: "test role"}, out: 4, pass: true},
 }
 
 var readRoleTests = []struct {
@@ -89,7 +92,7 @@ func testRoleCreate(pz az.Principal, svc *Service) func(t *testing.T) {
 
 func testRoleRead(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
-		var totPass uint = 1
+		var totPass uint = init_roles
 		for _, test := range roleTests {
 			in, out := test.in, test.out
 			role, err := svc.GetRole(pz, out)
@@ -191,7 +194,7 @@ func testRoleDelete(pz az.Principal, svc *Service) func(t *testing.T) {
 		}
 
 		roles, _ := svc.GetRoles(pz, 0, 2)
-		if len(roles) > 1 {
+		if len(roles) > int(init_roles) {
 			t.Errorf("Delete: at least one role was not deleted")
 		}
 	}
