@@ -33,7 +33,6 @@ import (
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/rpc"
 	"github.com/h2oai/steam/master/data"
-	"github.com/h2oai/steam/master/proxy"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
 )
@@ -121,7 +120,6 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- external ip for base and proxy ---
 	webAddress := opts.WebAddress
-	proxyAddress := opts.ClusterProxyAddress
 
 	// --- set up wd ---
 	wd, err := fs.MkWorkingDirectory(opts.WorkingDirectory)
@@ -222,43 +220,13 @@ func Run(version, buildDate string, opts Opts) {
 
 	go func() {
 		log.Println("Web server listening at", webAddress)
-		prefix := ""
-		if len(webAddress) > 1 && webAddress[:1] == ":" {
-			prefix = "localhost"
-		}
 		if enableTLS {
-			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
 			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
 				serverFailChan <- err
 			}
 		} else {
-			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
 			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
 				serverFailChan <- err
-			}
-		}
-	}()
-
-	// --- start reverse proxy ---
-
-	proxyHandler := authProvider.Secure(proxy.NewProxyHandler(defaultAz, ds))
-	proxyFailChan := make(chan error)
-	go func() {
-		log.Println("Cluster reverse proxy listening at", proxyAddress)
-		prefix := ""
-		if len(proxyAddress) > 1 && proxyAddress[:1] == ":" {
-			prefix = "localhost"
-		}
-		if enableTLS {
-			log.Printf("Point H2O client libraries to https://%s%s/\n", prefix, proxyAddress)
-			if err := http.ListenAndServeTLS(proxyAddress, certFile, keyFile, proxyHandler); err != nil {
-				proxyFailChan <- err
-			}
-
-		} else {
-			log.Printf("Point H2O client libraries to http://%s%s/\n", prefix, proxyAddress)
-			if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
-				proxyFailChan <- err
 			}
 		}
 	}()
@@ -269,9 +237,6 @@ func Run(version, buildDate string, opts Opts) {
 		select {
 		case err := <-serverFailChan:
 			log.Fatalln("HTTP server startup failed:", err)
-			return
-		case err := <-proxyFailChan:
-			log.Fatalln("Cluster reverse proxy startup failed:", err)
 			return
 		case sig := <-sigChan:
 			log.Println("Caught signal", sig)
