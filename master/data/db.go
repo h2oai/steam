@@ -41,10 +41,10 @@ import (
 
 const (
 	VERSION = "1.1.0"
-	STANDARD_USER = "standard user"
+	standard_user = "standard user"
 )
 
-var STANDARD_USER_INIT_PERMISSIONS = []string{"ManageCluster", "ViewCluster"}
+var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster"}
 
 type metadata map[string]string
 
@@ -262,7 +262,7 @@ func prime(db *goqu.Database) error {
 }
 
 func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd []Permission) error {
-	role, doesRoleExist, err := readRole(tx, ByName(STANDARD_USER));
+	role, doesRoleExist, err := readRole(tx, ByName(standard_user));
 	if err != nil {
 		return errors.Wrapf(err, "error reading role %s", role)
 	}
@@ -273,11 +273,13 @@ func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd [
 		initRolePermissions(tx, role.Id, permissionsToAdd)
 
 	} else {
-		roleId, err := createRole(tx, STANDARD_USER)
+		roleId, err := createRole(tx, standard_user)
 		if err != nil {
 			return errors.Wrapf(err, "error creating role %s", role)
 		}
-		initRolePermissions(tx, roleId, permissionsToAdd)
+		if err := initRolePermissions(tx, roleId, permissionsToAdd); err != nil {
+			return errors.Wrapf(err, "error initialization role permissions")
+		}
 	}
 	return err
 }
@@ -364,7 +366,7 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 			return errors.Wrap(err, "reading permissions")
 		}
 
-		if err := initRoles(tx, permissions, getPermissionsSubset(permissions, STANDARD_USER_INIT_PERMISSIONS)); err != nil {
+		if err := initRoles(tx, permissions, getPermissionsSubset(permissions, standard_user_init_permissions)); err != nil {
 			return errors.Wrap(err, "initialization roles")
 		}
 		return nil
