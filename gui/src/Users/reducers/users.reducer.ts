@@ -31,7 +31,17 @@ let initialState = {
   createNewUserIsEntered: false,
   createNewRoleIsEntered: false,
   ldapExists: false,
-  ldapConfig: null
+  ldapConfig: {
+    host: "",
+    port: 689,
+    ldaps: true,
+    bind_dn: "DC=xyz,DC=com",
+    bind_password: "",
+    user_base_dn: "",
+    user_base_filter: "",
+    user_rn_attribute: "cn",
+    force_bind: true
+  }
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
