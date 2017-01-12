@@ -44,7 +44,7 @@ const (
 	standard_user = "standard user"
 )
 
-var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster"}
+var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster", "ViewEngine"}
 
 type metadata map[string]string
 
@@ -167,11 +167,11 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 
 		}
 
+		if err := prime(db); err != nil {
+			return nil, errors.Wrap(err, "priming database")
+		}
 	}
 
-	if err := prime(db); err != nil {
-		return nil, errors.Wrap(err, "priming database")
-	}
 
 	ds, err := initDatastore(db)
 	if err != nil {
