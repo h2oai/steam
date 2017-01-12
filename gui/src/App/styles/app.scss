@@ -324,3 +324,9 @@ input[type="text"], textarea {
 .pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
   color: rgba(0, 0, 0, 0.7) !important;
 }
+.pt-input {
+  width: 200px;
+}
+.pt-toast .pt-button-group {
+  padding: 0px;
+}
