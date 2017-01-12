@@ -211,15 +211,41 @@ check [?]
 Check entities
 Commands:
 
-    $ steam check mojo ...
     $ steam check admin ...
+    $ steam check mojo ...
 `
 
 func check(c *context) *cobra.Command {
 	cmd := newCmd(c, checkHelp, nil)
 
-	cmd.AddCommand(checkMojo(c))
 	cmd.AddCommand(checkAdmin(c))
+	cmd.AddCommand(checkMojo(c))
+	return cmd
+}
+
+var checkAdminHelp = `
+admin [?]
+Check Admin
+Examples:
+
+    Check if an identity has admin privileges
+    $ steam check admin
+
+`
+
+func checkAdmin(c *context) *cobra.Command {
+
+	cmd := newCmd(c, checkAdminHelp, func(c *context, args []string) {
+
+		// Check if an identity has admin privileges
+		isAdmin, err := c.remote.CheckAdmin()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("IsAdmin:\t%v\n", isAdmin)
+		return
+	})
+
 	return cmd
 }
 
@@ -251,32 +277,6 @@ func checkMojo(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().StringVar(&algo, "algo", algo, "No description available")
-	return cmd
-}
-
-var checkAdminHelp = `
-admin [?]
-Check Admin
-Examples:
-
-    Check if an identity has admin privileges
-    $ steam check admin
-
-`
-
-func checkAdmin(c *context) *cobra.Command {
-
-	cmd := newCmd(c, checkAdminHelp, func(c *context, args []string) {
-
-		// Check if an identity has admin privileges
-		isAdmin, err := c.remote.CheckAdmin()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Printf("IsAdmin:\t%v\n", isAdmin)
-		return
-	})
-
 	return cmd
 }
 
@@ -1719,6 +1719,7 @@ func getConfig(c *context) *cobra.Command {
 			fmt.Sprintf("Version:\t%v\t", config.Version),                         // No description available
 			fmt.Sprintf("KerberosEnabled:\t%v\t", config.KerberosEnabled),         // No description available
 			fmt.Sprintf("ClusterProxyAddress:\t%v\t", config.ClusterProxyAddress), // No description available
+			fmt.Sprintf("Username:\t%v\t", config.Username),                       // No description available
 		}
 		c.printt("Attribute\tValue\t", lines)
 		return

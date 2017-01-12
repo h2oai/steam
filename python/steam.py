@@ -116,17 +116,17 @@ class RPCClient:
 	
 	def check_admin(self):
 		"""
-		Check if an identity has superuser privileges
+		Check if an identity has admin privileges
 
 		Parameters:
 
 		Returns:
-		is_superuser: No description available (bool)
+		is_admin: No description available (bool)
 		"""
 		request = {
 		}
-		response = self.connection.call("CheckSuperuser", request)
-		return response['is_superuser']
+		response = self.connection.call("CheckAdmin", request)
+		return response['is_admin']
 	
 	def set_ldap_config(self, config):
 		"""
