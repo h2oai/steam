@@ -89,7 +89,7 @@ func testRoleCreate(pz az.Principal, svc *Service) func(t *testing.T) {
 
 func testRoleRead(pz az.Principal, svc *Service) func(t *testing.T) {
 	return func(t *testing.T) {
-		var totPass uint = 1
+		var totPass uint = 2
 		for _, test := range roleTests {
 			in, out := test.in, test.out
 			role, err := svc.GetRole(pz, out)
