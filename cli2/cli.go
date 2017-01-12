@@ -2443,15 +2443,19 @@ func getLdap(c *context) *cobra.Command {
 				log.Fatalln(err)
 			}
 			lines := []string{
-				fmt.Sprintf("Host:\t%v\t", config.Host),                       // No description available
-				fmt.Sprintf("Port:\t%v\t", config.Port),                       // No description available
-				fmt.Sprintf("Ldaps:\t%v\t", config.Ldaps),                     // No description available
-				fmt.Sprintf("BindDn:\t%v\t", config.BindDn),                   // No description available
-				fmt.Sprintf("BindPassword:\t%v\t", config.BindPassword),       // No description available
-				fmt.Sprintf("UserBaseDn:\t%v\t", config.UserBaseDn),           // No description available
-				fmt.Sprintf("UserBaseFilter:\t%v\t", config.UserBaseFilter),   // No description available
-				fmt.Sprintf("UserRnAttribute:\t%v\t", config.UserRnAttribute), // No description available
-				fmt.Sprintf("ForceBind:\t%v\t", config.ForceBind),             // No description available
+				fmt.Sprintf("Host:\t%v\t", config.Host),                                       // No description available
+				fmt.Sprintf("Port:\t%v\t", config.Port),                                       // No description available
+				fmt.Sprintf("Ldaps:\t%v\t", config.Ldaps),                                     // No description available
+				fmt.Sprintf("BindDn:\t%v\t", config.BindDn),                                   // No description available
+				fmt.Sprintf("BindPassword:\t%v\t", config.BindPassword),                       // No description available
+				fmt.Sprintf("UserBaseDn:\t%v\t", config.UserBaseDn),                           // No description available
+				fmt.Sprintf("UserBaseFilter:\t%v\t", config.UserBaseFilter),                   // No description available
+				fmt.Sprintf("UserNameAttribute:\t%v\t", config.UserNameAttribute),             // No description available
+				fmt.Sprintf("GroupDn:\t%v\t", config.GroupDn),                                 // No description available
+				fmt.Sprintf("StaticMemberAttribute:\t%v\t", config.StaticMemberAttribute),     // No description available
+				fmt.Sprintf("SearchRequestSizeLimint:\t%v\t", config.SearchRequestSizeLimint), // No description available
+				fmt.Sprintf("SearchRequestTimeLimit:\t%v\t", config.SearchRequestTimeLimit),   // No description available
+				fmt.Sprintf("ForceBind:\t%v\t", config.ForceBind),                             // No description available
 			}
 			c.printt("Attribute\tValue\t", lines)
 			fmt.Printf("Exists:\t%v\n", exists)

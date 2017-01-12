@@ -27,15 +27,19 @@ type Config struct {
 }
 
 type LdapConfig struct {
-	Host            string
-	Port            int
-	Ldaps           bool
-	BindDn          string
-	BindPassword    string
-	UserBaseDn      string
-	UserBaseFilter  string
-	UserRnAttribute string
-	ForceBind       bool
+	Host                    string
+	Port                    int
+	Ldaps                   bool
+	BindDn                  string
+	BindPassword            string
+	UserBaseDn              string
+	UserBaseFilter          string
+	UserNameAttribute       string
+	GroupDn                 string
+	StaticMemberAttribute   string
+	SearchRequestSizeLimint int
+	SearchRequestTimeLimit  int
+	ForceBind               bool
 }
 
 type Cluster struct {
@@ -430,7 +434,7 @@ type GetConfig struct {
 	Config Config `help:"An object containing Steam startup configurations"`
 }
 type CheckAdmin struct {
-	_           int
+	_       int
 	IsAdmin bool
 }
 type SetLdapConfig struct {

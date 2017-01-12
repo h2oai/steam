@@ -2198,11 +2198,13 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 }
 
 type ldapSerialized struct {
-	Address         string
-	Bind            string
-	UserBaseDn      string
-	UserBaseFilter  string
-	UserRnAttribute string
+	Address               string
+	Bind                  string
+	UserBaseDn            string
+	UserBaseFilter        string
+	UserNameAttribute     string
+	GroupDn               string
+	StaticMemberAttribute string
 
 	ForceBind bool
 	Ldaps     bool
@@ -2215,7 +2217,10 @@ func configToSerialized(config *web.LdapConfig) ldapSerialized {
 		bind,
 		config.UserBaseDn,
 		config.UserBaseFilter,
-		config.UserRnAttribute,
+		config.UserNameAttribute,
+		config.GroupDn,
+		config.StaticMemberAttribute,
+
 		config.ForceBind,
 		config.Ldaps,
 	}
@@ -2231,11 +2236,11 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 
 	return &web.LdapConfig{
 		Host: host, Port: port,
-		Ldaps:           config.Ldaps,
-		UserBaseDn:      config.UserBaseDn,
-		UserBaseFilter:  config.UserBaseFilter,
-		UserRnAttribute: config.UserRnAttribute,
-		ForceBind:       config.ForceBind,
+		Ldaps:             config.Ldaps,
+		UserBaseDn:        config.UserBaseDn,
+		UserBaseFilter:    config.UserBaseFilter,
+		UserNameAttribute: config.UserNameAttribute,
+		ForceBind:         config.ForceBind,
 	}, nil
 }
 

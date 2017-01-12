@@ -180,7 +180,11 @@ export interface LdapConfig {
   bind_password: string
   user_base_dn: string
   user_base_filter: string
-  user_rn_attribute: string
+  user_name_attribute: string
+  group_dn: string
+  static_member_attribute: string
+  search_request_size_limint: number
+  search_request_time_limit: number
   force_bind: boolean
 }
 
