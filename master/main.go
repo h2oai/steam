@@ -161,7 +161,7 @@ func Run(version, buildDate string, opts Opts) {
 			log.Fatalln("Invalid configuration:", err)
 		}
 
-		authProvider = NewBasicLdapAuthProvider(defaultAz, webAddress, conn)
+		authProvider = NewBasicLdapAuthProvider(ds, webAddress, conn)
 	default: // "basic"
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}

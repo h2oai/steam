@@ -123,6 +123,10 @@ func WithAddress(address string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["address"] = address; return }
 }
 
+func WithAuthType(authType string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["auth_type"] = authType; return }
+}
+
 // WithBinomial model creates an entry in the binomial_metrics table and links it to the model
 func WithBinomialModel(mse, rSquared, logloss, auc, gini float64) QueryOpt {
 	return func(q *QueryConfig) error {
@@ -470,12 +474,17 @@ func ForRole(roleId int64) QueryOpt {
 	}
 }
 
-func LinkRole(roleId int64) QueryOpt {
+func LinkRole(roleId int64, reset bool) QueryOpt {
 	return func(q *QueryConfig) error {
 		if q.entityTypeId != q.entityTypes.Identity {
 			return errors.New("LinkRole: roles may only be linked with identities")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
+			if reset {
+				if err := deleteIdentityRole(c.tx, ByIdentityId(c.entityId)); err != nil {
+					return errors.Wrap(err, "deleting identity role in database")
+				}
+			}
 			_, err := createIdentityRole(c.tx, WithIdentityId(c.entityId), WithRoleId(roleId))
 			return errors.Wrap(err, "creating identity role in database")
 		})

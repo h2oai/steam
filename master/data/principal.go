@@ -56,6 +56,10 @@ func (pz *Principal) IsAdmin() bool {
 	return pz.isAdmin
 }
 
+func (pz *Principal) AuthType() string {
+	return pz.Identity.AuthType
+}
+
 func (pz *Principal) HasPermission(code int64) bool {
 	if pz.IsAdmin() {
 		return true

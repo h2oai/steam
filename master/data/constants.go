@@ -36,6 +36,10 @@ const (
 
 	// --- Role ---
 	AdminRN = "admin"
+
+	// --- Security --
+	LocalAuth = "local"
+	LDAPAuth  = "ldap"
 )
 
 var cluster_types_list = []string{
@@ -153,7 +157,7 @@ type permission_map struct {
 }
 
 type permission_string_map struct {
-	Id int64
+	Id   int64
 	Desc string
 }
 

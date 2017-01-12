@@ -21,16 +21,17 @@ import (
 	"net/http"
 	"strings"
 
-	"golang.org/x/net/context"
-
 	auth "github.com/abbot/go-http-auth"
 	"github.com/h2oai/steam/master/az"
+	"github.com/h2oai/steam/master/data"
+	"golang.org/x/net/context"
 )
 
 const contentType = "Content-Type"
 
 type BasicLdapAuth struct {
 	az        az.Az
+	ds        *data.Datastore
 	Directory az.Directory
 	Realm     string
 
@@ -96,7 +97,7 @@ func (a *BasicLdapAuth) CheckAuth(r *http.Request) string {
 		return ""
 	}
 	// If found, validate user against local datastore
-	if pz != nil { // TODO: This should check if user is an LDAP user or local
+	if pz != nil && pz.AuthType() == data.LocalAuth { // TODO: This should check if user is an LDAP user or local
 		return auth.NewBasicAuthenticator(a.Realm, func(user, realm string) string { return a.az.Authenticate(user) }).CheckAuth(r)
 	}
 
@@ -105,9 +106,9 @@ func (a *BasicLdapAuth) CheckAuth(r *http.Request) string {
 		return user
 	}
 
-	return a.Conn.Users.NewUser(s[1], user, password, a.Conn)
+	return a.Conn.Users.NewUser(s[1], user, password, a.Conn, a.ds)
 }
 
-func NewBasicLdapAuth(az az.Az, directory az.Directory, realm string, conn *Ldap) *BasicLdapAuth {
-	return &BasicLdapAuth{az: az, Directory: directory, Realm: realm, Conn: conn}
+func NewBasicLdapAuth(az az.Az, directory az.Directory, realm string, conn *Ldap, ds *data.Datastore) *BasicLdapAuth {
+	return &BasicLdapAuth{az: az, Directory: directory, Realm: realm, Conn: conn, ds: ds}
 }

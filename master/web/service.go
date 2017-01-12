@@ -92,7 +92,7 @@ func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
 		Version:             s.version,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
-		Username: pz.Name(),
+		Username:            pz.Name(),
 	}, nil
 }
 
@@ -1749,7 +1749,7 @@ func (s *Service) LinkIdentityWithRole(pz az.Principal, identityId int64, roleId
 		return errors.New("unable to locate role")
 	}
 	// Link role to identity
-	err := s.ds.UpdateIdentity(identityId, data.LinkRole(roleId),
+	err := s.ds.UpdateIdentity(identityId, data.LinkRole(roleId, false),
 		data.WithLinkAudit(pz),
 	)
 	return errors.Wrap(err, "updating identity in database")

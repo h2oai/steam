@@ -1756,6 +1756,7 @@ func (ds *Datastore) CreateIdentity(name string, options ...QueryOpt) (int64, er
 		// Default insert fields
 		identity := goqu.Record{
 			"name":      name,
+			"auth_type": LocalAuth,
 			"is_active": 1,
 			"created":   time.Now(),
 		}
@@ -1957,6 +1958,7 @@ func createIdentity(tx *goqu.TxDatabase, name string, options ...QueryOpt) (int6
 	// Default insert fields
 	identity := goqu.Record{
 		"name":      name,
+		"auth_type": LocalAuth,
 		"is_active": 1,
 		"created":   time.Now(),
 	}

@@ -87,6 +87,7 @@ type History struct {
 type Identity struct {
 	Id          int64          `db:"id,pk"`
 	Name        string         `db:"name,arg"`
+	AuthType    string         `db:"auth_type,def=LocalAuth"`
 	Password    sql.NullString `db:"password"`
 	WorkgroupId sql.NullInt64  `db:"workgroup_id"`
 	IsActive    bool           `db:"is_active,def=1"`

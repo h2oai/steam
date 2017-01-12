@@ -20,6 +20,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/h2oai/steam/master/data"
 )
 
 type LdapUser struct {
@@ -32,7 +34,7 @@ type LdapUser struct {
 }
 
 // NewUser creates a new LdapUser with it's own "self-destruct" timer
-func (u *LdapUser) NewUser(auth, user, password string, conn *Ldap) string {
+func (u *LdapUser) NewUser(auth, user, password string, conn *Ldap, ds *data.Datastore) string {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 
@@ -45,6 +47,38 @@ func (u *LdapUser) NewUser(auth, user, password string, conn *Ldap) string {
 	if err := conn.CheckBind(user, password); err != nil {
 		log.Println(err)
 		return ""
+	}
+
+	if ds == nil {
+		log.Println("Failed to load datastore")
+		return ""
+	}
+
+	// FIXME: THIS SHOULD INHERIT ROLES FROM LDAP
+	role, _, err := ds.ReadRole(data.ByName(data.STANDARD_USER))
+	if err != nil {
+		log.Println("Mapping roles: reading role from database", err)
+		return ""
+	}
+
+	if identity, exists, err := ds.ReadIdentity(data.ByName(user)); err != nil {
+		log.Println("Mapping roles: reading identity from database", err)
+		return ""
+	} else if exists {
+		log.Println("LDAP", user, "updating roles")
+		if err := ds.UpdateIdentity(identity.Id, data.LinkRole(role.Id, true)); err != nil {
+			log.Println("Mapping roles: adding roles to identity", err)
+			return ""
+		}
+	} else {
+		log.Println("LDAP", user, "initializing user")
+		if _, err := ds.CreateIdentity(user,
+			data.WithDefaultIdentityWorkgroup, data.LinkRole(role.Id, false),
+			data.WithAuthType(data.LDAPAuth),
+		); err != nil {
+			log.Println("Mapping roles: initializing identity with roles", err)
+			return ""
+		}
 	}
 	t := time.AfterFunc(u.MaxTime, func() {
 		u.mu.Lock()

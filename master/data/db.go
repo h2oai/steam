@@ -40,8 +40,8 @@ import (
 )
 
 const (
-	VERSION = "1.1.0"
-	standard_user = "standard user"
+	VERSION       = "1.1.0"
+	STANDARD_USER = "standard user"
 )
 
 var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster", "ViewEngine"}
@@ -172,7 +172,6 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 		}
 	}
 
-
 	ds, err := initDatastore(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "initializing datastore")
@@ -282,7 +281,7 @@ func prime(db *goqu.Database) error {
 }
 
 func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd []Permission) error {
-	role, doesRoleExist, err := readRole(tx, ByName(standard_user));
+	role, doesRoleExist, err := readRole(tx, ByName(STANDARD_USER))
 	if err != nil {
 		return errors.Wrapf(err, "error reading role %s", role)
 	}
@@ -293,7 +292,7 @@ func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd [
 		initRolePermissions(tx, role.Id, permissionsToAdd)
 
 	} else {
-		roleId, err := createRole(tx, standard_user)
+		roleId, err := createRole(tx, STANDARD_USER)
 		if err != nil {
 			return errors.Wrapf(err, "error creating role %s", role)
 		}

@@ -154,6 +154,7 @@ var createTableIdentity = `
 CREATE TABLE identity (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
+    auth_type test NOT NULL,
     password text,
     workgroup_id integer,
     is_active boolean NOT NULL,

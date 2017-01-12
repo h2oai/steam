@@ -263,6 +263,7 @@ func ScanIdentity(r *sql.Row) (Identity, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
+		&s.AuthType,
 		&s.Password,
 		&s.WorkgroupId,
 		&s.IsActive,
@@ -282,6 +283,7 @@ func ScanIdentitys(rs *sql.Rows) ([]Identity, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
+			&s.AuthType,
 			&s.Password,
 			&s.WorkgroupId,
 			&s.IsActive,
