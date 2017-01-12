@@ -41,6 +41,7 @@ import (
 
 const (
 	VERSION = "1.1.0"
+	STANDARD_USER = "standard user"
 )
 
 var STANDARD_USER_INIT_PERMISSIONS = []string{"ManageCluster", "ViewCluster"}
@@ -261,7 +262,7 @@ func prime(db *goqu.Database) error {
 }
 
 func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd []Permission) error {
-	role, doesRoleExist, err := readRole(tx, ByName("standard user"));
+	role, doesRoleExist, err := readRole(tx, ByName(STANDARD_USER));
 	if err != nil {
 		return errors.Wrapf(err, "error reading role %s", role)
 	}
@@ -272,7 +273,7 @@ func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd [
 		initRolePermissions(tx, role.Id, permissionsToAdd)
 
 	} else {
-		roleId, err := createRole(tx, "standard user")
+		roleId, err := createRole(tx, STANDARD_USER)
 		if err != nil {
 			return errors.Wrapf(err, "error creating role %s", role)
 		}
