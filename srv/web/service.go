@@ -165,19 +165,19 @@ type Label struct {
 }
 
 type LdapConfig struct {
-	Host                    string `json:"host"`
-	Port                    int    `json:"port"`
-	Ldaps                   bool   `json:"ldaps"`
-	BindDn                  string `json:"bind_dn"`
-	BindPassword            string `json:"bind_password"`
-	UserBaseDn              string `json:"user_base_dn"`
-	UserBaseFilter          string `json:"user_base_filter"`
-	UserNameAttribute       string `json:"user_name_attribute"`
-	GroupDn                 string `json:"group_dn"`
-	StaticMemberAttribute   string `json:"static_member_attribute"`
-	SearchRequestSizeLimint int    `json:"search_request_size_limint"`
-	SearchRequestTimeLimit  int    `json:"search_request_time_limit"`
-	ForceBind               bool   `json:"force_bind"`
+	Host                   string `json:"host"`
+	Port                   int    `json:"port"`
+	Ldaps                  bool   `json:"ldaps"`
+	BindDn                 string `json:"bind_dn"`
+	BindPassword           string `json:"bind_password"`
+	UserBaseDn             string `json:"user_base_dn"`
+	UserBaseFilter         string `json:"user_base_filter"`
+	UserNameAttribute      string `json:"user_name_attribute"`
+	GroupDn                string `json:"group_dn"`
+	StaticMemberAttribute  string `json:"static_member_attribute"`
+	SearchRequestSizeLimit int    `json:"search_request_size_limit"`
+	SearchRequestTimeLimit int    `json:"search_request_time_limit"`
+	ForceBind              bool   `json:"force_bind"`
 }
 
 type Model struct {
@@ -314,6 +314,7 @@ type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
 	CheckAdmin(pz az.Principal) (bool, error)
+	SetLocalConfig(pz az.Principal) error
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
 	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
 	TestLdapConfig(pz az.Principal, config *LdapConfig) error
@@ -452,6 +453,12 @@ type CheckAdminIn struct {
 
 type CheckAdminOut struct {
 	IsAdmin bool `json:"is_admin"`
+}
+
+type SetLocalConfigIn struct {
+}
+
+type SetLocalConfigOut struct {
 }
 
 type SetLdapConfigIn struct {
@@ -1475,6 +1482,16 @@ func (this *Remote) CheckAdmin() (bool, error) {
 		return false, err
 	}
 	return out.IsAdmin, nil
+}
+
+func (this *Remote) SetLocalConfig() error {
+	in := SetLocalConfigIn{}
+	var out SetLocalConfigOut
+	err := this.Proc.Call("SetLocalConfig", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *Remote) SetLdapConfig(config *LdapConfig) error {
@@ -2728,6 +2745,39 @@ func (this *Impl) CheckAdmin(r *http.Request, in *CheckAdminIn, out *CheckAdminO
 	}
 
 	out.IsAdmin = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) SetLocalConfig(r *http.Request, in *SetLocalConfigIn, out *SetLocalConfigOut) error {
+	const name = "SetLocalConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.SetLocalConfig(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

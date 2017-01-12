@@ -51,6 +51,11 @@ export function checkAdmin(): void {
   Proxy.Call("CheckAdmin", req, print);
 }
 
+export function setLocalConfig(): void {
+  const req: any = {  };
+  Proxy.Call("SetLocalConfig", req, print);
+}
+
 export function setLdapConfig(config: LdapConfig): void {
   const req: any = { config: config };
   Proxy.Call("SetLdapConfig", req, print);
