@@ -25,19 +25,20 @@ import (
 )
 
 type BasicLdapAuthProvider struct {
+	az    *DefaultAz
 	realm string
 
 	conn *ldap.Ldap
 }
 
 func (p *BasicLdapAuthProvider) Secure(handler http.Handler) http.Handler {
-	authenticator := ldap.NewBasicLdapAuth(p.realm, p.conn)
+	authenticator := ldap.NewBasicLdapAuth(p.az, p.az.directory, p.realm, p.conn)
 
 	return auth.JustCheck(authenticator, handler.ServeHTTP)
 }
 
-func NewBasicLdapAuthProvider(realm string, conn *ldap.Ldap) *BasicLdapAuthProvider {
-	return &BasicLdapAuthProvider{realm: realm, conn: conn}
+func NewBasicLdapAuthProvider(az *DefaultAz, realm string, conn *ldap.Ldap) *BasicLdapAuthProvider {
+	return &BasicLdapAuthProvider{az: az, realm: realm, conn: conn}
 }
 
 // Basic/Digest auth have no notion of logouts, so these handlers simply fail auth,

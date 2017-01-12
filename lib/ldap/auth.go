@@ -24,12 +24,15 @@ import (
 	"golang.org/x/net/context"
 
 	auth "github.com/abbot/go-http-auth"
+	"github.com/h2oai/steam/master/az"
 )
 
 const contentType = "Content-Type"
 
 type BasicLdapAuth struct {
-	Realm string
+	az        az.Az
+	Directory az.Directory
+	Realm     string
 
 	// Headers used by authenticator. Set to ProxyHeaders to use with
 	// proxy server. When nil, NormalHeaders are used.
@@ -87,6 +90,17 @@ func (a *BasicLdapAuth) CheckAuth(r *http.Request) string {
 		return ""
 	}
 
+	// First lookup in local datastore
+	pz, err := a.Directory.Lookup(user)
+	if err != nil {
+		return ""
+	}
+	// If found, validate user against local datastore
+	if pz != nil { // TODO: This should check if user is an LDAP user or local
+		return auth.NewBasicAuthenticator(a.Realm, func(user, realm string) string { return a.az.Authenticate(user) }).CheckAuth(r)
+	}
+
+	// If not local, continue to check in LDAP for user
 	if a.Conn.Users.Exists(s[1]) {
 		return user
 	}
@@ -94,6 +108,6 @@ func (a *BasicLdapAuth) CheckAuth(r *http.Request) string {
 	return a.Conn.Users.NewUser(s[1], user, password, a.Conn)
 }
 
-func NewBasicLdapAuth(realm string, conn *Ldap) *BasicLdapAuth {
-	return &BasicLdapAuth{Realm: realm, Conn: conn}
+func NewBasicLdapAuth(az az.Az, directory az.Directory, realm string, conn *Ldap) *BasicLdapAuth {
+	return &BasicLdapAuth{az: az, Directory: directory, Realm: realm, Conn: conn}
 }
