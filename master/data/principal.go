@@ -29,7 +29,7 @@ type Principal struct {
 	ds          *Datastore
 	Identity    *Identity
 	permissions map[int64]bool
-	isAdmin bool
+	isAdmin     bool
 }
 
 func (pz *Principal) Id() int64 {
@@ -90,7 +90,7 @@ func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivileg
 	if err := tx.Wrap(func() error {
 		var err error
 		privileges, err = readPrivileges(tx,
-			ById(pz.Identity.Id),
+			ByIdentityId(pz.Identity.Id),
 			ByEntityTypeId(entityTypeId),
 			ByEntityId(entityId),
 		)
