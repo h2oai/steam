@@ -27,7 +27,7 @@ import CreateUser from "./components/CreateUser";
 import CreateRole from "./components/CreateRole";
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {enterNewUser, enterNewRole, exitNewRole, exitNewUser, fetchLdapConfig} from "./actions/users.actions";
+import {enterNewUser, enterNewRole, exitNewRole, exitNewUser, fetchLdapConfig, checkAdmin} from "./actions/users.actions";
 import UserAuthentication from "./components/UserAuthentication";
 
 
@@ -36,6 +36,7 @@ interface Props {
   permission: Permission
   createNewUserIsEntered: boolean
   createNewRoleIsEntered: boolean
+  isAdmin: boolean
 }
 interface DispatchProps {
   enterNewUser: Function
@@ -43,6 +44,7 @@ interface DispatchProps {
   exitNewUser: Function
   exitNewRole: Function
   fetchLdapConfig: Function
+  checkAdmin: Function
 }
 export class Users extends React.Component<Props & DispatchProps, any> {
 
@@ -61,12 +63,6 @@ export class Users extends React.Component<Props & DispatchProps, any> {
           isSelected: false,
           onClick: this.clickHandler.bind(this),
           component: <RolePermissions />
-        },
-        authentication: {
-          label: 'USER AUTHENTICATION',
-          isSelected: false,
-          onClick: this.clickHandler.bind(this),
-          component: <UserAuthentication />
         }
       },
       isSelected: 'users'
@@ -87,15 +83,37 @@ export class Users extends React.Component<Props & DispatchProps, any> {
           isSelected: false,
           onClick: this.clickHandler.bind(this),
           component: <RolePermissions />
-        },
-        authentication: {
-          label: 'AUTHENTICATION',
-          isSelected: false,
-          onClick: this.clickHandler.bind(this),
-          component: <UserAuthentication />
-        },
+        }
       }
     });
+    this.props.checkAdmin();
+  }
+
+  componentWillReceiveProps(nextProps): void {
+    if (!this.props.isAdmin && nextProps.isAdmin) {
+      this.setState({
+        tabs: {
+          users: {
+            label: 'USERS',
+            isSelected: true,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAccess />
+          },
+          roles: {
+            label: 'ROLES',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <RolePermissions />
+          },
+          authentication: {
+            label: 'AUTHENTICATION',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAuthentication />
+          }
+        }
+      });
+    }
   }
 
   clickHandler(tab) {
@@ -174,7 +192,8 @@ export class Users extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state: any): any {
   return {
     createNewUserIsEntered: state.users.createNewUserIsEntered,
-    createNewRoleIsEntered: state.users.createNewRoleIsEntered
+    createNewRoleIsEntered: state.users.createNewRoleIsEntered,
+    isAdmin: state.users.isAdmin
   };
 }
 
@@ -184,7 +203,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     enterNewRole: bindActionCreators(enterNewRole, dispatch),
     exitNewUser: bindActionCreators(exitNewUser, dispatch),
     exitNewRole: bindActionCreators(exitNewRole, dispatch),
-    fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch)
+    fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch),
+    checkAdmin: bindActionCreators(checkAdmin, dispatch)
   };
 }
 

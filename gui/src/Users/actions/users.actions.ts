@@ -61,7 +61,24 @@ export const REQUEST_SAVE_LDAP = 'REQUEST_SAVE_LDAP';
 export const RECEIVE_SAVE_LDAP = 'RECEIVE_SAVE_LDAP';
 export const REQUEST_TEST_LDAP = 'REQUEST_TEST_LDAP';
 export const RECEIVE_TEST_LDAP = 'RECEIVE_TEST_LDAP';
+export const REQUEST_ADMIN_CHECK = 'REQUEST_ADMIN_CHECK';
+export const RECEIVE_ADMIN_CHECK = 'RECEIVE_ADMIN_CHECK';
 
+export function requestAdminCheck() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_ADMIN_CHECK
+    });
+  };
+}
+export function receiveAdminCheck(isSuperuser) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_ADMIN_CHECK,
+      isAdmin: isSuperuser
+    });
+  };
+};
 export function requestTestLdap() {
   return (dispatch) => {
     dispatch({
@@ -909,5 +926,19 @@ export function testLdapConfig(ldapConfig: LdapConfig) {
         dispatch(receiveTestLdap());
       }
     });
-  }
+  };
+}
+
+export function checkAdmin() {
+  return (dispatch, getState) => {
+    dispatch(requestAdminCheck());
+    Remote.checkAdmin((error, isSuperuser) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Superuser", "Unable to check admin status", null));
+        return;
+      }
+      console.log("is superuser", isSuperuser);
+      dispatch(receiveAdminCheck(isSuperuser));
+    });
+  };
 }
