@@ -4,7 +4,6 @@
 
 var path = require('path');
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
-var SRC_DIR = path.resolve(__dirname, 'src');
 
 module.exports = {
   entry: [
