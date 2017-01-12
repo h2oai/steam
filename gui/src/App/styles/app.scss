@@ -1,4 +1,21 @@
 @import '../../variables.scss';
+@import "~@blueprintjs/core/src/blueprint.scss";
+.pt-toast.pt-intent-danger {
+  color: black;
+}
+.pt-toast.pt-intent-primary {
+  color: black;
+}
+.pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+.pt-input {
+  width: 200px;
+}
+.pt-toast .pt-button-group {
+  padding: 0px;
+}
+
 
 html, body, .app-container, #app {
   height: 100%;
@@ -319,16 +336,4 @@ input[type="text"], textarea {
   a {
     text-decoration: underline;
   }
-}
-
-@import "~@blueprintjs/core/src/blueprint.scss";
-
-.pt-toast.pt-intent-danger {
-  color: black;
-}
-.pt-toast.pt-intent-primary {
-  color: black;
-}
-.pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
-  color: rgba(0, 0, 0, 0.7) !important;
 }

@@ -128,10 +128,10 @@ export class CreateRole extends React.Component<Props & DispatchProps, any> {
         <div className="lede">To create a new type of role in Steam, provide a name for this role, and select the privileges it should have</div>
         <br />
         <div>Role Name</div>
-        <input type="text" ref={(input) => this.nameInput = input} onChange={this.onNameChanged.bind(this) }/>
+        <input type="text" className="pt-input" ref={(input) => this.nameInput = input} onChange={this.onNameChanged.bind(this) }/>
         <br />
         <div>Role Description</div>
-        <input type="text" ref={(input) => this.descriptionInput = input} onChange={this.onDescriptionChanged.bind(this) }/>
+        <input type="text" className="pt-input" ref={(input) => this.descriptionInput = input} onChange={this.onDescriptionChanged.bind(this) }/>
         <br />
         <Table>
           <Row>

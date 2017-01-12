@@ -19,8 +19,7 @@ import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-import { Permission, Role, Identity, Workgroup } from "../../Proxy/Proxy";
-import {LdapConfig} from "../../Proxy/Proxy";
+import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -60,7 +59,40 @@ export const REQUEST_LDAP_CONFIG = 'REQUEST_LDAP_CONFIG';
 export const RECEIVE_LDAP_CONFIG = 'RECEIVE_LDAP_CONFIG';
 export const REQUEST_SAVE_LDAP = 'REQUEST_SAVE_LDAP';
 export const RECEIVE_SAVE_LDAP = 'RECEIVE_SAVE_LDAP';
+export const REQUEST_TEST_LDAP = 'REQUEST_TEST_LDAP';
+export const RECEIVE_TEST_LDAP = 'RECEIVE_TEST_LDAP';
+export const REQUEST_ADMIN_CHECK = 'REQUEST_ADMIN_CHECK';
+export const RECEIVE_ADMIN_CHECK = 'RECEIVE_ADMIN_CHECK';
 
+export function requestAdminCheck() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_ADMIN_CHECK
+    });
+  };
+}
+export function receiveAdminCheck(isSuperuser) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_ADMIN_CHECK,
+      isAdmin: isSuperuser
+    });
+  };
+};
+export function requestTestLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_TEST_LDAP
+    });
+  };
+};
+export function  receiveTestLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_TEST_LDAP
+    });
+  };
+};
 export function requestSaveLdap() {
   return (dispatch) => {
     dispatch({
@@ -878,6 +910,34 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Updated", null));
         fetchLdapConfig();
       }
+    });
+  };
+}
+
+export function testLdapConfig(ldapConfig: LdapConfig) {
+  return (dispatch, getState) => {
+    dispatch(requestTestLdap());
+    Remote.testLdapConfig(ldapConfig, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP", error.toString(), null));
+        dispatch(receiveTestLdap());
+      } else {
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
+        dispatch(receiveTestLdap());
+      }
+    });
+  };
+}
+
+export function checkAdmin() {
+  return (dispatch, getState) => {
+    dispatch(requestAdminCheck());
+    Remote.checkAdmin((error, isSuperuser) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Superuser", "Unable to check admin status", null));
+        return;
+      }
+      dispatch(receiveAdminCheck(isSuperuser));
     });
   };
 }
