@@ -33,8 +33,8 @@ let initialState = {
   ldapExists: false,
   ldapConfig: {
     host: "",
-    port: 689,
-    ldaps: true,
+    port: 389,
+    ldaps: false,
     bind_dn: "DC=xyz,DC=com",
     bind_password: "",
     user_base_dn: "",
