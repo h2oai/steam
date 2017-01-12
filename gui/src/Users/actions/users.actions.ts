@@ -564,6 +564,7 @@ export function fetchPermissionsWithRoles() {
               reject();
             }
             resolve({
+              roleName: role.name,
               roleId : role.id,
               permissions : res
             });
@@ -577,29 +578,28 @@ export function fetchPermissionsWithRoles() {
         });
 
         descriptionsPromise.then((descriptions) => {
-            let flags;
-            let permissionSet;
+          let flags;
+          let permissionSet;
 
-            for (let i = 0; i < descriptions.length; i++) {
-              flags = [];
-              for (let j = 0; j < permissionsByRole.length; j++) {
-                permissionSet = permissionsByRole[j];
-                if (_.findIndex(permissionSet.permissions, (o: Permission) => {
-                  return o.id === descriptions[i].id;
-                }) !== -1) {
-                  flags.push({value: true, roleId: permissionSet.roleId});
-                } else {
-                  flags.push({value: false, roleId: permissionSet.roleId});
-                }
+          for (let i = 0; i < descriptions.length; i++) {
+            flags = [];
+            for (let j = 0; j < permissionsByRole.length; j++) {
+              permissionSet = permissionsByRole[j];
+              if (_.findIndex(permissionSet.permissions, (o: Permission) => {
+                return o.id === descriptions[i].id;
+              }) !== -1) {
+                flags.push({value: true, roleId: permissionSet.roleId, roleName: permissionSet.roleName});
+              } else {
+                flags.push({value: false, roleId: permissionSet.roleId, roleName: permissionSet.roleName});
               }
-              output.push({
-                description : descriptions[i].description,
-                id: descriptions[i].id,
-                flags
-              });
             }
-
-            dispatch(receivePermissionsByRole(output));
+            output.push({
+              description : descriptions[i].description,
+              id: descriptions[i].id,
+              flags
+            });
+          }
+          dispatch(receivePermissionsByRole(output));
         });
       });
     });
