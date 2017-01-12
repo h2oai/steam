@@ -48,8 +48,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   userbaseDnInput: HTMLInputElement;
   userbaseFilterInput: HTMLInputElement;
   usernameAttribueInput: HTMLInputElement;
-  realnameAttributeInput: HTMLInputElement;
+  //realnameAttributeInput: HTMLInputElement;
   groupDnInput: HTMLInputElement;
+  staticMemberAttributeInput: HTMLInputElement;
+  searchRequestSizeLimitInput: HTMLInputElement;
+  searchRequestTimeLimitInput: HTMLInputElement;
 
   constructor(params) {
     super(params);
@@ -61,7 +64,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       passwordInputValid: true,
       userbaseDnInputValid: true,
       usernameAttributeInputValid: true,
-      groupDnInputValid: true
+      groupDnInputValid: true,
     };
   }
 
@@ -131,14 +134,17 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     return {
       host: this.hostInput.value,
       port: parseInt(this.portInput.value, 10),
-      ldaps: true,
+      ldaps: this.sslEnabledInput.value === 'true',
       bind_dn: this.bindDnInput.value,
       bind_password: this.bindDnPasswordInput.value,
       user_base_dn: this.userbaseDnInput.value,
       user_base_filter: this.userbaseFilterInput.value,
-      //user_name_attribute: this.usernameAttribueInput.value, //awaiting backend implementation
-      user_rn_attribute: this.realnameAttributeInput.value,
-      //group_dn: this.groupDnInput.value, //awaiting backend implementation
+      user_name_attribute: this.usernameAttribueInput.value,
+      //user_rn_attribute: this.realnameAttributeInput.value,
+      group_dn: this.groupDnInput.value,
+      static_member_attribute: this.staticMemberAttributeInput.value,
+      search_request_size_limint: parseInt(this.searchRequestSizeLimitInput.value, 10),
+      search_request_time_limit: parseInt(this.searchRequestTimeLimitInput.value, 10),
       force_bind: true
     };
   };
@@ -293,6 +299,30 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                       <input type="text" className={"pt-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.groupDnInput = ref} defaultValue=""></input>
                     </td>
                 </tr>
+
+                <tr className="auth-row">
+                  <td className="auth-left">Static Member Attribute</td>
+                  <td className="auth-right">
+                    <input type="text" className="pt-input" ref={(ref) => this.staticMemberAttributeInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.static_member_attribute : ""}></input>
+                  </td>
+                </tr>
+
+
+                <tr className="auth-row">
+                  <td className="auth-left">Search Request Size Limit</td>
+                  <td className="auth-right">
+                    <input type="numeric" ref={(ref) => this.searchRequestSizeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.search_request_size_limint.toString() : "0"}></input>
+                  </td>
+                </tr>
+
+
+                <tr className="auth-row">
+                  <td className="auth-left">Group DN</td>
+                  <td className="auth-right">
+                    <input type="numeric" ref={(ref) => this.searchRequestTimeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.group_dn.toString() : "0"}></input>
+                  </td>
+                </tr>
+
               </tbody>
             </table>
 
