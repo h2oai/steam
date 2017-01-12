@@ -260,11 +260,13 @@ CREATE TABLE permission (
 var createTablePrivilege = `
 CREATE TABLE privilege (
     privilege_type text NOT NULL,
+    identity_id integer NOT NULL,
     workgroup_id integer NOT NULL,
     entity_type_id integer NOT NULL,
     entity_id integer NOT NULL,
 
-    PRIMARY KEY (privilege_type, workgroup_id, entity_type_id, entity_id),
+    PRIMARY KEY (identity_id, privilege_type, workgroup_id, entity_type_id, entity_id),
+    FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE,
     FOREIGN KEY (entity_type_id) REFERENCES entity_type(id),
     FOREIGN KEY (workgroup_id) REFERENCES workgroup(id) ON DELETE CASCADE
 )

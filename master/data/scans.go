@@ -588,6 +588,7 @@ func ScanPrivilege(r *sql.Row) (Privilege, error) {
 	var s Privilege
 	if err := r.Scan(
 		&s.Type,
+		&s.IdentityId,
 		&s.WorkgroupId,
 		&s.EntityType,
 		&s.EntityId,
@@ -604,6 +605,7 @@ func ScanPrivileges(rs *sql.Rows) ([]Privilege, error) {
 		var s Privilege
 		if err = rs.Scan(
 			&s.Type,
+			&s.IdentityId,
 			&s.WorkgroupId,
 			&s.EntityType,
 			&s.EntityId,

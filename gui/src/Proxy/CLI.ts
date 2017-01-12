@@ -48,7 +48,7 @@ export function getConfig(): void {
 
 export function checkAdmin(): void {
   const req: any = {  };
-  Proxy.Call("CheckSAdmin", req, print);
+  Proxy.Call("CheckAdmin", req, print);
 }
 
 export function setLdapConfig(config: LdapConfig): void {
