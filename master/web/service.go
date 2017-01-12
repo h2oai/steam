@@ -2134,7 +2134,7 @@ func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityT
 		return errors.Wrap(err, "checking view privileges")
 	}
 	// Create privilege/sharing
-	_, err := s.ds.CreatePrivilege(kind, workgroupId, entityTypeId, entityId,
+	_, err := s.ds.CreatePrivilege(kind, pz.Id(), workgroupId, entityTypeId, entityId,
 		data.WithAudit(pz),
 	)
 	return errors.Wrap(err, "creating privilege in database")

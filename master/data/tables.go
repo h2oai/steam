@@ -159,6 +159,7 @@ type Permission struct {
 
 type Privilege struct {
 	Type        string `db:"privilege_type,arg"`
+	IdentityId  int64  `db:"identity_id,arg"`
 	WorkgroupId int64  `db:"workgroup_id,arg"`
 	EntityType  int64  `db:"entity_type_id,arg"`
 	EntityId    int64  `db:"entity_id,arg"`

@@ -174,11 +174,11 @@ func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: linking identity to workgroup")
 	})
 	q.AddPostFunc(func(c *QueryConfig) error {
-		_, err := createPrivilege(c.tx, Owns, workgroupId, c.entityTypes.Identity, c.entityId)
+		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, c.entityTypes.Identity, c.entityId)
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: creating identity privilege")
 	})
 	q.AddPostFunc(func(c *QueryConfig) error {
-		_, err := createPrivilege(c.tx, Owns, workgroupId, c.entityTypes.Workgroup, workgroupId)
+		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, c.entityTypes.Workgroup, workgroupId)
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: creating workgroup privilege")
 	})
 	return nil
@@ -694,7 +694,7 @@ func WithPrivilege(pz az.Principal, typ string) QueryOpt {
 			if pz == nil {
 				return errors.New("WithPrivilege: no principal provided")
 			}
-			_, err := createPrivilege(c.tx, typ, pz.WorkgroupId(), c.entityTypeId, c.entityId)
+			_, err := createPrivilege(c.tx, typ, pz.Id(), pz.WorkgroupId(), c.entityTypeId, c.entityId)
 			return errors.Wrap(err, "WithPrivilege: creating privilege")
 		})
 		return nil

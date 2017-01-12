@@ -3707,7 +3707,7 @@ func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 // ---------- --------- ----------
 // ---------- --------- ----------
 
-func (ds *Datastore) CreatePrivilege(typ string, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
+func (ds *Datastore) CreatePrivilege(typ string, identityId, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
 	tx, err := ds.db.Begin()
 	if err != nil {
 		return 0, errors.Wrap(err, "beginning transaction")
@@ -3720,6 +3720,7 @@ func (ds *Datastore) CreatePrivilege(typ string, workgroupId, entityType, entity
 		// Default insert fields
 		privilege := goqu.Record{
 			"privilege_type": typ,
+			"identity_id":    identityId,
 			"workgroup_id":   workgroupId,
 			"entity_type_id": entityType,
 			"entity_id":      entityId,
@@ -3916,12 +3917,13 @@ func (ds *Datastore) DeletePrivilege(options ...QueryOpt) error {
 
 	return errors.Wrap(err, "committing transaction")
 }
-func createPrivilege(tx *goqu.TxDatabase, typ string, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
+func createPrivilege(tx *goqu.TxDatabase, typ string, identityId, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, CreateOp, "privilege", nil)
 	// Default insert fields
 	privilege := goqu.Record{
 		"privilege_type": typ,
+		"identity_id":    identityId,
 		"workgroup_id":   workgroupId,
 		"entity_type_id": entityType,
 		"entity_id":      entityId,

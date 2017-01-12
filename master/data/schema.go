@@ -259,8 +259,8 @@ CREATE TABLE permission (
 
 var createTablePrivilege = `
 CREATE TABLE privilege (
-    identity_id integer NOT NULL,
     privilege_type text NOT NULL,
+    identity_id integer NOT NULL,
     workgroup_id integer NOT NULL,
     entity_type_id integer NOT NULL,
     entity_id integer NOT NULL,
