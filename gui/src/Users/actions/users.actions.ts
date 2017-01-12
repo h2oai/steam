@@ -599,7 +599,6 @@ export function fetchPermissionsWithRoles() {
               flags
             });
           }
-          console.log(output);
           dispatch(receivePermissionsByRole(output));
         });
       });
