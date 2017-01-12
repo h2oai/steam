@@ -156,7 +156,6 @@ export class RolePermissions extends React.Component<Props & DispatchProps, any>
         return<Row key={permissionIndex}>
           <Cell className="right-table-bar" key={permissionSet.description}>{permissionSet.description}</Cell>
           {permissionSet.flags.map((flag: any, flagIndex) => {
-            console.log(flag);
             if (flag.roleName === ADMIN_ROLE_NAME) {
               return <Cell className="center-text" key={flagIndex}><input data-roleid={flag.roleId}
                 ref={(input) => this.registerInput(input, {value: true, roleId: flag.roleId}, flagIndex, permissionSet, permissionIndex)}
