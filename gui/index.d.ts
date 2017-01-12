@@ -24,4 +24,8 @@ declare function require(string): string;
 interface Window {
   devToolsExtension: any
   ga: any
+  chrome?: {
+    webstore: any
+  }
+  InstallTrigger?: any
 }
