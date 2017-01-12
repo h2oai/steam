@@ -313,6 +313,14 @@ input[type="text"], textarea {
   color: $h2o-orange-prime;
 }
 
+.unsupported-browser {
+  text-align: center;
+  margin-top: 30px;
+  a {
+    text-decoration: underline;
+  }
+}
+
 @import "~@blueprintjs/core/src/blueprint.scss";
 
 .pt-toast.pt-intent-danger {
