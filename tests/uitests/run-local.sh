@@ -4,17 +4,17 @@
 cd $GOPATH/src/github.com/h2oai/steam/
 STEAM_DIR=$GOPATH/src/github.com/h2oai/steam
 TESTS_DIR=$STEAM_DIR/tests/uitests
-make clean
-make all db
+make clean all
+sudo -v
+rm -f var/master/db/steam.db
 
-curl -o h2o.zip http://h2o-release.s3.amazonaws.com/h2o/rel-turing/8/h2o-3.10.0.8.zip
-unzip h2o.zip
-H2O_DIR=$STEAM_DIR/h2o-3.10.0.8
-rm h2o.zip
+H2O_DIR=~/documents/h2o-3/build
+
 
 export H2O_PATH=$H2O_DIR/h2o.jar
+export STEAM_PATH=$STEAM_DIR/steam
 
-./steam serve master --admin-name=admin --admin-password=admin012 --compilation-service-address=":55000" > \
+sudo ./steam serve master --admin-name=patrick --admin-password=superuser --compilation-service-address=":55000" > \
 	$TESTS_DIR/steam.log 2>&1 &
 
 STEAM_PID=$!
@@ -35,7 +35,7 @@ JETTY_PID=$!
 disown
 
 sleep 5
-$STEAM_DIR/steam login localhost:9000 --username=admin --password=admin012 > /dev/null
+$STEAM_DIR/steam login localhost:9000 --username=patrick --password=superuser > /dev/null
 $STEAM_DIR/steam register cluster --address="localhost:54535"
 
 cd $TESTS_DIR
@@ -66,15 +66,14 @@ done
 
 unset JETTY_PATH
 unset H2O_PATH
+unset STEAM_PATH
 
-kill $STEAM_PID
+sudo rm -r $STEAM_DIR/var
+sudo killall steam
 kill $H2O_PID
 kill $H2O2_PID
 kill $JETTY_PID
 
 cat .failures
 rm .failures
-
-rm -rf $H2O_DIR
-
 

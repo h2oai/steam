@@ -39,8 +39,8 @@ for dir in `ls -d *-test`; do
 	sqlite3 steam.db < create-schema.sql
 	cd ../../..
 	rm -rf var/master/model/*
-	./steam login localhost:9000 --username admin --password admin012 > /dev/null
-	./steam serve master --admin-name admin --admin-password admin012 >> ../steam.log  2>&1 &
+	./steam login localhost:9000 --username superuser --password superuser > /dev/null
+	./steam serve master --superuser-name superuser --superuser-password superuser >> ../steam.log  2>&1 &
 	STEAM_PID=$!
 	disown
 	cd ..
