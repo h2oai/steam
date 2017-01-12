@@ -18,8 +18,8 @@ var roleTests = []struct {
 	pass bool
 	err  error
 }{
-	{in: roleIn{name: "role1", desc: "test role"}, out: 2, pass: true},
-	{in: roleIn{name: "role2", desc: "test role"}, out: 3, pass: true},
+	{in: roleIn{name: "role1", desc: "test role"}, out: 3, pass: true},
+	{in: roleIn{name: "role2", desc: "test role"}, out: 4, pass: true},
 }
 
 var readRoleTests = []struct {
