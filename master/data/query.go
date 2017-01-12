@@ -110,7 +110,10 @@ type QueryOpt func(*QueryConfig) error
 // ------------- ------------- -------------
 
 func WithActivity(activate bool) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.fields["is_active"] = activate; return }
+	if activate {
+		return func(q *QueryConfig) (err error) { q.fields["is_active"] = 1; return }
+	}
+	return func(q *QueryConfig) (err error) { q.fields["is_active"] = 0; return }
 }
 
 // ByAddress queries the database for matching address columns
@@ -121,6 +124,10 @@ func ByAddress(address string) QueryOpt {
 // WithAddress adds an address value to the query
 func WithAddress(address string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["address"] = address; return }
+}
+
+func WithAuthType(authType string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["auth_type"] = authType; return }
 }
 
 // WithBinomial model creates an entry in the binomial_metrics table and links it to the model
@@ -187,6 +194,18 @@ func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 // WithDescription adds a description value to the query
 func WithDescription(description string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["description"] = description; return }
+}
+
+func ByEnabled(q *QueryConfig) (err error) {
+	q.dataset = q.dataset.Where(q.I("enabled").Eq(1))
+	return
+}
+
+func WithEnable(enable bool) QueryOpt {
+	if enable {
+		return func(q *QueryConfig) (err error) { q.fields["enabled"] = 1; return }
+	}
+	return func(q *QueryConfig) (err error) { q.fields["enabled"] = 0; return }
 }
 
 func ForEntity(entityTypeId, entityId int64) QueryOpt {
@@ -470,12 +489,17 @@ func ForRole(roleId int64) QueryOpt {
 	}
 }
 
-func LinkRole(roleId int64) QueryOpt {
+func LinkRole(roleId int64, reset bool) QueryOpt {
 	return func(q *QueryConfig) error {
 		if q.entityTypeId != q.entityTypes.Identity {
 			return errors.New("LinkRole: roles may only be linked with identities")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
+			if reset {
+				if err := deleteIdentityRole(c.tx, ByIdentityId(c.entityId)); err != nil {
+					return errors.Wrap(err, "deleting identity role in database")
+				}
+			}
 			_, err := createIdentityRole(c.tx, WithIdentityId(c.entityId), WithRoleId(roleId))
 			return errors.Wrap(err, "creating identity role in database")
 		})
