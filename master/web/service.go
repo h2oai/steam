@@ -88,8 +88,17 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 }
 
 func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
+	var authType string
+	if auth, exists, err := s.ds.ReadAuthentication(data.ByEnabled); err != nil {
+		return nil, errors.Wrap(err, "reading authentication from database")
+	} else if exists {
+		authType = auth.Key
+	} else {
+		authType = data.LocalAuth
+	}
 	return &web.Config{
 		Version:             s.version,
+		AuthenticationType:  authType,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
 		Username:            pz.Name(),

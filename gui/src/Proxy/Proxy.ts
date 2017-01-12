@@ -83,9 +83,10 @@ export interface ClusterType {
 
 export interface Config {
   
-  version: string
-  kerberos_enabled: boolean
+  authentication_type: string
   cluster_proxy_address: string
+  kerberos_enabled: boolean
+  version: string
   username: string
 }
 

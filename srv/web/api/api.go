@@ -20,9 +20,10 @@ package api
 // --- Type Definitions ---
 
 type Config struct {
-	Version             string
-	KerberosEnabled     bool
+	AuthenticationType  string
 	ClusterProxyAddress string
+	KerberosEnabled     bool
+	Version             string
 	Username            string
 }
 
