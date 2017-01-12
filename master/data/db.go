@@ -251,7 +251,6 @@ func toPostgresOpts(o DBOpts) string {
 
 func IsPrimed(db *goqu.Database) (bool, error) {
 	ct, err := db.From("meta").Count()
-	log.Println(ct)
 	return ct > 0, err
 }
 
