@@ -20,7 +20,7 @@ import {
   RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
   RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE,
   ENTER_NEW_USER,
-  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG
+  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG, RECEIVE_ADMIN_CHECK
 } from '../actions/users.actions';
 
 let initialState = {
@@ -31,13 +31,28 @@ let initialState = {
   createNewUserIsEntered: false,
   createNewRoleIsEntered: false,
   ldapExists: false,
-  ldapConfig: null
+  ldapConfig: {
+    host: "",
+    port: 389,
+    ldaps: false,
+    bind_dn: "DC=xyz,DC=com",
+    bind_password: "",
+    user_base_dn: "",
+    user_base_filter: "",
+    user_rn_attribute: "cn",
+    force_bind: true
+  },
+  isAdmin: false
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case RECEIVE_ADMIN_CHECK : {
+      return _.assign({}, state, {
+        isAdmin: action.isAdmin
+      });
+    }
     case RECEIVE_LDAP_CONFIG : {
-      console.log(action.exists, action.config);
       return _.assign({}, state, {
         ldapExists: action.exists,
         ldapConfig: action.config
