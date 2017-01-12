@@ -63,7 +63,23 @@ export const REQUEST_TEST_LDAP = 'REQUEST_TEST_LDAP';
 export const RECEIVE_TEST_LDAP = 'RECEIVE_TEST_LDAP';
 export const REQUEST_ADMIN_CHECK = 'REQUEST_ADMIN_CHECK';
 export const RECEIVE_ADMIN_CHECK = 'RECEIVE_ADMIN_CHECK';
+export const REQUEST_SET_LOCAL_CONFIG = 'REQUEST_SET_LOCAL_CONFIG';
+export const RECEIVE_SET_LOCAL_CONFIG = 'RECEIVE_SET_LOCAL_CONFIG';
 
+export function requestSetLocalConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_SET_LOCAL_CONFIG
+    });
+  };
+}
+export function receiveSetLocalConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_SET_LOCAL_CONFIG
+    });
+  };
+}
 export function requestAdminCheck() {
   return (dispatch) => {
     dispatch({
@@ -908,7 +924,7 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
       } else {
         dispatch(receiveSaveLdap());
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Updated", null));
-        fetchLdapConfig();
+        dispatch(fetchLdapConfig());
       }
     });
   };
@@ -938,6 +954,21 @@ export function checkAdmin() {
         return;
       }
       dispatch(receiveAdminCheck(isSuperuser));
+    });
+  };
+}
+
+export function setLocalConfig() {
+  return (dispatch, getState) => {
+    dispatch(requestSetLocalConfig());
+    Remote.setLocalConfig((error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP", error, null));
+        return;
+      }
+      dispatch(receiveSetLocalConfig());
+      dispatch(fetchLdapConfig());
+      dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Removed", null));
     });
   };
 }

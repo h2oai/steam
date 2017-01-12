@@ -24,7 +24,7 @@ import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 import { LdapConfig} from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
-import { fetchLdapConfig, saveLdapConfig, testLdapConfig } from "../actions/users.actions";
+import { fetchLdapConfig, saveLdapConfig, testLdapConfig, setLocalConfig } from "../actions/users.actions";
 
 interface Props {
   doesLdapExist: boolean,
@@ -33,7 +33,8 @@ interface Props {
 interface DispatchProps {
   fetchLdapConfig: Function,
   saveLdapConfig: Function,
-  testLdapConfig: Function
+  testLdapConfig: Function,
+  setLocalConfig: Function
 }
 
 export class UserAuthentication extends React.Component<Props & DispatchProps, any> {
@@ -58,7 +59,8 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     super(params);
     this.state = {
       isLDAPConnectionSettingsOpen: true,
-      showDBOptions: true,
+      showDBOptions: false,
+      selectedDB: "",
       hostInputValid: true,
       portInputValid: true,
       passwordInputValid: true,
@@ -143,7 +145,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       //user_rn_attribute: this.realnameAttributeInput.value,
       group_dn: this.groupDnInput.value,
       static_member_attribute: this.staticMemberAttributeInput.value,
-      search_request_size_limint: parseInt(this.searchRequestSizeLimitInput.value, 10),
+      search_request_size_limit: parseInt(this.searchRequestSizeLimitInput.value, 10),
       search_request_time_limit: parseInt(this.searchRequestTimeLimitInput.value, 10),
       force_bind: true
     };
@@ -169,35 +171,54 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     }
   };
   onDBChanged = (e) => {
-    if (this.dbSelectInput.selectedIndex === 0) { //LDAP
+    if (e.target.value === "LDAP") {
       this.setState({
-        showDBOptions: true
+        showDBOptions: true,
+        selectedDB: e.target.value
       });
-    } else if (this.dbSelectInput.selectedIndex === 1) {
+    } else if (e.target.value === "Steam Local DB") {
       this.setState({
-        showDBOptions: false
+        showDBOptions: false,
+        selectedDB: e.target.value
       });
+    } else {
+      console.log("ERROR", "Unknown Input Value"); //Should never be reached
     }
+  };
+  onRemoveLdapClicked = () => {
+    this.props.setLocalConfig();
   };
 
   render(): React.ReactElement<HTMLDivElement> {
+    let defaultSelectedDB;
+
+    if (this.state.selectedDB && this.state.selectedDB !== "") {
+      defaultSelectedDB = this.state.selectedDB;
+    } else {
+      if (this.props.doesLdapExist) {
+        defaultSelectedDB = "LDAP";
+      } else {
+        defaultSelectedDB = "Steam Local DB";
+      }
+    }
+
     return (
       <div className="user-authentication">
 
         <p>&nbsp;</p>
-        {!this.props.doesLdapExist ? <table className="space-20">
+        <table className="space-20">
           <tbody>
             <tr className="auth-row">
               <td className="auth-left">User DB Type</td>
               <td className="auth-right">
-                <select ref={(ref) => this.dbSelectInput = ref} onChange={this.onDBChanged}>
+                <select value={defaultSelectedDB} ref={(ref) => this.dbSelectInput = ref} onChange={this.onDBChanged}>
                   <option>Steam Local DB</option>
                   <option>LDAP</option>
                 </select>
               </td>
             </tr>
           </tbody>
-        </table> : null }
+        </table>
 
         {this.state.showDBOptions ?
         <div>
@@ -286,14 +307,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   </td>
                 </tr>
                 <tr className="auth-row">
-                  <td className="auth-left">REAL NAME ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The user attribute that contains a human readable name.<br/> This is typically 'cn' (common name) or 'displayName'.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_rn_attribute : ""} className="pt-input" ref={(ref) => this.realnameAttributeInput = ref}></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
                     <td className="auth-left">Group DN</td>
                     <td className="auth-right">
                       <input type="text" className={"pt-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.groupDnInput = ref} defaultValue=""></input>
@@ -311,15 +324,15 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                 <tr className="auth-row">
                   <td className="auth-left">Search Request Size Limit</td>
                   <td className="auth-right">
-                    <input type="numeric" ref={(ref) => this.searchRequestSizeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.search_request_size_limint.toString() : "0"}></input>
+                    <input type="text" className="pt-input" ref={(ref) => this.searchRequestSizeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.search_request_size_limit.toString() : ""}></input>
                   </td>
                 </tr>
 
 
                 <tr className="auth-row">
-                  <td className="auth-left">Group DN</td>
+                  <td className="auth-left">Search Request Time Limit</td>
                   <td className="auth-right">
-                    <input type="numeric" ref={(ref) => this.searchRequestTimeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.group_dn.toString() : "0"}></input>
+                    <input type="text" className="pt-input" ref={(ref) => this.searchRequestTimeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.group_dn.toString() : ""}></input>
                   </td>
                 </tr>
 
@@ -330,8 +343,15 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         </div> : null }
 
         <div id="actionButtonsContainer" className="space-20">
-          <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
-          <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
+          {this.state.showDBOptions ?
+            <span>
+              <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
+              <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
+            </span>
+            : null}
+          {this.props.doesLdapExist && !this.state.showDBOptions ?
+            <div className="button-primary" onClick={this.onRemoveLdapClicked}>Remove LDAP</div>
+            : null}
         </div>
 
       </div>
@@ -350,7 +370,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch),
     saveLdapConfig: bindActionCreators(saveLdapConfig, dispatch),
-    testLdapConfig: bindActionCreators(testLdapConfig, dispatch)
+    testLdapConfig: bindActionCreators(testLdapConfig, dispatch),
+    setLocalConfig: bindActionCreators(setLocalConfig, dispatch)
   };
 }
 
