@@ -919,7 +919,7 @@ export function testLdapConfig(ldapConfig: LdapConfig) {
     dispatch(requestTestLdap());
     Remote.testLdapConfig(ldapConfig, (error: Error) => {
       if (error) {
-        dispatch(openNotification(NotificationType.Error, "LDAP", "LDAP Config Invalid", null));
+        dispatch(openNotification(NotificationType.Error, "LDAP", error.toString(), null));
         dispatch(receiveTestLdap());
       } else {
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
