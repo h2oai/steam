@@ -41,8 +41,8 @@ nohup java -jar \
 		>> comp.log 2>&1 &
 
 nohup ./steam serve master \
-        --superuser-name=steamer \
-        --superuser-password=terrabella \
+        --admin-name=steamer \
+        --admin-password=terrabella \
         --web-tls-cert-path=/etc/ssl/star_h2o_ai.pem \
         --web-tls-key-path=/etc/ssl/star_h2o_ai.key \
         >> steam.log 2>&1 &

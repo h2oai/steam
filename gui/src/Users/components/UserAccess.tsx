@@ -130,7 +130,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
   };
 
   renderTableRows = () => {
-    let isSuperuser = (userWithRoleAndProject): boolean => {
+    let isAdmin = (userWithRoleAndProject): boolean => {
       if (userWithRoleAndProject.user.id !== 1) {
         return true;
       }
@@ -139,7 +139,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
 
 
     let renderLastCell = (userWithRoleAndProject) => {
-      if (isSuperuser(userWithRoleAndProject)) {
+      if (isAdmin(userWithRoleAndProject)) {
         if (userWithRoleAndProject.user.is_active) {
           return(<Cell className="link"><span onClick={() => this.props.deleteUser(userWithRoleAndProject.user.id)}><i className="fa fa-times" aria-hidden="true" alt="Deactivate user"></i>&nbsp;Deactivate User</span><br/><br/><span onClick={() => this.onEditUserClicked(userWithRoleAndProject.user)}><i className="fa fa-edit" aria-hidden="true" alt="edit"></i>&nbsp;Edit</span></Cell>);
         } else {

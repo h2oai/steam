@@ -82,8 +82,8 @@ type (
 		SSLRootCert       string
 
 		// Auth Flags
-		SuperName string
-		SuperPass string
+		AdminName string
+		AdminPass string
 
 		Flags uint
 	}
@@ -120,34 +120,54 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "checking if database is primed")
 	} else if !primed {
-		if strings.TrimSpace(dbOpts.SuperName) == "" {
+		if strings.TrimSpace(dbOpts.AdminName) == "" {
 			r := bufio.NewReader(os.Stdin)
-			fmt.Print("Superuser name: ")
+
+			fmt.Print("Steam local admin username: ")
+
 			name, err := r.ReadString('\n')
 			if err != nil {
 				return nil, err
 			}
-			dbOpts.SuperName = strings.Trim(name, "\n")
-		}
-		if strings.TrimSpace(dbOpts.SuperPass) == "" {
-			fmt.Print("Superuser password: ")
-			passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
-			if err != nil {
-				return nil, err
-			}
-			dbOpts.SuperPass = strings.Trim(string(passBytes), "\n")
-			fmt.Println()
-		}
-		if err := auth.ValidateUsername(dbOpts.SuperName); err != nil {
-			return nil, errors.Wrap(err, "validating username")
-		}
-		if err := auth.ValidatePassword(dbOpts.SuperPass); err != nil {
-			return nil, errors.Wrap(err, "validating password")
+			dbOpts.AdminName = strings.Trim(name, "\n")
 		}
 
-		if err := prime(db); err != nil {
-			return nil, errors.Wrap(err, "priming database")
+		if err := auth.ValidateUsername(dbOpts.AdminName); err != nil {
+			return nil, errors.Wrap(err, "validating username")
 		}
+
+		if strings.TrimSpace(dbOpts.AdminPass) == "" {
+			fmt.Print("Steam local admin password: ")
+
+			passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				fmt.Println()
+				return nil, err
+			}
+
+			if err := auth.ValidatePassword(string(passBytes)); err != nil {
+				fmt.Println()
+				return nil, errors.Wrap(err, "validating password")
+			}
+			fmt.Print("\nValidate local admin password: ")
+			valiBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				fmt.Println()
+				return nil, err
+			}
+			if string(valiBytes) != string(passBytes) {
+				fmt.Println()
+				return nil, errors.New("password mismatch")
+			}
+			fmt.Println()
+			dbOpts.AdminPass = strings.Trim(string(passBytes), "\n")
+
+		}
+
+	}
+
+	if err := prime(db); err != nil {
+		return nil, errors.Wrap(err, "priming database")
 	}
 
 	ds, err := initDatastore(db)
@@ -156,7 +176,7 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	}
 
 	if !primed {
-		if _, err := ds.createSuperuser(dbOpts.SuperName, dbOpts.SuperPass); err != nil {
+		if _, err := ds.createAdmin(dbOpts.AdminName, dbOpts.AdminPass); err != nil {
 			return nil, err
 		}
 	}
@@ -382,7 +402,7 @@ func (ds *Datastore) getRow(dataset *goqu.Dataset) (*sql.Row, error) {
 	return ds.db.QueryRow(sql, args...), nil
 }
 
-func (ds *Datastore) createSuperuser(username, password string) (int64, error) {
+func (ds *Datastore) createAdmin(username, password string) (int64, error) {
 	hashPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return 0, errors.Wrap(err, "hasing password")
@@ -403,7 +423,7 @@ func (ds *Datastore) createSuperuser(username, password string) (int64, error) {
 			return errors.Wrap(err, "creating identity")
 		}
 
-		roleId, err := createRole(tx, SuperuserRN)
+		roleId, err := createRole(tx, AdminRN)
 		if err != nil {
 			return errors.Wrap(err, "creating role")
 		}

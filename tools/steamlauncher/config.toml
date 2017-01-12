@@ -2,9 +2,9 @@ title = "Steam Config File"
 
 # Simple config file for steam laucher
 
-[superuser]
-name = "superuser"
-password = "superuser"
+[admin]
+name = "admin"
+password = "admin012"
 
 [steam]
 port = 9000

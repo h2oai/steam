@@ -49,10 +49,10 @@ Perform the following steps to install Steam on a YARN edge node.
 Start Steam on YARN
 ~~~~~~~~~~~~~~~~~~~
 
-After Steam is installed on the YARN edge node, the next step is to provide the designated Steam superuser with
-the URL of the edge node and the superuser login credentials. The superuser can then start Steam and begin creating roles, workgroups, and users.
+After Steam is installed on the YARN edge node, the next step is to provide the designated Steam admin with
+the URL of the edge node and the admin login credentials. The admin can then start Steam and begin creating roles, workgroups, and users.
 
-1. SSH into the YARN edge node where the Steam package was copied. Note that this step requires superuser privileges. 
+1. SSH into the YARN edge node where the Steam package was copied. Note that this step requires admin privileges.
 
  ::
 
@@ -64,17 +64,17 @@ the URL of the edge node and the superuser login credentials. The superuser can 
 
     java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 
-3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location and for additional flags that can be specified when starting Steam. 
+3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--admin-name=admin`` and ``--admin-password=admin012`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam admin. The Steam admin is responsible for creating roles, workgroups, and users and maintains the H2O cluster. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location and for additional flags that can be specified when starting Steam.
 
  ::
 
-  sudo ./steam serve master --superuser-name=superuser --superuser-password=superuser
+  sudo ./steam serve master --admin-name=admin --admin-password=admin012
 
  **Note**: This version of Steam currently includes an experimental/early release of LDAP basic authentication support using the ``—-authentication-provider`` and ``—-authentication-config`` flags. When used, a configuration file is required. For example:
 
  ::
 
-  sudo ./steam serve master --superuser-name=superuser --superuser-password=superuser —-authentication-provider="ldap-basic" —-authentication-config="file/path.toml"
+  sudo ./steam serve master --admin-name=admin --admin-password=admin012 —-authentication-provider="ldap-basic" —-authentication-config="file/path.toml"
 
 
 4. Open a Chrome browser and navigate to the YARN edge node.
@@ -115,12 +115,12 @@ After Steam is installed, the following steps describe how to start Steam.
 
     java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
 
-3. Open another terminal window and start Steam. Be sure to include the ``--superuser-name=superuser`` and
-   ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This creates Steam superuser. A Steam superuser is responsible for creating roles,workgroups, and users. This also starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the prediction service on the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--prediction-service-host=<hostname>``. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
+3. Open another terminal window and start Steam. Be sure to include the ``--admin-name=admin`` and
+   ``--admin-password=admin`` flags. (Or provide a more secure password.) This creates Steam admin. A Steam admin is responsible for creating roles,workgroups, and users. This also starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the prediction service on the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--prediction-service-host=<hostname>``. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
 
  ::
 
-  ./steam serve master --superuser-name=superuser --superuser-password=superuser
+  ./steam serve master --admin-name=admin --admin-password=admin012
 
  **Note**: If you are demoing Steam and do not have an Internet connection, you can set the prediction service to point to localhost using ``--prediction-service-host=localhost``. 
 
@@ -158,10 +158,10 @@ The following table lists the options/flags that can be added to the ``./steam s
 | ``--profile=``                            | Specify ``true`` to enable the Go       |
 |                                           | profiler.                               |
 +-------------------------------------------+-----------------------------------------+
-| ``--superuser-name=``                     | Set the superuser username. This is     |
+| ``--admin-name=``                         | Set the admin username. This is         |
 |                                           | required at first-time-use only.        |
 +-------------------------------------------+-----------------------------------------+
-| ``--superuser-password=``                 | Set the superuser password. This is     |
+| ``--admin-password=``                     | Set the admin password. This is         |
 |                                           | required at first-time-use only.        |
 +-------------------------------------------+-----------------------------------------+
 | ``--web-address=``                        | Specify the web server address. For     |

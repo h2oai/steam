@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	superuser = "superuser"
+	admin = "admin"
 )
 
 var (
@@ -81,8 +81,8 @@ func setupWD(testType string) (string, string) {
 
 func setupDS(driver, wd string) *data.Datastore {
 	dbOpts := data.DBOpts{
-		SuperName: superuser,
-		SuperPass: superuser,
+		AdminName: admin,
+		AdminPass: "admin012",
 	}
 	switch driver {
 	case "sqlite3":
@@ -97,7 +97,7 @@ func setupDS(driver, wd string) *data.Datastore {
 }
 
 func setupPz(ds *data.Datastore) az.Principal {
-	pz, err := ds.Lookup(superuser)
+	pz, err := ds.Lookup(admin)
 	if err != nil {
 		log.Fatalf("Looking up principal", err)
 	}

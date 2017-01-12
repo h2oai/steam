@@ -23,7 +23,7 @@ sudo -i -u postgres
 createuser --interactive -P steam
 # Enter password for new role: pa$$word
 # Enter it again: pa$$word
-# Shall the new role be a superuser? (y/n) n
+# Shall the new role be a admin? (y/n) n
 # Shall the new role be allowed to create databases? (y/n) y
 # Shall the new role be allowed to create more new roles? (y/n) n
 createdb steam steam

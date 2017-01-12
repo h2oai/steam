@@ -35,7 +35,7 @@ const (
 	View = "view"
 
 	// --- Role ---
-	SuperuserRN = "superuser"
+	AdminRN = "admin"
 )
 
 var cluster_types_list = []string{

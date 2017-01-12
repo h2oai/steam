@@ -46,9 +46,9 @@ export function getConfig(): void {
   Proxy.Call("GetConfig", req, print);
 }
 
-export function checkSuperuser(): void {
+export function checkAdmin(): void {
   const req: any = {  };
-  Proxy.Call("CheckSuperuser", req, print);
+  Proxy.Call("CheckSAdmin", req, print);
 }
 
 export function setLdapConfig(config: LdapConfig): void {
@@ -59,6 +59,11 @@ export function setLdapConfig(config: LdapConfig): void {
 export function getLdapConfig(): void {
   const req: any = {  };
   Proxy.Call("GetLdapConfig", req, print);
+}
+
+export function testLdapConfig(config: LdapConfig): void {
+  const req: any = { config: config };
+  Proxy.Call("TestLdapConfig", req, print);
 }
 
 export function registerCluster(address: string): void {

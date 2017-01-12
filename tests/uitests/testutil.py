@@ -504,7 +504,7 @@ def newtest():
 		driver = webdriver.Firefox(p)
 	else:
 		driver = webdriver.Chrome()
-	driver.get("http://superuser:superuser@localhost:9000")
+	driver.get("http://admin:admin012@localhost:9000")
 	return driver
 
 def newProxytest(proxy):
@@ -516,7 +516,7 @@ def newProxytest(proxy):
 		o = Options()
 		o.add_argument("--proxy-server={0}".format(proxy.proxy))
 		driver = webdriver.Chrome(chrome_options=o)
-	driver.get("http://superuser:superuser@localhost:9000")
+	driver.get("http://admin:admin012@localhost:9000")
 	return driver
 
 def endtest(driver):

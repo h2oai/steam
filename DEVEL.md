@@ -64,7 +64,7 @@ Now you are ready to start the server.
 Start the server as below
 
 ```
-./steam serve master --superuser-name USER_NAME --superuser-password PASSWORD
+./steam serve master --admin-name USER_NAME --admin-password PASSWORD
 ```
 
 
