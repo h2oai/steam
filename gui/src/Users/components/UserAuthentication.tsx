@@ -24,7 +24,7 @@ import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 import { LdapConfig} from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
-import {fetchLdapConfig, saveLdapConfig} from "../actions/users.actions";
+import { fetchLdapConfig, saveLdapConfig, testLdapConfig } from "../actions/users.actions";
 
 interface Props {
   doesLdapExist: boolean,
@@ -32,7 +32,8 @@ interface Props {
 }
 interface DispatchProps {
   fetchLdapConfig: Function,
-  saveLdapConfig: Function
+  saveLdapConfig: Function,
+  testLdapConfig: Function
 }
 
 export class UserAuthentication extends React.Component<Props & DispatchProps, any> {
@@ -126,6 +127,26 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     });
   };
 
+  buildLdapConfig = (): LdapConfig => {
+    return {
+      host: this.hostInput.value,
+      port: parseInt(this.portInput.value, 10),
+      ldaps: true,
+      bind_dn: this.bindDnInput.value,
+      bind_password: this.bindDnPasswordInput.value,
+      user_base_dn: this.userbaseDnInput.value,
+      user_base_filter: this.userbaseFilterInput.value,
+      //user_name_attribute: this.usernameAttribueInput.value,
+      user_rn_attribute: this.realnameAttributeInput.value,
+      //group_dn: this.groupDnInput.value,
+      force_bind: true
+    }
+  };
+
+  onTestConfigClicked = () => {
+    this.props.testLdapConfig(this.buildLdapConfig());
+  };
+
   onSaveConfigClicked = (e) => {
     e.preventDefault();
     this.validateAll();
@@ -138,20 +159,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       this.state.usernameAttributeInputValid &&
       this.state.groupDnInputValid
     ) {
-      let ldapConfig: LdapConfig = {
-        host: this.hostInput.value,
-        port: parseInt(this.portInput.value, 10),
-        ldaps: true,
-        bind_dn: this.bindDnInput.value,
-        bind_password: this.bindDnPasswordInput.value,
-        user_base_dn: this.userbaseDnInput.value,
-        user_base_filter: this.userbaseFilterInput.value,
-        //user_name_attribute: this.usernameAttribueInput.value,
-        user_rn_attribute: this.realnameAttributeInput.value,
-        //group_dn: this.groupDnInput.value,
-        force_bind: true
-      };
-      this.props.saveLdapConfig(ldapConfig);
+      this.props.saveLdapConfig(this.buildLdapConfig());
     }
   };
   onDBChanged = (e) => {
@@ -291,6 +299,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         </div> : null }
 
         <div id="actionButtonsContainer" className="space-20">
+          <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
           <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
         </div>
 
@@ -309,7 +318,8 @@ function mapStateToProps(state): any {
 function mapDispatchToProps(dispatch): DispatchProps {
   return {
     fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch),
-    saveLdapConfig: bindActionCreators(saveLdapConfig, dispatch)
+    saveLdapConfig: bindActionCreators(saveLdapConfig, dispatch),
+    testLdapConfig: bindActionCreators(testLdapConfig, dispatch)
   };
 }
 

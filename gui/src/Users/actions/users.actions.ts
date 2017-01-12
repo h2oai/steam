@@ -19,8 +19,7 @@ import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-import { Permission, Role, Identity, Workgroup } from "../../Proxy/Proxy";
-import {LdapConfig} from "../../Proxy/Proxy";
+import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -60,7 +59,23 @@ export const REQUEST_LDAP_CONFIG = 'REQUEST_LDAP_CONFIG';
 export const RECEIVE_LDAP_CONFIG = 'RECEIVE_LDAP_CONFIG';
 export const REQUEST_SAVE_LDAP = 'REQUEST_SAVE_LDAP';
 export const RECEIVE_SAVE_LDAP = 'RECEIVE_SAVE_LDAP';
+export const REQUEST_TEST_LDAP = 'REQUEST_TEST_LDAP';
+export const RECEIVE_TEST_LDAP = 'RECEIVE_TEST_LDAP';
 
+export function requestTestLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_TEST_LDAP
+    });
+  };
+};
+export function  receiveTestLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_TEST_LDAP
+    });
+  };
+};
 export function requestSaveLdap() {
   return (dispatch) => {
     dispatch({
@@ -880,4 +895,19 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
       }
     });
   };
+}
+
+export function testLdapConfig(ldapConfig: LdapConfig) {
+  return (dispatch, getState) => {
+    dispatch(requestTestLdap());
+    Remote.testLdapConfig(ldapConfig, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP", "LDAP Config Invalid", null));
+        dispatch(receiveTestLdap());
+      } else {
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
+        dispatch(receiveTestLdap());
+      }
+    });
+  }
 }
