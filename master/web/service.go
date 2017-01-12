@@ -92,6 +92,7 @@ func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
 		Version:             s.version,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
+		Username: pz.Name(),
 	}, nil
 }
 
