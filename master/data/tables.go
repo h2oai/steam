@@ -27,6 +27,13 @@ import (
 	"github.com/lib/pq"
 )
 
+type Authentication struct {
+	Id      int64  `db:"id,pk"`
+	Key     string `db:"key,arg"`
+	Value   string `db:"value,arg"`
+	Enabled bool   `db:"enabled"`
+}
+
 type binomialModel struct {
 	ModelId  int64   `db:"model_id,arg,pk"`
 	Mse      float64 `db:"mse,arg"`
@@ -196,12 +203,6 @@ type rolePermission struct {
 type state struct {
 	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`
-}
-
-type Security struct {
-	Id    int64  `db:"id,pk"`
-	Key   string `db:"key,arg"`
-	Value string `db:"value,arg"`
 }
 
 type Service struct {

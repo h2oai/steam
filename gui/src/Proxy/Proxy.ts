@@ -183,7 +183,7 @@ export interface LdapConfig {
   user_name_attribute: string
   group_dn: string
   static_member_attribute: string
-  search_request_size_limint: number
+  search_request_size_limit: number
   search_request_time_limit: number
   force_bind: boolean
 }
@@ -337,6 +337,9 @@ export interface Service {
   
   // Check if an identity has admin privileges
   checkAdmin: (go: (error: Error, isAdmin: boolean) => void) => void
+  
+  // Set security configuration to local
+  setLocalConfig: (go: (error: Error) => void) => void
   
   // Set LDAP security configuration
   setLdapConfig: (config: LdapConfig, go: (error: Error) => void) => void
@@ -716,6 +719,14 @@ interface CheckAdminIn {
 interface CheckAdminOut {
   
   is_admin: boolean
+  
+}
+
+interface SetLocalConfigIn {
+  
+}
+
+interface SetLocalConfigOut {
   
 }
 
@@ -2262,6 +2273,18 @@ export function checkAdmin(go: (error: Error, isAdmin: boolean) => void): void {
     } else {
       const d: CheckAdminOut = <CheckAdminOut> data;
       return go(null, d.is_admin);
+    }
+  });
+}
+
+export function setLocalConfig(go: (error: Error) => void): void {
+  const req: SetLocalConfigIn = {  };
+  Proxy.Call("SetLocalConfig", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: SetLocalConfigOut = <SetLocalConfigOut> data;
+      return go(null);
     }
   });
 }

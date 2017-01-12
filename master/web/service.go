@@ -2244,6 +2244,16 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 	}, nil
 }
 
+func (s *Service) SetLocalConfig(pz az.Principal) error {
+	if authentication, exists, err := s.ds.ReadAuthentication(data.ByEnabled); err != nil {
+		return errors.Wrap(err, "reading authentication setting from database")
+	} else if exists {
+		err := s.ds.UpdateAuthentication(authentication.Id, data.WithEnable(false))
+		return errors.Wrap(err, "updaing authentication setting from database")
+	}
+	return nil
+}
+
 func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 	if !pz.IsAdmin() {
 		return errors.New("only admins can edit LDAP settings")
@@ -2258,15 +2268,15 @@ func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 		return errors.Wrap(err, "serializing config metadata")
 	}
 
-	if security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap")); err != nil {
-		return errors.Wrap(err, "reading security config from database")
+	if authentication, exists, err := s.ds.ReadAuthentication(data.ByKey(data.LDAPAuth)); err != nil {
+		return errors.Wrap(err, "reading authentication config from database")
 	} else if exists {
-		err := s.ds.UpdateSecurity(security.Id, data.WithValue(string(meta)))
-		return errors.Wrap(err, "updating security config in database")
+		err := s.ds.UpdateAuthentication(authentication.Id, data.WithValue(string(meta)), data.WithEnable(true))
+		return errors.Wrap(err, "updating authentication config in database")
 	}
 
-	_, err = s.ds.CreateSecurity("ldap", string(meta))
-	return errors.Wrap(err, "creating security config in database")
+	_, err = s.ds.CreateAuthentication(data.LDAPAuth, string(meta), data.WithEnable(true))
+	return errors.Wrap(err, "creating authentication config in database")
 }
 
 func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) {
@@ -2274,15 +2284,15 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 		return nil, false, errors.New("only admins can view LDAP settings")
 	}
 
-	security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap"))
+	authentication, exists, err := s.ds.ReadAuthentication(data.ByKey(data.LDAPAuth))
 	if err != nil {
-		return nil, false, errors.Wrap(err, "reading security config from database")
+		return nil, false, errors.Wrap(err, "reading authentication config from database")
 	} else if !exists {
 		return nil, false, nil
 	}
 
 	var deserial ldapSerialized
-	if err := json.Unmarshal([]byte(security.Value), &deserial); err != nil {
+	if err := json.Unmarshal([]byte(authentication.Value), &deserial); err != nil {
 		return nil, false, errors.Wrap(err, "deserializing config metadata")
 	}
 

@@ -128,6 +128,19 @@ class RPCClient:
 		response = self.connection.call("CheckAdmin", request)
 		return response['is_admin']
 	
+	def set_local_config(self):
+		"""
+		Set security configuration to local
+
+		Parameters:
+
+		Returns:None
+		"""
+		request = {
+		}
+		response = self.connection.call("SetLocalConfig", request)
+		return 
+	
 	def set_ldap_config(self, config):
 		"""
 		Set LDAP security configuration

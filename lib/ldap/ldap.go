@@ -188,7 +188,7 @@ func FromConfig(config *web.LdapConfig) *Ldap {
 }
 
 func FromDatabase(ds *data.Datastore) (*Ldap, error) {
-	config, exists, err := ds.ReadSecurity(data.ByKey("ldap"))
+	config, exists, err := ds.ReadAuthentication(data.ByKey("ldap"))
 	if err != nil {
 		return nil, errors.Wrap(err, "reading security config from database")
 	} else if !exists {

@@ -110,7 +110,10 @@ type QueryOpt func(*QueryConfig) error
 // ------------- ------------- -------------
 
 func WithActivity(activate bool) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.fields["is_active"] = activate; return }
+	if activate {
+		return func(q *QueryConfig) (err error) { q.fields["is_active"] = 1; return }
+	}
+	return func(q *QueryConfig) (err error) { q.fields["is_active"] = 0; return }
 }
 
 // ByAddress queries the database for matching address columns
@@ -191,6 +194,18 @@ func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 // WithDescription adds a description value to the query
 func WithDescription(description string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["description"] = description; return }
+}
+
+func ByEnabled(q *QueryConfig) (err error) {
+	q.dataset = q.dataset.Where(q.I("enabled").Eq(1))
+	return
+}
+
+func WithEnable(enable bool) QueryOpt {
+	if enable {
+		return func(q *QueryConfig) (err error) { q.fields["enabled"] = 1; return }
+	}
+	return func(q *QueryConfig) (err error) { q.fields["enabled"] = 0; return }
 }
 
 func ForEntity(entityTypeId, entityId int64) QueryOpt {
