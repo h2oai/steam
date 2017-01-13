@@ -20,7 +20,7 @@
  */
 
 import * as React from 'react';
-import { withRouter, PlainRoute } from 'react-router';
+import { withRouter } from 'react-router';
 import NotificationsManager from './components/NotificationsManager';
 import Navigation from '../Navigation/components/Navigation/Navigation';
 import Breadcrumb from './components/Breadcrumb';
@@ -30,7 +30,7 @@ import './styles/breadcrumb.scss';
 import './styles/app.scss';
 
 interface Props {
-  routes: PlainRoute[],
+  routes: any,
   params: any
 }
 
