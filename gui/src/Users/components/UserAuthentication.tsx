@@ -310,13 +310,13 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" className={"pt-input " + (this.state.usernameAttributeInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.usernameAttribueInput = ref} defaultValue={this.props.ldapConfig.user_name_attribute ? this.props.ldapConfig.user_name_attribute : ""}></input>
+                    <input type="text" className={"pt-input " + (this.state.usernameAttributeInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.usernameAttribueInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_name_attribute : ""}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
                     <td className="auth-left">GROUP DN</td>
                     <td className="auth-right">
-                      <input type="text" className={"pt-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.groupDnInput = ref} defaultValue={this.props.fetchLdapConfig ? this.props.ldapConfig.group_dn : ""}></input>
+                      <input type="text" className={"pt-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.groupDnInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.group_dn : ""}></input>
                     </td>
                 </tr>
 
