@@ -1,10 +1,8 @@
 FROM centos:6.8
 
-MAINTAINER H2O.ai version: 1.2.0
+MAINTAINER H2O.ai version: 1.1.6
 
-RUN mkdir -p /go/src/github.com/h2oai/steam
-ADD . /go/src/github.com/h2oai/steam
-WORKDIR /go/src/github.com/h2oai/steam
+WORKDIR /steam
 
 # Install NodeJS
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
@@ -23,15 +21,21 @@ ENV GOPATH /steam
 RUN yum install -y java-1.7.0-openjdk
 RUN yum install -y java-1.7.0-openjdk-devel
 
+# Clone Steam repository
+RUN yum install -y git
+RUN mkdir -p src/github.com/h2oai
+WORKDIR /steam/src/github.com/h2oai
+RUN git clone https://github.com/h2oai/steam.git
+
 # Install Typings
-WORKDIR /go/src/github.com/h2oai/steam/gui
+WORKDIR /steam/src/github.com/h2oai/steam/gui
 RUN npm install typings -g
 RUN typings install
 
 # Build Steam
-WORKDIR /go/src/github.com/h2oai/steam
-RUN ls
+WORKDIR /steam/src/github.com/h2oai/steam
 RUN make
+RUN make db
 
 # Run Prediction Service Builder
 RUN nohup java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war &
