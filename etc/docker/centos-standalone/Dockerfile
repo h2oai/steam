@@ -42,4 +42,3 @@ EXPOSE 9999
 
 # Run Steam
 CMD ./steam serve master --admin-name root --admin-password admin012
-

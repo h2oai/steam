@@ -28,6 +28,7 @@ type Principal interface {
 	Password() string
 	IsActive() bool
 	IsAdmin() bool
+	AuthType() string
 	HasPermission(code int64) bool
 	CheckPermission(code int64) error
 	Owns(entityTypeId, entityId int64) (bool, error)

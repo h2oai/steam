@@ -154,3 +154,9 @@ export function getConfig() {
     });
   };
 }
+
+export function resetConfig() {
+  return (dispatch) => {
+    dispatch(fetchConfigCompleted({}));
+  };
+}

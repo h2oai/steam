@@ -40,6 +40,10 @@ let initialState = {
     user_base_dn: "",
     user_base_filter: "",
     user_rn_attribute: "cn",
+    group_dn: "",
+    static_member_attribute: "",
+    search_request_size_limit: 0,
+    search_request_time_limit: 0,
     force_bind: true
   },
   isAdmin: false
