@@ -45,6 +45,7 @@ import (
 	"github.com/h2oai/steam/srv/h2ov3"
 	"github.com/h2oai/steam/srv/web"
 	"github.com/pkg/errors"
+	"os"
 )
 
 type Service struct {
@@ -204,6 +205,10 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		return 0, errors.Wrap(err, "reading engine from database")
 	} else if !exists {
 		return 0, errors.New("unable to locate engine in database")
+	}
+	// Check SSL file
+	if _, err := os.Stat(s.certFilePath); os.IsNotExist(err) {
+		return 0, errors.New("SSL \"" + s.certFilePath + "\" cert file does not exist")
 	}
 	// FIXME implement keytab generation on the fly
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
