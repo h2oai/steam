@@ -32,18 +32,20 @@ import { connect } from 'react-redux';
 import './navigation.scss';
 import { Project, Config } from '../../../Proxy/Proxy';
 import {Motion, spring} from 'react-motion';
-import { getConfig } from '../../../Clusters/actions/clusters.actions';
+import { getConfig, resetConfig } from '../../../Clusters/actions/clusters.actions';
 import { bindActionCreators } from 'redux';
 
 interface Props {
   routes: any
   params: any
   project: Project
-  config: Config
+  config: Config,
+  router: any
 }
 
 interface DispatchProps {
-  getConfig: Function
+  getConfig: Function,
+  resetConfig: Function
 }
 
 
@@ -111,6 +113,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   }
 
   logout() {
+    this.props.resetConfig();
     $.ajax({
       url: window.location.protocol + '://' + window.location.host,
       beforeSend: function (xhr) {
@@ -118,6 +121,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
         xhr.setRequestHeader('Authorization', 'Basic ' + btoa('fjkdshfhkjsdfjkhsdkfjhsdf:hfkjdshfdhff'));
       }
     });
+    this.props.router.push('/logout');
   }
 
   renderSubmenu(activeRoute: any, shouldShow: boolean): JSX.Element {
@@ -175,7 +179,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                 <div className="logo-container">
                   <Link to="/">
                     <div className="logo">STEAM</div>
-                    <div>{this.props.config ? 'v' + this.props.config.version : null}</div>
+                    <div>{this.props.config && this.props.config.version ? 'v' + this.props.config.version : null}</div>
                   </Link>
                 </div>
                 <div className="username">
@@ -240,7 +244,8 @@ function mapStateToProps(state): any {
 
 function mapDispatchToProps(dispatch) {
   return {
-    getConfig: bindActionCreators(getConfig, dispatch)
+    getConfig: bindActionCreators(getConfig, dispatch),
+    resetConfig: bindActionCreators(resetConfig, dispatch)
   };
 }
 
