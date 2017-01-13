@@ -2207,13 +2207,15 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 }
 
 type ldapSerialized struct {
-	Address               string
-	Bind                  string
-	UserBaseDn            string
-	UserBaseFilter        string
-	UserNameAttribute     string
-	GroupDn               string
-	StaticMemberAttribute string
+	Address                string
+	Bind                   string
+	UserBaseDn             string
+	UserBaseFilter         string
+	UserNameAttribute      string
+	GroupDn                string
+	StaticMemberAttribute  string
+	SearchRequestSizeLimit int
+	SearchRequestTimeLimit int
 
 	ForceBind bool
 	Ldaps     bool
@@ -2229,6 +2231,8 @@ func configToSerialized(config *web.LdapConfig) ldapSerialized {
 		config.UserNameAttribute,
 		config.GroupDn,
 		config.StaticMemberAttribute,
+		config.SearchRequestSizeLimit,
+		config.SearchRequestTimeLimit,
 
 		config.ForceBind,
 		config.Ldaps,
@@ -2240,16 +2244,22 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 	host := address[0]
 	port, err := strconv.Atoi(address[1])
 	if err != nil {
-		return nil, errors.Wrap(err, "converint port to integer")
+		return nil, errors.Wrap(err, "convering port to integer")
 	}
+	b, err := base64.StdEncoding.DecodeString(config.Bind)
+	if err != nil {
+		return nil, errors.Wrap(err, "decoding bind") //FIXME format error
+	}
+	bind := strings.Split(string(b), ":")
 
 	return &web.LdapConfig{
-		Host: host, Port: port,
-		Ldaps:             config.Ldaps,
-		UserBaseDn:        config.UserBaseDn,
-		UserBaseFilter:    config.UserBaseFilter,
-		UserNameAttribute: config.UserNameAttribute,
-		ForceBind:         config.ForceBind,
+		host, port,
+		config.Ldaps,
+		bind[0], "",
+		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
+		config.GroupDn, config.StaticMemberAttribute,
+		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
+		config.ForceBind,
 	}, nil
 }
 
