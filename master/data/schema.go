@@ -62,6 +62,7 @@ var schema = map[string]string{
 	"regression_model":    createTableRegressionModel,
 	"role":                createTableRole,
 	"role_permission":     createTableRolePermission,
+	"service":             createTableService,
 	"state":               createTableState,
 	"workgroup":           createTableWorkgroup,
 }
