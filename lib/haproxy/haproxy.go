@@ -23,9 +23,12 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 			"    mode http\n" +
 			"    timeout connect 5000ms\n" +
 			"    timeout client  50000ms\n" +
-			"    timeout server  50000ms\n\n" +
+			"    timeout server  50000ms\n" +
+			"    option forwardfor\n" +
+			"    option http-server-close\n\n" +
 			"frontend h2o-clusters\n" +
-			"    bind *:9999\n"
+			"    bind *:443 ssl crt ./steam_haproxy.pem\n" +
+			"    reqadd X-Forwarded-Proto:\\ https\n"
 
 	for _, c := range clusters {
 		if c.ContextPath.String != "/" {
@@ -40,6 +43,7 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 			config += "backend " + c.Name + "\n"
 			if c.Token.String != "" {
 				config += "    http-request set-header Authorization Basic\\ %[req.cook(" + c.Name + ")]\n"
+				config += "    redirect scheme https if !{ ssl_fc }\n"
 			}
 			config += "    server " + c.Name + " " + c.Address.String + "\n\n"
 		}
