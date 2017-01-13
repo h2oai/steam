@@ -45,6 +45,7 @@ import (
 	"github.com/h2oai/steam/srv/h2ov3"
 	"github.com/h2oai/steam/srv/web"
 	"github.com/pkg/errors"
+	"os"
 )
 
 type Service struct {
@@ -56,6 +57,7 @@ type Service struct {
 	clusterProxyAddress       string
 	scoringServicePortMin     int
 	scoringServicePortMax     int
+	certFilePath              string
 	kerberosEnabled           bool
 }
 
@@ -64,6 +66,7 @@ func NewService(
 	ds *data.Datastore,
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
+	certFilePath string,
 	kerberos bool,
 ) *Service {
 	return &Service{
@@ -71,6 +74,7 @@ func NewService(
 		ds,
 		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
 		scoringServicePortsRange[0], scoringServicePortsRange[1],
+		certFilePath,
 		kerberos,
 	}
 }
@@ -168,8 +172,7 @@ func (s Service) reloadProxyConf(name string) {
 		log.Println("Failed to read clusters.")
 	}
 
-	uid, gid, err := yarn.GetUser(name)
-	if err := haproxy.Reload(clusters, uid, gid); err != nil {
+	if err := haproxy.Reload(clusters, s.clusterProxyAddress, s.certFilePath); err != nil {
 		log.Println("Failed to reload proxy configuration.")
 	}
 }
@@ -202,6 +205,10 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		return 0, errors.Wrap(err, "reading engine from database")
 	} else if !exists {
 		return 0, errors.New("unable to locate engine in database")
+	}
+	// Check SSL file
+	if _, err := os.Stat(s.certFilePath); os.IsNotExist(err) {
+		return 0, errors.New("SSL \"" + s.certFilePath + "\" cert file does not exist")
 	}
 	// FIXME implement keytab generation on the fly
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
