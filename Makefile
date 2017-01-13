@@ -136,4 +136,3 @@ darwin: gui
 
 release: ssb launcher linux
 
-git
