@@ -115,7 +115,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
       url: window.location.protocol + '://' + window.location.host,
       beforeSend: function (xhr) {
         xhr.withCredentials = true;
-        xhr.setRequestHeader('Authorization', 'Basic ' + btoa('fjkdshfhkjsdfjkhsdkfjhsdf:hfkjdshfdhff'));
+        xhr.setRequestHeader('Authorization', 'Basic ' + btoa('this_is_a_fake_user:logging_out'));
       }
     });
   }
