@@ -15,7 +15,7 @@ import (
 	"os"
 )
 
-func Reload(clusters []data.Cluster, uid, gid uint32) error {
+func Reload(clusters []data.Cluster, port, certFilePath string) error {
 	config :=
 		"global\n" +
 			"    daemon\n\n" +
@@ -27,7 +27,7 @@ func Reload(clusters []data.Cluster, uid, gid uint32) error {
 			"    option forwardfor\n" +
 			"    option http-server-close\n\n" +
 			"frontend h2o-clusters\n" +
-			"    bind *:9999 ssl crt ./steam_haproxy.pem\n" +
+			"    bind *" + port + " ssl crt " + certFilePath + "\n" +
 			"    reqadd X-Forwarded-Proto:\\ https\n"
 
 	for _, c := range clusters {

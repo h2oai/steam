@@ -72,7 +72,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
 
   goProxy(cluster) {
     document.cookie = cluster.name + "=" + cluster.token;
-    let url = "https://" + window.location.hostname + ":9999" + cluster.context_path + "flow/index.html";
+    let url = "https://" + window.location.hostname + this.props.config.cluster_proxy_address + cluster.context_path + "flow/index.html";
     window.open(url, "_blank");
   }
 

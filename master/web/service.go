@@ -171,8 +171,7 @@ func (s Service) reloadProxyConf(name string) {
 		log.Println("Failed to read clusters.")
 	}
 
-	uid, gid, err := yarn.GetUser(name)
-	if err := haproxy.Reload(clusters, uid, gid); err != nil {
+	if err := haproxy.Reload(clusters, s.clusterProxyAddress, s.certFilePath); err != nil {
 		log.Println("Failed to reload proxy configuration.")
 	}
 }
