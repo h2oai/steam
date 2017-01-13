@@ -25,16 +25,19 @@ import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 import { LdapConfig} from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
 import { fetchLdapConfig, saveLdapConfig, testLdapConfig, setLocalConfig } from "../actions/users.actions";
+import { getConfig } from "../../Clusters/actions/clusters.actions";
 
 interface Props {
   doesLdapExist: boolean,
   ldapConfig: LdapConfig,
+  authType: string
 }
 interface DispatchProps {
   fetchLdapConfig: Function,
   saveLdapConfig: Function,
   testLdapConfig: Function,
-  setLocalConfig: Function
+  setLocalConfig: Function,
+  getConfig: Function
 }
 
 export class UserAuthentication extends React.Component<Props & DispatchProps, any> {
@@ -59,7 +62,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     super(params);
     this.state = {
       isLDAPConnectionSettingsOpen: true,
-      showDBOptions: false,
       selectedDB: "",
       hostInputValid: true,
       portInputValid: true,
@@ -122,6 +124,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   };
 
   componentWillMount() {
+    this.props.getConfig();
     this.props.fetchLdapConfig();
     FocusStyleManager.onlyShowFocusOnTabs();
   }
@@ -173,12 +176,10 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   onDBChanged = (e) => {
     if (e.target.value === "LDAP") {
       this.setState({
-        showDBOptions: true,
         selectedDB: e.target.value
       });
     } else if (e.target.value === "Steam Local DB") {
       this.setState({
-        showDBOptions: false,
         selectedDB: e.target.value
       });
     } else {
@@ -195,8 +196,14 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     if (this.state.selectedDB && this.state.selectedDB !== "") {
       defaultSelectedDB = this.state.selectedDB;
     } else {
-      if (this.props.doesLdapExist) {
-        defaultSelectedDB = "LDAP";
+      if (this.props.authType) {
+        if (this.props.authType.toLowerCase() === "ldap") {
+          defaultSelectedDB = "LDAP";
+        } else if (this.props.authType.toLowerCase() === "local") {
+          defaultSelectedDB = "Steam Local DB";
+        } else {
+          console.log("ERROR", "Unrecognized auth type"); //should never be reached
+        }
       } else {
         defaultSelectedDB = "Steam Local DB";
       }
@@ -220,7 +227,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
           </tbody>
         </table>
 
-        {this.state.showDBOptions ?
+        {defaultSelectedDB.toLowerCase() === 'ldap' ?
         <div>
           <div className="colapse-header">
             <Button onClick={this.onShowLDAPConnectionSettingsClicked}>
@@ -255,7 +262,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   <td className="auth-left">SSL-ENABLED</td>
                   <td className="auth-right">
                     <label className="pt-control pt-switch .modifier">
-                      <input type="checkbox" defaultChecked={true} ref={(ref) => this.sslEnabledInput = ref} />
+                      <input type="checkbox" defaultChecked={this.props.ldapConfig ? this.props.ldapConfig.ldaps : false} ref={(ref) => this.sslEnabledInput = ref} />
                       <span className="pt-control-indicator"></span>
                     </label>
                   </td>
@@ -307,14 +314,14 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   </td>
                 </tr>
                 <tr className="auth-row">
-                    <td className="auth-left">Group DN</td>
+                    <td className="auth-left">GROUP DN</td>
                     <td className="auth-right">
                       <input type="text" className={"pt-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.groupDnInput = ref} defaultValue=""></input>
                     </td>
                 </tr>
 
                 <tr className="auth-row">
-                  <td className="auth-left">Static Member Attribute</td>
+                  <td className="auth-left">STATIC MEMBER ATTRIBUTE</td>
                   <td className="auth-right">
                     <input type="text" className="pt-input" ref={(ref) => this.staticMemberAttributeInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.static_member_attribute : ""}></input>
                   </td>
@@ -322,7 +329,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
 
                 <tr className="auth-row">
-                  <td className="auth-left">Search Request Size Limit</td>
+                  <td className="auth-left">SEARCH REQUEST SIZE LIMIT</td>
                   <td className="auth-right">
                     <input type="text" className="pt-input" ref={(ref) => this.searchRequestSizeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.search_request_size_limit.toString() : ""}></input>
                   </td>
@@ -330,7 +337,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
 
                 <tr className="auth-row">
-                  <td className="auth-left">Search Request Time Limit</td>
+                  <td className="auth-left">SEARCH REQUEST TIME LIMIT</td>
                   <td className="auth-right">
                     <input type="text" className="pt-input" ref={(ref) => this.searchRequestTimeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.group_dn.toString() : ""}></input>
                   </td>
@@ -343,13 +350,13 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         </div> : null }
 
         <div id="actionButtonsContainer" className="space-20">
-          {this.state.showDBOptions ?
+          {defaultSelectedDB.toLowerCase() === 'ldap' ?
             <span>
               <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
               <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
             </span>
             : null}
-          {this.props.doesLdapExist && !this.state.showDBOptions ?
+          {this.props.authType && this.props.authType.toLowerCase() === "ldap" && defaultSelectedDB.toLowerCase() !== 'ldap' ?
             <div className="button-primary" onClick={this.onRemoveLdapClicked}>Remove LDAP</div>
             : null}
         </div>
@@ -362,7 +369,8 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 function mapStateToProps(state): any {
   return {
     ldapConfig: state.users.ldapConfig,
-    doesLdapExist: state.users.ldapExists
+    doesLdapExist: state.users.ldapExists,
+    authType: state.clusters.config.authentication_type
   };
 }
 
@@ -371,7 +379,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch),
     saveLdapConfig: bindActionCreators(saveLdapConfig, dispatch),
     testLdapConfig: bindActionCreators(testLdapConfig, dispatch),
-    setLocalConfig: bindActionCreators(setLocalConfig, dispatch)
+    setLocalConfig: bindActionCreators(setLocalConfig, dispatch),
+    getConfig: bindActionCreators(getConfig, dispatch)
   };
 }
 

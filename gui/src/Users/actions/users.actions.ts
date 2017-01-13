@@ -20,6 +20,7 @@ import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
 import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
+import { getConfig } from '../../Clusters/actions/clusters.actions';
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -925,6 +926,7 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
         dispatch(receiveSaveLdap());
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Updated", null));
         dispatch(fetchLdapConfig());
+        dispatch(getConfig());
       }
     });
   };
@@ -968,6 +970,7 @@ export function setLocalConfig() {
       }
       dispatch(receiveSetLocalConfig());
       dispatch(fetchLdapConfig());
+      dispatch(getConfig());
       dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Removed", null));
     });
   };
