@@ -61,6 +61,7 @@ func testSetup(testType, driver string) (*Service, az.Principal, string) {
 		"",
 		":9001",
 		[2]int{65525, 65535},
+		"",
 		false,
 	)
 
