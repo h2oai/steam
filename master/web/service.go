@@ -56,6 +56,7 @@ type Service struct {
 	clusterProxyAddress       string
 	scoringServicePortMin     int
 	scoringServicePortMax     int
+	certFilePath              string
 	kerberosEnabled           bool
 }
 
@@ -64,6 +65,7 @@ func NewService(
 	ds *data.Datastore,
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
+	certFilePath string,
 	kerberos bool,
 ) *Service {
 	return &Service{
@@ -71,6 +73,7 @@ func NewService(
 		ds,
 		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
 		scoringServicePortsRange[0], scoringServicePortsRange[1],
+		certFilePath,
 		kerberos,
 	}
 }
