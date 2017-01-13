@@ -197,6 +197,7 @@ func Run(version, buildDate string, opts Opts) {
 		predictionServiceHost,
 		opts.ClusterProxyAddress,
 		opts.PredictionServicePorts,
+		opts.WebTLSCertPath,
 		opts.Yarn.KerberosEnabled,
 	)
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
