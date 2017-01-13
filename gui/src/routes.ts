@@ -38,7 +38,6 @@ import Dummy from './Dummy/Dummy';
 import ProjectScreenStrategy from './Projects/components/ProjectScreenStrategy';
 import Collaborators from './Collaborators/Collaborators';
 import LaunchCluster from './Clusters/components/LaunchCluster';
-import Logout from './Logout/components/Logout';
 
 interface IIndexRoute {
   component: any
@@ -202,14 +201,5 @@ export const routes: IRoute[] = [
         showInNavigation: true
       }
     ]
-  },
-  //logout
-  {
-    path: 'logout',
-    component: Logout,
-    name: 'Logout',
-    icon: '',
-    showInBreadcrumb: false,
-    showInNavigation: false
   }
 ];
