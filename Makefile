@@ -36,6 +36,7 @@ GUI=./gui
 ASSETS = ./var/master/assets
 SCRIPTS = ./scripts
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
+ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 all: build gui ssb launcher
 
@@ -137,6 +138,12 @@ darwin: gui
 	cp -r $(ASSETS) ./dist/$(DIST_DARWIN)/var/master/
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
+
+dist/rpm/centos-7:
+	packaging/centos-7/build
+
+dist/rpm/centos-6:
+	packaging/centos-6/build
 
 release: ssb launcher linux
 
