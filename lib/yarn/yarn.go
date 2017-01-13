@@ -218,7 +218,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	if err != nil {
 		return "", "", "", "", "", err
 	}
-	fmt.Println(cpe)
+
 	token := ""
 	if secure {
 		if !cpe {
