@@ -194,7 +194,6 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
         <EditUserDialog open={this.state.editUserOpen} userToEdit={this.state.userToEdit} closeHandler={this.editUserCloseHandler} fetchWorkgroups={this.props.fetchWorkgroups} fetchUsersWithRolesAndProjects={this.props.fetchUsersWithRolesAndProjects} userWithWorkgroups={this.props.userWithWorkgroups } workgroups={this.props.workgroups} updateUserWorkgroups={this.props.updateUserWorkgroups} updateUserRoles={this.props.updateUserRoles} usersWithRolesAndProjects={this.props.usersWithRolesAndProjects} roles={this.props.roles} />
         <div className="filter-and-list">
           <div className="filter-column">
-            FILTERS
             <Table className="full-size">
               <Row header={true}>
                 <Cell>
