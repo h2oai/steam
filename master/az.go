@@ -22,6 +22,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/h2oai/steam/master/data"
+
 	auth "github.com/abbot/go-http-auth"
 	"github.com/h2oai/steam/master/az"
 )
@@ -43,6 +45,10 @@ func (a *DefaultAz) Authenticate(username string) string {
 
 	if pz == nil {
 		log.Printf("User %s does not exist\n", username)
+		return ""
+	}
+	if pz.AuthType() != data.LocalAuth {
+		log.Printf("User %s is not enabled through local login\n", username)
 		return ""
 	}
 	return pz.Password()

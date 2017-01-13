@@ -152,16 +152,23 @@ func Run(version, buildDate string, opts Opts) {
 	// --- create basic auth service ---
 	defaultAz := NewDefaultAz(ds)
 	var authProvider AuthProvider
-	switch opts.AuthProvider {
-	case "digest":
+
+	var set string
+	if auth, exists, err := ds.ReadAuthentication(data.ByEnabled); err != nil {
+		log.Fatalln("Reading authentication setting from database:", err)
+	} else if exists {
+		set = auth.Key
+	}
+	switch {
+	case opts.AuthProvider == "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
-	case "basic-ldap":
+	case opts.AuthProvider == "basic-ldap", set == data.LDAPAuth:
 		conn, err := ldap.FromDatabase(ds)
 		if err != nil {
 			log.Fatalln("Invalid configuration:", err)
 		}
 
-		authProvider = NewBasicLdapAuthProvider(webAddress, conn)
+		authProvider = NewBasicLdapAuthProvider(ds, webAddress, conn)
 	default: // "basic"
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}

@@ -41,6 +41,7 @@ func createSQLiteDB(db *sql.DB) error {
 }
 
 var schema = map[string]string{
+	"authentication":      createTableAuthentication,
 	"binomial_model":      createTableBinomialModel,
 	"cluster":             createTableCluster,
 	"cluster_type":        createTableClusterType,
@@ -61,11 +62,19 @@ var schema = map[string]string{
 	"regression_model":    createTableRegressionModel,
 	"role":                createTableRole,
 	"role_permission":     createTableRolePermission,
-	"security":            createTableSecurity,
 	"service":             createTableService,
 	"state":               createTableState,
 	"workgroup":           createTableWorkgroup,
 }
+
+var createTableAuthentication = `
+CREATE TABLE authentication (
+    id integer PRIMARY KEY AUTOINCREMENT,
+    key text NOT NULL UNIQUE,
+    value texts NOT NULL,
+    enabled boolean UNIQUE
+)
+`
 
 var createTableBinomialModel = `
 CREATE TABLE binomial_model (
@@ -154,6 +163,7 @@ var createTableIdentity = `
 CREATE TABLE identity (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
+    auth_type test NOT NULL,
     password text,
     workgroup_id integer,
     is_active boolean NOT NULL,
@@ -311,14 +321,6 @@ CREATE TABLE role_permission (
     PRIMARY KEY (role_id, permission_id),
     FOREIGN KEY (permission_id) REFERENCES permission(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
-)
-`
-
-var createTableSecurity = `
-CREATE TABLE security (
-    id integer PRIMARY KEY AUTOINCREMENT,
-    key text NOT NULL UNIQUE,
-    value texts NOT NULL
 )
 `
 

@@ -20,6 +20,7 @@ import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
 import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
+import { getConfig } from '../../Clusters/actions/clusters.actions';
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -63,7 +64,23 @@ export const REQUEST_TEST_LDAP = 'REQUEST_TEST_LDAP';
 export const RECEIVE_TEST_LDAP = 'RECEIVE_TEST_LDAP';
 export const REQUEST_ADMIN_CHECK = 'REQUEST_ADMIN_CHECK';
 export const RECEIVE_ADMIN_CHECK = 'RECEIVE_ADMIN_CHECK';
+export const REQUEST_SET_LOCAL_CONFIG = 'REQUEST_SET_LOCAL_CONFIG';
+export const RECEIVE_SET_LOCAL_CONFIG = 'RECEIVE_SET_LOCAL_CONFIG';
 
+export function requestSetLocalConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_SET_LOCAL_CONFIG
+    });
+  };
+}
+export function receiveSetLocalConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_SET_LOCAL_CONFIG
+    });
+  };
+}
 export function requestAdminCheck() {
   return (dispatch) => {
     dispatch({
@@ -908,7 +925,8 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
       } else {
         dispatch(receiveSaveLdap());
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Updated", null));
-        fetchLdapConfig();
+        dispatch(fetchLdapConfig());
+        dispatch(getConfig());
       }
     });
   };
@@ -938,6 +956,22 @@ export function checkAdmin() {
         return;
       }
       dispatch(receiveAdminCheck(isSuperuser));
+    });
+  };
+}
+
+export function setLocalConfig() {
+  return (dispatch, getState) => {
+    dispatch(requestSetLocalConfig());
+    Remote.setLocalConfig((error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP", error, null));
+        return;
+      }
+      dispatch(receiveSetLocalConfig());
+      dispatch(fetchLdapConfig());
+      dispatch(getConfig());
+      dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Removed", null));
     });
   };
 }

@@ -20,22 +20,27 @@ package api
 // --- Type Definitions ---
 
 type Config struct {
-	Version             string
-	KerberosEnabled     bool
+	AuthenticationType  string
 	ClusterProxyAddress string
+	KerberosEnabled     bool
+	Version             string
 	Username            string
 }
 
 type LdapConfig struct {
-	Host            string
-	Port            int
-	Ldaps           bool
-	BindDn          string
-	BindPassword    string
-	UserBaseDn      string
-	UserBaseFilter  string
-	UserRnAttribute string
-	ForceBind       bool
+	Host                   string
+	Port                   int
+	Ldaps                  bool
+	BindDn                 string
+	BindPassword           string
+	UserBaseDn             string
+	UserBaseFilter         string
+	UserNameAttribute      string
+	GroupDn                string
+	StaticMemberAttribute  string
+	SearchRequestSizeLimit int
+	SearchRequestTimeLimit int
+	ForceBind              bool
 }
 
 type Cluster struct {
@@ -298,6 +303,7 @@ type Service struct {
 	PingServer                    PingServer                    `help:"Ping the Steam server"`
 	GetConfig                     GetConfig                     `help:"Get Steam start up configurations"`
 	CheckAdmin                    CheckAdmin                    `help:"Check if an identity has admin privileges"`
+	SetLocalConfig                SetLocalConfig                `help:"Set security configuration to local"`
 	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
 	GetLdapConfig                 GetLdapConfig                 `help:"Get LDAP security configurations"`
 	TestLdapConfig                TestLdapConfig                `help:"Test LDAP security configurations"`
@@ -430,8 +436,10 @@ type GetConfig struct {
 	Config Config `help:"An object containing Steam startup configurations"`
 }
 type CheckAdmin struct {
-	_           int
+	_       int
 	IsAdmin bool
+}
+type SetLocalConfig struct {
 }
 type SetLdapConfig struct {
 	Config LdapConfig

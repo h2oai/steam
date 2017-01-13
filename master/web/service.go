@@ -88,11 +88,20 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 }
 
 func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
+	var authType string
+	if auth, exists, err := s.ds.ReadAuthentication(data.ByEnabled); err != nil {
+		return nil, errors.Wrap(err, "reading authentication from database")
+	} else if exists {
+		authType = auth.Key
+	} else {
+		authType = data.LocalAuth
+	}
 	return &web.Config{
 		Version:             s.version,
+		AuthenticationType:  authType,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
-		Username: pz.Name(),
+		Username:            pz.Name(),
 	}, nil
 }
 
@@ -1749,7 +1758,7 @@ func (s *Service) LinkIdentityWithRole(pz az.Principal, identityId int64, roleId
 		return errors.New("unable to locate role")
 	}
 	// Link role to identity
-	err := s.ds.UpdateIdentity(identityId, data.LinkRole(roleId),
+	err := s.ds.UpdateIdentity(identityId, data.LinkRole(roleId, false),
 		data.WithLinkAudit(pz),
 	)
 	return errors.Wrap(err, "updating identity in database")
@@ -2198,11 +2207,15 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 }
 
 type ldapSerialized struct {
-	Address         string
-	Bind            string
-	UserBaseDn      string
-	UserBaseFilter  string
-	UserRnAttribute string
+	Address                string
+	Bind                   string
+	UserBaseDn             string
+	UserBaseFilter         string
+	UserNameAttribute      string
+	GroupDn                string
+	StaticMemberAttribute  string
+	SearchRequestSizeLimit int
+	SearchRequestTimeLimit int
 
 	ForceBind bool
 	Ldaps     bool
@@ -2215,7 +2228,12 @@ func configToSerialized(config *web.LdapConfig) ldapSerialized {
 		bind,
 		config.UserBaseDn,
 		config.UserBaseFilter,
-		config.UserRnAttribute,
+		config.UserNameAttribute,
+		config.GroupDn,
+		config.StaticMemberAttribute,
+		config.SearchRequestSizeLimit,
+		config.SearchRequestTimeLimit,
+
 		config.ForceBind,
 		config.Ldaps,
 	}
@@ -2226,17 +2244,33 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 	host := address[0]
 	port, err := strconv.Atoi(address[1])
 	if err != nil {
-		return nil, errors.Wrap(err, "converint port to integer")
+		return nil, errors.Wrap(err, "convering port to integer")
 	}
+	b, err := base64.StdEncoding.DecodeString(config.Bind)
+	if err != nil {
+		return nil, errors.Wrap(err, "decoding bind") //FIXME format error
+	}
+	bind := strings.Split(string(b), ":")
 
 	return &web.LdapConfig{
-		Host: host, Port: port,
-		Ldaps:           config.Ldaps,
-		UserBaseDn:      config.UserBaseDn,
-		UserBaseFilter:  config.UserBaseFilter,
-		UserRnAttribute: config.UserRnAttribute,
-		ForceBind:       config.ForceBind,
+		host, port,
+		config.Ldaps,
+		bind[0], "",
+		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
+		config.GroupDn, config.StaticMemberAttribute,
+		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
+		config.ForceBind,
 	}, nil
+}
+
+func (s *Service) SetLocalConfig(pz az.Principal) error {
+	if authentication, exists, err := s.ds.ReadAuthentication(data.ByEnabled); err != nil {
+		return errors.Wrap(err, "reading authentication setting from database")
+	} else if exists {
+		err := s.ds.UpdateAuthentication(authentication.Id, data.WithEnable(false))
+		return errors.Wrap(err, "updaing authentication setting from database")
+	}
+	return nil
 }
 
 func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
@@ -2253,15 +2287,15 @@ func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 		return errors.Wrap(err, "serializing config metadata")
 	}
 
-	if security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap")); err != nil {
-		return errors.Wrap(err, "reading security config from database")
+	if authentication, exists, err := s.ds.ReadAuthentication(data.ByKey(data.LDAPAuth)); err != nil {
+		return errors.Wrap(err, "reading authentication config from database")
 	} else if exists {
-		err := s.ds.UpdateSecurity(security.Id, data.WithValue(string(meta)))
-		return errors.Wrap(err, "updating security config in database")
+		err := s.ds.UpdateAuthentication(authentication.Id, data.WithValue(string(meta)), data.WithEnable(true))
+		return errors.Wrap(err, "updating authentication config in database")
 	}
 
-	_, err = s.ds.CreateSecurity("ldap", string(meta))
-	return errors.Wrap(err, "creating security config in database")
+	_, err = s.ds.CreateAuthentication(data.LDAPAuth, string(meta), data.WithEnable(true))
+	return errors.Wrap(err, "creating authentication config in database")
 }
 
 func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) {
@@ -2269,15 +2303,15 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 		return nil, false, errors.New("only admins can view LDAP settings")
 	}
 
-	security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap"))
+	authentication, exists, err := s.ds.ReadAuthentication(data.ByKey(data.LDAPAuth))
 	if err != nil {
-		return nil, false, errors.Wrap(err, "reading security config from database")
+		return nil, false, errors.Wrap(err, "reading authentication config from database")
 	} else if !exists {
 		return nil, false, nil
 	}
 
 	var deserial ldapSerialized
-	if err := json.Unmarshal([]byte(security.Value), &deserial); err != nil {
+	if err := json.Unmarshal([]byte(authentication.Value), &deserial); err != nil {
 		return nil, false, errors.Wrap(err, "deserializing config metadata")
 	}
 
