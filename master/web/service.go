@@ -24,28 +24,26 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/h2oai/steam/lib/ldap"
-
-	"github.com/h2oai/steam/master/auth"
-
-	"os"
-
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/haproxy"
+	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/svc"
 	"github.com/h2oai/steam/lib/yarn"
+	"github.com/h2oai/steam/master/auth"
 	"github.com/h2oai/steam/master/az"
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/srv/compiler"
 	"github.com/h2oai/steam/srv/h2ov3"
 	"github.com/h2oai/steam/srv/web"
+
 	"github.com/pkg/errors"
 )
 
@@ -169,8 +167,14 @@ func (s Service) reloadProxyConf(name string) {
 	if err != nil {
 		log.Println("Failed to read clusters.")
 	}
+	proxyClusters := make([]data.Cluster, 0)
+	for _, cluster := range clusters {
+		if cluster.ContextPath.Valid {
+			proxyClusters = append(proxyClusters, cluster)
+		}
+	}
 
-	if err := haproxy.Reload(clusters, s.clusterProxyAddress, fs.GetAssetsPath(s.workingDir, "cert.pem")); err != nil {
+	if err := haproxy.Reload(proxyClusters, s.clusterProxyAddress, fs.GetAssetsPath(s.workingDir, "cert.pem")); err != nil {
 		log.Println("Failed to reload proxy configuration.")
 	}
 }
@@ -218,7 +222,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	}
 	// Create cluster
 	clusterId, err := s.ds.CreateCluster(clusterName, s.ds.ClusterType.Yarn,
-		data.WithYarnDetail(engineId, int64(size), appId, memory, out, contextPath, token),
+		data.WithYarnDetail(engineId, int64(size), identity.Name, appId, memory, out, contextPath, token),
 		data.WithAddress(address), data.WithState(data.States.Started),
 		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
 	)
@@ -2462,7 +2466,7 @@ func toYarnCluster(c data.Cluster, y data.ClusterYarnDetail) *web.YarnCluster {
 		int(y.Size),
 		y.ApplicationId,
 		y.Memory,
-		"",
+		c.Username.String,
 	}
 }
 

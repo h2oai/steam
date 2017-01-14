@@ -34,7 +34,6 @@ import (
 	"time"
 
 	"github.com/h2oai/steam/lib/haproxy"
-
 	"github.com/pkg/errors"
 )
 

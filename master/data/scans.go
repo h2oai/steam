@@ -81,6 +81,7 @@ func ScanCluster(r *sql.Row) (Cluster, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
+		&s.Username,
 		&s.ContextPath,
 		&s.ClusterTypeId,
 		&s.DetailId,
@@ -102,6 +103,7 @@ func ScanClusters(rs *sql.Rows) ([]Cluster, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
+			&s.Username,
 			&s.ContextPath,
 			&s.ClusterTypeId,
 			&s.DetailId,

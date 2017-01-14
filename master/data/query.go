@@ -590,7 +590,7 @@ func UnlinkWorkgroup(workgroupId int64) QueryOpt {
 }
 
 // WithYarnDetail adds a type_id of yarn and provides the corresponding detail
-func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir, contextPath, token string) QueryOpt {
+func WithYarnDetail(engineId, size int64, username, applicationId, memory, outputDir, contextPath, token string) QueryOpt {
 	return func(q *QueryConfig) error {
 		if q.fields["type_id"] != q.clusterTypes.Yarn {
 			return errors.New("cannot add yarn details for a non-yarn cluster")
@@ -601,6 +601,7 @@ func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir, cont
 		}
 
 		q.fields["detail_id"] = yarnId
+		q.fields["username"] = username
 		q.fields["context_path"] = contextPath
 		q.fields["token"] = token
 		return nil
