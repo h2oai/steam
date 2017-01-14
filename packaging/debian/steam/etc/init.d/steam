@@ -1,8 +1,8 @@
 #!/bin/sh
 # kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
-if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
-    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
-fi
+#if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
+#    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
+#fi
 ### BEGIN INIT INFO
 # Provides:          steam
 # Required-Start:    $remote_fs $syslog
@@ -18,41 +18,27 @@ fi
 # Author: Steam Team <steam@h2o.ai>
 # Code "leveraged" from other init.d scripts.
 
-set -e
-
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 DESC="steam"
-H2ODIR=/opt/h2oai
+H2ODIR=/opt/h2oai/steam
 DAEMON=$H2ODIR/steam
-
-# This is an example to start a single forking daemon capable of writing
-# a pid file. To get other behaviors, implement do_start(), do_stop() or
-# other functions to override the defaults in /lib/init/init-d-script.
-# See also init-d-script(5)
-
 STEAM_USER=steam
 STEAM_GROUP=steam
-STEAM_TMP_DIR=$H2ODIR/tmp
-PIDFILE=$STEAM_TMP_DIR/steam.pid
-
-test -x $DAEMON || exit 0
-
-. /lib/lsb/init-functions
+PIDFILE=/var/run/steam.pid
 
 case "$1" in
+  set-admin-password)
+	$DAEMON --set-admin-password
+    ;;
   start)
-	log_daemon_msg "Starting h2o steam" "steam"
-	if ! test -d $STEAM_TMP_DIR; then
-		mkdir -p $STEAM_TMP_DIR
-		chown -R $STEAM_USER:$STEAM_GROUP $STEAM_TMP_DIR
-	fi
-	start_daemon -p $PIDFILE $DAEMON serve master --working-directory=$H2ODIR/var/master --superuser-name=admin --superuser-password=ineedtochangethepassword
-	log_end_msg $?
+	logger "Starting h2o steam" "steam"
+	start-stop-daemon --start --make-pidfile --pidfile $PIDFILE --background --startas /bin/bash -- -c "exec $DAEMON serve master --working-directory=$H2ODIR/var/master >> /var/log/steam.log 2>&1"
+	logger $?
     ;;
   stop)
-	log_daemon_msg "Stopping h2o steam" "steam"
-	killproc -p $PIDFILE $DAEMON
-	log_end_msg $?
+	logger "Stopping h2o steam" "steam"
+	start-stop-daemon --stop --pidfile  $PIDFILE
+	logger $?
     ;;
   status)
 	if pidofproc -p $PIDFILE $DAEMON >/dev/null 2>&1; then
