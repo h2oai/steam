@@ -20,7 +20,8 @@
 	cli-markdown \
 	linux \
 	darwin \
-	release
+	release \
+	debian_package
 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
@@ -142,3 +143,6 @@ darwin: gui
 
 release: ssb db launcher linux
 
+debian_package:
+	@echo STEAM_VERSION is $(STEAM_VERSION)
+	@echo STEAM_TAR_GZ_URL is $(STEAM_VERSION)
