@@ -43,28 +43,28 @@ interface DispatchProps {
 export class UserAuthentication extends React.Component<Props & DispatchProps, any> {
 
   dbSelectInput: HTMLSelectElement;
-  hostInput: HTMLInputElement;
-  portInput: HTMLInputElement;
-  sslEnabledInput: HTMLInputElement;
-  bindDnInput: HTMLInputElement;
   bindDnPasswordInput: HTMLInputElement;
   confirmPasswordInput: HTMLInputElement;
-  userbaseDnInput: HTMLInputElement;
-  userbaseFilterInput: HTMLInputElement;
-  usernameAttribueInput: HTMLInputElement;
-  //realnameAttributeInput: HTMLInputElement;
-  groupDnInput: HTMLInputElement;
-  staticMemberAttributeInput: HTMLInputElement;
-  searchRequestSizeLimitInput: HTMLInputElement;
-  searchRequestTimeLimitInput: HTMLInputElement;
 
   constructor(params) {
     super(params);
     this.state = {
+      hostValue: "",
+      portValue: "636",
+      sslEnabledValue: true,
+      bindDnValue: "dc=xyz,dc=com",
+      bindDnPasswordValue: "",
+      confirmPasswordValue: "",
+      userbaseDnValue: "",
+      userbaseFilterValue: "",
+      usernameAttributeValue: "",
+      groupDnValue: "dc=xyz,dc=com",
+      staticMemberAttributeValue: "memberUid",
+      searchRequestSizeLimitValue: "",
+      searchRequestTimeLimitValue: "",
       isLDAPConnectionSettingsOpen: true,
       selectedDB: "",
       hostInputValid: true,
-      portInputValid: true,
       passwordInputValid: true,
       userbaseDnInputValid: true,
       usernameAttributeInputValid: true,
@@ -73,33 +73,27 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   }
 
   validateAll = () => {
-    if (this.hostInput.value.length > 3) {
+    if (this.state.hostValue.length > 3) {
       this.setState({ hostInputValid: true });
     } else {
       this.setState({ hostInputValid: false });
     }
 
-    if (this.portInput.value.length > 0) {
-      this.setState({ portInputValid: true });
-    } else {
-      this.setState({ portInputValid: false });
-    }
-
     this.validatePasswords();
 
-    if (this.userbaseDnInput.value.length > 0) {
+    if (this.state.userbaseDnValue.length > 0) {
       this.setState({ userbaseDnInputValid: true });
     } else {
       this.setState({ userbaseDnInputValid: false});
     }
 
-    if (this.usernameAttribueInput.value.length > 0) {
+    if (this.state.usernameAttributeValue.length > 0) {
       this.setState({ usernameAttributeInputValid: true });
     } else {
       this.setState({ usernameAttributeInputValid: false });
     }
 
-    if (this.groupDnInput.value.length > 0) {
+    if (this.state.groupDnValue.length > 0) {
       this.setState({ groupDnInputValid: true });
     } else {
       this.setState({ groupDnInputValid: false});
@@ -124,10 +118,35 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   };
 
   componentWillMount() {
+    if (this.props.ldapConfig) {
+      this.populateValuesFromConfig(this.props.ldapConfig);
+    }
     this.props.getConfig();
     this.props.fetchLdapConfig();
     FocusStyleManager.onlyShowFocusOnTabs();
   }
+
+  componentWillReceiveProps = (nextProps) => {
+    if (this.props.ldapConfig && nextProps.ldapConfig && JSON.stringify(this.props.ldapConfig) !== JSON.stringify(nextProps.ldapConfig)) {
+      this.populateValuesFromConfig(nextProps.ldapConfig);
+    }
+  };
+
+  populateValuesFromConfig = (config: LdapConfig) => {
+    this.setState({
+      hostValue: config.host,
+      portValue: config.port,
+      sslEnabledValue: config.ldaps,
+      bindDnValue: config.bind_dn,
+      userbaseDnValue: config.user_base_dn,
+      userbaseFilterValue: config.user_base_filter,
+      usernameAttributeValue: config.user_name_attribute,
+      groupDnValue: config.group_dn,
+      staticMemberAttributeValue: config.static_member_attribute,
+      searchRequestSizeLimitValue: config.search_request_size_limit,
+      searchRequestTimeLimitValue: config.search_request_time_limit
+    });
+  };
 
   onShowLDAPConnectionSettingsClicked = () => {
     this.setState({
@@ -137,41 +156,32 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
   buildLdapConfig = (): LdapConfig => {
     return {
-      host: this.hostInput.value,
-      port: parseInt(this.portInput.value, 10),
-      ldaps: this.sslEnabledInput.value === 'true',
-      bind_dn: this.bindDnInput.value,
+      host: this.state.hostValue,
+      port: parseInt(this.state.portValue, 10),
+      ldaps: this.state.sslEnabledValue === 'true',
+      bind_dn: this.state.bindDnValue,
       bind_password: this.bindDnPasswordInput.value,
-      user_base_dn: this.userbaseDnInput.value,
-      user_base_filter: this.userbaseFilterInput.value,
-      user_name_attribute: this.usernameAttribueInput.value,
+      user_base_dn: this.state.userbaseDnValue,
+      user_base_filter: this.state.userbaseFilterValue,
+      user_name_attribute: this.state.usernameAttributeValue,
       //user_rn_attribute: this.realnameAttributeInput.value,
-      group_dn: this.groupDnInput.value,
-      static_member_attribute: this.staticMemberAttributeInput.value,
-      search_request_size_limit: parseInt(this.searchRequestSizeLimitInput.value, 10),
-      search_request_time_limit: parseInt(this.searchRequestTimeLimitInput.value, 10),
+      group_dn: this.state.groupDnValue,
+      static_member_attribute: this.state.staticMemberAttributeValue,
+      search_request_size_limit: parseInt(this.state.searchRequestSizeLimitValue, 10),
+      search_request_time_limit: parseInt(this.state.searchRequestTimeLimitValue, 10),
       force_bind: true
     };
   };
 
   onTestConfigClicked = () => {
+    this.validateAll();
     this.props.testLdapConfig(this.buildLdapConfig());
   };
 
   onSaveConfigClicked = (e) => {
     e.preventDefault();
     this.validateAll();
-
-    if (
-      this.state.hostInputValid &&
-      this.state.portInputValid &&
-      this.state.passwordInputValid &&
-      this.state.userbaseDnInputValid &&
-      this.state.usernameAttributeInputValid &&
-      this.state.groupDnInputValid
-    ) {
-      this.props.saveLdapConfig(this.buildLdapConfig());
-    }
+    this.props.saveLdapConfig(this.buildLdapConfig());
   };
   onDBChanged = (e) => {
     if (e.target.value === "LDAP") {
@@ -189,7 +199,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   onRemoveLdapClicked = () => {
     this.props.setLocalConfig();
   };
-
   render(): React.ReactElement<HTMLDivElement> {
     let defaultSelectedDB;
 
@@ -247,7 +256,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                      <input type="text" className={"pt-input " + (this.state.hostInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.hostInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.host : ""}></input>
+                      <input type="text"
+                             className={"pt-input ldap-input " + (this.state.hostInputValid ? '' : 'pt-intent-danger')}
+                             value={this.state.hostValue}
+                             onChange={(e: any) => this.setState({"hostValue": e.target.value})}
+                      ></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -255,14 +268,24 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" className={"pt-input " + (this.state.portInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.portInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.port.toString() : ""}></input>
+                    <input type="text"
+                           className={"pt-input ldap-input "}
+                           value={this.state.portValue}
+                           onChange={(e: any) => this.setState({"portValue": e.target.value})}
+                    ></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
                   <td className="auth-left">SSL-ENABLED</td>
                   <td className="auth-right">
                     <label className="pt-control pt-switch .modifier">
-                      <input type="checkbox" defaultChecked={this.props.ldapConfig ? this.props.ldapConfig.ldaps : false} ref={(ref) => this.sslEnabledInput = ref} />
+                      <input type="checkbox"
+                             checked={this.state.sslEnabledValue}
+                             onChange={(e: any) => {
+                                  this.setState({"sslEnabledValue": !this.state.sslEnabledValue});
+                                }
+                             }
+                      />
                       <span className="pt-control-indicator"></span>
                     </label>
                   </td>
@@ -272,7 +295,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.bind_dn : null} className="pt-input" ref={(ref) => this.bindDnInput = ref}></input>
+                    <input type="text"
+                           className="pt-input ldap-input"
+                           value={this.state.bindDnValue}
+                           onChange={(e: any) => this.setState({"bindDnValue": e.target.value})}
+                    ></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -280,13 +307,13 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                      <input type="password" className={"pt-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.bindDnPasswordInput = ref}></input>
+                    <input type="password" className={"pt-input ldap-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.bindDnPasswordInput = ref}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
                   <td className="auth-left">CONFIRM PASSWORD</td>
                   <td className="auth-right">
-                    <input type="password" className={"pt-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.confirmPasswordInput = ref}></input>
+                    <input type="password" className={"pt-input ldap-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.confirmPasswordInput = ref}></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -294,7 +321,12 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_base_dn : ""} className={"pt-input " + (this.state.userbaseDnInputValid ? "" : "pt-intent-danger")} ref={(ref) => this.userbaseDnInput = ref}></input>
+                    <input type="text"
+                           className={"pt-input ldap-input " + (this.state.userbaseDnInputValid ? "" : "pt-intent-danger")}
+                           value={this.state.userbaseDnValue}
+                           onChange={(e: any) => this.setState({"userbaseDnValue": e.target.value})}
+                    >
+                    </input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -302,7 +334,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_base_filter : ""} className="pt-input" ref={(ref) => this.userbaseFilterInput = ref}></input>
+                    <input type="text"
+                           className="pt-input ldap-input"
+                           onChange={(e: any) => this.setState({"userbaseFilterValue": e.target.value})}
+                           value={this.state.userbaseFilterValue}
+                    ></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
@@ -310,20 +346,32 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
-                    <input type="text" className={"pt-input " + (this.state.usernameAttributeInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.usernameAttribueInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.user_name_attribute : ""}></input>
+                    <input type="text"
+                           className={"pt-input ldap-input " + (this.state.usernameAttributeInputValid ? '' : 'pt-intent-danger')}
+                           onChange={(e: any) => this.setState({"usernameAttributeValue": e.target.value})}
+                           value={this.state.usernameAttributeValue}
+                           ></input>
                   </td>
                 </tr>
                 <tr className="auth-row">
                     <td className="auth-left">GROUP DN</td>
                     <td className="auth-right">
-                      <input type="text" className={"pt-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')} ref={(ref) => this.groupDnInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.group_dn : ""}></input>
+                      <input type="text"
+                           className={"pt-input ldap-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')}
+                           onChange={(e: any) => this.setState({groupDnValue: e.target.value})}
+                           value={this.state.groupDnValue}
+                           ></input>
                     </td>
                 </tr>
 
                 <tr className="auth-row">
                   <td className="auth-left">STATIC MEMBER ATTRIBUTE</td>
                   <td className="auth-right">
-                    <input type="text" className="pt-input" ref={(ref) => this.staticMemberAttributeInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.static_member_attribute : ""}></input>
+                    <input type="text"
+                           className="pt-input ldap-input "
+                           value={this.state.staticMemberAttributeValue}
+                           onChange={(e: any) => this.setState({"staticMemberAttributeValue": e.target.value})}
+                    ></input>
                   </td>
                 </tr>
 
@@ -331,7 +379,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                 <tr className="auth-row">
                   <td className="auth-left">SEARCH REQUEST SIZE LIMIT</td>
                   <td className="auth-right">
-                    <input type="text" className="pt-input" ref={(ref) => this.searchRequestSizeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.search_request_size_limit.toString() : ""}></input>
+                    <input type="text"
+                           className="pt-input ldap-input "
+                           value={this.state.searchRequestSizeLimitValue}
+                           onChange={(e: any) => this.setState({"searchRequestSizeLimitValue": e.target.value})}
+                    ></input>
                   </td>
                 </tr>
 
@@ -339,7 +391,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                 <tr className="auth-row">
                   <td className="auth-left">SEARCH REQUEST TIME LIMIT</td>
                   <td className="auth-right">
-                    <input type="text" className="pt-input" ref={(ref) => this.searchRequestTimeLimitInput = ref} defaultValue={this.props.ldapConfig ? this.props.ldapConfig.search_request_time_limit.toString() : ""}></input>
+                    <input type="text"
+                           className="pt-input ldap-input "
+                           value={this.state.searchRequestTimeLimitValue}
+                           onChange={(e: any) => this.setState({ "searchRequestTimeLimitValue": e.target.value })}
+                    ></input>
                   </td>
                 </tr>
 
