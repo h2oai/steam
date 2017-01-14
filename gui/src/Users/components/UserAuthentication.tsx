@@ -118,6 +118,9 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   };
 
   componentWillMount() {
+    if (this.props.ldapConfig) {
+      this.populateValuesFromConfig(this.props.ldapConfig);
+    }
     this.props.getConfig();
     this.props.fetchLdapConfig();
     FocusStyleManager.onlyShowFocusOnTabs();
@@ -125,20 +128,24 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
   componentWillReceiveProps = (nextProps) => {
     if (this.props.ldapConfig && nextProps.ldapConfig && JSON.stringify(this.props.ldapConfig) !== JSON.stringify(nextProps.ldapConfig)) {
-      this.setState({
-        hostValue: nextProps.ldapConfig.host,
-        portValue: nextProps.ldapConfig.port,
-        sslEnabledValue: nextProps.ldapConfig.ldaps,
-        bindDnValue: nextProps.ldapConfig.bind_dn,
-        userbaseDnValue: nextProps.ldapConfig.user_base_dn,
-        userbaseFilterValue: nextProps.ldapConfig.user_base_filter,
-        usernameAttributeValue: nextProps.ldapConfig.user_name_attribute,
-        groupDnValue: nextProps.ldapConfig.group_dn,
-        staticMemberAttributeValue: nextProps.ldapConfig.static_member_attribute,
-        searchRequestSizeLimitValue: nextProps.ldapConfig.search_request_size_limit,
-        searchRequestTimeLimitValue: nextProps.ldapConfig.search_request_time_limit
-      });
+      this.populateValuesFromConfig(nextProps.ldapConfig);
     }
+  };
+
+  populateValuesFromConfig = (config: LdapConfig) => {
+    this.setState({
+      hostValue: config.host,
+      portValue: config.port,
+      sslEnabledValue: config.ldaps,
+      bindDnValue: config.bind_dn,
+      userbaseDnValue: config.user_base_dn,
+      userbaseFilterValue: config.user_base_filter,
+      usernameAttributeValue: config.user_name_attribute,
+      groupDnValue: config.group_dn,
+      staticMemberAttributeValue: config.static_member_attribute,
+      searchRequestSizeLimitValue: config.search_request_size_limit,
+      searchRequestTimeLimitValue: config.search_request_time_limit
+    });
   };
 
   onShowLDAPConnectionSettingsClicked = () => {
