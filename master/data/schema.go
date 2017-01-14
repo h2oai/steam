@@ -94,6 +94,7 @@ var createTableCluster = `
 CREATE TABLE cluster (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL,
+    username text,
     context_path text,
     type_id integer NOT NULL,
     detail_id integer,

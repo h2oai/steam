@@ -46,6 +46,7 @@ type binomialModel struct {
 type Cluster struct {
 	Id            int64          `db:"id,pk"`
 	Name          string         `db:"name,arg"`
+	Username      sql.NullString `db:"username"`
 	ContextPath   sql.NullString `db:"context_path"`
 	ClusterTypeId int64          `db:"type_id,arg"`
 	DetailId      sql.NullInt64  `db:"detail_id"`

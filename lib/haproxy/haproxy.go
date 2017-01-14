@@ -1,11 +1,14 @@
 package haproxy
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"os/exec"
+	"text/template"
 
 	"github.com/h2oai/steam/master/data"
 
@@ -15,42 +18,73 @@ import (
 	"os"
 )
 
+var config = `global
+	daemon
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client  50000ms
+    timeout server  50000ms
+    option forwardfor
+    option http-server-close
+
+frontend h2o-clusters
+    bind *:{{.Port}}{{if .Cert}} ssl crt {{.Cert}}{{end}}
+    reqadd X-Forwarded-Proto:\ https
+    {{- range .Clus}}
+    acl cluster_{{.Name}} path_beg {{.Ctxt}}
+    use_backend {{.Name}} if cluster_{{.Name}}
+    {{- end}}
+{{range .Clus}}
+backend {{.Name}}{{if .Toke}}
+	http-request set-header Authorization Basic\ %[req.cook({{.Name}})]
+	redirect scheme https if !{ ssl_fc }{{end}}
+	server {{.Name}} {{.Addr}}
+{{end}}
+`
+
+func (h *haProxyConfig) writeConfig() (*bytes.Buffer, error) {
+	tmpl := template.New("Config")
+
+	buf := new(bytes.Buffer)
+	configTemplate, err := tmpl.Parse(config)
+	if err != nil {
+		return nil, err //FIXME format error
+	}
+	if err := configTemplate.Execute(buf, h); err != nil {
+		return nil, err //FIXME: format error
+	}
+
+	return buf, nil
+
+}
+
+type haProxyConfig struct {
+	Port string
+	Cert string
+	Clus []haCluster
+}
+
+type haCluster struct{ Name, Addr, Ctxt, Toke string }
+
 func Reload(clusters []data.Cluster, port, certFilePath string) error {
-	config :=
-		"global\n" +
-			"    daemon\n\n" +
-			"defaults\n" +
-			"    mode http\n" +
-			"    timeout connect 5000ms\n" +
-			"    timeout client  50000ms\n" +
-			"    timeout server  50000ms\n" +
-			"    option forwardfor\n" +
-			"    option http-server-close\n\n" +
-			"frontend h2o-clusters\n" +
-			"    bind *" + port + " ssl crt " + certFilePath + "\n" +
-			"    reqadd X-Forwarded-Proto:\\ https\n"
-
-	for _, c := range clusters {
-		if c.ContextPath.String != "/" {
-			config +=
-				"    acl cluster_" + c.Name + " path_beg " + c.ContextPath.String + "\n" +
-					"    use_backend " + c.Name + " if " + "cluster_" + c.Name + "\n\n"
-		}
+	conf := haProxyConfig{
+		Port: port,
+		Cert: certFilePath,
+		Clus: make([]haCluster, len(clusters)),
+	}
+	for i, cluster := range clusters {
+		conf.Clus[i] = haCluster{Name: fmt.Sprintf("%s_%s", cluster.Name, cluster.Username.String),
+			Addr: cluster.Address.String, Ctxt: cluster.ContextPath.String,
+			Toke: cluster.Token.String}
 	}
 
-	for _, c := range clusters {
-		if c.ContextPath.String != "/" {
-			config += "backend " + c.Name + "\n"
-			if c.Token.String != "" {
-				config += "    http-request set-header Authorization Basic\\ %[req.cook(" + c.Name + ")]\n"
-				config += "    redirect scheme https if !{ ssl_fc }\n"
-			}
-			config += "    server " + c.Name + " " + c.Address.String + "\n\n"
-		}
+	buf, err := conf.writeConfig()
+	if err != nil {
+		return err
 	}
 
-	if err := ioutil.WriteFile("haproxy.conf",
-		[]byte(config), 0644); err != nil {
+	if err := ioutil.WriteFile("haproxy.conf", buf.Bytes(), 0644); err != nil {
 		return err
 	}
 
