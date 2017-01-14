@@ -145,4 +145,4 @@ release: ssb db launcher linux
 
 debian_package:
 	@echo STEAM_VERSION is $(STEAM_VERSION)
-	@echo STEAM_TAR_GZ_URL is $(STEAM_VERSION)
+	@echo STEAM_TAR_GZ_URL is $(STEAM_TAR_GZ_URL)
