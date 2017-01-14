@@ -112,6 +112,7 @@ clean:
 	go clean
 	rm -rf var
 	cd $(SSB) && ./gradlew clean
+	rm -rf tmp target
 
 linux: gui
 	rm -rf ./dist/$(DIST_LINUX)
@@ -145,4 +146,28 @@ release: ssb db launcher linux
 
 debian_package:
 	@echo STEAM_VERSION is $(STEAM_VERSION)
+	@echo STEAM_TAR_GZ is $(STEAM_TAR_GZ)
 	@echo STEAM_TAR_GZ_URL is $(STEAM_TAR_GZ_URL)
+	
+	rm -fr tmp
+	mkdir tmp
+	
+	rsync -a packaging/debian tmp/
+	sed "s/SUBST_PACKAGE_VERSION/$(STEAM_VERSION)/" packaging/debian/steam/DEBIAN/control > tmp/debian/steam/DEBIAN/control
+	pwd
+	
+	(cd tmp && wget $(STEAM_TAR_GZ_URL))
+	pwd
+	
+	mkdir -p tmp/debian/steam/opt/h2oai
+	pwd
+	
+	(cd tmp/debian/steam/opt/h2oai && tar zxvf ../../../../$(STEAM_TAR_GZ))
+	pwd
+	
+	(cd tmp/debian && dpkg-deb -b steam .)
+	pwd
+	
+	mkdir target
+	cp -p tmp/debian/steam_$(STEAM_VERSION)_amd64.deb target
+
