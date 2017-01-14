@@ -219,7 +219,7 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- launch polling job
 	pollFailChan := make(chan error)
-	go func() { pollFailChan <- yarn.StartPoll(ds, "started", "failed") }()
+	go func() { pollFailChan <- yarn.StartPoll(ds, data.States.Started, data.States.Stopped) }()
 
 	// --- start web server ---
 
