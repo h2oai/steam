@@ -187,8 +187,9 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
 		return 0, errors.Wrap(err, "checking permission")
 	}
-	// Check that name is unique to user
-	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByPrivilege(pz))
+	// Check that name is unique to user that are still running
+	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByState(data.States.Started),
+		data.ByPrivilege(pz))
 	if err != nil {
 		return 0, errors.Wrap(err, "reading cluster from database")
 	} else if exists {
