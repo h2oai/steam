@@ -96,12 +96,19 @@ func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
 	} else {
 		authType = data.LocalAuth
 	}
+
+	permissions, err := s.ds.ReadPermissions(data.ForIdentity(pz.Id()))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading identity from database")
+	}
+	fmt.Println(permissions)
 	return &web.Config{
 		Version:             s.version,
 		AuthenticationType:  authType,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
 		Username:            pz.Name(),
+		Permissions:         toPermissions(permissions),
 	}, nil
 }
 

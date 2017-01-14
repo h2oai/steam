@@ -85,11 +85,12 @@ type ClusterType struct {
 }
 
 type Config struct {
-	AuthenticationType  string `json:"authentication_type"`
-	ClusterProxyAddress string `json:"cluster_proxy_address"`
-	KerberosEnabled     bool   `json:"kerberos_enabled"`
-	Version             string `json:"version"`
-	Username            string `json:"username"`
+	AuthenticationType  string        `json:"authentication_type"`
+	ClusterProxyAddress string        `json:"cluster_proxy_address"`
+	KerberosEnabled     bool          `json:"kerberos_enabled"`
+	Version             string        `json:"version"`
+	Username            string        `json:"username"`
+	Permissions         []*Permission `json:"permissions"`
 }
 
 type Dataset struct {

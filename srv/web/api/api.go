@@ -25,6 +25,7 @@ type Config struct {
 	KerberosEnabled     bool
 	Version             string
 	Username            string
+	Permissions         []Permission
 }
 
 type LdapConfig struct {

@@ -1721,6 +1721,7 @@ func getConfig(c *context) *cobra.Command {
 			fmt.Sprintf("KerberosEnabled:\t%v\t", config.KerberosEnabled),         // No description available
 			fmt.Sprintf("Version:\t%v\t", config.Version),                         // No description available
 			fmt.Sprintf("Username:\t%v\t", config.Username),                       // No description available
+			fmt.Sprintf("Permissions:\t%+v\t", config.Permissions),                // No description available
 		}
 		c.printt("Attribute\tValue\t", lines)
 		return
