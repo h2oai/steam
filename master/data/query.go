@@ -196,6 +196,10 @@ func WithDescription(description string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["description"] = description; return }
 }
 
+func ByDetailId(detailId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("detail_id").Eq(detailId)); return }
+}
+
 func ByEnabled(q *QueryConfig) (err error) {
 	q.dataset = q.dataset.Where(q.I("enabled").Eq(1))
 	return
@@ -531,8 +535,17 @@ func WithSize(size string) QueryOpt {
 }
 
 // ByState queries the database for a matching state column
-func ByState(state int64) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("state").Eq(state)); return }
+func ByState(state string) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		if q.table == "cluster_yarn_detail" {
+			id := q.tx.From("cluster").Select("detail_id").Where(goqu.I("state").Eq(state))
+
+			q.dataset = q.dataset.Where(q.I("id").Eq(id))
+			return
+		}
+		q.dataset = q.dataset.Where(q.I("state").Eq(state))
+		return
+	}
 }
 
 // WithState adds a state value to the query
