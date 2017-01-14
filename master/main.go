@@ -238,8 +238,8 @@ func Run(version, buildDate string, opts Opts) {
 			if err != nil {
 				log.Fatalln(err) //FIXME format error
 			}
-			if err := ioutil.WriteFile(fs.GetAssetsPath(opts.WorkingDirectory, "cert.pem"), append(cb, kb), 0622); err != nil {
-				return log.Fatalln(err)
+			if err := ioutil.WriteFile(fs.GetAssetsPath(opts.WorkingDirectory, "cert.pem"), append(cb, kb...), 0622); err != nil {
+				log.Fatalln(err)
 			}
 
 			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
