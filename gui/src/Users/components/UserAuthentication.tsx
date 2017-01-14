@@ -336,7 +336,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   <td className="auth-right">
                     <input type="text"
                            className="pt-input ldap-input"
-                           onChange={(e: any) => this.setState({userbaseFilterValue: e.target.value})}
+                           onChange={(e: any) => this.setState({"userbaseFilterValue": e.target.value})}
                            value={this.state.userbaseFilterValue}
                     ></input>
                   </td>
