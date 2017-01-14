@@ -1,0 +1,14 @@
+*** /dev/null	2017-01-11 12:56:05.776000000 -0800
+--- Makefile	2017-01-11 17:30:30.530457863 -0800
+***************
+*** 0 ****
+--- 1,9 ----
++ 
++ GOPATH=$(shell pwd)/go
++ 
++ build: FORCE
++ 	cd $(GOPATH)/src/github.com/h2oai/steam && make GOPATH=$(GOPATH)
++ 
++ 
++ FORCE:
++ 

@@ -1,0 +1,20 @@
+Document: steam
+Title: Debian Steam Manual
+Author: Steam Team, h2o.ai
+Abstract: This manual describes what steam is
+ and how it can be used to
+ manage online manuals on Debian systems.
+Section: unknown
+
+Format: debiandoc-sgml
+Files: /usr/share/doc/steam/steam.sgml.gz
+
+Format: postscript
+Files: /usr/share/doc/steam/steam.ps.gz
+
+Format: text
+Files: /usr/share/doc/steam/steam.text.gz
+
+Format: HTML
+Index: /usr/share/doc/steam/html/index.html
+Files: /usr/share/doc/steam/html/*.html

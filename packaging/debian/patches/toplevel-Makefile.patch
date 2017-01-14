@@ -1,0 +1,26 @@
+Need a toplevel Makefile.
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,22 @@
++
++INSTALLPATH=/opt/h2oai
++
++all: install
++
++install: FORCE
++	-mkdir -p $(DESTDIR)$(INSTALLPATH)
++	cp -r bits/* $(DESTDIR)$(INSTALLPATH)
++
++distclean: clean
++	echo distclean, yeah yeah
++
++# Not clear this will ever be executed by the dpkg process, but for completeness...
++clean: FORCE
++	echo clean, yeah yeah
++
++# Nothing for now
++test: FORCE
++	echo test, yeah yeah
++
++FORCE:
++
