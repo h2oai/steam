@@ -1,4 +1,4 @@
-FROM centos:6.8
+FROM alanfranz/fwd-centos-6:latest
 
 MAINTAINER H2O.ai version: 1.1.6
 
@@ -7,6 +7,12 @@ WORKDIR /steam
 # Install NodeJS
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
 RUN yum install -y nodejs-6.8.1
+
+# Add jenkins and SSH
+RUN mkdir /var/run/sshd
+RUN adduser jenkins
+RUN yum install -y openssh-server
+RUN /usr/sbin/sshd
 
 # Install GCC for SQLite dependency
 RUN yum install -y gcc
