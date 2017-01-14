@@ -5,6 +5,7 @@ MAINTAINER H2O.ai version: 1.2.0
 RUN mkdir -p /go/src/github.com/h2oai/steam
 ADD . /go/src/github.com/h2oai/steam
 WORKDIR /go/src/github.com/h2oai/steam
+RUN rm -f /go/src/github.com/h2oai/steam/var/master/db/steam.db
 
 # Install NodeJS
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
