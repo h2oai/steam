@@ -18,6 +18,7 @@
 package master
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/pprof"
@@ -197,7 +198,6 @@ func Run(version, buildDate string, opts Opts) {
 		predictionServiceHost,
 		opts.ClusterProxyAddress,
 		opts.PredictionServicePorts,
-		opts.WebTLSCertPath,
 		opts.Yarn.KerberosEnabled,
 	)
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
@@ -224,11 +224,24 @@ func Run(version, buildDate string, opts Opts) {
 
 	certFile := strings.TrimSpace(opts.WebTLSCertPath)
 	keyFile := strings.TrimSpace(opts.WebTLSKeyPath)
+
 	enableTLS := !(len(certFile) == 0 && len(keyFile) == 0)
 
 	go func() {
 		log.Println("Web server listening at", webAddress)
 		if enableTLS {
+			kb, err := ioutil.ReadFile(keyFile)
+			if err != nil {
+				log.Fatalln(err) //FIXME format error
+			}
+			cb, err := ioutil.ReadFile(certFile)
+			if err != nil {
+				log.Fatalln(err) //FIXME format error
+			}
+			if err := ioutil.WriteFile(fs.GetAssetsPath(opts.WorkingDirectory, "cert.pem"), append(cb, kb...), 0622); err != nil {
+				log.Fatalln(err)
+			}
+
 			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
 				serverFailChan <- err
 			}
