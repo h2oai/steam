@@ -50,16 +50,16 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     super(params);
     this.state = {
       hostValue: "",
-      portValue: "",
+      portValue: "389",
       sslEnabledValue: false,
-      bindDnValue: "",
+      bindDnValue: "DC=xyz,DC=com",
       bindDnPasswordValue: "",
       confirmPasswordValue: "",
       userbaseDnValue: "",
       userbaseFilterValue: "",
       usernameAttributeValue: "",
-      groupDnValue: "",
-      staticMemberAttributeValue: "",
+      groupDnValue: "dc=xyz,dc=com",
+      staticMemberAttributeValue: "member",
       searchRequestSizeLimitValue: "",
       searchRequestTimeLimitValue: "",
       isLDAPConnectionSettingsOpen: true,
@@ -124,7 +124,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   }
 
   componentWillReceiveProps = (nextProps) => {
-    if (JSON.stringify(this.props.ldapConfig) !== JSON.stringify(nextProps.ldapConfig)) {
+    if (this.props.ldapConfig && nextProps.ldapConfig && JSON.stringify(this.props.ldapConfig) !== JSON.stringify(nextProps.ldapConfig)) {
       this.setState({
         hostValue: nextProps.ldapConfig.host,
         portValue: nextProps.ldapConfig.port,
