@@ -25,7 +25,7 @@ import {
   REQUEST_MODELS, REGISTER_CLUSTER_ERROR, RECEIVE_WORKGROUPS } from '../actions/projects.actions';
 
 let initialState = {
-  clusters: [],
+  clusters: null,
   models: [],
   project: {},
   availableProjects: null,

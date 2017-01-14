@@ -1,19 +1,19 @@
 /*
-  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+ Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
-  License, or (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Affero General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
  * Created by justin on 7/22/16.
@@ -24,46 +24,50 @@ import ProjectsList from './ProjectsList';
 import WelcomeSplashScreen from './WelcomeSplashScreen';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { fetchProjects, deleteProject } from '../actions/projects.actions';
-import { Project } from '../../Proxy/Proxy';
+import { fetchProjects, deleteProject, fetchClusters } from '../actions/projects.actions';
+import { Project, Cluster } from '../../Proxy/Proxy';
 
 interface DispatchProps {
   fetchProjects: Function,
-  deleteProject: Function
+  deleteProject: Function,
+  fetchClusters: Function
 }
 
 interface Props {
-  projects: Project[]
+  projects: Project[],
+  clusters: Cluster[]
 }
 
 export class ProjectScreenStrategy extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     this.props.fetchProjects();
+    this.props.fetchClusters();
   }
 
   render(): any {
-    if (this.props.projects === null) {
+    if (this.props.projects === null || this.props.clusters === null) {
       return null;
     }
-    if (_.isEmpty(this.props.projects)) {
+    if (_.isEmpty(this.props.clusters)) {
       return <WelcomeSplashScreen/>;
+    } else {
+      return <ProjectsList projects={this.props.projects} deleteProject={this.props.deleteProject}></ProjectsList>;
     }
-    return (
-      <ProjectsList projects={this.props.projects} deleteProject={this.props.deleteProject}></ProjectsList>
-    );
   }
 }
 
 function mapStateToProps(state) {
   return {
-    projects: state.projects.availableProjects
+    projects: state.projects.availableProjects,
+    clusters: state.projects.clusters
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     fetchProjects: bindActionCreators(fetchProjects, dispatch),
-    deleteProject: bindActionCreators(deleteProject, dispatch)
+    deleteProject: bindActionCreators(deleteProject, dispatch),
+    fetchClusters: bindActionCreators(fetchClusters, dispatch)
   };
 }
 
