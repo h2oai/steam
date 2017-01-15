@@ -75,7 +75,7 @@ var unauthenticatedCommands = []string{
 
 func requiresAuth(seq string) bool {
 	for _, c := range unauthenticatedCommands {
-		if strings.Contains(seq, c) {
+		if strings.Contains(seq, c) || strings.HasSuffix(strings.TrimSpace(seq), "steam") {
 			return false
 		}
 	}
@@ -99,20 +99,21 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 	}
 
 	var (
-		verbose, setAdmin   bool
-		workingDirectory    string
-		dbDriver            string
-		dbPath              string
-		dbName              string
-		dbUsername          string
-		dbPassword          string
-		dbHost              string
-		dbPort              string
-		dbConnectionTimeout string
-		dbSSLMode           string
-		dbSSLCertPath       string
-		dbSSLKeyPath        string
-		dbSSLRootCertPath   string
+		verbose              bool
+		setAdmin, checkAdmin bool
+		workingDirectory     string
+		dbDriver             string
+		dbPath               string
+		dbName               string
+		dbUsername           string
+		dbPassword           string
+		dbHost               string
+		dbPort               string
+		dbConnectionTimeout  string
+		dbSSLMode            string
+		dbSSLCertPath        string
+		dbSSLKeyPath         string
+		dbSSLRootCertPath    string
 	)
 	cmd := &cobra.Command{
 		Use:               steam,
@@ -132,8 +133,15 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 				SSLKey:      dbSSLKeyPath,
 				SSLRootCert: dbSSLRootCertPath,
 			}
-			if err := master.SetAdmin(workingDirectory, dbOpts); err != nil {
-				log.Fatalln(err)
+			if setAdmin {
+				if err := master.SetAdmin(workingDirectory, dbOpts); err != nil {
+					log.Fatalln(err)
+				}
+			}
+			if checkAdmin {
+				if err := master.CheckAdmin(workingDirectory, dbOpts); err != nil {
+					log.Fatalln(err)
+				}
 			}
 		},
 
@@ -150,6 +158,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 
 	opts := master.DefaultOpts
 	cmd.Flags().BoolVar(&setAdmin, "set-admin", false, "Set this flag to set the Steam local admin")
+	cmd.Flags().BoolVar(&checkAdmin, "check-admin", false, "Set this flag to check if there is a Steam local admin")
 	cmd.Flags().StringVar(&dbDriver, "db-driver", opts.DBOpts.Driver, "Driver for sql implementation. (Supported types are \"sqlite3\" or \"postgres\")")
 	cmd.Flags().StringVar(&dbPath, "db-path", opts.DBOpts.Path, "Set the path to a local database")
 	cmd.Flags().StringVar(&dbName, "db-name", opts.DBOpts.Name, "Database name to use for application data storage (required)")
