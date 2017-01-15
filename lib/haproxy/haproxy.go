@@ -29,7 +29,7 @@ defaults
     option http-server-close
 
 frontend h2o-clusters
-    bind *:{{.Port}}{{if .Cert}} ssl crt {{.Cert}}{{end}}
+    bind *{{.Port}}{{if .Cert}} ssl crt {{.Cert}}{{end}}
     reqadd X-Forwarded-Proto:\ https
     {{- range .Clus}}
     acl cluster_{{.Name}} path_beg {{.Ctxt}}
