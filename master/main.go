@@ -33,6 +33,7 @@ import (
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/rpc"
+	"github.com/h2oai/steam/lib/yarn"
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
@@ -216,6 +217,10 @@ func Run(version, buildDate string, opts Opts) {
 		webServeMux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
 	}
 
+	// --- launch polling job
+	pollFailChan := make(chan error)
+	go func() { pollFailChan <- yarn.StartPoll(ds, data.States.Started, data.States.Stopped) }()
+
 	// --- start web server ---
 
 	serverFailChan := make(chan error)
@@ -256,6 +261,9 @@ func Run(version, buildDate string, opts Opts) {
 
 	for {
 		select {
+		case err := <-pollFailChan:
+			log.Fatalln("Poll KILL EVERYTHING", err)
+			return
 		case err := <-serverFailChan:
 			log.Fatalln("HTTP server startup failed:", err)
 			return

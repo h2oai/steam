@@ -163,7 +163,7 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 }
 
 func (s Service) reloadProxyConf(name string) {
-	clusters, err := s.ds.ReadClusters()
+	clusters, err := s.ds.ReadClusters(data.ByState(data.States.Started))
 	if err != nil {
 		log.Println("Failed to read clusters.")
 	}
@@ -187,8 +187,9 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
 		return 0, errors.Wrap(err, "checking permission")
 	}
-	// Check that name is unique to user
-	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByPrivilege(pz))
+	// Check that name is unique to user that are still running
+	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByState(data.States.Started),
+		data.ByPrivilege(pz))
 	if err != nil {
 		return 0, errors.Wrap(err, "reading cluster from database")
 	} else if exists {
@@ -248,19 +249,25 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 	if cluster.ClusterTypeId != s.ds.ClusterType.Yarn {
 		return errors.New("cluster was not started through YARN")
 	}
-	// Fetch yarn details
-	yarnDetails, exists, err := s.ds.ReadClusterYarnDetail(data.ById(cluster.DetailId.Int64))
-	if err != nil {
-		return errors.Wrap(err, "reading yarn details from cluster")
-	} else if !exists {
-		return errors.New("failed locating yarn details")
-	}
 	// Fetch identity details
 	identity, exists, err := s.ds.ReadIdentity(data.ById(pz.Id()))
 	if err != nil {
 		return errors.Wrap(err, "reading identity from cluster")
 	} else if !exists {
 		return errors.New("failed locating identity")
+	}
+	// FIXME: if cluster status is not started assume it failed
+	if cluster.State != data.States.Started {
+		err = s.ds.DeleteCluster(clusterId, data.WithAudit(pz))
+		s.reloadProxyConf(identity.Name)
+		return errors.Wrap(err, "deleting cluster from database")
+	}
+	// Fetch yarn details
+	yarnDetails, exists, err := s.ds.ReadClusterYarnDetail(data.ById(cluster.DetailId.Int64))
+	if err != nil {
+		return errors.Wrap(err, "reading yarn details from cluster")
+	} else if !exists {
+		return errors.New("failed locating yarn details")
 	}
 	// FIXME implement keytab generation on the fly
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
