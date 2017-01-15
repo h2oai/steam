@@ -223,7 +223,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		if !cpe {
 			return "", "", "", "", "", errors.New("this version of h2o is not compatible with Steam secure launch. Please upgrade your h2o version")
 		}
-		contextPathArgs := []string{"-J", "-context_path", "-J", "/" + name}
+		contextPathArgs := []string{"-J", "-context_path", "-J", "/" + username + "_" + name}
 		cmdArgs = append(cmdArgs, contextPathArgs...)
 		contextPath = "/" + name
 		passwd := randStr(10)
