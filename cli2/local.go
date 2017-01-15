@@ -163,8 +163,8 @@ func serveMaster(c *context) *cobra.Command {
 		dbSSLCertPath                string
 		dbSSLKeyPath                 string
 		dbSSLRootCertPath            string
-		adminName                string
-		adminPassword            string
+		adminName                    string
+		adminPassword                string
 	)
 
 	opts := master.DefaultOpts
@@ -285,7 +285,7 @@ func upload(c *context) *cobra.Command {
 
 var uploadFileHelp = `
 file [path]
-Upload an asset to Steam. 
+Upload an asset to Steam.
 Examples:
 
 	$ steam upload file \
@@ -333,7 +333,7 @@ func uploadFile(c *context) *cobra.Command {
 
 var uploadEngineHelp = `
 engine [path]
-Upload an engine to Steam. 
+Upload an engine to Steam.
 Examples:
 
 	$ steam upload engine \
