@@ -31,6 +31,7 @@ import (
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/pkg/errors"
+	"crypto/tls"
 )
 
 type H2O struct {
@@ -45,7 +46,7 @@ func NewClient(address, contextPath, token string) *H2O {
 		address,
 		contextPath,
 		token,
-		http.DefaultClient,
+		&http.Client{Transport:&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}},
 	}
 }
 
@@ -73,7 +74,7 @@ func (h *H2O) url(path string, parms ...interface{}) string {
 		}
 	}
 
-	return (&url.URL{Scheme: "http", Host: h.Address, Path: h.ContextPath + path}).String()
+	return (&url.URL{Scheme: "https", Host: h.Address, Path: h.ContextPath + path}).String()
 }
 
 type H2OException struct {

@@ -217,7 +217,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
 	// Start cluster in yarn
 	appId, address, out, token, contextPath, err := yarn.StartCloud(size, s.kerberosEnabled, memory,
-		clusterName, engine.Location, identity.Name, keytabPath, secure)
+		clusterName, engine.Location, identity.Name, keytabPath, s.workingDir, secure)
 	if err != nil {
 		return 0, errors.Wrap(err, "starting yarn cluster")
 	}

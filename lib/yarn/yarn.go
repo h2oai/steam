@@ -35,6 +35,7 @@ import (
 
 	"github.com/h2oai/steam/lib/haproxy"
 	"github.com/pkg/errors"
+	"github.com/h2oai/steam/lib/fs"
 )
 
 func kInit(username, keytab string, uid, gid uint32) error {
@@ -185,7 +186,7 @@ func yarnCommand(uid, gid uint32, name, username string, args ...string) (string
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string, secure bool) (string, string, string, string, string, error) {
+func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab, workingDir string, secure bool) (string, string, string, string, string, error) {
 	// Get user information for Kerberos and Yarn reasons
 	uid, gid, err := GetUser(username)
 	if err != nil {
@@ -213,7 +214,7 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	}
 
 	contextPath := ""
-	cpe, err := contextPathEnabledEngine(enginePath, uid, gid)
+	cpe, err := contextPathEnabledEngine(enginePath)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
@@ -232,6 +233,16 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		defer os.Remove(token + "_realm.properties")
 		securityArgs := []string{"-hash_login", "-login_conf", token + "_realm.properties"}
 		cmdArgs = append(cmdArgs, securityArgs...)
+
+
+		ksPath, ksPass, err := genKeystore(workingDir)
+		if err != nil {
+			cleanDir(out, uid, gid)
+			return "", "", "", "", "", errors.Wrap(err, "failed generating Java keystore")
+		}
+		defer os.Remove(ksPath)
+		sslArgs := []string{"-jks", ksPath, "-jks_pass", ksPass}
+		cmdArgs = append(cmdArgs, sslArgs...)
 	}
 
 	appID, address, err := yarnCommand(uid, gid, name, username, cmdArgs...)
@@ -243,7 +254,30 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	return appID, address, out, token, contextPath + "/", nil
 }
 
-func contextPathEnabledEngine(enginePath string, uid, gid uint32) (bool, error) {
+func genKeystore(workingDir string) (string, string, error) {
+	passwd := randStr(10)
+
+	ksName := randStr(10) + "_keystore.jks"
+	ksPath := fs.GetAssetsPath(workingDir, ksName)
+
+	cmd := exec.Command("keytool",
+	"-genkey",
+	"-alias", "server",
+	"-keyalg", "RSA",
+	"-keystore", ksPath,
+	"-dname", "CN=h2o, OU=h2o, O=h2o, L=h2o, S=h2o, C=h2o",
+	"-storepass", passwd,
+	"-keypass", passwd)
+
+	// Execute command
+	if err := cmd.Run(); err != nil {
+		return "", "", errors.Wrapf(err, "failed running command %s", cmd.Args)
+	}
+
+	return ksPath, passwd, nil
+}
+
+func contextPathEnabledEngine(enginePath string) (bool, error) {
 	// Set up hadoop job with user impersonation
 	cmd := exec.Command("java", "-jar", enginePath, "-help")
 

@@ -38,7 +38,7 @@ frontend h2o-clusters
 backend {{.User}}_{{.Name}}{{if .Toke}}
 	http-request set-header Authorization Basic\ %[req.cook({{.Name}})]
 	redirect scheme https if !{ ssl_fc }{{end}}
-	server {{.User}}_{{.Name}} {{.Addr}}
+	server {{.User}}_{{.Name}} {{.Addr}} ssl verify none
 {{end}}
 `
 
