@@ -40,7 +40,7 @@ case "$1" in
       logger -s -p ERR "ERROR: Start failed (RC is $RC)"
       exit 2
     else
-      logger -s -p INFO "INFO: Started"
+      logger -s -p INFO "INFO: Started with pid `cat $PIDFILE`"
     fi
     ;;
   stop)
