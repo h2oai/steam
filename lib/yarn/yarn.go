@@ -223,9 +223,10 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		if !cpe {
 			return "", "", "", "", "", errors.New("this version of h2o is not compatible with Steam secure launch. Please upgrade your h2o version")
 		}
-		contextPathArgs := []string{"-J", "-context_path", "-J", "/" + name}
+
+		contextPath = "/" + username + "_" + name
+		contextPathArgs := []string{"-J", "-context_path", "-J", contextPath}
 		cmdArgs = append(cmdArgs, contextPathArgs...)
-		contextPath = "/" + name
 		passwd := randStr(10)
 		token, _ = haproxy.GenRealmFile(username, passwd)
 		defer os.Remove(token + "_realm.properties")
