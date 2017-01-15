@@ -257,7 +257,7 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 		return errors.New("failed locating identity")
 	}
 	// FIXME: if cluster status is not started assume it failed
-	if cluster.State == data.States.Failed {
+	if cluster.State != data.States.Started {
 		err = s.ds.DeleteCluster(clusterId, data.WithAudit(pz))
 		s.reloadProxyConf(identity.Name)
 		return errors.Wrap(err, "deleting cluster from database")
