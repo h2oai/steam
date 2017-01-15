@@ -20,13 +20,14 @@ DAEMON=$H2ODIR/steam
 STEAM_USER=steam
 STEAM_GROUP=steam
 PIDFILE=/var/run/steam.pid
+WORKING_DIRECTORY=$H2ODIR/var/master
 
 . /etc/steam/steam.conf
 
 case "$1" in
   set-admin)
     # Interactively prompt to set local steam admin username and password.
-    $DAEMON --set-admin
+    $DAEMON --working-directory=$WORKING_DIRECTORY --set-admin
     if [ $? -ne 0 ]; then
       echo "ERROR: setting admin credentials failed"
       exit 2
@@ -69,7 +70,7 @@ case "$1" in
       exit 2
     fi
 
-    $DAEMON --check-admin
+    $DAEMON --working-directory=$WORKING_DIRECTORY --check-admin
     if [ $? -ne 0 ]; then
       logger -s -p ERR "ERROR: no admin credentials set"
       echo ""
