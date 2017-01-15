@@ -6,7 +6,6 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
-	"fmt"
 	"os/exec"
 	"text/template"
 
@@ -32,14 +31,14 @@ frontend h2o-clusters
     bind *{{.Port}}{{if .Cert}} ssl crt {{.Cert}}{{end}}
     reqadd X-Forwarded-Proto:\ https
     {{- range .Clus}}
-    acl cluster_{{.Name}} path_beg {{.Ctxt}}
-    use_backend {{.Name}} if cluster_{{.Name}}
+    acl cluster_{{.User}}_{{.Name}} path_beg {{.Ctxt}}
+    use_backend {{.User}}_{{.Name}} if cluster_{{.User}}_{{.Name}}
     {{- end}}
 {{range .Clus}}
-backend {{.Name}}{{if .Toke}}
+backend {{.User}}_{{.Name}}{{if .Toke}}
 	http-request set-header Authorization Basic\ %[req.cook({{.Name}})]
 	redirect scheme https if !{ ssl_fc }{{end}}
-	server {{.Name}} {{.Addr}}
+	server {{.User}}_{{.Name}} {{.Addr}}
 {{end}}
 `
 
@@ -65,7 +64,7 @@ type haProxyConfig struct {
 	Clus []haCluster
 }
 
-type haCluster struct{ Name, Addr, Ctxt, Toke string }
+type haCluster struct{ Name, User, Addr, Ctxt, Toke string }
 
 func Reload(clusters []data.Cluster, port, certFilePath string) error {
 	conf := haProxyConfig{
@@ -74,9 +73,11 @@ func Reload(clusters []data.Cluster, port, certFilePath string) error {
 		Clus: make([]haCluster, len(clusters)),
 	}
 	for i, cluster := range clusters {
-		conf.Clus[i] = haCluster{Name: fmt.Sprintf("%s_%s", cluster.Name, cluster.Username.String),
+		conf.Clus[i] = haCluster{
+			Name: cluster.Name, User: cluster.Username.String,
 			Addr: cluster.Address.String, Ctxt: cluster.ContextPath.String,
-			Toke: cluster.Token.String}
+			Toke: cluster.Token.String,
+		}
 	}
 
 	buf, err := conf.writeConfig()
