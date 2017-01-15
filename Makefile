@@ -170,7 +170,7 @@ debian_package:
 	(cd tmp/debian && dpkg-deb -b steam .)
 	pwd
 	
-	mkdir target
+	mkdir -p target
 	cp -p tmp/debian/steam_$(STEAM_VERSION)_amd64.deb target
 
 rpm_package:
@@ -197,5 +197,5 @@ rpm_package:
 	(cd tmp/rpm && fpm -s dir -t rpm -n steam -v $(STEAM_VERSION) -C steam)
 	pwd
 	
-	mkdir target
+	mkdir -p target
 	cp -p tmp/rpm/steam-$(STEAM_VERSION)-1.x86_64.rpm target
