@@ -163,6 +163,7 @@ debian_package:
 	pwd
 	
 	(cd tmp/debian/steam/opt/h2oai && tar zxvf ../../../../$(STEAM_TAR_GZ))
+	(cd tmp/debian/steam/opt/h2oai && mv steam-$(STEAM_VERSION)-linux-amd64 steam)
 	pwd
 	
 	(cd tmp/debian && dpkg-deb -b steam .)
