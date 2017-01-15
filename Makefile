@@ -21,7 +21,8 @@
 	linux \
 	darwin \
 	release \
-	debian_package
+	debian_package \
+	rpm_package \
 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
@@ -172,3 +173,29 @@ debian_package:
 	mkdir target
 	cp -p tmp/debian/steam_$(STEAM_VERSION)_amd64.deb target
 
+rpm_package:
+	@echo STEAM_VERSION is $(STEAM_VERSION)
+	@echo STEAM_TAR_GZ is $(STEAM_TAR_GZ)
+	@echo STEAM_TAR_GZ_URL is $(STEAM_TAR_GZ_URL)
+	
+	rm -fr tmp
+	mkdir tmp
+	
+	rsync -a packaging/rpm tmp/
+	pwd
+	
+	(cd tmp && wget $(STEAM_TAR_GZ_URL))
+	pwd
+	
+	mkdir -p tmp/rpm/steam/opt/h2oai
+	pwd
+	
+	(cd tmp/rpm/steam/opt/h2oai && tar zxvf ../../../../$(STEAM_TAR_GZ))
+	(cd tmp/rpm/steam/opt/h2oai && mv steam-$(STEAM_VERSION)-linux-amd64 steam)
+	pwd
+	
+	(cd tmp/rpm && fpm -s dir -t rpm -n steam -v $(STEAM_VERSION) -C steam)
+	pwd
+	
+	mkdir target
+	cp -p tmp/rpm/steam-$(STEAM_VERSION)-1.x86_64.rpm target
