@@ -51,6 +51,11 @@ case "$1" in
       exit 2
     fi
 
+    if [ `id -u` -ne 0 ]; then
+      logger -s -p ERR "ERROR: Must be root"
+      exit 2
+    fi
+
     if [ ! -f $STEAM_WEB_TLS_CERT_PATH ]; then
       logger -s -p ERR "ERROR: no cert ($STEAM_WEB_TLS_CERT_PATH)"
       echo ""
@@ -62,11 +67,6 @@ case "$1" in
       logger -s -p ERR "ERROR: no key ($STEAM_WEB_TLS_PRIVATE_KEY_PATH)"
       echo ""
       echo "Try $0 create-self-signed-cert"
-      exit 2
-    fi
-
-    if [ `id -u` -ne 0 ]; then
-      logger -s -p ERR "ERROR: Must be root"
       exit 2
     fi
 
