@@ -69,6 +69,14 @@ case "$1" in
       exit 2
     fi
 
+#    $DAEMON --check-admin
+#    if [ $? -ne 0 ]; then
+#      logger -s -p ERR "ERROR: no admin credentials set"
+#      echo ""
+#      echo "Try $0 set-admin"
+#      exit 2
+#    fi
+
     start-stop-daemon \
       --start \
       --make-pidfile --pidfile $PIDFILE \
