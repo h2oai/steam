@@ -118,6 +118,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		reset(c),
 		serve(c),
 		upload(c),
+		_init(c),
 	)
 	registerGeneratedCommands(c, cmd)
 	return cmd

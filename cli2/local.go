@@ -115,6 +115,67 @@ func reset(c *context) *cobra.Command {
 	return cmd
 }
 
+var initHelp = `
+init
+Initialize Steam check
+Examples:
+
+	$ steam init
+`
+
+func _init(c *context) *cobra.Command {
+	var (
+	 workingDirectory string
+	 dbDriver string
+	 dbPath string
+	 dbName string
+	 dbUsername string
+	 dbPassword string
+	 dbPort string
+	 dbHost string
+	 dbSSLMode string
+	 dbSSLCertPath string
+	 dbSSLKeyPath string
+	 dbSSLRootCertPath string
+	)
+
+	cmd := newCmd(c, initHelp, func(c *context, args []string) {
+		dbOpts := data.DBOpts{
+			Driver: dbDriver,
+			Path: dbPath,
+			Name: dbName,
+			User: dbUsername,
+			Pass: dbPassword,
+			Port: dbPort,
+			Host: dbHost,
+			SSLMode: dbSSLMode,
+			SSLCert: dbSSLCertPath,
+			SSLKey: dbSSLKeyPath,
+			SSLRootCert: dbSSLRootCertPath,
+		}
+
+		if err := master.SetAdmin(workingDirectory, dbOpts); err != nil {
+			log.Fatalln(err)
+		}
+	})
+
+	opts := master.DefaultOpts
+	cmd.Flags().StringVar(&workingDirectory, "workging-directory", master.DefaultOpts.WorkingDirectory, "Working directory for application files.")
+	cmd.Flags().StringVar(&dbDriver, "db-driver", opts.DBOpts.Driver, "Driver for sql implementation. (Supported types are \"sqlite3\" or \"postgres\")")
+	cmd.Flags().StringVar(&dbPath, "db-path", opts.DBOpts.Path, "Set the path to a local database")
+	cmd.Flags().StringVar(&dbName, "db-name", opts.DBOpts.Name, "Database name to use for application data storage (required)")
+	cmd.Flags().StringVar(&dbUsername, "db-username", opts.DBOpts.User, "Database username (required)")
+	cmd.Flags().StringVar(&dbPassword, "db-password", opts.DBOpts.Pass, "Database password (optional)")
+	cmd.Flags().StringVar(&dbHost, "db-host", opts.DBOpts.Host, "Database host (optional, defaults to localhost")
+	cmd.Flags().StringVar(&dbPort, "db-port", opts.DBOpts.Port, "Database port (optional, defaults to 5432)")
+	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DBOpts.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DBOpts.SSLCert, "Database connection SSL certificate path (optional)")
+	cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DBOpts.SSLKey, "Database connection SSL key path (optional)")
+	cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DBOpts.SSLRootCert, "Database connection SSL root certificate path (optional)")
+
+	return cmd
+}
+
 var serveHelp = `
 serve [agent-type]
 Launch a new service.

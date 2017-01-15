@@ -48,10 +48,6 @@ const (
 
 var defaultPredictionServicePorts = [...]int{1025, 65535}
 
-const (
-	defaultDriver = "sqlite3"
-)
-
 type YarnOpts struct {
 	KerberosEnabled bool
 }
@@ -72,19 +68,6 @@ type Opts struct {
 	DBOpts                    data.DBOpts
 }
 
-// var DefaultConnection = data.Connection{
-// 	"steam",
-// 	"steam",
-// 	"",
-// 	"",
-// 	"",
-// 	"",
-// 	"disable",
-// 	"",
-// 	"",
-// 	"",
-// }
-
 var DefaultOpts = &Opts{
 	defaultWebAddress,
 	"",
@@ -99,7 +82,7 @@ var DefaultOpts = &Opts{
 	false,
 	YarnOpts{false},
 	data.DBOpts{
-		Driver: "sqilte3",
+		Driver: "sqlite3",
 
 		Path: filepath.Join(".", fs.VarDir, "master", fs.DbDir, "steam.db"),
 
@@ -139,13 +122,7 @@ func Run(version, buildDate string, opts Opts) {
 	// --- init storage ---
 
 	opts.DBOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
-	ds, err := data.NewDatastore(defaultDriver, opts.DBOpts)
-	// ds, err := data.Create(
-	// 	path.Join(wd, fs.DbDir, "steam.db"),
-	// 	// opts.DB.Connection,
-	// 	opts.DB.Admin,
-	// 	opts.DB.AdminPassword,
-	// )
+	ds, err := data.NewDatastore(opts.DBOpts.Driver, opts.DBOpts)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -265,4 +242,19 @@ func Run(version, buildDate string, opts Opts) {
 			return
 		}
 	}
+}
+
+
+func SetAdmin(workingDirectory string, dbOpts data.DBOpts) error {
+
+	// --- set up wd ---
+	wd, err := fs.MkWorkingDirectory(workingDirectory)
+	if err != nil {
+		return err
+	}
+
+	// --- init storage ---
+	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
+	_, err = data.NewDatastore(dbOpts.Driver, dbOpts)
+	return err
 }
