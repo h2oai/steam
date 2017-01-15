@@ -159,6 +159,7 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 	opts := master.DefaultOpts
 	cmd.Flags().BoolVar(&setAdmin, "set-admin", false, "Set this flag to set the Steam local admin")
 	cmd.Flags().BoolVar(&checkAdmin, "check-admin", false, "Set this flag to check if there is a Steam local admin")
+	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&dbDriver, "db-driver", opts.DBOpts.Driver, "Driver for sql implementation. (Supported types are \"sqlite3\" or \"postgres\")")
 	cmd.Flags().StringVar(&dbPath, "db-path", opts.DBOpts.Path, "Set the path to a local database")
 	cmd.Flags().StringVar(&dbName, "db-name", opts.DBOpts.Name, "Database name to use for application data storage (required)")
