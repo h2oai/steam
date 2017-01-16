@@ -261,7 +261,7 @@ func SetAdmin(workingDirectory string, dbOpts data.DBOpts) error {
 	}
 
 	// --- init storage ---
-	dbOpts.Path = path.Join(wd, fs.VarDir, "master", fs.DbDir, "steam.db")
+	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
 	_, err = data.NewDatastore(dbOpts.Driver, dbOpts)
 	return err
 }
@@ -275,7 +275,7 @@ func CheckAdmin(workingDirectory string, dbOpts data.DBOpts) error {
 	}
 
 	// --- init storage ---
-	dbOpts.Path = path.Join(wd, fs.VarDir, "master", fs.DbDir, "steam.db")
+	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
 	if _, err := os.Stat(dbOpts.Path); os.IsNotExist(err) {
 		return err
 	}
