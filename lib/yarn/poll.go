@@ -3,6 +3,7 @@ package yarn
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -87,10 +88,13 @@ func (p *Poll) pollFunc() error {
 	// of a mismatch, always defer to yarn
 	for _, detail := range details {
 		if _, ok := jobIds[fmt.Sprintf("job_%s", detail.ApplicationId)]; !ok {
+			log.Println("POLL", detail.ApplicationId, "Yarn state mismatch with Steam state")
 			cluster, exists, err := p.ds.ReadCluster(data.ByDetailId(detail.Id))
 			if err != nil {
 				return errors.Wrap(err, "reading cluster from database")
 			} else if exists {
+				log.Printf("POLL %s user: %s cluster: %s stopped externally; changing Steam state",
+					detail.ApplicationId, cluster.Username.String, cluster.Name)
 				if err := p.ds.UpdateCluster(cluster.Id, data.WithState(p.failed)); err != nil {
 					return errors.Wrap(err, "updating cluster state")
 				}
