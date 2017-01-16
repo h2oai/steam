@@ -60,15 +60,27 @@ type Poll struct {
 
 func StartPoll(ds clusterDatabase, startedState, failedState string) error {
 	poll := Poll{ds: ds, started: startedState, failed: failedState}
+	cmd := exec.Command("hadoop", "version")
+	if err := cmd.Run(); err != nil {
+		log.Println("Hadoop executable not found; Steam will run without polling")
+		return nil
+	}
 
+	first := true
 	t := time.NewTimer(time.Minute)
 	for {
 		if err := poll.pollFunc(); err != nil {
-			return err
+			if first {
+				return err
+			}
+			log.Println("Poll ERROR", err)
 		}
 		// Wait for a minute before next poll
 		<-t.C
 		t.Reset(time.Minute)
+		if first {
+			first = false
+		}
 	}
 }
 

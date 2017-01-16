@@ -240,8 +240,10 @@ func Run(version, buildDate string, opts Opts) {
 	for {
 		select {
 		case err := <-pollFailChan:
-			log.Fatalln("Poll KILL EVERYTHING", err)
-			return
+			if err != nil {
+				log.Fatalln("Poll startup failure", err)
+				return
+			}
 		case err := <-serverFailChan:
 			log.Fatalln("HTTP server startup failed:", err)
 			return
