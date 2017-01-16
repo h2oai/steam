@@ -103,7 +103,6 @@ var (
 
 func init() {
 	pflag.BoolVarP(&debug, "debug", "d", false, "Set to enable debug mode")
-	debug = true
 
 	States.init()
 	EntityTypes.init()
