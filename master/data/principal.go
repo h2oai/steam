@@ -77,6 +77,7 @@ func (pz *Principal) CheckPermission(code int64) error {
 
 // TODO use bitwise ops to simplify this
 func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivilege string) (bool, error) {
+
 	if pz.IsAdmin() {
 		return true, nil
 	}
@@ -90,12 +91,16 @@ func (pz *Principal) hasPrivilege(entityTypeId, entityId int64, expectedPrivileg
 		return false, errors.Wrap(err, "beginning transaction")
 	}
 
+	entityType, ok := pz.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return false, fmt.Errorf("unable to locate entity type id: %d", entityTypeId)
+	}
 	var privileges []Privilege
 	if err := tx.Wrap(func() error {
 		var err error
 		privileges, err = readPrivileges(tx,
 			ByIdentityId(pz.Identity.Id),
-			ByEntityTypeId(entityTypeId),
+			ByEntityType(entityType),
 			ByEntityId(entityId),
 		)
 		return errors.Wrap(err, "reading privileges from database")

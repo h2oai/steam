@@ -2182,8 +2182,12 @@ func (s *Service) GetPrivileges(pz az.Principal, entityTypeId, entityId int64) (
 		return nil, errors.Wrap(err, "checking view privileges")
 	}
 	// Read privileges
+	entityType, ok := s.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return nil, fmt.Errorf("unable to locate entity type id: %d", entityTypeId)
+	}
 	entityPrivileges, err := s.ds.ReadEntityPrivileges(
-		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.ByEntityType(entityType), data.ByEntityId(entityId),
 	)
 	return toEntityPrivileges(entityPrivileges), errors.Wrap(err, "reading entity privileges from database")
 }
@@ -2202,9 +2206,13 @@ func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entit
 	if err := pz.CheckView(s.ds.EntityType.Workgroup, workgroupId); err != nil {
 		return errors.Wrap(err, "checking view privileges")
 	}
+	entityType, ok := s.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return fmt.Errorf("unable to locate entity type id: %d", entityTypeId)
+	}
 	// Delete privileges
 	err := s.ds.DeletePrivilege(data.ByPrivilegeType(kind), data.ByWorkgroupId(workgroupId),
-		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.ByEntityType(entityType), data.ByEntityId(entityId),
 		data.WithUnshareAudit(pz),
 	)
 	return errors.Wrap(err, "deleting privilege from database")
@@ -2218,9 +2226,13 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 	if err := pz.CheckView(entityTypeId, entityId); err != nil {
 		return nil, errors.Wrap(err, "checking view privileges")
 	}
+	entityType, ok := s.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return nil, fmt.Errorf("unable to locate entity type id: %d", entityTypeId)
+	}
 	// Fetch history details
 	history, err := s.ds.ReadHistories(
-		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.ByEntityType(entityType), data.ByEntityId(entityId),
 		data.WithOffset(offset), data.WithLimit(limit),
 	)
 	return toEntityHistories(history), errors.Wrap(err, "reading history from database")

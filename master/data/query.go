@@ -272,14 +272,6 @@ func ByEntityType(entityType string) QueryOpt {
 	}
 }
 
-// ByEntityTypeId queries the database for matching entity_type_id columns
-func ByEntityTypeId(entityTypeId int64) QueryOpt {
-	return func(q *QueryConfig) (err error) {
-		q.dataset = q.dataset.Where(q.I("entity_type_id").Eq(entityTypeId))
-		return
-	}
-}
-
 func WithFilterByName(filter string) QueryOpt {
 	return func(q *QueryConfig) (err error) {
 		q.dataset = q.dataset.Where(q.I("name").Like("%" + filter + "%"))
