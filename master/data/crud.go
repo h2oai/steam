@@ -95,7 +95,6 @@ func (ds *Datastore) ReadAuthentications(options ...QueryOpt) ([]Authentication,
 		}
 		defer rows.Close()
 		authentications, err = ScanAuthentications(rows)
-
 		if err != nil {
 			return err
 		}
@@ -251,7 +250,18 @@ func createAuthentication(tx *goqu.TxDatabase, key, value string, options ...Que
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readAuthentications(tx *goqu.TxDatabase, options ...QueryOpt) ([]Authentication, error) {
@@ -273,9 +283,18 @@ func readAuthentications(tx *goqu.TxDatabase, options ...QueryOpt) ([]Authentica
 		return []Authentication{}, err
 	}
 	defer rows.Close()
+	authentications, err := ScanAuthentications(rows)
+	if err != nil {
+		return []Authentication{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Authentication{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Authentications
-	return ScanAuthentications(rows)
+	return authentications, nil
 }
 
 func readAuthentication(tx *goqu.TxDatabase, options ...QueryOpt) (Authentication, bool, error) {
@@ -299,12 +318,19 @@ func readAuthentication(tx *goqu.TxDatabase, options ...QueryOpt) (Authenticatio
 	}
 	ret_authentication, err := ScanAuthentication(row)
 	if err == sql.ErrNoRows {
-		return Authentication{}, exists, nil
+		return Authentication{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Authentication{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Authentication{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Authentication
-	return ret_authentication, exists, err
+	return ret_authentication, exists, nil
 }
 
 func updateAuthentication(tx *goqu.TxDatabase, authenticationId int64, options ...QueryOpt) error {
@@ -322,8 +348,14 @@ func updateAuthentication(tx *goqu.TxDatabase, authenticationId int64, options .
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -342,8 +374,15 @@ func deleteAuthentication(tx *goqu.TxDatabase, authenticationId int64, options .
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------------- ----------
@@ -380,7 +419,18 @@ func createBinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, logl
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readBinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]binomialModel, error) {
@@ -402,9 +452,18 @@ func readBinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]binomialMod
 		return []binomialModel{}, err
 	}
 	defer rows.Close()
+	binomialModels, err := ScanBinomialModels(rows)
+	if err != nil {
+		return []binomialModel{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []binomialModel{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to binomialModels
-	return ScanBinomialModels(rows)
+	return binomialModels, nil
 }
 
 func readBinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (binomialModel, bool, error) {
@@ -428,12 +487,19 @@ func readBinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (binomialModel,
 	}
 	ret_binomialModel, err := ScanBinomialModel(row)
 	if err == sql.ErrNoRows {
-		return binomialModel{}, exists, nil
+		return binomialModel{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return binomialModel{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return binomialModel{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to binomialModel
-	return ret_binomialModel, exists, err
+	return ret_binomialModel, exists, nil
 }
 
 func updateBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...QueryOpt) error {
@@ -451,8 +517,14 @@ func updateBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -471,8 +543,15 @@ func deleteBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------- ----------
@@ -558,7 +637,6 @@ func (ds *Datastore) ReadClusters(options ...QueryOpt) ([]Cluster, error) {
 		}
 		defer rows.Close()
 		clusters, err = ScanClusters(rows)
-
 		if err != nil {
 			return err
 		}
@@ -716,7 +794,18 @@ func createCluster(tx *goqu.TxDatabase, name string, clusterTypeId int64, option
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readClusters(tx *goqu.TxDatabase, options ...QueryOpt) ([]Cluster, error) {
@@ -738,9 +827,18 @@ func readClusters(tx *goqu.TxDatabase, options ...QueryOpt) ([]Cluster, error) {
 		return []Cluster{}, err
 	}
 	defer rows.Close()
+	clusters, err := ScanClusters(rows)
+	if err != nil {
+		return []Cluster{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Cluster{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Clusters
-	return ScanClusters(rows)
+	return clusters, nil
 }
 
 func readCluster(tx *goqu.TxDatabase, options ...QueryOpt) (Cluster, bool, error) {
@@ -764,12 +862,19 @@ func readCluster(tx *goqu.TxDatabase, options ...QueryOpt) (Cluster, bool, error
 	}
 	ret_cluster, err := ScanCluster(row)
 	if err == sql.ErrNoRows {
-		return Cluster{}, exists, nil
+		return Cluster{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Cluster{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Cluster{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Cluster
-	return ret_cluster, exists, err
+	return ret_cluster, exists, nil
 }
 
 func updateCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) error {
@@ -787,8 +892,14 @@ func updateCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -807,8 +918,15 @@ func deleteCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ----------- ----------
@@ -840,7 +958,18 @@ func createClusterType(tx *goqu.TxDatabase, name string, options ...QueryOpt) (i
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readClusterTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]clusterType, error) {
@@ -862,9 +991,18 @@ func readClusterTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]clusterType, 
 		return []clusterType{}, err
 	}
 	defer rows.Close()
+	clusterTypes, err := ScanClusterTypes(rows)
+	if err != nil {
+		return []clusterType{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []clusterType{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to clusterTypes
-	return ScanClusterTypes(rows)
+	return clusterTypes, nil
 }
 
 func readClusterType(tx *goqu.TxDatabase, options ...QueryOpt) (clusterType, bool, error) {
@@ -888,12 +1026,19 @@ func readClusterType(tx *goqu.TxDatabase, options ...QueryOpt) (clusterType, boo
 	}
 	ret_clusterType, err := ScanClusterType(row)
 	if err == sql.ErrNoRows {
-		return clusterType{}, exists, nil
+		return clusterType{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return clusterType{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return clusterType{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to clusterType
-	return ret_clusterType, exists, err
+	return ret_clusterType, exists, nil
 }
 
 func updateClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...QueryOpt) error {
@@ -911,8 +1056,14 @@ func updateClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -931,8 +1082,15 @@ func deleteClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ----------------- ----------
@@ -1019,7 +1177,6 @@ func (ds *Datastore) ReadClusterYarnDetails(options ...QueryOpt) ([]ClusterYarnD
 		}
 		defer rows.Close()
 		clusterYarnDetails, err = ScanClusterYarnDetails(rows)
-
 		if err != nil {
 			return err
 		}
@@ -1178,7 +1335,18 @@ func createClusterYarnDetail(tx *goqu.TxDatabase, engineId, size int64, applicat
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readClusterYarnDetails(tx *goqu.TxDatabase, options ...QueryOpt) ([]ClusterYarnDetail, error) {
@@ -1200,9 +1368,18 @@ func readClusterYarnDetails(tx *goqu.TxDatabase, options ...QueryOpt) ([]Cluster
 		return []ClusterYarnDetail{}, err
 	}
 	defer rows.Close()
+	clusterYarnDetails, err := ScanClusterYarnDetails(rows)
+	if err != nil {
+		return []ClusterYarnDetail{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []ClusterYarnDetail{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to ClusterYarnDetails
-	return ScanClusterYarnDetails(rows)
+	return clusterYarnDetails, nil
 }
 
 func readClusterYarnDetail(tx *goqu.TxDatabase, options ...QueryOpt) (ClusterYarnDetail, bool, error) {
@@ -1226,12 +1403,19 @@ func readClusterYarnDetail(tx *goqu.TxDatabase, options ...QueryOpt) (ClusterYar
 	}
 	ret_clusterYarnDetail, err := ScanClusterYarnDetail(row)
 	if err == sql.ErrNoRows {
-		return ClusterYarnDetail{}, exists, nil
+		return ClusterYarnDetail{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return ClusterYarnDetail{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return ClusterYarnDetail{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to ClusterYarnDetail
-	return ret_clusterYarnDetail, exists, err
+	return ret_clusterYarnDetail, exists, nil
 }
 
 func updateClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, options ...QueryOpt) error {
@@ -1249,8 +1433,14 @@ func updateClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -1269,8 +1459,15 @@ func deleteClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------ ----------
@@ -1355,7 +1552,6 @@ func (ds *Datastore) ReadEngines(options ...QueryOpt) ([]Engine, error) {
 		}
 		defer rows.Close()
 		engines, err = ScanEngines(rows)
-
 		if err != nil {
 			return err
 		}
@@ -1512,7 +1708,18 @@ func createEngine(tx *goqu.TxDatabase, name, location string, options ...QueryOp
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readEngines(tx *goqu.TxDatabase, options ...QueryOpt) ([]Engine, error) {
@@ -1534,9 +1741,18 @@ func readEngines(tx *goqu.TxDatabase, options ...QueryOpt) ([]Engine, error) {
 		return []Engine{}, err
 	}
 	defer rows.Close()
+	engines, err := ScanEngines(rows)
+	if err != nil {
+		return []Engine{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Engine{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Engines
-	return ScanEngines(rows)
+	return engines, nil
 }
 
 func readEngine(tx *goqu.TxDatabase, options ...QueryOpt) (Engine, bool, error) {
@@ -1560,12 +1776,19 @@ func readEngine(tx *goqu.TxDatabase, options ...QueryOpt) (Engine, bool, error) 
 	}
 	ret_engine, err := ScanEngine(row)
 	if err == sql.ErrNoRows {
-		return Engine{}, exists, nil
+		return Engine{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Engine{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Engine{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Engine
-	return ret_engine, exists, err
+	return ret_engine, exists, nil
 }
 
 func updateEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) error {
@@ -1583,8 +1806,14 @@ func updateEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -1603,8 +1832,15 @@ func deleteEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ---------- ----------
@@ -1636,7 +1872,18 @@ func createEntityType(tx *goqu.TxDatabase, name string, options ...QueryOpt) (in
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readEntityTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]entityType, error) {
@@ -1658,9 +1905,18 @@ func readEntityTypes(tx *goqu.TxDatabase, options ...QueryOpt) ([]entityType, er
 		return []entityType{}, err
 	}
 	defer rows.Close()
+	entityTypes, err := ScanEntityTypes(rows)
+	if err != nil {
+		return []entityType{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []entityType{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to entityTypes
-	return ScanEntityTypes(rows)
+	return entityTypes, nil
 }
 
 func readEntityType(tx *goqu.TxDatabase, options ...QueryOpt) (entityType, bool, error) {
@@ -1684,12 +1940,19 @@ func readEntityType(tx *goqu.TxDatabase, options ...QueryOpt) (entityType, bool,
 	}
 	ret_entityType, err := ScanEntityType(row)
 	if err == sql.ErrNoRows {
-		return entityType{}, exists, nil
+		return entityType{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return entityType{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return entityType{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to entityType
-	return ret_entityType, exists, err
+	return ret_entityType, exists, nil
 }
 
 func updateEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryOpt) error {
@@ -1707,8 +1970,14 @@ func updateEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -1727,8 +1996,15 @@ func deleteEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------- ----------
@@ -1815,7 +2091,6 @@ func (ds *Datastore) ReadHistories(options ...QueryOpt) ([]History, error) {
 		}
 		defer rows.Close()
 		histories, err = ScanHistorys(rows)
-
 		if err != nil {
 			return err
 		}
@@ -1974,7 +2249,18 @@ func createHistory(tx *goqu.TxDatabase, action string, identityId, entityTypeId,
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readHistories(tx *goqu.TxDatabase, options ...QueryOpt) ([]History, error) {
@@ -1996,9 +2282,18 @@ func readHistories(tx *goqu.TxDatabase, options ...QueryOpt) ([]History, error) 
 		return []History{}, err
 	}
 	defer rows.Close()
+	histories, err := ScanHistorys(rows)
+	if err != nil {
+		return []History{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []History{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Histories
-	return ScanHistorys(rows)
+	return histories, nil
 }
 
 func readHistory(tx *goqu.TxDatabase, options ...QueryOpt) (History, bool, error) {
@@ -2022,12 +2317,19 @@ func readHistory(tx *goqu.TxDatabase, options ...QueryOpt) (History, bool, error
 	}
 	ret_history, err := ScanHistory(row)
 	if err == sql.ErrNoRows {
-		return History{}, exists, nil
+		return History{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return History{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return History{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to History
-	return ret_history, exists, err
+	return ret_history, exists, nil
 }
 
 func updateHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) error {
@@ -2045,8 +2347,14 @@ func updateHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -2065,8 +2373,15 @@ func deleteHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- -------- ----------
@@ -2152,7 +2467,6 @@ func (ds *Datastore) ReadIdentities(options ...QueryOpt) ([]Identity, error) {
 		}
 		defer rows.Close()
 		identities, err = ScanIdentitys(rows)
-
 		if err != nil {
 			return err
 		}
@@ -2310,7 +2624,18 @@ func createIdentity(tx *goqu.TxDatabase, name string, options ...QueryOpt) (int6
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readIdentities(tx *goqu.TxDatabase, options ...QueryOpt) ([]Identity, error) {
@@ -2332,9 +2657,18 @@ func readIdentities(tx *goqu.TxDatabase, options ...QueryOpt) ([]Identity, error
 		return []Identity{}, err
 	}
 	defer rows.Close()
+	identities, err := ScanIdentitys(rows)
+	if err != nil {
+		return []Identity{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Identity{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Identities
-	return ScanIdentitys(rows)
+	return identities, nil
 }
 
 func readIdentity(tx *goqu.TxDatabase, options ...QueryOpt) (Identity, bool, error) {
@@ -2358,12 +2692,19 @@ func readIdentity(tx *goqu.TxDatabase, options ...QueryOpt) (Identity, bool, err
 	}
 	ret_identity, err := ScanIdentity(row)
 	if err == sql.ErrNoRows {
-		return Identity{}, exists, nil
+		return Identity{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Identity{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Identity{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Identity
-	return ret_identity, exists, err
+	return ret_identity, exists, nil
 }
 
 func updateIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) error {
@@ -2381,8 +2722,14 @@ func updateIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -2401,8 +2748,15 @@ func deleteIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------------ ----------
@@ -2432,7 +2786,18 @@ func createIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) (int64, error)
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readIdentityRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]identityRole, error) {
@@ -2454,9 +2819,18 @@ func readIdentityRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]identityRole
 		return []identityRole{}, err
 	}
 	defer rows.Close()
+	identityRoles, err := ScanIdentityRoles(rows)
+	if err != nil {
+		return []identityRole{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []identityRole{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to identityRoles
-	return ScanIdentityRoles(rows)
+	return identityRoles, nil
 }
 
 func readIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) (identityRole, bool, error) {
@@ -2480,12 +2854,19 @@ func readIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) (identityRole, b
 	}
 	ret_identityRole, err := ScanIdentityRole(row)
 	if err == sql.ErrNoRows {
-		return identityRole{}, exists, nil
+		return identityRole{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return identityRole{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return identityRole{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to identityRole
-	return ret_identityRole, exists, err
+	return ret_identityRole, exists, nil
 }
 
 func updateIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -2503,8 +2884,14 @@ func updateIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -2523,8 +2910,15 @@ func deleteIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ----------------- ----------
@@ -2557,7 +2951,18 @@ func createIdentityWorkgroup(tx *goqu.TxDatabase, identityId, workgroupId int64,
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readIdentityWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]identityWorkgroup, error) {
@@ -2579,9 +2984,18 @@ func readIdentityWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]identit
 		return []identityWorkgroup{}, err
 	}
 	defer rows.Close()
+	identityWorkgroups, err := ScanIdentityWorkgroups(rows)
+	if err != nil {
+		return []identityWorkgroup{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []identityWorkgroup{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to identityWorkgroups
-	return ScanIdentityWorkgroups(rows)
+	return identityWorkgroups, nil
 }
 
 func readIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (identityWorkgroup, bool, error) {
@@ -2605,12 +3019,19 @@ func readIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (identityWo
 	}
 	ret_identityWorkgroup, err := ScanIdentityWorkgroup(row)
 	if err == sql.ErrNoRows {
-		return identityWorkgroup{}, exists, nil
+		return identityWorkgroup{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return identityWorkgroup{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return identityWorkgroup{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to identityWorkgroup
-	return ret_identityWorkgroup, exists, err
+	return ret_identityWorkgroup, exists, nil
 }
 
 func updateIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -2628,8 +3049,14 @@ func updateIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -2648,8 +3075,15 @@ func deleteIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ----- ----------
@@ -2735,7 +3169,6 @@ func (ds *Datastore) ReadLabels(options ...QueryOpt) ([]Label, error) {
 		}
 		defer rows.Close()
 		labels, err = ScanLabels(rows)
-
 		if err != nil {
 			return err
 		}
@@ -2893,7 +3326,18 @@ func createLabel(tx *goqu.TxDatabase, projectId int64, name, description string,
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readLabels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Label, error) {
@@ -2915,9 +3359,18 @@ func readLabels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Label, error) {
 		return []Label{}, err
 	}
 	defer rows.Close()
+	labels, err := ScanLabels(rows)
+	if err != nil {
+		return []Label{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Label{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Labels
-	return ScanLabels(rows)
+	return labels, nil
 }
 
 func readLabel(tx *goqu.TxDatabase, options ...QueryOpt) (Label, bool, error) {
@@ -2941,12 +3394,19 @@ func readLabel(tx *goqu.TxDatabase, options ...QueryOpt) (Label, bool, error) {
 	}
 	ret_label, err := ScanLabel(row)
 	if err == sql.ErrNoRows {
-		return Label{}, exists, nil
+		return Label{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Label{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Label{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Label
-	return ret_label, exists, err
+	return ret_label, exists, nil
 }
 
 func updateLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error {
@@ -2964,8 +3424,14 @@ func updateLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -2984,8 +3450,15 @@ func deleteLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ---- ----------
@@ -3017,7 +3490,18 @@ func createMeta(tx *goqu.TxDatabase, key string, options ...QueryOpt) (int64, er
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readMetas(tx *goqu.TxDatabase, options ...QueryOpt) ([]meta, error) {
@@ -3039,9 +3523,18 @@ func readMetas(tx *goqu.TxDatabase, options ...QueryOpt) ([]meta, error) {
 		return []meta{}, err
 	}
 	defer rows.Close()
+	metas, err := ScanMetas(rows)
+	if err != nil {
+		return []meta{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []meta{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to metas
-	return ScanMetas(rows)
+	return metas, nil
 }
 
 func readMeta(tx *goqu.TxDatabase, options ...QueryOpt) (meta, bool, error) {
@@ -3065,12 +3558,19 @@ func readMeta(tx *goqu.TxDatabase, options ...QueryOpt) (meta, bool, error) {
 	}
 	ret_meta, err := ScanMeta(row)
 	if err == sql.ErrNoRows {
-		return meta{}, exists, nil
+		return meta{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return meta{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return meta{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to meta
-	return ret_meta, exists, err
+	return ret_meta, exists, nil
 }
 
 func updateMeta(tx *goqu.TxDatabase, metaId int64, options ...QueryOpt) error {
@@ -3088,8 +3588,14 @@ func updateMeta(tx *goqu.TxDatabase, metaId int64, options ...QueryOpt) error {
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -3108,8 +3614,15 @@ func deleteMeta(tx *goqu.TxDatabase, metaId int64, options ...QueryOpt) error {
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------------- ----------
@@ -3141,7 +3654,18 @@ func createModelCategory(tx *goqu.TxDatabase, name string, options ...QueryOpt) 
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readModelCategories(tx *goqu.TxDatabase, options ...QueryOpt) ([]modelCategory, error) {
@@ -3163,9 +3687,18 @@ func readModelCategories(tx *goqu.TxDatabase, options ...QueryOpt) ([]modelCateg
 		return []modelCategory{}, err
 	}
 	defer rows.Close()
+	modelCategories, err := ScanModelCategorys(rows)
+	if err != nil {
+		return []modelCategory{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []modelCategory{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to modelCategories
-	return ScanModelCategorys(rows)
+	return modelCategories, nil
 }
 
 func readModelCategory(tx *goqu.TxDatabase, options ...QueryOpt) (modelCategory, bool, error) {
@@ -3189,12 +3722,19 @@ func readModelCategory(tx *goqu.TxDatabase, options ...QueryOpt) (modelCategory,
 	}
 	ret_modelCategory, err := ScanModelCategory(row)
 	if err == sql.ErrNoRows {
-		return modelCategory{}, exists, nil
+		return modelCategory{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return modelCategory{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return modelCategory{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to modelCategory
-	return ret_modelCategory, exists, err
+	return ret_modelCategory, exists, nil
 }
 
 func updateModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...QueryOpt) error {
@@ -3212,8 +3752,14 @@ func updateModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -3232,8 +3778,15 @@ func deleteModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ----- ----------
@@ -3321,7 +3874,6 @@ func (ds *Datastore) ReadModels(options ...QueryOpt) ([]Model, error) {
 		}
 		defer rows.Close()
 		models, err = ScanModels(rows)
-
 		if err != nil {
 			return err
 		}
@@ -3481,7 +4033,18 @@ func createModel(tx *goqu.TxDatabase, name, modelKey, algorithm, modelCategory, 
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Model, error) {
@@ -3503,9 +4066,18 @@ func readModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]Model, error) {
 		return []Model{}, err
 	}
 	defer rows.Close()
+	models, err := ScanModels(rows)
+	if err != nil {
+		return []Model{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Model{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Models
-	return ScanModels(rows)
+	return models, nil
 }
 
 func readModel(tx *goqu.TxDatabase, options ...QueryOpt) (Model, bool, error) {
@@ -3529,12 +4101,19 @@ func readModel(tx *goqu.TxDatabase, options ...QueryOpt) (Model, bool, error) {
 	}
 	ret_model, err := ScanModel(row)
 	if err == sql.ErrNoRows {
-		return Model{}, exists, nil
+		return Model{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Model{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Model{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Model
-	return ret_model, exists, err
+	return ret_model, exists, nil
 }
 
 func updateModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error {
@@ -3552,8 +4131,14 @@ func updateModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -3572,8 +4157,15 @@ func deleteModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ---------------- ----------
@@ -3608,7 +4200,18 @@ func createMultinomialModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, l
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readMultinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]multinomialModel, error) {
@@ -3630,9 +4233,18 @@ func readMultinomialModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]multinom
 		return []multinomialModel{}, err
 	}
 	defer rows.Close()
+	multinomialModels, err := ScanMultinomialModels(rows)
+	if err != nil {
+		return []multinomialModel{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []multinomialModel{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to multinomialModels
-	return ScanMultinomialModels(rows)
+	return multinomialModels, nil
 }
 
 func readMultinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (multinomialModel, bool, error) {
@@ -3656,12 +4268,19 @@ func readMultinomialModel(tx *goqu.TxDatabase, options ...QueryOpt) (multinomial
 	}
 	ret_multinomialModel, err := ScanMultinomialModel(row)
 	if err == sql.ErrNoRows {
-		return multinomialModel{}, exists, nil
+		return multinomialModel{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return multinomialModel{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return multinomialModel{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to multinomialModel
-	return ret_multinomialModel, exists, err
+	return ret_multinomialModel, exists, nil
 }
 
 func updateMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, options ...QueryOpt) error {
@@ -3679,8 +4298,14 @@ func updateMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, optio
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -3699,8 +4324,15 @@ func deleteMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, optio
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ---------- ----------
@@ -3784,7 +4416,6 @@ func (ds *Datastore) ReadPermissions(options ...QueryOpt) ([]Permission, error) 
 		}
 		defer rows.Close()
 		permissions, err = ScanPermissions(rows)
-
 		if err != nil {
 			return err
 		}
@@ -3940,7 +4571,18 @@ func createPermission(tx *goqu.TxDatabase, code, description string, options ...
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readPermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]Permission, error) {
@@ -3962,9 +4604,18 @@ func readPermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]Permission, er
 		return []Permission{}, err
 	}
 	defer rows.Close()
+	permissions, err := ScanPermissions(rows)
+	if err != nil {
+		return []Permission{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Permission{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Permissions
-	return ScanPermissions(rows)
+	return permissions, nil
 }
 
 func readPermission(tx *goqu.TxDatabase, options ...QueryOpt) (Permission, bool, error) {
@@ -3988,12 +4639,19 @@ func readPermission(tx *goqu.TxDatabase, options ...QueryOpt) (Permission, bool,
 	}
 	ret_permission, err := ScanPermission(row)
 	if err == sql.ErrNoRows {
-		return Permission{}, exists, nil
+		return Permission{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Permission{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Permission{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Permission
-	return ret_permission, exists, err
+	return ret_permission, exists, nil
 }
 
 func updatePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryOpt) error {
@@ -4011,8 +4669,14 @@ func updatePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -4031,8 +4695,15 @@ func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- --------- ----------
@@ -4119,7 +4790,6 @@ func (ds *Datastore) ReadPrivileges(options ...QueryOpt) ([]Privilege, error) {
 		}
 		defer rows.Close()
 		privileges, err = ScanPrivileges(rows)
-
 		if err != nil {
 			return err
 		}
@@ -4278,7 +4948,18 @@ func createPrivilege(tx *goqu.TxDatabase, typ string, identityId, workgroupId, e
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readPrivileges(tx *goqu.TxDatabase, options ...QueryOpt) ([]Privilege, error) {
@@ -4300,9 +4981,18 @@ func readPrivileges(tx *goqu.TxDatabase, options ...QueryOpt) ([]Privilege, erro
 		return []Privilege{}, err
 	}
 	defer rows.Close()
+	privileges, err := ScanPrivileges(rows)
+	if err != nil {
+		return []Privilege{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Privilege{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Privileges
-	return ScanPrivileges(rows)
+	return privileges, nil
 }
 
 func readPrivilege(tx *goqu.TxDatabase, options ...QueryOpt) (Privilege, bool, error) {
@@ -4326,12 +5016,19 @@ func readPrivilege(tx *goqu.TxDatabase, options ...QueryOpt) (Privilege, bool, e
 	}
 	ret_privilege, err := ScanPrivilege(row)
 	if err == sql.ErrNoRows {
-		return Privilege{}, exists, nil
+		return Privilege{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Privilege{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Privilege{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Privilege
-	return ret_privilege, exists, err
+	return ret_privilege, exists, nil
 }
 
 func updatePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -4349,8 +5046,14 @@ func updatePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -4369,8 +5072,15 @@ func deletePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------- ----------
@@ -4456,7 +5166,6 @@ func (ds *Datastore) ReadProjects(options ...QueryOpt) ([]Project, error) {
 		}
 		defer rows.Close()
 		projects, err = ScanProjects(rows)
-
 		if err != nil {
 			return err
 		}
@@ -4614,7 +5323,18 @@ func createProject(tx *goqu.TxDatabase, name, description, modelCategory string,
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readProjects(tx *goqu.TxDatabase, options ...QueryOpt) ([]Project, error) {
@@ -4636,9 +5356,18 @@ func readProjects(tx *goqu.TxDatabase, options ...QueryOpt) ([]Project, error) {
 		return []Project{}, err
 	}
 	defer rows.Close()
+	projects, err := ScanProjects(rows)
+	if err != nil {
+		return []Project{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Project{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Projects
-	return ScanProjects(rows)
+	return projects, nil
 }
 
 func readProject(tx *goqu.TxDatabase, options ...QueryOpt) (Project, bool, error) {
@@ -4662,12 +5391,19 @@ func readProject(tx *goqu.TxDatabase, options ...QueryOpt) (Project, bool, error
 	}
 	ret_project, err := ScanProject(row)
 	if err == sql.ErrNoRows {
-		return Project{}, exists, nil
+		return Project{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Project{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Project{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Project
-	return ret_project, exists, err
+	return ret_project, exists, nil
 }
 
 func updateProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) error {
@@ -4685,8 +5421,14 @@ func updateProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -4705,8 +5447,15 @@ func deleteProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- --------------- ----------
@@ -4741,7 +5490,18 @@ func createRegressionModel(tx *goqu.TxDatabase, modelId int64, mse, rSquared, me
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readRegressionModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]regressionModel, error) {
@@ -4763,9 +5523,18 @@ func readRegressionModels(tx *goqu.TxDatabase, options ...QueryOpt) ([]regressio
 		return []regressionModel{}, err
 	}
 	defer rows.Close()
+	regressionModels, err := ScanRegressionModels(rows)
+	if err != nil {
+		return []regressionModel{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []regressionModel{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to regressionModels
-	return ScanRegressionModels(rows)
+	return regressionModels, nil
 }
 
 func readRegressionModel(tx *goqu.TxDatabase, options ...QueryOpt) (regressionModel, bool, error) {
@@ -4789,12 +5558,19 @@ func readRegressionModel(tx *goqu.TxDatabase, options ...QueryOpt) (regressionMo
 	}
 	ret_regressionModel, err := ScanRegressionModel(row)
 	if err == sql.ErrNoRows {
-		return regressionModel{}, exists, nil
+		return regressionModel{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return regressionModel{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return regressionModel{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to regressionModel
-	return ret_regressionModel, exists, err
+	return ret_regressionModel, exists, nil
 }
 
 func updateRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options ...QueryOpt) error {
@@ -4812,8 +5588,14 @@ func updateRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -4832,8 +5614,15 @@ func deleteRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ---- ----------
@@ -4917,7 +5706,6 @@ func (ds *Datastore) ReadRoles(options ...QueryOpt) ([]Role, error) {
 		}
 		defer rows.Close()
 		roles, err = ScanRoles(rows)
-
 		if err != nil {
 			return err
 		}
@@ -5073,7 +5861,18 @@ func createRole(tx *goqu.TxDatabase, name string, options ...QueryOpt) (int64, e
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]Role, error) {
@@ -5095,9 +5894,18 @@ func readRoles(tx *goqu.TxDatabase, options ...QueryOpt) ([]Role, error) {
 		return []Role{}, err
 	}
 	defer rows.Close()
+	roles, err := ScanRoles(rows)
+	if err != nil {
+		return []Role{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Role{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Roles
-	return ScanRoles(rows)
+	return roles, nil
 }
 
 func readRole(tx *goqu.TxDatabase, options ...QueryOpt) (Role, bool, error) {
@@ -5121,12 +5929,19 @@ func readRole(tx *goqu.TxDatabase, options ...QueryOpt) (Role, bool, error) {
 	}
 	ret_role, err := ScanRole(row)
 	if err == sql.ErrNoRows {
-		return Role{}, exists, nil
+		return Role{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Role{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Role{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Role
-	return ret_role, exists, err
+	return ret_role, exists, nil
 }
 
 func updateRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
@@ -5144,8 +5959,14 @@ func updateRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -5164,8 +5985,15 @@ func deleteRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- -------------- ----------
@@ -5198,7 +6026,18 @@ func createRolePermission(tx *goqu.TxDatabase, roleId, permissionId int64, optio
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readRolePermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]rolePermission, error) {
@@ -5220,9 +6059,18 @@ func readRolePermissions(tx *goqu.TxDatabase, options ...QueryOpt) ([]rolePermis
 		return []rolePermission{}, err
 	}
 	defer rows.Close()
+	rolePermissions, err := ScanRolePermissions(rows)
+	if err != nil {
+		return []rolePermission{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []rolePermission{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to rolePermissions
-	return ScanRolePermissions(rows)
+	return rolePermissions, nil
 }
 
 func readRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) (rolePermission, bool, error) {
@@ -5246,12 +6094,19 @@ func readRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) (rolePermissio
 	}
 	ret_rolePermission, err := ScanRolePermission(row)
 	if err == sql.ErrNoRows {
-		return rolePermission{}, exists, nil
+		return rolePermission{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return rolePermission{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return rolePermission{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to rolePermission
-	return ret_rolePermission, exists, err
+	return ret_rolePermission, exists, nil
 }
 
 func updateRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
@@ -5269,8 +6124,14 @@ func updateRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -5289,8 +6150,15 @@ func deleteRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ----- ----------
@@ -5322,7 +6190,18 @@ func createState(tx *goqu.TxDatabase, name string, options ...QueryOpt) (int64, 
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readStates(tx *goqu.TxDatabase, options ...QueryOpt) ([]state, error) {
@@ -5344,9 +6223,18 @@ func readStates(tx *goqu.TxDatabase, options ...QueryOpt) ([]state, error) {
 		return []state{}, err
 	}
 	defer rows.Close()
+	states, err := ScanStates(rows)
+	if err != nil {
+		return []state{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []state{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to states
-	return ScanStates(rows)
+	return states, nil
 }
 
 func readState(tx *goqu.TxDatabase, options ...QueryOpt) (state, bool, error) {
@@ -5370,12 +6258,19 @@ func readState(tx *goqu.TxDatabase, options ...QueryOpt) (state, bool, error) {
 	}
 	ret_state, err := ScanState(row)
 	if err == sql.ErrNoRows {
-		return state{}, exists, nil
+		return state{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return state{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return state{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to state
-	return ret_state, exists, err
+	return ret_state, exists, nil
 }
 
 func updateState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error {
@@ -5393,8 +6288,14 @@ func updateState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -5413,8 +6314,15 @@ func deleteState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- ------- ----------
@@ -5501,7 +6409,6 @@ func (ds *Datastore) ReadServices(options ...QueryOpt) ([]Service, error) {
 		}
 		defer rows.Close()
 		services, err = ScanServices(rows)
-
 		if err != nil {
 			return err
 		}
@@ -5660,7 +6567,18 @@ func createService(tx *goqu.TxDatabase, projectId, modelId int64, name string, o
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readServices(tx *goqu.TxDatabase, options ...QueryOpt) ([]Service, error) {
@@ -5682,9 +6600,18 @@ func readServices(tx *goqu.TxDatabase, options ...QueryOpt) ([]Service, error) {
 		return []Service{}, err
 	}
 	defer rows.Close()
+	services, err := ScanServices(rows)
+	if err != nil {
+		return []Service{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Service{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Services
-	return ScanServices(rows)
+	return services, nil
 }
 
 func readService(tx *goqu.TxDatabase, options ...QueryOpt) (Service, bool, error) {
@@ -5708,12 +6635,19 @@ func readService(tx *goqu.TxDatabase, options ...QueryOpt) (Service, bool, error
 	}
 	ret_service, err := ScanService(row)
 	if err == sql.ErrNoRows {
-		return Service{}, exists, nil
+		return Service{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Service{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Service{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Service
-	return ret_service, exists, err
+	return ret_service, exists, nil
 }
 
 func updateService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) error {
@@ -5731,8 +6665,14 @@ func updateService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -5751,8 +6691,15 @@ func deleteService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
 
 // ---------- --------- ----------
@@ -5837,7 +6784,6 @@ func (ds *Datastore) ReadWorkgroups(options ...QueryOpt) ([]Workgroup, error) {
 		}
 		defer rows.Close()
 		workgroups, err = ScanWorkgroups(rows)
-
 		if err != nil {
 			return err
 		}
@@ -5994,7 +6940,18 @@ func createWorkgroup(tx *goqu.TxDatabase, typ, name string, options ...QueryOpt)
 	if err != nil {
 		return 0, errors.Wrap(err, "executing query")
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
 }
 
 func readWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]Workgroup, error) {
@@ -6016,9 +6973,18 @@ func readWorkgroups(tx *goqu.TxDatabase, options ...QueryOpt) ([]Workgroup, erro
 		return []Workgroup{}, err
 	}
 	defer rows.Close()
+	workgroups, err := ScanWorkgroups(rows)
+	if err != nil {
+		return []Workgroup{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Workgroup{}, errors.Wrap(err, "running post functions")
+		}
+	}
 
 	// Scan rows to Workgroups
-	return ScanWorkgroups(rows)
+	return workgroups, nil
 }
 
 func readWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (Workgroup, bool, error) {
@@ -6042,12 +7008,19 @@ func readWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) (Workgroup, bool, e
 	}
 	ret_workgroup, err := ScanWorkgroup(row)
 	if err == sql.ErrNoRows {
-		return Workgroup{}, exists, nil
+		return Workgroup{}, false, nil
 	} else if err == nil {
 		exists = true
+	} else {
+		return Workgroup{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Workgroup{}, false, errors.Wrap(err, "running post functions")
+		}
 	}
 	// Scan row to Workgroup
-	return ret_workgroup, exists, err
+	return ret_workgroup, exists, nil
 }
 
 func updateWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt) error {
@@ -6065,8 +7038,14 @@ func updateWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
 	}
 	return nil
 }
@@ -6085,6 +7064,13 @@ func deleteWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 		color.Unset()
 	}
 	// Execute query
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
 }
