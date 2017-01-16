@@ -91,7 +91,7 @@ export function downloadModel(): Function {
 
 export function deployModel(modelId: number, name: string, projectId: string, packageName: string): Function {
   return (dispatch) => {
-    dispatch(openNotification(NotificationType.Info, 'Deploying model', null, null));
+    dispatch(openNotification(NotificationType.Info, 'Deploying model', "Deploying Model", null));
     Remote.startService(modelId, name, packageName, (error, res) => {
       if (error) {
         dispatch(openNotification(NotificationType.Error, "Deployment Error", error.toString(), null));

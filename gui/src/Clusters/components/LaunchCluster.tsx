@@ -33,7 +33,8 @@ import { NumericInput } from 'h2oUIKit';
 
 interface Props {
   engines: any,
-  config: any
+  config: any,
+  clusterLaunchIsInProgress: boolean
 }
 
 interface DispatchProps {
@@ -70,8 +71,8 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
     let keytab = _.get((this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement), 'value', '');
-    let secure = (this.refs.clusterForm.querySelector('input[name="secure"]') as HTMLInputElement).checked;
-
+    // let secure = (this.refs.clusterForm.querySelector('input[name="secure"]') as HTMLInputElement).checked;
+    let secure = true;
     this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', secure, keytab);
   }
 
@@ -119,16 +120,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
             </Row>
             <Row>
               <Cell>
-                SECURE
-              </Cell>
-              <Cell>
-                <div className="checkbox">
-                  <input type="checkbox" name="secure" />
-                </div>
-              </Cell>
-            </Row>
-            <Row>
-              <Cell>
                 H2O VERSION
               </Cell>
               <Cell>
@@ -153,7 +144,15 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
             </Row> : null}
           </Table>
-          <button type="submit" className="button-primary">Launch New Clusters</button>
+          {this.props.clusterLaunchIsInProgress ? null : <button type="submit" className="button-primary">Launch New Clusters</button>}
+          {this.props.clusterLaunchIsInProgress ? <div className="pt-spinner .modifier">
+            <div className="pt-spinner-svg-container">
+              <svg viewBox="0 0 100 100">
+                <path className="pt-spinner-track" d="M 50,50 m 0,-44.5 a 44.5,44.5 0 1 1 0,89 a 44.5,44.5 0 1 1 0,-89"></path>
+                <path className="pt-spinner-head" d="M 94.5 50 A 44.5 44.5 0 0 0 50 5.5"></path>
+              </svg>
+            </div>
+          </div> : null}
         </form>
       </div>
     );
@@ -163,7 +162,8 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state) {
   return {
     engines: state.clusters.engines,
-    config: state.clusters.config
+    config: state.clusters.config,
+    clusterLaunchIsInProgress: state.clusters.clusterLaunchIsInProgress
   };
 }
 

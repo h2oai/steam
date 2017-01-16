@@ -78,3 +78,4 @@ coverage.out
 /tools/steamlauncher/service.log
 /steam.log
 /service.log
+/node_modules

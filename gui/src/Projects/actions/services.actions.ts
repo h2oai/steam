@@ -19,6 +19,8 @@
  * Created by justin on 7/22/16.
  */
 import * as Remote from '../../Proxy/Proxy';
+import { openNotification } from '../../App/actions/notification.actions';
+import { NotificationType } from '../../App/components/Notification';
 
 export const REQUEST_ALL_SERVICES = 'REQUEST_ALL_SERVICES';
 export const RECEIVE_ALL_SERVICES = 'RECEIVE_ALL_SERVICES';
@@ -77,10 +79,14 @@ export function fetchServicesForProject(projectId: number) {
 export function killService(serviceId: number, projectId: number) {
   return (dispatch) => {
     Remote.stopService(serviceId, (error) => {
-      if (projectId) {
-        dispatch(fetchServicesForProject(projectId));
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Create Error', error.toString(), null));
       } else {
-        dispatch(fetchAllServices());
+        if (projectId) {
+          dispatch(fetchServicesForProject(projectId));
+        } else {
+          dispatch(fetchAllServices());
+        }
       }
     });
   };

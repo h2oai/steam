@@ -18,12 +18,14 @@
 package master
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/pprof"
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -31,10 +33,11 @@ import (
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/rpc"
+	"github.com/h2oai/steam/lib/yarn"
 	"github.com/h2oai/steam/master/data"
-	"github.com/h2oai/steam/master/proxy"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -42,16 +45,10 @@ const (
 	defaultClusterProxyAddress          = ":9001"
 	defaultCompilationAddress           = ":8080"
 	defaultPredictionServiceHost        = ""
-	DefaultPredictionServicePortsString = "1025:65535"
+	defaultPredictionServicePortsString = "1025:65535"
 )
 
 var defaultPredictionServicePorts = [...]int{1025, 65535}
-
-type DBOpts struct {
-	Connection        data.Connection
-	SuperuserName     string
-	SuperuserPassword string
-}
 
 type YarnOpts struct {
 	KerberosEnabled bool
@@ -70,20 +67,7 @@ type Opts struct {
 	PredictionServicePorts    [2]int
 	EnableProfiler            bool
 	Yarn                      YarnOpts
-	DB                        DBOpts
-}
-
-var DefaultConnection = data.Connection{
-	"steam",
-	"steam",
-	"",
-	"",
-	"",
-	"",
-	"disable",
-	"",
-	"",
-	"",
+	DBOpts                    data.DBOpts
 }
 
 var DefaultOpts = &Opts{
@@ -99,7 +83,17 @@ var DefaultOpts = &Opts{
 	defaultPredictionServicePorts,
 	false,
 	YarnOpts{false},
-	DBOpts{DefaultConnection, "", ""},
+	data.DBOpts{
+		Driver: "sqlite3",
+
+		Path: filepath.Join(".", fs.VarDir, "master", fs.DbDir, "steam.db"),
+
+		Name:    "steam",
+		Pass:    "steam",
+		Host:    "localhost",
+		Port:    "5432",
+		SSLMode: "disable",
+	},
 }
 
 type AuthProvider interface {
@@ -112,7 +106,6 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- external ip for base and proxy ---
 	webAddress := opts.WebAddress
-	proxyAddress := opts.ClusterProxyAddress
 
 	// --- set up wd ---
 	wd, err := fs.MkWorkingDirectory(opts.WorkingDirectory)
@@ -130,13 +123,8 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- init storage ---
 
-	ds, err := data.Create(
-		path.Join(wd, fs.DbDir, "steam.db"),
-		// opts.DB.Connection,
-		opts.DB.SuperuserName,
-		opts.DB.SuperuserPassword,
-	)
-
+	opts.DBOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
+	ds, err := data.NewDatastore(opts.DBOpts, false)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -144,16 +132,23 @@ func Run(version, buildDate string, opts Opts) {
 	// --- create basic auth service ---
 	defaultAz := NewDefaultAz(ds)
 	var authProvider AuthProvider
-	switch opts.AuthProvider {
-	case "digest":
+
+	var set string
+	if auth, exists, err := ds.ReadAuthentication(data.ByEnabled); err != nil {
+		log.Fatalln("Reading authentication setting from database:", err)
+	} else if exists {
+		set = auth.Key
+	}
+	switch {
+	case opts.AuthProvider == "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
-	case "basic-ldap":
-		conn, err := ldap.FromConfig(opts.AuthConfig)
+	case opts.AuthProvider == "basic-ldap", set == data.LDAPAuth:
+		conn, err := ldap.FromDatabase(ds)
 		if err != nil {
-			log.Fatalln("Please provide a valid ldap configuration file", err)
+			log.Fatalln("Invalid configuration:", err)
 		}
 
-		authProvider = NewBasicLdapAuthProvider(webAddress, conn)
+		authProvider = NewBasicLdapAuthProvider(ds, webAddress, conn)
 	default: // "basic"
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}
@@ -175,6 +170,7 @@ func Run(version, buildDate string, opts Opts) {
 
 	webServeMux := http.NewServeMux()
 	webService := web.NewService(
+		version,
 		wd,
 		ds,
 		opts.CompilationServiceAddress,
@@ -199,6 +195,10 @@ func Run(version, buildDate string, opts Opts) {
 		webServeMux.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
 	}
 
+	// --- launch polling job
+	pollFailChan := make(chan error)
+	go func() { pollFailChan <- yarn.StartPoll(ds, data.States.Started, data.States.Stopped) }()
+
 	// --- start web server ---
 
 	serverFailChan := make(chan error)
@@ -207,47 +207,30 @@ func Run(version, buildDate string, opts Opts) {
 
 	certFile := strings.TrimSpace(opts.WebTLSCertPath)
 	keyFile := strings.TrimSpace(opts.WebTLSKeyPath)
+
 	enableTLS := !(len(certFile) == 0 && len(keyFile) == 0)
 
 	go func() {
 		log.Println("Web server listening at", webAddress)
-		prefix := ""
-		if len(webAddress) > 1 && webAddress[:1] == ":" {
-			prefix = "localhost"
-		}
 		if enableTLS {
-			log.Printf("Point your web browser to https://%s%s/\n", prefix, webAddress)
+			kb, err := ioutil.ReadFile(keyFile)
+			if err != nil {
+				log.Fatalln(err) //FIXME format error
+			}
+			cb, err := ioutil.ReadFile(certFile)
+			if err != nil {
+				log.Fatalln(err) //FIXME format error
+			}
+			if err := ioutil.WriteFile(fs.GetAssetsPath(opts.WorkingDirectory, "cert.pem"), append(cb, kb...), 0622); err != nil {
+				log.Fatalln(err)
+			}
+
 			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
 				serverFailChan <- err
 			}
 		} else {
-			log.Printf("Point your web browser to http://%s%s/\n", prefix, webAddress)
 			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
 				serverFailChan <- err
-			}
-		}
-	}()
-
-	// --- start reverse proxy ---
-
-	proxyHandler := authProvider.Secure(proxy.NewProxyHandler(defaultAz, ds))
-	proxyFailChan := make(chan error)
-	go func() {
-		log.Println("Cluster reverse proxy listening at", proxyAddress)
-		prefix := ""
-		if len(proxyAddress) > 1 && proxyAddress[:1] == ":" {
-			prefix = "localhost"
-		}
-		if enableTLS {
-			log.Printf("Point H2O client libraries to https://%s%s/\n", prefix, proxyAddress)
-			if err := http.ListenAndServeTLS(proxyAddress, certFile, keyFile, proxyHandler); err != nil {
-				proxyFailChan <- err
-			}
-
-		} else {
-			log.Printf("Point H2O client libraries to http://%s%s/\n", prefix, proxyAddress)
-			if err := http.ListenAndServe(proxyAddress, proxyHandler); err != nil {
-				proxyFailChan <- err
 			}
 		}
 	}()
@@ -256,11 +239,13 @@ func Run(version, buildDate string, opts Opts) {
 
 	for {
 		select {
+		case err := <-pollFailChan:
+			if err != nil {
+				log.Fatalln("Poll startup failure", err)
+				return
+			}
 		case err := <-serverFailChan:
 			log.Fatalln("HTTP server startup failed:", err)
-			return
-		case err := <-proxyFailChan:
-			log.Fatalln("Cluster reverse proxy startup failed:", err)
 			return
 		case sig := <-sigChan:
 			log.Println("Caught signal", sig)
@@ -268,4 +253,41 @@ func Run(version, buildDate string, opts Opts) {
 			return
 		}
 	}
+}
+
+func SetAdmin(workingDirectory string, dbOpts data.DBOpts) error {
+
+	// --- set up wd ---
+	wd, err := fs.MkWorkingDirectory(workingDirectory)
+	if err != nil {
+		return err
+	}
+
+	// --- init storage ---
+	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
+	_, err = data.NewDatastore(dbOpts, true)
+	return err
+}
+
+func CheckAdmin(workingDirectory string, dbOpts data.DBOpts) error {
+
+	// --- set up wd ---
+	wd, err := fs.MkWorkingDirectory(workingDirectory)
+	if err != nil {
+		return err
+	}
+
+	// --- init storage ---
+
+	switch dbOpts.Driver {
+	case "sqlite3":
+		dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
+		if _, err := os.Stat(dbOpts.Path); os.IsNotExist(err) {
+			return err
+		}
+
+	}
+
+	_, err = data.NewDatastore(dbOpts, false)
+	return errors.Wrap(err, "setting up datastore")
 }

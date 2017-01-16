@@ -18,8 +18,9 @@
 import * as _ from 'lodash';
 import {
   RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
-  RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE, ENTER_NEW_USER,
-  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY
+  RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE,
+  ENTER_NEW_USER,
+  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG, RECEIVE_ADMIN_CHECK
 } from '../actions/users.actions';
 
 let initialState = {
@@ -28,11 +29,38 @@ let initialState = {
   projects: [],
   updates: [],
   createNewUserIsEntered: false,
-  createNewRoleIsEntered: false
+  createNewRoleIsEntered: false,
+  ldapExists: false,
+  ldapConfig: {
+    host: "",
+    port: 636,
+    ldaps: true,
+    bind_dn: "dc=xyz,dc=com",
+    bind_password: "",
+    user_base_dn: "",
+    user_base_filter: "",
+    group_dn: "dc=xyz,dc=com",
+    static_member_attribute: "memberUid",
+    search_request_size_limit: 0,
+    search_request_time_limit: 0,
+    force_bind: true
+  },
+  isAdmin: false
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case RECEIVE_ADMIN_CHECK : {
+      return _.assign({}, state, {
+        isAdmin: action.isAdmin
+      });
+    }
+    case RECEIVE_LDAP_CONFIG : {
+      return _.assign({}, state, {
+        ldapExists: action.exists,
+        ldapConfig: action.config
+      });
+    }
     case RECEIVE_WORKGROUPS_FOR_IDENTITY : {
       return _.assign({}, state, {
         userWithWorkgroups: {

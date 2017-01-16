@@ -43,7 +43,7 @@ export class ProjectMembers extends React.Component<Props & DispatchProps, any> 
     this.props.fetchMembersForProject();
   }
 
-  onLoadLabelsClicked = (e: React.MouseEvent) => {
+  onLoadLabelsClicked = (e: React.MouseEvent<any>) => {
     this.props.loadLabelsTab();
   };
 

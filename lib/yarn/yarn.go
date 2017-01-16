@@ -24,6 +24,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"os"
 	"os/exec"
 	"os/user"
 	"regexp"
@@ -32,9 +33,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/h2oai/steam/lib/haproxy"
-	"os"
+	"github.com/pkg/errors"
 )
 
 func kInit(username, keytab string, uid, gid uint32) error {
@@ -97,17 +97,16 @@ func GetUser(username string) (uint32, uint32, error) {
 	return uint32(uid64), uint32(gid64), nil
 }
 
-func contextParamScan(r io.ReadCloser, contextEnabled *string) {
+func contextParamScan(r io.ReadCloser, ok chan bool) {
 	in := bufio.NewScanner(r)
 	for in.Scan() {
 		if in.Text() != "" {
-			if contextEnabled != nil {
-				if strings.Contains(in.Text(), "-context_path") {
-					*contextEnabled = "enabled"
-				}
+			if strings.Contains(in.Text(), "-context_path") {
+				ok <- true
 			}
 		}
 	}
+	ok <- false
 }
 
 func yarnScan(r io.Reader, name, username string, appID, address, err *string, cancel context.CancelFunc) {
@@ -177,7 +176,7 @@ func yarnCommand(uid, gid uint32, name, username string, args ...string) (string
 
 	// Execute command
 	if err := cmd.Run(); err != nil {
-		return "", "", errors.Wrapf(err, "failed running command %s: %v", cmd.Args, cmdErr)
+		return "", "", errors.Wrapf(err, "failed running command %s: %v", strings.Join(cmd.Args, " "), cmdErr)
 	}
 
 	return appID, address, nil
@@ -214,19 +213,24 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	}
 
 	contextPath := ""
-	cpe := contextPathEnabledEngine(enginePath, uid, gid)
-	if cpe {
-		contextPathArgs := []string{"-J", "-context_path", "-J", "/" + name}
-		cmdArgs = append(cmdArgs, contextPathArgs...)
-		contextPath = "/" + name
+	cpe, err := contextPathEnabledEngine(enginePath, uid, gid)
+	if err != nil {
+		return "", "", "", "", "", err
 	}
 
 	token := ""
 	if secure {
+		if !cpe {
+			return "", "", "", "", "", errors.New("this version of h2o is not compatible with Steam secure launch. Please upgrade your h2o version")
+		}
+
+		contextPath = "/" + username + "_" + name
+		contextPathArgs := []string{"-J", "-context_path", "-J", contextPath}
+		cmdArgs = append(cmdArgs, contextPathArgs...)
 		passwd := randStr(10)
 		token, _ = haproxy.GenRealmFile(username, passwd)
 		defer os.Remove(token + "_realm.properties")
-		securityArgs := []string{"-hash_login", "-login_conf", token+"_realm.properties"}
+		securityArgs := []string{"-hash_login", "-login_conf", token + "_realm.properties"}
 		cmdArgs = append(cmdArgs, securityArgs...)
 	}
 
@@ -239,30 +243,25 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 	return appID, address, out, token, contextPath + "/", nil
 }
 
-func contextPathEnabledEngine(enginePath string, uid, gid uint32) bool {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func contextPathEnabledEngine(enginePath string, uid, gid uint32) (bool, error) {
 	// Set up hadoop job with user impersonation
-	cmd := exec.CommandContext(ctx, "java", "-jar", enginePath, "-help")
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+	cmd := exec.Command("java", "-jar", enginePath, "-help")
 
 	// Set stderr
 	stdErr, err := cmd.StderrPipe()
 	if err != nil {
-		return false
+		return false, errors.Wrap(err, "starting standard error pipe")
 	}
 	defer stdErr.Close()
 
 	// Log output and scan
-	var contextEnabled string
-	go contextParamScan(stdErr, &contextEnabled)
+	okChan := make(chan bool)
+	go contextParamScan(stdErr, okChan)
 
 	// Execute command. NOT checking for err because -help in h2odriver returns always 1...
 	cmd.Run()
 
-	return contextEnabled != ""
+	return <-okChan, nil
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID

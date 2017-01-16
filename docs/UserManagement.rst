@@ -164,11 +164,11 @@ User Management Example
 
 The following example creates sample roles, workgroups, and users using the CLI. Refer to the `CLI Command Reference <CLIAppendix.html>`__  for information about all of the commands available in the CLI.
 
-1. Log in as the Steam superuser on the machine that is running Steam.
+1. Log in as the Steam admin on the machine that is running Steam.
 
  ::
 
-  ./steam login <yarn_edge_node>:<port> --username=superuser --password=superuser
+  ./steam login <yarn_edge_node>:<port> --username=admin --password=admin
 
 2. Create an engineer role, and link that role to permissions. Note that
    you can run ``./steam get all permissions`` to view a list of available

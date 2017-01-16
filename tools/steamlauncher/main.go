@@ -125,8 +125,8 @@ func launchSteam(ctx context.Context) error {
 	// Issue commands and start steam
 	argv := []string{
 		"serve", "master",
-		"--superuser-name=" + config.Superuser.Name,
-		"--superuser-password=" + config.Superuser.Pass,
+		"--admin-name=" + config.Admin.Name,
+		"--admin-password=" + config.Admin.Pass,
 		"--web-address=:" + strconv.Itoa(config.Steam.Port),
 		"--compilation-service-address=" + config.PredictionBuilder.Host + ":" + strconv.Itoa(config.PredictionBuilder.Port),
 		"--scoring-service-port-range=" + config.PredictionService.PortRange,
@@ -168,8 +168,8 @@ func initSteam() error {
 		"/web",
 		"web",
 		"localhost:"+strconv.Itoa(config.Steam.Port),
-		config.Superuser.Name,
-		config.Superuser.Pass),
+		config.Admin.Name,
+		config.Admin.Pass),
 	}
 
 	// Initialize the permissions map

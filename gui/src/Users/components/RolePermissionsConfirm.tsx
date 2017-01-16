@@ -116,7 +116,7 @@ export default class RolePermissionsConfirm extends React.Component<Props, any> 
     });
   };
 
-  onCloseClicked = (e: React.MouseEvent) => {
+  onCloseClicked = (e: React.MouseEvent<any>) => {
     this.props.closeHandler();
   };
 

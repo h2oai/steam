@@ -1,155 +1,161 @@
-/*
-  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
-  License, or (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package web
 
 import (
+	"os"
 	"testing"
+
+	"github.com/h2oai/steam/master/az"
 )
 
-func TestIdentityCRUD(tt *testing.T) {
-	t := newTest(tt)
-
-	const name1 = "user1"
-	const password1 = "password1"
-
-	id, err := t.svc.CreateIdentity(t.su, name1, password1)
-	t.nil(err)
-
-	user, err := t.svc.GetIdentity(t.su, id)
-	t.nil(err)
-
-	t.ok(name1 == user.Name, "name")
-	t.ok(user.IsActive, "active")
-
-	user, err = t.svc.GetIdentityByName(t.su, name1)
-	t.nil(err)
-	t.ok(name1 == user.Name, "name")
-
-	users, err := t.svc.GetIdentities(t.su, 0, 1000)
-	t.nil(err)
-
-	t.ok(len(users) == 2, "user count")
-
-	t.ok(t.su.Name() == users[0].Name, "name")
-	t.ok(name1 == users[1].Name, "name")
-
-	err = t.svc.DeactivateIdentity(t.su, id)
-	t.nil(err)
-
-	user, err = t.svc.GetIdentity(t.su, id)
-	t.nil(err)
-
-	t.ok(name1 == user.Name, "name")
-	t.ok(!user.IsActive, "active")
+type identityIn struct {
+	name string
+	pasw string
 }
 
-func TestIdentityWorkgroupLinking(tt *testing.T) {
-	t := newTest(tt)
-
-	userId, err := t.svc.CreateIdentity(t.su, "user1", "password1")
-	t.nil(err)
-
-	groupId, err := t.svc.CreateWorkgroup(t.su, "group1", "group description1")
-	t.nil(err)
-
-	users, err := t.svc.GetIdentitiesForWorkgroup(t.su, groupId)
-	t.nil(err)
-
-	t.ok(len(users) == 0, "users for group")
-
-	err = t.svc.LinkIdentityWithWorkgroup(t.su, userId, groupId)
-	t.nil(err)
-
-	users, err = t.svc.GetIdentitiesForWorkgroup(t.su, groupId)
-	t.nil(err)
-
-	t.ok(len(users) == 1, "users for group")
-	t.ok(users[0].Name == "user1", "user name")
-
-	groups, err := t.svc.GetWorkgroupsForIdentity(t.su, userId)
-	t.nil(err)
-
-	t.ok(len(groups) == 1, "groups for user: expected 1 got %d", len(groups))
-	t.ok(groups[0].Name == "group1", "group name")
-
-	err = t.svc.UnlinkIdentityFromWorkgroup(t.su, userId, groupId)
-	t.nil(err)
-
-	users, err = t.svc.GetIdentitiesForWorkgroup(t.su, groupId)
-	t.nil(err)
-
-	t.ok(len(users) == 0, "users for group")
+var identityTests = []struct {
+	in   identityIn
+	out  int64
+	pass bool
+	err  error
+}{
+	{in: identityIn{name: "user1", pasw: "password1"}, out: 2, pass: true},
+	{in: identityIn{name: "user2", pasw: "password1"}, out: 3, pass: true},
 }
 
-func TestIdentityAndRoleLinking(tt *testing.T) {
-	t := newTest(tt)
+var readIdentityTests = []struct {
+	offset uint
+	limit  uint
+}{
+	{0, 10},
+}
 
-	userId, err := t.svc.CreateIdentity(t.su, "user1", "password1")
-	t.nil(err)
+var updateIdentityTests = map[int64][]struct {
+	in   identityIn
+	pass bool
+	err  error
+}{
+	2: {
+		{in: identityIn{pasw: "pass_change"}, pass: true},
+	},
+}
 
-	roleId, err := t.svc.CreateRole(t.su, "role1", "role description1")
-	t.nil(err)
+func TestSQLiteIdentity(t *testing.T) {
+	svc, pz, temp := testSetup("identity", "sqlite3")
+	defer os.RemoveAll(temp)
 
-	users, err := t.svc.GetIdentitiesForRole(t.su, roleId)
-	t.nil(err)
-
-	t.ok(len(users) == 0, "users for role")
-
-	err = t.svc.LinkIdentityWithRole(t.su, userId, roleId)
-	t.nil(err)
-
-	users, err = t.svc.GetIdentitiesForRole(t.su, roleId)
-	t.nil(err)
-
-	t.ok(len(users) == 1, "users for role")
-	t.ok(users[0].Name == "user1", "user name")
-
-	roles, err := t.svc.GetRolesForIdentity(t.su, userId)
-	t.nil(err)
-
-	t.ok(len(roles) == 1, "roles for user")
-	t.ok(roles[0].Name == "role1", "role name")
-
-	perms, err := t.svc.GetPermissionsForIdentity(t.su, userId)
-	t.ok(len(perms) == 0, "permissions for user")
-
-	allPerms, err := t.svc.GetAllPermissions(t.su)
-	t.nil(err)
-
-	permIds := make([]int64, len(allPerms))
-	for i, p := range allPerms {
-		permIds[i] = p.Id
+	t.Logf("Testing %d case(s)", len(identityTests))
+	// -- C --
+	if ok := t.Run("Create", testIdentityCreate(pz, svc)); !ok {
+		t.FailNow()
 	}
 
-	err = t.svc.LinkRoleWithPermissions(t.su, roleId, permIds)
-	t.nil(err)
+	// -- R --
+	if ok := t.Run("Read", testIdentityRead(pz, svc)); !ok {
+		t.FailNow()
+	}
 
-	perms, err = t.svc.GetPermissionsForIdentity(t.su, userId)
-	t.ok(len(perms) == len(allPerms), "permissions for user")
+	// -- U --
+	if ok := t.Run("Update", testIdentityUpdate(pz, svc)); !ok {
+		t.FailNow()
+	}
 
-	err = t.svc.UnlinkIdentityFromRole(t.su, userId, roleId)
-	t.nil(err)
+	// -- D --
+	// Identities never get deleted
+}
 
-	users, err = t.svc.GetIdentitiesForRole(t.su, roleId)
-	t.nil(err)
+func testIdentityCreate(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		for _, test := range identityTests {
+			in, out := test.in, test.out
+			id, err := svc.CreateIdentity(pz, in.name, in.pasw)
+			if test.pass {
+				if err != nil {
+					t.Errorf("Create(%+v): unexpected error creating identity: %+v", in, err)
+				} else if id != out {
+					t.Errorf("Create(%+v): incorrect cluster id: expected %d, got %d", out, out, id)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Create(%+v): expected error creating identity", in)
+				} else if err.Error() != test.err.Error() {
+					t.Errorf("Create(%+v): incorrect error: expected %q, got %q", in, test.err, err)
+				}
+			}
+		}
+	}
+}
 
-	t.ok(len(users) == 0, "users for role")
+func testIdentityRead(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		var totPass uint = 1
+		for _, test := range identityTests {
+			in, out := test.in, test.out
+			identity, err := svc.GetIdentity(pz, out)
+			if test.pass {
+				if err != nil {
+					t.Errorf("Read(%+v): unexpected error reading identity: %+v", out, err)
+				} else if in.name != identity.Name {
+					t.Errorf("Read(%+v): incorrect identity name: expected %s, got %s", out, in.name, identity.Name)
+				}
+				totPass++
+			} else {
+				if err == nil {
+					t.Errorf("Read(%+v): expected error reading identity", out)
+				}
+			}
 
-	perms, err = t.svc.GetPermissionsForIdentity(t.su, userId)
-	t.ok(len(perms) == 0, "permissions for user")
+			identity, err = svc.GetIdentityByName(pz, in.name)
+			if test.pass {
+				if err != nil {
+					t.Errorf("Read(%+v): unexpected error reading identity: %+v", in.name, err)
+				} else if out != identity.Id {
+					t.Errorf("Read(%+v): incorrect identity id: expected %s, got %s", in.name, out, identity.Id)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Read(%+v): expected error reading identity", in.name)
+				}
+			}
+
+		}
+
+		for _, get := range readIdentityTests {
+			var count int
+			if totPass-get.offset < get.limit {
+				count = int(totPass - get.offset)
+			} else {
+				count = int(get.limit)
+			}
+			identities, err := svc.GetIdentities(pz, get.offset, get.limit)
+			if err != nil {
+				t.Errorf("Read(%+v): unexpected error reading identities: %+v", get, err)
+			} else if len(identities) != count {
+				t.Errorf("Read(%+v): incorrect number of identities read: expected %d, got %d", get, count, len(identities))
+			} else if len(identities) > 0 && identities[0].Id-1 != int64(get.offset) {
+				t.Errorf("Read(%+v): incorrect offset: expected %d, got %d)", get, get.offset, identities[0].Id-1)
+			}
+		}
+	}
+}
+
+func testIdentityUpdate(pz az.Principal, svc *Service) func(t *testing.T) {
+	return func(t *testing.T) {
+		for id, upds := range updateIdentityTests {
+			for _, test := range upds {
+				in := test.in
+				err := svc.UpdateIdentity(pz, id, in.pasw)
+				if test.pass {
+					if err != nil {
+						t.Errorf("Update(%d:%+v): unexpected error updating identity: %+v", id, in, err)
+					}
+				} else {
+					if err == nil {
+						t.Errorf("Update(%d:%+v): expected error updating identity: %+v", id, in, err)
+					} else if err.Error() != test.err.Error() {
+						t.Errorf("Update(%d:%+v): incorrect error: expected %q, got %q", id, in, test.err, err)
+					}
+				}
+			}
+		}
+	}
 }

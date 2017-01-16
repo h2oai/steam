@@ -35,9 +35,10 @@ import (
 	"strings"
 	"time"
 
+	"net/http"
+
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 const (
@@ -313,6 +314,10 @@ func GetDeepwaterDepPath(wd string, modelId int64) string {
 
 func GetAssetsPath(wd, asset string) string {
 	return path.Join(wd, AssetsDir, asset)
+}
+
+func GetDBPath(wd, db string) string {
+	return path.Join(wd, DbDir, db)
 }
 
 func GetModelDirs(wd string, modelId int64) ([]string, error) {

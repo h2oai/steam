@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import TabNavigation from '../Projects/components/TabNavigation';
-import {Identity, Permission, Project} from '../Proxy/Proxy';
+import {Identity, Permission} from '../Proxy/Proxy';
 import UserAccess from './components/UserAccess';
 import RolePermissions from './components/RolePermissions';
 import './styles/users.scss';
@@ -27,7 +27,8 @@ import CreateUser from "./components/CreateUser";
 import CreateRole from "./components/CreateRole";
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {enterNewUser, enterNewRole, exitNewRole, exitNewUser} from "./actions/users.actions";
+import {enterNewUser, enterNewRole, exitNewRole, exitNewUser, fetchLdapConfig, checkAdmin} from "./actions/users.actions";
+import UserAuthentication from "./components/UserAuthentication";
 
 
 interface Props {
@@ -35,12 +36,15 @@ interface Props {
   permission: Permission
   createNewUserIsEntered: boolean
   createNewRoleIsEntered: boolean
+  isAdmin: boolean
 }
 interface DispatchProps {
   enterNewUser: Function
   enterNewRole: Function
   exitNewUser: Function
   exitNewRole: Function
+  fetchLdapConfig: Function
+  checkAdmin: Function
 }
 export class Users extends React.Component<Props & DispatchProps, any> {
 
@@ -66,22 +70,75 @@ export class Users extends React.Component<Props & DispatchProps, any> {
   }
 
   componentWillMount(): void {
-    this.setState({
-      tabs: {
-        users: {
-          label: 'USERS',
-          isSelected: true,
-          onClick: this.clickHandler.bind(this),
-          component: <UserAccess />
-        },
-        roles: {
-          label: 'ROLES',
-          isSelected: false,
-          onClick: this.clickHandler.bind(this),
-          component: <RolePermissions />
+    if (!this.props.isAdmin) {
+      this.setState({
+        tabs: {
+          users: {
+            label: 'USERS',
+            isSelected: true,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAccess />
+          },
+          roles: {
+            label: 'ROLES',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <RolePermissions />
+          }
         }
-      }
-    });
+      });
+    } else {
+      this.setState({
+        tabs: {
+          users: {
+            label: 'USERS',
+            isSelected: true,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAccess />
+          },
+          roles: {
+            label: 'ROLES',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <RolePermissions />
+          },
+          authentication: {
+            label: 'AUTHENTICATION',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAuthentication />
+          }
+        }
+      });
+    }
+    this.props.checkAdmin();
+  }
+
+  componentWillReceiveProps(nextProps): void {
+    if (!this.props.isAdmin && nextProps.isAdmin) {
+      this.setState({
+        tabs: {
+          users: {
+            label: 'USERS',
+            isSelected: true,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAccess />
+          },
+          roles: {
+            label: 'ROLES',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <RolePermissions />
+          },
+          authentication: {
+            label: 'AUTHENTICATION',
+            isSelected: false,
+            onClick: this.clickHandler.bind(this),
+            component: <UserAuthentication />
+          }
+        }
+      });
+    }
   }
 
   clickHandler(tab) {
@@ -99,6 +156,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     let newState = _.cloneDeep(this.state);
     newState.tabs.roles.isSelected = false;
     newState.tabs.users.isSelected = true;
+    newState.tabs.authentication.isSelected = false;
     newState.isSelected = "users";
     this.setState(newState);
     this.props.enterNewUser();
@@ -108,6 +166,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     let newState = _.cloneDeep(this.state);
     newState.tabs.roles.isSelected = true;
     newState.tabs.users.isSelected = false;
+    newState.tabs.authentication.isSelected = false;
     newState.isSelected = "roles";
     this.setState(newState);
     this.props.enterNewRole();
@@ -146,6 +205,8 @@ export class Users extends React.Component<Props & DispatchProps, any> {
               <UserAccess /> : null}
             {this.state.tabs.roles.isSelected === true ?
               <RolePermissions /> : null}
+            {this.state.tabs.authentication && this.state.tabs.authentication.isSelected === true ?
+              <UserAuthentication /> : null}
           </div>
         </div>
       );
@@ -156,7 +217,8 @@ export class Users extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state: any): any {
   return {
     createNewUserIsEntered: state.users.createNewUserIsEntered,
-    createNewRoleIsEntered: state.users.createNewRoleIsEntered
+    createNewRoleIsEntered: state.users.createNewRoleIsEntered,
+    isAdmin: state.users.isAdmin
   };
 }
 
@@ -165,7 +227,9 @@ function mapDispatchToProps(dispatch): DispatchProps {
     enterNewUser: bindActionCreators(enterNewUser, dispatch),
     enterNewRole: bindActionCreators(enterNewRole, dispatch),
     exitNewUser: bindActionCreators(exitNewUser, dispatch),
-    exitNewRole: bindActionCreators(exitNewRole, dispatch)
+    exitNewRole: bindActionCreators(exitNewRole, dispatch),
+    fetchLdapConfig: bindActionCreators(fetchLdapConfig, dispatch),
+    checkAdmin: bindActionCreators(checkAdmin, dispatch)
   };
 }
 

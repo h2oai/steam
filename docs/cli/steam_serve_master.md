@@ -34,8 +34,8 @@ steam serve master
       --profile[=false]: Enable Go profiler
       --scoring-service-address="": Address to start scoring services on ("<ip>")
       --scoring-service-port-range="1025:65535": Specified port range to create scoring services on. ("<from>:<to>")
-      --superuser-name="": Set superuser username (required for first-time-use only)
-      --superuser-password="": Set superuser password (required for first-time-use only)
+      --admin-name="": Set admin username (required for first-time-use only)
+      --admin-password="": Set admin password (required for first-time-use only)
       --web-address=":9000": Web server address ("<ip>:<port>" or ":<port>").
       --web-tls-cert-path="": Web server TLS certificate file path (optional).
       --web-tls-key-path="": Web server TLS key file path (optional).

@@ -17,11 +17,16 @@
 package ldap
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
+	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/srv/web"
+
 	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
 )
@@ -29,18 +34,84 @@ import (
 type Ldap struct {
 	Address  string
 	BindDN   string
-	BindPass string `toml:"bindPassword"`
+	BindPass string
 
-	UserBaseDn      string
-	UserIdAttribute string
-	UserObjectClass string
+	UserBaseDn        string // Location of LDAP users TODO: allow for multiple DNs
+	UserBaseFilter    string // LDAP search filter e.g. (department=IT)
+	UserNameAttribute string // Contains username (typically uid or sAMAccountName)
+
+	GroupDn                 string // The group to allow users from //XXX TEMPORARY
+	GroupBaseDn             string // Location of LDAP group TODO: allow for multiple DNs
+	GroupNameAttribute      string // The attribute that contains the name (typically cn)
+	StaticGroupSearchFilter string // LDAP search filter e.g. (department=IT)
+	StaticMemberAttribute   string // The group member values (typically member or memberUid)
+
+	SearchRequestSizeLimit int // The maximum number of entries request by LDAP searches
+	SearchRequestTimeLimit int // The maximum number of seconds to wait for LDAP searches
 
 	// TODO implement TLS case
-	isTLS     bool
+	Ldaps     bool
 	ForceBind bool
 
 	// Users who are logged in
 	Users *LdapUser
+}
+
+func (l *Ldap) Test() error {
+	conn, err := ldap.Dial("tcp", l.Address)
+	if err != nil {
+		return errors.Wrap(err, "dialing ldap")
+	}
+
+	req := ldap.NewSearchRequest(
+		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
+		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
+		false,
+		"(objectClass=*)",
+		[]string{l.StaticMemberAttribute}, nil,
+	)
+
+	res, err := conn.Search(req)
+	if err != nil {
+		return errors.Wrap(err, "searching for group")
+	}
+	if len(res.Entries) < 1 {
+		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
+	} else if len(res.Entries) > 2 {
+		return errors.New("too many group entries")
+	}
+
+	return nil
+}
+
+func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
+	req := ldap.NewSearchRequest(
+		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
+		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
+		false,
+		"(objectClass=*)",
+		[]string{l.StaticMemberAttribute}, nil,
+	)
+
+	res, err := conn.Search(req)
+	if err != nil {
+		return false, errors.Wrap(err, "searching ldap")
+	}
+
+	users := res.Entries[0].GetAttributeValues(l.StaticMemberAttribute)
+	sort.Strings(users)
+	if i := sort.SearchStrings(users, user); i != len(users) {
+		for _, u := range users[i:] {
+			if u == user {
+				return true, nil
+			}
+			if !strings.HasPrefix(u, user) {
+				break
+			}
+		}
+	}
+
+	return false, nil
 }
 
 func (l *Ldap) CheckBind(user, password string) error {
@@ -57,15 +128,11 @@ func (l *Ldap) CheckBind(user, password string) error {
 	// Search request for userDN
 	req := ldap.NewSearchRequest(
 		l.UserBaseDn,
-		ldap.ScopeWholeSubtree,
-		ldap.NeverDerefAliases,
-		0,
-		0,
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0,
 		false,
-		fmt.Sprintf("(&(objectClass=%s)(%s=%s))",
-			l.UserObjectClass, l.UserIdAttribute, user),
-		nil,
-		nil,
+		fmt.Sprintf("(&%s(%s=%s))",
+			l.UserBaseFilter, l.UserNameAttribute, user),
+		nil, nil,
 	)
 	res, err := conn.Search(req)
 	if err != nil {
@@ -76,6 +143,13 @@ func (l *Ldap) CheckBind(user, password string) error {
 	} else if len(res.Entries) > 1 {
 		return fmt.Errorf("too many user entries")
 	}
+
+	if ok, err := l.checkGroup(conn, user); err != nil {
+		return errors.Wrap(err, "checking valid groups")
+	} else if !ok {
+		return errors.New("LDAP user has no valid Steam permissions")
+	}
+
 	userDn := res.Entries[0].DN
 
 	// Verify user Bind
@@ -83,49 +157,66 @@ func (l *Ldap) CheckBind(user, password string) error {
 }
 
 func NewLdap(
-	address, bindDn, bindPass string,
-	userBaseDn, userIdAttribute, userObjectClass string,
-	forceBind bool,
-	idleTime, maxTime time.Duration) *Ldap {
+	// Connection settings
+	address, bindDn, bindPass string, ldaps, forceBind bool,
+	// User settings
+	userBaseDn, userBaseFilter, userNameAttribute string,
+	// Group settings
+	groupDN, staticMemberAttribute string,
+	// Advanced Settings
+	searchRequestSizeLimit, searchRequestTimeLimit int,
+) *Ldap {
 	return &Ldap{
-		// Base LDAP settings
-		Address: address, BindDN: bindDn, BindPass: bindPass,
-		// User filter settings
-		UserBaseDn: userBaseDn, UserIdAttribute: userIdAttribute, UserObjectClass: userObjectClass,
+		// Connection settings
+		Address: address, BindDN: bindDn, BindPass: bindPass, Ldaps: ldaps, ForceBind: forceBind,
+		// User settings
+		UserBaseDn: userBaseDn, UserNameAttribute: userNameAttribute, UserBaseFilter: userBaseFilter,
+		// Group Settings
+		GroupDn: groupDN, StaticMemberAttribute: staticMemberAttribute,
 		// Additional Configs
-		ForceBind: forceBind,
-		Users:     NewLdapUser(idleTime, maxTime),
+		Users: NewLdapUser(time.Minute*1, 2*time.Hour),
 	}
 }
 
-func FromConfig(fileName string) (*Ldap, error) {
-	A := struct {
-		Hostname        string
-		Port            int
-		BindDn          string
-		BindPassword    string
-		UserBaseDn      string
-		UserIdAttribute string
-		UserObjectClass string
+func FromConfig(config *web.LdapConfig) *Ldap {
+	return NewLdap(
+		fmt.Sprintf("%s:%d", config.Host, config.Port), config.BindDn, config.BindPassword, config.Ldaps, config.ForceBind,
+		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
+		config.GroupDn, config.StaticMemberAttribute,
+		0, 0,
+	)
+}
 
-		IsTLS     bool `toml:"useLdaps"`
-		ForceBind bool
-		IdleTime  time.Duration
-		MaxTime   time.Duration
-	}{}
-
-	f, err := filepath.Abs(fileName)
+func FromDatabase(ds *data.Datastore) (*Ldap, error) {
+	config, exists, err := ds.ReadAuthentication(data.ByKey("ldap"))
 	if err != nil {
-		return nil, errors.Wrap(err, "getting absolute path")
+		return nil, errors.Wrap(err, "reading security config from database")
+	} else if !exists {
+		return nil, errors.New("no valid LDAP configurations. Please set LDAP configurations prior to starting steam with LDAP")
 	}
-	if _, err := toml.DecodeFile(f, &A); err != nil {
-		return nil, errors.Wrap(err, "decoding config file")
+
+	aux := struct {
+		Bind string
+		Ldap
+	}{}
+	if err := json.Unmarshal([]byte(config.Value), &aux); err != nil {
+		return nil, errors.Wrap(err, "deserializing config")
 	}
+
+	b, err := base64.StdEncoding.DecodeString(aux.Bind)
+	if err != nil {
+		return nil, errors.Wrap(err, "decoding bind")
+	}
+
+	decrypt := strings.Split(string(b), ":")
+	aux.Ldap.BindDN, aux.Ldap.BindPass = decrypt[0], decrypt[1]
+
+	a := aux.Ldap
 
 	return NewLdap(
-		fmt.Sprintf("%s:%d", A.Hostname, A.Port),
-		A.BindDn, A.BindPassword,
-		A.UserBaseDn, A.UserIdAttribute, A.UserObjectClass,
-
-		A.ForceBind, time.Minute*A.IdleTime, time.Minute*A.MaxTime), nil
+		a.Address, a.BindDN, a.BindPass, a.Ldaps, a.ForceBind,
+		a.UserBaseDn, a.UserBaseFilter, a.UserNameAttribute,
+		a.GroupDn, a.StaticMemberAttribute,
+		0, 0,
+	), nil
 }

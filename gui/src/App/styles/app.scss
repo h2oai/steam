@@ -1,4 +1,25 @@
 @import '../../variables.scss';
+@import "~@blueprintjs/core/src/blueprint.scss";
+.pt-toast.pt-intent-danger {
+  color: black;
+}
+.pt-toast.pt-intent-primary {
+  color: black;
+}
+.pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+.pt-input {
+  width: 200px;
+}
+.pt-toast .pt-button-group {
+  padding: 0px;
+}
+.button-primary:hover {
+  color: white;
+  text-decoration: none;
+}
+
 
 html, body, .app-container, #app {
   height: 100%;
@@ -18,7 +39,7 @@ h1 {
   text-transform: capitalize;
   color: $h2o-charcoal-grey;
   line-height: 1.1;
-  margin-bottom: 0px;
+  margin-bottom: 22px;
   margin-top: 22px;
 }
 
@@ -29,6 +50,7 @@ h2 {
   text-transform: capitalize;
   color: $h2o-charcoal-grey;
   line-height: 1.1;
+  padding-top: 12px;
 }
 
 /*Lede text, i.e. primary paragraphs of text on a page that serves introductory purposes.*/
@@ -255,8 +277,6 @@ input[type="text"], textarea {
   margin-bottom: 7px;
 }
 
-@import '../../variables.scss';
-
 .tooltip-launcher {
   position: relative;
 }
@@ -301,4 +321,23 @@ input[type="text"], textarea {
   fill:#FFFFFF;
   stroke:#FFFFFF;
   stroke-miterlimit:10;
+}
+
+.colapse-header {
+  font-weight: bold;
+  border-bottom-style: solid;
+  border-bottom-color: $h2o-soft-grey;
+  border-bottom-width: thin;
+  padding-bottom: 8px;
+}
+.steam-tooltip-launcher {
+  color: $h2o-orange-prime;
+}
+
+.unsupported-browser {
+  text-align: center;
+  margin-top: 30px;
+  a {
+    text-decoration: underline;
+  }
 }
