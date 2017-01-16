@@ -95,6 +95,7 @@ test:
 	cd tests && ./goh2orunner.sh
 
 reset:
+	rm -rf var/master/db
 	rm -rf var/master/model
 	rm -rf var/master/project
 

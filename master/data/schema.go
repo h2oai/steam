@@ -97,7 +97,7 @@ CREATE TABLE cluster (
     username text,
     context_path text,
     type_id integer NOT NULL,
-    detail_id integer,
+    detail_id integer UNIQUE,
     address text UNIQUE,
     token text,
     state text NOT NULL,
