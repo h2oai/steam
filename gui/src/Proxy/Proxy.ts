@@ -88,6 +88,7 @@ export interface Config {
   kerberos_enabled: boolean
   version: string
   username: string
+  permissions: Permission[]
 }
 
 export interface Dataset {
