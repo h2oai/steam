@@ -147,7 +147,6 @@ func NewDatastore(driver string, dbOpts DBOpts, forceAdmin bool) (*Datastore, er
 		if err != nil {
 			return nil, errors.Wrap(err, "searching for admins")
 		}
-		fmt.Println(admins)
 		if len(admins) > 0 {
 			hashPassword, err := auth.HashPassword(dbOpts.AdminPass)
 			if err != nil {
