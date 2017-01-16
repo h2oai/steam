@@ -37,6 +37,7 @@ import (
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -275,9 +276,16 @@ func CheckAdmin(workingDirectory string, dbOpts data.DBOpts) error {
 	}
 
 	// --- init storage ---
-	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
-	if _, err := os.Stat(dbOpts.Path); os.IsNotExist(err) {
-		return err
+
+	switch dbOpts.Driver {
+	case "sqlite3":
+		dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
+		if _, err := os.Stat(dbOpts.Path); os.IsNotExist(err) {
+			return err
+		}
+
 	}
-	return nil
+
+	_, err = data.NewDatastore(dbOpts.Driver, dbOpts, false)
+	return errors.Wrap(err, "setting up datastore")
 }

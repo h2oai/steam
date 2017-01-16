@@ -123,9 +123,24 @@ func NewDatastore(driver string, dbOpts DBOpts, forceAdmin bool) (*Datastore, er
 	if err != nil {
 		return nil, errors.Wrap(err, "checking if database is primed")
 	} else if !primed {
-		dbOpts.AdminName, dbOpts.AdminPass, err = setAdmin(dbOpts)
-		if err != nil {
-			return nil, errors.Wrap(err, "setting local admin")
+		if forceAdmin {
+			dbOpts.AdminName, dbOpts.AdminPass, err = setAdmin(dbOpts)
+			if err != nil {
+				return nil, errors.Wrap(err, "setting up local admin")
+			}
+		} else {
+			if dbOpts.AdminName == "" || dbOpts.AdminPass == "" {
+				return nil, errors.New("First time Steam launch requires setting" +
+					" the local admin: please use './steam --set-admin' or set" +
+					" the flags '--admin-name' and '--admin-password'")
+			}
+
+			if err := auth.ValidateUsername(dbOpts.AdminName); err != nil {
+				return nil, errors.Wrap(err, "validating username")
+			}
+			if err := auth.ValidatePassword(dbOpts.AdminPass); err != nil {
+				return nil, errors.Wrap(err, "validating password")
+			}
 		}
 		if err := prime(db); err != nil {
 			return nil, errors.Wrap(err, "priming database")
