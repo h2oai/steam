@@ -74,8 +74,8 @@ func setupSqlite() (string, DBOpts, error) {
 	return dir, DBOpts{
 		Driver:    "sqlite3",
 		Path:      filepath.Join(dir, "sl.db"),
-		AdminName: AdminRN,
-		AdminPass: AdminRN,
+		AdminName: "superuser",
+		AdminPass: "password",
 	}, err
 }
 
@@ -90,14 +90,14 @@ func TestSqliteDB(t *testing.T) {
 
 	// -- Setup --
 
-	dir, dbPath, err := setupSqlite()
+	dir, dbOpts, err := setupSqlite()
 	if err != nil {
 		t.Fatalf("Failed setup: %+v", err)
 	}
 
 	// -- Setup --
 
-	ds, err := NewDatastore("sqlite3", dbPath)
+	ds, err := NewDatastore("sqlite3", dbOpts, false)
 	if err != nil {
 		t.Errorf("Failed creating database: %+v", err)
 		t.FailNow()
@@ -109,7 +109,7 @@ func TestSqliteDB(t *testing.T) {
 	if clean {
 		os.RemoveAll(dir)
 	} else {
-		log.Println("Database for TestSqliteDB at", dbPath)
+		log.Println("Database for TestSqliteDB at", dbOpts)
 	}
 }
 

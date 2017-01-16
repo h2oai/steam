@@ -89,7 +89,7 @@ func setupDS(driver, wd string) *data.Datastore {
 		dbOpts.Path = filepath.Join(wd, fs.DbDir, "steam.db")
 	}
 
-	ds, err := data.NewDatastore(driver, dbOpts)
+	ds, err := data.NewDatastore(driver, dbOpts, false)
 	if err != nil {
 		log.Fatalf("Creating datastore: %+v", err)
 	}

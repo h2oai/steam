@@ -163,7 +163,7 @@ func ForAdminWorkgroup(q *QueryConfig) error {
 	ds := q.tx.From("identity_workgroup").SelectDistinct("identity_id").Where(
 		goqu.I("workgroup_id").Eq(workgroupId),
 	)
-	q.dataset = q.dataset.Where(goqu.I("identity_id").Eq(ds))
+	q.dataset = q.dataset.Where(goqu.I("id").Eq(ds))
 	return nil
 }
 

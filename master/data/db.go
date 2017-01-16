@@ -109,7 +109,7 @@ func init() {
 	EntityTypes.init()
 }
 
-func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
+func NewDatastore(driver string, dbOpts DBOpts, forceAdmin bool) (*Datastore, error) {
 	if dbOpts.Flags&Debug != 0 {
 		debug = true
 	}
@@ -124,52 +124,17 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "checking if database is primed")
 	} else if !primed {
-		if strings.TrimSpace(dbOpts.AdminName) == "" {
-			r := bufio.NewReader(os.Stdin)
-
-			fmt.Print("Steam local admin username: ")
-
-			name, err := r.ReadString('\n')
-			if err != nil {
-				return nil, err
-			}
-			dbOpts.AdminName = strings.Trim(name, "\n")
+		dbOpts.AdminName, dbOpts.AdminPass, err = setAdmin(dbOpts)
+		if err != nil {
+			return nil, errors.Wrap(err, "setting local admin")
 		}
-
-		if err := auth.ValidateUsername(dbOpts.AdminName); err != nil {
-			return nil, errors.Wrap(err, "validating username")
-		}
-
-		if strings.TrimSpace(dbOpts.AdminPass) == "" {
-			fmt.Print("Steam local admin password: ")
-
-			passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
-			if err != nil {
-				fmt.Println()
-				return nil, err
-			}
-
-			if err := auth.ValidatePassword(string(passBytes)); err != nil {
-				fmt.Println()
-				return nil, errors.Wrap(err, "validating password")
-			}
-			fmt.Print("\nValidate local admin password: ")
-			valiBytes, err := terminal.ReadPassword(int(syscall.Stdin))
-			if err != nil {
-				fmt.Println()
-				return nil, err
-			}
-			if string(valiBytes) != string(passBytes) {
-				fmt.Println()
-				return nil, errors.New("password mismatch")
-			}
-			fmt.Println()
-			dbOpts.AdminPass = strings.Trim(string(passBytes), "\n")
-
-		}
-
 		if err := prime(db); err != nil {
 			return nil, errors.Wrap(err, "priming database")
+		}
+	} else if forceAdmin {
+		dbOpts.AdminName, dbOpts.AdminPass, err = setAdmin(dbOpts)
+		if err != nil {
+			return nil, errors.Wrap(err, "setting local admin")
 		}
 	}
 
@@ -178,13 +143,78 @@ func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {
 		return nil, errors.Wrap(err, "initializing datastore")
 	}
 
-	if !primed {
-		if _, err := ds.createAdmin(dbOpts.AdminName, dbOpts.AdminPass); err != nil {
-			return nil, err
+	if !primed || forceAdmin {
+		admins, err := ds.ReadIdentities(ForAdminWorkgroup)
+		if err != nil {
+			return nil, errors.Wrap(err, "searching for admins")
+		}
+		fmt.Println(admins)
+		if len(admins) > 0 {
+			hashPassword, err := auth.HashPassword(dbOpts.AdminPass)
+			if err != nil {
+				return nil, errors.Wrap(err, "hashing password")
+			}
+			if err := ds.UpdateIdentity(admins[0].Id,
+				WithName(dbOpts.AdminName), WithPassword(hashPassword),
+			); err != nil {
+				return nil, err
+			}
+		} else {
+			if _, err := ds.createAdmin(dbOpts.AdminName, dbOpts.AdminPass); err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	return ds, nil
+}
+
+func setAdmin(dbOpts DBOpts) (string, string, error) {
+	adminName, adminPass := dbOpts.AdminName, dbOpts.AdminPass
+	if strings.TrimSpace(adminName) == "" {
+		r := bufio.NewReader(os.Stdin)
+
+		fmt.Print("Steam local admin username: ")
+
+		name, err := r.ReadString('\n')
+		if err != nil {
+			return "", "", err
+		}
+		adminName = strings.Trim(name, "\n")
+	}
+
+	if err := auth.ValidateUsername(adminName); err != nil {
+		return "", "", errors.Wrap(err, "validating username")
+	}
+
+	if strings.TrimSpace(adminPass) == "" {
+		fmt.Print("Steam local admin password: ")
+
+		passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			fmt.Println()
+			return "", "", err
+		}
+
+		if err := auth.ValidatePassword(string(passBytes)); err != nil {
+			fmt.Println()
+			return "", "", errors.Wrap(err, "validating password")
+		}
+		fmt.Print("\nValidate local admin password: ")
+		valiBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			fmt.Println()
+			return "", "", err
+		}
+		if string(valiBytes) != string(passBytes) {
+			fmt.Println()
+			return "", "", errors.New("password mismatch")
+		}
+		fmt.Println()
+		adminPass = strings.Trim(string(passBytes), "\n")
+	}
+
+	return adminName, adminPass, nil
 }
 
 func open(driver string, opts DBOpts) (*goqu.Database, error) {
@@ -459,7 +489,7 @@ func (ds *Datastore) getRow(dataset *goqu.Dataset) (*sql.Row, error) {
 func (ds *Datastore) createAdmin(username, password string) (int64, error) {
 	hashPassword, err := auth.HashPassword(password)
 	if err != nil {
-		return 0, errors.Wrap(err, "hasing password")
+		return 0, errors.Wrap(err, "hashing password")
 	}
 
 	tx, err := ds.db.Begin()
@@ -472,7 +502,7 @@ func (ds *Datastore) createAdmin(username, password string) (int64, error) {
 		var err error
 		id, err = createIdentity(tx, username,
 			WithPassword(hashPassword),
-			WithDefaultIdentityWorkgroup)
+			WithAdminWorkgroup)
 		if err != nil {
 			return errors.Wrap(err, "creating identity")
 		}
