@@ -82,7 +82,7 @@ case "$1" in
       --start \
       --make-pidfile --pidfile $PIDFILE \
       --background \
-      --startas /bin/bash -- -c "exec $DAEMON serve master --web-address=:$STEAM_HTTPS_PORT --cluster-proxy-address=:$STEAM_PROXY_HTTPS_PORT --web-tls-cert-path=$STEAM_WEB_TLS_CERT_PATH --web-tls-key-path=$STEAM_WEB_TLS_PRIVATE_KEY_PATH --working-directory=$H2ODIR/var/master >> /var/log/steam.log 2>&1"
+      --startas /bin/bash -- -c "exec $DAEMON serve master --web-address=:$STEAM_HTTPS_PORT --cluster-proxy-address=:$STEAM_PROXY_HTTPS_PORT --web-tls-cert-path=$STEAM_WEB_TLS_CERT_PATH --web-tls-key-path=$STEAM_WEB_TLS_PRIVATE_KEY_PATH --working-directory=$WORKING_DIRECTORY >> /var/log/steam.log 2>&1"
 
     RC=$?
     if [ $RC -ne 0 ]; then
@@ -114,7 +114,7 @@ case "$1" in
     $0 start
     ;;
   *)
-    echo "Usage: /etc/init.d/steam {set-admin|start|stop|force-stop|restart|force-reload}"
+    echo "Usage: /etc/init.d/steam {set-admin|create-self-signed-cert|start|stop|force-stop|restart|force-reload}"
     exit 1
     ;;
 esac
