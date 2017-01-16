@@ -30,10 +30,12 @@ import PageHeader from '../../Projects/components/PageHeader';
 import Table from '../../Projects/components/Table';
 import '../styles/launchcluster.scss';
 import { NumericInput } from 'h2oUIKit';
+import {hasPermissionToShow} from "../../App/utils/permissions";
 
 interface Props {
   engines: any,
   config: any,
+  isAdmin: boolean
   clusterLaunchIsInProgress: boolean
 }
 
@@ -123,10 +125,10 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 H2O VERSION
               </Cell>
               <Cell>
-                <div className="upload-engine">
+                {hasPermissionToShow("ManageEngine", this.props.config, this.props.isAdmin) ? <div className="upload-engine">
                   <input ref="engine" type="file" name="engine"/>
                   <div className="button-primary" onClick={this.uploadEngine.bind(this)}>Upload Engine</div>
-                </div>
+                </div> : null}
                 <select onChange={this.onChangeEngine.bind(this)}>
                   <option></option>
                   {this.props.engines.map((engine, i) => {
@@ -163,6 +165,7 @@ function mapStateToProps(state) {
   return {
     engines: state.clusters.engines,
     config: state.clusters.config,
+    isAdmin: state.global.isAdmin,
     clusterLaunchIsInProgress: state.clusters.clusterLaunchIsInProgress
   };
 }

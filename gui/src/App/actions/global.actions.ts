@@ -21,7 +21,20 @@ import { NotificationType } from '../components/Notification';
 
 export const REQUEST_ENTITY_IDS = 'REQUEST_ENTITY_IDS';
 export const RECEIVE_ENTITY_IDS = 'RECEIVE_ENTITY_IDS';
+export const REQUEST_IS_ADMIN = 'REQUEST_IS_ADMIN';
+export const RECEIVE_IS_ADMIN = 'RECEIVE_IS_ADMIN';
 
+export function requestIsAdmin() {
+  return {
+    type: REQUEST_IS_ADMIN
+  };
+}
+export function receiveIsAdmin(isAdmin) {
+  return {
+    type: RECEIVE_IS_ADMIN,
+    isAdmin
+  };
+}
 export function requestEntityIds() {
   return {
     type: REQUEST_ENTITY_IDS
@@ -42,7 +55,7 @@ export function fetchEntityIds() {
     return new Promise((resolve, reject) => {
       Remote.getAllEntityTypes((error, res) => {
         if (error) {
-          openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null);
+          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving permissions list', null));
           reject(error);
           return;
         }
@@ -50,6 +63,21 @@ export function fetchEntityIds() {
         resolve(res);
       });
     });
-
   };
 }
+export function fetchIsAdmin() {
+  return (dispatch, getState) => {
+    dispatch(requestIsAdmin());
+    return new Promise((resolve, reject) => {
+      Remote.checkAdmin((error: Error, isAdmin: boolean) => {
+        if (error) {
+          dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
+          reject(error);
+          return;
+        }
+        dispatch(receiveIsAdmin(isAdmin));
+        resolve(isAdmin);
+      });
+    });
+  };
+};

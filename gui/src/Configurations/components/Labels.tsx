@@ -29,14 +29,24 @@ import { connect } from 'react-redux';
 import '../styles/labels.scss';
 
 import * as _ from 'lodash';
+import {hasPermissionToShow} from "../../App/utils/permissions";
+import {fetchIsAdmin} from "../../App/actions/global.actions";
+import {getConfig} from "../../Clusters/actions/clusters.actions";
+import {Config} from "../../Proxy/Proxy";
 
 interface Props {
-    labels?: any
-    projectid: string
-    fetchLabels: Function
-    createLabel: Function
-    deleteLabel: Function
-    updateLabel: Function
+  labels?: any
+  projectid: string
+  config: Config
+  isAdmin: boolean
+  fetchLabels: Function
+  createLabel: Function
+  deleteLabel: Function
+  updateLabel: Function
+}
+interface DispatchProps {
+  fetchIsAdmin: Function
+  getConfig: Function
 }
 
 interface State {
@@ -44,10 +54,10 @@ interface State {
   label: any
 }
 
-class Labels extends React.Component<Props, any> {
+class Labels extends React.Component<Props & DispatchProps, any> {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             modalOpen: false,
             label: {}
@@ -58,6 +68,8 @@ class Labels extends React.Component<Props, any> {
         if (!this.props.labels || !this.props.labels[this.props.projectid]) {
             this.props.fetchLabels(this.props.projectid);
         }
+        this.props.fetchIsAdmin();
+        this.props.getConfig();
     }
 
     openModal() {
@@ -169,9 +181,10 @@ class Labels extends React.Component<Props, any> {
                     the power to label a model "production".
                 </p>
                 <span>
+                  {hasPermissionToShow("ManageLabel", this.props.config, this.props.isAdmin) ?
                     <button className="button-primary" onClick={this.openModal.bind(this) }>
                         Create New Label
-                    </button>
+                    </button> : null }
                 </span>
                 <CreateNewLabelModal label={this.state.label} open={this.state.modalOpen} cancel={this.closeModal.bind(this) } save={this.saveUpdateLabel.bind(this)} />
                 <div className="label-table">
@@ -193,16 +206,20 @@ class Labels extends React.Component<Props, any> {
 
 function mapStateToProps(state: any): any {
     return {
-        labels: state.labels
+      labels: state.labels,
+      config: state.clusters.config,
+      isAdmin: state.global.isAdmin
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        fetchLabels: bindActionCreators(fetchLabels, dispatch),
-        createLabel: bindActionCreators(createLabel, dispatch),
-        deleteLabel: bindActionCreators(deleteLabel, dispatch),
-        updateLabel: bindActionCreators(updateLabel, dispatch)
+      fetchLabels: bindActionCreators(fetchLabels, dispatch),
+      createLabel: bindActionCreators(createLabel, dispatch),
+      deleteLabel: bindActionCreators(deleteLabel, dispatch),
+      updateLabel: bindActionCreators(updateLabel, dispatch),
+      fetchIsAdmin: bindActionCreators(fetchIsAdmin, dispatch),
+      getConfig: bindActionCreators(getConfig, dispatch)
     };
 }
 
