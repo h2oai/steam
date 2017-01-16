@@ -34,6 +34,8 @@ import './styles/clusters.scss';
 import { Link } from 'react-router';
 import { getConfig } from './actions/clusters.actions';
 import ConfirmDeleteClusterDialog from "./components/ConfirmDeleteClusterDialog";
+import { hasPermissionToShow } from "../App/utils/permissions";
+import {fetchIsAdmin} from "../App/actions/global.actions";
 
 interface DispatchProps {
   fetchClusters: Function
@@ -46,7 +48,8 @@ interface DispatchProps {
 
 interface Props {
   clusters: Cluster[],
-  config: any
+  config: any,
+  isAdmin: boolean
 }
 
 export class Clusters extends React.Component<Props & DispatchProps, any> {
@@ -129,6 +132,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
     if (!this.props.clusters) {
       return <div></div>;
     }
+
     return (
       <div className="clusters">
         <ConfirmDeleteClusterDialog isOpen={this.state.confirmDeleteClusterOpen} clusterToDelete={this.state.selectedCluster} onDeleteConfirmed={this.onDeleteClusterConfirmed} onCancel={this.onDeleteClusterCanceled} />
@@ -139,7 +143,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
               <div className="button-secondary" onClick={this.onCreateNewClusterClicked.bind(this)}>
                 Connect to Cluster
               </div>
-              <Link to="clusters/new" className="button-primary">Launch New Cluster</Link>
+              {hasPermissionToShow("ViewEngine", this.props.config, this.props.isAdmin) ?
+              <Link to="clusters/new" className="button-primary">Launch New Cluster</Link> : null}
             </div>
             : null }
         </PageHeader>
@@ -168,8 +173,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                                                         rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
-                    <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
-                      className="fa fa-trash no-margin"/></button>
+                    {hasPermissionToShow("ManageCluster", this.props.config, this.props.isAdmin) ? <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
+                      className="fa fa-trash no-margin"/></button> : null }
                   </span>
                 </header>
                 <div className="flexrow">
@@ -203,7 +208,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state): any {
   return {
     clusters: state.projects.clusters,
-    config: state.clusters.config
+    config: state.clusters.config,
+    isAdmin: state.global.isAdmin
   };
 }
 

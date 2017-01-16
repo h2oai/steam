@@ -947,19 +947,6 @@ export function testLdapConfig(ldapConfig: LdapConfig) {
   };
 }
 
-export function checkAdmin() {
-  return (dispatch, getState) => {
-    dispatch(requestAdminCheck());
-    Remote.checkAdmin((error, isSuperuser) => {
-      if (error) {
-        dispatch(openNotification(NotificationType.Error, "Superuser", "Unable to check admin status", null));
-        return;
-      }
-      dispatch(receiveAdminCheck(isSuperuser));
-    });
-  };
-}
-
 export function setLocalConfig() {
   return (dispatch, getState) => {
     dispatch(requestSetLocalConfig());

@@ -29,6 +29,7 @@ import RocGraph from './RocGraph';
 import ModelLabelSelect from './ModelLabelSelect';
 import { Link } from 'react-router';
 import { Label } from '../../Proxy/Proxy';
+import {hasPermissionToShow} from "../../App/utils/permissions";
 
 interface Props {
   onFilter: Function,
