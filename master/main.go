@@ -124,7 +124,7 @@ func Run(version, buildDate string, opts Opts) {
 	// --- init storage ---
 
 	opts.DBOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
-	ds, err := data.NewDatastore(opts.DBOpts.Driver, opts.DBOpts, false)
+	ds, err := data.NewDatastore(opts.DBOpts, false)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -263,7 +263,7 @@ func SetAdmin(workingDirectory string, dbOpts data.DBOpts) error {
 
 	// --- init storage ---
 	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
-	_, err = data.NewDatastore(dbOpts.Driver, dbOpts, true)
+	_, err = data.NewDatastore(dbOpts, true)
 	return err
 }
 
@@ -286,6 +286,6 @@ func CheckAdmin(workingDirectory string, dbOpts data.DBOpts) error {
 
 	}
 
-	_, err = data.NewDatastore(dbOpts.Driver, dbOpts, false)
+	_, err = data.NewDatastore(dbOpts, false)
 	return errors.Wrap(err, "setting up datastore")
 }

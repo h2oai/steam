@@ -81,15 +81,16 @@ func setupWD(testType string) (string, string) {
 
 func setupDS(driver, wd string) *data.Datastore {
 	dbOpts := data.DBOpts{
+		Driver:    driver,
 		AdminName: admin,
-		AdminPass: "admin012",
+		AdminPass: "adminadmin",
 	}
 	switch driver {
 	case "sqlite3":
 		dbOpts.Path = filepath.Join(wd, fs.DbDir, "steam.db")
 	}
 
-	ds, err := data.NewDatastore(driver, dbOpts, false)
+	ds, err := data.NewDatastore(dbOpts, false)
 	if err != nil {
 		log.Fatalf("Creating datastore: %+v", err)
 	}

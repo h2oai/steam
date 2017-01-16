@@ -108,13 +108,13 @@ func init() {
 	EntityTypes.init()
 }
 
-func NewDatastore(driver string, dbOpts DBOpts, forceAdmin bool) (*Datastore, error) {
+func NewDatastore(dbOpts DBOpts, forceAdmin bool) (*Datastore, error) {
 	if dbOpts.Flags&Debug != 0 {
 		debug = true
 	}
 
 	// Connect to db
-	db, err := open(driver, dbOpts)
+	db, err := open(dbOpts)
 	if err != nil {
 		return nil, errors.Wrap(err, "connecting to database")
 	}
@@ -230,10 +230,10 @@ func setAdmin(dbOpts DBOpts) (string, string, error) {
 	return adminName, adminPass, nil
 }
 
-func open(driver string, opts DBOpts) (*goqu.Database, error) {
+func open(opts DBOpts) (*goqu.Database, error) {
 	// Set connection opts
 	var dbOpts string
-	switch driver {
+	switch opts.Driver {
 	case "sqlite3":
 		dbOpts = opts.Path
 	case "postgres":
@@ -244,12 +244,12 @@ func open(driver string, opts DBOpts) (*goqu.Database, error) {
 	}
 
 	// Open connection
-	db, err := sql.Open(driver, dbOpts)
+	db, err := sql.Open(opts.Driver, dbOpts)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening database connection")
 	}
 	// Set configurations (eg. use fk constraints)
-	switch driver {
+	switch opts.Driver {
 	case "sqlite3":
 		if _, err := os.Stat(dbOpts); os.IsNotExist(err) {
 			if err := createSQLiteDB(db); err != nil {
@@ -265,7 +265,7 @@ func open(driver string, opts DBOpts) (*goqu.Database, error) {
 		return nil, errors.Wrap(err, "failed pinging database")
 	}
 
-	return goqu.New(driver, db), nil
+	return goqu.New(opts.Driver, db), nil
 }
 
 func toPostgresOpts(o DBOpts) string {

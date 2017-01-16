@@ -97,7 +97,7 @@ func TestSqliteDB(t *testing.T) {
 
 	// -- Setup --
 
-	ds, err := NewDatastore("sqlite3", dbOpts, false)
+	ds, err := NewDatastore(dbOpts, false)
 	if err != nil {
 		t.Errorf("Failed creating database: %+v", err)
 		t.FailNow()
