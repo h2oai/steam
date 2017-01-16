@@ -48,7 +48,7 @@ var debug bool
 {{define "postFunc" -}}
 	for _, post := range q.postFunc {
 		if err := post(q); err != nil {
-			return errors.Wrap(err, "running post functions")
+			return {{if .}}{{.}}, {{end}}errors.Wrap(err, "running post functions")
 		}
 	}
 {{- end}}
@@ -62,9 +62,9 @@ var debug bool
 
 {{define "fields" -}} {{/* ARG REQUIRED */ -}}
 	// Default insert fields
-	{{toFieldVar .Name}} := goqu.Record{ 
+	{{toFieldVar .Name}} := goqu.Record{
 		{{- range .Cols}}
-		{{- if .IsArg}} 
+		{{- if .IsArg}}
 		"{{.TblName}}": {{toFieldVar .Name}},
 		{{- else if .Default}}
 		"{{.TblName}}": {{.Default}},
@@ -85,16 +85,18 @@ var debug bool
 	if err != nil {
 		return {{if .}}{{.}}, {{end}}errors.Wrap(err, "executing query")
 	}
-	{{- if .}}{{/* Case for private */}}
-	return res.LastInsertId()
-	{{- else}}{{/* Case for exported */}}
-	id, err = res.LastInsertId()
+	id, err {{if .}}:{{else}}{{end}}= res.LastInsertId()
 	if err != nil {
-		return errors.Wrap(err, "retrieving id")
+		return {{if .}}{{.}}, {{end}}errors.Wrap(err, "retrieving id")
 	}
 	q.entityId = id
+	{{- if .}}{{/* Case for private */}}
+	{{template "postFunc" .}}
+
+	return id, nil
+	{{- else}}{{/* Case for exported */}}
 	{{template "postFunc"}}
-	
+
 	return nil
 	{{- end}}
 {{- end}}
@@ -117,13 +119,15 @@ var debug bool
 {{- end}}
 
 {{define "scanRows" -}} {{/* ARG OPTIONAL */ -}}
-	{{- if .}}{{/* Case for private */}}
-	// Scan rows to {{( toPluralName .Name)}}s
-	return Scan{{title .Name}}s(rows)
-	{{- else}}{{/* Case for exported */}}
 	if err != nil {
-		return err
+		return {{if .}}[]{{.Name}}{}, {{end}}err
 	}
+	{{- if .}}{{/* Case for private */}}
+	{{template "postFunc" printf "[]%s{}" .Name}}
+
+	// Scan rows to {{( toPluralName .Name)}}s
+	return {{lowerFirst ( toPluralName .Name)}}s, nil
+	{{- else}}{{/* Case for exported */}}
 	{{template "postFunc"}}
 
 	return nil
@@ -140,14 +144,18 @@ var debug bool
 
 {{define "scanRow" -}} {{/* ARG OPTIONAL */ -}}
 	if err == sql.ErrNoRows {
-		return {{if .}}{{.Name}}{}, exists, {{end}}nil
+		return {{if .}}{{.Name}}{}, false, {{end}}nil
 	} else if err == nil {
 		exists = true
-	}
 	{{- if .}}{{/* Case for private */}}
+	} else {
+		return {{.Name}}{}, false, err
+	}
+	{{template "postFunc" printf "%s{}, false" .Name}}
 	// Scan row to {{.Name}}
-	return ret_{{lowerFirst .Name}}, exists, err
+	return ret_{{lowerFirst .Name}}, exists, nil
 	{{- else}}{{/* Case for exported */}}
+	}
 	if err != nil {
 		return err
 	}
@@ -157,7 +165,7 @@ var debug bool
 	{{- end}}
 {{- end}}
 
-{{define "updateSql" -}} {{/* ARG OPTIONAL for exported */ -}}
+{{define "updateSql" -}} {{/* ARG OPTIONAL */ -}}
 	if debug && len(q.fields) > 0 {
 		color.Set(color.FgYellow)
 		log.Println(q.dataset.ToUpdateSql(q.fields))
@@ -165,36 +173,29 @@ var debug bool
 	}
 	// Execute query
 	if len(q.fields) > 0 {
-	{{- if .}}{{/* Case for exported */}}
 		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
 			return errors.Wrap(err, "executing query")
 		}
 	}
 	{{template "postFunc"}}
-	{{- else}}
-		_, err := q.dataset.Update(q.fields).Exec()
-		return errors.Wrap(err, "executing query")
-	}
-	{{- end}}
 	return nil
 {{- end}}
 
-{{define "deleteSql" -}} {{/* ARG REQUIRED for exported */ -}}
+{{define "deleteSql" -}} {{/* ARG OPTIONAL */ -}}
 	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
 		color.Unset()
 	}
 	// Execute query
-	{{- if .}}{{/* Case for exported */}}
 	if _, err := q.dataset.Delete().Exec(); err != nil {
 		return errors.Wrap(err, "executing query")
 	}
 	{{template "postFunc"}}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
-	{{- else}} 
-	_, err := q.dataset.Delete().Exec()
-	return errors.Wrap(err, "executing query")
+	{{if .}}
+	return nil
+	{{else}}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	{{- end}}
 {{- end}}
 
@@ -211,7 +212,7 @@ var debug bool
 {{- /* CREATE EXPORTED */ -}}
 func (ds *Datastore) Create{{title .Name}}({{toArgs .Cols}}options ...QueryOpt) (int64, error) {
 	{{with "0"}}{{template "begin" .}}{{end}}
-	
+
 	var id int64
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
@@ -238,7 +239,7 @@ func (ds *Datastore) Read{{title ( toPluralName .Name)}}s(options ...QueryOpt) (
 		{{lowerFirst ( toPluralName .Name)}}s, err = Scan{{title .Name}}s(rows)
 		{{template "scanRows"}}
 	})
-	
+
 	return {{lowerFirst ( toPluralName .Name)}}s, errors.Wrap(err, "committing transaction")
 }
 
@@ -273,7 +274,7 @@ func (ds *Datastore) Update{{title .Name}}({{if .Key}}{{lowerFirst .Name}}Id int
 		q := NewQueryConfig(ds, tx, UpdateOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 		{{- end}}
 		{{template "options"}}
-		{{template "updateSql" .}}
+		{{template "updateSql"}}
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -291,7 +292,7 @@ func (ds *Datastore) Delete{{title .Name}}({{if .Key}}{{lowerFirst .Name}}Id int
 		q := NewQueryConfig(ds, tx, DeleteOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 		{{- end}}
 		{{template "options"}}
-		{{template "deleteSql" .}}
+		{{template "deleteSql"}}
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -324,6 +325,7 @@ func read{{title ( toPluralName .Name)}}s(tx *goqu.TxDatabase, options ...QueryO
 	{{with printf "[]%s{}" .Name}}{{template "options" .}}{{end}}
 	{{template "toSql"}}
 	{{template "getRows" .}}
+	{{lowerFirst ( toPluralName .Name)}}s, err := Scan{{title .Name}}s(rows)
 	{{template "scanRows" .}}
 }
 
@@ -360,7 +362,7 @@ func delete{{title .Name}}(tx *goqu.TxDatabase, {{if .Key}}{{lowerFirst .Name}}I
 	q := NewQueryConfig(nil, tx, DeleteOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 	{{- end}}
 	{{template "options"}}
-	{{template "deleteSql"}}
+	{{template "deleteSql" .}}
 }
 {{end}}
 `

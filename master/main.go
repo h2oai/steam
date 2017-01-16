@@ -37,6 +37,7 @@ import (
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -123,7 +124,7 @@ func Run(version, buildDate string, opts Opts) {
 	// --- init storage ---
 
 	opts.DBOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
-	ds, err := data.NewDatastore(opts.DBOpts.Driver, opts.DBOpts)
+	ds, err := data.NewDatastore(opts.DBOpts, false)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -262,7 +263,7 @@ func SetAdmin(workingDirectory string, dbOpts data.DBOpts) error {
 
 	// --- init storage ---
 	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
-	_, err = data.NewDatastore(dbOpts.Driver, dbOpts)
+	_, err = data.NewDatastore(dbOpts, true)
 	return err
 }
 
@@ -275,9 +276,16 @@ func CheckAdmin(workingDirectory string, dbOpts data.DBOpts) error {
 	}
 
 	// --- init storage ---
-	dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
-	if _, err := os.Stat(dbOpts.Path); os.IsNotExist(err) {
-		return err
+
+	switch dbOpts.Driver {
+	case "sqlite3":
+		dbOpts.Path = path.Join(wd, fs.DbDir, "steam.db")
+		if _, err := os.Stat(dbOpts.Path); os.IsNotExist(err) {
+			return err
+		}
+
 	}
-	return nil
+
+	_, err = data.NewDatastore(dbOpts, false)
+	return errors.Wrap(err, "setting up datastore")
 }
