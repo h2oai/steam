@@ -35,7 +35,11 @@ const (
 	View = "view"
 
 	// --- Role ---
+
 	AdminRN = "admin"
+
+	// -- Workgroup ---
+	AdminWG = "user:admin"
 
 	// --- Security --
 	LocalAuth = "local"
@@ -61,6 +65,36 @@ func newClusterTypeKeys(clusterTypes []clusterType) clusterTypeKeys {
 	return clusterTypeKeys{
 		External: m["external"],
 		Yarn:     m["yarn"],
+	}
+}
+
+type entity_types struct {
+	Cluster    string
+	Engine     string
+	Identity   string
+	Label      string
+	Model      string
+	Permission string
+	Privilege  string
+	Project    string
+	Role       string
+	Service    string
+	Workgroup  string
+}
+
+func (e *entity_types) init() {
+	*e = entity_types{
+		"cluster",
+		"engine",
+		"identity",
+		"label",
+		"model",
+		"permission",
+		"privilege",
+		"project",
+		"role",
+		"service",
+		"workgroup",
 	}
 }
 
@@ -289,8 +323,8 @@ type states struct {
 	Completed    string
 }
 
-func initState() states {
-	return states{
+func (s *states) init() {
+	*s = states{
 		"idle",
 		"starting",
 		"started",

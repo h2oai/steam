@@ -83,7 +83,7 @@ CREATE TABLE binomial_model (
     r_squared double precision,
     logloss double precision,
     auc double precision,
-    gini double precision, 
+    gini double precision,
 
     PRIMARY KEY (model_id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
@@ -150,12 +150,12 @@ CREATE TABLE history (
     id integer PRIMARY KEY AUTOINCREMENT,
     action text NOT NULL,
     identity_id integer NOT NULL,
-    entity_type_id integer NOT NULL,
+    entity_type string NOT NULL,
     entity_id integer NOT NULL,
     description text,
     created datetime NOT NULL,
 
-    FOREIGN KEY (entity_type_id) REFERENCES entity_type(id),
+    FOREIGN KEY (entity_type) REFERENCES entity_type(name),
     FOREIGN KEY (identity_id) REFERENCES identity(id)
 )
 `
@@ -273,12 +273,12 @@ CREATE TABLE privilege (
     privilege_type text NOT NULL,
     identity_id integer NOT NULL,
     workgroup_id integer NOT NULL,
-    entity_type_id integer NOT NULL,
+    entity_type text NOT NULL,
     entity_id integer NOT NULL,
 
-    PRIMARY KEY (identity_id, privilege_type, workgroup_id, entity_type_id, entity_id),
+    PRIMARY KEY (identity_id, privilege_type, workgroup_id, entity_type, entity_id),
     FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE,
-    FOREIGN KEY (entity_type_id) REFERENCES entity_type(id),
+    FOREIGN KEY (entity_type) REFERENCES entity_type(name),
     FOREIGN KEY (workgroup_id) REFERENCES workgroup(id) ON DELETE CASCADE
 )
 `
@@ -289,7 +289,7 @@ CREATE TABLE project (
     name text NOT NULL UNIQUE,
     description text NOT NULL,
     model_category text NOT NULL,
-    created datetime NOT NULL  
+    created datetime NOT NULL
 )
 `
 
@@ -310,7 +310,7 @@ CREATE TABLE role (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
     description text,
-    created datetime NOT NULL  
+    created datetime NOT NULL
 )
 `
 
@@ -357,6 +357,6 @@ CREATE TABLE workgroup (
     type workgroup_type NOT NULL,
     name text NOT NULL UNIQUE,
     description text,
-    created datetime NOT NULL 
+    created datetime NOT NULL
 )
 `

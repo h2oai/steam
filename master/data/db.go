@@ -20,22 +20,20 @@ package data
 import (
 	"bufio"
 	"database/sql"
-	"flag"
-
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"syscall"
 
-	"github.com/fatih/color"
-
-	"golang.org/x/crypto/ssh/terminal"
-
 	"github.com/h2oai/steam/master/auth"
+
+	"github.com/fatih/color"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
+	"github.com/spf13/pflag"
+	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/doug-martin/goqu.v3"
 )
 
@@ -99,13 +97,16 @@ const (
 
 // --- Enums ---
 var (
-	States states
+	States      states
+	EntityTypes entity_types
 )
 
 func init() {
-	flag.BoolVar(&debug, "debug", false, "Set to enable debug mode")
+	pflag.BoolVarP(&debug, "debug", "d", false, "Set to enable debug mode")
+	debug = true
 
-	States = initState()
+	States.init()
+	EntityTypes.init()
 }
 
 func NewDatastore(driver string, dbOpts DBOpts) (*Datastore, error) {

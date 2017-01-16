@@ -181,7 +181,7 @@ var debug bool
 	return nil
 {{- end}}
 
-{{define "deleteSql" -}} {{/* ARG REQUIRED */ -}}
+{{define "deleteSql" -}} {{/* ARG OPTIONAL */ -}}
 	if debug {
 		color.Set(color.FgRed)
 		log.Println(q.dataset.ToDeleteSql())
@@ -192,7 +192,11 @@ var debug bool
 		return errors.Wrap(err, "executing query")
 	}
 	{{template "postFunc"}}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+	{{if .}}
+	return nil
+	{{else}}
+	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
+	{{- end}}
 {{- end}}
 
 {{- /* ----------------------------- */}}
@@ -358,7 +362,7 @@ func delete{{title .Name}}(tx *goqu.TxDatabase, {{if .Key}}{{lowerFirst .Name}}I
 	q := NewQueryConfig(nil, tx, DeleteOp, "{{lowerFirst (camelToSnake .Name)}}", nil)
 	{{- end}}
 	{{template "options"}}
-	{{template "deleteSql"}}
+	{{template "deleteSql" .}}
 }
 {{end}}
 `

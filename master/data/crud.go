@@ -221,7 +221,8 @@ func (ds *Datastore) DeleteAuthentication(authenticationId int64, options ...Que
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -382,7 +383,9 @@ func deleteAuthentication(tx *goqu.TxDatabase, authenticationId int64, options .
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------------- ----------
@@ -551,7 +554,9 @@ func deleteBinomialModel(tx *goqu.TxDatabase, binomialModelId int64, options ...
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------- ----------
@@ -763,7 +768,8 @@ func (ds *Datastore) DeleteCluster(clusterId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -926,7 +932,9 @@ func deleteCluster(tx *goqu.TxDatabase, clusterId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ----------- ----------
@@ -1090,7 +1098,9 @@ func deleteClusterType(tx *goqu.TxDatabase, clusterTypeId int64, options ...Quer
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ----------------- ----------
@@ -1303,7 +1313,8 @@ func (ds *Datastore) DeleteClusterYarnDetail(clusterYarnDetailId int64, options 
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -1467,7 +1478,9 @@ func deleteClusterYarnDetail(tx *goqu.TxDatabase, clusterYarnDetailId int64, opt
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------ ----------
@@ -1678,7 +1691,8 @@ func (ds *Datastore) DeleteEngine(engineId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -1840,7 +1854,9 @@ func deleteEngine(tx *goqu.TxDatabase, engineId int64, options ...QueryOpt) erro
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ---------- ----------
@@ -2004,7 +2020,9 @@ func deleteEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------- ----------
@@ -2013,7 +2031,7 @@ func deleteEntityType(tx *goqu.TxDatabase, entityTypeId int64, options ...QueryO
 // ---------- ------- ----------
 // ---------- ------- ----------
 
-func (ds *Datastore) CreateHistory(action string, identityId, entityTypeId, entityId int64, options ...QueryOpt) (int64, error) {
+func (ds *Datastore) CreateHistory(action string, identityId int64, entityType string, entityId int64, options ...QueryOpt) (int64, error) {
 	tx, err := ds.db.Begin()
 	if err != nil {
 		return 0, errors.Wrap(err, "beginning transaction")
@@ -2025,11 +2043,11 @@ func (ds *Datastore) CreateHistory(action string, identityId, entityTypeId, enti
 		q := NewQueryConfig(ds, tx, CreateOp, "history", nil)
 		// Default insert fields
 		history := goqu.Record{
-			"action":         action,
-			"identity_id":    identityId,
-			"entity_type_id": entityTypeId,
-			"entity_id":      entityId,
-			"created":        time.Now(),
+			"action":      action,
+			"identity_id": identityId,
+			"entity_type": entityType,
+			"entity_id":   entityId,
+			"created":     time.Now(),
 		}
 		q.AddFields(history)
 		for _, option := range options {
@@ -2217,21 +2235,22 @@ func (ds *Datastore) DeleteHistory(historyId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
 }
-func createHistory(tx *goqu.TxDatabase, action string, identityId, entityTypeId, entityId int64, options ...QueryOpt) (int64, error) {
+func createHistory(tx *goqu.TxDatabase, action string, identityId int64, entityType string, entityId int64, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, CreateOp, "history", nil)
 	// Default insert fields
 	history := goqu.Record{
-		"action":         action,
-		"identity_id":    identityId,
-		"entity_type_id": entityTypeId,
-		"entity_id":      entityId,
-		"created":        time.Now(),
+		"action":      action,
+		"identity_id": identityId,
+		"entity_type": entityType,
+		"entity_id":   entityId,
+		"created":     time.Now(),
 	}
 	q.AddFields(history)
 	for _, option := range options {
@@ -2381,7 +2400,9 @@ func deleteHistory(tx *goqu.TxDatabase, historyId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- -------- ----------
@@ -2593,7 +2614,8 @@ func (ds *Datastore) DeleteIdentity(identityId int64, options ...QueryOpt) error
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -2756,7 +2778,9 @@ func deleteIdentity(tx *goqu.TxDatabase, identityId int64, options ...QueryOpt) 
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------------ ----------
@@ -2918,7 +2942,9 @@ func deleteIdentityRole(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ----------------- ----------
@@ -3083,7 +3109,9 @@ func deleteIdentityWorkgroup(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ----- ----------
@@ -3295,7 +3323,8 @@ func (ds *Datastore) DeleteLabel(labelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -3458,7 +3487,9 @@ func deleteLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ---- ----------
@@ -3622,7 +3653,9 @@ func deleteMeta(tx *goqu.TxDatabase, metaId int64, options ...QueryOpt) error {
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------------- ----------
@@ -3786,7 +3819,9 @@ func deleteModelCategory(tx *goqu.TxDatabase, modelCategoryId int64, options ...
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ----- ----------
@@ -4000,7 +4035,8 @@ func (ds *Datastore) DeleteModel(modelId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -4165,7 +4201,9 @@ func deleteModel(tx *goqu.TxDatabase, modelId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ---------------- ----------
@@ -4332,7 +4370,9 @@ func deleteMultinomialModel(tx *goqu.TxDatabase, multinomialModelId int64, optio
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ---------- ----------
@@ -4542,7 +4582,8 @@ func (ds *Datastore) DeletePermission(permissionId int64, options ...QueryOpt) e
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -4703,7 +4744,9 @@ func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- --------- ----------
@@ -4712,7 +4755,7 @@ func deletePermission(tx *goqu.TxDatabase, permissionId int64, options ...QueryO
 // ---------- --------- ----------
 // ---------- --------- ----------
 
-func (ds *Datastore) CreatePrivilege(typ string, identityId, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
+func (ds *Datastore) CreatePrivilege(typ string, identityId, workgroupId int64, entityType string, entityId int64, options ...QueryOpt) (int64, error) {
 	tx, err := ds.db.Begin()
 	if err != nil {
 		return 0, errors.Wrap(err, "beginning transaction")
@@ -4727,7 +4770,7 @@ func (ds *Datastore) CreatePrivilege(typ string, identityId, workgroupId, entity
 			"privilege_type": typ,
 			"identity_id":    identityId,
 			"workgroup_id":   workgroupId,
-			"entity_type_id": entityType,
+			"entity_type":    entityType,
 			"entity_id":      entityId,
 		}
 		q.AddFields(privilege)
@@ -4916,12 +4959,13 @@ func (ds *Datastore) DeletePrivilege(options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
 }
-func createPrivilege(tx *goqu.TxDatabase, typ string, identityId, workgroupId, entityType, entityId int64, options ...QueryOpt) (int64, error) {
+func createPrivilege(tx *goqu.TxDatabase, typ string, identityId, workgroupId int64, entityType string, entityId int64, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, CreateOp, "privilege", nil)
 	// Default insert fields
@@ -4929,7 +4973,7 @@ func createPrivilege(tx *goqu.TxDatabase, typ string, identityId, workgroupId, e
 		"privilege_type": typ,
 		"identity_id":    identityId,
 		"workgroup_id":   workgroupId,
-		"entity_type_id": entityType,
+		"entity_type":    entityType,
 		"entity_id":      entityId,
 	}
 	q.AddFields(privilege)
@@ -5080,7 +5124,9 @@ func deletePrivilege(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------- ----------
@@ -5292,7 +5338,8 @@ func (ds *Datastore) DeleteProject(projectId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -5455,7 +5502,9 @@ func deleteProject(tx *goqu.TxDatabase, projectId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- --------------- ----------
@@ -5622,7 +5671,9 @@ func deleteRegressionModel(tx *goqu.TxDatabase, regressionModelId int64, options
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ---- ----------
@@ -5832,7 +5883,8 @@ func (ds *Datastore) DeleteRole(roleId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -5993,7 +6045,9 @@ func deleteRole(tx *goqu.TxDatabase, roleId int64, options ...QueryOpt) error {
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- -------------- ----------
@@ -6158,7 +6212,9 @@ func deleteRolePermission(tx *goqu.TxDatabase, options ...QueryOpt) error {
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ----- ----------
@@ -6322,7 +6378,9 @@ func deleteState(tx *goqu.TxDatabase, stateId int64, options ...QueryOpt) error 
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- ------- ----------
@@ -6535,7 +6593,8 @@ func (ds *Datastore) DeleteService(serviceId int64, options ...QueryOpt) error {
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -6699,7 +6758,9 @@ func deleteService(tx *goqu.TxDatabase, serviceId int64, options ...QueryOpt) er
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }
 
 // ---------- --------- ----------
@@ -6910,7 +6971,8 @@ func (ds *Datastore) DeleteWorkgroup(workgroupId int64, options ...QueryOpt) err
 				return errors.Wrap(err, "running post functions")
 			}
 		}
-		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
 	})
 
 	return errors.Wrap(err, "committing transaction")
@@ -7072,5 +7134,7 @@ func deleteWorkgroup(tx *goqu.TxDatabase, workgroupId int64, options ...QueryOpt
 			return errors.Wrap(err, "running post functions")
 		}
 	}
-	return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityTypeId(q.entityTypeId)), "deleting privileges")
+
+	return nil
+
 }

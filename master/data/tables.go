@@ -83,13 +83,13 @@ type entityType struct {
 }
 
 type History struct {
-	Id           int64          `db:"id,pk"`
-	Action       string         `db:"action,arg"`
-	IdentityId   int64          `db:"identity_id,arg"`
-	EntityTypeId int64          `db:"entity_type_id,arg"`
-	EntityId     int64          `db:"entity_id,arg"`
-	Description  sql.NullString `db:"description"`
-	Created      time.Time      `db:"created,def=time.Now()"`
+	Id          int64          `db:"id,pk"`
+	Action      string         `db:"action,arg"`
+	IdentityId  int64          `db:"identity_id,arg"`
+	EntityType  string         `db:"entity_type,arg"`
+	EntityId    int64          `db:"entity_id,arg"`
+	Description sql.NullString `db:"description"`
+	Created     time.Time      `db:"created,def=time.Now()"`
 }
 
 type Identity struct {
@@ -170,7 +170,7 @@ type Privilege struct {
 	Type        string `db:"privilege_type,arg"`
 	IdentityId  int64  `db:"identity_id,arg"`
 	WorkgroupId int64  `db:"workgroup_id,arg"`
-	EntityType  int64  `db:"entity_type_id,arg"`
+	EntityType  string `db:"entity_type,arg"`
 	EntityId    int64  `db:"entity_id,arg"`
 }
 
