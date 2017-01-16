@@ -1,0 +1,63 @@
+#!/bin/sh
+# kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
+#if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
+#    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
+#fi
+### BEGIN INIT INFO
+# Provides:          steam
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: H2O Steam platform
+# Description:       H2O Steam platform
+#                    <...>
+#                    <...>
+### END INIT INFO
+
+# Author: Steam Team <steam@h2o.ai>
+# Code "leveraged" from other init.d scripts.
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+DESC="steam"
+H2ODIR=/opt/h2oai/steam
+DAEMON=$H2ODIR/steam
+STEAM_USER=steam
+STEAM_GROUP=steam
+PIDFILE=/var/run/steam.pid
+
+case "$1" in
+  set-admin-password)
+	$DAEMON --set-admin-password
+    ;;
+  start)
+	logger "Starting h2o steam" "steam"
+	start-stop-daemon --start --make-pidfile --pidfile $PIDFILE --background --startas /bin/bash -- -c "exec $DAEMON serve master --working-directory=$H2ODIR/var/master >> /var/log/steam.log 2>&1"
+	logger $?
+    ;;
+  stop)
+	logger "Stopping h2o steam" "steam"
+	start-stop-daemon --stop --pidfile  $PIDFILE
+	logger $?
+    ;;
+  status)
+	if pidofproc -p $PIDFILE $DAEMON >/dev/null 2>&1; then
+	    echo "$DAEMON is running";
+	    exit 0;
+	else
+	    echo "$DAEMON is NOT running";
+	    if test -f $PIDFILE; then exit 2; fi
+	    exit 3;
+	fi
+    ;;
+  force-reload|restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: /etc/init.d/steam {start|stop|restart|force-reload}"
+    exit 1
+    ;;
+esac
+
+exit 0
