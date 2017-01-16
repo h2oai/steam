@@ -38,7 +38,7 @@ interface DispatchProps {
 }
 
 export class App extends React.Component<Props & DispatchProps, any> {
-    render(): React.ReactElement<HTMLDivElement> {
+  render(): React.ReactElement<HTMLDivElement> {
     let isChrome = !!window.chrome && !!window.chrome.webstore;
     let isFirefox = typeof window.InstallTrigger !== 'undefined';
     let app = (
