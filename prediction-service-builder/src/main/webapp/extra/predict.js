@@ -58,10 +58,6 @@
     var domains = model.domainValues;
     var domainMap = model.domains;
 
-    console.log(names);
-    console.log(domains);
-    console.log(domainMap);
-
     var form = '<legend>Parameters</legend>';
 
     for (var i in names) {
@@ -155,8 +151,7 @@
   function showInputParameters() {
     $.get(API_HOST + '/info', function(data, status) {
       // show result
-      console.log(data.names);
-      if (data.names[0] === 'picturefile' && data.names[1] === 'label') {
+      if (data.problemType === 'image') {
         isBinaryPrediction = true;
         hideBatch();
       } else {
@@ -176,7 +171,6 @@
     var result = '<legend>Model Predictions</legend>'
 
     if (data.classProbabilities) {
-
 
       // binomial and multinomial
       var label = data.label;
@@ -282,7 +276,6 @@
       path = '/predictbinary';
     }
     var cmd = API_HOST + path + params;
-    console.log(cmd);
     if (isBinaryPrediction) {
       var form = $('#allparams');
       var data = new FormData();

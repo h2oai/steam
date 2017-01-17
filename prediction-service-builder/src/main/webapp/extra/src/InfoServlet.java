@@ -70,23 +70,17 @@ public class InfoServlet extends HttpServlet {
       }
 
       Map<String, Object> map = new HashMap<String, Object>();
-
       map.put("modelName", modelName);
       map.put("isSupervised", genModel.isSupervised());
       map.put("nfeatures", genModel.nfeatures());
       map.put("nclasses", genModel.nclasses());
       map.put("modelCategory", genModel.getModelCategory());
-//      map.put("modelCategories", genModel.getModelCategories());
+
       map.put("UUID", genModel.getUUID());
       int numCols = genModel.getNumCols();
       map.put("numCols", numCols);
       map.put("names", genModel.getNames());
-//      map.put("responseName", genModel.getResponseName());
       map.put("responseIdx", genModel.getResponseIdx());
-//      for (int i = 0; i < numCols; i++) {
-//        map.put("numClassesCol-" + i, genModel.getResponseIdx(i));
-//        map.put("domainValuesCol-" + i, genModel.getDomainValues(i));
-//      }
       map.put("domainValues", genModel.getDomainValues());
       map.put("numResponseClasses", genModel.getNumResponseClasses());
       map.put("isClassifier", genModel.isClassifier());
@@ -96,8 +90,14 @@ public class InfoServlet extends HttpServlet {
       map.put("responseDomainValues", mod.getResponseDomainValues());
       map.put("header", mod.getHeader());
 
-//      map.put("totalUnknownCategoricalLevelsSeen", mod.getTotalUnknownCategoricalLevelsSeen());
-//      map.put("unknownCategoricalLevelsSeenPerColumn", mod.getUnknownCategoricalLevelsSeenPerColumn());
+      // get extra parameters is it's a Deepwater model
+      Class cls = genModel.getClass();
+      if (cls.getSimpleName().equals("DeepwaterMojoModel")) {
+        map.put("problemType", cls.getField("_problem_type").get(genModel));
+        map.put("height", cls.getField("_height").get(genModel));
+        map.put("width", cls.getField("_width").get(genModel));
+        map.put("channels", cls.getField("_channels").get(genModel));
+      }
 
       String modelJson = gson.toJson(map);
       response.getWriter().write(modelJson);
