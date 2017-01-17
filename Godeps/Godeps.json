@@ -36,6 +36,11 @@
 			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
 		},
 		{
+			"ImportPath": "github.com/gorilla/handlers",
+			"Comment": "v1.1-14-g3a5767c",
+			"Rev": "3a5767ca75ece5f7f1440b1d16975247f8d8b221"
+		},
+		{
 			"ImportPath": "github.com/gorilla/rpc",
 			"Rev": "64e20900b8aa38bb0771dec71ba3bcc2b07fc8ec"
 		},
@@ -81,6 +86,16 @@
 			"Rev": "17b591df37844cde689f4d5813e5cea0927d8dd2"
 		},
 		{
+			"ImportPath": "github.com/rs/cors",
+			"Comment": "v1.0",
+			"Rev": "a62a804a8a009876ca59105f7899938a1349f4b3"
+		},
+		{
+			"ImportPath": "github.com/rs/xhandler",
+			"Comment": "v1.0-1-ged27b6f",
+			"Rev": "ed27b6fd65218132ee50cd95f38474a3d8a2cd12"
+		},
+		{
 			"ImportPath": "github.com/rs/xid",
 			"Rev": "057f3c928c207d1e7e318929eeac93bb46e319e3"
 		},
@@ -91,7 +106,7 @@
 		},
 		{
 			"ImportPath": "github.com/serenize/snaker",
-			"Rev": "d88cc11617e4f179fa2c821a60908d5fabd7bdad"
+			"Rev": "543781d2b79bd95c51ffe70e70a55c946ca211ff"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",

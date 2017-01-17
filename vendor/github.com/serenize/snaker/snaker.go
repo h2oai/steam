@@ -57,9 +57,11 @@ func SnakeToCamel(s string) string {
 			continue
 		}
 
-		w := []rune(word)
-		w[0] = unicode.ToUpper(w[0])
-		result += string(w)
+		if len(word) > 0 {
+			w := []rune(word)
+			w[0] = unicode.ToUpper(w[0])
+			result += string(w)
+		}
 	}
 
 	return result
@@ -78,8 +80,9 @@ func startsWithInitialism(s string) string {
 }
 
 // commonInitialisms, taken from
-// https://github.com/golang/lint/blob/3d26dc39376c307203d3a221bada26816b3073cf/lint.go#L482
+// https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
 var commonInitialisms = map[string]bool{
+	"ACL":   true,
 	"API":   true,
 	"ASCII": true,
 	"CPU":   true,
@@ -100,9 +103,12 @@ var commonInitialisms = map[string]bool{
 	"RPC":   true,
 	"SLA":   true,
 	"SMTP":  true,
+	"SQL":   true,
 	"SSH":   true,
+	"TCP":   true,
 	"TLS":   true,
 	"TTL":   true,
+	"UDP":   true,
 	"UI":    true,
 	"UID":   true,
 	"UUID":  true,
@@ -111,4 +117,7 @@ var commonInitialisms = map[string]bool{
 	"UTF8":  true,
 	"VM":    true,
 	"XML":   true,
+	"XMPP":  true,
+	"XSRF":  true,
+	"XSS":   true,
 }

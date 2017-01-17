@@ -1,24 +1,28 @@
 /*
-  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+ Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
-  License, or (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Affero General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 'use strict';
 
 import * as $ from 'jquery';
+const ENVIRONMENT: ENVIRONMENT = <ENVIRONMENT> require('environment');
+
 var _rpcId: number = 0;
+
+const HOST = ENVIRONMENT && ENVIRONMENT.API_HOST ? ENVIRONMENT.API_HOST : '';
 
 function nextId(): number {
   return ++_rpcId;
@@ -77,11 +81,14 @@ function invoke(method: string, param: any, headers: any, go: (error: Error, dat
   };
 
   const settings: JQueryAjaxSettings = {
-    url: "/web",
+    url: HOST + "/web",
     type: "POST",
     data: JSON.stringify(req),
     contentType: "application/json; charset=utf-8",
-    dataType: "json"
+    dataType: "json",
+    xhrFields: {
+      withCredentials: true
+    }
   };
 
   if (headers) {
@@ -101,7 +108,7 @@ function invoke(method: string, param: any, headers: any, go: (error: Error, dat
 
 export function upload(formData: FormData, go: (error: Error, data: any) => void) {
   const settings: JQueryAjaxSettings = {
-    url: "/upload",
+    url: HOST + "/upload",
     type: "POST",
     data: formData,
     cache: false,
