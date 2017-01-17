@@ -17,6 +17,7 @@
 package ldap
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -27,8 +28,8 @@ import (
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/srv/web"
 
-	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
+	ldap "gopkg.in/ldap.v2"
 )
 
 type Ldap struct {
@@ -49,20 +50,29 @@ type Ldap struct {
 	SearchRequestSizeLimit int // The maximum number of entries request by LDAP searches
 	SearchRequestTimeLimit int // The maximum number of seconds to wait for LDAP searches
 
-	// TODO implement TLS case
 	Ldaps     bool
 	ForceBind bool
+
+	tlsConfig *tls.Config
 
 	// Users who are logged in
 	Users *LdapUser
 }
 
 func (l *Ldap) Test() error {
-	conn, err := ldap.Dial("tcp", l.Address)
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+
+	if l.Ldaps {
+		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
+	} else {
+		conn, err = ldap.Dial("tcp", l.Address)
+	}
 	if err != nil {
 		return errors.Wrap(err, "dialing ldap")
 	}
-
 	req := ldap.NewSearchRequest(
 		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
@@ -116,7 +126,16 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
 
 func (l *Ldap) CheckBind(user, password string) error {
 	// Make connection to LDAP with read-only user
-	conn, err := ldap.Dial("tcp", l.Address)
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+
+	if l.Ldaps {
+		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
+	} else {
+		conn, err = ldap.Dial("tcp", l.Address)
+	}
 	if err != nil {
 		return errors.Wrap(err, "dialing ldap")
 	}
