@@ -84,3 +84,6 @@ coverage.out
 *.ipr
 *.iml
 
+# ignore packaging info
+packaging/env.list
+

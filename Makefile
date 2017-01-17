@@ -37,6 +37,7 @@ ASSETS = ./var/master/assets
 SCRIPTS = ./scripts
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+RPM_OUT_DIR = $(ROOT_DIR)/dist/rpm
 
 all: build gui ssb launcher
 
@@ -112,6 +113,8 @@ clean:
 	rm -rf var
 	cd $(SSB) && ./gradlew clean
 	rm -rf tmp target
+	rm -f packaging/env.list
+	rm -rf dist
 
 linux: gui
 	rm -rf ./dist/$(DIST_LINUX)
@@ -139,10 +142,13 @@ darwin: gui
 	cp -r $(SCRIPTS) ./dist/$(DIST_DARWIN)/var/master/
 	tar czfC ./dist/$(DIST_DARWIN).tar.gz dist $(DIST_DARWIN)
 
-dist/rpm/centos-7:
+packaging/env.list:
+	env | grep STEAM >> $@
+
+dist/rpm/centos-7: packaging/env.list
 	packaging/centos-7/build
 
-dist/rpm/centos-6:
+dist/rpm/centos-6: packaging/env.list
 	packaging/centos-6/build
 
 release: ssb launcher linux
@@ -176,28 +182,22 @@ debian_package:
 	cp -p tmp/debian/steam_$(STEAM_VERSION)_amd64.deb target
 
 rpm_package:
-	@echo STEAM_VERSION is $(STEAM_VERSION)
-	@echo STEAM_TAR_GZ is $(STEAM_TAR_GZ)
-	@echo STEAM_TAR_GZ_URL is $(STEAM_TAR_GZ_URL)
+ifndef STEAM_RELEASE_VERSION
+	$(error STEAM_RELEASE_VERSION is not defind)
+endif
+
+	@echo STEAM_RELEASE_VERSION is $(STEAM_RELEASE_VERSION)
+
+	rm -fr $(RPM_OUT_DIR)
+	mkdir -p $(RPM_OUT_DIR)
 	
-	rm -fr tmp
-	mkdir tmp
-	
-	rsync -a packaging/rpm tmp/
+	rsync -a packaging/rpm/ $(RPM_OUT_DIR)
 	pwd
 	
-	(cd tmp && wget $(STEAM_TAR_GZ_URL))
+	mkdir -p $(RPM_OUT_DIR)/steam/opt/h2oai/steam/
+	cp -r dist/steam-${STEAM_RELEASE_VERSION}-linux-amd64/ $(RPM_OUT_DIR)/steam/opt/h2oai/steam/
 	pwd
 	
-	mkdir -p tmp/rpm/steam/opt/h2oai
+	(cd dist && echo -e "\n" | setsid fpm -s dir -t rpm -n steam -v $(STEAM_RELEASE_VERSION) --description "Steam Cluster Manager" --depends haproxy -C $(RPM_OUT_DIR)/steam)
 	pwd
-	
-	(cd tmp/rpm/steam/opt/h2oai && tar zxvf ../../../../$(STEAM_TAR_GZ))
-	(cd tmp/rpm/steam/opt/h2oai && mv steam-$(STEAM_VERSION)-linux-amd64 steam)
-	pwd
-	
-	(cd tmp/rpm && fpm -s dir -t rpm -n steam -v $(STEAM_VERSION) -C steam)
-	pwd
-	
-	mkdir -p target
-	cp -p tmp/rpm/steam-$(STEAM_VERSION)-1.x86_64.rpm target
+
