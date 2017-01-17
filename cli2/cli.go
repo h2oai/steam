@@ -1716,10 +1716,12 @@ func getConfig(c *context) *cobra.Command {
 			log.Fatalln(err)
 		}
 		lines := []string{
-			fmt.Sprintf("Version:\t%v\t", config.Version),                         // No description available
-			fmt.Sprintf("KerberosEnabled:\t%v\t", config.KerberosEnabled),         // No description available
+			fmt.Sprintf("AuthenticationType:\t%v\t", config.AuthenticationType),   // No description available
 			fmt.Sprintf("ClusterProxyAddress:\t%v\t", config.ClusterProxyAddress), // No description available
+			fmt.Sprintf("KerberosEnabled:\t%v\t", config.KerberosEnabled),         // No description available
+			fmt.Sprintf("Version:\t%v\t", config.Version),                         // No description available
 			fmt.Sprintf("Username:\t%v\t", config.Username),                       // No description available
+			fmt.Sprintf("Permissions:\t%+v\t", config.Permissions),                // No description available
 		}
 		c.printt("Attribute\tValue\t", lines)
 		return
@@ -2443,15 +2445,19 @@ func getLdap(c *context) *cobra.Command {
 				log.Fatalln(err)
 			}
 			lines := []string{
-				fmt.Sprintf("Host:\t%v\t", config.Host),                       // No description available
-				fmt.Sprintf("Port:\t%v\t", config.Port),                       // No description available
-				fmt.Sprintf("Ldaps:\t%v\t", config.Ldaps),                     // No description available
-				fmt.Sprintf("BindDn:\t%v\t", config.BindDn),                   // No description available
-				fmt.Sprintf("BindPassword:\t%v\t", config.BindPassword),       // No description available
-				fmt.Sprintf("UserBaseDn:\t%v\t", config.UserBaseDn),           // No description available
-				fmt.Sprintf("UserBaseFilter:\t%v\t", config.UserBaseFilter),   // No description available
-				fmt.Sprintf("UserRnAttribute:\t%v\t", config.UserRnAttribute), // No description available
-				fmt.Sprintf("ForceBind:\t%v\t", config.ForceBind),             // No description available
+				fmt.Sprintf("Host:\t%v\t", config.Host),                                     // No description available
+				fmt.Sprintf("Port:\t%v\t", config.Port),                                     // No description available
+				fmt.Sprintf("Ldaps:\t%v\t", config.Ldaps),                                   // No description available
+				fmt.Sprintf("BindDn:\t%v\t", config.BindDn),                                 // No description available
+				fmt.Sprintf("BindPassword:\t%v\t", config.BindPassword),                     // No description available
+				fmt.Sprintf("UserBaseDn:\t%v\t", config.UserBaseDn),                         // No description available
+				fmt.Sprintf("UserBaseFilter:\t%v\t", config.UserBaseFilter),                 // No description available
+				fmt.Sprintf("UserNameAttribute:\t%v\t", config.UserNameAttribute),           // No description available
+				fmt.Sprintf("GroupDn:\t%v\t", config.GroupDn),                               // No description available
+				fmt.Sprintf("StaticMemberAttribute:\t%v\t", config.StaticMemberAttribute),   // No description available
+				fmt.Sprintf("SearchRequestSizeLimit:\t%v\t", config.SearchRequestSizeLimit), // No description available
+				fmt.Sprintf("SearchRequestTimeLimit:\t%v\t", config.SearchRequestTimeLimit), // No description available
+				fmt.Sprintf("ForceBind:\t%v\t", config.ForceBind),                           // No description available
 			}
 			c.printt("Attribute\tValue\t", lines)
 			fmt.Printf("Exists:\t%v\n", exists)
@@ -3854,12 +3860,14 @@ Set entities
 Commands:
 
     $ steam set attributes ...
+    $ steam set local ...
 `
 
 func set(c *context) *cobra.Command {
 	cmd := newCmd(c, setHelp, nil)
 
 	cmd.AddCommand(setAttributes(c))
+	cmd.AddCommand(setLocal(c))
 	return cmd
 }
 
@@ -3902,6 +3910,35 @@ func setAttributes(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&attributes, "attributes", attributes, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+	return cmd
+}
+
+var setLocalHelp = `
+local [?]
+Set Local
+Examples:
+
+    Set security configuration to local
+    $ steam set local --config
+
+`
+
+func setLocal(c *context) *cobra.Command {
+	var config bool // Switch for SetLocalConfig()
+
+	cmd := newCmd(c, setLocalHelp, func(c *context, args []string) {
+		if config { // SetLocalConfig
+
+			// Set security configuration to local
+			err := c.remote.SetLocalConfig()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return
+		}
+	})
+	cmd.Flags().BoolVar(&config, "config", config, "Set security configuration to local")
+
 	return cmd
 }
 

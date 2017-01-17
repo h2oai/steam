@@ -30,10 +30,13 @@ import PageHeader from '../../Projects/components/PageHeader';
 import Table from '../../Projects/components/Table';
 import '../styles/launchcluster.scss';
 import { NumericInput } from 'h2oUIKit';
+import {hasPermissionToShow} from "../../App/utils/permissions";
 
 interface Props {
   engines: any,
-  config: any
+  config: any,
+  isAdmin: boolean
+  clusterLaunchIsInProgress: boolean
 }
 
 interface DispatchProps {
@@ -122,10 +125,10 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 H2O VERSION
               </Cell>
               <Cell>
-                <div className="upload-engine">
+                {hasPermissionToShow("ManageEngine", this.props.config, this.props.isAdmin) ? <div className="upload-engine">
                   <input ref="engine" type="file" name="engine"/>
                   <div className="button-primary" onClick={this.uploadEngine.bind(this)}>Upload Engine</div>
-                </div>
+                </div> : null}
                 <select onChange={this.onChangeEngine.bind(this)}>
                   <option></option>
                   {this.props.engines.map((engine, i) => {
@@ -143,7 +146,15 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
             </Row> : null}
           </Table>
-          <button type="submit" className="button-primary">Launch New Clusters</button>
+          {this.props.clusterLaunchIsInProgress ? null : <button type="submit" className="button-primary">Launch New Clusters</button>}
+          {this.props.clusterLaunchIsInProgress ? <div className="pt-spinner .modifier">
+            <div className="pt-spinner-svg-container">
+              <svg viewBox="0 0 100 100">
+                <path className="pt-spinner-track" d="M 50,50 m 0,-44.5 a 44.5,44.5 0 1 1 0,89 a 44.5,44.5 0 1 1 0,-89"></path>
+                <path className="pt-spinner-head" d="M 94.5 50 A 44.5 44.5 0 0 0 50 5.5"></path>
+              </svg>
+            </div>
+          </div> : null}
         </form>
       </div>
     );
@@ -153,7 +164,9 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state) {
   return {
     engines: state.clusters.engines,
-    config: state.clusters.config
+    config: state.clusters.config,
+    isAdmin: state.global.isAdmin,
+    clusterLaunchIsInProgress: state.clusters.clusterLaunchIsInProgress
   };
 }
 

@@ -35,9 +35,9 @@ type QueryConfig struct {
 	fields   map[string]interface{}
 	postFunc []QueryOpt
 	// Entity options
-	entityTypeId int64
-	entityId     int64
-	audit        string
+	entityType string
+	entityId   int64
+	audit      string
 	// Enum references
 	clusterTypes clusterTypeKeys
 	permissions  permissionKeys
@@ -54,11 +54,6 @@ func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, op string, table string,
 		clusterTypes = ds.ClusterType
 		permissions = ds.Permission
 		entityTypes = ds.EntityType
-	}
-
-	var entityTypeId int64
-	if ds != nil {
-		entityTypeId = toEntityId(ds, table)
 	}
 
 	dataset := tx.From(table)
@@ -79,9 +74,9 @@ func NewQueryConfig(ds *Datastore, tx *goqu.TxDatabase, op string, table string,
 		fields:   make(map[string]interface{}),
 		postFunc: make([]QueryOpt, 0),
 
-		entityId:     id,
-		entityTypeId: entityTypeId,
-		audit:        op,
+		entityId:   id,
+		entityType: table,
+		audit:      op,
 
 		clusterTypes: clusterTypes,
 		permissions:  permissions,
@@ -110,7 +105,10 @@ type QueryOpt func(*QueryConfig) error
 // ------------- ------------- -------------
 
 func WithActivity(activate bool) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.fields["is_active"] = activate; return }
+	if activate {
+		return func(q *QueryConfig) (err error) { q.fields["is_active"] = 1; return }
+	}
+	return func(q *QueryConfig) (err error) { q.fields["is_active"] = 0; return }
 }
 
 // ByAddress queries the database for matching address columns
@@ -123,10 +121,14 @@ func WithAddress(address string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["address"] = address; return }
 }
 
+func WithAuthType(authType string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["auth_type"] = authType; return }
+}
+
 // WithBinomial model creates an entry in the binomial_metrics table and links it to the model
 func WithBinomialModel(mse, rSquared, logloss, auc, gini float64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Model {
+		if q.entityType != EntityTypes.Model {
 			return errors.New("WithBinomialModel: entity must be of type 'Model'")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
@@ -151,10 +153,54 @@ func WithClusterId(clusterId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["cluster_id"] = clusterId; return }
 }
 
+func ForAdminWorkgroup(q *QueryConfig) error {
+	if q.entityType != EntityTypes.Identity {
+		errors.New("ForWorkgroup: workgroups can only be searched from identities")
+	}
+	// Create relational dataset
+	workgroupId := q.tx.From("workgroup").Select("id").Where(goqu.I("name").Eq(AdminWG))
+
+	ds := q.tx.From("identity_workgroup").SelectDistinct("identity_id").Where(
+		goqu.I("workgroup_id").Eq(workgroupId),
+	)
+	q.dataset = q.dataset.Where(goqu.I("id").Eq(ds))
+	return nil
+}
+
+func WithAdminWorkgroup(q *QueryConfig) error {
+	var workgroupId int64
+	if workgroup, exists, err := readWorkgroup(q.tx, ByName(AdminWG)); err != nil {
+		return errors.Wrap(err, "WithAdminWorkgroup: reading admin workgroup")
+	} else if !exists {
+		var err error
+		workgroupId, err = createWorkgroup(q.tx, "identity", AdminWG)
+		if err != nil {
+			return errors.Wrap(err, "WithAdminWorkgroup: creating admin workgrop")
+		}
+	} else {
+		workgroupId = workgroup.Id
+	}
+
+	q.fields["workgroup_id"] = workgroupId
+	q.AddPostFunc(func(c *QueryConfig) error {
+		_, err := createIdentityWorkgroup(c.tx, c.entityId, workgroupId)
+		return errors.Wrap(err, "WithAdminWorkgroup: linking identity to workgroup")
+	})
+	q.AddPostFunc(func(c *QueryConfig) error {
+		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, EntityTypes.Identity, c.entityId)
+		return errors.Wrap(err, "WithAdminWorkgroup: creating identity privilege")
+	})
+	q.AddPostFunc(func(c *QueryConfig) error {
+		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, EntityTypes.Workgroup, workgroupId)
+		return errors.Wrap(err, "WithAdminWorkgroup: creating workgroup privilege")
+	})
+	return nil
+}
+
 // WithDefaultIdentityWorkgroup creates and links a default workgroup for an identity
 func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 	// Fetch identity name
-	if q.entityTypeId != q.entityTypes.Identity {
+	if q.entityType != EntityTypes.Identity {
 		return errors.New("WithDefaultIdentityWorkgroup: entity must be of type 'Identity'")
 	}
 	name := q.fields["name"]
@@ -174,11 +220,11 @@ func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: linking identity to workgroup")
 	})
 	q.AddPostFunc(func(c *QueryConfig) error {
-		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, c.entityTypes.Identity, c.entityId)
+		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, EntityTypes.Identity, c.entityId)
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: creating identity privilege")
 	})
 	q.AddPostFunc(func(c *QueryConfig) error {
-		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, c.entityTypes.Workgroup, workgroupId)
+		_, err := createPrivilege(c.tx, Owns, c.entityId, workgroupId, EntityTypes.Workgroup, workgroupId)
 		return errors.Wrap(err, "WithDefaultIdentityWorkgroup: creating workgroup privilege")
 	})
 	return nil
@@ -187,6 +233,22 @@ func WithDefaultIdentityWorkgroup(q *QueryConfig) error {
 // WithDescription adds a description value to the query
 func WithDescription(description string) QueryOpt {
 	return func(q *QueryConfig) (err error) { q.fields["description"] = description; return }
+}
+
+func ByDetailId(detailId int64) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("detail_id").Eq(detailId)); return }
+}
+
+func ByEnabled(q *QueryConfig) (err error) {
+	q.dataset = q.dataset.Where(q.I("enabled").Eq(1))
+	return
+}
+
+func WithEnable(enable bool) QueryOpt {
+	if enable {
+		return func(q *QueryConfig) (err error) { q.fields["enabled"] = 1; return }
+	}
+	return func(q *QueryConfig) (err error) { q.fields["enabled"] = 0; return }
 }
 
 func ForEntity(entityTypeId, entityId int64) QueryOpt {
@@ -203,10 +265,9 @@ func ByEntityId(entityId int64) QueryOpt {
 	}
 }
 
-// ByEntityTypeId queries the database for matching entity_type_id columns
-func ByEntityTypeId(entityTypeId int64) QueryOpt {
+func ByEntityType(entityType string) QueryOpt {
 	return func(q *QueryConfig) (err error) {
-		q.dataset = q.dataset.Where(q.I("entity_type_id").Eq(entityTypeId))
+		q.dataset = q.dataset.Where(q.I("entity_type").Eq(entityType))
 		return
 	}
 }
@@ -303,7 +364,7 @@ func WithModelObjectType(typ string) QueryOpt {
 
 func WithMultinomialModel(mse, rSquared, logloss float64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Model {
+		if q.entityType != EntityTypes.Model {
 			return errors.New("WithMultinomialModel: entity must of type model")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
@@ -357,7 +418,7 @@ func ByPermissionId(permissionId int64) QueryOpt {
 
 func LinkPermissions(reset bool, permissionIds ...int64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Role {
+		if q.entityType != EntityTypes.Role {
 			return errors.New("LinkPermission: permission can only be linked to a role")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
@@ -379,7 +440,7 @@ func LinkPermissions(reset bool, permissionIds ...int64) QueryOpt {
 
 func UnlinkPermissions(permissionIds ...int64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Role {
+		if q.entityType != EntityTypes.Role {
 			return errors.New("UnlinkPermission: permission can only be unlinked from a role")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
@@ -433,7 +494,7 @@ func WithRawSchema(schema, schemaVersion string) QueryOpt {
 
 func WithRegressionModel(mse, rSquared, meanResidualDeviance float64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Model {
+		if q.entityType != EntityTypes.Model {
 			return errors.New("WithRegressionModel: entity must of type model")
 		}
 
@@ -470,12 +531,17 @@ func ForRole(roleId int64) QueryOpt {
 	}
 }
 
-func LinkRole(roleId int64) QueryOpt {
+func LinkRole(roleId int64, reset bool) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Identity {
+		if q.entityType != EntityTypes.Identity {
 			return errors.New("LinkRole: roles may only be linked with identities")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
+			if reset {
+				if err := deleteIdentityRole(c.tx, ByIdentityId(c.entityId)); err != nil {
+					return errors.Wrap(err, "deleting identity role in database")
+				}
+			}
 			_, err := createIdentityRole(c.tx, WithIdentityId(c.entityId), WithRoleId(roleId))
 			return errors.Wrap(err, "creating identity role in database")
 		})
@@ -485,7 +551,7 @@ func LinkRole(roleId int64) QueryOpt {
 
 func UnlinkRole(roleId int64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Identity {
+		if q.entityType != EntityTypes.Identity {
 			return errors.New("UnlinkRole: roles may only be unlinked with identities")
 		}
 		q.AddPostFunc(func(c *QueryConfig) error {
@@ -507,8 +573,17 @@ func WithSize(size string) QueryOpt {
 }
 
 // ByState queries the database for a matching state column
-func ByState(state int64) QueryOpt {
-	return func(q *QueryConfig) (err error) { q.dataset = q.dataset.Where(q.I("state").Eq(state)); return }
+func ByState(state string) QueryOpt {
+	return func(q *QueryConfig) (err error) {
+		if q.table == "cluster_yarn_detail" {
+			id := q.tx.From("cluster").Select("detail_id").Where(goqu.I("state").Eq(state))
+
+			q.dataset = q.dataset.Where(q.I("id").Eq(id))
+			return
+		}
+		q.dataset = q.dataset.Where(q.I("state").Eq(state))
+		return
+	}
 }
 
 // WithState adds a state value to the query
@@ -525,7 +600,7 @@ func ByWorkgroupId(workgroupId int64) QueryOpt {
 
 func ForWorkgroup(workgroupId int64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Identity {
+		if q.entityType != EntityTypes.Identity {
 			errors.New("ForWorkgroup: workgroups can only be searched from identities")
 		}
 		// Create relational dataset
@@ -539,7 +614,7 @@ func ForWorkgroup(workgroupId int64) QueryOpt {
 
 func LinkWorkgroup(workgroupId int64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Identity {
+		if q.entityType != EntityTypes.Identity {
 			return errors.New("LinkWorkgroup: workgroups can only be linked to identities")
 		}
 		// Insert into relation
@@ -553,7 +628,7 @@ func LinkWorkgroup(workgroupId int64) QueryOpt {
 
 func UnlinkWorkgroup(workgroupId int64) QueryOpt {
 	return func(q *QueryConfig) error {
-		if q.entityTypeId != q.entityTypes.Identity {
+		if q.entityType != EntityTypes.Identity {
 			return errors.New("LinkWorkgroup: workgroups can only be linked to identities")
 		}
 		// Insert into relation
@@ -566,7 +641,7 @@ func UnlinkWorkgroup(workgroupId int64) QueryOpt {
 }
 
 // WithYarnDetail adds a type_id of yarn and provides the corresponding detail
-func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir, contextPath, token string) QueryOpt {
+func WithYarnDetail(engineId, size int64, username, applicationId, memory, outputDir, contextPath, token string) QueryOpt {
 	return func(q *QueryConfig) error {
 		if q.fields["type_id"] != q.clusterTypes.Yarn {
 			return errors.New("cannot add yarn details for a non-yarn cluster")
@@ -577,6 +652,7 @@ func WithYarnDetail(engineId, size int64, applicationId, memory, outputDir, cont
 		}
 
 		q.fields["detail_id"] = yarnId
+		q.fields["username"] = username
 		q.fields["context_path"] = contextPath
 		q.fields["token"] = token
 		return nil
@@ -602,7 +678,7 @@ func WithAudit(pz az.Principal) QueryOpt {
 			if err != nil {
 				return errors.Wrap(err, "WithAudit: serializing metadata")
 			}
-			_, err = createHistory(c.tx, c.audit, pz.Id(), c.entityTypeId, c.entityId,
+			_, err = createHistory(c.tx, c.audit, pz.Id(), c.entityType, c.entityId,
 				WithDescription(string(json)),
 			)
 			return errors.Wrap(err, "WithAudit: creating audit entry")
@@ -621,7 +697,7 @@ func WithLinkAudit(pz az.Principal) QueryOpt {
 			if err != nil {
 				return errors.Wrap(err, "WithLinkAudit: serializing metadata")
 			}
-			_, err = createHistory(c.tx, LinkOp, pz.Id(), c.entityTypeId, c.entityId,
+			_, err = createHistory(c.tx, LinkOp, pz.Id(), c.entityType, c.entityId,
 				WithDescription(string(json)),
 			)
 			return errors.Wrap(err, "WithLinkAudit: creating audit entry")
@@ -640,7 +716,7 @@ func WithUnlinkAudit(pz az.Principal) QueryOpt {
 			if err != nil {
 				return errors.Wrap(err, "WithUnlinkAudit: serializing metadata")
 			}
-			_, err = createHistory(c.tx, UnlinkOp, pz.Id(), c.entityTypeId, c.entityId,
+			_, err = createHistory(c.tx, UnlinkOp, pz.Id(), c.entityType, c.entityId,
 				WithDescription(string(json)),
 			)
 			return errors.Wrap(err, "WithUnlinkAudit: creating audit entry")
@@ -659,7 +735,7 @@ func WithShareAudit(pz az.Principal) QueryOpt {
 			if err != nil {
 				return errors.Wrap(err, "WithShareAudit: serializing metadata")
 			}
-			_, err = createHistory(c.tx, ShareOp, pz.Id(), c.entityTypeId, c.entityId,
+			_, err = createHistory(c.tx, ShareOp, pz.Id(), c.entityType, c.entityId,
 				WithDescription(string(json)),
 			)
 			return errors.Wrap(err, "WithShareAudit: creating audit entry")
@@ -678,7 +754,7 @@ func WithUnshareAudit(pz az.Principal) QueryOpt {
 			if err != nil {
 				return errors.Wrap(err, "WithUnshareAudit: serializing metadata")
 			}
-			_, err = createHistory(c.tx, UnshareOp, pz.Id(), c.entityTypeId, c.entityId,
+			_, err = createHistory(c.tx, UnshareOp, pz.Id(), c.entityType, c.entityId,
 				WithDescription(string(json)),
 			)
 			return errors.Wrap(err, "WithUnshareAudit: creating audit entry")
@@ -694,7 +770,7 @@ func WithPrivilege(pz az.Principal, typ string) QueryOpt {
 			if pz == nil {
 				return errors.New("WithPrivilege: no principal provided")
 			}
-			_, err := createPrivilege(c.tx, typ, pz.Id(), pz.WorkgroupId(), c.entityTypeId, c.entityId)
+			_, err := createPrivilege(c.tx, typ, pz.Id(), pz.WorkgroupId(), c.entityType, c.entityId)
 			return errors.Wrap(err, "WithPrivilege: creating privilege")
 		})
 		return nil
@@ -716,7 +792,7 @@ func ByPrivilege(pz az.Principal) QueryOpt {
 		)
 		aux := q.tx.From("privilege").SelectDistinct("entity_id").Where(
 			goqu.I("workgroup_id").In(x),
-			goqu.I("entity_type").Eq(q.entityTypeId),
+			goqu.I("entity_type").Eq(q.entityType),
 		)
 
 		q.dataset = q.dataset.Where(goqu.I("id").In(aux))

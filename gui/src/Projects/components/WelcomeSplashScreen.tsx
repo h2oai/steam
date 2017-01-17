@@ -38,8 +38,8 @@ export default class WelcomeSplashScreen extends React.Component<Props & Dispatc
           <h1>WELCOME TO</h1>
           <div className="page-header product-title">H<span className="half-size"><sub>2</sub></span>O STEAM</div>
           <h1>Fast, distributed data science for teams</h1>
-          <div><Link to="/newproject"
-                     className={classNames('default', 'start-project')}>Start A New Project</Link>
+          <div><Link to="/clusters"
+                     className={classNames('default', 'start-project')}>Start A New Cluster</Link>
           </div>
         </div>
       </div>

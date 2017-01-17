@@ -31,7 +31,20 @@ interface Window {
   InstallTrigger?: any
 }
 
+
 interface ENVIRONMENT {
   API_HOST: string
   PRODUCTION: boolean
+}
+declare module 'react-router-redux' {
+  export var syncHistoryWithStore: any;
+  export var routerReducer: any;
+}
+
+declare module 'react-router' {
+  export var Link: any;
+  export var hashHistory: any;
+  export var withRouter: any;
+  export var Router: any;
+  export var PlainRoute: any;
 }

@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+# Automatically added by dh_installinit
+if ([ -x "/etc/init.d/steam" ] || [ -e "/etc/init/steam.conf" ]) && \
+   [ "$1" = remove ]; then
+	invoke-rc.d steam stop || exit $?
+fi
+# End automatically added section

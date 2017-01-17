@@ -24,26 +24,26 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/h2oai/steam/lib/ldap"
-
-	"github.com/h2oai/steam/master/auth"
-
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/haproxy"
+	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/svc"
 	"github.com/h2oai/steam/lib/yarn"
+	"github.com/h2oai/steam/master/auth"
 	"github.com/h2oai/steam/master/az"
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/srv/compiler"
 	"github.com/h2oai/steam/srv/h2ov3"
 	"github.com/h2oai/steam/srv/web"
+
 	"github.com/pkg/errors"
 )
 
@@ -88,11 +88,27 @@ func (s *Service) PingServer(pz az.Principal, status string) (string, error) {
 }
 
 func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
+	var authType string
+	if auth, exists, err := s.ds.ReadAuthentication(data.ByEnabled); err != nil {
+		return nil, errors.Wrap(err, "reading authentication from database")
+	} else if exists {
+		authType = auth.Key
+	} else {
+		authType = data.LocalAuth
+	}
+
+	permissions, err := s.ds.ReadPermissions(data.ForIdentity(pz.Id()))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading identity from database")
+	}
+	fmt.Println(permissions)
 	return &web.Config{
 		Version:             s.version,
+		AuthenticationType:  authType,
 		KerberosEnabled:     s.kerberosEnabled,
 		ClusterProxyAddress: s.clusterProxyAddress,
-		Username: pz.Name(),
+		Username:            pz.Name(),
+		Permissions:         toPermissions(permissions),
 	}, nil
 }
 
@@ -154,13 +170,18 @@ func (s *Service) UnregisterCluster(pz az.Principal, clusterId int64) error {
 }
 
 func (s Service) reloadProxyConf(name string) {
-	clusters, err := s.ds.ReadClusters()
+	clusters, err := s.ds.ReadClusters(data.ByState(data.States.Started))
 	if err != nil {
 		log.Println("Failed to read clusters.")
 	}
+	proxyClusters := make([]data.Cluster, 0)
+	for _, cluster := range clusters {
+		if cluster.ContextPath.Valid {
+			proxyClusters = append(proxyClusters, cluster)
+		}
+	}
 
-	uid, gid, err := yarn.GetUser(name)
-	if err := haproxy.Reload(clusters, uid, gid); err != nil {
+	if err := haproxy.Reload(proxyClusters, s.clusterProxyAddress, fs.GetAssetsPath(s.workingDir, "cert.pem")); err != nil {
 		log.Println("Failed to reload proxy configuration.")
 	}
 }
@@ -173,8 +194,9 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
 		return 0, errors.Wrap(err, "checking permission")
 	}
-	// Check that name is unique to user
-	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByPrivilege(pz))
+	// Check that name is unique to user that are still running
+	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByState(data.States.Started),
+		data.ByPrivilege(pz))
 	if err != nil {
 		return 0, errors.Wrap(err, "reading cluster from database")
 	} else if exists {
@@ -194,6 +216,10 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	} else if !exists {
 		return 0, errors.New("unable to locate engine in database")
 	}
+	// Check SSL file
+	if _, err := os.Stat(fs.GetAssetsPath(s.workingDir, "cert.pem")); os.IsNotExist(err) {
+		return 0, errors.New("SSL \"" + fs.GetAssetsPath(s.workingDir, "cert.pem") + "\" cert file does not exist")
+	}
 	// FIXME implement keytab generation on the fly
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
 	// Start cluster in yarn
@@ -204,7 +230,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	}
 	// Create cluster
 	clusterId, err := s.ds.CreateCluster(clusterName, s.ds.ClusterType.Yarn,
-		data.WithYarnDetail(engineId, int64(size), appId, memory, out, contextPath, token),
+		data.WithYarnDetail(engineId, int64(size), identity.Name, appId, memory, out, contextPath, token),
 		data.WithAddress(address), data.WithState(data.States.Started),
 		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
 	)
@@ -230,19 +256,25 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 	if cluster.ClusterTypeId != s.ds.ClusterType.Yarn {
 		return errors.New("cluster was not started through YARN")
 	}
-	// Fetch yarn details
-	yarnDetails, exists, err := s.ds.ReadClusterYarnDetail(data.ById(cluster.DetailId.Int64))
-	if err != nil {
-		return errors.Wrap(err, "reading yarn details from cluster")
-	} else if !exists {
-		return errors.New("failed locating yarn details")
-	}
 	// Fetch identity details
 	identity, exists, err := s.ds.ReadIdentity(data.ById(pz.Id()))
 	if err != nil {
 		return errors.Wrap(err, "reading identity from cluster")
 	} else if !exists {
 		return errors.New("failed locating identity")
+	}
+	// FIXME: if cluster status is not started assume it failed
+	if cluster.State != data.States.Started {
+		err = s.ds.DeleteCluster(clusterId, data.WithAudit(pz))
+		s.reloadProxyConf(identity.Name)
+		return errors.Wrap(err, "deleting cluster from database")
+	}
+	// Fetch yarn details
+	yarnDetails, exists, err := s.ds.ReadClusterYarnDetail(data.ById(cluster.DetailId.Int64))
+	if err != nil {
+		return errors.Wrap(err, "reading yarn details from cluster")
+	} else if !exists {
+		return errors.New("failed locating yarn details")
 	}
 	// FIXME implement keytab generation on the fly
 	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
@@ -1749,7 +1781,7 @@ func (s *Service) LinkIdentityWithRole(pz az.Principal, identityId int64, roleId
 		return errors.New("unable to locate role")
 	}
 	// Link role to identity
-	err := s.ds.UpdateIdentity(identityId, data.LinkRole(roleId),
+	err := s.ds.UpdateIdentity(identityId, data.LinkRole(roleId, false),
 		data.WithLinkAudit(pz),
 	)
 	return errors.Wrap(err, "updating identity in database")
@@ -2134,8 +2166,12 @@ func (s *Service) ShareEntity(pz az.Principal, kind string, workgroupId, entityT
 	if err := pz.CheckView(s.ds.EntityType.Workgroup, workgroupId); err != nil {
 		return errors.Wrap(err, "checking view privileges")
 	}
+	entityType, ok := s.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return errors.New(fmt.Sprintf("invalid entity type id: %d", entityTypeId))
+	}
 	// Create privilege/sharing
-	_, err := s.ds.CreatePrivilege(kind, pz.Id(), workgroupId, entityTypeId, entityId,
+	_, err := s.ds.CreatePrivilege(kind, pz.Id(), workgroupId, entityType, entityId,
 		data.WithAudit(pz),
 	)
 	return errors.Wrap(err, "creating privilege in database")
@@ -2153,8 +2189,12 @@ func (s *Service) GetPrivileges(pz az.Principal, entityTypeId, entityId int64) (
 		return nil, errors.Wrap(err, "checking view privileges")
 	}
 	// Read privileges
+	entityType, ok := s.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return nil, fmt.Errorf("unable to locate entity type id: %d", entityTypeId)
+	}
 	entityPrivileges, err := s.ds.ReadEntityPrivileges(
-		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.ByEntityType(entityType), data.ByEntityId(entityId),
 	)
 	return toEntityPrivileges(entityPrivileges), errors.Wrap(err, "reading entity privileges from database")
 }
@@ -2173,9 +2213,13 @@ func (s *Service) UnshareEntity(pz az.Principal, kind string, workgroupId, entit
 	if err := pz.CheckView(s.ds.EntityType.Workgroup, workgroupId); err != nil {
 		return errors.Wrap(err, "checking view privileges")
 	}
+	entityType, ok := s.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return fmt.Errorf("unable to locate entity type id: %d", entityTypeId)
+	}
 	// Delete privileges
 	err := s.ds.DeletePrivilege(data.ByPrivilegeType(kind), data.ByWorkgroupId(workgroupId),
-		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.ByEntityType(entityType), data.ByEntityId(entityId),
 		data.WithUnshareAudit(pz),
 	)
 	return errors.Wrap(err, "deleting privilege from database")
@@ -2189,20 +2233,28 @@ func (s *Service) GetHistory(pz az.Principal, entityTypeId, entityId int64, offs
 	if err := pz.CheckView(entityTypeId, entityId); err != nil {
 		return nil, errors.Wrap(err, "checking view privileges")
 	}
+	entityType, ok := s.ds.EntityTypeMap[entityTypeId]
+	if !ok {
+		return nil, fmt.Errorf("unable to locate entity type id: %d", entityTypeId)
+	}
 	// Fetch history details
 	history, err := s.ds.ReadHistories(
-		data.ByEntityTypeId(entityTypeId), data.ByEntityId(entityId),
+		data.ByEntityType(entityType), data.ByEntityId(entityId),
 		data.WithOffset(offset), data.WithLimit(limit),
 	)
 	return toEntityHistories(history), errors.Wrap(err, "reading history from database")
 }
 
 type ldapSerialized struct {
-	Address         string
-	Bind            string
-	UserBaseDn      string
-	UserBaseFilter  string
-	UserRnAttribute string
+	Address                string
+	Bind                   string
+	UserBaseDn             string
+	UserBaseFilter         string
+	UserNameAttribute      string
+	GroupDn                string
+	StaticMemberAttribute  string
+	SearchRequestSizeLimit int
+	SearchRequestTimeLimit int
 
 	ForceBind bool
 	Ldaps     bool
@@ -2215,7 +2267,12 @@ func configToSerialized(config *web.LdapConfig) ldapSerialized {
 		bind,
 		config.UserBaseDn,
 		config.UserBaseFilter,
-		config.UserRnAttribute,
+		config.UserNameAttribute,
+		config.GroupDn,
+		config.StaticMemberAttribute,
+		config.SearchRequestSizeLimit,
+		config.SearchRequestTimeLimit,
+
 		config.ForceBind,
 		config.Ldaps,
 	}
@@ -2226,17 +2283,33 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 	host := address[0]
 	port, err := strconv.Atoi(address[1])
 	if err != nil {
-		return nil, errors.Wrap(err, "converint port to integer")
+		return nil, errors.Wrap(err, "convering port to integer")
 	}
+	b, err := base64.StdEncoding.DecodeString(config.Bind)
+	if err != nil {
+		return nil, errors.Wrap(err, "decoding bind") //FIXME format error
+	}
+	bind := strings.Split(string(b), ":")
 
 	return &web.LdapConfig{
-		Host: host, Port: port,
-		Ldaps:           config.Ldaps,
-		UserBaseDn:      config.UserBaseDn,
-		UserBaseFilter:  config.UserBaseFilter,
-		UserRnAttribute: config.UserRnAttribute,
-		ForceBind:       config.ForceBind,
+		host, port,
+		config.Ldaps,
+		bind[0], "",
+		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
+		config.GroupDn, config.StaticMemberAttribute,
+		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
+		config.ForceBind,
 	}, nil
+}
+
+func (s *Service) SetLocalConfig(pz az.Principal) error {
+	if authentication, exists, err := s.ds.ReadAuthentication(data.ByEnabled); err != nil {
+		return errors.Wrap(err, "reading authentication setting from database")
+	} else if exists {
+		err := s.ds.UpdateAuthentication(authentication.Id, data.WithEnable(false))
+		return errors.Wrap(err, "updaing authentication setting from database")
+	}
+	return nil
 }
 
 func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
@@ -2253,15 +2326,15 @@ func (s *Service) SetLdapConfig(pz az.Principal, config *web.LdapConfig) error {
 		return errors.Wrap(err, "serializing config metadata")
 	}
 
-	if security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap")); err != nil {
-		return errors.Wrap(err, "reading security config from database")
+	if authentication, exists, err := s.ds.ReadAuthentication(data.ByKey(data.LDAPAuth)); err != nil {
+		return errors.Wrap(err, "reading authentication config from database")
 	} else if exists {
-		err := s.ds.UpdateSecurity(security.Id, data.WithValue(string(meta)))
-		return errors.Wrap(err, "updating security config in database")
+		err := s.ds.UpdateAuthentication(authentication.Id, data.WithValue(string(meta)), data.WithEnable(true))
+		return errors.Wrap(err, "updating authentication config in database")
 	}
 
-	_, err = s.ds.CreateSecurity("ldap", string(meta))
-	return errors.Wrap(err, "creating security config in database")
+	_, err = s.ds.CreateAuthentication(data.LDAPAuth, string(meta), data.WithEnable(true))
+	return errors.Wrap(err, "creating authentication config in database")
 }
 
 func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) {
@@ -2269,15 +2342,15 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 		return nil, false, errors.New("only admins can view LDAP settings")
 	}
 
-	security, exists, err := s.ds.ReadSecurity(data.ByKey("ldap"))
+	authentication, exists, err := s.ds.ReadAuthentication(data.ByKey(data.LDAPAuth))
 	if err != nil {
-		return nil, false, errors.Wrap(err, "reading security config from database")
+		return nil, false, errors.Wrap(err, "reading authentication config from database")
 	} else if !exists {
 		return nil, false, nil
 	}
 
 	var deserial ldapSerialized
-	if err := json.Unmarshal([]byte(security.Value), &deserial); err != nil {
+	if err := json.Unmarshal([]byte(authentication.Value), &deserial); err != nil {
 		return nil, false, errors.Wrap(err, "deserializing config metadata")
 	}
 
@@ -2423,7 +2496,7 @@ func toYarnCluster(c data.Cluster, y data.ClusterYarnDetail) *web.YarnCluster {
 		int(y.Size),
 		y.ApplicationId,
 		y.Memory,
-		"",
+		c.Username.String,
 	}
 }
 

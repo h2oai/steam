@@ -1,0 +1,9 @@
+Package: steam
+Section: unknown
+Version: SUBST_PACKAGE_VERSION
+Maintainer: Steam Team <steam@h2o.ai>
+Architecture: amd64
+Description: Platform for h2o cluster management and service deployment
+ Steam supports secure h2o cluster launch and management, proxied cluster
+ access for security, simple model management and a number of options
+ for deploying predictive services.

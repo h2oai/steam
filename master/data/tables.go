@@ -27,6 +27,13 @@ import (
 	"github.com/lib/pq"
 )
 
+type Authentication struct {
+	Id      int64  `db:"id,pk"`
+	Key     string `db:"key,arg"`
+	Value   string `db:"value,arg"`
+	Enabled bool   `db:"enabled"`
+}
+
 type binomialModel struct {
 	ModelId  int64   `db:"model_id,arg,pk"`
 	Mse      float64 `db:"mse,arg"`
@@ -39,6 +46,7 @@ type binomialModel struct {
 type Cluster struct {
 	Id            int64          `db:"id,pk"`
 	Name          string         `db:"name,arg"`
+	Username      sql.NullString `db:"username"`
 	ContextPath   sql.NullString `db:"context_path"`
 	ClusterTypeId int64          `db:"type_id,arg"`
 	DetailId      sql.NullInt64  `db:"detail_id"`
@@ -75,18 +83,19 @@ type entityType struct {
 }
 
 type History struct {
-	Id           int64          `db:"id,pk"`
-	Action       string         `db:"action,arg"`
-	IdentityId   int64          `db:"identity_id,arg"`
-	EntityTypeId int64          `db:"entity_type_id,arg"`
-	EntityId     int64          `db:"entity_id,arg"`
-	Description  sql.NullString `db:"description"`
-	Created      time.Time      `db:"created,def=time.Now()"`
+	Id          int64          `db:"id,pk"`
+	Action      string         `db:"action,arg"`
+	IdentityId  int64          `db:"identity_id,arg"`
+	EntityType  string         `db:"entity_type,arg"`
+	EntityId    int64          `db:"entity_id,arg"`
+	Description sql.NullString `db:"description"`
+	Created     time.Time      `db:"created,def=time.Now()"`
 }
 
 type Identity struct {
 	Id          int64          `db:"id,pk"`
 	Name        string         `db:"name,arg"`
+	AuthType    string         `db:"auth_type,def=LocalAuth"`
 	Password    sql.NullString `db:"password"`
 	WorkgroupId sql.NullInt64  `db:"workgroup_id"`
 	IsActive    bool           `db:"is_active,def=1"`
@@ -161,7 +170,7 @@ type Privilege struct {
 	Type        string `db:"privilege_type,arg"`
 	IdentityId  int64  `db:"identity_id,arg"`
 	WorkgroupId int64  `db:"workgroup_id,arg"`
-	EntityType  int64  `db:"entity_type_id,arg"`
+	EntityType  string `db:"entity_type,arg"`
 	EntityId    int64  `db:"entity_id,arg"`
 }
 
@@ -195,12 +204,6 @@ type rolePermission struct {
 type state struct {
 	Id   int64  `db:"id,pk"`
 	Name string `db:"name,arg"`
-}
-
-type Security struct {
-	Id    int64  `db:"id,pk"`
-	Key   string `db:"key,arg"`
-	Value string `db:"value,arg"`
 }
 
 type Service struct {

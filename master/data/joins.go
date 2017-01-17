@@ -729,6 +729,7 @@ func scanEntityPrivilege(r *sql.Row) (EntityPrivilege, error) {
 	var s EntityPrivilege
 	if err := r.Scan(
 		&s.Type,
+		&s.IdentityId,
 		&s.WorkgroupId,
 		&s.EntityType,
 		&s.EntityId,
@@ -750,6 +751,7 @@ func scanEntityPrivileges(rs *sql.Rows) ([]EntityPrivilege, error) {
 		var s EntityPrivilege
 		if err = rs.Scan(
 			&s.Type,
+			&s.IdentityId,
 			&s.WorkgroupId,
 			&s.EntityType,
 			&s.EntityId,
@@ -778,7 +780,7 @@ func (ds *Datastore) ReadEntityPrivileges(options ...QueryOpt) ([]EntityPrivileg
 	var entityPrivileges []EntityPrivilege
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, "", "workgroup", nil)
+		q := NewQueryConfig(ds, tx, "", "privilege", nil)
 		q.dataset = q.dataset.LeftOuterJoin(goqu.I("workgroup"), goqu.On(
 			goqu.I("privilege.workgroup_id").Eq(goqu.I("workgroup.id")),
 		))

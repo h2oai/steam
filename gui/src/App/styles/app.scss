@@ -1,4 +1,25 @@
 @import '../../variables.scss';
+@import "~@blueprintjs/core/src/blueprint.scss";
+.pt-toast.pt-intent-danger {
+  color: black;
+}
+.pt-toast.pt-intent-primary {
+  color: black;
+}
+.pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+.pt-input {
+  width: 200px;
+}
+.pt-toast .pt-button-group {
+  padding: 0px;
+}
+.button-primary:hover {
+  color: white;
+  text-decoration: none;
+}
+
 
 html, body, .app-container, #app {
   height: 100%;
@@ -18,7 +39,7 @@ h1 {
   text-transform: capitalize;
   color: $h2o-charcoal-grey;
   line-height: 1.1;
-  margin-bottom: 0px;
+  margin-bottom: 22px;
   margin-top: 22px;
 }
 
@@ -319,16 +340,4 @@ input[type="text"], textarea {
   a {
     text-decoration: underline;
   }
-}
-
-@import "~@blueprintjs/core/src/blueprint.scss";
-
-.pt-toast.pt-intent-danger {
-  color: black;
-}
-.pt-toast.pt-intent-primary {
-  color: black;
-}
-.pt-toast[class*="pt-intent-"] .pt-button, .pt-toast[class*="pt-intent-"] .pt-button::before, .pt-toast[class*="pt-intent-"] .pt-button:active, .pt-toast[class*="pt-intent-"] .pt-button.pt-active {
-  color: rgba(0, 0, 0, 0.7) !important;
 }

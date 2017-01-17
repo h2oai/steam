@@ -194,12 +194,9 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
         <EditUserDialog open={this.state.editUserOpen} userToEdit={this.state.userToEdit} closeHandler={this.editUserCloseHandler} fetchWorkgroups={this.props.fetchWorkgroups} fetchUsersWithRolesAndProjects={this.props.fetchUsersWithRolesAndProjects} userWithWorkgroups={this.props.userWithWorkgroups } workgroups={this.props.workgroups} updateUserWorkgroups={this.props.updateUserWorkgroups} updateUserRoles={this.props.updateUserRoles} usersWithRolesAndProjects={this.props.usersWithRolesAndProjects} roles={this.props.roles} />
         <div className="filter-and-list">
           <div className="filter-column">
-            FILTERS
             <Table className="full-size">
               <Row header={true}>
                 <Cell>
-                  ROLES<br/>
-
                   {this.props.selectedRoles ?
                     <input type="checkbox"
                            checked={numRolesSelected > 0}
@@ -211,7 +208,7 @@ export class UserAccess extends React.Component<Props & DispatchProps, any> {
                            onChange={(e) => numRolesSelected === this.props.selectedRoles.length ? this.onSelectNoneClicked() : this.onSelectAllClicked() } />
                     : null
                   }
-                  {this.props.selectedRoles && numRolesSelected === this.props.selectedRoles.length ? <span>Select None</span> : <span>Select All</span>}
+                  ROLES
 
                 </Cell>
               </Row>

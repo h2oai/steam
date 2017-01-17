@@ -4,6 +4,40 @@ package data
 
 import "database/sql"
 
+func ScanAuthentication(r *sql.Row) (Authentication, error) {
+	var s Authentication
+	if err := r.Scan(
+		&s.Id,
+		&s.Key,
+		&s.Value,
+		&s.Enabled,
+	); err != nil {
+		return Authentication{}, err
+	}
+	return s, nil
+}
+
+func ScanAuthentications(rs *sql.Rows) ([]Authentication, error) {
+	structs := make([]Authentication, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Authentication
+		if err = rs.Scan(
+			&s.Id,
+			&s.Key,
+			&s.Value,
+			&s.Enabled,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanBinomialModel(r *sql.Row) (binomialModel, error) {
 	var s binomialModel
 	if err := r.Scan(
@@ -47,6 +81,7 @@ func ScanCluster(r *sql.Row) (Cluster, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
+		&s.Username,
 		&s.ContextPath,
 		&s.ClusterTypeId,
 		&s.DetailId,
@@ -68,6 +103,7 @@ func ScanClusters(rs *sql.Rows) ([]Cluster, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
+			&s.Username,
 			&s.ContextPath,
 			&s.ClusterTypeId,
 			&s.DetailId,
@@ -224,7 +260,7 @@ func ScanHistory(r *sql.Row) (History, error) {
 		&s.Id,
 		&s.Action,
 		&s.IdentityId,
-		&s.EntityTypeId,
+		&s.EntityType,
 		&s.EntityId,
 		&s.Description,
 		&s.Created,
@@ -243,7 +279,7 @@ func ScanHistorys(rs *sql.Rows) ([]History, error) {
 			&s.Id,
 			&s.Action,
 			&s.IdentityId,
-			&s.EntityTypeId,
+			&s.EntityType,
 			&s.EntityId,
 			&s.Description,
 			&s.Created,
@@ -263,6 +299,7 @@ func ScanIdentity(r *sql.Row) (Identity, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.Name,
+		&s.AuthType,
 		&s.Password,
 		&s.WorkgroupId,
 		&s.IsActive,
@@ -282,6 +319,7 @@ func ScanIdentitys(rs *sql.Rows) ([]Identity, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
+			&s.AuthType,
 			&s.Password,
 			&s.WorkgroupId,
 			&s.IsActive,
@@ -773,38 +811,6 @@ func ScanStates(rs *sql.Rows) ([]state, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.Name,
-		); err != nil {
-			return nil, err
-		}
-		structs = append(structs, s)
-	}
-	if err = rs.Err(); err != nil {
-		return nil, err
-	}
-	return structs, nil
-}
-
-func ScanSecurity(r *sql.Row) (Security, error) {
-	var s Security
-	if err := r.Scan(
-		&s.Id,
-		&s.Key,
-		&s.Value,
-	); err != nil {
-		return Security{}, err
-	}
-	return s, nil
-}
-
-func ScanSecuritys(rs *sql.Rows) ([]Security, error) {
-	structs := make([]Security, 0, 16)
-	var err error
-	for rs.Next() {
-		var s Security
-		if err = rs.Scan(
-			&s.Id,
-			&s.Key,
-			&s.Value,
 		); err != nil {
 			return nil, err
 		}

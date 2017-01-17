@@ -28,6 +28,7 @@ import '../styles/projectslist.scss';
 import { hashHistory } from 'react-router';
 import InputFeedback from '../../App/components/InputFeedback';
 import { FeedbackType } from '../../App/components/InputFeedback';
+import * as _ from 'lodash';
 
 interface Props {
   projects: Project[],
@@ -52,7 +53,8 @@ export default class ProjectsList extends React.Component<Props, any> {
         </PageHeader>
         <div>
           <h1>All Projects</h1>
-          <div className="panel-container">
+          {_.isEmpty(this.props.projects) ? <h5>You have no projects.</h5> : null}
+          {!_.isEmpty(this.props.projects) ? <div className="panel-container">
             {this.props.projects.map((project: any, i) => {
               return (
                 <Panel className="project-card" key={i}>
@@ -72,7 +74,7 @@ export default class ProjectsList extends React.Component<Props, any> {
                 </Panel>
               );
             })}
-          </div>
+          </div> : null}
         </div>
       </div>
     );

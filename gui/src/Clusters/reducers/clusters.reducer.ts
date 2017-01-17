@@ -19,12 +19,16 @@
  * Created by justin on 9/15/16.
  */
 import * as _ from 'lodash';
-import { RECEIVE_ENGINES, FETCH_CONFIG_COMPLETED } from '../actions/clusters.actions';
+import {
+  RECEIVE_ENGINES, FETCH_CONFIG_COMPLETED, START_CLUSTER_COMPLETED,
+  START_CLUSTER
+} from '../actions/clusters.actions';
 
 
 let initialState = {
   engines: [],
-  config: null
+  config: null,
+  clusterLaunchIsInProgress: false
 };
 
 export const clustersReducer = (state = initialState, action) => {
@@ -36,6 +40,14 @@ export const clustersReducer = (state = initialState, action) => {
     case FETCH_CONFIG_COMPLETED:
       return _.assign({}, state, {
         config: action.config
+      });
+    case START_CLUSTER:
+      return _.assign({}, state, {
+        clusterLaunchIsInProgress: true
+      });
+    case START_CLUSTER_COMPLETED:
+      return _.assign({}, state, {
+        clusterLaunchIsInProgress: false
       });
     default:
       return state;
