@@ -924,7 +924,7 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
         return;
       } else {
         dispatch(receiveSaveLdap());
-        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Updated", null));
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP config updated. Please restart steam for changes to apply.", null));
         dispatch(fetchLdapConfig());
         dispatch(getConfig());
       }
