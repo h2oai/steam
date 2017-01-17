@@ -170,7 +170,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
               <Panel key={i}>
                 <header>
                   <span><i className="fa fa-cubes mar-bot-20"/> <a onClick={cluster.context_path !== "" ? this.goProxy.bind(this, cluster) : null} href={cluster.context_path !== "" ? null : 'http://' + cluster.address + cluster.context_path} target="_blank"
-                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> -- {cluster.status.total_cpu_count}&nbsp;cores</span>
+                                                        rel="noopener" className="charcoal-grey semibold">{cluster.name}</a> {cluster.status.total_cpu_count ? <span> -- {cluster.status.total_cpu_count} &nbsp;cores</span> : null}</span>
                   <span className="remove-cluster">
                     {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
                     {hasPermissionToShow("ManageCluster", this.props.config, this.props.isAdmin) ? <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
@@ -191,10 +191,10 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                       }
                     </div>
                 </div>
-                <div className="flexcolumn">
+                {cluster.status.total_cpu_count ? <div className="flexcolumn">
                   <div className="info-header">VERSION</div>
                   <div className="charcoal-grey">{cluster.status.version}</div>
-                </div>
+                </div> : null }
               </div>
               </Panel>
             );
