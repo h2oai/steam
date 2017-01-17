@@ -73,6 +73,11 @@ func (l *Ldap) Test() error {
 	if err != nil {
 		return errors.Wrap(err, "dialing ldap")
 	}
+	defer conn.Close()
+	if err := conn.Bind(l.BindDN, l.BindPass); err != nil {
+		return errors.Wrap(err, "attempting bind")
+	}
+
 	req := ldap.NewSearchRequest(
 		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
