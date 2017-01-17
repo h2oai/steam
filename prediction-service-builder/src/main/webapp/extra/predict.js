@@ -54,9 +54,9 @@
 
 // Form for model, shown in element
   function showModel(model, element) {
-    var names = model.m._names;
-    var domains = model.m._domains;
-    var domainMap = model.domainMap;
+    var names = model.names;
+    var domains = model.domainValues;
+    var domainMap = model.domains;
 
     var form = '<legend>Parameters</legend>';
 
@@ -151,7 +151,7 @@
   function showInputParameters() {
     $.get(API_HOST + '/info', function(data, status) {
       // show result
-      if (data.m._problem_type === 'image') {
+      if (data.problemType === 'image') {
         isBinaryPrediction = true;
         hideBatch();
       } else {
@@ -171,7 +171,6 @@
     var result = '<legend>Model Predictions</legend>'
 
     if (data.classProbabilities) {
-
 
       // binomial and multinomial
       var label = data.label;
@@ -277,7 +276,6 @@
       path = '/predictbinary';
     }
     var cmd = API_HOST + path + params;
-    console.log(cmd);
     if (isBinaryPrediction) {
       var form = $('#allparams');
       var data = new FormData();
