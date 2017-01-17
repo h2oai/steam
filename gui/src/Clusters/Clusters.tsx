@@ -181,13 +181,20 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   <div className="flexcolumn">
                     <div className="info-header">STATUS</div>
                     <div className="flexrow mar-right-71">
-                      { cluster.status.status === "Healthy" ?
-                        <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Healthy</div>
-                        : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.status.status}</div>
-                      }
-                      { cluster.state === "started" ?
-                        <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Started</div>
-                        : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.state}</div>
+                      {cluster.state === "stopped" ?
+                        <div className="flexrow">
+                          <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> Stopped</div>
+                        </div> :
+                        <div className="flexrow">
+                          { cluster.status.status === "Healthy" ?
+                            <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Healthy</div>
+                            : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.status.status}</div>
+                          }
+                          { cluster.state === "started" ?
+                            <div className="infodot-container"><i className="fa fa-circle green mar-right-3"/> Started</div>
+                            : <div className="infodot-container"><i className="fa fa-circle orange mar-right-3"/> {cluster.state}</div>
+                          }
+                        </div>
                       }
                     </div>
                 </div>
