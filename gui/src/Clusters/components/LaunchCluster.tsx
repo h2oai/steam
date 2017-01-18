@@ -58,8 +58,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
-      selectedEngine: null,
-      engineDropdownOpen: null
+      selectedEngine: null
     };
   }
 
@@ -83,15 +82,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   uploadEngine(event) {
     event.preventDefault();
     this.props.uploadEngine(this.refs.engine);
-    this.setState({
-      engineDropdownOpen: true
-    });
-  };
-
-  onEngineUploadDialogOpened = () => {
-    this.setState({
-      engineDropdownOpen: true
-    });
   };
 
   render() {
@@ -99,7 +89,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     let uploadEngine;
     if (hasPermissionToShow("ManageEngine", this.props.config, this.props.isAdmin)) {
       uploadEngine = (
-        <label className="pt-file-upload" onClick={this.onEngineUploadDialogOpened} >
+        <label className="pt-file-upload">
           <input ref="engine" type="file" onChange={this.uploadEngine.bind(this)} />
           <span className="pt-file-upload-input">Upload New Engine...</span>
         </label>
