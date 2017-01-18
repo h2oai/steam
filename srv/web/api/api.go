@@ -451,8 +451,9 @@ type GetLdapConfig struct {
 	Exists bool
 }
 type TestLdapConfig struct {
-	Config LdapConfig
-	_      int
+	Config    LdapConfig
+	_         int
+	UserCount int
 }
 type RegisterCluster struct {
 	Address   string

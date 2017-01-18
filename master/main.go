@@ -37,8 +37,8 @@ import (
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
-	"github.com/rs/cors"
 	"github.com/pkg/errors"
+	"github.com/rs/cors"
 )
 
 const (
@@ -69,7 +69,7 @@ type Opts struct {
 	EnableProfiler            bool
 	Yarn                      YarnOpts
 	DBOpts                    data.DBOpts
-	Dev		          bool
+	Dev                       bool
 }
 
 var DefaultOpts = &Opts{
@@ -105,10 +105,10 @@ type AuthProvider interface {
 }
 
 func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
-	if (opts.Dev) {
+	if opts.Dev {
 		c := cors.New(cors.Options{
-			AllowedOrigins: []string{"*"},
-			AllowedMethods: []string{"POST", "OPTIONS", "GET"},
+			AllowedOrigins:   []string{"*"},
+			AllowedMethods:   []string{"POST", "OPTIONS", "GET"},
 			AllowCredentials: true,
 		})
 		return c.Handler(handler)
@@ -145,9 +145,12 @@ func Run(version, buildDate string, opts Opts) {
 	}
 
 	// --- create basic auth service ---
+	tlsConfig, err := ldap.CreateTLSConfig(opts.WebTLSCertPath, opts.WebTLSKeyPath)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	defaultAz := NewDefaultAz(ds)
 	var authProvider AuthProvider
-
 	var set string
 	if auth, exists, err := ds.ReadAuthentication(data.ByEnabled); err != nil {
 		log.Fatalln("Reading authentication setting from database:", err)
@@ -158,7 +161,7 @@ func Run(version, buildDate string, opts Opts) {
 	case opts.AuthProvider == "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
 	case opts.AuthProvider == "basic-ldap", set == data.LDAPAuth:
-		conn, err := ldap.FromDatabase(ds)
+		conn, err := ldap.FromDatabase(ds, tlsConfig)
 		if err != nil {
 			log.Fatalln("Invalid configuration:", err)
 		}
@@ -187,6 +190,7 @@ func Run(version, buildDate string, opts Opts) {
 		version,
 		wd,
 		ds,
+		tlsConfig,
 		opts.CompilationServiceAddress,
 		predictionServiceHost,
 		opts.ClusterProxyAddress,

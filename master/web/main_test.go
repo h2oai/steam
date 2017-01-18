@@ -57,6 +57,7 @@ func testSetup(testType, driver string) (*Service, az.Principal, string) {
 		"test",
 		wd,
 		ds,
+		nil,
 		test_compilationServiceAddress,
 		"",
 		":9001",

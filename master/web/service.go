@@ -17,6 +17,7 @@
 package web
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
@@ -51,6 +52,7 @@ type Service struct {
 	version                   string
 	workingDir                string
 	ds                        *data.Datastore
+	tlsConfig                 *tls.Config
 	compilationServiceAddress string
 	scoringServiceAddress     string
 	clusterProxyAddress       string
@@ -62,6 +64,7 @@ type Service struct {
 func NewService(
 	version, workingDir string,
 	ds *data.Datastore,
+	tlsConfig *tls.Config,
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
 	kerberos bool,
@@ -69,6 +72,7 @@ func NewService(
 	return &Service{
 		version, workingDir,
 		ds,
+		tlsConfig,
 		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
 		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
@@ -2358,8 +2362,8 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	return config, exists, err
 }
 
-func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) error {
-	return ldap.FromConfig(config).Test()
+func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) (int, error) {
+	return ldap.FromConfig(config, s.tlsConfig).Test()
 }
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
