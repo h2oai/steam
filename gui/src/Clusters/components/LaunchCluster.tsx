@@ -108,7 +108,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
       if (this.props.engines && this.props.engines.length > 0) {
         uploadEngine = null;
       } else {
-        uploadEngine = <div>Please request your Admin to upload more engines</div>;
+        uploadEngine = <div>Please ask your Admin to upload more engines</div>;
       }
     }
 
