@@ -55,8 +55,8 @@ RUN make
 RUN openssl genrsa -out steam.key 2048
 RUN openssl req -new -key steam.key -out steam.csr -subj "/C=US/ST=California/L=Mountain View/O=IT/CN=www.h2o.ai"
 RUN sudo openssl x509 -req -days 365 -in steam.csr -signkey steam.key -out steam.crt
-RUN cat steam.crt steam.key | tee steam.pem
-RUN cp steam.pem /go/src/github.com/h2oai/steam/var/master/assets/
+RUN cat steam.crt steam.key | tee cert.pem
+RUN cp cert.pem /go/src/github.com/h2oai/steam/var/master/assets/
 
 # Run Prediction Service Builder
 RUN nohup java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war &
