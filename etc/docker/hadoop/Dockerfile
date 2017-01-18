@@ -4,7 +4,7 @@ MAINTAINER H2O.ai
 USER root
 
 ENV STEAM_VERSION 1.2.0
-#ENV PATH /go/src/github.com/h2oai/dist/steam-${STEAM_VERSION}-linux-amd64:$PATH
+ENV PATH /go/src/github.com/h2oai/steam:$PATH
 ENV PATH $PATH:/usr/local/hadoop/bin
 
 # Fix DNS resolution issues when nss is not installed
@@ -39,9 +39,24 @@ RUN add-apt-repository ppa:openjdk-r/ppa
 RUN apt-get update
 RUN apt-get install -y openjdk-7-jdk
 
+# Install HAProxy
+RUN apt-get install software-properties-common
+RUN add-apt-repository ppa:vbernat/haproxy-1.7
+RUN apt-get update
+RUN apt-get install -y haproxy
+
 # Build Steam
 WORKDIR /go/src/github.com/h2oai/steam
+RUN make clean reset
 RUN make
+
+# Create self-signed cert
+#RUN openssl req -nodes -x509 -newkey rsa:4096 -keyout cert.pem -out cert.crt -days 365 -subj '/CN=localhost'
+RUN openssl genrsa -out steam.key 2048
+RUN openssl req -new -key steam.key -out steam.csr -subj "/C=US/ST=California/L=Mountain View/O=IT/CN=www.h2o.ai"
+RUN sudo openssl x509 -req -days 365 -in steam.csr -signkey steam.key -out steam.crt
+RUN cat steam.crt steam.key | tee steam.pem
+RUN cp steam.pem /go/src/github.com/h2oai/steam/var/master/assets/
 
 # Run Prediction Service Builder
 RUN nohup java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war &
@@ -49,6 +64,7 @@ RUN nohup java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.wa
 EXPOSE 8080
 EXPOSE 9000
 EXPOSE 9001
+EXPOSE 9002
 EXPOSE 9999
 
 CMD /go/src/github.com/h2oai/steam/start.sh
