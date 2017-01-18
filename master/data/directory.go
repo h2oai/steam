@@ -18,8 +18,6 @@
 package data
 
 import (
-	"log"
-
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/master/az"
 	"github.com/pkg/errors"
@@ -28,26 +26,28 @@ import (
 // --- Datastore-backed Directory Impl ---
 
 func (ds *Datastore) Lookup(username, password, token string) (az.Principal, error) {
+	// Fetch identity
+	identity, exists, err := ds.ReadIdentity(ByName(username))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading identity")
+	}
+
 	auth, ok, err := ds.ReadAuthentication(ByEnabled)
 	if err != nil {
 		return nil, errors.Wrap(err, "reading authentication config")
 	} else if !ok {
-		return ds.LookupUser(username)
+		return ds.localLookup(identity, exists)
 	}
 
-	exists := ds.users.Exists(token)
-	if exists {
-		return ds.LookupUser(username)
-	}
 	switch auth.Key {
 	case LDAPAuth:
 		conn, err := ldap.FromDatabase(auth.Value)
 		if err != nil {
 			return nil, errors.Wrap(err, "creating ldap config from database")
 		}
-		return ds.ldapLookup(username, password, token, conn)
+		return ds.ldapLookup(identity, exists, username, password, token, conn)
 	}
-	return ds.LookupUser(username)
+	return nil, nil
 }
 
 func (ds *Datastore) LookupUser(name string) (az.Principal, error) {
@@ -57,6 +57,15 @@ func (ds *Datastore) LookupUser(name string) (az.Principal, error) {
 		return nil, errors.Wrap(err, "reading identity")
 	}
 	if !ok {
+		return nil, nil
+	}
+
+	return ds.localLookup(identity, ok)
+}
+
+func (ds *Datastore) localLookup(identity Identity, exists bool) (az.Principal, error) {
+	// Validate that this identity exists
+	if !exists {
 		return nil, nil
 	}
 
@@ -89,59 +98,16 @@ func (ds *Datastore) LookupUser(name string) (az.Principal, error) {
 	return &Principal{ds, &identity, permissions, isAdmin}, nil
 }
 
-func (ds *Datastore) ldapLookup(username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
-	// Fetch identity
-	identity, userExists, err := ds.ReadIdentity(ByName(username))
+func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
+	// Validate if local
+	if identity.AuthType == LocalAuth || ds.users.Exists(token) {
+		return ds.localLookup(identity, exists)
+	}
+
+	identity, exists, err := ds.NewUser(identity, exists, username, password, token, conn)
 	if err != nil {
-		return nil, errors.Wrap(err, "reading identity")
-	}
-	if identity.AuthType == LocalAuth {
-		return ds.LookupUser(username)
+		return nil, errors.Wrap(err, "creating new user")
 	}
 
-	log.Println("LDAP", username, "Checking bind")
-	if err := conn.CheckBind(username, password); err != nil {
-		return nil, errors.Wrap(err, "checking user bind")
-	}
-	log.Println("LDAP", username, "bind success")
-
-	ds.users.NewUser(token)
-
-	// Fetch valid roles
-	// FIXME: THIS SHOULD INHERIT ROLES FROM LDAP
-	role, _, err := ds.ReadRole(ByName(standard_user))
-	if err != nil {
-		return nil, errors.Wrap(err, "reading roles from database")
-	}
-
-	if !userExists { // at this point already validated so add instead of bail
-		id, err := ds.CreateIdentity(
-			username,
-			WithDefaultIdentityWorkgroup, LinkRole(role.Id, false),
-			WithAuthType(LDAPAuth),
-		)
-		if err != nil {
-			return nil, errors.Wrap(err, "creating identity")
-		}
-		identity, _, err = ds.ReadIdentity(ById(id))
-		if err != nil {
-			return nil, errors.Wrap(err, "reading identity")
-		}
-	} else {
-		if err := ds.UpdateIdentity(identity.Id, LinkRole(role.Id, true)); err != nil {
-			return nil, errors.Wrap(err, "adding roles to identity")
-		}
-	}
-
-	perms, err := ds.ReadPermissions(ForIdentity(identity.Id))
-	if err != nil {
-		return nil, errors.Wrap(err, "reading permissions")
-	}
-
-	permissions := make(map[int64]bool)
-	for _, perm := range perms {
-		permissions[perm.Id] = true
-	}
-
-	return &Principal{ds, &identity, permissions, false}, nil
+	return ds.localLookup(identity, exists)
 }
