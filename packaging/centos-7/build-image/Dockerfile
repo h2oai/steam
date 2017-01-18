@@ -15,7 +15,5 @@ ENV GOPATH /go
 RUN yum install -y java-1.7.0-openjdk-devel
 ENV JAVA_HOME /usr/lib/jvm/java
 
-WORKDIR /go/src/github.com/h2oai/steam/gui
-RUN npm install typings -g && typings install
-
+RUN npm install typings -g 
 

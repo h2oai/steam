@@ -151,6 +151,9 @@ dist/rpm/centos-7: packaging/env.list
 dist/rpm/centos-6: packaging/env.list
 	packaging/centos-6/build
 
+dist/deb/ubuntu: packaging/env.list
+	packaging/ubuntu/build
+
 release: ssb launcher linux
 
 debian_package:
