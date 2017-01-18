@@ -32,6 +32,7 @@ RUN apt-get install -y openjdk-7-jdk
 
 # Build Steam
 WORKDIR /go/src/github.com/h2oai/steam
+RUN make clean reset
 RUN make
 
 # Run Prediction Service Builder
