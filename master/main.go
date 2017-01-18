@@ -31,14 +31,13 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steam/lib/fs"
-	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/rpc"
 	"github.com/h2oai/steam/lib/yarn"
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
-	"github.com/rs/cors"
 	"github.com/pkg/errors"
+	"github.com/rs/cors"
 )
 
 const (
@@ -69,7 +68,7 @@ type Opts struct {
 	EnableProfiler            bool
 	Yarn                      YarnOpts
 	DBOpts                    data.DBOpts
-	Dev		          bool
+	Dev                       bool
 }
 
 var DefaultOpts = &Opts{
@@ -105,10 +104,10 @@ type AuthProvider interface {
 }
 
 func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
-	if (opts.Dev) {
+	if opts.Dev {
 		c := cors.New(cors.Options{
-			AllowedOrigins: []string{"*"},
-			AllowedMethods: []string{"POST", "OPTIONS", "GET"},
+			AllowedOrigins:   []string{"*"},
+			AllowedMethods:   []string{"POST", "OPTIONS", "GET"},
 			AllowCredentials: true,
 		})
 		return c.Handler(handler)
@@ -146,26 +145,13 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- create basic auth service ---
 	defaultAz := NewDefaultAz(ds)
-	var authProvider AuthProvider
 
-	var set string
-	if auth, exists, err := ds.ReadAuthentication(data.ByEnabled); err != nil {
-		log.Fatalln("Reading authentication setting from database:", err)
-	} else if exists {
-		set = auth.Key
-	}
+	var authProvider AuthProvider
 	switch {
 	case opts.AuthProvider == "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
-	case opts.AuthProvider == "basic-ldap", set == data.LDAPAuth:
-		conn, err := ldap.FromDatabase(ds)
-		if err != nil {
-			log.Fatalln("Invalid configuration:", err)
-		}
-
-		authProvider = NewBasicLdapAuthProvider(ds, webAddress, conn)
 	default: // "basic"
-		authProvider = newBasicAuthProvider(defaultAz, webAddress)
+		authProvider = newMultiAuthProvider(defaultAz, webAddress)
 	}
 	// --- set up prediction service launch host
 
