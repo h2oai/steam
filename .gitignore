@@ -79,3 +79,11 @@ coverage.out
 /steam.log
 /service.log
 /node_modules
+
+# ignore idea files
+*.ipr
+*.iml
+
+# ignore packaging info
+packaging/env.list
+

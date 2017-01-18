@@ -18,13 +18,39 @@
 package data
 
 import (
+	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/master/az"
 	"github.com/pkg/errors"
 )
 
 // --- Datastore-backed Directory Impl ---
 
-func (ds *Datastore) Lookup(name string) (az.Principal, error) {
+func (ds *Datastore) Lookup(username, password, token string) (az.Principal, error) {
+	// Fetch identity
+	identity, exists, err := ds.ReadIdentity(ByName(username))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading identity")
+	}
+
+	auth, ok, err := ds.ReadAuthentication(ByEnabled)
+	if err != nil {
+		return nil, errors.Wrap(err, "reading authentication config")
+	} else if !ok {
+		return ds.localLookup(identity, exists)
+	}
+
+	switch auth.Key {
+	case LDAPAuth:
+		conn, err := ldap.FromDatabase(auth.Value)
+		if err != nil {
+			return nil, errors.Wrap(err, "creating ldap config from database")
+		}
+		return ds.ldapLookup(identity, exists, username, password, token, conn)
+	}
+	return nil, nil
+}
+
+func (ds *Datastore) LookupUser(name string) (az.Principal, error) {
 	// Fetch identity
 	identity, ok, err := ds.ReadIdentity(ByName(name))
 	if err != nil {
@@ -33,6 +59,16 @@ func (ds *Datastore) Lookup(name string) (az.Principal, error) {
 	if !ok {
 		return nil, nil
 	}
+
+	return ds.localLookup(identity, ok)
+}
+
+func (ds *Datastore) localLookup(identity Identity, exists bool) (az.Principal, error) {
+	// Validate that this identity exists
+	if !exists {
+		return nil, nil
+	}
+
 	// Fetch roles
 	roles, err := ds.ReadRoles(ForIdentity(identity.Id))
 	if err != nil {
@@ -60,4 +96,18 @@ func (ds *Datastore) Lookup(name string) (az.Principal, error) {
 	}
 
 	return &Principal{ds, &identity, permissions, isAdmin}, nil
+}
+
+func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
+	// Validate if local
+	if identity.AuthType == LocalAuth || ds.users.Exists(token) {
+		return ds.localLookup(identity, exists)
+	}
+
+	identity, exists, err := ds.NewUser(identity, exists, username, password, token, conn)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating new user")
+	}
+
+	return ds.localLookup(identity, exists)
 }

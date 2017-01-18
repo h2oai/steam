@@ -17,18 +17,17 @@
 package ldap
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
-	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/srv/web"
 
-	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
+	ldap "gopkg.in/ldap.v2"
 )
 
 type Ldap struct {
@@ -49,21 +48,39 @@ type Ldap struct {
 	SearchRequestSizeLimit int // The maximum number of entries request by LDAP searches
 	SearchRequestTimeLimit int // The maximum number of seconds to wait for LDAP searches
 
-	// TODO implement TLS case
 	Ldaps     bool
 	ForceBind bool
 
-	// Users who are logged in
-	Users *LdapUser
+	tlsConfig *tls.Config
 }
 
 func (l *Ldap) Test() error {
-	conn, err := ldap.Dial("tcp", l.Address)
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+
+	if l.Ldaps {
+		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
+	} else {
+		conn, err = ldap.Dial("tcp", l.Address)
+	}
 	if err != nil {
 		return errors.Wrap(err, "dialing ldap")
 	}
+	defer conn.Close()
+	if err := conn.Bind(l.BindDN, l.BindPass); err != nil {
+		return errors.Wrap(err, "attempting bind")
+	}
 
-	req := ldap.NewSearchRequest(
+	userReq := ldap.NewSearchRequest(
+		l.UserBaseDn, ldap.ScopeWholeSubtree, ldap.DerefAlways,
+		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
+		false,
+		"(objectClass=*)",
+		nil, nil,
+	)
+	groupReq := ldap.NewSearchRequest(
 		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
 		false,
@@ -71,14 +88,33 @@ func (l *Ldap) Test() error {
 		[]string{l.StaticMemberAttribute}, nil,
 	)
 
-	res, err := conn.Search(req)
+	userRes, err := conn.Search(userReq)
+	if err != nil {
+		return errors.Wrap(err, "searching for user base DN")
+	}
+	if len(userRes.Entries) < 1 {
+		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
+	}
+
+	groupRes, err := conn.Search(groupReq)
 	if err != nil {
 		return errors.Wrap(err, "searching for group")
 	}
-	if len(res.Entries) < 1 {
+	if len(groupRes.Entries) < 1 {
 		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
-	} else if len(res.Entries) > 2 {
+	} else if len(groupRes.Entries) > 2 {
 		return errors.New("too many group entries")
+	}
+	members := make(map[string]struct{})
+	for _, member := range groupRes.Entries[0].GetAttributeValues(l.StaticMemberAttribute) {
+		members[member] = struct{}{}
+	}
+
+	var count int
+	for _, user := range userRes.Entries {
+		if _, ok := members[user.DN]; ok {
+			count++
+		}
 	}
 
 	return nil
@@ -89,7 +125,7 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
 		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
 		false,
-		"(objectClass=*)",
+		fmt.Sprintf("(&%s(objectClass=*))", l.UserBaseFilter),
 		[]string{l.StaticMemberAttribute}, nil,
 	)
 
@@ -115,8 +151,18 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
 }
 
 func (l *Ldap) CheckBind(user, password string) error {
+
 	// Make connection to LDAP with read-only user
-	conn, err := ldap.Dial("tcp", l.Address)
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+
+	if l.Ldaps {
+		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
+	} else {
+		conn, err = ldap.Dial("tcp", l.Address)
+	}
 	if err != nil {
 		return errors.Wrap(err, "dialing ldap")
 	}
@@ -173,8 +219,6 @@ func NewLdap(
 		UserBaseDn: userBaseDn, UserNameAttribute: userNameAttribute, UserBaseFilter: userBaseFilter,
 		// Group Settings
 		GroupDn: groupDN, StaticMemberAttribute: staticMemberAttribute,
-		// Additional Configs
-		Users: NewLdapUser(time.Minute*1, 2*time.Hour),
 	}
 }
 
@@ -187,19 +231,12 @@ func FromConfig(config *web.LdapConfig) *Ldap {
 	)
 }
 
-func FromDatabase(ds *data.Datastore) (*Ldap, error) {
-	config, exists, err := ds.ReadAuthentication(data.ByKey("ldap"))
-	if err != nil {
-		return nil, errors.Wrap(err, "reading security config from database")
-	} else if !exists {
-		return nil, errors.New("no valid LDAP configurations. Please set LDAP configurations prior to starting steam with LDAP")
-	}
-
+func FromDatabase(config string) (*Ldap, error) {
 	aux := struct {
 		Bind string
 		Ldap
 	}{}
-	if err := json.Unmarshal([]byte(config.Value), &aux); err != nil {
+	if err := json.Unmarshal([]byte(config), &aux); err != nil {
 		return nil, errors.Wrap(err, "deserializing config")
 	}
 

@@ -28,7 +28,7 @@ type Principal interface {
 	Password() string
 	IsActive() bool
 	IsAdmin() bool
-	AuthType() string
+	IsLocal() bool
 	HasPermission(code int64) bool
 	CheckPermission(code int64) error
 	Owns(entityTypeId, entityId int64) (bool, error)
@@ -40,10 +40,13 @@ type Principal interface {
 }
 
 type Directory interface {
-	Lookup(username string) (Principal, error)
+	// Lookup should return a Principal if the Principal is local or if the
+	// Principal validated against a valid external authentication provider
+	Lookup(username, password, basicAuthToken string) (Principal, error)
+	LookupUser(username string) (Principal, error)
 }
 
 type Az interface {
-	Authenticate(username string) string
+	Authenticate(username, password, basicAuthToken string) (bool, string, string)
 	Identify(r *http.Request) (Principal, error)
 }

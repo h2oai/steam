@@ -103,7 +103,7 @@ export function requestTestLdap() {
     });
   };
 };
-export function  receiveTestLdap() {
+export function receiveTestLdap() {
   return (dispatch) => {
     dispatch({
       type: RECEIVE_TEST_LDAP
@@ -312,7 +312,7 @@ export function receiveSavePermissions(data): any {
 
 export function filterSelectionsChanged(id, selected) {
   return {
-    type : FILTER_SELECTIONS_CHANGED,
+    type: FILTER_SELECTIONS_CHANGED,
     id,
     selected
   };
@@ -382,31 +382,31 @@ export function receiveRoleNames(roleNames) {
 
 function getProjects(dispatch): Promise<Array<any>> {
   return new Promise((resolve, reject) => {
-      dispatch(requestProjects());
-      Remote.getProjects(0, 1000, (error, res: any) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null));
-          reject();
-        }
-        dispatch(receiveProjects(res));
-        resolve(res);
-      });
-    }
+    dispatch(requestProjects());
+    Remote.getProjects(0, 1000, (error, res: any) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null));
+        reject();
+      }
+      dispatch(receiveProjects(res));
+      resolve(res);
+    });
+  }
   );
 }
 
 function getUsers(dispatch): Promise<Array<Role>> {
   return new Promise((resolve, reject) => {
-      dispatch(requestUsers());
-      Remote.getIdentities(0, 1000, (error, res: any) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null));
-          reject();
-        }
-        dispatch(receiveUsers(res));
-        resolve(res);
-      });
-    }
+    dispatch(requestUsers());
+    Remote.getIdentities(0, 1000, (error, res: any) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null));
+        reject();
+      }
+      dispatch(receiveUsers(res));
+      resolve(res);
+    });
+  }
   );
 }
 
@@ -415,16 +415,16 @@ function getUsers(dispatch): Promise<Array<Role>> {
  */
 function getRoles(dispatch): Promise<Array<Role>> {
   return new Promise((resolve, reject) => {
-      dispatch(requestRoleNames());
-      Remote.getRoles(0, 1000, (error, res: any) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null));
-          reject();
-        }
-        dispatch(receiveRoleNames(res));
-        resolve(res);
-      });
-    }
+    dispatch(requestRoleNames());
+    Remote.getRoles(0, 1000, (error, res: any) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null));
+        reject();
+      }
+      dispatch(receiveRoleNames(res));
+      resolve(res);
+    });
+  }
   );
 }
 
@@ -465,7 +465,7 @@ export interface INewRolePermission {
   permissionId: number,
   isEnabled: boolean
 }
-export class NewRolePermission implements  INewRolePermission{
+export class NewRolePermission implements INewRolePermission {
   constructor(public permissionId: number, public isEnabled: boolean) { }
 }
 export function createRole(newRoleName: string, newRoleDescription: string, permissions: Array<INewRolePermission>) {
@@ -508,7 +508,7 @@ export interface INewUserDetails {
   roleIds: Array<number>
 }
 export class NewUserDetails implements INewUserDetails {
-  constructor(public name: string, public password: string, public workgroupIds: Array<number>, public roleIds: Array<number>) {  }
+  constructor(public name: string, public password: string, public workgroupIds: Array<number>, public roleIds: Array<number>) { }
 }
 export function createUser(newUserDetails: INewUserDetails) {
   return (dispatch) => {
@@ -614,8 +614,8 @@ export function fetchPermissionsWithRoles() {
             }
             resolve({
               roleName: role.name,
-              roleId : role.id,
-              permissions : res
+              roleId: role.id,
+              permissions: res
             });
           })
         ));
@@ -637,13 +637,13 @@ export function fetchPermissionsWithRoles() {
               if (_.findIndex(permissionSet.permissions, (o: Permission) => {
                 return o.id === descriptions[i].id;
               }) !== -1) {
-                flags.push({value: true, roleId: permissionSet.roleId, roleName: permissionSet.roleName});
+                flags.push({ value: true, roleId: permissionSet.roleId, roleName: permissionSet.roleName });
               } else {
-                flags.push({value: false, roleId: permissionSet.roleId, roleName: permissionSet.roleName});
+                flags.push({ value: false, roleId: permissionSet.roleId, roleName: permissionSet.roleName });
               }
             }
             output.push({
-              description : descriptions[i].description,
+              description: descriptions[i].description,
               id: descriptions[i].id,
               flags
             });
@@ -664,7 +664,7 @@ export function saveUpdatedPermissions(updates) {
         Remote.linkRoleWithPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
           if (error) {
             dispatch(receiveSavePermissions({
-                error
+              error
             }));
             return;
           }
@@ -924,7 +924,7 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
         return;
       } else {
         dispatch(receiveSaveLdap());
-        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP config updated. Please restart steam for changes to apply.", null));
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP config updated.", null));
         dispatch(fetchLdapConfig());
         dispatch(getConfig());
       }
