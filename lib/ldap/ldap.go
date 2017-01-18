@@ -23,9 +23,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
-	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/srv/web"
 
 	"github.com/pkg/errors"
@@ -54,9 +52,6 @@ type Ldap struct {
 	ForceBind bool
 
 	tlsConfig *tls.Config
-
-	// Users who are logged in
-	Users *LdapUser
 }
 
 func (l *Ldap) Test() error {
@@ -156,6 +151,7 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
 }
 
 func (l *Ldap) CheckBind(user, password string) error {
+
 	// Make connection to LDAP with read-only user
 	var (
 		conn *ldap.Conn
@@ -223,8 +219,6 @@ func NewLdap(
 		UserBaseDn: userBaseDn, UserNameAttribute: userNameAttribute, UserBaseFilter: userBaseFilter,
 		// Group Settings
 		GroupDn: groupDN, StaticMemberAttribute: staticMemberAttribute,
-		// Additional Configs
-		Users: NewLdapUser(time.Minute*1, 2*time.Hour),
 	}
 }
 
@@ -237,19 +231,12 @@ func FromConfig(config *web.LdapConfig) *Ldap {
 	)
 }
 
-func FromDatabase(ds *data.Datastore) (*Ldap, error) {
-	config, exists, err := ds.ReadAuthentication(data.ByKey("ldap"))
-	if err != nil {
-		return nil, errors.Wrap(err, "reading security config from database")
-	} else if !exists {
-		return nil, errors.New("no valid LDAP configurations. Please set LDAP configurations prior to starting steam with LDAP")
-	}
-
+func FromDatabase(config string) (*Ldap, error) {
 	aux := struct {
 		Bind string
 		Ldap
 	}{}
-	if err := json.Unmarshal([]byte(config.Value), &aux); err != nil {
+	if err := json.Unmarshal([]byte(config), &aux); err != nil {
 		return nil, errors.Wrap(err, "deserializing config")
 	}
 
