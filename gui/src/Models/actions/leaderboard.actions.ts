@@ -71,7 +71,11 @@ export function receiveLeaderboard(leaderboard) {
 export function fetchLeaderboard(projectId: number, modelCategory: string, name: string, sortBy: string, ascending: boolean, offset: number) {
   return (dispatch) => {
     dispatch(requestLeaderboard());
-    findModelStrategy(modelCategory.toLowerCase())(projectId, name, sortBy || '', ascending || false, offset, MAX_ITEMS, (error, models) => {
+    let modelImpl = findModelStrategy(modelCategory.toLowerCase());
+    if (!modelImpl) {
+      dispatch(openNotification(NotificationType.Error, 'Unable to determine model category', 'Unable to determine model category', null));
+    }
+    modelImpl(projectId, name, sortBy || '', ascending || false, offset, MAX_ITEMS, (error, models) => {
       if (error) {
         dispatch(openNotification(NotificationType.Error, 'Load Error', error.toString(), null));
         return;
