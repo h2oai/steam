@@ -59,7 +59,7 @@
   },
   "scripts": {
     "postinstall": "typings prune && typings install",
-    "start": "webpack --watch",
+    "start": "NODE_ENV=development webpack --watch",
     "webpack": "webpack",
     "test": "jest"
   },

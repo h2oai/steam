@@ -924,7 +924,7 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
         return;
       } else {
         dispatch(receiveSaveLdap());
-        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Updated", null));
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP config updated. Please restart steam for changes to apply.", null));
         dispatch(fetchLdapConfig());
         dispatch(getConfig());
       }
@@ -943,19 +943,6 @@ export function testLdapConfig(ldapConfig: LdapConfig) {
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
         dispatch(receiveTestLdap());
       }
-    });
-  };
-}
-
-export function checkAdmin() {
-  return (dispatch, getState) => {
-    dispatch(requestAdminCheck());
-    Remote.checkAdmin((error, isSuperuser) => {
-      if (error) {
-        dispatch(openNotification(NotificationType.Error, "Superuser", "Unable to check admin status", null));
-        return;
-      }
-      dispatch(receiveAdminCheck(isSuperuser));
     });
   };
 }

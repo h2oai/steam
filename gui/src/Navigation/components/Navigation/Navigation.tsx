@@ -34,6 +34,8 @@ import { Project, Config } from '../../../Proxy/Proxy';
 import {Motion, spring} from 'react-motion';
 import { getConfig, resetConfig } from '../../../Clusters/actions/clusters.actions';
 import { bindActionCreators } from 'redux';
+import { fetchIsAdmin } from '../../../App/actions/global.actions';
+import { hasPermissionToShow } from '../../../App/utils/permissions';
 
 interface Props {
   routes: any
@@ -41,11 +43,13 @@ interface Props {
   project: Project
   config: Config,
   router: any
+  isAdmin: boolean
 }
 
 interface DispatchProps {
   getConfig: Function,
   resetConfig: Function
+  fetchIsAdmin: Function
 }
 
 
@@ -68,6 +72,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
   componentWillMount(): void {
     this.setMenuState(this.props.routes);
     this.props.getConfig();
+    this.props.fetchIsAdmin();
   }
 
   componentWillReceiveProps(nextProps: Props): void {
@@ -168,8 +173,25 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
     );
   }
 
+  hasPermissionToShowPath(path: string): boolean {
+    switch (path) {
+      case "projects":
+        return hasPermissionToShow("ViewProject", this.props.config, this.props.isAdmin);
+      case "services":
+        return hasPermissionToShow("ViewService", this.props.config, this.props.isAdmin);
+      case "clusters":
+        return hasPermissionToShow("ViewCluster", this.props.config, this.props.isAdmin);
+      case "users" :
+        return hasPermissionToShow("ViewIdentity", this.props.config, this.props.isAdmin);
+      default :
+        console.log("ERROR", "Unrecognized path seeking permissions"); //should never be reached
+        return true; //backend will deal with
+    }
+  }
+
   render(): React.ReactElement<HTMLElement> {
     let submenu = <div></div>;
+
     return (
       <div className={classNames('nav-container')}>
         <Sidebar className="primary-navigation">
@@ -202,14 +224,16 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
                   }
                   let activeChildren = route.path === this.state.activeTopLevelPath && this.state.isSubMenuActive;
                   let path = '/' + route.path;
-                  return (
-                    <li key={path}
-                        className={classNames('nav-list--item', { active: isActive}, {activeChildren: activeChildren}) }>
-                      <Link to={path}><i className={route.icon}></i>
-                        <div className="nav-list--label">{route.name}</div>
-                      </Link>
-                    </li>
-                  );
+                  if (this.hasPermissionToShowPath(route.path)) {
+                    return (
+                      <li key={path}
+                          className={classNames('nav-list--item', { active: isActive}, {activeChildren: activeChildren}) }>
+                        <Link to={path}><i className={route.icon}></i>
+                          <div className="nav-list--label">{route.name}</div>
+                        </Link>
+                      </li>
+                    );
+                  }
                 })
                 }
                 <li className="logout nav-list--item">
@@ -238,14 +262,16 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state): any {
   return {
     project: state.projects.project,
-    config: state.clusters.config
+    config: state.clusters.config,
+    isAdmin: state.global.isAdmin
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     getConfig: bindActionCreators(getConfig, dispatch),
-    resetConfig: bindActionCreators(resetConfig, dispatch)
+    resetConfig: bindActionCreators(resetConfig, dispatch),
+    fetchIsAdmin: bindActionCreators(fetchIsAdmin, dispatch)
   };
 }
 

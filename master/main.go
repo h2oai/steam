@@ -37,6 +37,7 @@ import (
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/master/web"
 	srvweb "github.com/h2oai/steam/srv/web"
+	"github.com/rs/cors"
 	"github.com/pkg/errors"
 )
 
@@ -68,6 +69,7 @@ type Opts struct {
 	EnableProfiler            bool
 	Yarn                      YarnOpts
 	DBOpts                    data.DBOpts
+	Dev		          bool
 }
 
 var DefaultOpts = &Opts{
@@ -94,11 +96,24 @@ var DefaultOpts = &Opts{
 		Port:    "5432",
 		SSLMode: "disable",
 	},
+	false,
 }
 
 type AuthProvider interface {
 	Secure(handler http.Handler) http.Handler
 	Logout() http.Handler
+}
+
+func handlerStrategy(handler http.Handler, opts Opts) http.Handler {
+	if (opts.Dev) {
+		c := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{"POST", "OPTIONS", "GET"},
+			AllowCredentials: true,
+		})
+		return c.Handler(handler)
+	}
+	return handler
 }
 
 func Run(version, buildDate string, opts Opts) {
@@ -152,7 +167,6 @@ func Run(version, buildDate string, opts Opts) {
 	default: // "basic"
 		authProvider = newBasicAuthProvider(defaultAz, webAddress)
 	}
-
 	// --- set up prediction service launch host
 
 	var predictionServiceHost string
@@ -181,11 +195,11 @@ func Run(version, buildDate string, opts Opts) {
 	)
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 
-	webServeMux.Handle("/logout", authProvider.Logout())
-	webServeMux.Handle("/web", authProvider.Secure(rpc.NewServer(rpc.NewService("web", webServiceImpl))))
-	webServeMux.Handle("/upload", authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds)))
-	webServeMux.Handle("/download", authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)))
-	webServeMux.Handle("/", authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))))
+	webServeMux.Handle("/logout", handlerStrategy(authProvider.Logout(), opts))
+	webServeMux.Handle("/web", authProvider.Secure(handlerStrategy(rpc.NewServer(rpc.NewService("web", webServiceImpl)), opts)))
+	webServeMux.Handle("/upload", handlerStrategy(authProvider.Secure(newUploadHandler(defaultAz, wd, webServiceImpl.Service, ds)), opts))
+	webServeMux.Handle("/download", handlerStrategy(authProvider.Secure(newDownloadHandler(defaultAz, wd, webServiceImpl.Service, opts.CompilationServiceAddress)), opts))
+	webServeMux.Handle("/", handlerStrategy(authProvider.Secure(http.FileServer(http.Dir(path.Join(wd, "/www")))), opts))
 
 	if opts.EnableProfiler {
 		// --- pprof registrations (no auth) ---
@@ -225,11 +239,11 @@ func Run(version, buildDate string, opts Opts) {
 				log.Fatalln(err)
 			}
 
-			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServeTLS(webAddress, certFile, keyFile, context.ClearHandler(handlerStrategy(webServeMux, opts))); err != nil {
 				serverFailChan <- err
 			}
 		} else {
-			if err := http.ListenAndServe(webAddress, context.ClearHandler(webServeMux)); err != nil {
+			if err := http.ListenAndServe(webAddress, context.ClearHandler(handlerStrategy(webServeMux, opts))); err != nil {
 				serverFailChan <- err
 			}
 		}

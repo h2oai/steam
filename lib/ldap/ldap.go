@@ -17,6 +17,7 @@
 package ldap
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -27,8 +28,8 @@ import (
 	"github.com/h2oai/steam/master/data"
 	"github.com/h2oai/steam/srv/web"
 
-	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
+	ldap "gopkg.in/ldap.v2"
 )
 
 type Ldap struct {
@@ -49,21 +50,42 @@ type Ldap struct {
 	SearchRequestSizeLimit int // The maximum number of entries request by LDAP searches
 	SearchRequestTimeLimit int // The maximum number of seconds to wait for LDAP searches
 
-	// TODO implement TLS case
 	Ldaps     bool
 	ForceBind bool
+
+	tlsConfig *tls.Config
 
 	// Users who are logged in
 	Users *LdapUser
 }
 
 func (l *Ldap) Test() error {
-	conn, err := ldap.Dial("tcp", l.Address)
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+
+	if l.Ldaps {
+		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
+	} else {
+		conn, err = ldap.Dial("tcp", l.Address)
+	}
 	if err != nil {
 		return errors.Wrap(err, "dialing ldap")
 	}
+	defer conn.Close()
+	if err := conn.Bind(l.BindDN, l.BindPass); err != nil {
+		return errors.Wrap(err, "attempting bind")
+	}
 
-	req := ldap.NewSearchRequest(
+	userReq := ldap.NewSearchRequest(
+		l.UserBaseDn, ldap.ScopeWholeSubtree, ldap.DerefAlways,
+		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
+		false,
+		"(objectClass=*)",
+		nil, nil,
+	)
+	groupReq := ldap.NewSearchRequest(
 		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
 		false,
@@ -71,14 +93,33 @@ func (l *Ldap) Test() error {
 		[]string{l.StaticMemberAttribute}, nil,
 	)
 
-	res, err := conn.Search(req)
+	userRes, err := conn.Search(userReq)
+	if err != nil {
+		return errors.Wrap(err, "searching for user base DN")
+	}
+	if len(userRes.Entries) < 1 {
+		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
+	}
+
+	groupRes, err := conn.Search(groupReq)
 	if err != nil {
 		return errors.Wrap(err, "searching for group")
 	}
-	if len(res.Entries) < 1 {
+	if len(groupRes.Entries) < 1 {
 		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
-	} else if len(res.Entries) > 2 {
+	} else if len(groupRes.Entries) > 2 {
 		return errors.New("too many group entries")
+	}
+	members := make(map[string]struct{})
+	for _, member := range groupRes.Entries[0].GetAttributeValues(l.StaticMemberAttribute) {
+		members[member] = struct{}{}
+	}
+
+	var count int
+	for _, user := range userRes.Entries {
+		if _, ok := members[user.DN]; ok {
+			count++
+		}
 	}
 
 	return nil
@@ -89,7 +130,7 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
 		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
 		false,
-		"(objectClass=*)",
+		fmt.Sprintf("(&%s(objectClass=*))", l.UserBaseFilter),
 		[]string{l.StaticMemberAttribute}, nil,
 	)
 
@@ -116,7 +157,16 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
 
 func (l *Ldap) CheckBind(user, password string) error {
 	// Make connection to LDAP with read-only user
-	conn, err := ldap.Dial("tcp", l.Address)
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+
+	if l.Ldaps {
+		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
+	} else {
+		conn, err = ldap.Dial("tcp", l.Address)
+	}
 	if err != nil {
 		return errors.Wrap(err, "dialing ldap")
 	}

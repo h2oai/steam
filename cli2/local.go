@@ -165,6 +165,7 @@ func serveMaster(c *context) *cobra.Command {
 		dbSSLRootCertPath            string
 		adminName                    string
 		adminPassword                string
+		dev		             bool
 	)
 
 	opts := master.DefaultOpts
@@ -229,6 +230,7 @@ func serveMaster(c *context) *cobra.Command {
 				AdminPass: adminPassword,
 				Flags:     flag,
 			},
+			dev,
 		})
 	})
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
@@ -247,6 +249,7 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&predictionServicePortsString, "prediction-service-port-range", "1025:65535", "Specified port range to create prediction services on. (\"<from>:<to>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
+	cmd.Flags().BoolVar(&dev, "dev", opts.Dev, "Turns on development features")
 
 	// DB OPTS
 	cmd.Flags().StringVar(&dbDriver, "db-driver", opts.DBOpts.Driver, "Driver for sql implementation. (Supported types are \"sqlite3\" or \"postgres\")")

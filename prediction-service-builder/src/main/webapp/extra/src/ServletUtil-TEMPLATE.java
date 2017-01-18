@@ -33,6 +33,7 @@ class ServletUtil {
         modelNames = FileUtils.readLines(new File(servletPath, "modelnames.txt"));
         logger.info("modelNames size {}", modelNames.size());
         models = new HashMap<String, EasyPredictModelWrapper>();
+        genModels = new HashMap<String, GenModel>();
         EasyPredictModelWrapper mod = null;
         for (String m : modelNames) {
           if (m.endsWith(".java"))
@@ -54,23 +55,25 @@ class ServletUtil {
       logger.debug("models already loaded");
   }
 
-  static GenModel rawModel = null;
-  static String modelName = null;
+  public static GenModel genModel = null;
+  public static String modelName = null;
   public static EasyPredictModelWrapper model = null;
   public static Map<String, EasyPredictModelWrapper> models = null;
+  public static Map<String, GenModel> genModels = null;
 
   // this is how to do easy predict that doesn't error on wrong categorical levels
-  //    rawModel = new
+  //    genModel = new
   //        new EasyPredictModelWrapper(
-  //            new EasyPredictModelWrapper.Config().setModel(rawModel).setConvertUnknownCategoricalLevelsToNa(true)
+  //            new EasyPredictModelWrapper.Config().setModel(genModel).setConvertUnknownCategoricalLevelsToNa(true)
   //        );
 
   static EasyPredictModelWrapper addPojoModel(String modelName) {
     EasyPredictModelWrapper model = null;
     try {
       Class<?> clazz = Class.forName(modelName);
-      GenModel rawModel = (GenModel) clazz.newInstance();
-      model = new EasyPredictModelWrapper(rawModel);
+      genModel = (GenModel) clazz.newInstance();
+      genModels.put(modelName, genModel);
+      model = new EasyPredictModelWrapper(genModel);
       models.put(modelName, model);
       logger.debug("added model {}  new size {}", modelName, models.size());
 
@@ -87,8 +90,9 @@ class ServletUtil {
     EasyPredictModelWrapper model = null;
     try {
       String fileName = servletPath + File.separator + modelName + ".zip";
-      GenModel rawModel = REPLACE_THIS_WITH_MODEL;
-      model = new EasyPredictModelWrapper(rawModel);
+      genModel = REPLACE_THIS_WITH_MODEL;
+      genModels.put(modelName, genModel);
+      model = new EasyPredictModelWrapper(genModel);
       models.put(modelName, model);
       logger.info("added model {}  new size {}", modelName, models.size());
     }
@@ -96,6 +100,14 @@ class ServletUtil {
       logger.error("error {}", e);
     }
     return model;
+  }
+
+  public EasyPredictModelWrapper getModel(String name) {
+    return models.get(name);
+  }
+
+  public GenModel getGenModel(String name) {
+    return genModels.get(name);
   }
 
   // load preprocessing
