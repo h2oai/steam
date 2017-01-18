@@ -30,7 +30,8 @@ import PageHeader from '../../Projects/components/PageHeader';
 import Table from '../../Projects/components/Table';
 import '../styles/launchcluster.scss';
 import { NumericInput } from 'h2oUIKit';
-import {hasPermissionToShow} from "../../App/utils/permissions";
+import { hasPermissionToShow } from "../../App/utils/permissions";
+import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core";
 
 interface Props {
   engines: any,
@@ -57,7 +58,8 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
-      engineId: null
+      selectedEngine: null,
+      engineDropdownOpen: null
     };
   }
 
@@ -69,7 +71,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   startCluster(event) {
     event.preventDefault();
     let clusterName = (this.refs.clusterForm.querySelector('input[name="name"]') as HTMLInputElement).value;
-    let engineId = this.state.engineId;
+    let engineId = this.state.selectedEngine.id;
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
     let keytab = _.get((this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement), 'value', '');
@@ -81,15 +83,53 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   uploadEngine(event) {
     event.preventDefault();
     this.props.uploadEngine(this.refs.engine);
-  }
-
-  onChangeEngine(event) {
     this.setState({
-      engineId: event.target.value
+      engineDropdownOpen: true
     });
-  }
+  };
+
+  onEngineUploadDialogOpened = () => {
+    this.setState({
+      engineDropdownOpen: true
+    });
+  };
 
   render() {
+
+    let uploadEngine;
+    if (hasPermissionToShow("ManageEngine", this.props.config, this.props.isAdmin)) {
+      uploadEngine = (
+        <label className="pt-file-upload" onClick={this.onEngineUploadDialogOpened} >
+          <input ref="engine" type="file" onChange={this.uploadEngine.bind(this)} />
+          <span className="pt-file-upload-input">Upload New Engine...</span>
+        </label>
+      );
+    } else {
+      if (this.props.engines && this.props.engines.length > 0) {
+        uploadEngine = null;
+      } else {
+        uploadEngine = <div>Please request your Admin to upload more engines</div>;
+      }
+    }
+
+    let currentEngineString;
+    if (this.state.selectedEngine) {
+      currentEngineString = this.state.selectedEngine.name;
+    } else {
+      currentEngineString = "Please select an engine";
+    }
+
+    let engineSelectContent = (
+      <div>
+        {this.props.engines.map((engine, i) => {
+          return <div key={i} className="pt-menu-item pt-popover-dismiss" onClick={() => this.setState({ selectedEngine: engine })}>
+            {engine.name}
+          </div>;
+        })}
+        {uploadEngine}
+      </div>
+    );
+
     return (
       <div className="launch-cluster">
         <PageHeader>LAUNCH NEW CLUSTER</PageHeader>
@@ -125,16 +165,17 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 H2O VERSION
               </Cell>
               <Cell>
-                {hasPermissionToShow("ManageEngine", this.props.config, this.props.isAdmin) ? <div className="upload-engine">
-                  <input ref="engine" type="file" name="engine"/>
-                  <div className="button-primary" onClick={this.uploadEngine.bind(this)}>Upload Engine</div>
-                </div> : null}
-                <select onChange={this.onChangeEngine.bind(this)}>
-                  <option></option>
-                  {this.props.engines.map((engine, i) => {
-                    return <option key={i} value={engine.id}>{engine.name}</option>;
-                  })}
-                </select>
+
+                <Popover content={engineSelectContent}
+                         interactionKind={PopoverInteractionKind.CLICK}
+                         popoverClassName="pt-popover-content-sizing"
+                         position={Position.BOTTOM}
+                         useSmartPositioning={true}>
+                  <div className="pt-button">
+                    { currentEngineString } &nbsp;
+                    <span className="pt-icon-standa pt-icon-caret-down pt-align-right font-18"></span>
+                  </div>
+                </Popover>
               </Cell>
             </Row>
             {_.get(this.props.config, 'kerberos_enabled', false) ? <Row>
