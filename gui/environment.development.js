@@ -17,5 +17,5 @@
 
 module.exports = {
   PRODUCTION: false,
-  API_HOST: 'http://localhost:9000'
+  API_HOST: 'https://localhost:9000'
 };

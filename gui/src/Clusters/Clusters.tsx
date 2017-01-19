@@ -178,6 +178,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   </span>
                 </header>
                 <div className="flexrow">
+                  Token: {cluster.token}
+                <div className="flexrow">
                   <div className="flexcolumn">
                     <div className="info-header">STATUS</div>
                     <div className="flexrow mar-right-71">
