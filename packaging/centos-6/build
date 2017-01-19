@@ -27,4 +27,9 @@ rm -rf ${OUT_DIR}
 docker run --env-file ../env.list --rm -v $(pwd)/build-inside:/build-inside:ro -v ${SRC_DIR}:/source:ro -v ${OUT_DIR}:/out \
 	-w /build-inside ${BUILD_IMAGE} /build-inside/build-package \
 
+# Build test image
+docker build -t ${TEST_IMAGE} test-image
+rm -rf test-logs
+docker run --env-file ../env.list --rm -v $(pwd)/test-inside:/test-inside:ro -v ${OUT_DIR}:/out:ro -v $(pwd)/test-logs:/test-logs -w /test-inside ${TEST_IMAGE} /test-inside/test || { echo "ERROR: the test phase failed." ; exit 1 ; }
+echo "Test phase succeeded."
 
