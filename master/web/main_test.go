@@ -99,7 +99,7 @@ func setupDS(driver, wd string) *data.Datastore {
 }
 
 func setupPz(ds *data.Datastore) az.Principal {
-	pz, err := ds.Lookup(admin)
+	pz, err := ds.LookupUser(admin)
 	if err != nil {
 		log.Fatalf("Looking up principal", err)
 	}

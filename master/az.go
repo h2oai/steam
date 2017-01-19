@@ -22,41 +22,48 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/h2oai/steam/master/data"
+	"github.com/h2oai/steam/master/az"
+
+	"crypto/tls"
 
 	auth "github.com/abbot/go-http-auth"
-	"github.com/h2oai/steam/master/az"
 )
 
 type DefaultAz struct {
 	directory az.Directory
+
+	config *tls.Config
 }
 
-func NewDefaultAz(directory az.Directory) *DefaultAz {
-	return &DefaultAz{directory}
+func NewDefaultAz(directory az.Directory, tlsConfig *tls.Config) *DefaultAz {
+	return &DefaultAz{directory, tlsConfig}
 }
 
-func (a *DefaultAz) Authenticate(username string) string {
-	pz, err := a.directory.Lookup(username)
+// Authenticate either returns a local user with password, or else it validates
+// a user against an external authentication provider
+// Returns IsLocalUser, DBUsername, DBPassword
+func (a *DefaultAz) Authenticate(username, password, token string) (bool, string, string) {
+	// Looking and/or validate against an external authentication provider
+	pz, err := a.directory.Lookup(username, password, token, a.config)
 	if err != nil {
 		log.Printf("User %s read failed: %s\n", username, err)
-		return ""
+		return false, "", ""
 	}
-
 	if pz == nil {
 		log.Printf("User %s does not exist\n", username)
-		return ""
+		return false, "", ""
 	}
-	if pz.AuthType() != data.LocalAuth {
-		log.Printf("User %s is not enabled through local login\n", username)
-		return ""
+	// If local, return true for local and the password to perform basic auth
+	if pz.IsLocal() {
+		return true, "", pz.Password()
 	}
-	return pz.Password()
+	// Else return false and the name (Name should be not "" if properly validated)
+	return false, pz.Name(), ""
 }
 
 func (a *DefaultAz) Identify(r *http.Request) (az.Principal, error) {
 	username := r.Header.Get(auth.AuthUsernameHeader)
-	pz, err := a.directory.Lookup(username)
+	pz, err := a.directory.LookupUser(username)
 	if err != nil {
 		return nil, err
 	}

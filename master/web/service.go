@@ -105,7 +105,6 @@ func (s *Service) GetConfig(pz az.Principal) (*web.Config, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "reading identity from database")
 	}
-	fmt.Println(permissions)
 	return &web.Config{
 		Version:             s.version,
 		AuthenticationType:  authType,

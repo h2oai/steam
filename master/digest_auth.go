@@ -18,9 +18,10 @@
 package master
 
 import (
+	"net/http"
+
 	"github.com/abbot/go-http-auth"
 	"github.com/h2oai/steam/master/az"
-	"net/http"
 )
 
 type DigestAuthProvider struct {
@@ -30,7 +31,8 @@ type DigestAuthProvider struct {
 
 func (p *DigestAuthProvider) Secure(handler http.Handler) http.Handler {
 	authenticator := auth.NewDigestAuthenticator(p.realm, func(user, realm string) string {
-		return p.az.Authenticate(user)
+		_, _, password := p.az.Authenticate(user, "", "")
+		return password
 	})
 	return auth.JustCheck(authenticator, handler.ServeHTTP)
 }

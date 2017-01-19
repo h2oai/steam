@@ -149,26 +149,14 @@ func Run(version, buildDate string, opts Opts) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defaultAz := NewDefaultAz(ds)
+	defaultAz := NewDefaultAz(ds, tlsConfig)
+
 	var authProvider AuthProvider
-	var set string
-	if auth, exists, err := ds.ReadAuthentication(data.ByEnabled); err != nil {
-		log.Fatalln("Reading authentication setting from database:", err)
-	} else if exists {
-		set = auth.Key
-	}
 	switch {
 	case opts.AuthProvider == "digest":
 		authProvider = newDigestAuthProvider(defaultAz, webAddress)
-	case opts.AuthProvider == "basic-ldap", set == data.LDAPAuth:
-		conn, err := ldap.FromDatabase(ds, tlsConfig)
-		if err != nil {
-			log.Fatalln("Invalid configuration:", err)
-		}
-
-		authProvider = NewBasicLdapAuthProvider(ds, webAddress, conn)
 	default: // "basic"
-		authProvider = newBasicAuthProvider(defaultAz, webAddress)
+		authProvider = newMultiAuthProvider(defaultAz, webAddress)
 	}
 	// --- set up prediction service launch host
 

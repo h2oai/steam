@@ -28,6 +28,8 @@ import (
 
 	"github.com/h2oai/steam/master/auth"
 
+	"time"
+
 	"github.com/fatih/color"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -39,7 +41,7 @@ import (
 
 const (
 	VERSION       = "1.1.0"
-	STANDARD_USER = "standard user"
+	standard_user = "standard user"
 )
 
 var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster", "ViewEngine"}
@@ -48,7 +50,8 @@ type metadata map[string]string
 
 type (
 	Datastore struct {
-		db *goqu.Database
+		db    *goqu.Database
+		users *userTable
 
 		// Internal mapping for printing
 		EntityTypeMap map[int64]string
@@ -325,7 +328,7 @@ func prime(db *goqu.Database) error {
 }
 
 func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd []Permission) error {
-	role, doesRoleExist, err := readRole(tx, ByName(STANDARD_USER))
+	role, doesRoleExist, err := readRole(tx, ByName(standard_user))
 	if err != nil {
 		return errors.Wrapf(err, "error reading role %s", role)
 	}
@@ -336,7 +339,7 @@ func initRoles(tx *goqu.TxDatabase, permissions []Permission, permissionsToAdd [
 		initRolePermissions(tx, role.Id, permissionsToAdd)
 
 	} else {
-		roleId, err := createRole(tx, STANDARD_USER)
+		roleId, err := createRole(tx, standard_user)
 		if err != nil {
 			return errors.Wrapf(err, "error creating role %s", role)
 		}
@@ -438,7 +441,8 @@ func initDatastore(db *goqu.Database) (*Datastore, error) {
 	}
 
 	return &Datastore{
-		db: db,
+		db:    db,
+		users: newUserTable(2 * time.Hour),
 
 		EntityTypeMap: toEntityTypeMap(entityTypes),
 		PermissionMap: toPermissionMap(permissions),

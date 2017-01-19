@@ -36,6 +36,7 @@ RUN typings install
 
 # Build Steam
 WORKDIR /go/src/github.com/h2oai/steam
+RUN make clean reset
 RUN make
 
 # Run Prediction Service Builder
