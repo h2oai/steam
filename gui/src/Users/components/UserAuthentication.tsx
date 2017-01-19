@@ -26,6 +26,10 @@ import { LdapConfig} from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
 import { fetchLdapConfig, saveLdapConfig, testLdapConfig, setLocalConfig } from "../actions/users.actions";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
+import { NotificationType } from "../../App/components/Notification";
+import {ToastDataFactory} from "../../App/actions/notification.actions";
+import { toastManager } from '../../App/components/ToastManager';
+
 
 interface Props {
   doesLdapExist: boolean,
@@ -175,7 +179,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
   onTestConfigClicked = () => {
     this.validateAll();
-    this.props.testLdapConfig(this.buildLdapConfig());
+    if (this.bindDnPasswordInput.value === this.confirmPasswordInput.value) {
+      this.props.testLdapConfig(this.buildLdapConfig());
+    } else {
+      toastManager.show(ToastDataFactory.create(NotificationType.Error, "Passwords do not match"));
+    }
   };
 
   onSaveConfigClicked = (e) => {
