@@ -33,7 +33,7 @@ export const CLOSE_NOTIFICATION_MANAGER = 'CLOSE_NOTIFICATION_MANAGER';
 class ToastData {
   constructor(public message, public intent, public className, public timeout) { };
 }
-class ToastDataFactory {
+export class ToastDataFactory {
 
   constructor() { };
 
