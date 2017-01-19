@@ -61,11 +61,16 @@ type ModelAsset interface {
 }
 
 func CompileModel(address, wd string, projectId, modelId int64, logicalName, modelType, algorithm, artifact, packageName string) (string, error) {
+	// ping to check if service is up
+	if _, err := http.Get(toUrl(address, "ping")); err != nil {
+		return "", fmt.Errorf("cannot locate a compilation service at: %s", address)
+	}
+
 	// Verify that model has assets set
 	switch modelType {
 	case "mojo", "pojo":
 	case "":
-		return "", errors.New("model type unset")
+		return "", errors.New("no mojo or pojo available")
 	default:
 		return "", errors.New(fmt.Sprintf("invalid model type %q", modelType))
 	}
@@ -90,11 +95,6 @@ func CompileModel(address, wd string, projectId, modelId int64, logicalName, mod
 		assets = NewDeepwater(wd, modelId, logicalName, modelType, pythonFilePaths)
 	} else {
 		assets = NewModel(wd, modelId, logicalName, modelType, pythonFilePaths)
-	}
-
-	// ping to check if service is up
-	if _, err := http.Get(toUrl(address, "ping")); err != nil {
-		return "", errors.Wrap(err, "could not connect to prediction service builder")
 	}
 
 	if err := callCompiler(toUrl(address, slug), targetFile, assets); err != nil {
