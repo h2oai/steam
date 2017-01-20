@@ -1,0 +1,17 @@
+#!/bin/bash -ex
+trap 'chown -R --reference /test-inside/test /test-logs/' EXIT
+
+yum -y install /out/*.rpm
+
+FILES_IN_RPM=$(rpm -qlp /out/*.rpm)
+
+test -x /opt/h2oai/steam/steam
+
+yum -y remove steam
+
+for f in $FILES_IN_RPM; do
+  if [ -f $f ]; then 
+      echo "File $f exists after RPM package removal"
+      exit -1
+  fi
+done
