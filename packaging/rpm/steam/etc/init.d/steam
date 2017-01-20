@@ -17,6 +17,7 @@
 
 # Author: Steam Team <steam@h2o.ai>
 # Code "leveraged" from other init.d scripts.
+. /etc/init.d/functions
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 DESC="steam"
@@ -32,16 +33,18 @@ case "$1" in
     ;;
   start)
 	logger "Starting h2o steam" "steam"
-	start-stop-daemon --start --make-pidfile --pidfile $PIDFILE --background --startas /bin/bash -- -c "exec $DAEMON serve master --working-directory=$H2ODIR/var/master >> /var/log/steam.log 2>&1"
+	exec $DAEMON serve master --working-directory=$H2ODIR/var/master >> /var/log/steam.log 2>&1 &
+	PID=$!
 	logger $?
+	echo $PID > $PIDFILE
     ;;
   stop)
 	logger "Stopping h2o steam" "steam"
-	start-stop-daemon --stop --pidfile  $PIDFILE
+	killproc -p  $PIDFILE
 	logger $?
     ;;
   status)
-	if pidofproc -p $PIDFILE $DAEMON >/dev/null 2>&1; then
+	if pidofproc -p $PIDFILE >/dev/null 2>&1; then
 	    echo "$DAEMON is running";
 	    exit 0;
 	else
