@@ -212,7 +212,7 @@ endif
 		--post-install ../packaging/rpm/SCRIPTS/post \
 		--pre-uninstall ../packaging/rpm/SCRIPTS/preun \
 		--post-uninstall ../packaging/rpm/SCRIPTS/postun \
-		--config-files "/etc/steam/steam.conf"
+		--config-files "/etc/steam/steam.conf" \
 		--force \
 		-C $(RPM_OUT_DIR)/steam)
 	pwd
