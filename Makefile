@@ -198,6 +198,19 @@ endif
 	cp -r dist/steam-${STEAM_RELEASE_VERSION}-linux-amd64/. $(RPM_OUT_DIR)/steam/opt/h2oai/steam/
 	pwd
 	
-	(cd dist && echo -e "\n" | setsid fpm -s dir -t rpm -n steam -v $(STEAM_RELEASE_VERSION) --description "Steam Cluster Manager" --depends "haproxy >= 1.5" -C $(RPM_OUT_DIR)/steam)
+	(cd dist && echo -e "\n" | setsid fpm -s dir \
+		-t rpm \
+		-n steam \
+		-v $(STEAM_RELEASE_VERSION) \
+		--vendor H2O.ai \
+		--url http://h2o.ai/download \
+		--description "Steam Cluster Manager" \
+		--depends "haproxy >= 1.5, /sbin/service, /sbin/chkconfig" \
+		--pre-install ../packaging/rpm/SCRIPTS/pre \
+		--post-install ../packaging/rpm/SCRIPTS/post \
+		--pre-uninstall ../packaging/rpm/SCRIPTS/preun \
+		--post-uninstall ../packaging/rpm/SCRIPTS/postun \
+		--force \
+		-C $(RPM_OUT_DIR)/steam)
 	pwd
 

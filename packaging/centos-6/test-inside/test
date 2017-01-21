@@ -1,6 +1,8 @@
 #!/bin/bash -ex
 trap 'chown -R --reference /test-inside/test /test-logs/' EXIT
 
+rpmlint /out/*.rpm || echo "WARNING: check RPM structure !!!"
+
 yum -y install /out/*.rpm
 
 FILES_IN_RPM=$(rpm -qlp /out/*.rpm)

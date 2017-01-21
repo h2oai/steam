@@ -3,3 +3,5 @@ MAINTAINER H2O.ai version: 1.2.0
 
 RUN yum install -y haproxy
 
+RUN yum install -y rpmlint
+
