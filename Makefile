@@ -205,11 +205,14 @@ endif
 		--vendor H2O.ai \
 		--url http://h2o.ai/download \
 		--description "Steam Cluster Manager" \
+		--license "AGPLv3" \
+		--category "System Environment/Daemons" \
 		--depends "haproxy >= 1.5, /sbin/service, /sbin/chkconfig" \
 		--pre-install ../packaging/rpm/SCRIPTS/pre \
 		--post-install ../packaging/rpm/SCRIPTS/post \
 		--pre-uninstall ../packaging/rpm/SCRIPTS/preun \
 		--post-uninstall ../packaging/rpm/SCRIPTS/postun \
+		--config-files "/etc/steam/steam.conf"
 		--force \
 		-C $(RPM_OUT_DIR)/steam)
 	pwd

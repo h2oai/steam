@@ -1,16 +1,12 @@
 #!/bin/sh
-
-### BEGIN INIT INFO
-# Provides:          steam
-# Required-Start:    $remote_fs $syslog
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: H2O Steam service
-# Description:       H2O Steam service
-#                    <...>
-#                    <...>
-### END INIT INFO
+#
+# steam
+#
+# chkconfig:    - 85 15
+# description:  Steam is H2O cluster launcher and manager.
+# processname:  steam
+# config:       /etc/steam/steam.conf
+# pidfile:      /var/run/steam.pid
 
 # Author: Steam Team <steam@h2o.ai>
 . /etc/init.d/functions
@@ -18,10 +14,12 @@
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 H2ODIR=/opt/h2oai/steam
 DAEMON=$H2ODIR/steam
+PROG=$(basename $DAEMON)
 STEAM_USER=steam
 STEAM_GROUP=steam
 PIDFILE=/var/run/steam.pid
 WORKING_DIRECTORY=$H2ODIR/var/master
+LOCKFILE=/var/lock/subsys/$PROG
 
 . /etc/steam/steam.conf
 
@@ -88,6 +86,7 @@ case "$1" in
       exit 2
     else
       logger -s -p INFO "INFO: Started with pid `cat $PIDFILE`"
+      touch $LOCKFILE
     fi
     ;;
   stop)
@@ -98,6 +97,7 @@ case "$1" in
       logger -s -p WARN "WARN: Stop failed (RC is $RC), but ignoring"
     else
       rm -f $PIDFILE
+      rm -f $LOCKFILE
       logger -s -p INFO "INFO: Stopped"
     fi
     ;;
@@ -111,8 +111,11 @@ case "$1" in
     $0 stop
     $0 start
     ;;
+  status)
+    status $PROG
+    ;;
   *)
-    echo "Usage: /etc/init.d/steam {set-admin|create-self-signed-cert|start|stop|force-stop|restart|force-reload}"
+    echo "Usage: /etc/init.d/steam {set-admin|create-self-signed-cert|start|stop|force-stop|restart|force-reload|status}"
     exit 1
     ;;
 esac
