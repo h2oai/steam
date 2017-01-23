@@ -435,6 +435,17 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
             : null}
         </div>
 
+        <div id="testConfig">
+          <p>
+            <hr />
+          </p>
+          <p>Preview users & roles from above config</p>
+          <div id="testClusterInfo">
+            Cluster Info
+          </div>
+
+        </div>
+
       </div>
     );
   }
