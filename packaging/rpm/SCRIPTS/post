@@ -1,0 +1,12 @@
+# Needs to have linux '\n' lines endings! In ViM: `set ff=unix`
+case "$1" in
+    1)
+        /sbin/chkconfig --add %{name}
+    ;;
+
+    2)
+        /sbin/chkconfig --del %{name}
+        /sbin/chkconfig --add %{name}
+    ;;
+esac
+

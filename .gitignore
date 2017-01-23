@@ -29,6 +29,9 @@ _testmain.go
 .DS_Store
 *.swp
 coverage.out
+*.rdb
+tmp
+private
 
 # ignore list
 /steamY
