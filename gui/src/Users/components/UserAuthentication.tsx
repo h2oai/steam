@@ -22,23 +22,25 @@ import { bindActionCreators } from 'redux';
 import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
 import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
+import { Dialog } from '@blueprintjs/core/dist/components/dialog/dialog';
 import { LdapConfig} from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
 import { fetchLdapConfig, saveLdapConfig, testLdapConfig, setLocalConfig } from "../actions/users.actions";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
 import { NotificationType } from "../../App/components/Notification";
-import {ToastDataFactory} from "../../App/actions/notification.actions";
+import { ToastDataFactory } from "../../App/actions/notification.actions";
 import { toastManager } from '../../App/components/ToastManager';
 import Table from "../../Projects/components/Table";
 import Row from "../../Projects/components/Row";
 import Cell from "../../Projects/components/Cell";
 import { DEFAULT_BIND_DN_PASSWORD, DEFAULT_BIND_DN, DEFAULT_CONFIRM_PASSWORD, DEFAULT_GROUP_DN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_SEARCH_REQUEST_SIZE_LIMIT, DEFAULT_SEARCH_REQUEST_TIME_LIMIT, DEFAULT_SSL_ENABLED, DEFAULT_STATIC_MEMBER_ATTRIBUTE, DEFAULT_USERBASE_DN, DEFAULT_USERBASE_FILTER, DEFAULT_USERNAME_ATTRIBUTE } from "../reducers/users.reducer";
 
-
 interface Props {
   doesLdapExist: boolean,
   ldapConfig: LdapConfig,
-  authType: string
+  authType: string,
+  onCreateRoleClicked: Function,
+  onManageRoleClicked: Function
 }
 interface DispatchProps {
   fetchLdapConfig: Function,
@@ -56,7 +58,29 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
   constructor(params) {
     super(params);
-    this.onResetClicked();
+    this.state = {
+      hostValue: DEFAULT_HOST,
+      portValue: DEFAULT_PORT,
+      sslEnabledValue: DEFAULT_SSL_ENABLED,
+      bindDnValue: DEFAULT_BIND_DN,
+      bindDnPasswordValue: DEFAULT_BIND_DN_PASSWORD,
+      confirmPasswordValue: DEFAULT_CONFIRM_PASSWORD,
+      userbaseDnValue: DEFAULT_USERBASE_DN,
+      userbaseFilterValue: DEFAULT_USERBASE_FILTER,
+      usernameAttributeValue: DEFAULT_USERNAME_ATTRIBUTE,
+      groupDnValue: DEFAULT_GROUP_DN,
+      staticMemberAttributeValue: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
+      searchRequestSizeLimitValue: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
+      searchRequestTimeLimitValue: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
+      isLDAPConnectionSettingsOpen: true,
+      selectedDB: "",
+      hostInputValid: true,
+      passwordInputValid: true,
+      userbaseDnInputValid: true,
+      usernameAttributeInputValid: true,
+      groupDnInputValid: true,
+      afterConfirmAction: null
+    };
   }
 
   validateAll = () => {
@@ -192,14 +216,14 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   };
 
   onAddNewRolesClicked = () => {
-
+    this.props.onCreateRoleClicked();
   };
 
   onConfigureSteamRolesClicked = () => {
-
+    this.props.onManageRoleClicked();
   };
   onResetClicked = () => {
-    this.state = {
+    this.setState({
       hostValue: DEFAULT_HOST,
       portValue: DEFAULT_PORT,
       sslEnabledValue: DEFAULT_SSL_ENABLED,
@@ -214,13 +238,13 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       searchRequestSizeLimitValue: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
       searchRequestTimeLimitValue: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
       isLDAPConnectionSettingsOpen: true,
-      selectedDB: "",
+      selectedDB: "LDAP",
       hostInputValid: true,
       passwordInputValid: true,
       userbaseDnInputValid: true,
       usernameAttributeInputValid: true,
       groupDnInputValid: true,
-    };
+    });
   };
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -453,19 +477,17 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         </div>
 
         <div id="testConfig">
-          <p>
-            <hr />
-          </p>
-          <p>Preview users & roles from above config</p>
+          <p></p>
+          <hr />
+          <p></p>
+          <p className="mar-bot-20">Preview users & roles from above config</p>
           <div id="testClusterInfo">
           </div>
-          <div>
-            LDAP SELECTION
+          <div className="font-oswald font-semibold font-18 mar-bot-7">LDAP SELECTION</div>
+          <div className="mar-bot-16">
+            <span className="green font-oswald font-24 font-bold">1345</span><span className="font-18 font-oswald font-semibold"> Users </span><span className="green font-24 font-bold font-oswald">30</span><span className="font-18 font-oswald font-semibold"> Groups</span>
           </div>
-          <div>
-            <span>1345</span> Users <span>30</span> Groups
-          </div>
-          <Table>
+          <Table className="mar-bot-30">
             <Row header={true}>
               <Cell>GROUP NAME</Cell>
               <Cell># of USERS</Cell>
@@ -477,10 +499,27 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
               <Cell>xxx-121,32212</Cell>
             </Row>
           </Table>
-          <div className="button-secondary" onClick={this.onAddNewRolesClicked}>Add New Role</div> &nbsp;
-          <div className="button-secondary" onClick={this.onConfigureSteamRolesClicked}>Configure Steam Roles</div> &nbsp;
+          <div className="button-secondary" onClick={() => this.setState({afterConfirmAction: this.onAddNewRolesClicked})}>Add New Role</div> &nbsp;
+          <div className="button-secondary" onClick={() => this.setState({afterConfirmAction: this.onConfigureSteamRolesClicked})}>Configure Steam Roles</div> &nbsp;
           <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
         </div>
+
+        <Dialog
+          iconName="Confirm"
+          isOpen={this.state.afterConfirmAction}
+          onClose={() => this.setState({afterConfirmAction: null})}
+          title="Confirm exit"
+        >
+          <div className="pt-dialog-body">
+            Navigating away from this page will discard current LDAP config
+          </div>
+          <div className="pt-dialog-footer">
+            <div className="pt-dialog-footer-actions">
+              <div className="button-secondary" onClick={() => this.setState({afterConfirmAction: null})}>Cancel</div> &nbsp;
+              <div className="button-primary" onClick={this.state.afterConfirmAction}>Accept</div>
+            </div>
+          </div>
+        </Dialog>
 
       </div>
     );
