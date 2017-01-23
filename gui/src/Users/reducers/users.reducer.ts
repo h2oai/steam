@@ -23,6 +23,20 @@ import {
   EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG, RECEIVE_ADMIN_CHECK
 } from '../actions/users.actions';
 
+export const DEFAULT_HOST = "";
+export const DEFAULT_PORT = "636";
+export const DEFAULT_SSL_ENABLED = true;
+export const DEFAULT_BIND_DN = "dc=xyz,dc=com";
+export const DEFAULT_BIND_DN_PASSWORD = "";
+export const DEFAULT_CONFIRM_PASSWORD = "";
+export const DEFAULT_USERBASE_DN = "";
+export const DEFAULT_USERBASE_FILTER = "";
+export const DEFAULT_USERNAME_ATTRIBUTE = "";
+export const DEFAULT_GROUP_DN = "dc=xyz,dc=com";
+export const DEFAULT_STATIC_MEMBER_ATTRIBUTE = "memberUid";
+export const DEFAULT_SEARCH_REQUEST_SIZE_LIMIT = "";
+export const DEFAULT_SEARCH_REQUEST_TIME_LIMIT = "";
+
 let initialState = {
   permissionsWithRoles: [],
   roles: [],
@@ -32,17 +46,18 @@ let initialState = {
   createNewRoleIsEntered: false,
   ldapExists: false,
   ldapConfig: {
-    host: "",
-    port: 636,
-    ldaps: true,
-    bind_dn: "dc=xyz,dc=com",
-    bind_password: "",
-    user_base_dn: "",
-    user_base_filter: "",
-    group_dn: "dc=xyz,dc=com",
-    static_member_attribute: "memberUid",
-    search_request_size_limit: 0,
-    search_request_time_limit: 0,
+    host: DEFAULT_HOST,
+    port: DEFAULT_PORT,
+    ldaps: DEFAULT_SSL_ENABLED,
+    bind_dn: DEFAULT_BIND_DN,
+    bind_password: DEFAULT_BIND_DN_PASSWORD,
+    user_base_dn: DEFAULT_USERBASE_DN,
+    user_base_filter: DEFAULT_USERBASE_FILTER,
+    usernameAttribute: DEFAULT_USERNAME_ATTRIBUTE,
+    group_dn: DEFAULT_GROUP_DN,
+    static_member_attribute: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
+    search_request_size_limit: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
+    search_request_time_limit: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
     force_bind: true
   },
   isAdmin: false

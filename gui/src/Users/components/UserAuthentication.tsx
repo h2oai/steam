@@ -29,6 +29,10 @@ import { getConfig } from "../../Clusters/actions/clusters.actions";
 import { NotificationType } from "../../App/components/Notification";
 import {ToastDataFactory} from "../../App/actions/notification.actions";
 import { toastManager } from '../../App/components/ToastManager';
+import Table from "../../Projects/components/Table";
+import Row from "../../Projects/components/Row";
+import Cell from "../../Projects/components/Cell";
+import { DEFAULT_BIND_DN_PASSWORD, DEFAULT_BIND_DN, DEFAULT_CONFIRM_PASSWORD, DEFAULT_GROUP_DN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_SEARCH_REQUEST_SIZE_LIMIT, DEFAULT_SEARCH_REQUEST_TIME_LIMIT, DEFAULT_SSL_ENABLED, DEFAULT_STATIC_MEMBER_ATTRIBUTE, DEFAULT_USERBASE_DN, DEFAULT_USERBASE_FILTER, DEFAULT_USERNAME_ATTRIBUTE } from "../reducers/users.reducer";
 
 
 interface Props {
@@ -52,28 +56,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
   constructor(params) {
     super(params);
-    this.state = {
-      hostValue: "",
-      portValue: "636",
-      sslEnabledValue: true,
-      bindDnValue: "dc=xyz,dc=com",
-      bindDnPasswordValue: "",
-      confirmPasswordValue: "",
-      userbaseDnValue: "",
-      userbaseFilterValue: "",
-      usernameAttributeValue: "",
-      groupDnValue: "dc=xyz,dc=com",
-      staticMemberAttributeValue: "memberUid",
-      searchRequestSizeLimitValue: "",
-      searchRequestTimeLimitValue: "",
-      isLDAPConnectionSettingsOpen: true,
-      selectedDB: "",
-      hostInputValid: true,
-      passwordInputValid: true,
-      userbaseDnInputValid: true,
-      usernameAttributeInputValid: true,
-      groupDnInputValid: true,
-    };
+    this.onResetClicked();
   }
 
   validateAll = () => {
@@ -207,6 +190,39 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   onRemoveLdapClicked = () => {
     this.props.setLocalConfig();
   };
+
+  onAddNewRolesClicked = () => {
+
+  };
+
+  onConfigureSteamRolesClicked = () => {
+
+  };
+  onResetClicked = () => {
+    this.state = {
+      hostValue: DEFAULT_HOST,
+      portValue: DEFAULT_PORT,
+      sslEnabledValue: DEFAULT_SSL_ENABLED,
+      bindDnValue: DEFAULT_BIND_DN,
+      bindDnPasswordValue: DEFAULT_BIND_DN_PASSWORD,
+      confirmPasswordValue: DEFAULT_CONFIRM_PASSWORD,
+      userbaseDnValue: DEFAULT_USERBASE_DN,
+      userbaseFilterValue: DEFAULT_USERBASE_FILTER,
+      usernameAttributeValue: DEFAULT_USERNAME_ATTRIBUTE,
+      groupDnValue: DEFAULT_GROUP_DN,
+      staticMemberAttributeValue: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
+      searchRequestSizeLimitValue: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
+      searchRequestTimeLimitValue: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
+      isLDAPConnectionSettingsOpen: true,
+      selectedDB: "",
+      hostInputValid: true,
+      passwordInputValid: true,
+      userbaseDnInputValid: true,
+      usernameAttributeInputValid: true,
+      groupDnInputValid: true,
+    };
+  };
+
   render(): React.ReactElement<HTMLDivElement> {
     let defaultSelectedDB;
 
@@ -425,10 +441,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
         <div id="actionButtonsContainer" className="space-20">
           {defaultSelectedDB.toLowerCase() === 'ldap' ?
-            <span>
+            <div>
               <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
+              <div className="button-secondary" onClick={this.onResetClicked}>Reset</div> &nbsp;
               <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
-            </span>
+            </div>
             : null}
           {this.props.authType && this.props.authType.toLowerCase() === "ldap" && defaultSelectedDB.toLowerCase() !== 'ldap' ?
             <div className="button-primary" onClick={this.onRemoveLdapClicked}>Remove LDAP</div>
@@ -441,9 +458,28 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
           </p>
           <p>Preview users & roles from above config</p>
           <div id="testClusterInfo">
-            Cluster Info
           </div>
-
+          <div>
+            LDAP SELECTION
+          </div>
+          <div>
+            <span>1345</span> Users <span>30</span> Groups
+          </div>
+          <Table>
+            <Row header={true}>
+              <Cell>GROUP NAME</Cell>
+              <Cell># of USERS</Cell>
+              <Cell>USERS</Cell>
+            </Row>
+            <Row>
+              <Cell>xyz301</Cell>
+              <Cell>13</Cell>
+              <Cell>xxx-121,32212</Cell>
+            </Row>
+          </Table>
+          <div className="button-secondary" onClick={this.onAddNewRolesClicked}>Add New Role</div> &nbsp;
+          <div className="button-secondary" onClick={this.onConfigureSteamRolesClicked}>Configure Steam Roles</div> &nbsp;
+          <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
         </div>
 
       </div>
