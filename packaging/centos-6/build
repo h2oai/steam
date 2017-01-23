@@ -15,6 +15,7 @@ docker build --pull -t ${BUILD_IMAGE} build-image
 #clean previous packages. you may want to omit this if
 #you want to preserve them all and have got other means of removing them.
 rm -rf ${OUT_DIR}
+mkdir -p ${OUT_DIR}
 
 # run the build-package script from the build-inside directory inside a container
 # started from the above build image. The script will access the source directory of 

@@ -23,7 +23,8 @@
 	release \
 	debian_package \
 	rpm_package \
-
+	dist/rpm/centos-6 \
+	dist/rpm/centos-7 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
