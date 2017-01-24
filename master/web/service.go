@@ -2250,7 +2250,9 @@ type ldapSerialized struct {
 	UserBaseDn             string
 	UserBaseFilter         string
 	UserNameAttribute      string
-	GroupDn                string
+	GroupBaseDN            string
+	GroupNameAttribute     string
+	GroupNames             []string
 	StaticMemberAttribute  string
 	SearchRequestSizeLimit int
 	SearchRequestTimeLimit int
@@ -2261,13 +2263,17 @@ type ldapSerialized struct {
 
 func configToSerialized(config *web.LdapConfig) ldapSerialized {
 	bind := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", config.BindDn, config.BindPassword)))
+	groups := strings.Split(config.GroupNames, ",")
+
 	return ldapSerialized{
 		fmt.Sprintf("%s:%d", config.Host, config.Port),
 		bind,
 		config.UserBaseDn,
 		config.UserBaseFilter,
 		config.UserNameAttribute,
-		config.GroupDn,
+		config.GroupBaseDn,
+		config.GroupNameAttribute,
+		groups,
 		config.StaticMemberAttribute,
 		config.SearchRequestSizeLimit,
 		config.SearchRequestTimeLimit,
@@ -2295,7 +2301,7 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 		config.Ldaps,
 		bind[0], "",
 		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
-		config.GroupDn, config.StaticMemberAttribute,
+		config.GroupBaseDN, config.GroupNameAttribute, strings.Join(config.GroupNames, ","), config.StaticMemberAttribute,
 		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
 		config.ForceBind,
 	}, nil
@@ -2357,8 +2363,9 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	return config, exists, err
 }
 
-func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) error {
-	return ldap.FromConfig(config).Test()
+func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) (int, []*web.LdapGroup, error) {
+	ct, gs, err := ldap.FromConfig(config).TestConfig()
+	return ct, toLdapGroup(gs), err
 }
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
@@ -2841,6 +2848,14 @@ func toEntityHistories(es []data.History) []*web.EntityHistory {
 	ar := make([]*web.EntityHistory, len(es))
 	for i, e := range es {
 		ar[i] = toEntityHistory(e)
+	}
+	return ar
+}
+
+func toLdapGroup(gs map[string]int) []*web.LdapGroup {
+	ar := make([]*web.LdapGroup, 0, len(gs))
+	for g, u := range gs {
+		ar = append(ar, &web.LdapGroup{Name: g, Users: u})
 	}
 	return ar
 }

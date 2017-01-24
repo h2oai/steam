@@ -178,13 +178,15 @@ class RPCClient:
 		Parameters:
 		config: No description available (LdapConfig)
 
-		Returns:None
+		Returns:
+		count: No description available (int)
+		groups: No description available (LdapGroup)
 		"""
 		request = {
 			'config': config
 		}
 		response = self.connection.call("TestLdapConfig", request)
-		return 
+		return response['count'], response['groups']
 	
 	def register_cluster(self, address):
 		"""
