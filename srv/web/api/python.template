@@ -11,7 +11,6 @@ import json
 import sys
 import logging
 import ssl
-from h2o.backend.connection import H2OConnectionConf
 from collections import namedtuple
 
 class RPCError(Exception):
@@ -89,11 +88,11 @@ class RPCClient:
 	def get_cluster_connection(self, cluster):
 		proxconf = self.get_config()
 		cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
-		conf = H2OConnectionConf.create({'https':True, 'verify_ssl_certificates':self.connection.verify_ssl, \
+		conf = {'https':True, 'verify_ssl_certificates':self.connection.verify_ssl, \
 			'port': int(cport), \
 			'context_path':'%s_%s' % (proxconf['username'], cluster['name']), \
 			'cookies':["%s=%s" % (cluster['name'], cluster['token'])], \
-			'ip':self.connection.host})
+			'ip':self.connection.host}
 		return conf
 	
 	
