@@ -21,10 +21,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
 	"github.com/h2oai/steam/srv/web"
+
+	"bytes"
 
 	"github.com/pkg/errors"
 	ldap "gopkg.in/ldap.v2"
@@ -39,11 +42,11 @@ type Ldap struct {
 	UserBaseFilter    string // LDAP search filter e.g. (department=IT)
 	UserNameAttribute string // Contains username (typically uid or sAMAccountName)
 
-	GroupDn                 string // The group to allow users from //XXX TEMPORARY
-	GroupBaseDn             string // Location of LDAP group TODO: allow for multiple DNs
-	GroupNameAttribute      string // The attribute that contains the name (typically cn)
-	StaticGroupSearchFilter string // LDAP search filter e.g. (department=IT)
-	StaticMemberAttribute   string // The group member values (typically member or memberUid)
+	GroupBaseDn             string   // Location of LDAP group TODO: allow for multiple DNs
+	GroupNameAttribute      string   // The attribute that contains the name (typically cn)
+	GroupNames              []string // The names of groups that have access to Steam
+	StaticGroupSearchFilter string   // LDAP search filter e.g. (department=IT)
+	StaticMemberAttribute   string   // The group member values (typically member or memberUid)
 
 	SearchRequestSizeLimit int // The maximum number of entries request by LDAP searches
 	SearchRequestTimeLimit int // The maximum number of seconds to wait for LDAP searches
@@ -54,7 +57,7 @@ type Ldap struct {
 	tlsConfig *tls.Config
 }
 
-func (l *Ldap) Test() error {
+func (l *Ldap) TestConfig() (int, map[string]int, error) {
 	var (
 		conn *ldap.Conn
 		err  error
@@ -66,11 +69,11 @@ func (l *Ldap) Test() error {
 		conn, err = ldap.Dial("tcp", l.Address)
 	}
 	if err != nil {
-		return errors.Wrap(err, "dialing ldap")
+		return 0, nil, errors.Wrap(err, "dialing ldap")
 	}
 	defer conn.Close()
 	if err := conn.Bind(l.BindDN, l.BindPass); err != nil {
-		return errors.Wrap(err, "attempting bind")
+		return 0, nil, errors.Wrap(err, "attempting bind")
 	}
 
 	userReq := ldap.NewSearchRequest(
@@ -78,54 +81,75 @@ func (l *Ldap) Test() error {
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
 		false,
 		"(objectClass=*)",
-		nil, nil,
+		[]string{l.UserNameAttribute}, nil,
 	)
+
+	q := joinOrQuery(l.GroupNameAttribute, l.GroupNames...)
 	groupReq := ldap.NewSearchRequest(
-		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
+		l.GroupBaseDn, ldap.ScopeWholeSubtree, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
 		false,
-		"(objectClass=*)",
-		[]string{l.StaticMemberAttribute}, nil,
+		fmt.Sprintf("(%s)", q),
+		[]string{l.StaticMemberAttribute, l.GroupNameAttribute}, nil,
 	)
 
 	userRes, err := conn.Search(userReq)
 	if err != nil {
-		return errors.Wrap(err, "searching for user base DN")
+		return 0, nil, errors.Wrap(err, "searching for user base DN")
 	}
 	if len(userRes.Entries) < 1 {
-		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
+		return 0, nil, errors.New(fmt.Sprint("unable to locate user base DN", l.UserBaseDn))
 	}
 
 	groupRes, err := conn.Search(groupReq)
 	if err != nil {
-		return errors.Wrap(err, "searching for group")
+		return 0, nil, errors.Wrap(err, "searching for groups")
 	}
 	if len(groupRes.Entries) < 1 {
-		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
-	} else if len(groupRes.Entries) > 2 {
-		return errors.New("too many group entries")
-	}
-	members := make(map[string]struct{})
-	for _, member := range groupRes.Entries[0].GetAttributeValues(l.StaticMemberAttribute) {
-		members[member] = struct{}{}
+		return 0, nil, errors.New(fmt.Sprint("unable to locate any matching groups", l.GroupBaseDn))
 	}
 
-	var count int
-	for _, user := range userRes.Entries {
-		if _, ok := members[user.DN]; ok {
-			count++
+	users := make(map[string]struct{})
+	for _, u := range userRes.Entries {
+		users[u.GetAttributeValue(l.UserNameAttribute)] = struct{}{}
+	}
+
+	var ct int
+	groups := make(map[string]int)
+	for _, e := range groupRes.Entries {
+		for _, member := range e.GetAttributeValues(l.StaticMemberAttribute) {
+			if _, ok := users[member]; ok {
+				ct++
+				groups[e.GetAttributeValue(l.GroupNameAttribute)]++
+			}
 		}
 	}
 
-	return nil
+	return ct, groups, nil
 }
 
-func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
+func joinOrQuery(nameAttribute string, names ...string) string {
+	buf := new(bytes.Buffer)
+	if len(names) > 1 {
+		buf.WriteString("(|")
+	}
+	for _, name := range names {
+		buf.WriteString(fmt.Sprintf("(%s=%s)", nameAttribute, name))
+	}
+	if len(names) > 1 {
+		buf.WriteString(")")
+	}
+
+	return buf.String()
+}
+
+func (l *Ldap) checkGroup(conn *ldap.Conn, userName string) (bool, error) {
+	query := joinOrQuery(l.GroupNameAttribute, l.GroupNames...)
 	req := ldap.NewSearchRequest(
-		l.GroupDn, ldap.ScopeBaseObject, ldap.DerefAlways,
+		l.GroupBaseDn, ldap.ScopeWholeSubtree, ldap.DerefAlways,
 		l.SearchRequestSizeLimit, l.SearchRequestTimeLimit,
 		false,
-		fmt.Sprintf("(&%s(objectClass=*))", l.UserBaseFilter),
+		fmt.Sprintf("(%s)", query),
 		[]string{l.StaticMemberAttribute}, nil,
 	)
 
@@ -134,15 +158,24 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
 		return false, errors.Wrap(err, "searching ldap")
 	}
 
-	users := res.Entries[0].GetAttributeValues(l.StaticMemberAttribute)
-	sort.Strings(users)
-	if i := sort.SearchStrings(users, user); i != len(users) {
-		for _, u := range users[i:] {
-			if u == user {
+	if len(res.Entries) < 1 {
+		log.Println("no groups found matching query")
+		return false, nil
+	}
+
+	// Search each group for at least one match with this user
+	for _, entry := range res.Entries {
+		users := entry.GetAttributeValues(l.StaticMemberAttribute)
+
+		// builtin sort.Search requires that the array be sorted first
+
+		// Sort.Search returns the smallest index at which userName is less the next value
+		// This means you need to verify that users[i] == userName because some values may incorrectly
+		// return true (i.e. "Jetty1", may return true for "Jetty")
+		sort.Strings(users)
+		if i := sort.SearchStrings(users, userName); i != len(users) {
+			if users[i] == userName {
 				return true, nil
-			}
-			if !strings.HasPrefix(u, user) {
-				break
 			}
 		}
 	}
@@ -208,7 +241,7 @@ func NewLdap(
 	// User settings
 	userBaseDn, userBaseFilter, userNameAttribute string,
 	// Group settings
-	groupDN, staticMemberAttribute string,
+	groupBaseDn, groupNameAttribute, staticMemberAttribute string, groupNames []string,
 	// Advanced Settings
 	searchRequestSizeLimit, searchRequestTimeLimit int,
 ) *Ldap {
@@ -217,23 +250,28 @@ func NewLdap(
 		Address: address, BindDN: bindDn, BindPass: bindPass, Ldaps: ldaps, ForceBind: forceBind,
 		// User settings
 		UserBaseDn: userBaseDn, UserNameAttribute: userNameAttribute, UserBaseFilter: userBaseFilter,
-		// Group Settings
-		GroupDn: groupDN, StaticMemberAttribute: staticMemberAttribute,
+		// Group settings
+		GroupBaseDn: groupBaseDn, GroupNameAttribute: groupNameAttribute, StaticMemberAttribute: staticMemberAttribute, GroupNames: groupNames,
+		// Advanced settings
+		SearchRequestSizeLimit: searchRequestSizeLimit, SearchRequestTimeLimit: searchRequestTimeLimit,
 	}
 }
 
 func FromConfig(config *web.LdapConfig) *Ldap {
+	groupNames := strings.Split(config.GroupNames, ",")
+
 	return NewLdap(
 		fmt.Sprintf("%s:%d", config.Host, config.Port), config.BindDn, config.BindPassword, config.Ldaps, config.ForceBind,
 		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
-		config.GroupDn, config.StaticMemberAttribute,
-		0, 0,
+		config.GroupBaseDn, config.GroupNameAttribute, config.StaticMemberAttribute, groupNames,
+		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
 	)
 }
 
 func FromDatabase(config string) (*Ldap, error) {
 	aux := struct {
-		Bind string
+		Bind       string
+		GroupNames string
 		Ldap
 	}{}
 	if err := json.Unmarshal([]byte(config), &aux); err != nil {
@@ -249,11 +287,12 @@ func FromDatabase(config string) (*Ldap, error) {
 	aux.Ldap.BindDN, aux.Ldap.BindPass = decrypt[0], decrypt[1]
 
 	a := aux.Ldap
+	groups := strings.Split(aux.GroupNames, ",")
 
 	return NewLdap(
 		a.Address, a.BindDN, a.BindPass, a.Ldaps, a.ForceBind,
 		a.UserBaseDn, a.UserBaseFilter, a.UserNameAttribute,
-		a.GroupDn, a.StaticMemberAttribute,
-		0, 0,
+		a.GroupBaseDn, a.GroupNameAttribute, a.StaticMemberAttribute, groups,
+		a.SearchRequestSizeLimit, a.SearchRequestTimeLimit,
 	), nil
 }
