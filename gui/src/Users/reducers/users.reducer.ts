@@ -19,8 +19,8 @@ import * as _ from 'lodash';
 import {
   RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
   RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE,
-  ENTER_NEW_USER,
-  EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG, RECEIVE_ADMIN_CHECK
+  ENTER_NEW_USER, EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG,
+  RECEIVE_ADMIN_CHECK, RECEIVE_TEST_LDAP, REQUEST_CLEAR_TEST_LDAP
 } from '../actions/users.actions';
 
 export const DEFAULT_HOST = "";
@@ -36,6 +36,8 @@ export const DEFAULT_GROUP_DN = "dc=xyz,dc=com";
 export const DEFAULT_STATIC_MEMBER_ATTRIBUTE = "memberUid";
 export const DEFAULT_SEARCH_REQUEST_SIZE_LIMIT = "";
 export const DEFAULT_SEARCH_REQUEST_TIME_LIMIT = "";
+export const DEFAULT_GROUP_NAMES_ATTRIBUTE = "";
+export const DEFAULT_GROUP_NAMES = "";
 
 let initialState = {
   permissionsWithRoles: [],
@@ -54,17 +56,31 @@ let initialState = {
     user_base_dn: DEFAULT_USERBASE_DN,
     user_base_filter: DEFAULT_USERBASE_FILTER,
     usernameAttribute: DEFAULT_USERNAME_ATTRIBUTE,
-    group_dn: DEFAULT_GROUP_DN,
+    group_base_dn: DEFAULT_GROUP_DN,
+    group_name_attribute: DEFAULT_GROUP_NAMES_ATTRIBUTE,
     static_member_attribute: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
+    group_names: DEFAULT_GROUP_NAMES,
     search_request_size_limit: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
     search_request_time_limit: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
     force_bind: true
   },
-  isAdmin: false
+  isAdmin: false,
+  testResult: null
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case REQUEST_CLEAR_TEST_LDAP : {
+      return _.assign({}, state, {
+          testResult: null
+        }
+      );
+    }
+    case RECEIVE_TEST_LDAP : {
+      return _.assign({}, state, {
+        testResult: action.ldapTestResult
+      });
+    }
     case RECEIVE_ADMIN_CHECK : {
       return _.assign({}, state, {
         isAdmin: action.isAdmin

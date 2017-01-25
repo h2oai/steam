@@ -25,7 +25,10 @@ import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 import { Dialog } from '@blueprintjs/core/dist/components/dialog/dialog';
 import { LdapConfig} from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
-import { fetchLdapConfig, saveLdapConfig, testLdapConfig, setLocalConfig } from "../actions/users.actions";
+import {
+  fetchLdapConfig, saveLdapConfig, testLdapConfig, setLocalConfig,
+  LdapTestResult, requestClearTestLdap
+} from "../actions/users.actions";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
 import { NotificationType } from "../../App/components/Notification";
 import { ToastDataFactory } from "../../App/actions/notification.actions";
@@ -33,21 +36,23 @@ import { toastManager } from '../../App/components/ToastManager';
 import Table from "../../Projects/components/Table";
 import Row from "../../Projects/components/Row";
 import Cell from "../../Projects/components/Cell";
-import { DEFAULT_BIND_DN_PASSWORD, DEFAULT_BIND_DN, DEFAULT_CONFIRM_PASSWORD, DEFAULT_GROUP_DN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_SEARCH_REQUEST_SIZE_LIMIT, DEFAULT_SEARCH_REQUEST_TIME_LIMIT, DEFAULT_SSL_ENABLED, DEFAULT_STATIC_MEMBER_ATTRIBUTE, DEFAULT_USERBASE_DN, DEFAULT_USERBASE_FILTER, DEFAULT_USERNAME_ATTRIBUTE } from "../reducers/users.reducer";
+import { DEFAULT_BIND_DN_PASSWORD, DEFAULT_BIND_DN, DEFAULT_CONFIRM_PASSWORD, DEFAULT_GROUP_DN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_SEARCH_REQUEST_SIZE_LIMIT, DEFAULT_SEARCH_REQUEST_TIME_LIMIT, DEFAULT_SSL_ENABLED, DEFAULT_STATIC_MEMBER_ATTRIBUTE, DEFAULT_USERBASE_DN, DEFAULT_USERBASE_FILTER, DEFAULT_USERNAME_ATTRIBUTE, DEFAULT_GROUP_NAMES_ATTRIBUTE, DEFAULT_GROUP_NAMES } from "../reducers/users.reducer";
 
 interface Props {
   doesLdapExist: boolean,
   ldapConfig: LdapConfig,
   authType: string,
   onCreateRoleClicked: Function,
-  onManageRoleClicked: Function
+  onManageRoleClicked: Function,
+  testResults: LdapTestResult
 }
 interface DispatchProps {
   fetchLdapConfig: Function,
   saveLdapConfig: Function,
   testLdapConfig: Function,
   setLocalConfig: Function,
-  getConfig: Function
+  getConfig: Function,
+  clearTestLdap: Function
 }
 
 export class UserAuthentication extends React.Component<Props & DispatchProps, any> {
@@ -68,18 +73,23 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       userbaseDnValue: DEFAULT_USERBASE_DN,
       userbaseFilterValue: DEFAULT_USERBASE_FILTER,
       usernameAttributeValue: DEFAULT_USERNAME_ATTRIBUTE,
-      groupDnValue: DEFAULT_GROUP_DN,
+      groupBaseDnValue: DEFAULT_GROUP_DN,
+      groupNameAttributeValue: DEFAULT_GROUP_NAMES_ATTRIBUTE,
       staticMemberAttributeValue: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
+      groupNamesValue: DEFAULT_GROUP_NAMES,
       searchRequestSizeLimitValue: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
       searchRequestTimeLimitValue: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
-      isLDAPConnectionSettingsOpen: true,
+
       selectedDB: "",
       hostInputValid: true,
       passwordInputValid: true,
       userbaseDnInputValid: true,
       usernameAttributeInputValid: true,
       groupDnInputValid: true,
-      afterConfirmAction: null
+      afterConfirmAction: null,
+      isLDAPConnectionSettingsOpen: true,
+      isGroupSettingsOpen: true,
+      isAdvancedSettingsOpen: true
     };
   }
 
@@ -104,7 +114,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       this.setState({ usernameAttributeInputValid: false });
     }
 
-    if (this.state.groupDnValue.length > 0) {
+    if (this.state.groupBaseDnValue.length > 0) {
       this.setState({ groupDnInputValid: true });
     } else {
       this.setState({ groupDnInputValid: false});
@@ -152,8 +162,10 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       userbaseDnValue: config.user_base_dn,
       userbaseFilterValue: config.user_base_filter,
       usernameAttributeValue: config.user_name_attribute,
-      groupDnValue: config.group_dn,
+      groupBaseDnValue: config.group_base_dn,
+      groupNameAttributeValue: config.group_name_attribute,
       staticMemberAttributeValue: config.static_member_attribute,
+      groupNamesValue: config.group_names,
       searchRequestSizeLimitValue: config.search_request_size_limit,
       searchRequestTimeLimitValue: config.search_request_time_limit
     });
@@ -162,6 +174,16 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   onShowLDAPConnectionSettingsClicked = () => {
     this.setState({
       isLDAPConnectionSettingsOpen: !this.state.isLDAPConnectionSettingsOpen
+    });
+  };
+  onShowGroupSettingsClicked = () => {
+    this.setState({
+      isGroupSettingsOpen: !this.state.isGroupSettingsOpen
+    });
+  };
+  onShowAdvancedSettingsClicked = () => {
+    this.setState({
+      isAdvancedSettingsOpen: !this.state.isAdvancedSettingsOpen
     });
   };
 
@@ -175,9 +197,10 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       user_base_dn: this.state.userbaseDnValue,
       user_base_filter: this.state.userbaseFilterValue,
       user_name_attribute: this.state.usernameAttributeValue,
-      //user_rn_attribute: this.realnameAttributeInput.value,
-      group_dn: this.state.groupDnValue,
+      group_name_attribute: this.state.groupNameAttributeValue,
+      group_base_dn: this.state.groupBaseDnValue,
       static_member_attribute: this.state.staticMemberAttributeValue,
+      group_names: this.state.groupNamesValue,
       search_request_size_limit: parseInt(this.state.searchRequestSizeLimitValue, 10),
       search_request_time_limit: parseInt(this.state.searchRequestTimeLimitValue, 10),
       force_bind: true
@@ -233,7 +256,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       userbaseDnValue: DEFAULT_USERBASE_DN,
       userbaseFilterValue: DEFAULT_USERBASE_FILTER,
       usernameAttributeValue: DEFAULT_USERNAME_ATTRIBUTE,
-      groupDnValue: DEFAULT_GROUP_DN,
+      groupBaseDnValue: DEFAULT_GROUP_DN,
       staticMemberAttributeValue: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
       searchRequestSizeLimitValue: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
       searchRequestTimeLimitValue: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
@@ -403,21 +426,38 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                            ></input>
                   </td>
                 </tr>
+              </tbody>
+            </table>
+          </Collapse>
+
+          <div className="colapse-header">
+            <Button onClick={this.onShowGroupSettingsClicked}>
+              {this.state.isGroupSettingsOpen ?
+                <i className="fa fa-minus" aria-hidden="true"></i> :
+                <i className="fa fa-plus" aria-hidden="true"></i>
+              }
+            </Button> &nbsp;
+            Dynamic Group Settings
+          </div>
+
+          <Collapse isOpen={this.state.isGroupSettingsOpen} className="space-20">
+            <table>
+              <tbody>
                 <tr className="auth-row">
-                    <td className="auth-left">GROUP DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP groups, specified by the DN of your group subtree.<br/> If necessary, you can specify several DNs separated by semicolons.</div>}>
+                  <td className="auth-left">GROUP DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP groups, specified by the DN of your group subtree.<br/> If necessary, you can specify several DNs separated by semicolons.</div>}>
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
-                    <td className="auth-right">
-                      <input type="text"
+                  <td className="auth-right">
+                    <input type="text"
                            className={"pt-input ldap-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')}
-                           onChange={(e: any) => this.setState({groupDnValue: e.target.value})}
-                           value={this.state.groupDnValue}
-                           ></input>
-                    </td>
+                           onChange={(e: any) => this.setState({groupBaseDnValue: e.target.value})}
+                           value={this.state.groupBaseDnValue}
+                    ></input>
+                  </td>
                 </tr>
 
                 <tr className="auth-row">
-                    <td className="auth-left">STATIC MEMBER ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.<br/> A typical value for this is 'cn'.</div>}>
+                  <td className="auth-left">STATIC MEMBER ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.<br/> A typical value for this is 'cn'.</div>}>
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
@@ -428,8 +468,23 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     ></input>
                   </td>
                 </tr>
+              </tbody>
+            </table>
+          </Collapse>
 
+          <div className="colapse-header">
+            <Button onClick={this.onShowAdvancedSettingsClicked}>
+              {this.state.isAdvancedSettingsOpen ?
+                <i className="fa fa-minus" aria-hidden="true"></i> :
+                <i className="fa fa-plus" aria-hidden="true"></i>
+              }
+            </Button> &nbsp;
+            Advanced Settings
+          </div>
 
+          <Collapse isOpen={this.state.isAdvancedSettingsOpen} className="space-20">
+            <table>
+              <tbody>
                 <tr className="auth-row">
                   <td className="auth-left">SEARCH REQUEST SIZE LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>H2O Steam can chase referrals with anonymous bind only.<br/> You must also have anonymous search enabled on your LDAP server. Turn this off if you have no need for referrals.</div>}>
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
@@ -442,7 +497,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     ></input>
                   </td>
                 </tr>
-
 
                 <tr className="auth-row">
                   <td className="auth-left">SEARCH REQUEST TIME LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>Sets the maximum number of entries requested by LDAP searches.<br /> The number actually returned is subject to the limit imposed by the LDAP server.</div>}>
@@ -459,8 +513,9 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
               </tbody>
             </table>
-
           </Collapse>
+
+
         </div> : null }
 
         <div id="actionButtonsContainer" className="space-20">
@@ -476,12 +531,16 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
             : null}
         </div>
 
-        <div id="testConfig">
+        {this.props.testResults ? <div id="testConfig">
           <p></p>
           <hr />
           <p></p>
           <p className="mar-bot-20">Preview users & roles from above config</p>
           <div id="testClusterInfo">
+            <span>
+              <i className="fa fa-cubes mar-bot-20"/> &nbsp;
+              <a href={`${this.state.hostValue} : ${this.state.portValue}`} target="_blank" rel="noopener" className="charcoal-grey semibold link">{`${this.state.hostValue} : ${this.state.portValue}`}</a>
+            </span>
           </div>
           <div className="font-oswald font-semibold font-18 mar-bot-7">LDAP SELECTION</div>
           <div className="mar-bot-16">
@@ -502,7 +561,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
           <div className="button-secondary" onClick={() => this.setState({afterConfirmAction: this.onAddNewRolesClicked})}>Add New Role</div> &nbsp;
           <div className="button-secondary" onClick={() => this.setState({afterConfirmAction: this.onConfigureSteamRolesClicked})}>Configure Steam Roles</div> &nbsp;
           <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
-        </div>
+        </div> : null }
 
         <Dialog
           iconName="Confirm"
@@ -530,7 +589,8 @@ function mapStateToProps(state): any {
   return {
     ldapConfig: state.users.ldapConfig,
     doesLdapExist: state.users.ldapExists,
-    authType: state.clusters.config.authentication_type
+    authType: state.clusters.config.authentication_type,
+    testResults: state.users.testResult
   };
 }
 
@@ -540,7 +600,8 @@ function mapDispatchToProps(dispatch): DispatchProps {
     saveLdapConfig: bindActionCreators(saveLdapConfig, dispatch),
     testLdapConfig: bindActionCreators(testLdapConfig, dispatch),
     setLocalConfig: bindActionCreators(setLocalConfig, dispatch),
-    getConfig: bindActionCreators(getConfig, dispatch)
+    getConfig: bindActionCreators(getConfig, dispatch),
+    clearTestLdap: bindActionCreators(requestClearTestLdap, dispatch)
   };
 }
 
