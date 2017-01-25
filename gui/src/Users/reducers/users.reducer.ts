@@ -36,7 +36,7 @@ export const DEFAULT_GROUP_DN = "dc=xyz,dc=com";
 export const DEFAULT_STATIC_MEMBER_ATTRIBUTE = "memberUid";
 export const DEFAULT_SEARCH_REQUEST_SIZE_LIMIT = "";
 export const DEFAULT_SEARCH_REQUEST_TIME_LIMIT = "";
-export const DEFAULT_GROUP_NAMES_ATTRIBUTE = "";
+export const DEFAULT_GROUP_NAME_ATTRIBUTE = "";
 export const DEFAULT_GROUP_NAMES = "";
 
 let initialState = {
@@ -57,7 +57,7 @@ let initialState = {
     user_base_filter: DEFAULT_USERBASE_FILTER,
     usernameAttribute: DEFAULT_USERNAME_ATTRIBUTE,
     group_base_dn: DEFAULT_GROUP_DN,
-    group_name_attribute: DEFAULT_GROUP_NAMES_ATTRIBUTE,
+    group_name_attribute: DEFAULT_GROUP_NAME_ATTRIBUTE,
     static_member_attribute: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
     group_names: DEFAULT_GROUP_NAMES,
     search_request_size_limit: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,

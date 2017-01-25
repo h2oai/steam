@@ -36,7 +36,7 @@ import { toastManager } from '../../App/components/ToastManager';
 import Table from "../../Projects/components/Table";
 import Row from "../../Projects/components/Row";
 import Cell from "../../Projects/components/Cell";
-import { DEFAULT_BIND_DN_PASSWORD, DEFAULT_BIND_DN, DEFAULT_CONFIRM_PASSWORD, DEFAULT_GROUP_DN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_SEARCH_REQUEST_SIZE_LIMIT, DEFAULT_SEARCH_REQUEST_TIME_LIMIT, DEFAULT_SSL_ENABLED, DEFAULT_STATIC_MEMBER_ATTRIBUTE, DEFAULT_USERBASE_DN, DEFAULT_USERBASE_FILTER, DEFAULT_USERNAME_ATTRIBUTE, DEFAULT_GROUP_NAMES_ATTRIBUTE, DEFAULT_GROUP_NAMES } from "../reducers/users.reducer";
+import { DEFAULT_BIND_DN_PASSWORD, DEFAULT_BIND_DN, DEFAULT_CONFIRM_PASSWORD, DEFAULT_GROUP_DN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_SEARCH_REQUEST_SIZE_LIMIT, DEFAULT_SEARCH_REQUEST_TIME_LIMIT, DEFAULT_SSL_ENABLED, DEFAULT_STATIC_MEMBER_ATTRIBUTE, DEFAULT_USERBASE_DN, DEFAULT_USERBASE_FILTER, DEFAULT_USERNAME_ATTRIBUTE, DEFAULT_GROUP_NAME_ATTRIBUTE, DEFAULT_GROUP_NAMES } from "../reducers/users.reducer";
 
 interface Props {
   doesLdapExist: boolean,
@@ -74,7 +74,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       userbaseFilterValue: DEFAULT_USERBASE_FILTER,
       usernameAttributeValue: DEFAULT_USERNAME_ATTRIBUTE,
       groupBaseDnValue: DEFAULT_GROUP_DN,
-      groupNameAttributeValue: DEFAULT_GROUP_NAMES_ATTRIBUTE,
+      groupNameAttributeValue: DEFAULT_GROUP_NAME_ATTRIBUTE,
       staticMemberAttributeValue: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
       groupNamesValue: DEFAULT_GROUP_NAMES,
       searchRequestSizeLimitValue: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
@@ -85,7 +85,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       passwordInputValid: true,
       userbaseDnInputValid: true,
       usernameAttributeInputValid: true,
-      groupDnInputValid: true,
+      groupBaseDnInputValid: true,
       afterConfirmAction: null,
       isLDAPConnectionSettingsOpen: true,
       isGroupSettingsOpen: true,
@@ -115,9 +115,9 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     }
 
     if (this.state.groupBaseDnValue.length > 0) {
-      this.setState({ groupDnInputValid: true });
+      this.setState({ groupBaseDnInputValid: true });
     } else {
-      this.setState({ groupDnInputValid: false});
+      this.setState({ groupBaseDnInputValid: false});
     }
 
   };
@@ -257,7 +257,9 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       userbaseFilterValue: DEFAULT_USERBASE_FILTER,
       usernameAttributeValue: DEFAULT_USERNAME_ATTRIBUTE,
       groupBaseDnValue: DEFAULT_GROUP_DN,
+      groupNamesValue: DEFAULT_GROUP_NAMES,
       staticMemberAttributeValue: DEFAULT_STATIC_MEMBER_ATTRIBUTE,
+      groupNameAttributeValue: DEFAULT_GROUP_NAME_ATTRIBUTE,
       searchRequestSizeLimitValue: DEFAULT_SEARCH_REQUEST_SIZE_LIMIT,
       searchRequestTimeLimitValue: DEFAULT_SEARCH_REQUEST_TIME_LIMIT,
       isLDAPConnectionSettingsOpen: true,
@@ -268,6 +270,8 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
       usernameAttributeInputValid: true,
       groupDnInputValid: true,
     });
+    this.bindDnPasswordInput.value = "";
+    this.confirmPasswordInput.value = "";
   };
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -437,19 +441,44 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                 <i className="fa fa-plus" aria-hidden="true"></i>
               }
             </Button> &nbsp;
-            Dynamic Group Settings
+            Group Settings
           </div>
 
           <Collapse isOpen={this.state.isGroupSettingsOpen} className="space-20">
             <table>
               <tbody>
+
                 <tr className="auth-row">
-                  <td className="auth-left">GROUP DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP groups, specified by the DN of your group subtree.<br/> If necessary, you can specify several DNs separated by semicolons.</div>}>
+                  <td className="auth-left">GROUP NAMES</td>
+                  <td className="auth-right">
+                    <input type="text"
+                           className={"pt-input ldap-input "}
+                           onChange={(e: any) => this.setState({groupNamesValue: e.target.value})}
+                           value={this.state.groupNamesValue}
+                    ></input>
+                  </td>
+                </tr>
+
+                <tr className="auth-row">
+                  <td className="auth-left">GROUP NAMES ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.</div>}>
                     <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                   </Tooltip></td>
                   <td className="auth-right">
                     <input type="text"
-                           className={"pt-input ldap-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')}
+                           className={"pt-input ldap-input "}
+                           onChange={(e: any) => this.setState({groupNameAttributeValue: e.target.value})}
+                           value={this.state.groupNameAttributeValue}
+                    ></input>
+                  </td>
+                </tr>
+
+                <tr className="auth-row">
+                  <td className="auth-left">GROUP BASE DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP groups, specified by the DN of your group subtree.<br/> If necessary, you can specify several DNs separated by semicolons.</div>}>
+                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                  </Tooltip></td>
+                  <td className="auth-right">
+                    <input type="text"
+                           className={"pt-input ldap-input " + (this.state.groupBaseDnInputValid ? '' : 'pt-intent-danger')}
                            onChange={(e: any) => this.setState({groupBaseDnValue: e.target.value})}
                            value={this.state.groupBaseDnValue}
                     ></input>
@@ -586,10 +615,14 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 }
 
 function mapStateToProps(state): any {
+  let authType;
+  if (state.clusters.config) {
+    authType = state.clusters.config.authentication_type;
+  }
   return {
     ldapConfig: state.users.ldapConfig,
     doesLdapExist: state.users.ldapExists,
-    authType: state.clusters.config.authentication_type,
+    authType,
     testResults: state.users.testResult
   };
 }
