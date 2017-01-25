@@ -23,7 +23,8 @@
 	release \
 	debian_package \
 	rpm_package \
-
+	dist/rpm/centos-6 \
+	dist/rpm/centos-7 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 DIST_LINUX = steam-$(STEAM_RELEASE_VERSION)-linux-amd64
@@ -48,7 +49,7 @@ build:
 	go build
 
 gui:
-	cd $(GUI) && rm -rf node_modules && rm -rf typings && npm cache clean && sudo npm install typings -g && npm install && typings install && npm run webpack
+	cd $(GUI) && rm -rf node_modules && rm -rf typings && npm cache clean && npm install typings && npm install && ./node_modules/.bin/typings install && npm run webpack
 
 guitest:
 	cd $(GUI) && npm test
@@ -195,9 +196,25 @@ endif
 	pwd
 	
 	mkdir -p $(RPM_OUT_DIR)/steam/opt/h2oai/steam/
-	cp -r dist/steam-${STEAM_RELEASE_VERSION}-linux-amd64/ $(RPM_OUT_DIR)/steam/opt/h2oai/steam/
+	cp -r dist/steam-${STEAM_RELEASE_VERSION}-linux-amd64/. $(RPM_OUT_DIR)/steam/opt/h2oai/steam/
 	pwd
 	
-	(cd dist && echo -e "\n" | setsid fpm -s dir -t rpm -n steam -v $(STEAM_RELEASE_VERSION) --description "Steam Cluster Manager" --depends haproxy -C $(RPM_OUT_DIR)/steam)
+	(cd dist && echo -e "\n" | setsid fpm -s dir \
+		-t rpm \
+		-n steam \
+		-v $(STEAM_RELEASE_VERSION) \
+		--vendor H2O.ai \
+		--url http://h2o.ai/download \
+		--description "Steam Cluster Manager" \
+		--license "AGPLv3" \
+		--category "System Environment/Daemons" \
+		--depends "haproxy >= 1.5, /sbin/service, /sbin/chkconfig" \
+		--pre-install ../packaging/rpm/SCRIPTS/pre \
+		--post-install ../packaging/rpm/SCRIPTS/post \
+		--pre-uninstall ../packaging/rpm/SCRIPTS/preun \
+		--post-uninstall ../packaging/rpm/SCRIPTS/postun \
+		--config-files "/etc/steam/steam.conf" \
+		--force \
+		-C $(RPM_OUT_DIR)/steam)
 	pwd
 

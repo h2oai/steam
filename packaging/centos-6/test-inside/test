@@ -1,0 +1,28 @@
+#!/bin/bash -ex
+trap 'chown -R --reference /test-inside/test /test-logs/' EXIT
+
+rpmlint /out/*.rpm || echo "WARNING: check RPM structure !!!"
+
+yum -y install /out/*.rpm
+
+FILES_IN_RPM=$(rpm -qlp /out/*.rpm)
+# Verify that steam binary exists
+test -x /opt/h2oai/steam/steam
+
+# Generate certificate
+/etc/init.d/steam create-self-signed-cert
+# Skip set-admin check
+sed -ibac -e 's/--check-admin//g' -e 's/serve master/serve master --admin-name=admin --admin-password=password/' /etc/init.d/steam
+# Launch steam locally
+/etc/init.d/steam start
+# Kill steam locally
+/etc/init.d/steam stop
+# Remove steam package for system
+yum -y remove steam
+# Verify that there are no files left after package removal
+for f in $FILES_IN_RPM; do
+  if [ -f $f ]; then 
+      echo "File $f exists after RPM package removal"
+      exit -1
+  fi
+done

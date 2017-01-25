@@ -1,0 +1,15 @@
+# Needs to have linux '\n' lines endings! In ViM: `set ff=unix`
+USERNAME=%{name}
+GROUPNAME=%{name}
+if ! getent group $GROUPNAME >/dev/null; then
+  %{_sbindir}/groupadd --system $GROUPNAME
+fi
+if ! getent passwd $USERNAME >/dev/null; then
+  %{_sbindir}/useradd --system \
+        --gid $GROUPNAME \
+        --home /opt/h2oai/%{name} \
+        --no-create-home \
+        --shell /sbin/nologin \
+        $USERNAME
+fi
+
