@@ -109,18 +109,33 @@ func (l *Ldap) TestConfig() (int, map[string]int, error) {
 		return 0, nil, errors.New(fmt.Sprint("unable to locate any matching groups", l.GroupBaseDn))
 	}
 
-	users := make(map[string]struct{})
+	uCN := make(map[string]struct{})
+	uDN := make(map[string]struct{})
 	for _, u := range userRes.Entries {
-		users[u.GetAttributeValue(l.UserNameAttribute)] = struct{}{}
+		uCN[u.GetAttributeValue(l.UserNameAttribute)] = struct{}{}
+		uDN[u.DN] = struct{}{}
 	}
 
 	var ct int
 	groups := make(map[string]int)
 	for _, e := range groupRes.Entries {
+		// TODO: There may be a better implementation for this
+		// Query is case insensitive... attribute keys are not. Additionally
+		// the LDAP/AD key may not match the provided key.
+		var aName string
+		for _, a := range e.Attributes {
+			if strings.ToLower(l.GroupNameAttribute) == strings.ToLower(a.Name) {
+				aName = a.Name
+			}
+		}
+
 		for _, member := range e.GetAttributeValues(l.StaticMemberAttribute) {
-			if _, ok := users[member]; ok {
+			if _, ok := uCN[member]; ok {
 				ct++
-				groups[e.GetAttributeValue(l.GroupNameAttribute)]++
+				groups[e.GetAttributeValue(aName)]++
+			} else if _, ok := uDN[member]; ok {
+				ct++
+				groups[e.GetAttributeValue(aName)]++
 			}
 		}
 	}
@@ -143,7 +158,7 @@ func joinOrQuery(nameAttribute string, names ...string) string {
 	return buf.String()
 }
 
-func (l *Ldap) checkGroup(conn *ldap.Conn, userName string) (bool, error) {
+func (l *Ldap) checkGroup(conn *ldap.Conn, userCN, userDN string) (bool, error) {
 	query := joinOrQuery(l.GroupNameAttribute, l.GroupNames...)
 	req := ldap.NewSearchRequest(
 		l.GroupBaseDn, ldap.ScopeWholeSubtree, ldap.DerefAlways,
@@ -173,8 +188,13 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, userName string) (bool, error) {
 		// This means you need to verify that users[i] == userName because some values may incorrectly
 		// return true (i.e. "Jetty1", may return true for "Jetty")
 		sort.Strings(users)
-		if i := sort.SearchStrings(users, userName); i != len(users) {
-			if users[i] == userName {
+		if i := sort.SearchStrings(users, userDN); i != len(users) {
+			if users[i] == userDN {
+				return true, nil
+			}
+		}
+		if i := sort.SearchStrings(users, userCN); i != len(users) {
+			if users[i] == userCN {
 				return true, nil
 			}
 		}
@@ -184,7 +204,6 @@ func (l *Ldap) checkGroup(conn *ldap.Conn, userName string) (bool, error) {
 }
 
 func (l *Ldap) CheckBind(user, password string) error {
-
 	// Make connection to LDAP with read-only user
 	var (
 		conn *ldap.Conn
@@ -223,13 +242,12 @@ func (l *Ldap) CheckBind(user, password string) error {
 		return fmt.Errorf("too many user entries")
 	}
 
-	if ok, err := l.checkGroup(conn, user); err != nil {
+	userDn := res.Entries[0].DN
+	if ok, err := l.checkGroup(conn, user, userDn); err != nil {
 		return errors.Wrap(err, "checking valid groups")
 	} else if !ok {
 		return errors.New("LDAP user has no valid Steam permissions")
 	}
-
-	userDn := res.Entries[0].DN
 
 	// Verify user Bind
 	return errors.Wrapf(conn.Bind(userDn, password), "user %s binding to ldap", user)
