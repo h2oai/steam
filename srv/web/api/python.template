@@ -81,44 +81,49 @@ class View(object):
 	def __str__(self):
 		return json.dumps(self.__dict__)
 
-class RPCClient:
-	def __init__(self, connection):
-		self.connection = connection
+steamconn = None
 
-	def get_cluster_connection(self, cluster):
-		proxconf = self.get_config()
-		cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
-		conf = {'https':True, 'verify_ssl_certificates':self.connection.verify_ssl, \
-			'port': int(cport), \
-			'context_path':'%s_%s' % (proxconf['username'], cluster['name']), \
-			'cookies':["%s=%s" % (cluster['name'], cluster['token'])], \
-			'ip':self.connection.host}
-		return conf
+def connect(host, port, username, passw, verify_ssl=True):
+	global steamconn
+	steamconn = HTTPConnection(host, port, username, passw, verify_ssl)
+
+def get_cluster_connection(self, cluster):
+	proxconf = self.get_config()
+	cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
+	conf = {'https':True, 'verify_ssl_certificates':self.connection.verify_ssl, \
+		'port': int(cport), \
+		'context_path':'%s_%s' % (proxconf['username'], cluster['name']), \
+		'cookies':["%s=%s" % (cluster['name'], cluster['token'])], \
+		'ip':self.connection.host}
+	return conf
 	
 	
-	{{with .Facade}}
-	{{range .Methods}}
-	def {{snake .Name}}(self{{range .Inputs}}, {{snake .Name}}{{end}}):
-		"""
-		{{.Help}}
+{{with .Facade}}
+{{range .Methods}}
+def {{snake .Name}}({{- range $i, $e := .Inputs}}{{if $i}},{{end}}{{snake .Name}}{{- end}}):
+	"""
+	{{.Help}}
 
-		Parameters:
-		{{- range .Inputs}}
-		{{snake .Name}}: {{.Help}} ({{.Type}})
+	Parameters:
+	{{- range .Inputs}}
+	{{snake .Name}}: {{.Help}} ({{.Type}})
+	{{- end}}
+
+	Returns:
+	{{- range .Outputs}}
+	{{snake .Name}}: {{.Help}} ({{.Type}})
+	{{- else}}None{{end}}
+	"""
+	request = {
+		{{- range $i, $e := .Inputs}}{{if $i}},{{end}}
+		'{{snake .Name}}': {{snake .Name}}
 		{{- end}}
-
-		Returns:
-		{{- range .Outputs}}
-		{{snake .Name}}: {{.Help}} ({{.Type}})
-		{{- else}}None{{end}}
-		"""
-		request = {
-			{{- range $i, $e := .Inputs}}{{if $i}},{{end}}
-			'{{snake .Name}}': {{snake .Name}}
-			{{- end}}
-		}
-		response = self.connection.call("{{.Name}}", request)
-		return {{range $i, $e := .Outputs}}{{if $i}}, {{end}}response['{{snake .Name}}']{{end}}
-	{{end}}
-	{{end}}
+	}
+	global steamconn
+	if steamconn is None:
+		raise Exception('Not connected to Steam. Did you run `steam.connect()`?') 
+	response = steamconn.call("{{.Name}}", request)
+	return {{range $i, $e := .Outputs}}{{if $i}}, {{end}}response['{{snake .Name}}']{{end}}
+{{end}}
+{{end}}
 
