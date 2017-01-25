@@ -20,7 +20,6 @@ package yarn
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -38,25 +37,24 @@ import (
 )
 
 func kInit(username, keytab string, uid, gid uint32) error {
-	cmd := exec.Command("kinit", username, "-k", "-t", keytab)
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+	// Run 'klist -s' as user. If this returns with a 1 exit value, then there is no readable
+	// credential cache, otherwise it exists as 0
+	clist := exec.Command("klist", username, "-s")
+	clist.SysProcAttr = &syscall.SysProcAttr{}
+	clist.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+	if err := clist.Run(); err != nil {
+		cmd := exec.Command("kinit", username, "-k", "-t", keytab)
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return errors.Wrapf(err, "failed executing kinit: %v", string(out))
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return errors.Wrapf(err, "failed executing kinit: %v", string(out))
+		}
+
+		return nil
 	}
 
 	return nil
-}
-
-func kDest(uid, gid uint32) {
-	cmd := exec.Command("kdestroy")
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
-
-	if err := cmd.Run(); err != nil {
-		panic(fmt.Sprintf("failed executing kdestroy: %v", err))
-	}
 }
 
 func randStr(strlen int) string {
@@ -197,7 +195,6 @@ func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab
 		if err := kInit(username, keytab, uid, gid); err != nil {
 			return "", "", "", "", "", errors.Wrap(err, "failed initializing kerberos")
 		}
-		defer kDest(uid, gid)
 	}
 
 	// Randomize outfile name
