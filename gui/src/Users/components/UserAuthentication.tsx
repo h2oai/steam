@@ -564,28 +564,28 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
           <p></p>
           <hr />
           <p></p>
-          <p className="mar-bot-20">Preview users & roles from above config</p>
+          <p className="font-semibold mar-bot-20">Preview users & roles from above config</p>
           <div id="testClusterInfo">
-            <span>
+            <span className="font-semibold">
               <i className="fa fa-cubes mar-bot-20"/> &nbsp;
-              <a href={`${this.state.hostValue} : ${this.state.portValue}`} target="_blank" rel="noopener" className="charcoal-grey semibold link">{`${this.state.hostValue} : ${this.state.portValue}`}</a>
+              <a href={`${this.state.hostValue}:${this.state.portValue}`} target="_blank" rel="noopener" className="charcoal-grey semibold link">{`${this.state.hostValue} : ${this.state.portValue}`}</a>
             </span>
           </div>
           <div className="font-oswald font-semibold font-18 mar-bot-7">LDAP SELECTION</div>
           <div className="mar-bot-16">
-            <span className="green font-oswald font-24 font-bold">1345</span><span className="font-18 font-oswald font-semibold"> Users </span><span className="green font-24 font-bold font-oswald">30</span><span className="font-18 font-oswald font-semibold"> Groups</span>
+            <span className="green font-oswald font-24 font-bold">{this.props.testResults.count}</span><span className="font-18 font-oswald font-semibold"> Users</span> &nbsp; <span className="green font-24 font-bold font-oswald">{this.props.testResults.groups.length}</span><span className="font-18 font-oswald font-semibold"> Group{this.props.testResults.groups.length > 1 ? <span>s</span> : null}</span>
           </div>
           <Table className="mar-bot-30">
             <Row header={true}>
               <Cell>GROUP NAME</Cell>
               <Cell># of USERS</Cell>
-              <Cell>USERS</Cell>
             </Row>
-            <Row>
-              <Cell>xyz301</Cell>
-              <Cell>13</Cell>
-              <Cell>xxx-121,32212</Cell>
-            </Row>
+            {this.props.testResults.groups.map((group, index, array) => {
+               return <Row key={index}>
+                 <Cell>{group.name}</Cell>
+                 <Cell>{group.users}</Cell>
+               </Row>;
+            })}
           </Table>
           <div className="button-secondary" onClick={() => this.setState({afterConfirmAction: this.onAddNewRolesClicked})}>Add New Role</div> &nbsp;
           <div className="button-secondary" onClick={() => this.setState({afterConfirmAction: this.onConfigureSteamRolesClicked})}>Configure Steam Roles</div> &nbsp;
