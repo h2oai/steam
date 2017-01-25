@@ -272,6 +272,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     });
     this.bindDnPasswordInput.value = "";
     this.confirmPasswordInput.value = "";
+    this.props.clearTestLdap();
   };
 
   render(): React.ReactElement<HTMLDivElement> {
