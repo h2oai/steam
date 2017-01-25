@@ -36,11 +36,17 @@ func TestFromDatabase(t *testing.T) {
 					"Address": "ldap.0xdata.loc:389",
 					"Bind": "Y249YWRtaW4sZGM9MHhkYXRhLGRjPWxvYzoweGRhdGE=",
 					"UserBaseDn": "ou=users,dc=0xdata,dc=loc",
+					"UserBaseFilter": "",
 					"UserNameAttribute": "uid",
-					"GroupBaseDn": "ou=groups,dc=0xdata,dc=loc",
+					"GroupBaseDN": "ou=groups,dc=0xdata,dc=loc",
 					"GroupNameAttribute": "cn",
-					"GroupNames": "jettygroup,steamgroup",
+					"GroupNames": [
+						"jettygroup",
+						"steamgroup"
+					],
 					"StaticMemberAttribute": "memberUid",
+					"SearchRequestSizeLimit": 0,
+					"SearchRequestTimeLimit": 0,
 					"Ldaps": false
 				}`,
 			},

@@ -288,8 +288,7 @@ func FromConfig(config *web.LdapConfig) *Ldap {
 
 func FromDatabase(config string) (*Ldap, error) {
 	aux := struct {
-		Bind       string
-		GroupNames string
+		Bind string
 		Ldap
 	}{}
 	if err := json.Unmarshal([]byte(config), &aux); err != nil {
@@ -305,12 +304,11 @@ func FromDatabase(config string) (*Ldap, error) {
 	aux.Ldap.BindDN, aux.Ldap.BindPass = decrypt[0], decrypt[1]
 
 	a := aux.Ldap
-	groups := strings.Split(aux.GroupNames, ",")
 
 	return NewLdap(
 		a.Address, a.BindDN, a.BindPass, a.Ldaps, a.ForceBind,
 		a.UserBaseDn, a.UserBaseFilter, a.UserNameAttribute,
-		a.GroupBaseDn, a.GroupNameAttribute, a.StaticMemberAttribute, groups,
+		a.GroupBaseDn, a.GroupNameAttribute, a.StaticMemberAttribute, a.GroupNames,
 		a.SearchRequestSizeLimit, a.SearchRequestTimeLimit,
 	), nil
 }
