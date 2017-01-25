@@ -159,6 +159,7 @@ func (l *Ldap) CheckBind(user, password string) error {
 	)
 
 	if l.Ldaps {
+
 		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
 	} else {
 		conn, err = ldap.Dial("tcp", l.Address)
@@ -265,11 +266,15 @@ func FromDatabase(config string, tlsConfig *tls.Config) (*Ldap, error) {
 }
 
 func CreateTLSConfig(certFilePath, keyFilePath string) (*tls.Config, error) {
-	cert, err := tls.LoadX509KeyPair(certFilePath, keyFilePath)
-	if err != nil {
-		return nil, err
-	}
-	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
-	tlsConfig.BuildNameToCertificate()
+	// FIXME: should NOT continue to remove verify
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+
+	// cert, err := tls.LoadX509KeyPair(certFilePath, keyFilePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
+	// tlsConfig.BuildNameToCertificate()
 	return tlsConfig, nil
 }
