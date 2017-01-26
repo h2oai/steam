@@ -240,6 +240,10 @@ func (l *Ldap) CheckBind(user, password string) error {
 	} else if len(res.Entries) > 1 {
 		return fmt.Errorf("too many user entries")
 	}
+	// If a username is entered this is not an Anonymous bind >> Check password
+	if strings.TrimSpace(password) == "" {
+		return errors.New("no password provided. Please enter a valid password")
+	}
 
 	userDn := res.Entries[0].DN
 	if ok, err := l.checkGroup(conn, user, userDn); err != nil {
