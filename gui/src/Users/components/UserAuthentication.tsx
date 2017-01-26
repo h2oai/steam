@@ -450,7 +450,9 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                 <tbody>
 
                   <tr className="auth-row">
-                    <td className="auth-left">GROUP NAMES</td>
+                    <td className="auth-left">GROUP NAMES &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>A comma separated list of groups</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
                     <td className="auth-right">
                       <input type="text"
                         className={"pt-input ldap-input "}
