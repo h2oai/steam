@@ -261,20 +261,32 @@ input[type="text"], textarea {
   display: flex;
   flex-direction: column;
 }
-.mar-right-12 {
-  margin-right: 12px;
-}
 .mar-right-3 {
   margin-right: 3px;
+}
+.mar-right-12 {
+  margin-right: 12px;
 }
 .mar-right-71 {
   margin-right: 71px;
 }
-.mar-bot-20 {
-  margin-bottom: 20px;
+.mar-bot-6 {
+  margin-bottom: 6px;
 }
 .mar-bot-7 {
   margin-bottom: 7px;
+}
+.mar-bot-12 {
+  margin-bottom: 12px;
+}
+.mar-bot-16 {
+  margin-bottom: 16px;
+}
+.mar-bot-20 {
+  margin-bottom: 20px;
+}
+.mar-bot-30 {
+  margin-bottom: 30px;
 }
 
 .tooltip-launcher {
@@ -344,4 +356,16 @@ input[type="text"], textarea {
 
 .font-18 {
   font-size: 18px;
+}
+.font-24 {
+  font-size: 24px;
+}
+.font-bold {
+  font-weight: bold;
+}
+.font-oswald {
+  font-family: Oswald;
+}
+.font-semibold {
+  font-weight: 400;
 }

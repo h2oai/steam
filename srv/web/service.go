@@ -175,11 +175,18 @@ type LdapConfig struct {
 	UserBaseDn             string `json:"user_base_dn"`
 	UserBaseFilter         string `json:"user_base_filter"`
 	UserNameAttribute      string `json:"user_name_attribute"`
-	GroupDn                string `json:"group_dn"`
+	GroupBaseDn            string `json:"group_base_dn"`
+	GroupNameAttribute     string `json:"group_name_attribute"`
 	StaticMemberAttribute  string `json:"static_member_attribute"`
+	GroupNames             string `json:"group_names"`
 	SearchRequestSizeLimit int    `json:"search_request_size_limit"`
 	SearchRequestTimeLimit int    `json:"search_request_time_limit"`
 	ForceBind              bool   `json:"force_bind"`
+}
+
+type LdapGroup struct {
+	Name  string `json:"name"`
+	Users int    `json:"users"`
 }
 
 type Model struct {
@@ -319,7 +326,7 @@ type Service interface {
 	SetLocalConfig(pz az.Principal) error
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
 	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
-	TestLdapConfig(pz az.Principal, config *LdapConfig) (int, error)
+	TestLdapConfig(pz az.Principal, config *LdapConfig) (int, []*LdapGroup, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
@@ -483,7 +490,8 @@ type TestLdapConfigIn struct {
 }
 
 type TestLdapConfigOut struct {
-	UserCount int `json:"user_count"`
+	Count  int          `json:"count"`
+	Groups []*LdapGroup `json:"groups"`
 }
 
 type RegisterClusterIn struct {
@@ -1517,14 +1525,14 @@ func (this *Remote) GetLdapConfig() (*LdapConfig, bool, error) {
 	return out.Config, out.Exists, nil
 }
 
-func (this *Remote) TestLdapConfig(config *LdapConfig) (int, error) {
+func (this *Remote) TestLdapConfig(config *LdapConfig) (int, []*LdapGroup, error) {
 	in := TestLdapConfigIn{config}
 	var out TestLdapConfigOut
 	err := this.Proc.Call("TestLdapConfig", &in, &out)
 	if err != nil {
-		return 0, err
+		return 0, nil, err
 	}
-	return out.UserCount, nil
+	return out.Count, out.Groups, nil
 }
 
 func (this *Remote) RegisterCluster(address string) (int64, error) {
@@ -2879,13 +2887,15 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.TestLdapConfig(pz, in.Config)
+	val0, val1, err := this.Service.TestLdapConfig(pz, in.Config)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
 
-	out.UserCount = val0
+	out.Count = val0
+
+	out.Groups = val1
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

@@ -37,11 +37,18 @@ type LdapConfig struct {
 	UserBaseDn             string
 	UserBaseFilter         string
 	UserNameAttribute      string
-	GroupDn                string
+	GroupBaseDn            string
+	GroupNameAttribute     string
 	StaticMemberAttribute  string
+	GroupNames             string
 	SearchRequestSizeLimit int
 	SearchRequestTimeLimit int
 	ForceBind              bool
+}
+
+type LdapGroup struct {
+	Name  string
+	Users int
 }
 
 type Cluster struct {
@@ -451,9 +458,10 @@ type GetLdapConfig struct {
 	Exists bool
 }
 type TestLdapConfig struct {
-	Config    LdapConfig
-	_         int
-	UserCount int
+	Config LdapConfig
+	_      int
+	Count  int
+	Groups []LdapGroup
 }
 type RegisterCluster struct {
 	Address   string
