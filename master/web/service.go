@@ -2301,13 +2301,20 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 	bind := strings.Split(string(b), ":")
 
 	return &web.LdapConfig{
-		host, port,
-		config.Ldaps,
-		bind[0], "",
-		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
-		config.GroupBaseDN, config.GroupNameAttribute, strings.Join(config.GroupNames, ","), config.StaticMemberAttribute,
-		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
-		config.ForceBind,
+		Host:                   host,
+		Port:                   port,
+		Ldaps:                  config.Ldaps,
+		BindDn:                 bind[0],
+		UserBaseDn:             config.UserBaseDn,
+		UserBaseFilter:         config.UserBaseFilter,
+		UserNameAttribute:      config.UserNameAttribute,
+		GroupBaseDn:            config.GroupBaseDN,
+		GroupNameAttribute:     config.GroupNameAttribute,
+		GroupNames:             strings.Join(config.GroupNames, ","),
+		StaticMemberAttribute:  config.StaticMemberAttribute,
+		SearchRequestSizeLimit: config.SearchRequestSizeLimit,
+		SearchRequestTimeLimit: config.SearchRequestTimeLimit,
+		ForceBind:              config.ForceBind,
 	}, nil
 }
 
