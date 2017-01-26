@@ -2381,6 +2381,31 @@ func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) (int, 
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
 
+// TODO: KERBEROS FUNCTIONS
+func (s *Service) GetKeytab(pz az.Principal) (string, bool, error) {
+	// PERMISSIONS
+	// keytab, exists, err := s.ds.ReadUserKeytab(data.ByIdentityId(pz.Id()))
+
+	// return keytab.Name, exists, err
+	return "", false, nil
+}
+
+func (s *Service) TestKeytab(pz az.Principal) (bool, error) {
+	// PERMISSIONS
+	// keytab, exists, err := s.ds.ReadUserKeytab(data.ByIdentityId(pz.Id()))
+	// CheckErr -> CheckExists
+
+	// return  kerberos.Kinit(keytab.Keytab)
+	return false, nil
+}
+
+func (s *Service) DeleteKeytab(pz az.Principal) error {
+	// PERMISSIONS
+
+	// return s.ds.DeleteKeytab(data.ByIdentityId(pz.Id()))
+	return nil
+}
+
 // --- ---------- ---
 // --- ---------- ---
 // --- Deprecated ---

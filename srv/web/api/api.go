@@ -315,6 +315,9 @@ type Service struct {
 	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
 	GetLdapConfig                 GetLdapConfig                 `help:"Get LDAP security configurations"`
 	TestLdapConfig                TestLdapConfig                `help:"Test LDAP security configurations"`
+	GetKeytab                     GetKeytab                     `help:"Get the keytab for the logged in user"`
+	TestKeytab                    TestKeytab                    `help:"Test the keytab for the given user"`
+	DeleteKeytab                  DeleteKeytab                  `help:"Delete the keytab entry for the given user"`
 	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
 	UnregisterCluster             UnregisterCluster             `help:"Disconnect from a cluster"`
 	StartClusterOnYarn            StartClusterOnYarn            `help:"Start a cluster using Yarn"`
@@ -462,6 +465,18 @@ type TestLdapConfig struct {
 	_      int
 	Count  int
 	Groups []LdapGroup
+}
+type GetKeytab struct {
+	_        int
+	Filename string
+	Exists   bool
+}
+type TestKeytab struct {
+	_       int
+	IsValid bool
+}
+type DeleteKeytab struct {
+	_ int
 }
 type RegisterCluster struct {
 	Address   string
