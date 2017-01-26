@@ -273,7 +273,6 @@ func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
 		if err := kInit(username, keytab, uid, gid); err != nil {
 			return errors.Wrap(err, "failed initializing kerberos")
 		}
-		defer kDest(uid, gid)
 	}
 
 	if _, _, err := yarnCommand(uid, gid, name, username, "job", "-kill", "job_"+id); err != nil {
