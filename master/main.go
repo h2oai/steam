@@ -31,6 +31,7 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/h2oai/steam/lib/fs"
+	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/rpc"
 	"github.com/h2oai/steam/lib/yarn"
 	"github.com/h2oai/steam/master/data"
@@ -144,7 +145,11 @@ func Run(version, buildDate string, opts Opts) {
 	}
 
 	// --- create basic auth service ---
-	defaultAz := NewDefaultAz(ds)
+	tlsConfig, err := ldap.CreateTLSConfig(opts.WebTLSCertPath, opts.WebTLSKeyPath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defaultAz := NewDefaultAz(ds, tlsConfig)
 
 	var authProvider AuthProvider
 	switch {
@@ -173,6 +178,7 @@ func Run(version, buildDate string, opts Opts) {
 		version,
 		wd,
 		ds,
+		tlsConfig,
 		opts.CompilationServiceAddress,
 		predictionServiceHost,
 		opts.ClusterProxyAddress,

@@ -17,6 +17,7 @@
 package ldap
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -27,10 +28,8 @@ import (
 
 	"github.com/h2oai/steam/srv/web"
 
-	"bytes"
-
+	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
-	ldap "gopkg.in/ldap.v2"
 )
 
 type Ldap struct {
@@ -262,6 +261,8 @@ func NewLdap(
 	groupBaseDn, groupNameAttribute, staticMemberAttribute string, groupNames []string,
 	// Advanced Settings
 	searchRequestSizeLimit, searchRequestTimeLimit int,
+	// TLS Settings
+	tlsConfig *tls.Config,
 ) *Ldap {
 	return &Ldap{
 		// Connection settings
@@ -272,10 +273,12 @@ func NewLdap(
 		GroupBaseDn: groupBaseDn, GroupNameAttribute: groupNameAttribute, StaticMemberAttribute: staticMemberAttribute, GroupNames: groupNames,
 		// Advanced settings
 		SearchRequestSizeLimit: searchRequestSizeLimit, SearchRequestTimeLimit: searchRequestTimeLimit,
+		// TLS Settings
+		tlsConfig: tlsConfig,
 	}
 }
 
-func FromConfig(config *web.LdapConfig) *Ldap {
+func FromConfig(config *web.LdapConfig, tlsConfig *tls.Config) *Ldap {
 	groupNames := strings.Split(config.GroupNames, ",")
 
 	return NewLdap(
@@ -283,10 +286,11 @@ func FromConfig(config *web.LdapConfig) *Ldap {
 		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
 		config.GroupBaseDn, config.GroupNameAttribute, config.StaticMemberAttribute, groupNames,
 		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
+		tlsConfig,
 	)
 }
 
-func FromDatabase(config string) (*Ldap, error) {
+func FromDatabase(config string, tlsConfig *tls.Config) (*Ldap, error) {
 	aux := struct {
 		Bind string
 		Ldap
@@ -310,5 +314,20 @@ func FromDatabase(config string) (*Ldap, error) {
 		a.UserBaseDn, a.UserBaseFilter, a.UserNameAttribute,
 		a.GroupBaseDn, a.GroupNameAttribute, a.StaticMemberAttribute, a.GroupNames,
 		a.SearchRequestSizeLimit, a.SearchRequestTimeLimit,
+		tlsConfig,
 	), nil
+}
+
+func CreateTLSConfig(certFilePath, keyFilePath string) (*tls.Config, error) {
+	// FIXME: should NOT continue to remove verify
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+
+	// cert, err := tls.LoadX509KeyPair(certFilePath, keyFilePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
+	// tlsConfig.BuildNameToCertificate()
+	return tlsConfig, nil
 }

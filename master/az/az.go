@@ -18,6 +18,7 @@
 package az
 
 import (
+	"crypto/tls"
 	"net/http"
 )
 
@@ -42,7 +43,7 @@ type Principal interface {
 type Directory interface {
 	// Lookup should return a Principal if the Principal is local or if the
 	// Principal validated against a valid external authentication provider
-	Lookup(username, password, basicAuthToken string) (Principal, error)
+	Lookup(username, password, basicAuthToken string, tlsConfig *tls.Config) (Principal, error)
 	LookupUser(username string) (Principal, error)
 }
 

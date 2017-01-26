@@ -191,7 +191,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     return {
       host: this.state.hostValue,
       port: parseInt(this.state.portValue, 10),
-      ldaps: this.state.sslEnabledValue === 'true',
+      ldaps: this.state.sslEnabledValue,
       bind_dn: this.state.bindDnValue,
       bind_password: this.bindDnPasswordInput.value,
       user_base_dn: this.state.userbaseDnValue,
