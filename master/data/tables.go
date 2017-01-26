@@ -123,6 +123,7 @@ type Label struct {
 }
 
 type Keytab struct {
+	Id         int64  `db:"id,pk"`
 	IdentityId int64  `db:"identity_id,arg"`
 	Filename   string `db:"filename,arg"`
 	File       []byte `db:"file,arg"`

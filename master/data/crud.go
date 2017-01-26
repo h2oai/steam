@@ -3636,7 +3636,7 @@ func (ds *Datastore) ReadKeytab(options ...QueryOpt) (Keytab, bool, error) {
 	return keytab, exists, errors.Wrap(err, "committing transaction")
 }
 
-func (ds *Datastore) UpdateKeytab(options ...QueryOpt) error {
+func (ds *Datastore) UpdateKeytab(keytabId int64, options ...QueryOpt) error {
 	tx, err := ds.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "beginning transaction")
@@ -3644,7 +3644,7 @@ func (ds *Datastore) UpdateKeytab(options ...QueryOpt) error {
 
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, UpdateOp, "keytab", nil)
+		q := NewQueryConfig(ds, tx, UpdateOp, "keytab", keytabId)
 		for _, option := range options {
 			if err := option(q); err != nil {
 				return errors.Wrap(err, "setting up query options")
@@ -3672,7 +3672,7 @@ func (ds *Datastore) UpdateKeytab(options ...QueryOpt) error {
 	return errors.Wrap(err, "committing transaction")
 }
 
-func (ds *Datastore) DeleteKeytab(options ...QueryOpt) error {
+func (ds *Datastore) DeleteKeytab(keytabId int64, options ...QueryOpt) error {
 	tx, err := ds.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "beginning transaction")
@@ -3680,7 +3680,7 @@ func (ds *Datastore) DeleteKeytab(options ...QueryOpt) error {
 
 	err = tx.Wrap(func() error {
 		// Setup query with optional parameters
-		q := NewQueryConfig(ds, tx, DeleteOp, "keytab", nil)
+		q := NewQueryConfig(ds, tx, DeleteOp, "keytab", keytabId)
 		for _, option := range options {
 			if err := option(q); err != nil {
 				return errors.Wrap(err, "setting up query options")
@@ -3814,9 +3814,9 @@ func readKeytab(tx *goqu.TxDatabase, options ...QueryOpt) (Keytab, bool, error) 
 	return ret_keytab, exists, nil
 }
 
-func updateKeytab(tx *goqu.TxDatabase, options ...QueryOpt) error {
+func updateKeytab(tx *goqu.TxDatabase, keytabId int64, options ...QueryOpt) error {
 	// Setup query with optional parameters
-	q := NewQueryConfig(nil, tx, UpdateOp, "keytab", nil)
+	q := NewQueryConfig(nil, tx, UpdateOp, "keytab", keytabId)
 	for _, option := range options {
 		if err := option(q); err != nil {
 			return errors.Wrap(err, "setting up query options")
@@ -3841,9 +3841,9 @@ func updateKeytab(tx *goqu.TxDatabase, options ...QueryOpt) error {
 	return nil
 }
 
-func deleteKeytab(tx *goqu.TxDatabase, options ...QueryOpt) error {
+func deleteKeytab(tx *goqu.TxDatabase, keytabId int64, options ...QueryOpt) error {
 	// Setup query with optional parameters
-	q := NewQueryConfig(nil, tx, DeleteOp, "keytab", nil)
+	q := NewQueryConfig(nil, tx, DeleteOp, "keytab", keytabId)
 	for _, option := range options {
 		if err := option(q); err != nil {
 			return errors.Wrap(err, "setting up query options")

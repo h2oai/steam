@@ -53,6 +53,7 @@ var schema = map[string]string{
 	"identity_workgroup":  createTableIdentityWorkgroup,
 	"history":             createTableHistory,
 	"label":               createTableLabel,
+	"keytab":              createTableKeytab,
 	"meta":                createTableMeta,
 	"model":               createTableModel,
 	"multinomial_model":   createTableMultinomialModel,
@@ -211,6 +212,7 @@ CREATE TABLE label (
 
 var createTableKeytab = `
 CREATE TABLE keytab (
+    id integer PRIMARY KEY AUTOINCREMENT,
     identity_id integer,
     filename text,
     file blob,

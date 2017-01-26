@@ -437,6 +437,7 @@ func ScanLabels(rs *sql.Rows) ([]Label, error) {
 func ScanKeytab(r *sql.Row) (Keytab, error) {
 	var s Keytab
 	if err := r.Scan(
+		&s.Id,
 		&s.IdentityId,
 		&s.Filename,
 		&s.File,
@@ -452,6 +453,7 @@ func ScanKeytabs(rs *sql.Rows) ([]Keytab, error) {
 	for rs.Next() {
 		var s Keytab
 		if err = rs.Scan(
+			&s.Id,
 			&s.IdentityId,
 			&s.Filename,
 			&s.File,

@@ -2381,29 +2381,70 @@ func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) (int, 
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
 
-// TODO: KERBEROS FUNCTIONS
 func (s *Service) GetKeytab(pz az.Principal) (string, bool, error) {
-	// PERMISSIONS
-	// keytab, exists, err := s.ds.ReadUserKeytab(data.ByIdentityId(pz.Id()))
-
-	// return keytab.Name, exists, err
-	return "", false, nil
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
+		return "", false, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return "", false, errors.Wrap(err, "checking view privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	if err != nil {
+		return "", false, errors.Wrap(err, "reading keytab from database")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+		return "", false, errors.Wrap(err, "checking view privileges")
+	}
+	return keytab.Filename, exists, nil
 }
 
 func (s *Service) TestKeytab(pz az.Principal) (bool, error) {
-	// PERMISSIONS
-	// keytab, exists, err := s.ds.ReadUserKeytab(data.ByIdentityId(pz.Id()))
-	// CheckErr -> CheckExists
-
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
+		return false, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return false, errors.Wrap(err, "checking owns privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	if err != nil {
+		return false, errors.Wrap(err, "reading keytab from database")
+	} else if !exists {
+		return false, fmt.Errorf("cannot locate keytab for user %s", pz.Name())
+	}
+	// Verify privileges
+	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+		return false, errors.Wrap(err, "checking view privileges")
+	}
+	// Run Kinit to verify if valid (note: this will start a kerberos session)
 	// return  kerberos.Kinit(keytab.Keytab)
 	return false, nil
 }
 
 func (s *Service) DeleteKeytab(pz az.Principal) error {
-	// PERMISSIONS
-
-	// return s.ds.DeleteKeytab(data.ByIdentityId(pz.Id()))
-	return nil
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return errors.Wrap(err, "checking owns privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	if err != nil {
+		return errors.Wrap(err, "reading keytab from database")
+	} else if !exists {
+		return fmt.Errorf("cannot locate keytab for user %s", pz.Name())
+	}
+	// Verify privileges
+	if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+		return errors.Wrap(err, "checking view privileges")
+	}
+	// Delete Keytab
+	return s.ds.DeleteKeytab(keytab.Id)
 }
 
 // --- ---------- ---
