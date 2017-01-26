@@ -22,7 +22,7 @@ import { bindActionCreators } from 'redux';
 import { Collapse } from '@blueprintjs/core/dist/components/collapse/collapse';
 import { Button } from '@blueprintjs/core/dist/components/button/buttons';
 import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
-import { LdapConfig} from "../../Proxy/Proxy";
+import { LdapConfig } from "../../Proxy/Proxy";
 import { FocusStyleManager } from "@blueprintjs/core";
 import { fetchLdapConfig, saveLdapConfig, testLdapConfig, setLocalConfig } from "../actions/users.actions";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
@@ -88,7 +88,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     if (this.state.userbaseDnValue.length > 0) {
       this.setState({ userbaseDnInputValid: true });
     } else {
-      this.setState({ userbaseDnInputValid: false});
+      this.setState({ userbaseDnInputValid: false });
     }
 
     if (this.state.usernameAttributeValue.length > 0) {
@@ -100,7 +100,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     if (this.state.groupDnValue.length > 0) {
       this.setState({ groupDnInputValid: true });
     } else {
-      this.setState({ groupDnInputValid: false});
+      this.setState({ groupDnInputValid: false });
     }
 
   };
@@ -162,7 +162,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
     return {
       host: this.state.hostValue,
       port: parseInt(this.state.portValue, 10),
-      ldaps: this.state.sslEnabledValue === 'true',
+      ldaps: this.state.sslEnabledValue,
       bind_dn: this.state.bindDnValue,
       bind_password: this.bindDnPasswordInput.value,
       user_base_dn: this.state.userbaseDnValue,
@@ -245,183 +245,183 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         </table>
 
         {defaultSelectedDB.toLowerCase() === 'ldap' ?
-        <div>
-          <div className="colapse-header">
-            <Button onClick={this.onShowLDAPConnectionSettingsClicked}>
-              {this.state.isLDAPConnectionSettingsOpen ?
-                <i className="fa fa-minus" aria-hidden="true"></i> :
-                <i className="fa fa-plus" aria-hidden="true"></i>
-              }
-            </Button> &nbsp;
+          <div>
+            <div className="colapse-header">
+              <Button onClick={this.onShowLDAPConnectionSettingsClicked}>
+                {this.state.isLDAPConnectionSettingsOpen ?
+                  <i className="fa fa-minus" aria-hidden="true"></i> :
+                  <i className="fa fa-plus" aria-hidden="true"></i>
+                }
+              </Button> &nbsp;
             LDAP Connection Settings
           </div>
 
-          <Collapse isOpen={this.state.isLDAPConnectionSettingsOpen} className="space-20">
-            <table>
-              <tbody>
-                <tr className="auth-row">
-                  <td className="auth-left">HOST &nbsp; <Tooltip className="steam-tooltip-launcher" content="LDAP host server address">
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                      <input type="text"
-                             className={"pt-input ldap-input " + (this.state.hostInputValid ? '' : 'pt-intent-danger')}
-                             value={this.state.hostValue}
-                             onChange={(e: any) => this.setState({"hostValue": e.target.value})}
-                      ></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">PORT &nbsp; <Tooltip className="steam-tooltip-launcher" content="The LDAP server port">
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className={"pt-input ldap-input "}
-                           value={this.state.portValue}
-                           onChange={(e: any) => this.setState({"portValue": e.target.value})}
-                    ></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">SSL-ENABLED &nbsp; <Tooltip className="steam-tooltip-launcher" content="The LDAP server port">
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <label className="pt-control pt-switch .modifier">
-                      <input type="checkbox"
-                             checked={this.state.sslEnabledValue}
-                             onChange={(e: any) => {
-                                  this.setState({"sslEnabledValue": !this.state.sslEnabledValue});
-                                }
-                             }
-                      />
-                      <span className="pt-control-indicator"></span>
-                    </label>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">BIND DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>'Distinguished name' used to bind to LDAP server if extended access is needed.<br /> Leave this blank if anonymous bind is sufficient.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className="pt-input ldap-input"
-                           value={this.state.bindDnValue}
-                           onChange={(e: any) => this.setState({"bindDnValue": e.target.value})}
-                    ></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">BIND DN PASSWORD &nbsp; <Tooltip className="steam-tooltip-launcher" content="Password for the Bind DN user">
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="password" className={"pt-input ldap-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.bindDnPasswordInput = ref}></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">CONFIRM PASSWORD</td>
-                  <td className="auth-right">
-                    <input type="password" className={"pt-input ldap-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.confirmPasswordInput = ref}></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">USER BASE DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP users, specified by the DN of your user subtree.<br/> If necessary, you can specify several DNs separated by semicolons.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className={"pt-input ldap-input " + (this.state.userbaseDnInputValid ? "" : "pt-intent-danger")}
-                           value={this.state.userbaseDnValue}
-                           onChange={(e: any) => this.setState({"userbaseDnValue": e.target.value})}
-                    >
-                    </input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">USER BASE FILTER &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The LDAP search filter used to filter users.<br/> Highly recommended if you have a large amount of user entries under your user base DN.<br/> For example, '(department=IT)'</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className="pt-input ldap-input"
-                           onChange={(e: any) => this.setState({"userbaseFilterValue": e.target.value})}
-                           value={this.state.userbaseFilterValue}
-                    ></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                  <td className="auth-left">USER NAME ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The user attribute that contains the username.<br/> Note that this attribute's value should be case insensitive.<br/> Set to 'uid' for most configurations. In Active Directory (AD), this should be set to 'sAMAccountName'.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className={"pt-input ldap-input " + (this.state.usernameAttributeInputValid ? '' : 'pt-intent-danger')}
-                           onChange={(e: any) => this.setState({"usernameAttributeValue": e.target.value})}
-                           value={this.state.usernameAttributeValue}
-                           ></input>
-                  </td>
-                </tr>
-                <tr className="auth-row">
-                    <td className="auth-left">GROUP DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP groups, specified by the DN of your group subtree.<br/> If necessary, you can specify several DNs separated by semicolons.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
+            <Collapse isOpen={this.state.isLDAPConnectionSettingsOpen} className="space-20">
+              <table>
+                <tbody>
+                  <tr className="auth-row">
+                    <td className="auth-left">HOST &nbsp; <Tooltip className="steam-tooltip-launcher" content="LDAP host server address">
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
                     <td className="auth-right">
                       <input type="text"
-                           className={"pt-input ldap-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')}
-                           onChange={(e: any) => this.setState({groupDnValue: e.target.value})}
-                           value={this.state.groupDnValue}
-                           ></input>
+                        className={"pt-input ldap-input " + (this.state.hostInputValid ? '' : 'pt-intent-danger')}
+                        value={this.state.hostValue}
+                        onChange={(e: any) => this.setState({ "hostValue": e.target.value })}
+                        ></input>
                     </td>
-                </tr>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">PORT &nbsp; <Tooltip className="steam-tooltip-launcher" content="The LDAP server port">
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className={"pt-input ldap-input "}
+                        value={this.state.portValue}
+                        onChange={(e: any) => this.setState({ "portValue": e.target.value })}
+                        ></input>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">SSL-ENABLED &nbsp; <Tooltip className="steam-tooltip-launcher" content="The LDAP server port">
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <label className="pt-control pt-switch .modifier">
+                        <input type="checkbox"
+                          checked={this.state.sslEnabledValue}
+                          onChange={(e: any) => {
+                            this.setState({ "sslEnabledValue": !this.state.sslEnabledValue });
+                          }
+                          }
+                          />
+                        <span className="pt-control-indicator"></span>
+                      </label>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">BIND DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>'Distinguished name' used to bind to LDAP server if extended access is needed.<br /> Leave this blank if anonymous bind is sufficient.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className="pt-input ldap-input"
+                        value={this.state.bindDnValue}
+                        onChange={(e: any) => this.setState({ "bindDnValue": e.target.value })}
+                        ></input>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">BIND DN PASSWORD &nbsp; <Tooltip className="steam-tooltip-launcher" content="Password for the Bind DN user">
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="password" className={"pt-input ldap-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.bindDnPasswordInput = ref}></input>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">CONFIRM PASSWORD</td>
+                    <td className="auth-right">
+                      <input type="password" className={"pt-input ldap-input " + (this.state.passwordInputValid ? "" : 'pt-intent-danger')} ref={(ref) => this.confirmPasswordInput = ref}></input>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">USER BASE DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP users, specified by the DN of your user subtree.<br /> If necessary, you can specify several DNs separated by semicolons.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className={"pt-input ldap-input " + (this.state.userbaseDnInputValid ? "" : "pt-intent-danger")}
+                        value={this.state.userbaseDnValue}
+                        onChange={(e: any) => this.setState({ "userbaseDnValue": e.target.value })}
+                        >
+                      </input>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">USER BASE FILTER &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The LDAP search filter used to filter users.<br /> Highly recommended if you have a large amount of user entries under your user base DN.<br /> For example, '(department=IT)'</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className="pt-input ldap-input"
+                        onChange={(e: any) => this.setState({ "userbaseFilterValue": e.target.value })}
+                        value={this.state.userbaseFilterValue}
+                        ></input>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">USER NAME ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The user attribute that contains the username.<br /> Note that this attribute's value should be case insensitive.<br /> Set to 'uid' for most configurations. In Active Directory (AD), this should be set to 'sAMAccountName'.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className={"pt-input ldap-input " + (this.state.usernameAttributeInputValid ? '' : 'pt-intent-danger')}
+                        onChange={(e: any) => this.setState({ "usernameAttributeValue": e.target.value })}
+                        value={this.state.usernameAttributeValue}
+                        ></input>
+                    </td>
+                  </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">GROUP DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP groups, specified by the DN of your group subtree.<br /> If necessary, you can specify several DNs separated by semicolons.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className={"pt-input ldap-input " + (this.state.groupDnInputValid ? '' : 'pt-intent-danger')}
+                        onChange={(e: any) => this.setState({ groupDnValue: e.target.value })}
+                        value={this.state.groupDnValue}
+                        ></input>
+                    </td>
+                  </tr>
 
-                <tr className="auth-row">
-                    <td className="auth-left">STATIC MEMBER ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.<br/> A typical value for this is 'cn'.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className="pt-input ldap-input "
-                           value={this.state.staticMemberAttributeValue}
-                           onChange={(e: any) => this.setState({"staticMemberAttributeValue": e.target.value})}
-                    ></input>
-                  </td>
-                </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">STATIC MEMBER ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.<br /> A typical value for this is 'cn'.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className="pt-input ldap-input "
+                        value={this.state.staticMemberAttributeValue}
+                        onChange={(e: any) => this.setState({ "staticMemberAttributeValue": e.target.value })}
+                        ></input>
+                    </td>
+                  </tr>
 
 
-                <tr className="auth-row">
-                  <td className="auth-left">SEARCH REQUEST SIZE LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>H2O Steam can chase referrals with anonymous bind only.<br/> You must also have anonymous search enabled on your LDAP server. Turn this off if you have no need for referrals.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className="pt-input ldap-input "
-                           value={this.state.searchRequestSizeLimitValue}
-                           onChange={(e: any) => this.setState({"searchRequestSizeLimitValue": e.target.value})}
-                    ></input>
-                  </td>
-                </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">SEARCH REQUEST SIZE LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>H2O Steam can chase referrals with anonymous bind only.<br /> You must also have anonymous search enabled on your LDAP server. Turn this off if you have no need for referrals.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className="pt-input ldap-input "
+                        value={this.state.searchRequestSizeLimitValue}
+                        onChange={(e: any) => this.setState({ "searchRequestSizeLimitValue": e.target.value })}
+                        ></input>
+                    </td>
+                  </tr>
 
 
-                <tr className="auth-row">
-                  <td className="auth-left">SEARCH REQUEST TIME LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>Sets the maximum number of entries requested by LDAP searches.<br /> The number actually returned is subject to the limit imposed by the LDAP server.</div>}>
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                  </Tooltip></td>
-                  <td className="auth-right">
-                    <input type="text"
-                           className="pt-input ldap-input "
-                           value={this.state.searchRequestTimeLimitValue}
-                           onChange={(e: any) => this.setState({ "searchRequestTimeLimitValue": e.target.value })}
-                    ></input>
-                  </td>
-                </tr>
+                  <tr className="auth-row">
+                    <td className="auth-left">SEARCH REQUEST TIME LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>Sets the maximum number of entries requested by LDAP searches.<br /> The number actually returned is subject to the limit imposed by the LDAP server.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className="pt-input ldap-input "
+                        value={this.state.searchRequestTimeLimitValue}
+                        onChange={(e: any) => this.setState({ "searchRequestTimeLimitValue": e.target.value })}
+                        ></input>
+                    </td>
+                  </tr>
 
-              </tbody>
-            </table>
+                </tbody>
+              </table>
 
-          </Collapse>
-        </div> : null }
+            </Collapse>
+          </div> : null}
 
         <div id="actionButtonsContainer" className="space-20">
           {defaultSelectedDB.toLowerCase() === 'ldap' ?

@@ -350,7 +350,7 @@ export interface Service {
   getLdapConfig: (go: (error: Error, config: LdapConfig, exists: boolean) => void) => void
   
   // Test LDAP security configurations
-  testLdapConfig: (config: LdapConfig, go: (error: Error) => void) => void
+  testLdapConfig: (config: LdapConfig, go: (error: Error, userCount: number) => void) => void
   
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
@@ -761,6 +761,8 @@ interface TestLdapConfigIn {
 }
 
 interface TestLdapConfigOut {
+  
+  user_count: number
   
 }
 
@@ -2315,14 +2317,14 @@ export function getLdapConfig(go: (error: Error, config: LdapConfig, exists: boo
   });
 }
 
-export function testLdapConfig(config: LdapConfig, go: (error: Error) => void): void {
+export function testLdapConfig(config: LdapConfig, go: (error: Error, userCount: number) => void): void {
   const req: TestLdapConfigIn = { config: config };
   Proxy.Call("TestLdapConfig", req, function(error, data) {
     if (error) {
-      return go(error);
+      return go(error, null);
     } else {
       const d: TestLdapConfigOut = <TestLdapConfigOut> data;
-      return go(null);
+      return go(null, d.user_count);
     }
   });
 }

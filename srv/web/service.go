@@ -319,7 +319,7 @@ type Service interface {
 	SetLocalConfig(pz az.Principal) error
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
 	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
-	TestLdapConfig(pz az.Principal, config *LdapConfig) error
+	TestLdapConfig(pz az.Principal, config *LdapConfig) (int, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
@@ -483,6 +483,7 @@ type TestLdapConfigIn struct {
 }
 
 type TestLdapConfigOut struct {
+	UserCount int `json:"user_count"`
 }
 
 type RegisterClusterIn struct {
@@ -1516,14 +1517,14 @@ func (this *Remote) GetLdapConfig() (*LdapConfig, bool, error) {
 	return out.Config, out.Exists, nil
 }
 
-func (this *Remote) TestLdapConfig(config *LdapConfig) error {
+func (this *Remote) TestLdapConfig(config *LdapConfig) (int, error) {
 	in := TestLdapConfigIn{config}
 	var out TestLdapConfigOut
 	err := this.Proc.Call("TestLdapConfig", &in, &out)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return out.UserCount, nil
 }
 
 func (this *Remote) RegisterCluster(address string) (int64, error) {
@@ -2878,11 +2879,13 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	err := this.Service.TestLdapConfig(pz, in.Config)
+	val0, err := this.Service.TestLdapConfig(pz, in.Config)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
 	}
+
+	out.UserCount = val0
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

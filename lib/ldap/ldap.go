@@ -26,8 +26,8 @@ import (
 
 	"github.com/h2oai/steam/srv/web"
 
+	"github.com/go-ldap/ldap"
 	"github.com/pkg/errors"
-	ldap "gopkg.in/ldap.v2"
 )
 
 type Ldap struct {
@@ -54,7 +54,7 @@ type Ldap struct {
 	tlsConfig *tls.Config
 }
 
-func (l *Ldap) Test() error {
+func (l *Ldap) Test() (int, error) {
 	var (
 		conn *ldap.Conn
 		err  error
@@ -66,11 +66,11 @@ func (l *Ldap) Test() error {
 		conn, err = ldap.Dial("tcp", l.Address)
 	}
 	if err != nil {
-		return errors.Wrap(err, "dialing ldap")
+		return 0, errors.Wrap(err, "dialing ldap")
 	}
 	defer conn.Close()
 	if err := conn.Bind(l.BindDN, l.BindPass); err != nil {
-		return errors.Wrap(err, "attempting bind")
+		return 0, errors.Wrap(err, "attempting bind")
 	}
 
 	userReq := ldap.NewSearchRequest(
@@ -90,20 +90,20 @@ func (l *Ldap) Test() error {
 
 	userRes, err := conn.Search(userReq)
 	if err != nil {
-		return errors.Wrap(err, "searching for user base DN")
+		return 0, errors.Wrap(err, "searching for user base DN")
 	}
 	if len(userRes.Entries) < 1 {
-		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
+		return 0, errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
 	}
 
 	groupRes, err := conn.Search(groupReq)
 	if err != nil {
-		return errors.Wrap(err, "searching for group")
+		return 0, errors.Wrap(err, "searching for group")
 	}
 	if len(groupRes.Entries) < 1 {
-		return errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
+		return 0, errors.New(fmt.Sprint("unable to locate group", l.GroupDn))
 	} else if len(groupRes.Entries) > 2 {
-		return errors.New("too many group entries")
+		return 0, errors.New("too many group entries")
 	}
 	members := make(map[string]struct{})
 	for _, member := range groupRes.Entries[0].GetAttributeValues(l.StaticMemberAttribute) {
@@ -117,7 +117,7 @@ func (l *Ldap) Test() error {
 		}
 	}
 
-	return nil
+	return count, nil
 }
 
 func (l *Ldap) checkGroup(conn *ldap.Conn, user string) (bool, error) {
@@ -159,6 +159,7 @@ func (l *Ldap) CheckBind(user, password string) error {
 	)
 
 	if l.Ldaps {
+
 		conn, err = ldap.DialTLS("tcp", l.Address, l.tlsConfig)
 	} else {
 		conn, err = ldap.Dial("tcp", l.Address)
@@ -211,6 +212,8 @@ func NewLdap(
 	groupDN, staticMemberAttribute string,
 	// Advanced Settings
 	searchRequestSizeLimit, searchRequestTimeLimit int,
+	// TLS Settings
+	tlsConfig *tls.Config,
 ) *Ldap {
 	return &Ldap{
 		// Connection settings
@@ -219,19 +222,22 @@ func NewLdap(
 		UserBaseDn: userBaseDn, UserNameAttribute: userNameAttribute, UserBaseFilter: userBaseFilter,
 		// Group Settings
 		GroupDn: groupDN, StaticMemberAttribute: staticMemberAttribute,
+		// Additional Configs
+		tlsConfig: tlsConfig,
 	}
 }
 
-func FromConfig(config *web.LdapConfig) *Ldap {
+func FromConfig(config *web.LdapConfig, tlsConfig *tls.Config) *Ldap {
 	return NewLdap(
 		fmt.Sprintf("%s:%d", config.Host, config.Port), config.BindDn, config.BindPassword, config.Ldaps, config.ForceBind,
 		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
 		config.GroupDn, config.StaticMemberAttribute,
 		0, 0,
+		tlsConfig,
 	)
 }
 
-func FromDatabase(config string) (*Ldap, error) {
+func FromDatabase(config string, tlsConfig *tls.Config) (*Ldap, error) {
 	aux := struct {
 		Bind string
 		Ldap
@@ -255,5 +261,20 @@ func FromDatabase(config string) (*Ldap, error) {
 		a.UserBaseDn, a.UserBaseFilter, a.UserNameAttribute,
 		a.GroupDn, a.StaticMemberAttribute,
 		0, 0,
+		tlsConfig,
 	), nil
+}
+
+func CreateTLSConfig(certFilePath, keyFilePath string) (*tls.Config, error) {
+	// FIXME: should NOT continue to remove verify
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+
+	// cert, err := tls.LoadX509KeyPair(certFilePath, keyFilePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
+	// tlsConfig.BuildNameToCertificate()
+	return tlsConfig, nil
 }
