@@ -71,6 +71,21 @@ export function testLdapConfig(config: LdapConfig): void {
   Proxy.Call("TestLdapConfig", req, print);
 }
 
+export function getKeytab(): void {
+  const req: any = {  };
+  Proxy.Call("GetKeytab", req, print);
+}
+
+export function testKeytab(): void {
+  const req: any = {  };
+  Proxy.Call("TestKeytab", req, print);
+}
+
+export function deleteKeytab(): void {
+  const req: any = {  };
+  Proxy.Call("DeleteKeytab", req, print);
+}
+
 export function registerCluster(address: string): void {
   const req: any = { address: address };
   Proxy.Call("RegisterCluster", req, print);

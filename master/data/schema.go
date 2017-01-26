@@ -209,6 +209,16 @@ CREATE TABLE label (
 )
 `
 
+var createTableKeytab = `
+CREATE TABLE keytab (
+    identity_id integer,
+    filename text,
+    file blob,
+
+    FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE
+)
+`
+
 var createTableMeta = `
 CREATE TABLE meta (
     id integer NOT NULL,

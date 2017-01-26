@@ -360,6 +360,15 @@ export interface Service {
   // Test LDAP security configurations
   testLdapConfig: (config: LdapConfig, go: (error: Error, count: number, groups: LdapGroup[]) => void) => void
   
+  // Get the keytab for the logged in user
+  getKeytab: (go: (error: Error, filename: string, exists: boolean) => void) => void
+  
+  // Test the keytab for the given user
+  testKeytab: (go: (error: Error, isValid: boolean) => void) => void
+  
+  // Delete the keytab entry for the given user
+  deleteKeytab: (go: (error: Error) => void) => void
+  
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
   
@@ -773,6 +782,36 @@ interface TestLdapConfigOut {
   count: number
   
   groups: LdapGroup[]
+  
+}
+
+interface GetKeytabIn {
+  
+}
+
+interface GetKeytabOut {
+  
+  filename: string
+  
+  exists: boolean
+  
+}
+
+interface TestKeytabIn {
+  
+}
+
+interface TestKeytabOut {
+  
+  is_valid: boolean
+  
+}
+
+interface DeleteKeytabIn {
+  
+}
+
+interface DeleteKeytabOut {
   
 }
 
@@ -2335,6 +2374,42 @@ export function testLdapConfig(config: LdapConfig, go: (error: Error, count: num
     } else {
       const d: TestLdapConfigOut = <TestLdapConfigOut> data;
       return go(null, d.count, d.groups);
+    }
+  });
+}
+
+export function getKeytab(go: (error: Error, filename: string, exists: boolean) => void): void {
+  const req: GetKeytabIn = {  };
+  Proxy.Call("GetKeytab", req, function(error, data) {
+    if (error) {
+      return go(error, null, null);
+    } else {
+      const d: GetKeytabOut = <GetKeytabOut> data;
+      return go(null, d.filename, d.exists);
+    }
+  });
+}
+
+export function testKeytab(go: (error: Error, isValid: boolean) => void): void {
+  const req: TestKeytabIn = {  };
+  Proxy.Call("TestKeytab", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: TestKeytabOut = <TestKeytabOut> data;
+      return go(null, d.is_valid);
+    }
+  });
+}
+
+export function deleteKeytab(go: (error: Error) => void): void {
+  const req: DeleteKeytabIn = {  };
+  Proxy.Call("DeleteKeytab", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: DeleteKeytabOut = <DeleteKeytabOut> data;
+      return go(null);
     }
   });
 }

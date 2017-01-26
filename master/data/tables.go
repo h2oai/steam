@@ -122,6 +122,12 @@ type Label struct {
 	Created     pq.NullTime    `db:"created,def=time.Now()"`
 }
 
+type Keytab struct {
+	IdentityId int64  `db:"identity_id,arg"`
+	Filename   string `db:"filename,arg"`
+	File       []byte `db:"file,arg"`
+}
+
 type meta struct {
 	Id    int64  `db:"id,pk"`
 	Key   string `db:"key,arg"`

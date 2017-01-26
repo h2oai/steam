@@ -434,6 +434,38 @@ func ScanLabels(rs *sql.Rows) ([]Label, error) {
 	return structs, nil
 }
 
+func ScanKeytab(r *sql.Row) (Keytab, error) {
+	var s Keytab
+	if err := r.Scan(
+		&s.IdentityId,
+		&s.Filename,
+		&s.File,
+	); err != nil {
+		return Keytab{}, err
+	}
+	return s, nil
+}
+
+func ScanKeytabs(rs *sql.Rows) ([]Keytab, error) {
+	structs := make([]Keytab, 0, 16)
+	var err error
+	for rs.Next() {
+		var s Keytab
+		if err = rs.Scan(
+			&s.IdentityId,
+			&s.Filename,
+			&s.File,
+		); err != nil {
+			return nil, err
+		}
+		structs = append(structs, s)
+	}
+	if err = rs.Err(); err != nil {
+		return nil, err
+	}
+	return structs, nil
+}
+
 func ScanMeta(r *sql.Row) (meta, error) {
 	var s meta
 	if err := r.Scan(

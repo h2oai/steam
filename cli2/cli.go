@@ -48,6 +48,7 @@ func registerGeneratedCommands(c *context, cmd *cobra.Command) {
 		split(c),
 		start(c),
 		stop(c),
+		test(c),
 		unlink(c),
 		unregister(c),
 		unshare(c),
@@ -670,6 +671,7 @@ Commands:
     $ steam delete dataset ...
     $ steam delete datasource ...
     $ steam delete engine ...
+    $ steam delete keytab ...
     $ steam delete label ...
     $ steam delete model ...
     $ steam delete package ...
@@ -686,6 +688,7 @@ func delete_(c *context) *cobra.Command {
 	cmd.AddCommand(deleteDataset(c))
 	cmd.AddCommand(deleteDatasource(c))
 	cmd.AddCommand(deleteEngine(c))
+	cmd.AddCommand(deleteKeytab(c))
 	cmd.AddCommand(deleteLabel(c))
 	cmd.AddCommand(deleteModel(c))
 	cmd.AddCommand(deletePackage(c))
@@ -813,6 +816,31 @@ func deleteEngine(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
+	return cmd
+}
+
+var deleteKeytabHelp = `
+keytab [?]
+Delete Keytab
+Examples:
+
+    Delete the keytab entry for the given user
+    $ steam delete keytab
+
+`
+
+func deleteKeytab(c *context) *cobra.Command {
+
+	cmd := newCmd(c, deleteKeytabHelp, func(c *context, args []string) {
+
+		// Delete the keytab entry for the given user
+		err := c.remote.DeleteKeytab()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return
+	})
+
 	return cmd
 }
 
@@ -1326,6 +1354,7 @@ Commands:
     $ steam get identity ...
     $ steam get job ...
     $ steam get jobs ...
+    $ steam get keytab ...
     $ steam get labels ...
     $ steam get ldap ...
     $ steam get model ...
@@ -1363,6 +1392,7 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getIdentity(c))
 	cmd.AddCommand(getJob(c))
 	cmd.AddCommand(getJobs(c))
+	cmd.AddCommand(getKeytab(c))
 	cmd.AddCommand(getLabels(c))
 	cmd.AddCommand(getLdap(c))
 	cmd.AddCommand(getModel(c))
@@ -2373,6 +2403,33 @@ func getJobs(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().Int64Var(&clusterId, "cluster-id", clusterId, "No description available")
+	return cmd
+}
+
+var getKeytabHelp = `
+keytab [?]
+Get Keytab
+Examples:
+
+    Get the keytab for the logged in user
+    $ steam get keytab
+
+`
+
+func getKeytab(c *context) *cobra.Command {
+
+	cmd := newCmd(c, getKeytabHelp, func(c *context, args []string) {
+
+		// Get the keytab for the logged in user
+		filename, exists, err := c.remote.GetKeytab()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("Filename:\t%v\n", filename)
+		fmt.Printf("Exists:\t%v\n", exists)
+		return
+	})
+
 	return cmd
 }
 
@@ -4248,6 +4305,47 @@ func stopService(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().Int64Var(&serviceId, "service-id", serviceId, "No description available")
+	return cmd
+}
+
+var testHelp = `
+test [?]
+Test entities
+Commands:
+
+    $ steam test keytab ...
+`
+
+func test(c *context) *cobra.Command {
+	cmd := newCmd(c, testHelp, nil)
+
+	cmd.AddCommand(testKeytab(c))
+	return cmd
+}
+
+var testKeytabHelp = `
+keytab [?]
+Test Keytab
+Examples:
+
+    Test the keytab for the given user
+    $ steam test keytab
+
+`
+
+func testKeytab(c *context) *cobra.Command {
+
+	cmd := newCmd(c, testKeytabHelp, func(c *context, args []string) {
+
+		// Test the keytab for the given user
+		isValid, err := c.remote.TestKeytab()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("IsValid:\t%v\n", isValid)
+		return
+	})
+
 	return cmd
 }
 

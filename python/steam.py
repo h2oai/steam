@@ -188,6 +188,48 @@ class RPCClient:
 		response = self.connection.call("TestLdapConfig", request)
 		return response['count'], response['groups']
 	
+	def get_keytab(self):
+		"""
+		Get the keytab for the logged in user
+
+		Parameters:
+
+		Returns:
+		filename: No description available (string)
+		exists: No description available (bool)
+		"""
+		request = {
+		}
+		response = self.connection.call("GetKeytab", request)
+		return response['filename'], response['exists']
+	
+	def test_keytab(self):
+		"""
+		Test the keytab for the given user
+
+		Parameters:
+
+		Returns:
+		is_valid: No description available (bool)
+		"""
+		request = {
+		}
+		response = self.connection.call("TestKeytab", request)
+		return response['is_valid']
+	
+	def delete_keytab(self):
+		"""
+		Delete the keytab entry for the given user
+
+		Parameters:
+
+		Returns:None
+		"""
+		request = {
+		}
+		response = self.connection.call("DeleteKeytab", request)
+		return 
+	
 	def register_cluster(self, address):
 		"""
 		Connect to a cluster

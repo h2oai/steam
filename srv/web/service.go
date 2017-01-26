@@ -327,6 +327,9 @@ type Service interface {
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
 	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
 	TestLdapConfig(pz az.Principal, config *LdapConfig) (int, []*LdapGroup, error)
+	GetKeytab(pz az.Principal) (string, bool, error)
+	TestKeytab(pz az.Principal) (bool, error)
+	DeleteKeytab(pz az.Principal) error
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
@@ -492,6 +495,27 @@ type TestLdapConfigIn struct {
 type TestLdapConfigOut struct {
 	Count  int          `json:"count"`
 	Groups []*LdapGroup `json:"groups"`
+}
+
+type GetKeytabIn struct {
+}
+
+type GetKeytabOut struct {
+	Filename string `json:"filename"`
+	Exists   bool   `json:"exists"`
+}
+
+type TestKeytabIn struct {
+}
+
+type TestKeytabOut struct {
+	IsValid bool `json:"is_valid"`
+}
+
+type DeleteKeytabIn struct {
+}
+
+type DeleteKeytabOut struct {
 }
 
 type RegisterClusterIn struct {
@@ -1533,6 +1557,36 @@ func (this *Remote) TestLdapConfig(config *LdapConfig) (int, []*LdapGroup, error
 		return 0, nil, err
 	}
 	return out.Count, out.Groups, nil
+}
+
+func (this *Remote) GetKeytab() (string, bool, error) {
+	in := GetKeytabIn{}
+	var out GetKeytabOut
+	err := this.Proc.Call("GetKeytab", &in, &out)
+	if err != nil {
+		return "", false, err
+	}
+	return out.Filename, out.Exists, nil
+}
+
+func (this *Remote) TestKeytab() (bool, error) {
+	in := TestKeytabIn{}
+	var out TestKeytabOut
+	err := this.Proc.Call("TestKeytab", &in, &out)
+	if err != nil {
+		return false, err
+	}
+	return out.IsValid, nil
+}
+
+func (this *Remote) DeleteKeytab() error {
+	in := DeleteKeytabIn{}
+	var out DeleteKeytabOut
+	err := this.Proc.Call("DeleteKeytab", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *Remote) RegisterCluster(address string) (int64, error) {
@@ -2896,6 +2950,111 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 	out.Count = val0
 
 	out.Groups = val1
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetKeytab(r *http.Request, in *GetKeytabIn, out *GetKeytabOut) error {
+	const name = "GetKeytab"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, val1, err := this.Service.GetKeytab(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Filename = val0
+
+	out.Exists = val1
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) TestKeytab(r *http.Request, in *TestKeytabIn, out *TestKeytabOut) error {
+	const name = "TestKeytab"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.TestKeytab(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.IsValid = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) DeleteKeytab(r *http.Request, in *DeleteKeytabIn, out *DeleteKeytabOut) error {
+	const name = "DeleteKeytab"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.DeleteKeytab(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
 
 	res, merr := json.Marshal(out)
 	if merr != nil {

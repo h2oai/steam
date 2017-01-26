@@ -3492,6 +3492,382 @@ func deleteLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 
 }
 
+// ---------- ------ ----------
+// ---------- ------ ----------
+// ---------- Keytab ----------
+// ---------- ------ ----------
+// ---------- ------ ----------
+
+func (ds *Datastore) CreateKeytab(identityId int64, filename string, file []byte, options ...QueryOpt) (int64, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return 0, errors.Wrap(err, "beginning transaction")
+	}
+
+	var id int64
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, CreateOp, "keytab", nil)
+		// Default insert fields
+		keytab := goqu.Record{
+			"identity_id": identityId,
+			"filename":    filename,
+			"file":        file,
+		}
+		q.AddFields(keytab)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgGreen)
+			log.Println(q.dataset.ToInsertSql(q.fields))
+			color.Unset()
+		}
+		// Execute query
+		res, err := q.dataset.Insert(q.fields).Exec()
+		if err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+		id, err = res.LastInsertId()
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId = id
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return id, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) ReadKeytabs(options ...QueryOpt) ([]Keytab, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return []Keytab{}, errors.Wrap(err, "beginning transaction")
+	}
+
+	var keytabs []Keytab
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "", "keytab", nil)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgBlue)
+			log.Println(q.dataset.ToSql())
+			color.Unset()
+		}
+		// Execute query
+		rows, err := getRows(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		keytabs, err = ScanKeytabs(rows)
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return keytabs, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) ReadKeytab(options ...QueryOpt) (Keytab, bool, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return Keytab{}, false, errors.Wrap(err, "beginning transaction")
+	}
+
+	var keytab Keytab
+	var exists bool
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "", "keytab", nil)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgBlue)
+			log.Println(q.dataset.ToSql())
+			color.Unset()
+		}
+		// Execute query
+		row, err := getRow(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		keytab, err = ScanKeytab(row)
+		if err == sql.ErrNoRows {
+			return nil
+		} else if err == nil {
+			exists = true
+		}
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return keytab, exists, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) UpdateKeytab(options ...QueryOpt) error {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "beginning transaction")
+	}
+
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, UpdateOp, "keytab", nil)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug && len(q.fields) > 0 {
+			color.Set(color.FgYellow)
+			log.Println(q.dataset.ToUpdateSql(q.fields))
+			color.Unset()
+		}
+		// Execute query
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+		return nil
+	})
+
+	return errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) DeleteKeytab(options ...QueryOpt) error {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "beginning transaction")
+	}
+
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, DeleteOp, "keytab", nil)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgRed)
+			log.Println(q.dataset.ToDeleteSql())
+			color.Unset()
+		}
+		// Execute query
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
+	})
+
+	return errors.Wrap(err, "committing transaction")
+}
+func createKeytab(tx *goqu.TxDatabase, identityId int64, filename string, file []byte, options ...QueryOpt) (int64, error) {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, CreateOp, "keytab", nil)
+	// Default insert fields
+	keytab := goqu.Record{
+		"identity_id": identityId,
+		"filename":    filename,
+		"file":        file,
+	}
+	q.AddFields(keytab)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return 0, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
+		color.Set(color.FgGreen)
+		log.Println(q.dataset.ToInsertSql(q.fields))
+		color.Unset()
+	}
+	// Execute query
+	res, err := q.dataset.Insert(q.fields).Exec()
+	if err != nil {
+		return 0, errors.Wrap(err, "executing query")
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, errors.Wrap(err, "retrieving id")
+	}
+	q.entityId = id
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return 0, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return id, nil
+}
+
+func readKeytabs(tx *goqu.TxDatabase, options ...QueryOpt) ([]Keytab, error) {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "", "keytab", nil)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return []Keytab{}, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
+		color.Set(color.FgBlue)
+		log.Println(q.dataset.ToSql())
+		color.Unset()
+	}
+	// Execute query
+	rows, err := getRows(tx, q.dataset)
+	if err != nil {
+		return []Keytab{}, err
+	}
+	defer rows.Close()
+	keytabs, err := ScanKeytabs(rows)
+	if err != nil {
+		return []Keytab{}, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return []Keytab{}, errors.Wrap(err, "running post functions")
+		}
+	}
+
+	// Scan rows to Keytabs
+	return keytabs, nil
+}
+
+func readKeytab(tx *goqu.TxDatabase, options ...QueryOpt) (Keytab, bool, error) {
+	var exists bool
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, "", "keytab", nil)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return Keytab{}, exists, errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
+		color.Set(color.FgBlue)
+		log.Println(q.dataset.ToSql())
+		color.Unset()
+	}
+	// Execute query
+	row, err := getRow(tx, q.dataset)
+	if err != nil {
+		return Keytab{}, false, err
+	}
+	ret_keytab, err := ScanKeytab(row)
+	if err == sql.ErrNoRows {
+		return Keytab{}, false, nil
+	} else if err == nil {
+		exists = true
+	} else {
+		return Keytab{}, false, err
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return Keytab{}, false, errors.Wrap(err, "running post functions")
+		}
+	}
+	// Scan row to Keytab
+	return ret_keytab, exists, nil
+}
+
+func updateKeytab(tx *goqu.TxDatabase, options ...QueryOpt) error {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, UpdateOp, "keytab", nil)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug && len(q.fields) > 0 {
+		color.Set(color.FgYellow)
+		log.Println(q.dataset.ToUpdateSql(q.fields))
+		color.Unset()
+	}
+	// Execute query
+	if len(q.fields) > 0 {
+		if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+	return nil
+}
+
+func deleteKeytab(tx *goqu.TxDatabase, options ...QueryOpt) error {
+	// Setup query with optional parameters
+	q := NewQueryConfig(nil, tx, DeleteOp, "keytab", nil)
+	for _, option := range options {
+		if err := option(q); err != nil {
+			return errors.Wrap(err, "setting up query options")
+		}
+	}
+	if debug {
+		color.Set(color.FgRed)
+		log.Println(q.dataset.ToDeleteSql())
+		color.Unset()
+	}
+	// Execute query
+	if _, err := q.dataset.Delete().Exec(); err != nil {
+		return errors.Wrap(err, "executing query")
+	}
+	for _, post := range q.postFunc {
+		if err := post(q); err != nil {
+			return errors.Wrap(err, "running post functions")
+		}
+	}
+
+	return nil
+
+}
+
 // ---------- ---- ----------
 // ---------- ---- ----------
 // ---------- meta ----------
