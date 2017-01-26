@@ -21,6 +21,7 @@ import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
 import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
 import { getConfig } from '../../Clusters/actions/clusters.actions';
+import { LdapGroup } from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -66,7 +67,20 @@ export const REQUEST_ADMIN_CHECK = 'REQUEST_ADMIN_CHECK';
 export const RECEIVE_ADMIN_CHECK = 'RECEIVE_ADMIN_CHECK';
 export const REQUEST_SET_LOCAL_CONFIG = 'REQUEST_SET_LOCAL_CONFIG';
 export const RECEIVE_SET_LOCAL_CONFIG = 'RECEIVE_SET_LOCAL_CONFIG';
+export const REQUEST_CLEAR_TEST_LDAP = 'REQUEST_CLEAR_TEST_LDAP';
 
+export interface LdapTestResult {
+  count: number,
+  groups: LdapGroup[]
+}
+
+export function requestClearTestLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_CLEAR_TEST_LDAP
+    });
+  };
+};
 export function requestSetLocalConfig() {
   return (dispatch) => {
     dispatch({
@@ -103,10 +117,11 @@ export function requestTestLdap() {
     });
   };
 };
-export function receiveTestLdap() {
+export function receiveTestLdap(ldapTestResult: LdapTestResult) {
   return (dispatch) => {
     dispatch({
-      type: RECEIVE_TEST_LDAP
+      type: RECEIVE_TEST_LDAP,
+      ldapTestResult
     });
   };
 };
@@ -935,13 +950,12 @@ export function saveLdapConfig(ldapConfig: LdapConfig) {
 export function testLdapConfig(ldapConfig: LdapConfig) {
   return (dispatch, getState) => {
     dispatch(requestTestLdap());
-    Remote.testLdapConfig(ldapConfig, (error: Error) => {
+    Remote.testLdapConfig(ldapConfig, (error: Error, count: number, groups: LdapGroup[]) => {
       if (error) {
         dispatch(openNotification(NotificationType.Error, "LDAP", error.toString(), null));
-        dispatch(receiveTestLdap());
       } else {
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
-        dispatch(receiveTestLdap());
+        dispatch(receiveTestLdap({count, groups}));
       }
     });
   };

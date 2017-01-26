@@ -24,15 +24,19 @@ import (
 
 	"github.com/h2oai/steam/master/az"
 
+	"crypto/tls"
+
 	auth "github.com/abbot/go-http-auth"
 )
 
 type DefaultAz struct {
 	directory az.Directory
+
+	config *tls.Config
 }
 
-func NewDefaultAz(directory az.Directory) *DefaultAz {
-	return &DefaultAz{directory}
+func NewDefaultAz(directory az.Directory, tlsConfig *tls.Config) *DefaultAz {
+	return &DefaultAz{directory, tlsConfig}
 }
 
 // Authenticate either returns a local user with password, or else it validates
@@ -40,7 +44,7 @@ func NewDefaultAz(directory az.Directory) *DefaultAz {
 // Returns IsLocalUser, DBUsername, DBPassword
 func (a *DefaultAz) Authenticate(username, password, token string) (bool, string, string) {
 	// Looking and/or validate against an external authentication provider
-	pz, err := a.directory.Lookup(username, password, token)
+	pz, err := a.directory.Lookup(username, password, token, a.config)
 	if err != nil {
 		log.Printf("User %s read failed: %s\n", username, err)
 		return false, "", ""

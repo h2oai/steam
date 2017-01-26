@@ -17,6 +17,7 @@
 package web
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
@@ -51,6 +52,7 @@ type Service struct {
 	version                   string
 	workingDir                string
 	ds                        *data.Datastore
+	tlsConfig                 *tls.Config
 	compilationServiceAddress string
 	scoringServiceAddress     string
 	clusterProxyAddress       string
@@ -62,6 +64,7 @@ type Service struct {
 func NewService(
 	version, workingDir string,
 	ds *data.Datastore,
+	tlsConfig *tls.Config,
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
 	kerberos bool,
@@ -69,6 +72,7 @@ func NewService(
 	return &Service{
 		version, workingDir,
 		ds,
+		tlsConfig,
 		compilationServiceAddress, scoringServiceAddress, clusterProxyAddress,
 		scoringServicePortsRange[0], scoringServicePortsRange[1],
 		kerberos,
@@ -2250,7 +2254,9 @@ type ldapSerialized struct {
 	UserBaseDn             string
 	UserBaseFilter         string
 	UserNameAttribute      string
-	GroupDn                string
+	GroupBaseDN            string
+	GroupNameAttribute     string
+	GroupNames             []string
 	StaticMemberAttribute  string
 	SearchRequestSizeLimit int
 	SearchRequestTimeLimit int
@@ -2261,13 +2267,17 @@ type ldapSerialized struct {
 
 func configToSerialized(config *web.LdapConfig) ldapSerialized {
 	bind := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", config.BindDn, config.BindPassword)))
+	groups := strings.Split(config.GroupNames, ",")
+
 	return ldapSerialized{
 		fmt.Sprintf("%s:%d", config.Host, config.Port),
 		bind,
 		config.UserBaseDn,
 		config.UserBaseFilter,
 		config.UserNameAttribute,
-		config.GroupDn,
+		config.GroupBaseDn,
+		config.GroupNameAttribute,
+		groups,
 		config.StaticMemberAttribute,
 		config.SearchRequestSizeLimit,
 		config.SearchRequestTimeLimit,
@@ -2291,13 +2301,20 @@ func serializedToConfig(config ldapSerialized) (*web.LdapConfig, error) {
 	bind := strings.Split(string(b), ":")
 
 	return &web.LdapConfig{
-		host, port,
-		config.Ldaps,
-		bind[0], "",
-		config.UserBaseDn, config.UserBaseFilter, config.UserNameAttribute,
-		config.GroupDn, config.StaticMemberAttribute,
-		config.SearchRequestSizeLimit, config.SearchRequestTimeLimit,
-		config.ForceBind,
+		Host:                   host,
+		Port:                   port,
+		Ldaps:                  config.Ldaps,
+		BindDn:                 bind[0],
+		UserBaseDn:             config.UserBaseDn,
+		UserBaseFilter:         config.UserBaseFilter,
+		UserNameAttribute:      config.UserNameAttribute,
+		GroupBaseDn:            config.GroupBaseDN,
+		GroupNameAttribute:     config.GroupNameAttribute,
+		GroupNames:             strings.Join(config.GroupNames, ","),
+		StaticMemberAttribute:  config.StaticMemberAttribute,
+		SearchRequestSizeLimit: config.SearchRequestSizeLimit,
+		SearchRequestTimeLimit: config.SearchRequestTimeLimit,
+		ForceBind:              config.ForceBind,
 	}, nil
 }
 
@@ -2357,8 +2374,9 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	return config, exists, err
 }
 
-func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) error {
-	return ldap.FromConfig(config).Test()
+func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) (int, []*web.LdapGroup, error) {
+	ct, gs, err := ldap.FromConfig(config, s.tlsConfig).TestConfig()
+	return ct, toLdapGroup(gs), err
 }
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
@@ -2841,6 +2859,14 @@ func toEntityHistories(es []data.History) []*web.EntityHistory {
 	ar := make([]*web.EntityHistory, len(es))
 	for i, e := range es {
 		ar[i] = toEntityHistory(e)
+	}
+	return ar
+}
+
+func toLdapGroup(gs map[string]int) []*web.LdapGroup {
+	ar := make([]*web.LdapGroup, 0, len(gs))
+	for g, u := range gs {
+		ar = append(ar, &web.LdapGroup{Name: g, Users: u})
 	}
 	return ar
 }

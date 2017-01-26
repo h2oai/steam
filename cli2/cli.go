@@ -2453,8 +2453,10 @@ func getLdap(c *context) *cobra.Command {
 				fmt.Sprintf("UserBaseDn:\t%v\t", config.UserBaseDn),                         // No description available
 				fmt.Sprintf("UserBaseFilter:\t%v\t", config.UserBaseFilter),                 // No description available
 				fmt.Sprintf("UserNameAttribute:\t%v\t", config.UserNameAttribute),           // No description available
-				fmt.Sprintf("GroupDn:\t%v\t", config.GroupDn),                               // No description available
+				fmt.Sprintf("GroupBaseDn:\t%v\t", config.GroupBaseDn),                       // No description available
+				fmt.Sprintf("GroupNameAttribute:\t%v\t", config.GroupNameAttribute),         // No description available
 				fmt.Sprintf("StaticMemberAttribute:\t%v\t", config.StaticMemberAttribute),   // No description available
+				fmt.Sprintf("GroupNames:\t%v\t", config.GroupNames),                         // No description available
 				fmt.Sprintf("SearchRequestSizeLimit:\t%v\t", config.SearchRequestSizeLimit), // No description available
 				fmt.Sprintf("SearchRequestTimeLimit:\t%v\t", config.SearchRequestTimeLimit), // No description available
 				fmt.Sprintf("ForceBind:\t%v\t", config.ForceBind),                           // No description available

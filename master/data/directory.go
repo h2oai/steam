@@ -18,14 +18,17 @@
 package data
 
 import (
+	"crypto/tls"
+
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/master/az"
+
 	"github.com/pkg/errors"
 )
 
 // --- Datastore-backed Directory Impl ---
 
-func (ds *Datastore) Lookup(username, password, token string) (az.Principal, error) {
+func (ds *Datastore) Lookup(username, password, token string, tlsConfig *tls.Config) (az.Principal, error) {
 	// Fetch identity
 	identity, exists, err := ds.ReadIdentity(ByName(username))
 	if err != nil {
@@ -41,7 +44,7 @@ func (ds *Datastore) Lookup(username, password, token string) (az.Principal, err
 
 	switch auth.Key {
 	case LDAPAuth:
-		conn, err := ldap.FromDatabase(auth.Value)
+		conn, err := ldap.FromDatabase(auth.Value, tlsConfig)
 		if err != nil {
 			return nil, errors.Wrap(err, "creating ldap config from database")
 		}
