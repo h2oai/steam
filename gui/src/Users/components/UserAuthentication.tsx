@@ -461,19 +461,6 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   </tr>
 
                   <tr className="auth-row">
-                    <td className="auth-left">GROUP NAMES ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.</div>}>
-                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                    </Tooltip></td>
-                    <td className="auth-right">
-                      <input type="text"
-                        className={"pt-input ldap-input "}
-                        onChange={(e: any) => this.setState({ groupNameAttributeValue: e.target.value })}
-                        value={this.state.groupNameAttributeValue}
-                        ></input>
-                    </td>
-                  </tr>
-
-                  <tr className="auth-row">
                     <td className="auth-left">GROUP BASE DN &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The location of your LDAP groups, specified by the DN of your group subtree.<br /> If necessary, you can specify several DNs separated by semicolons.</div>}>
                       <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                     </Tooltip></td>
@@ -485,6 +472,20 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                         ></input>
                     </td>
                   </tr>
+
+                  <tr className="auth-row">
+                    <td className="auth-left">GROUP NAME ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.</div>}>
+                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </Tooltip></td>
+                    <td className="auth-right">
+                      <input type="text"
+                        className={"pt-input ldap-input "}
+                        onChange={(e: any) => this.setState({ groupNameAttributeValue: e.target.value })}
+                        value={this.state.groupNameAttributeValue}
+                        ></input>
+                    </td>
+                  </tr>
+
 
                   <tr className="auth-row">
                     <td className="auth-left">STATIC MEMBER ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.<br /> A typical value for this is 'cn'.</div>}>
