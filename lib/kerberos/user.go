@@ -51,7 +51,7 @@ func WriteKeytab(keytab data.Keytab, workingDirectory string, uid, gid int) (str
 
 func DeleteKeytab(keytabFile, workingDirectory string) error {
 	fPath := path.Join(workingDirectory, fs.LibDir, fs.KindKeytab, keytabFile)
-	if _, err := os.Stat(fpath); os.IsNotExist(err) {
+	if _, err := os.Stat(fPath); os.IsNotExist(err) {
 		return nil
 	}
 	return os.Remove(fPath)
