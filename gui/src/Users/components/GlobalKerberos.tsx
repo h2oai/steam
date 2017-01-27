@@ -63,21 +63,11 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
   }
 
   componentWillReceiveProps = (nextProps) => {
-    if (this.props.config && nextProps.config && JSON.stringify(this.props.config.kerberos_enabled) !== JSON.stringify(nextProps.config.kerberosEnabledValue)) {
+    if (!this.props.globalKeytab && nextProps.globalKeytab) {
       this.setState({
-        kerberosEnabledValue : nextProps.config.kerberos_enabled
+        steamPrincipleValue : nextProps.globalKeytab.principal
       });
     };
-
-    if (this.props.config && nextProps.config && JSON.stringify(this.props.config) !== JSON.stringify(nextProps.config)) {
-      this.populateValuesFromConfig(nextProps.config);
-    };
-  };
-
-  populateValuesFromConfig(config: Config) {
-    this.setState({
-      kerberosEnabledValue: config.kerberos_enabled
-    });
   };
 
   onDeleteKeytab = (id: number) => {
