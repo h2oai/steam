@@ -44,7 +44,7 @@ export class ClusterAuthentication extends React.Component<Props & DispatchProps
 
   refs: {
     [key: string]: (Element);
-    keytab: (HTMLInputElement)
+    file: HTMLInputElement
   };
 
   constructor(params) {
@@ -89,7 +89,7 @@ export class ClusterAuthentication extends React.Component<Props & DispatchProps
     this.setState({
       uploadText: e.target.value
     });
-    this.props.saveGlobalKerberos(this.refs.keytab, this.state.steamPrincipleValue);
+    this.props.saveGlobalKerberos(this.refs.file, this.state.steamPrincipleValue);
   };
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -103,7 +103,6 @@ export class ClusterAuthentication extends React.Component<Props & DispatchProps
               <td>
                 <label className="pt-control pt-switch .modifier">
                   <input type="checkbox"
-                         ref="keytab"
                          checked={this.state.kerberosEnabledValue}
                          onChange={(e: any) => {
                             this.setState({ "kerberosEnabledValue": !this.state.kerberosEnabledValue });
@@ -134,7 +133,7 @@ export class ClusterAuthentication extends React.Component<Props & DispatchProps
                 {this.props.globalKeytab ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
                 <p>
                   <label className="pt-file-upload">
-                    <input ref="engine" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
+                    <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
                     <span className="pt-file-upload-input">{this.state.uploadText}</span>
                   </label>
                 </p>}

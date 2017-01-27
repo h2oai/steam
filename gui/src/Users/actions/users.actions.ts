@@ -1031,6 +1031,7 @@ export function saveGlobalKerberos(file, principle) {
     dispatch(requestSaveGlobalKerberos());
     dispatch(openNotification(NotificationType.Info, "Update", 'Uploading keytab...', null));
     let data = new FormData();
+    console.log(file);
     data.append('file', file.files[0]);
     fetch(`/upload?type=keytab&principal=${principle}`, {
       credentials: 'include',
