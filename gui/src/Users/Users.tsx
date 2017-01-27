@@ -104,7 +104,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
         component: <UserAuthentication />
       };
       tabs["cluster_authentication"] = {
-        label: 'CLUSTER AUTHENTICATION',
+        label: 'GLOBAL KERBEROS',
         isSelected: false,
         onClick: this.clickHandler.bind(this),
         component: <ClusterAuthentication />

@@ -47,7 +47,7 @@ export function saveLocalKerberos(file) {
     dispatch(openNotification(NotificationType.Info, "Update", 'Uploading keytab...', null));
     let data = new FormData();
     data.append('file', file.files[0]);
-    fetch(`/upload?type=keytab`, {
+    fetch(`/upload?type=keytab&principal=user`, {
       credentials: 'include',
       method: 'post',
       body: data

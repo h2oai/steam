@@ -50,7 +50,7 @@ export class User extends React.Component<Props & DispatchProps, any> {
 
     let tabs = {};
     tabs["user"] = {
-      label: 'CLUSTER AUTHENTICATION',
+      label: 'KERBEROS',
       isSelected: true,
       onClick: this.clickHandler.bind(this),
       component: <ClusterAuthentication />
