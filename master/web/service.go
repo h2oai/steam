@@ -2466,7 +2466,7 @@ func (s *Service) GetUserKeytab(pz az.Principal) (*web.Keytab, bool, error) {
 
 func (s *Service) TestKeytab(pz az.Principal, keytabId int64) error {
 	// Check permissions/privileges
-	if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
+	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
 		return errors.Wrap(err, "checking permission")
 	}
 	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
