@@ -21,7 +21,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
 import { } from "../../Proxy/Proxy";
-import {Tooltip} from "@blueprintjs/core";
+import {Tooltip, FocusStyleManager} from "@blueprintjs/core";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
 import {Config} from "../../Proxy/Proxy";
 import {saveGlobalKerberos, fetchGlobalKeytab, setGlobalKerberosEnabled} from "../actions/users.actions";
@@ -58,6 +58,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
   }
 
   componentWillMount() {
+    FocusStyleManager.onlyShowFocusOnTabs();
     this.props.getConfig();
   }
 
