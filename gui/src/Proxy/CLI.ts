@@ -46,6 +46,11 @@ export function getConfig(): void {
   Proxy.Call("GetConfig", req, print);
 }
 
+export function setGlobalKerberos(enabled: boolean): void {
+  const req: any = { enabled: enabled };
+  Proxy.Call("SetGlobalKerberos", req, print);
+}
+
 export function checkAdmin(): void {
   const req: any = {  };
   Proxy.Call("CheckAdmin", req, print);

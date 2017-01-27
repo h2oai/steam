@@ -132,6 +132,21 @@ class SteamConnection:
 		response = self.connection.call("GetConfig", request)
 		return response['config']
 	
+	def set_global_kerberos(self, enabled):
+		"""
+		Set this to enable kerberos usage when applicable
+
+		Parameters:
+		enabled: Whether kerberos should be enabled or disabled (bool)
+
+		Returns:None
+		"""
+		request = {
+			'enabled': enabled
+		}
+		response = self.connection.call("SetGlobalKerberos", request)
+		return 
+	
 	def check_admin(self):
 		"""
 		Check if an identity has admin privileges

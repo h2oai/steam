@@ -3971,6 +3971,7 @@ Set entities
 Commands:
 
     $ steam set attributes ...
+    $ steam set global ...
     $ steam set local ...
 `
 
@@ -3978,6 +3979,7 @@ func set(c *context) *cobra.Command {
 	cmd := newCmd(c, setHelp, nil)
 
 	cmd.AddCommand(setAttributes(c))
+	cmd.AddCommand(setGlobal(c))
 	cmd.AddCommand(setLocal(c))
 	return cmd
 }
@@ -4021,6 +4023,40 @@ func setAttributes(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&attributes, "attributes", attributes, "No description available")
 	cmd.Flags().StringVar(&packageName, "package-name", packageName, "No description available")
 	cmd.Flags().Int64Var(&projectId, "project-id", projectId, "No description available")
+	return cmd
+}
+
+var setGlobalHelp = `
+global [?]
+Set Global
+Examples:
+
+    Set this to enable kerberos usage when applicable
+    $ steam set global --kerberos \
+        --enabled=?
+
+`
+
+func setGlobal(c *context) *cobra.Command {
+	var kerberos bool // Switch for SetGlobalKerberos()
+	var enabled bool  // Whether kerberos should be enabled or disabled
+
+	cmd := newCmd(c, setGlobalHelp, func(c *context, args []string) {
+		if kerberos { // SetGlobalKerberos
+
+			// Set this to enable kerberos usage when applicable
+			err := c.remote.SetGlobalKerberos(
+				enabled, // Whether kerberos should be enabled or disabled
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return
+		}
+	})
+	cmd.Flags().BoolVar(&kerberos, "kerberos", kerberos, "Set this to enable kerberos usage when applicable")
+
+	cmd.Flags().BoolVar(&enabled, "enabled", enabled, "Whether kerberos should be enabled or disabled")
 	return cmd
 }
 

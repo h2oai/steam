@@ -352,6 +352,9 @@ export interface Service {
   // Get Steam start up configurations
   getConfig: (go: (error: Error, config: Config) => void) => void
   
+  // Set this to enable kerberos usage when applicable
+  setGlobalKerberos: (enabled: boolean, go: (error: Error) => void) => void
+  
   // Check if an identity has admin privileges
   checkAdmin: (go: (error: Error, isAdmin: boolean) => void) => void
   
@@ -738,6 +741,16 @@ interface GetConfigIn {
 interface GetConfigOut {
   
   config: Config
+  
+}
+
+interface SetGlobalKerberosIn {
+  
+  enabled: boolean
+  
+}
+
+interface SetGlobalKerberosOut {
   
 }
 
@@ -2338,6 +2351,18 @@ export function getConfig(go: (error: Error, config: Config) => void): void {
     } else {
       const d: GetConfigOut = <GetConfigOut> data;
       return go(null, d.config);
+    }
+  });
+}
+
+export function setGlobalKerberos(enabled: boolean, go: (error: Error) => void): void {
+  const req: SetGlobalKerberosIn = { enabled: enabled };
+  Proxy.Call("SetGlobalKerberos", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: SetGlobalKerberosOut = <SetGlobalKerberosOut> data;
+      return go(null);
     }
   });
 }

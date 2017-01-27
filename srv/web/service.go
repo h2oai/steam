@@ -328,6 +328,7 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
+	SetGlobalKerberos(pz az.Principal, enabled bool) error
 	CheckAdmin(pz az.Principal) (bool, error)
 	SetLocalConfig(pz az.Principal) error
 	SetLdapConfig(pz az.Principal, config *LdapConfig) error
@@ -465,6 +466,13 @@ type GetConfigIn struct {
 
 type GetConfigOut struct {
 	Config *Config `json:"config"`
+}
+
+type SetGlobalKerberosIn struct {
+	Enabled bool `json:"enabled"`
+}
+
+type SetGlobalKerberosOut struct {
 }
 
 type CheckAdminIn struct {
@@ -1523,6 +1531,16 @@ func (this *Remote) GetConfig() (*Config, error) {
 		return nil, err
 	}
 	return out.Config, nil
+}
+
+func (this *Remote) SetGlobalKerberos(enabled bool) error {
+	in := SetGlobalKerberosIn{enabled}
+	var out SetGlobalKerberosOut
+	err := this.Proc.Call("SetGlobalKerberos", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *Remote) CheckAdmin() (bool, error) {
@@ -2801,6 +2819,39 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 	}
 
 	out.Config = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) SetGlobalKerberos(r *http.Request, in *SetGlobalKerberosIn, out *SetGlobalKerberosOut) error {
+	const name = "SetGlobalKerberos"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.SetGlobalKerberos(pz, in.Enabled)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
 
 	res, merr := json.Marshal(out)
 	if merr != nil {
