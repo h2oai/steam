@@ -3498,7 +3498,7 @@ func deleteLabel(tx *goqu.TxDatabase, labelId int64, options ...QueryOpt) error 
 // ---------- ------ ----------
 // ---------- ------ ----------
 
-func (ds *Datastore) CreateKeytab(identityId int64, filename string, file []byte, options ...QueryOpt) (int64, error) {
+func (ds *Datastore) CreateKeytab(filename string, file []byte, options ...QueryOpt) (int64, error) {
 	tx, err := ds.db.Begin()
 	if err != nil {
 		return 0, errors.Wrap(err, "beginning transaction")
@@ -3510,9 +3510,8 @@ func (ds *Datastore) CreateKeytab(identityId int64, filename string, file []byte
 		q := NewQueryConfig(ds, tx, CreateOp, "keytab", nil)
 		// Default insert fields
 		keytab := goqu.Record{
-			"identity_id": identityId,
-			"filename":    filename,
-			"file":        file,
+			"filename": filename,
+			"file":     file,
 		}
 		q.AddFields(keytab)
 		for _, option := range options {
@@ -3706,14 +3705,13 @@ func (ds *Datastore) DeleteKeytab(keytabId int64, options ...QueryOpt) error {
 
 	return errors.Wrap(err, "committing transaction")
 }
-func createKeytab(tx *goqu.TxDatabase, identityId int64, filename string, file []byte, options ...QueryOpt) (int64, error) {
+func createKeytab(tx *goqu.TxDatabase, filename string, file []byte, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, CreateOp, "keytab", nil)
 	// Default insert fields
 	keytab := goqu.Record{
-		"identity_id": identityId,
-		"filename":    filename,
-		"file":        file,
+		"filename": filename,
+		"file":     file,
 	}
 	q.AddFields(keytab)
 	for _, option := range options {

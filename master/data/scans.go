@@ -439,6 +439,7 @@ func ScanKeytab(r *sql.Row) (Keytab, error) {
 	if err := r.Scan(
 		&s.Id,
 		&s.IdentityId,
+		&s.Principal,
 		&s.Filename,
 		&s.File,
 	); err != nil {
@@ -455,6 +456,7 @@ func ScanKeytabs(rs *sql.Rows) ([]Keytab, error) {
 		if err = rs.Scan(
 			&s.Id,
 			&s.IdentityId,
+			&s.Principal,
 			&s.Filename,
 			&s.File,
 		); err != nil {

@@ -163,6 +163,13 @@ export interface Job {
   completed_at: number
 }
 
+export interface Keytab {
+  
+  id: number
+  principal: string
+  name: string
+}
+
 export interface Label {
   
   id: number
@@ -361,13 +368,16 @@ export interface Service {
   testLdapConfig: (config: LdapConfig, go: (error: Error, count: number, groups: LdapGroup[]) => void) => void
   
   // Get the keytab for the logged in user
-  getKeytab: (go: (error: Error, filename: string, exists: boolean) => void) => void
+  getUserKeytab: (go: (error: Error, keytab: Keytab, exists: boolean) => void) => void
+  
+  // Get the keytab for Steam (used for polling)
+  getSteamKeytab: (go: (error: Error, keytab: Keytab, exists: boolean) => void) => void
   
   // Test the keytab for the given user
-  testKeytab: (go: (error: Error, isValid: boolean) => void) => void
+  testKeytab: (keytabId: number, go: (error: Error) => void) => void
   
   // Delete the keytab entry for the given user
-  deleteKeytab: (go: (error: Error) => void) => void
+  deleteKeytab: (keytabId: number, go: (error: Error) => void) => void
   
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
@@ -785,13 +795,25 @@ interface TestLdapConfigOut {
   
 }
 
-interface GetKeytabIn {
+interface GetUserKeytabIn {
   
 }
 
-interface GetKeytabOut {
+interface GetUserKeytabOut {
   
-  filename: string
+  keytab: Keytab
+  
+  exists: boolean
+  
+}
+
+interface GetSteamKeytabIn {
+  
+}
+
+interface GetSteamKeytabOut {
+  
+  keytab: Keytab
   
   exists: boolean
   
@@ -799,15 +821,17 @@ interface GetKeytabOut {
 
 interface TestKeytabIn {
   
+  keytab_id: number
+  
 }
 
 interface TestKeytabOut {
   
-  is_valid: boolean
-  
 }
 
 interface DeleteKeytabIn {
+  
+  keytab_id: number
   
 }
 
@@ -2378,32 +2402,44 @@ export function testLdapConfig(config: LdapConfig, go: (error: Error, count: num
   });
 }
 
-export function getKeytab(go: (error: Error, filename: string, exists: boolean) => void): void {
-  const req: GetKeytabIn = {  };
-  Proxy.Call("GetKeytab", req, function(error, data) {
+export function getUserKeytab(go: (error: Error, keytab: Keytab, exists: boolean) => void): void {
+  const req: GetUserKeytabIn = {  };
+  Proxy.Call("GetUserKeytab", req, function(error, data) {
     if (error) {
       return go(error, null, null);
     } else {
-      const d: GetKeytabOut = <GetKeytabOut> data;
-      return go(null, d.filename, d.exists);
+      const d: GetUserKeytabOut = <GetUserKeytabOut> data;
+      return go(null, d.keytab, d.exists);
     }
   });
 }
 
-export function testKeytab(go: (error: Error, isValid: boolean) => void): void {
-  const req: TestKeytabIn = {  };
+export function getSteamKeytab(go: (error: Error, keytab: Keytab, exists: boolean) => void): void {
+  const req: GetSteamKeytabIn = {  };
+  Proxy.Call("GetSteamKeytab", req, function(error, data) {
+    if (error) {
+      return go(error, null, null);
+    } else {
+      const d: GetSteamKeytabOut = <GetSteamKeytabOut> data;
+      return go(null, d.keytab, d.exists);
+    }
+  });
+}
+
+export function testKeytab(keytabId: number, go: (error: Error) => void): void {
+  const req: TestKeytabIn = { keytab_id: keytabId };
   Proxy.Call("TestKeytab", req, function(error, data) {
     if (error) {
-      return go(error, null);
+      return go(error);
     } else {
       const d: TestKeytabOut = <TestKeytabOut> data;
-      return go(null, d.is_valid);
+      return go(null);
     }
   });
 }
 
-export function deleteKeytab(go: (error: Error) => void): void {
-  const req: DeleteKeytabIn = {  };
+export function deleteKeytab(keytabId: number, go: (error: Error) => void): void {
+  const req: DeleteKeytabIn = { keytab_id: keytabId };
   Proxy.Call("DeleteKeytab", req, function(error, data) {
     if (error) {
       return go(error);

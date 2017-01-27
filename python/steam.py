@@ -206,44 +206,62 @@ class SteamConnection:
 		response = self.connection.call("TestLdapConfig", request)
 		return response['count'], response['groups']
 	
-	def get_keytab(self):
+	def get_user_keytab(self):
 		"""
 		Get the keytab for the logged in user
 
 		Parameters:
 
 		Returns:
-		filename: No description available (string)
+		keytab: No description available (Keytab)
 		exists: No description available (bool)
 		"""
 		request = {
 		}
-		response = self.connection.call("GetKeytab", request)
-		return response['filename'], response['exists']
+		response = self.connection.call("GetUserKeytab", request)
+		return response['keytab'], response['exists']
 	
-	def test_keytab(self):
+	def get_steam_keytab(self):
 		"""
-		Test the keytab for the given user
+		Get the keytab for Steam (used for polling)
 
 		Parameters:
 
 		Returns:
-		is_valid: No description available (bool)
+		keytab: No description available (Keytab)
+		exists: No description available (bool)
 		"""
 		request = {
 		}
-		response = self.connection.call("TestKeytab", request)
-		return response['is_valid']
+		response = self.connection.call("GetSteamKeytab", request)
+		return response['keytab'], response['exists']
 	
-	def delete_keytab(self):
+	def test_keytab(self, keytab_id):
 		"""
-		Delete the keytab entry for the given user
+		Test the keytab for the given user
 
 		Parameters:
+		keytab_id: No description available (int64)
 
 		Returns:None
 		"""
 		request = {
+			'keytab_id': keytab_id
+		}
+		response = self.connection.call("TestKeytab", request)
+		return 
+	
+	def delete_keytab(self, keytab_id):
+		"""
+		Delete the keytab entry for the given user
+
+		Parameters:
+		keytab_id: No description available (int64)
+
+		Returns:None
+		"""
+		request = {
+			'keytab_id': keytab_id
 		}
 		response = self.connection.call("DeleteKeytab", request)
 		return 

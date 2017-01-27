@@ -214,8 +214,9 @@ var createTableKeytab = `
 CREATE TABLE keytab (
     id integer PRIMARY KEY AUTOINCREMENT,
     identity_id integer,
-    filename text,
-    file blob,
+    principal text,
+    filename text NOT NULL,
+    file blob NOT NULL,
 
     FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE
 )

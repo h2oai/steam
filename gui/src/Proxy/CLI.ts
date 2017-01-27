@@ -71,18 +71,23 @@ export function testLdapConfig(config: LdapConfig): void {
   Proxy.Call("TestLdapConfig", req, print);
 }
 
-export function getKeytab(): void {
+export function getUserKeytab(): void {
   const req: any = {  };
-  Proxy.Call("GetKeytab", req, print);
+  Proxy.Call("GetUserKeytab", req, print);
 }
 
-export function testKeytab(): void {
+export function getSteamKeytab(): void {
   const req: any = {  };
+  Proxy.Call("GetSteamKeytab", req, print);
+}
+
+export function testKeytab(keytabId: number): void {
+  const req: any = { keytab_id: keytabId };
   Proxy.Call("TestKeytab", req, print);
 }
 
-export function deleteKeytab(): void {
-  const req: any = {  };
+export function deleteKeytab(keytabId: number): void {
+  const req: any = { keytab_id: keytabId };
   Proxy.Call("DeleteKeytab", req, print);
 }
 

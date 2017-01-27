@@ -26,6 +26,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"os/user"
 	"path"
 	"sort"
 	"strconv"
@@ -35,6 +36,7 @@ import (
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/haproxy"
+	"github.com/h2oai/steam/lib/kerberos"
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/svc"
 	"github.com/h2oai/steam/lib/yarn"
@@ -2381,50 +2383,39 @@ func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) (int, 
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
 
-func (s *Service) GetKeytab(pz az.Principal) (string, bool, error) {
+func (s *Service) GetSteamKeytab(pz az.Principal) (*web.Keytab, bool, error) {
+	// Only admin can see/modify
+	if !pz.IsAdmin() {
+		return nil, false, errors.New("user is not an admin")
+	}
+	// Read keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByPrincipalSteam)
+	if err != nil {
+		return nil, false, errors.Wrap(err, "reading keytab from database")
+	}
+	return toKeytab(keytab), exists, nil
+}
+
+func (s *Service) GetUserKeytab(pz az.Principal) (*web.Keytab, bool, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
-		return "", false, errors.Wrap(err, "checking permission")
+		return nil, false, errors.Wrap(err, "checking permission")
 	}
 	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
-		return "", false, errors.Wrap(err, "checking view privileges")
+		return nil, false, errors.Wrap(err, "checking view privileges")
 	}
 	// Read Keytab
 	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
 	if err != nil {
-		return "", false, errors.Wrap(err, "reading keytab from database")
+		return nil, false, errors.Wrap(err, "reading keytab from database")
 	}
 	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
-		return "", false, errors.Wrap(err, "checking view privileges")
+		return nil, false, errors.Wrap(err, "checking view privileges")
 	}
-	return keytab.Filename, exists, nil
+	return toKeytab(keytab), exists, nil
 }
 
-func (s *Service) TestKeytab(pz az.Principal) (bool, error) {
-	// Check permissions/privileges
-	if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
-		return false, errors.Wrap(err, "checking permission")
-	}
-	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
-		return false, errors.Wrap(err, "checking owns privileges")
-	}
-	// Read Keytab
-	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
-	if err != nil {
-		return false, errors.Wrap(err, "reading keytab from database")
-	} else if !exists {
-		return false, fmt.Errorf("cannot locate keytab for user %s", pz.Name())
-	}
-	// Verify privileges
-	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
-		return false, errors.Wrap(err, "checking view privileges")
-	}
-	// Run Kinit to verify if valid (note: this will start a kerberos session)
-	// return  kerberos.Kinit(keytab.Keytab)
-	return false, nil
-}
-
-func (s *Service) DeleteKeytab(pz az.Principal) error {
+func (s *Service) TestKeytab(pz az.Principal, keytabId int64) error {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
 		return errors.Wrap(err, "checking permission")
@@ -2440,8 +2431,49 @@ func (s *Service) DeleteKeytab(pz az.Principal) error {
 		return fmt.Errorf("cannot locate keytab for user %s", pz.Name())
 	}
 	// Verify privileges
-	if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
 		return errors.Wrap(err, "checking view privileges")
+	}
+	// Get user uid and gid for impersonation of execs
+	uid, gid, err := getUser(pz.Name())
+	if err != nil {
+		return errors.Wrap(err, "get user")
+	}
+	// Generate keytab on disk, if not available
+	kpath, err := kerberos.WriteKeytab(keytab, s.workingDir, int(uid), int(gid))
+	if err != nil {
+		return errors.Wrap(err, "write keytab")
+	}
+	// Test by performing a kinit
+	return kerberos.Kinit(kpath, pz.Name(), uid, gid)
+}
+
+func (s *Service) DeleteKeytab(pz az.Principal, keytabId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return errors.Wrap(err, "checking owns privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	if err != nil {
+		return errors.Wrap(err, "reading keytab from database")
+	} else if !exists {
+		return fmt.Errorf("cannot locate keytab for user %s", pz.Name())
+	}
+	// Verify privileges
+	if keytab.Principal.Valid { // Is the steam keytab
+		if !pz.IsAdmin() {
+			return errors.New("user is not a valid admin")
+		}
+	} else if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+		return errors.Wrap(err, "checking view privileges")
+	}
+	// Delete local Keytab
+	if err := kerberos.DeleteKeytab(keytab.Filename, s.workingDir); err != nil {
+		return errors.Wrap(err, "deleting local keytab")
 	}
 	// Delete Keytab
 	return s.ds.DeleteKeytab(keytab.Id)
@@ -2544,6 +2576,24 @@ func toSizeBytes(i int64) string {
 	}
 
 	return ""
+}
+
+// Helper func to get uid/gid
+func getUser(username string) (uint32, uint32, error) {
+	u, err := user.Lookup(username)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "user lookup")
+	}
+
+	uid, err := strconv.ParseUint(u.Uid, 10, 64)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "parsing uid")
+	}
+	gid, err := strconv.ParseUint(u.Gid, 10, 64)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "parsing gid")
+	}
+	return uint32(uid), uint32(gid), nil
 }
 
 // //
@@ -2935,4 +2985,12 @@ func toLdapGroup(gs map[string]int) []*web.LdapGroup {
 		ar = append(ar, &web.LdapGroup{Name: g, Users: u})
 	}
 	return ar
+}
+
+func toKeytab(k data.Keytab) *web.Keytab {
+	return &web.Keytab{
+		Id:        int(k.Id),
+		Principal: k.Principal.String,
+		Name:      k.Filename,
+	}
 }

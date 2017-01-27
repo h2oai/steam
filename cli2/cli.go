@@ -825,22 +825,27 @@ Delete Keytab
 Examples:
 
     Delete the keytab entry for the given user
-    $ steam delete keytab
+    $ steam delete keytab \
+        --keytab-id=?
 
 `
 
 func deleteKeytab(c *context) *cobra.Command {
+	var keytabId int64 // No description available
 
 	cmd := newCmd(c, deleteKeytabHelp, func(c *context, args []string) {
 
 		// Delete the keytab entry for the given user
-		err := c.remote.DeleteKeytab()
+		err := c.remote.DeleteKeytab(
+			keytabId, // No description available
+		)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		return
 	})
 
+	cmd.Flags().Int64Var(&keytabId, "keytab-id", keytabId, "No description available")
 	return cmd
 }
 
@@ -1354,7 +1359,6 @@ Commands:
     $ steam get identity ...
     $ steam get job ...
     $ steam get jobs ...
-    $ steam get keytab ...
     $ steam get labels ...
     $ steam get ldap ...
     $ steam get model ...
@@ -1369,6 +1373,8 @@ Commands:
     $ steam get roles ...
     $ steam get service ...
     $ steam get services ...
+    $ steam get steam ...
+    $ steam get user ...
     $ steam get workgroup ...
     $ steam get workgroups ...
 `
@@ -1392,7 +1398,6 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getIdentity(c))
 	cmd.AddCommand(getJob(c))
 	cmd.AddCommand(getJobs(c))
-	cmd.AddCommand(getKeytab(c))
 	cmd.AddCommand(getLabels(c))
 	cmd.AddCommand(getLdap(c))
 	cmd.AddCommand(getModel(c))
@@ -1407,6 +1412,8 @@ func get(c *context) *cobra.Command {
 	cmd.AddCommand(getRoles(c))
 	cmd.AddCommand(getService(c))
 	cmd.AddCommand(getServices(c))
+	cmd.AddCommand(getSteam(c))
+	cmd.AddCommand(getUser(c))
 	cmd.AddCommand(getWorkgroup(c))
 	cmd.AddCommand(getWorkgroups(c))
 	return cmd
@@ -2406,33 +2413,6 @@ func getJobs(c *context) *cobra.Command {
 	return cmd
 }
 
-var getKeytabHelp = `
-keytab [?]
-Get Keytab
-Examples:
-
-    Get the keytab for the logged in user
-    $ steam get keytab
-
-`
-
-func getKeytab(c *context) *cobra.Command {
-
-	cmd := newCmd(c, getKeytabHelp, func(c *context, args []string) {
-
-		// Get the keytab for the logged in user
-		filename, exists, err := c.remote.GetKeytab()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Printf("Filename:\t%v\n", filename)
-		fmt.Printf("Exists:\t%v\n", exists)
-		return
-	})
-
-	return cmd
-}
-
 var getLabelsHelp = `
 labels [?]
 Get Labels
@@ -3427,6 +3407,78 @@ func getServices(c *context) *cobra.Command {
 	return cmd
 }
 
+var getSteamHelp = `
+steam [?]
+Get Steam
+Examples:
+
+    Get the keytab for Steam (used for polling)
+    $ steam get steam --keytab
+
+`
+
+func getSteam(c *context) *cobra.Command {
+	var keytab bool // Switch for GetSteamKeytab()
+
+	cmd := newCmd(c, getSteamHelp, func(c *context, args []string) {
+		if keytab { // GetSteamKeytab
+
+			// Get the keytab for Steam (used for polling)
+			keytab, exists, err := c.remote.GetSteamKeytab()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := []string{
+				fmt.Sprintf("Id:\t%v\t", keytab.Id),               // No description available
+				fmt.Sprintf("Principal:\t%v\t", keytab.Principal), // No description available
+				fmt.Sprintf("Name:\t%v\t", keytab.Name),           // No description available
+			}
+			c.printt("Attribute\tValue\t", lines)
+			fmt.Printf("Exists:\t%v\n", exists)
+			return
+		}
+	})
+	cmd.Flags().BoolVar(&keytab, "keytab", keytab, "Get the keytab for Steam (used for polling)")
+
+	return cmd
+}
+
+var getUserHelp = `
+user [?]
+Get User
+Examples:
+
+    Get the keytab for the logged in user
+    $ steam get user --keytab
+
+`
+
+func getUser(c *context) *cobra.Command {
+	var keytab bool // Switch for GetUserKeytab()
+
+	cmd := newCmd(c, getUserHelp, func(c *context, args []string) {
+		if keytab { // GetUserKeytab
+
+			// Get the keytab for the logged in user
+			keytab, exists, err := c.remote.GetUserKeytab()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := []string{
+				fmt.Sprintf("Id:\t%v\t", keytab.Id),               // No description available
+				fmt.Sprintf("Principal:\t%v\t", keytab.Principal), // No description available
+				fmt.Sprintf("Name:\t%v\t", keytab.Name),           // No description available
+			}
+			c.printt("Attribute\tValue\t", lines)
+			fmt.Printf("Exists:\t%v\n", exists)
+			return
+		}
+	})
+	cmd.Flags().BoolVar(&keytab, "keytab", keytab, "Get the keytab for the logged in user")
+
+	return cmd
+}
+
 var getWorkgroupHelp = `
 workgroup [?]
 Get Workgroup
@@ -4329,23 +4381,27 @@ Test Keytab
 Examples:
 
     Test the keytab for the given user
-    $ steam test keytab
+    $ steam test keytab \
+        --keytab-id=?
 
 `
 
 func testKeytab(c *context) *cobra.Command {
+	var keytabId int64 // No description available
 
 	cmd := newCmd(c, testKeytabHelp, func(c *context, args []string) {
 
 		// Test the keytab for the given user
-		isValid, err := c.remote.TestKeytab()
+		err := c.remote.TestKeytab(
+			keytabId, // No description available
+		)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Printf("IsValid:\t%v\n", isValid)
 		return
 	})
 
+	cmd.Flags().Int64Var(&keytabId, "keytab-id", keytabId, "No description available")
 	return cmd
 }
 

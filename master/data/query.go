@@ -455,6 +455,15 @@ func UnlinkPermissions(permissionIds ...int64) QueryOpt {
 	}
 }
 
+func WithPrincipal(principal string) QueryOpt {
+	return func(q *QueryConfig) (err error) { q.fields["principal"] = principal; return }
+}
+
+func ByPrincipalSteam(q *QueryConfig) (err error) {
+	q.dataset = q.dataset.Where(q.I("principal").Neq(nil))
+	return
+}
+
 // ByProject queries the database for a matching state column
 func ByProjectId(projectId int64) QueryOpt {
 	return func(q *QueryConfig) (err error) {

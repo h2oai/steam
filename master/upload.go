@@ -169,7 +169,8 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case fs.KindKeytab:
 		defer os.Remove(dstPath) // dstPath is a temp file
 
-		if err := s.handleKeytab(w, pz, fileBaseName, dstPath); err != nil {
+		principal := r.FormValue("principal")
+		if err := s.handleKeytab(w, pz, fileBaseName, dstPath, principal); err != nil {
 			log.Println("Failed saving keytab:", err)
 			return
 		}
@@ -231,7 +232,7 @@ func (s *UploadHandler) handleEngine(w http.ResponseWriter, pz az.Principal, fil
 	return nil
 }
 
-func (s *UploadHandler) handleKeytab(w http.ResponseWriter, pz az.Principal, fileName, filePath string) error {
+func (s *UploadHandler) handleKeytab(w http.ResponseWriter, pz az.Principal, fileName, filePath, principal string) error {
 	f, err := os.Open(filePath)
 	if err != nil {
 		// FIXME: ERROR
@@ -243,9 +244,19 @@ func (s *UploadHandler) handleKeytab(w http.ResponseWriter, pz az.Principal, fil
 		return err
 	}
 
+	switch principal {
+	case "user":
+		_, err := s.ds.CreateKeytab(
+			fileName, b, data.WithIdentityId(pz.Id()),
+			data.WithAudit(pz), data.WithPrivilege(pz, data.Owns),
+		)
+		return err
+	case "":
+		return errors.New("must specify a principal")
+	}
 	_, err = s.ds.CreateKeytab(
-		pz.Id(), fileName, b,
-		data.WithAudit(pz), data.WithPrivilege(pz, data.Owns),
+		fileName, b, data.WithPrincipal(principal),
+		data.WithAudit(pz),
 	)
 	return err
 }

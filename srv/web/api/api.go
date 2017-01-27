@@ -51,6 +51,12 @@ type LdapGroup struct {
 	Users int
 }
 
+type Keytab struct {
+	Id        int
+	Principal string
+	Name      string
+}
+
 type Cluster struct {
 	Id          int64
 	Name        string
@@ -315,7 +321,8 @@ type Service struct {
 	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
 	GetLdapConfig                 GetLdapConfig                 `help:"Get LDAP security configurations"`
 	TestLdapConfig                TestLdapConfig                `help:"Test LDAP security configurations"`
-	GetKeytab                     GetKeytab                     `help:"Get the keytab for the logged in user"`
+	GetUserKeytab                 GetUserKeytab                 `help:"Get the keytab for the logged in user"`
+	GetSteamKeytab                GetSteamKeytab                `help:"Get the keytab for Steam (used for polling)"`
 	TestKeytab                    TestKeytab                    `help:"Test the keytab for the given user"`
 	DeleteKeytab                  DeleteKeytab                  `help:"Delete the keytab entry for the given user"`
 	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
@@ -466,17 +473,23 @@ type TestLdapConfig struct {
 	Count  int
 	Groups []LdapGroup
 }
-type GetKeytab struct {
-	_        int
-	Filename string
-	Exists   bool
+type GetSteamKeytab struct {
+	_      int
+	Keytab Keytab
+	Exists bool
+}
+type GetUserKeytab struct {
+	_      int
+	Keytab Keytab
+	Exists bool
 }
 type TestKeytab struct {
-	_       int
-	IsValid bool
+	KeytabId int64
+	_        int
 }
 type DeleteKeytab struct {
-	_ int
+	KeytabId int64
+	_        int
 }
 type RegisterCluster struct {
 	Address   string
