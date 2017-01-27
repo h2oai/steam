@@ -2,19 +2,32 @@ package yarn
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 
+	"github.com/h2oai/steam/lib/kerberos"
 	"github.com/h2oai/steam/master/data"
 	"github.com/pkg/errors"
 )
 
-func jobList() (map[string]struct{}, error) {
+func jobList(keytabFile, principal string, uid, gid uint32) (map[string]struct{}, error) {
+	// Create timeout for hadoop job -list
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 	// Issue hadoop job -list to get job ids
-	cmd := exec.Command("hadoop", "job", "-list")
+	cmd := exec.CommandContext(ctx, "hadoop", "job", "-list")
+	if keytabFile != "" {
+		if err := kerberos.Kinit(keytabFile, principal, uid, gid); err != nil {
+			return nil, errors.Wrap(err, "kinit")
+		}
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
+	}
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, err
@@ -49,13 +62,15 @@ type clusterDatabase interface {
 	ReadCluster(...data.QueryOpt) (data.Cluster, bool, error)
 	ReadClusterYarnDetails(...data.QueryOpt) ([]data.ClusterYarnDetail, error)
 	UpdateCluster(int64, ...data.QueryOpt) error
+	ReadKeytab(...data.QueryOpt) (data.Keytab, bool, error)
 }
 
 type Poll struct {
 	ds clusterDatabase
 
-	started string
-	failed  string
+	workingDirectory string
+	started          string
+	failed           string
 }
 
 func StartPoll(ds clusterDatabase, startedState, failedState string) error {
@@ -66,31 +81,40 @@ func StartPoll(ds clusterDatabase, startedState, failedState string) error {
 		return nil
 	}
 
-	first := true
 	t := time.NewTimer(time.Minute)
 	for {
 		if err := poll.pollFunc(); err != nil {
-			if first {
-				return err
-			}
 			log.Println("Poll ERROR", err)
 		}
 		// Wait for a minute before next poll
 		<-t.C
 		t.Reset(time.Minute)
-		if first {
-			first = false
-		}
 	}
 }
 
 func (p *Poll) pollFunc() error {
+	var ktPath, principal string
+	var uid, gid uint32
+	keytab, exists, err := p.ds.ReadKeytab(data.ByPrincipalSteam)
+	if err != nil {
+		return errors.Wrap(err, "reading keytab")
+	} else if exists {
+		principal = keytab.Principal.String
+		uid, gid, err = GetUser(principal)
+		if err != nil {
+			return errors.Wrap(err, "getting user")
+		}
+		ktPath, err = kerberos.WriteKeytab(keytab, p.workingDirectory, int(uid), int(gid))
+		if err != nil {
+			return errors.Wrap(err, "writing keytab")
+		}
+	}
+
 	// Retrieve job Ids
-	jobIds, err := jobList()
+	jobIds, err := jobList(ktPath, principal, uid, gid)
 	if err != nil {
 		return errors.Wrap(err, "getting yarn job list")
 	}
-
 	// Get all yarn details of jobs in the started state
 	details, err := p.ds.ReadClusterYarnDetails(data.ByState(p.started))
 	if err != nil {
