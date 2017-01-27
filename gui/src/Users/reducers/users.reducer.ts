@@ -20,7 +20,7 @@ import {
   RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
   RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE,
   ENTER_NEW_USER, EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG,
-  RECEIVE_ADMIN_CHECK, RECEIVE_TEST_LDAP, REQUEST_CLEAR_TEST_LDAP
+  RECEIVE_ADMIN_CHECK, RECEIVE_TEST_LDAP, REQUEST_CLEAR_TEST_LDAP, RECEIVE_GLOBAL_KEYTAB
 } from '../actions/users.actions';
 
 export const DEFAULT_HOST = "";
@@ -70,6 +70,19 @@ let initialState = {
 
 export const usersReducer = (state: any = initialState, action: any) => {
   switch (action.type) {
+    case RECEIVE_GLOBAL_KEYTAB : {
+      if (action.exists) {
+        return _.assign({}, state, {
+            globalKeytab: action.keytab
+          }
+        );
+      } else {
+        return _.assign({}, state, {
+            globalKeytab: null
+          }
+        );
+      }
+    }
     case REQUEST_CLEAR_TEST_LDAP : {
       return _.assign({}, state, {
           testResult: null
