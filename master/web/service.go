@@ -27,7 +27,6 @@ import (
 	"net"
 	"os"
 	"os/user"
-	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -241,7 +240,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	}
 	// Start cluster in yarn
 	appId, address, out, token, contextPath, err := yarn.StartCloud(size, s.kerberosEnabled, memory,
-		clusterName, engine.Location, identity.Name, keytabPath, secure)
+		clusterName, engine.Location, identity.Name, keytabPath, secure, uid, gid)
 	if err != nil {
 		return 0, errors.Wrap(err, "starting yarn cluster")
 	}
@@ -293,11 +292,23 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 	} else if !exists {
 		return errors.New("failed locating yarn details")
 	}
-	// FIXME implement keytab generation on the fly
-	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
+	// Get UID and GID for impersonation
+	uid, gid, err := getUser(pz.Name())
+	if err != nil {
+		return errors.Wrap(err, "get user")
+	}
+	// Write keytab if not exists already
+	kt, err := s.viewKeytab(pz)
+	if err != nil {
+		return errors.Wrap(err, "viewing keytab")
+	}
+	keytabPath, err := kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
+	if err != nil {
+		return errors.Wrap(err, "writing keytab file")
+	}
 	// Stop clouds
 	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnDetails.ApplicationId,
-		yarnDetails.OutputDir, identity.Name, keytabPath); err != nil {
+		yarnDetails.OutputDir, identity.Name, keytabPath, uid, gid); err != nil {
 		return errors.Wrap(err, "stopping cluster")
 	}
 	// Delete cluster
