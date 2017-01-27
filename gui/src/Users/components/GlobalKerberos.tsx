@@ -156,7 +156,8 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
 
 function mapStateToProps(state) {
   return {
-    config: state.clusters.config
+    config: state.clusters.config,
+    globalKeytab: state.users.globalKeytab
   };
 }
 
