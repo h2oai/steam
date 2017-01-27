@@ -73,12 +73,28 @@ export const REQUEST_SAVE_GLOBAL_KERBEROS = 'REQUEST_SAVE_GLOBAL_KERBEROS';
 export const RECEIVE_SAVE_GLOBAL_KERBEROS = 'RECEIVE_SAVE_GLOBAL_KERBEROS';
 export const REQUEST_GLOBAL_KEYTAB = 'REQUEST_GLOBAL_KEYTAB';
 export const RECEIVE_GLOBAL_KEYTAB = 'RECEIVE_GLOBAL_KEYTAB';
+export const REQUEST_SET_GLOBAL_KERBEROS_ENABLED = 'REQUEST_SET_GLOBAL_KERBEROS_ENABLED';
+export const RECEIVE_SET_GLOBAL_KERBEROS_ENABLED = 'RECIEVE_SET_GLOBAL_KERBEROS_ENABLED';
 
 export interface LdapTestResult {
   count: number,
   groups: LdapGroup[]
 }
 
+export function requestSetGlobalKerberosEnabled() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_SET_GLOBAL_KERBEROS_ENABLED
+    });
+  };
+};
+export function receiveSetGlobalKerberosEnabled() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_SET_GLOBAL_KERBEROS_ENABLED
+    });
+  };
+};
 export function requestGlobalKeytab() {
   return (dispatch) => {
     dispatch({
@@ -1031,7 +1047,6 @@ export function saveGlobalKerberos(file, principle) {
     dispatch(requestSaveGlobalKerberos());
     dispatch(openNotification(NotificationType.Info, "Update", 'Uploading keytab...', null));
     let data = new FormData();
-    console.log(file);
     data.append('file', file.files[0]);
     fetch(`/upload?type=keytab&principal=${principle}`, {
       credentials: 'include',
@@ -1046,6 +1061,18 @@ export function saveGlobalKerberos(file, principle) {
         dispatch(openNotification(NotificationType.Error, "Error", response.statusText, null));
       }
     });
-
   };
+}
+
+export function setGlobalKerberosEnabled(isEnabled:boolean) {
+  return (dispatch, getState) => {
+    dispatch(requestSetGlobalKerberosEnabled());
+    Remote.setGlobalKerberos(isEnabled, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
+        return;
+      }
+      getConfig()(dispatch);
+    });
+  }
 }

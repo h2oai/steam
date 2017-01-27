@@ -24,7 +24,7 @@ import { } from "../../Proxy/Proxy";
 import {Tooltip} from "@blueprintjs/core";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
 import {Config} from "../../Proxy/Proxy";
-import {saveGlobalKerberos, fetchGlobalKeytab} from "../actions/users.actions";
+import {saveGlobalKerberos, fetchGlobalKeytab, setGlobalKerberosEnabled} from "../actions/users.actions";
 import {deleteKeytab, testKeytab} from "../../user/actions/user.actions";
 import {Keytab} from "../../Proxy/Proxy";
 
@@ -37,7 +37,8 @@ interface DispatchProps {
   getConfig: Function
   fetchGlobalKeytab: Function,
   deleteKeytab: Function,
-  testKeytab: Function
+  testKeytab: Function,
+  setGlobalKerberosEnabled: Function
 }
 
 export class GlobalKerberos extends React.Component<Props & DispatchProps, any> {
@@ -50,7 +51,6 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
   constructor(params) {
     super(params);
     this.state = {
-      kerberosEnabledValue: false,
       uploadText: "Upload New Keytab",
       steamPrincipleValue: ""
     };
@@ -103,10 +103,11 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               <td>
                 <label className="pt-control pt-switch .modifier">
                   <input type="checkbox"
-                         checked={this.state.kerberosEnabledValue}
-                         onChange={(e: any) => {
-                            this.setState({ "kerberosEnabledValue": !this.state.kerberosEnabledValue });
-                          }
+                         checked={this.props.config.kerberos_enabled}
+                         onChange={
+                           (e: any) => {
+                              this.props.setGlobalKerberosEnabled(!this.props.config.kerberos_enabled);
+                            }
                           }
                   />
                   <span className="pt-control-indicator"></span>
@@ -164,7 +165,8 @@ function mapDispatchToProps(dispatch) {
     getConfig: bindActionCreators(getConfig, dispatch),
     fetchGlobalKeytab: bindActionCreators(fetchGlobalKeytab(), dispatch),
     deleteKeytab: bindActionCreators(deleteKeytab, dispatch),
-    testKeytab: bindActionCreators(testKeytab, dispatch)
+    testKeytab: bindActionCreators(testKeytab, dispatch),
+    setGlobalKerberosEnabled: bindActionCreators(setGlobalKerberosEnabled, dispatch)
   };
 }
 

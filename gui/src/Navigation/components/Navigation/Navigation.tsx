@@ -184,7 +184,10 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
       case "configurations" :
         return hasPermissionToShow("ViewIdentity", this.props.config, this.props.isAdmin);
       case "user" :
-        return true;
+        if (this.props.config) {
+          return this.props.config.kerberos_enabled;
+        }
+        return false;
       default :
         console.log("ERROR", "Unrecognized path seeking permissions"); //should never be reached
         return true; //backend will deal with

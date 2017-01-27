@@ -16,12 +16,10 @@
 */
 
 import * as React from 'react';
-import * as _ from 'lodash';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/user.scss';
 import { } from "../../Proxy/Proxy";
-import {Tooltip} from "@blueprintjs/core";
 import {fetchUserKeytab, deleteKeytab, testKeytab, saveLocalKerberos} from "../actions/user.actions";
 import {Keytab} from "../../Proxy/Proxy";
 
