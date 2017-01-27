@@ -79,11 +79,11 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
     });
   };
 
-  onDeleteKeytab = (id) => {
+  onDeleteKeytab = (id: number) => {
     this.props.deleteKeytab(id);
   };
-  onTestConfigClicked = (id) => {
-    this.props.testKeytab(id);
+  onTestConfigClicked = () => {
+    this.props.testKeytab(this.props.globalKeytab.id);
   };
   onNewKeytabSelected = (e) => {
     this.setState({
@@ -131,7 +131,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
-                {this.props.globalKeytab ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
+                {this.props.globalKeytab ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
                 <p>
                   <label className="pt-file-upload">
                     <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
