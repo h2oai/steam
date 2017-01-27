@@ -22,7 +22,7 @@ import './styles/user.scss';
 import PageHeader from '../Projects/components/PageHeader';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import ClusterAuthentication from "./components/ClusterAuthentication";
+import UserKerberos from "./components/UserKerberos";
 
 
 interface Props {
@@ -53,7 +53,7 @@ export class User extends React.Component<Props & DispatchProps, any> {
       label: 'KERBEROS',
       isSelected: true,
       onClick: this.clickHandler.bind(this),
-      component: <ClusterAuthentication />
+      component: <UserKerberos />
     };
     return tabs;
   }
@@ -78,7 +78,7 @@ export class User extends React.Component<Props & DispatchProps, any> {
         <div className="panel-container">
           <TabNavigation tabs={this.state.tabs}/>
           {this.state.tabs.user && this.state.tabs.user.isSelected ?
-            <ClusterAuthentication /> : null}
+            <UserKerberos /> : null}
         </div>
       </div>
     );
