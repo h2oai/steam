@@ -106,7 +106,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
 
                 </td>
             </tr>
-            {this.state.kerberosEnabledValue ? <tr>
+            {this.props.config && this.props.config.kerberos_enabled ? <tr>
               <td className="auth-left">STEAM PRINCIPLE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>This is the kerberos principle used for steam monitoring and management</div>}>
                 <i className="fa fa-question-circle-o" aria-hidden="true"></i>
               </Tooltip></td>
@@ -118,7 +118,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
                 ></input>
               </td>
             </tr> : null }
-            {this.state.steamPrincipleValue !== "" && this.state.kerberosEnabledValue ? <tr>
+            {this.state.steamPrincipleValue !== "" && this.props.config && this.props.config.kerberos_enabled ? <tr>
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
