@@ -808,3 +808,12 @@ func ByPrivilege(pz az.Principal) QueryOpt {
 		return nil
 	}
 }
+
+func WithSelfView(q *QueryConfig) (err error) {
+	q.AddPostFunc(func(c *QueryConfig) error {
+		workgroupId := c.fields["workgroup_id"].(int64)
+		_, err := createPrivilege(c.tx, View, c.entityId, workgroupId, EntityTypes.Identity, c.entityId)
+		return errors.Wrap(err, "WithSelfView: creating privilege")
+	})
+	return
+}

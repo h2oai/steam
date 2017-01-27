@@ -225,8 +225,20 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	if _, err := os.Stat(fs.GetAssetsPath(s.workingDir, "cert.pem")); os.IsNotExist(err) {
 		return 0, errors.New("SSL \"" + fs.GetAssetsPath(s.workingDir, "cert.pem") + "\" cert file does not exist")
 	}
-	// FIXME implement keytab generation on the fly
-	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
+	// Get UID and GID for impersonation
+	uid, gid, err := getUser(pz.Name())
+	if err != nil {
+		return 0, errors.Wrap(err, "get user")
+	}
+	// Write keytab if not exists already
+	kt, err := s.viewKeytab(pz)
+	if err != nil {
+		return 0, errors.Wrap(err, "viewing keytab")
+	}
+	keytabPath, err := kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
+	if err != nil {
+		return 0, errors.Wrap(err, "writing keytab file")
+	}
 	// Start cluster in yarn
 	appId, address, out, token, contextPath, err := yarn.StartCloud(size, s.kerberosEnabled, memory,
 		clusterName, engine.Location, identity.Name, keytabPath, secure)
@@ -1594,7 +1606,7 @@ func (s *Service) CreateIdentity(pz az.Principal, name string, password string) 
 	}
 	// Create identity
 	id, err := s.ds.CreateIdentity(name, data.WithPassword(hash), data.WithDefaultIdentityWorkgroup,
-		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz), data.WithSelfView,
 	)
 	return id, errors.Wrap(err, "creating identity in database")
 }
@@ -2396,6 +2408,27 @@ func (s *Service) GetSteamKeytab(pz az.Principal) (*web.Keytab, bool, error) {
 	return toKeytab(keytab), exists, nil
 }
 
+func (s *Service) viewKeytab(pz az.Principal) (data.Keytab, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
+		return data.Keytab{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return data.Keytab{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	if err != nil {
+		return data.Keytab{}, errors.Wrap(err, "reading keytab from database")
+	} else if !exists {
+		return data.Keytab{}, errors.New("unable to locate keytab for user")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+		return data.Keytab{}, errors.Wrap(err, "checking view privileges")
+	}
+	return keytab, nil
+}
+
 func (s *Service) GetUserKeytab(pz az.Principal) (*web.Keytab, bool, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
@@ -2408,9 +2441,10 @@ func (s *Service) GetUserKeytab(pz az.Principal) (*web.Keytab, bool, error) {
 	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
 	if err != nil {
 		return nil, false, errors.Wrap(err, "reading keytab from database")
-	}
-	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
-		return nil, false, errors.Wrap(err, "checking view privileges")
+	} else if exists {
+		if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+			return nil, false, errors.Wrap(err, "checking view privileges")
+		}
 	}
 	return toKeytab(keytab), exists, nil
 }

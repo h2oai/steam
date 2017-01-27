@@ -33,29 +33,9 @@ import (
 	"time"
 
 	"github.com/h2oai/steam/lib/haproxy"
+	"github.com/h2oai/steam/lib/kerberos"
 	"github.com/pkg/errors"
 )
-
-func kInit(username, keytab string, uid, gid uint32) error {
-	// Run 'klist -s' as user. If this returns with a 1 exit value, then there is no readable
-	// credential cache, otherwise it exists as 0
-	clist := exec.Command("klist", username, "-s")
-	clist.SysProcAttr = &syscall.SysProcAttr{}
-	clist.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
-	if err := clist.Run(); err != nil {
-		cmd := exec.Command("kinit", username, "-k", "-t", keytab)
-		cmd.SysProcAttr = &syscall.SysProcAttr{}
-		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
-
-		if out, err := cmd.CombinedOutput(); err != nil {
-			return errors.Wrapf(err, "failed executing kinit: %v", string(out))
-		}
-
-		return nil
-	}
-
-	return nil
-}
 
 func randStr(strlen int) string {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -183,20 +163,12 @@ func yarnCommand(uid, gid uint32, name, username string, args ...string) (string
 // StartCloud starts a yarn cloud by shelling out to hadoop
 //
 // This process needs to store the job-ID to kill the process in the future
-func StartCloud(size int, kerberos bool, mem, name, enginePath, username, keytab string, secure bool) (string, string, string, string, string, error) {
-	// Get user information for Kerberos and Yarn reasons
-	uid, gid, err := GetUser(username)
-	if err != nil {
-		return "", "", "", "", "", errors.Wrap(err, "failed getting user")
-	}
-
-	// If kerberos enabled, initialize and defer destroy
-	if kerberos {
-		if err := kInit(username, keytab, uid, gid); err != nil {
-			return "", "", "", "", "", errors.Wrap(err, "failed initializing kerberos")
+func StartCloud(size int, kEnable bool, mem, name, enginePath, username, keytab string, secure bool, uid, gid uint32) (string, string, string, string, string, error) {
+	if kEnable {
+		if err := kerberos.Kinit(keytab, username, uid, gid); err != nil {
+			return "", "", "", "", "", errors.Wrap(err, "initializing kerberos")
 		}
 	}
-
 	// Randomize outfile name
 	out := "steam-output/" + name + "_" + randStr(5) + "_out"
 
@@ -262,16 +234,11 @@ func contextPathEnabledEngine(enginePath string, uid, gid uint32) (bool, error) 
 }
 
 // StopCloud kills a hadoop cloud by shelling out a command based on the job-ID
-func StopCloud(kerberos bool, name, id, outdir, username, keytab string) error {
-	uid, gid, err := GetUser(username)
-	if err != nil {
-		return errors.Wrap(err, "failed getting user")
-	}
-
+func StopCloud(kEnable bool, name, id, outdir, username, keytab string, uid, gid uint32) error {
 	// If kerberos enabled, initialize and defer destroy
-	if kerberos {
-		if err := kInit(username, keytab, uid, gid); err != nil {
-			return errors.Wrap(err, "failed initializing kerberos")
+	if kEnable {
+		if err := kerberos.Kinit(keytab, username, uid, gid); err != nil {
+			return errors.Wrap(err, "initializing kerberos")
 		}
 	}
 
