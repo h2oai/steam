@@ -56,8 +56,8 @@ export class UserKerberos extends React.Component<Props & DispatchProps, any> {
   onDeleteKeytab = (id) => {
     this.props.deleteKeytab(id);
   };
-  onTestConfigClicked = (id) => {
-    this.props.testKeytab(id);
+  onTestConfigClicked = () => {
+    this.props.testKeytab(this.props.userKeytab.id);
   };
   onNewKeytabSelected = (e) => {
     this.setState({
@@ -76,7 +76,7 @@ export class UserKerberos extends React.Component<Props & DispatchProps, any> {
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>Your principle keytab</p>
-                {this.props.userKeytab ? <p>{this.props.userKeytab.name} &nbsp; <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.userKeytab.id)}></i></p>
+                {this.props.userKeytab ? <p>{this.props.userKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.userKeytab.id)}></i></p>
                   : <p>
                     <label className="pt-file-upload">
                       <input ref="keytab" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />

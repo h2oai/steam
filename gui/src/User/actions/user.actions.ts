@@ -93,7 +93,7 @@ export function receiveSaveLocalKerberos() {
 };
 
 export function fetchUserKeytab() {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     dispatch(requestUserKeytab());
     Remote.getUserKeytab((error: Error, keytab: Keytab, exists: boolean) => {
       dispatch(receiveUserKeytab(keytab, exists));
@@ -143,6 +143,7 @@ export function saveLocalKerberos(file) {
       if (response.status === 200) {
         dispatch(openNotification(NotificationType.Confirm, "Success", 'Keytab uploaded', null));
         dispatch(receiveSaveLocalKerberos());
+        fetchUserKeytab()(dispatch);
       } else {
         dispatch(openNotification(NotificationType.Error, "Error", response.statusText, null));
       }
