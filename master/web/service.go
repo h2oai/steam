@@ -2473,18 +2473,27 @@ func (s *Service) TestKeytab(pz az.Principal, keytabId int64) error {
 		return errors.Wrap(err, "checking owns privileges")
 	}
 	// Read Keytab
-	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	keytab, exists, err := s.ds.ReadKeytab(data.ById(keytabId))
 	if err != nil {
 		return errors.Wrap(err, "reading keytab from database")
 	} else if !exists {
-		return fmt.Errorf("cannot locate keytab for user %s", pz.Name())
+		return errors.New("cannot locate keytab")
 	}
-	// Verify privileges
-	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
-		return errors.Wrap(err, "checking view privileges")
+	var uid, gid uint32
+	// Final privileges must be handled differently if a steam/user keytab
+	if keytab.Principal.Valid { // Is the steam keytab
+		if !pz.IsAdmin() {
+			return errors.New("user is not a valid admin")
+		}
+		// Get user uid and gid for impersonation of execs
+		uid, gid, err = getUser(keytab.Principal.String)
+	} else {
+		if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytabId); err != nil {
+			return errors.Wrap(err, "checking view privileges")
+		}
+		// Get user uid and gid for impersonation of execs
+		uid, gid, err = getUser(pz.Name())
 	}
-	// Get user uid and gid for impersonation of execs
-	uid, gid, err := getUser(pz.Name())
 	if err != nil {
 		return errors.Wrap(err, "get user")
 	}
@@ -2506,18 +2515,18 @@ func (s *Service) DeleteKeytab(pz az.Principal, keytabId int64) error {
 		return errors.Wrap(err, "checking owns privileges")
 	}
 	// Read Keytab
-	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	keytab, exists, err := s.ds.ReadKeytab(data.ById(keytabId))
 	if err != nil {
 		return errors.Wrap(err, "reading keytab from database")
 	} else if !exists {
-		return fmt.Errorf("cannot locate keytab for user %s", pz.Name())
+		return errors.New("cannot locate keytab")
 	}
-	// Verify privileges
+	// Final privileges must be handled differently if a steam/user keytab
 	if keytab.Principal.Valid { // Is the steam keytab
 		if !pz.IsAdmin() {
 			return errors.New("user is not a valid admin")
 		}
-	} else if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+	} else if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytabId); err != nil {
 		return errors.Wrap(err, "checking view privileges")
 	}
 	// Delete local Keytab
@@ -2525,7 +2534,7 @@ func (s *Service) DeleteKeytab(pz az.Principal, keytabId int64) error {
 		return errors.Wrap(err, "deleting local keytab")
 	}
 	// Delete Keytab
-	return s.ds.DeleteKeytab(keytab.Id)
+	return s.ds.DeleteKeytab(keytabId)
 }
 
 func ViewGlobalKerberos(ds *data.Datastore) (bool, error) {
