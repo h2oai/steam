@@ -60,6 +60,11 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
   componentWillMount() {
     FocusStyleManager.onlyShowFocusOnTabs();
     this.props.getConfig();
+    if (this.props.globalKeytab) {
+      this.setState({
+        steamPrincipleValue: this.props.globalKeytab.principal
+      });
+    }
   }
 
   componentWillReceiveProps = (nextProps) => {
@@ -122,7 +127,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
-                {this.props.globalKeytab ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
+                {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
                 <p>
                   <label className="pt-file-upload">
                     <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
@@ -134,7 +139,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
           </tbody>
         </table>
 
-        {this.props.globalKeytab ? <div id="actionButtonsContainer" className="space-20">
+        {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled  ? <div id="actionButtonsContainer" className="space-20">
             <div>
               <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
             </div>
