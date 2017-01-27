@@ -1,7 +1,9 @@
 Users
 =====
 
-The Users page includes a list of all users are have been added to the Steam database along with the user's role. From this page, Steam admins can add, edit, and deactivate users and roles.
+The Users page includes a list of all users are have been added to the Steam database along with the user's role. From this page, Steam Admins can add, edit, and deactivate users and roles.
+
+**Note**: Only Admins have access to the **Users** page. 
 
 .. figure:: images/users.png
    :alt: Users page
@@ -14,6 +16,13 @@ The Roles tab provides a table of the permissions assigned to each role. The inf
    :alt: Roles tab
 
    Roles tab
+
+The Authentication tab allows you to connect Steam to your current user database.
+
+.. figure:: images/ldap_authentication_config.png
+   :alt: Autnetication tab
+
+   Authentication tab
 
 Creating Roles
 --------------
