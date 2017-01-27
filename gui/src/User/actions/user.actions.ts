@@ -23,6 +23,7 @@ import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/P
 import { getConfig } from '../../Clusters/actions/clusters.actions';
 import { LdapGroup } from "../../Proxy/Proxy";
 import {Keytab} from "../../Proxy/Proxy";
+import {fetchGlobalKeytab} from "../../Users/actions/users.actions";
 
 export const REQUEST_USER_KEYTAB = 'REQUEST_USER_KEYTAB';
 export const RECEIVE_USER_KEYTAB = 'RECEIVE_USER_KEYTAB';
@@ -101,7 +102,7 @@ export function fetchUserKeytab() {
   };
 };
 
-export function deleteKeytab(keytabId: number) {
+export function deleteKeytab(keytabId: number, global: boolean) {
   return (dispatch, getState) => {
     dispatch(requestDeleteKeytab());
     Remote.deleteKeytab(keytabId, (error: Error) => {
@@ -111,6 +112,11 @@ export function deleteKeytab(keytabId: number) {
       }
       dispatch(openNotification(NotificationType.Info, "Update", "Keytab Deleted", null));
       dispatch(receiveDeleteKeytab());
+      if (global) {
+        fetchGlobalKeytab()(dispatch);
+      } else {
+        fetchUserKeytab()(dispatch);
+      }
     });
   };
 }
@@ -141,7 +147,7 @@ export function saveLocalKerberos(file) {
       body: data
     }).then((response) => {
       if (response.status === 200) {
-        dispatch(openNotification(NotificationType.Confirm, "Success", 'Keytab uploaded', null));
+        dispatch(openNotification(NotificationType.Confirm, "Success", 'User keytab uploaded', null));
         dispatch(receiveSaveLocalKerberos());
         fetchUserKeytab()(dispatch);
       } else {

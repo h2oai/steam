@@ -1054,9 +1054,9 @@ export function saveGlobalKerberos(file, principle) {
       body: data
     }).then((response) => {
       if (response.status === 200) {
-        dispatch(openNotification(NotificationType.Confirm, "Success", 'Keytab uploaded', null));
+        dispatch(openNotification(NotificationType.Confirm, "Success", 'Global Keytab uploaded', null));
         dispatch(receiveSaveGlobalKerberos());
-        fetchGlobalKeytab()(dispatch);
+        console.log(fetchGlobalKeytab()(dispatch));
       } else {
         dispatch(openNotification(NotificationType.Error, "Error", response.statusText, null));
       }
@@ -1064,7 +1064,7 @@ export function saveGlobalKerberos(file, principle) {
   };
 }
 
-export function setGlobalKerberosEnabled(isEnabled:boolean) {
+export function setGlobalKerberosEnabled(isEnabled: boolean) {
   return (dispatch, getState) => {
     dispatch(requestSetGlobalKerberosEnabled());
     Remote.setGlobalKerberos(isEnabled, (error: Error) => {
@@ -1072,7 +1072,8 @@ export function setGlobalKerberosEnabled(isEnabled:boolean) {
         dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
         return;
       }
+      dispatch(receiveSetGlobalKerberosEnabled());
       getConfig()(dispatch);
     });
-  }
+  };
 }

@@ -76,7 +76,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
   };
 
   onDeleteKeytab = (id: number) => {
-    this.props.deleteKeytab(id);
+    this.props.deleteKeytab(id, true);
   };
   onTestConfigClicked = () => {
     this.props.testKeytab(this.props.globalKeytab.id);

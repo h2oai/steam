@@ -54,7 +54,7 @@ export class UserKerberos extends React.Component<Props & DispatchProps, any> {
   }
 
   onDeleteKeytab = (id) => {
-    this.props.deleteKeytab(id);
+    this.props.deleteKeytab(id, false);
   };
   onTestConfigClicked = () => {
     this.props.testKeytab(this.props.userKeytab.id);

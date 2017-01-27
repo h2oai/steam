@@ -184,7 +184,7 @@ export class Navigation extends React.Component<Props & DispatchProps, any> {
       case "configurations" :
         return hasPermissionToShow("ViewIdentity", this.props.config, this.props.isAdmin);
       case "user" :
-        if (this.props.config) {
+        if (this.props.config && hasPermissionToShow("ManageKeytab", this.props.config, this.props.isAdmin)) {
           return this.props.config.kerberos_enabled;
         }
         return false;
