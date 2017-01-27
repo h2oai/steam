@@ -10,6 +10,7 @@ import string
 import json
 import sys
 import logging
+import ssl
 from collections import namedtuple
 
 class RPCError(Exception):
@@ -19,11 +20,12 @@ class RPCError(Exception):
 		return repr(self.value)
 
 class HTTPConnection:
-	def __init__(self, host, port, username, password):
+	def __init__(self, host, port, username, password, verify_ssl=True):
 		self.host = host
 		self.port = port
 		self.username = username
 		self.password = password
+		self.verify_ssl = verify_ssl
 		self.uid = 0
 
 	def call(self, method, params):
@@ -34,8 +36,9 @@ class HTTPConnection:
 			'params': [params]
 		}
 		payload = json.dumps(request)
-
-		ws = httplib.HTTP(self.host, self.port)
+		ssl._https_verify_certificates(self.verify_ssl)
+		ws = httplib.HTTPS(self.host, self.port)
+		
 		ws.putrequest("POST", '/web')
 
 		ws.putheader("Host", self.host)
@@ -78,9 +81,24 @@ class View(object):
 	def __str__(self):
 		return json.dumps(self.__dict__)
 
-class RPCClient:
+def connect(host, port, username, passw, verify_ssl=True):
+	steamconn = SteamConnection(HTTPConnection(host, port, username, passw, verify_ssl))
+	return steamconn
+
+class SteamConnection:
 	def __init__(self, connection):
 		self.connection = connection
+		
+	def get_cluster_connection(self, clid):
+		proxconf = self.get_config()
+		cluster = self.get_cluster(clid)
+		cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
+		conf = {'https':True, 'verify_ssl_certificates':self.connection.verify_ssl, \
+			'port': int(cport), \
+			'context_path':'%s_%s' % (proxconf['username'], cluster['name']), \
+			'cookies':["%s=%s" % (cluster['name'], cluster['token'])], \
+			'ip':self.connection.host}
+		return conf
 	
 	{{with .Facade}}
 	{{range .Methods}}
