@@ -32,7 +32,7 @@ import UserAuthentication from "./components/UserAuthentication";
 import {hasPermissionToShow} from "../App/utils/permissions";
 import {fetchConfig} from "../Clusters/actions/clusters.actions";
 import {fetchIsAdmin} from "../App/actions/global.actions";
-import ClusterAuthentication from "./components/ClusterAuthentication";
+import GlobalKerberos from "./components/GlobalKerberos";
 
 
 interface Props {
@@ -107,7 +107,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
         label: 'GLOBAL KERBEROS',
         isSelected: false,
         onClick: this.clickHandler.bind(this),
-        component: <ClusterAuthentication />
+        component: <GlobalKerberos />
       };
     }
     return tabs;
@@ -181,7 +181,7 @@ export class Users extends React.Component<Props & DispatchProps, any> {
             {this.state.tabs.authentication && this.state.tabs.authentication.isSelected ?
               <UserAuthentication onCreateRoleClicked={this.onCreateRoleClicked.bind(this)} onManageRoleClicked={() => this.clickHandler(this.state.tabs.roles)} /> : null}
             {this.state.tabs.cluster_authentication && this.state.tabs.cluster_authentication.isSelected ?
-              <ClusterAuthentication /> : null}
+              <GlobalKerberos /> : null}
           </div>
         </div>
       );

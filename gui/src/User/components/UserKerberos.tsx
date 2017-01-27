@@ -36,7 +36,7 @@ interface DispatchProps {
   saveLocalKerberos: Function
 }
 
-export class ClusterAuthentication extends React.Component<Props & DispatchProps, any> {
+export class UserKerberos extends React.Component<Props & DispatchProps, any> {
 
   refs: {
     [key: string]: (Element);
@@ -116,4 +116,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(ClusterAuthentication);
+export default connect<any, DispatchProps, any>(mapStateToProps, mapDispatchToProps)(UserKerberos);
