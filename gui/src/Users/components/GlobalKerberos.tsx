@@ -21,7 +21,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
 import { } from "../../Proxy/Proxy";
-import {Tooltip} from "@blueprintjs/core";
+import {Tooltip, FocusStyleManager} from "@blueprintjs/core";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
 import {Config} from "../../Proxy/Proxy";
 import {saveGlobalKerberos, fetchGlobalKeytab, setGlobalKerberosEnabled} from "../actions/users.actions";
@@ -58,6 +58,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
   }
 
   componentWillMount() {
+    FocusStyleManager.onlyShowFocusOnTabs();
     this.props.getConfig();
   }
 
@@ -79,11 +80,11 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
     });
   };
 
-  onDeleteKeytab = (id) => {
+  onDeleteKeytab = (id: number) => {
     this.props.deleteKeytab(id);
   };
-  onTestConfigClicked = (id) => {
-    this.props.testKeytab(id);
+  onTestConfigClicked = () => {
+    this.props.testKeytab(this.props.globalKeytab.id);
   };
   onNewKeytabSelected = (e) => {
     this.setState({
@@ -131,7 +132,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
-                {this.props.globalKeytab ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
+                {this.props.globalKeytab ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
                 <p>
                   <label className="pt-file-upload">
                     <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
@@ -156,7 +157,8 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
 
 function mapStateToProps(state) {
   return {
-    config: state.clusters.config
+    config: state.clusters.config,
+    globalKeytab: state.users.globalKeytab
   };
 }
 
