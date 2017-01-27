@@ -103,10 +103,10 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               <td>
                 <label className="pt-control pt-switch .modifier">
                   <input type="checkbox"
-                         checked={this.props.config.kerberos_enabled}
+                         checked={this.props.config ? this.props.config.kerberos_enabled : false}
                          onChange={
                            (e: any) => {
-                              this.props.setGlobalKerberosEnabled(!this.props.config.kerberos_enabled);
+                              this.props.setGlobalKerberosEnabled(this.props.config ? !this.props.config.kerberos_enabled : true);
                             }
                           }
                   />
@@ -156,6 +156,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
 
 function mapStateToProps(state) {
   return {
+    config: state.clusters.config
   };
 }
 

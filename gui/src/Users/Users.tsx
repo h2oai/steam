@@ -194,7 +194,7 @@ function mapStateToProps(state: any): any {
     createNewUserIsEntered: state.users.createNewUserIsEntered,
     createNewRoleIsEntered: state.users.createNewRoleIsEntered,
     isAdmin: state.global.isAdmin,
-    config: state.clusters.config,
+    config: state.clusters.config
   };
 }
 
