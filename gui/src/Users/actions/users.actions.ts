@@ -68,12 +68,28 @@ export const RECEIVE_ADMIN_CHECK = 'RECEIVE_ADMIN_CHECK';
 export const REQUEST_SET_LOCAL_CONFIG = 'REQUEST_SET_LOCAL_CONFIG';
 export const RECEIVE_SET_LOCAL_CONFIG = 'RECEIVE_SET_LOCAL_CONFIG';
 export const REQUEST_CLEAR_TEST_LDAP = 'REQUEST_CLEAR_TEST_LDAP';
+export const REQUEST_SAVE_GLOBAL_KERBEROS = 'REQUEST_SAVE_GLOBAL_KERBEROS';
+export const RECEIVE_SAVE_GLOBAL_KERBEROS = 'RECEIVE_SAVE_GLOBAL_KERBEROS';
 
 export interface LdapTestResult {
   count: number,
   groups: LdapGroup[]
 }
 
+export function requestSaveGlobalKerberos() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_SAVE_GLOBAL_KERBEROS
+    });
+  };
+};
+export function receiveSaveGlobalKerberos() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_SAVE_GLOBAL_KERBEROS
+    });
+  };
+};
 export function requestClearTestLdap() {
   return (dispatch) => {
     dispatch({
@@ -953,6 +969,7 @@ export function testLdapConfig(ldapConfig: LdapConfig) {
     Remote.testLdapConfig(ldapConfig, (error: Error, count: number, groups: LdapGroup[]) => {
       if (error) {
         dispatch(openNotification(NotificationType.Error, "LDAP", error.toString(), null));
+        dispatch(requestClearTestLdap());
       } else {
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
         dispatch(receiveTestLdap({count, groups}));
@@ -974,5 +991,27 @@ export function setLocalConfig() {
       dispatch(getConfig());
       dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Removed", null));
     });
+  };
+}
+
+export function saveGlobalKerberos(file) {
+  return (dispatch, getState) => {
+    dispatch(requestSaveGlobalKerberos());
+    dispatch(openNotification(NotificationType.Info, "Update", 'Uploading keytab...', null));
+    let data = new FormData();
+    data.append('file', file.files[0]);
+    fetch(`/upload?type=keytab`, {
+      credentials: 'include',
+      method: 'post',
+      body: data
+    }).then((response) => {
+      if (response.status === 200) {
+        dispatch(openNotification(NotificationType.Confirm, "Success", 'Keytab uploaded', null));
+        dispatch(receiveSaveGlobalKerberos());
+      } else {
+        dispatch(openNotification(NotificationType.Error, "Error", response.statusText, null));
+      }
+    });
+
   };
 }

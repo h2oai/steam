@@ -32,6 +32,7 @@ import UserAuthentication from "./components/UserAuthentication";
 import {hasPermissionToShow} from "../App/utils/permissions";
 import {fetchConfig} from "../Clusters/actions/clusters.actions";
 import {fetchIsAdmin} from "../App/actions/global.actions";
+import ClusterAuthentication from "./components/ClusterAuthentication";
 
 
 interface Props {
@@ -97,10 +98,16 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     }
     if (props.isAdmin) {
       tabs["authentication"] = {
-        label: 'AUTHENTICATION',
+        label: 'USER AUTHENTICATION',
         isSelected: false,
         onClick: this.clickHandler.bind(this),
         component: <UserAuthentication />
+      };
+      tabs["cluster_authentication"] = {
+        label: 'CLUSTER AUTHENTICATION',
+        isSelected: false,
+        onClick: this.clickHandler.bind(this),
+        component: <ClusterAuthentication />
       };
     }
     return tabs;
@@ -157,21 +164,24 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     } else {
       return (
         <div className="users">
-          <PageHeader>USERS & ROLES
+          <PageHeader>Configurations (Steam Global)
             <div className="header-buttons">
               <div className="button-primary" onClick={this.onCreateUserClicked.bind(this)}>Create User</div>
               <div className="button-primary" onClick={this.onCreateRoleClicked.bind(this)}>Create Role</div>
             </div>
           </PageHeader>
+          <p>All settings on this page affect the Steam installation globally for administrators. All users on Steam can potentially be affected. Please be careful and consult support if you are unsure about the implications of updating these settings.</p>
 
           <div className="panel-container">
             <TabNavigation tabs={this.state.tabs}/>
-            {this.state.tabs.users && this.state.tabs.users.isSelected === true ?
+            {this.state.tabs.users && this.state.tabs.users.isSelected ?
               <UserAccess /> : null}
-            {this.state.tabs.roles && this.state.tabs.roles.isSelected === true ?
+            {this.state.tabs.roles && this.state.tabs.roles.isSelected ?
               <RolePermissions /> : null}
-            {this.state.tabs.authentication && this.state.tabs.authentication.isSelected === true ?
+            {this.state.tabs.authentication && this.state.tabs.authentication.isSelected ?
               <UserAuthentication onCreateRoleClicked={this.onCreateRoleClicked.bind(this)} onManageRoleClicked={() => this.clickHandler(this.state.tabs.roles)} /> : null}
+            {this.state.tabs.cluster_authentication && this.state.tabs.cluster_authentication.isSelected ?
+              <ClusterAuthentication /> : null}
           </div>
         </div>
       );
