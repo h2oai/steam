@@ -470,23 +470,23 @@ func ScanKeytabs(rs *sql.Rows) ([]Keytab, error) {
 	return structs, nil
 }
 
-func ScanMeta(r *sql.Row) (meta, error) {
-	var s meta
+func ScanMeta(r *sql.Row) (Meta, error) {
+	var s Meta
 	if err := r.Scan(
 		&s.Id,
 		&s.Key,
 		&s.Value,
 	); err != nil {
-		return meta{}, err
+		return Meta{}, err
 	}
 	return s, nil
 }
 
-func ScanMetas(rs *sql.Rows) ([]meta, error) {
-	structs := make([]meta, 0, 16)
+func ScanMetas(rs *sql.Rows) ([]Meta, error) {
+	structs := make([]Meta, 0, 16)
 	var err error
 	for rs.Next() {
-		var s meta
+		var s Meta
 		if err = rs.Scan(
 			&s.Id,
 			&s.Key,

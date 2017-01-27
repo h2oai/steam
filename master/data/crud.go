@@ -3868,10 +3868,216 @@ func deleteKeytab(tx *goqu.TxDatabase, keytabId int64, options ...QueryOpt) erro
 
 // ---------- ---- ----------
 // ---------- ---- ----------
-// ---------- meta ----------
+// ---------- Meta ----------
 // ---------- ---- ----------
 // ---------- ---- ----------
 
+func (ds *Datastore) CreateMeta(key string, options ...QueryOpt) (int64, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return 0, errors.Wrap(err, "beginning transaction")
+	}
+
+	var id int64
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, CreateOp, "meta", nil)
+		// Default insert fields
+		meta := goqu.Record{
+			"key": key,
+		}
+		q.AddFields(meta)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgGreen)
+			log.Println(q.dataset.ToInsertSql(q.fields))
+			color.Unset()
+		}
+		// Execute query
+		res, err := q.dataset.Insert(q.fields).Exec()
+		if err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+		id, err = res.LastInsertId()
+		if err != nil {
+			return errors.Wrap(err, "retrieving id")
+		}
+		q.entityId = id
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return id, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) ReadMetas(options ...QueryOpt) ([]Meta, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return []Meta{}, errors.Wrap(err, "beginning transaction")
+	}
+
+	var metas []Meta
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "", "meta", nil)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgBlue)
+			log.Println(q.dataset.ToSql())
+			color.Unset()
+		}
+		// Execute query
+		rows, err := getRows(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		metas, err = ScanMetas(rows)
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return metas, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) ReadMeta(options ...QueryOpt) (Meta, bool, error) {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return Meta{}, false, errors.Wrap(err, "beginning transaction")
+	}
+
+	var meta Meta
+	var exists bool
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, "", "meta", nil)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgBlue)
+			log.Println(q.dataset.ToSql())
+			color.Unset()
+		}
+		// Execute query
+		row, err := getRow(tx, q.dataset)
+		if err != nil {
+			return err
+		}
+		meta, err = ScanMeta(row)
+		if err == sql.ErrNoRows {
+			return nil
+		} else if err == nil {
+			exists = true
+		}
+		if err != nil {
+			return err
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return nil
+	})
+
+	return meta, exists, errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) UpdateMeta(metaId int64, options ...QueryOpt) error {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "beginning transaction")
+	}
+
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, UpdateOp, "meta", metaId)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug && len(q.fields) > 0 {
+			color.Set(color.FgYellow)
+			log.Println(q.dataset.ToUpdateSql(q.fields))
+			color.Unset()
+		}
+		// Execute query
+		if len(q.fields) > 0 {
+			if _, err := q.dataset.Update(q.fields).Exec(); err != nil {
+				return errors.Wrap(err, "executing query")
+			}
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+		return nil
+	})
+
+	return errors.Wrap(err, "committing transaction")
+}
+
+func (ds *Datastore) DeleteMeta(metaId int64, options ...QueryOpt) error {
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "beginning transaction")
+	}
+
+	err = tx.Wrap(func() error {
+		// Setup query with optional parameters
+		q := NewQueryConfig(ds, tx, DeleteOp, "meta", metaId)
+		for _, option := range options {
+			if err := option(q); err != nil {
+				return errors.Wrap(err, "setting up query options")
+			}
+		}
+		if debug {
+			color.Set(color.FgRed)
+			log.Println(q.dataset.ToDeleteSql())
+			color.Unset()
+		}
+		// Execute query
+		if _, err := q.dataset.Delete().Exec(); err != nil {
+			return errors.Wrap(err, "executing query")
+		}
+		for _, post := range q.postFunc {
+			if err := post(q); err != nil {
+				return errors.Wrap(err, "running post functions")
+			}
+		}
+
+		return errors.Wrap(deletePrivilege(tx, ByEntityId(q.entityId), ByEntityType(q.entityType)), "deleting privileges")
+	})
+
+	return errors.Wrap(err, "committing transaction")
+}
 func createMeta(tx *goqu.TxDatabase, key string, options ...QueryOpt) (int64, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, CreateOp, "meta", nil)
@@ -3909,12 +4115,12 @@ func createMeta(tx *goqu.TxDatabase, key string, options ...QueryOpt) (int64, er
 	return id, nil
 }
 
-func readMetas(tx *goqu.TxDatabase, options ...QueryOpt) ([]meta, error) {
+func readMetas(tx *goqu.TxDatabase, options ...QueryOpt) ([]Meta, error) {
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "", "meta", nil)
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return []meta{}, errors.Wrap(err, "setting up query options")
+			return []Meta{}, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if debug {
@@ -3925,30 +4131,30 @@ func readMetas(tx *goqu.TxDatabase, options ...QueryOpt) ([]meta, error) {
 	// Execute query
 	rows, err := getRows(tx, q.dataset)
 	if err != nil {
-		return []meta{}, err
+		return []Meta{}, err
 	}
 	defer rows.Close()
 	metas, err := ScanMetas(rows)
 	if err != nil {
-		return []meta{}, err
+		return []Meta{}, err
 	}
 	for _, post := range q.postFunc {
 		if err := post(q); err != nil {
-			return []meta{}, errors.Wrap(err, "running post functions")
+			return []Meta{}, errors.Wrap(err, "running post functions")
 		}
 	}
 
-	// Scan rows to metas
+	// Scan rows to Metas
 	return metas, nil
 }
 
-func readMeta(tx *goqu.TxDatabase, options ...QueryOpt) (meta, bool, error) {
+func readMeta(tx *goqu.TxDatabase, options ...QueryOpt) (Meta, bool, error) {
 	var exists bool
 	// Setup query with optional parameters
 	q := NewQueryConfig(nil, tx, "", "meta", nil)
 	for _, option := range options {
 		if err := option(q); err != nil {
-			return meta{}, exists, errors.Wrap(err, "setting up query options")
+			return Meta{}, exists, errors.Wrap(err, "setting up query options")
 		}
 	}
 	if debug {
@@ -3959,22 +4165,22 @@ func readMeta(tx *goqu.TxDatabase, options ...QueryOpt) (meta, bool, error) {
 	// Execute query
 	row, err := getRow(tx, q.dataset)
 	if err != nil {
-		return meta{}, false, err
+		return Meta{}, false, err
 	}
 	ret_meta, err := ScanMeta(row)
 	if err == sql.ErrNoRows {
-		return meta{}, false, nil
+		return Meta{}, false, nil
 	} else if err == nil {
 		exists = true
 	} else {
-		return meta{}, false, err
+		return Meta{}, false, err
 	}
 	for _, post := range q.postFunc {
 		if err := post(q); err != nil {
-			return meta{}, false, errors.Wrap(err, "running post functions")
+			return Meta{}, false, errors.Wrap(err, "running post functions")
 		}
 	}
-	// Scan row to meta
+	// Scan row to Meta
 	return ret_meta, exists, nil
 }
 

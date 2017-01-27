@@ -316,6 +316,7 @@ type Workgroup struct {
 type Service struct {
 	PingServer                    PingServer                    `help:"Ping the Steam server"`
 	GetConfig                     GetConfig                     `help:"Get Steam start up configurations"`
+	SetGlobalKerberos             SetGlobalKerberos             `help:"Set this to enable kerberos usage when applicable"`
 	CheckAdmin                    CheckAdmin                    `help:"Check if an identity has admin privileges"`
 	SetLocalConfig                SetLocalConfig                `help:"Set security configuration to local"`
 	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
@@ -452,6 +453,10 @@ type PingServer struct {
 type GetConfig struct {
 	_      int
 	Config Config `help:"An object containing Steam startup configurations"`
+}
+type SetGlobalKerberos struct {
+	Enabled bool `help:"Whether kerberos should be enabled or disabled"`
+	_       int
 }
 type CheckAdmin struct {
 	_       int

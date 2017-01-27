@@ -130,7 +130,7 @@ type Keytab struct {
 	File       []byte         `db:"file,arg"`
 }
 
-type meta struct {
+type Meta struct {
 	Id    int64  `db:"id,pk"`
 	Key   string `db:"key,arg"`
 	Value string `db:"value"`

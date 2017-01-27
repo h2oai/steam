@@ -66,14 +66,16 @@ type clusterDatabase interface {
 }
 
 type Poll struct {
-	ds clusterDatabase
+	ds *data.Datastore
 
 	workingDirectory string
 	started          string
 	failed           string
 }
 
-func StartPoll(ds clusterDatabase, startedState, failedState string) error {
+type viewKerberosFn func(*data.Datastore) (bool, error)
+
+func StartPoll(ds *data.Datastore, startedState, failedState string, viewKerb viewKerberosFn) error {
 	poll := Poll{ds: ds, started: startedState, failed: failedState}
 	cmd := exec.Command("hadoop", "version")
 	if err := cmd.Run(); err != nil {
@@ -83,7 +85,11 @@ func StartPoll(ds clusterDatabase, startedState, failedState string) error {
 
 	t := time.NewTimer(time.Minute)
 	for {
-		if err := poll.pollFunc(); err != nil {
+		kEnable, err := viewKerb(poll.ds)
+		if err != nil {
+			log.Println("POLL", err, "trying withouth kerberos")
+		}
+		if err := poll.pollFunc(kEnable); err != nil {
 			log.Println("Poll ERROR", err)
 		}
 		// Wait for a minute before next poll
@@ -92,24 +98,25 @@ func StartPoll(ds clusterDatabase, startedState, failedState string) error {
 	}
 }
 
-func (p *Poll) pollFunc() error {
+func (p *Poll) pollFunc(kerberosEnabled bool) error {
 	var ktPath, principal string
 	var uid, gid uint32
-	keytab, exists, err := p.ds.ReadKeytab(data.ByPrincipalSteam)
-	if err != nil {
-		return errors.Wrap(err, "reading keytab")
-	} else if exists {
-		principal = keytab.Principal.String
-		uid, gid, err = GetUser(principal)
+	if kerberosEnabled {
+		keytab, exists, err := p.ds.ReadKeytab(data.ByPrincipalSteam)
 		if err != nil {
-			return errors.Wrap(err, "getting user")
-		}
-		ktPath, err = kerberos.WriteKeytab(keytab, p.workingDirectory, int(uid), int(gid))
-		if err != nil {
-			return errors.Wrap(err, "writing keytab")
+			return errors.Wrap(err, "reading keytab")
+		} else if exists {
+			principal = keytab.Principal.String
+			uid, gid, err = GetUser(principal)
+			if err != nil {
+				return errors.Wrap(err, "getting user")
+			}
+			ktPath, err = kerberos.WriteKeytab(keytab, p.workingDirectory, int(uid), int(gid))
+			if err != nil {
+				return errors.Wrap(err, "writing keytab")
+			}
 		}
 	}
-
 	// Retrieve job Ids
 	jobIds, err := jobList(ktPath, principal, uid, gid)
 	if err != nil {

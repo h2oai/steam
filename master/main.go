@@ -183,7 +183,6 @@ func Run(version, buildDate string, opts Opts) {
 		predictionServiceHost,
 		opts.ClusterProxyAddress,
 		opts.PredictionServicePorts,
-		opts.Yarn.KerberosEnabled,
 	)
 	webServiceImpl := &srvweb.Impl{webService, defaultAz}
 
@@ -203,7 +202,9 @@ func Run(version, buildDate string, opts Opts) {
 
 	// --- launch polling job
 	pollFailChan := make(chan error)
-	go func() { pollFailChan <- yarn.StartPoll(ds, data.States.Started, data.States.Stopped) }()
+	go func() {
+		pollFailChan <- yarn.StartPoll(ds, data.States.Started, data.States.Stopped, web.ViewGlobalKerberos)
+	}()
 
 	// --- start web server ---
 

@@ -68,8 +68,12 @@ func NewService(
 	tlsConfig *tls.Config,
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
-	kerberos bool,
 ) *Service {
+	kerberos, err := ViewGlobalKerberos(ds)
+	if err != nil {
+		// FIXME: THIS SHOULD BE HANDLED MORE GRACEFULLY
+		panic(err)
+	}
 	return &Service{
 		version, workingDir,
 		ds,
@@ -2522,6 +2526,38 @@ func (s *Service) DeleteKeytab(pz az.Principal, keytabId int64) error {
 	}
 	// Delete Keytab
 	return s.ds.DeleteKeytab(keytab.Id)
+}
+
+func ViewGlobalKerberos(ds *data.Datastore) (bool, error) {
+	meta, exists, err := ds.ReadMeta(data.ByKey("kerberos"))
+	if err != nil {
+		return false, errors.Wrap(err, "reading meta table")
+	} else if !exists {
+		return false, nil
+	}
+	return strconv.ParseBool(meta.Value)
+}
+
+func (s *Service) SetGlobalKerberos(pz az.Principal, enabled bool) error {
+	// Check permission (only admin)
+	if !pz.IsAdmin() {
+		return errors.New("user is not an admin")
+	}
+
+	meta, exists, err := s.ds.ReadMeta(data.ByKey("kerberos"))
+	if err != nil {
+		return errors.Wrap(err, "reading meta table")
+	} else if exists {
+		if err := s.ds.UpdateMeta(meta.Id, data.WithValue(strconv.FormatBool(enabled))); err != nil {
+			errors.Wrap(err, "updating kerberos value")
+		}
+	} else {
+		if _, err := s.ds.CreateMeta("kerberos", data.WithValue(strconv.FormatBool(enabled))); err != nil {
+			errors.Wrap(err, "creating kerberos value")
+		}
+	}
+	s.kerberosEnabled = enabled
+	return nil
 }
 
 // --- ---------- ---
