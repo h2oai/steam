@@ -17,11 +17,30 @@
 
 import * as _ from 'lodash';
 import {} from '../actions/user.actions';
+import {RECEIVE_USER_KEYTAB} from "../actions/user.actions";
 
 
 let initialState = {
+  userKeytab: null
 };
 
-export const usersReducer = (state: any = initialState, action: any) => {
-
+export const userReducer = (state: any = initialState, action: any) => {
+  switch (action.type) {
+    case RECEIVE_USER_KEYTAB : {
+      if (action.exists) {
+        return _.assign({}, state, {
+            userKeytab: action.keytab
+          }
+        );
+      } else {
+        return _.assign({}, state, {
+            userKeytab: null
+          }
+        );
+      }
+    }
+    default: {
+      return state;
+    }
+  }
 };

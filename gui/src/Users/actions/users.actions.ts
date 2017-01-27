@@ -22,6 +22,7 @@ import { NotificationType } from '../../App/components/Notification';
 import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
 import { getConfig } from '../../Clusters/actions/clusters.actions';
 import { LdapGroup } from "../../Proxy/Proxy";
+import {Keytab} from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -70,12 +71,30 @@ export const RECEIVE_SET_LOCAL_CONFIG = 'RECEIVE_SET_LOCAL_CONFIG';
 export const REQUEST_CLEAR_TEST_LDAP = 'REQUEST_CLEAR_TEST_LDAP';
 export const REQUEST_SAVE_GLOBAL_KERBEROS = 'REQUEST_SAVE_GLOBAL_KERBEROS';
 export const RECEIVE_SAVE_GLOBAL_KERBEROS = 'RECEIVE_SAVE_GLOBAL_KERBEROS';
+export const REQUEST_GLOBAL_KEYTAB = 'REQUEST_GLOBAL_KEYTAB';
+export const RECEIVE_GLOBAL_KEYTAB = 'RECEIVE_GLOBAL_KEYTAB';
 
 export interface LdapTestResult {
   count: number,
   groups: LdapGroup[]
 }
 
+export function requestGlobalKeytab() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_GLOBAL_KEYTAB
+    });
+  };
+};
+export function receiveGlobalKeytab(keytab: Keytab, exists: boolean) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_GLOBAL_KEYTAB,
+      keytab,
+      exists
+    });
+  };
+};
 export function requestSaveGlobalKerberos() {
   return (dispatch) => {
     dispatch({
@@ -994,13 +1013,26 @@ export function setLocalConfig() {
   };
 }
 
-export function saveGlobalKerberos(file) {
+export function fetchGlobalKeytab() {
+  return (dispatch) => {
+    dispatch(requestGlobalKeytab());
+    Remote.getSteamKeytab((error: Error, keytab: Keytab, exists: boolean) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
+        return;
+      }
+      dispatch(receiveGlobalKeytab(keytab, exists));
+    });
+  };
+}
+
+export function saveGlobalKerberos(file, principle) {
   return (dispatch, getState) => {
     dispatch(requestSaveGlobalKerberos());
     dispatch(openNotification(NotificationType.Info, "Update", 'Uploading keytab...', null));
     let data = new FormData();
     data.append('file', file.files[0]);
-    fetch(`/upload?type=keytab&principal=steam`, {
+    fetch(`/upload?type=keytab&principal=${principle}`, {
       credentials: 'include',
       method: 'post',
       body: data
@@ -1008,6 +1040,7 @@ export function saveGlobalKerberos(file) {
       if (response.status === 200) {
         dispatch(openNotification(NotificationType.Confirm, "Success", 'Keytab uploaded', null));
         dispatch(receiveSaveGlobalKerberos());
+        fetchGlobalKeytab()(dispatch);
       } else {
         dispatch(openNotification(NotificationType.Error, "Error", response.statusText, null));
       }

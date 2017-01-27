@@ -20,13 +20,19 @@ import * as _ from 'lodash';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/user.scss';
-import { saveLocalKerberos } from "../actions/user.actions";
 import { } from "../../Proxy/Proxy";
 import {Tooltip} from "@blueprintjs/core";
+import {fetchUserKeytab, deleteKeytab, testKeytab, saveLocalKerberos} from "../actions/user.actions";
+import {Keytab} from "../../Proxy/Proxy";
+
 
 interface Props {
+  userKeytab: Keytab
 }
 interface DispatchProps {
+  fetchUserKeytab: Function,
+  deleteKeytab: Function,
+  testKeytab: Function,
   saveLocalKerberos: Function
 }
 
@@ -46,18 +52,20 @@ export class ClusterAuthentication extends React.Component<Props & DispatchProps
   }
 
   componentWillMount() {
+    this.props.fetchUserKeytab();
   }
 
-  onTestConfigClicked = () => {
-
+  onDeleteKeytab = (id) => {
+    this.props.deleteKeytab(id);
   };
-  onSaveConfigClicked = () => {
-    this.props.saveLocalKerberos(this.refs.keytab);
+  onTestConfigClicked = (id) => {
+    this.props.testKeytab(id);
   };
   onNewKeytabSelected = (e) => {
     this.setState({
       uploadText: e.target.value
     });
+    this.props.saveLocalKerberos(this.refs.keytab);
   };
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -70,23 +78,23 @@ export class ClusterAuthentication extends React.Component<Props & DispatchProps
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>Your principle keytab</p>
-                <p>
-                  <label className="pt-file-upload">
-                    <input ref="keytab" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
-                    <span className="pt-file-upload-input">{this.state.uploadText}</span>
-                  </label>
-                </p>
+                {this.props.userKeytab ? <p>{this.props.userKeytab.name} &nbsp; <i className="fa fa-trash" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.userKeytab.id)}></i></p>
+                  : <p>
+                    <label className="pt-file-upload">
+                      <input ref="keytab" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
+                      <span className="pt-file-upload-input">{this.state.uploadText}</span>
+                    </label>
+                  </p> }
               </td>
             </tr>
           </tbody>
         </table>
 
-        <div id="actionButtonsContainer" className="space-20">
+        {this.props.userKeytab ? <div id="actionButtonsContainer" className="space-20">
             <div>
-              <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
-              <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
+              <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
             </div>
-        </div>
+        </div> : null}
 
       </div>
     );
@@ -95,11 +103,15 @@ export class ClusterAuthentication extends React.Component<Props & DispatchProps
 
 function mapStateToProps(state) {
   return {
+    userKeytab: state.user.userKeytab
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    fetchUserKeytab: bindActionCreators(fetchUserKeytab, dispatch),
+    deleteKeytab: bindActionCreators(deleteKeytab, dispatch),
+    testKeytab: bindActionCreators(testKeytab, dispatch),
     saveLocalKerberos: bindActionCreators(saveLocalKerberos, dispatch)
   };
 }

@@ -22,10 +22,61 @@ import { NotificationType } from '../../App/components/Notification';
 import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
 import { getConfig } from '../../Clusters/actions/clusters.actions';
 import { LdapGroup } from "../../Proxy/Proxy";
+import {Keytab} from "../../Proxy/Proxy";
 
+export const REQUEST_USER_KEYTAB = 'REQUEST_USER_KEYTAB';
+export const RECEIVE_USER_KEYTAB = 'RECEIVE_USER_KEYTAB';
+export const REQUEST_TEST_KEYTAB = 'REQUEST_TEST_KEYTAB';
+export const RECEIVE_TEST_KEYTAB = 'RECEIVE_TEST_KEYTAB';
+export const REQUEST_DELETE_KEYTAB = 'REQUEST_DELETE_KEYTAB';
+export const RECEIVE_DELETE_KEYTAB = 'RECEIVE_DELETE_KEYTAB';
 export const REQUEST_SAVE_LOCAL_KERBEROS = 'REQUEST_SAVE_GLOBAL_KERBEROS';
 export const RECEIVE_SAVE_LOCAL_KERBEROS = 'RECEIVE_SAVE_GLOBAL_KERBEROS';
 
+export function requestUserKeytab() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_USER_KEYTAB
+    });
+  };
+};
+export function receiveUserKeytab(keytab: Keytab, exists: boolean) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_USER_KEYTAB,
+      keytab,
+      exists
+    });
+  };
+};
+export function requestTestKeytab() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_TEST_KEYTAB
+    });
+  };
+};
+export function receiveTestKeytab() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_TEST_KEYTAB
+    });
+  };
+};
+export function requestDeleteKeytab() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_DELETE_KEYTAB
+    });
+  };
+};
+export function receiveDeleteKeytab() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_DELETE_KEYTAB
+    });
+  };
+};
 export function requestSaveLocalKerberos() {
   return (dispatch) => {
     dispatch({
@@ -40,6 +91,43 @@ export function receiveSaveLocalKerberos() {
     });
   };
 };
+
+export function fetchUserKeytab() {
+  return (dispatch, getState) => {
+    dispatch(requestUserKeytab());
+    Remote.getUserKeytab((error: Error, keytab: Keytab, exists: boolean) => {
+      dispatch(receiveUserKeytab(keytab, exists));
+    });
+  };
+};
+
+export function deleteKeytab(keytabId: number) {
+  return (dispatch, getState) => {
+    dispatch(requestDeleteKeytab());
+    Remote.deleteKeytab(keytabId, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
+        return;
+      }
+      dispatch(openNotification(NotificationType.Info, "Update", "Keytab Deleted", null));
+      dispatch(receiveDeleteKeytab());
+    });
+  };
+}
+
+export function testKeytab(keytabId: number) {
+  return (dispatch, getstate) => {
+    dispatch(requestTestKeytab());
+    Remote.testKeytab(keytabId, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
+        return;
+      }
+      dispatch(openNotification(NotificationType.Confirm, "Update", "Keytab Valid", null));
+      dispatch(receiveTestKeytab());
+    });
+  };
+}
 
 export function saveLocalKerberos(file) {
   return (dispatch, getState) => {
