@@ -21,12 +21,12 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
 import { } from "../../Proxy/Proxy";
-import {Tooltip, FocusStyleManager} from "@blueprintjs/core";
+import { Tooltip, FocusStyleManager } from "@blueprintjs/core";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
-import {Config} from "../../Proxy/Proxy";
-import {saveGlobalKerberos, fetchGlobalKeytab, setGlobalKerberosEnabled} from "../actions/users.actions";
-import {deleteKeytab, testKeytab} from "../../user/actions/user.actions";
-import {Keytab} from "../../Proxy/Proxy";
+import { Config } from "../../Proxy/Proxy";
+import { saveGlobalKerberos, fetchGlobalKeytab, setGlobalKerberosEnabled } from "../actions/users.actions";
+import { deleteKeytab, testKeytab } from "../../User/actions/user.actions";
+import { Keytab } from "../../Proxy/Proxy";
 
 interface Props {
   config: Config,
@@ -70,7 +70,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
   componentWillReceiveProps = (nextProps) => {
     if (!this.props.globalKeytab && nextProps.globalKeytab) {
       this.setState({
-        steamPrincipleValue : nextProps.globalKeytab.principal
+        steamPrincipleValue: nextProps.globalKeytab.principal
       });
     };
   };
@@ -99,17 +99,17 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               <td>
                 <label className="pt-control pt-switch .modifier">
                   <input type="checkbox"
-                         checked={this.props.config ? this.props.config.kerberos_enabled : false}
-                         onChange={
-                           (e: any) => {
-                              this.props.setGlobalKerberosEnabled(this.props.config ? !this.props.config.kerberos_enabled : true);
-                            }
-                          }
-                  />
+                    checked={this.props.config ? this.props.config.kerberos_enabled : false}
+                    onChange={
+                      (e: any) => {
+                        this.props.setGlobalKerberosEnabled(this.props.config ? !this.props.config.kerberos_enabled : true);
+                      }
+                    }
+                    />
                   <span className="pt-control-indicator"></span>
                 </label>
 
-                </td>
+              </td>
             </tr>
             {this.props.config && this.props.config.kerberos_enabled ? <tr>
               <td className="auth-left">STEAM PRINCIPLE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>This is the kerberos principle used for steam monitoring and management</div>}>
@@ -117,33 +117,33 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               </Tooltip></td>
               <td>
                 <input type="text"
-                       className="pt-input ldap-input "
-                       value={this.state.steamPrincipleValue}
-                       onChange={(e: any) => this.setState({ "steamPrincipleValue": e.target.value })}
-                ></input>
+                  className="pt-input ldap-input "
+                  value={this.state.steamPrincipleValue}
+                  onChange={(e: any) => this.setState({ "steamPrincipleValue": e.target.value })}
+                  ></input>
               </td>
-            </tr> : null }
+            </tr> : null}
             {this.state.steamPrincipleValue !== "" && this.props.config && this.props.config.kerberos_enabled ? <tr>
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
                 {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
-                <p>
-                  <label className="pt-file-upload">
-                    <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
-                    <span className="pt-file-upload-input">{this.state.uploadText}</span>
-                  </label>
-                </p>}
+                  <p>
+                    <label className="pt-file-upload">
+                      <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
+                      <span className="pt-file-upload-input">{this.state.uploadText}</span>
+                    </label>
+                  </p>}
               </td>
-            </tr> : null }
+            </tr> : null}
           </tbody>
         </table>
 
-        {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled  ? <div id="actionButtonsContainer" className="space-20">
-            <div>
-              <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
-            </div>
-        </div> : null }
+        {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <div id="actionButtonsContainer" className="space-20">
+          <div>
+            <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
+          </div>
+        </div> : null}
 
       </div>
     );
