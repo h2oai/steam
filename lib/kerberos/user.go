@@ -27,7 +27,8 @@ func Kinit(keytabFile, principal string, uid, gid uint32) error {
 	// Impersonate to verify that ticket is valid for user
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
-	return errors.Wrap(cmd.Run(), "invalid keytab. Please delete keytab and upload a valid keytab")
+	msg, err := cmd.CombinedOutput()
+	return errors.Wrapf(err, "invalid keytab. Please delete keytab and upload a valid keytab: %s", msg)
 }
 
 // klist is primarily used to verify whether a user has a valid ticket or not
