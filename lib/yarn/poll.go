@@ -75,8 +75,8 @@ type Poll struct {
 
 type viewKerberosFn func(*data.Datastore) (bool, error)
 
-func StartPoll(ds *data.Datastore, startedState, failedState string, viewKerb viewKerberosFn) error {
-	poll := Poll{ds: ds, started: startedState, failed: failedState}
+func StartPoll(ds *data.Datastore, startedState, failedState, workgingDir string, viewKerb viewKerberosFn) error {
+	poll := Poll{ds: ds, started: startedState, failed: failedState, workingDirectory: workgingDir}
 	cmd := exec.Command("hadoop", "version")
 	if err := cmd.Run(); err != nil {
 		log.Println("Hadoop executable not found; Steam will run without polling")

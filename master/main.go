@@ -203,7 +203,7 @@ func Run(version, buildDate string, opts Opts) {
 	// --- launch polling job
 	pollFailChan := make(chan error)
 	go func() {
-		pollFailChan <- yarn.StartPoll(ds, data.States.Started, data.States.Stopped, web.ViewGlobalKerberos)
+		pollFailChan <- yarn.StartPoll(ds, data.States.Started, data.States.Stopped, opts.WorkingDirectory, web.ViewGlobalKerberos)
 	}()
 
 	// --- start web server ---
