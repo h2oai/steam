@@ -20,7 +20,7 @@ import {
   RECEIVE_PERMISSIONS_WITH_ROLES, RECEIVE_ROLE_NAMES, RECEIVE_PROJECTS, RECEIVE_USERS, RECEIVE_SAVE_PERMISSIONS,
   RESET_UPDATES, RECEIVE_USERS_WITH_ROLES_AND_PROJECTS, FILTER_SELECTIONS_CHANGED, ENTER_NEW_ROLE, EXIT_NEW_ROLE,
   ENTER_NEW_USER, EXIT_NEW_USER, RECEIVE_CREATE_ROLE, RECEIVE_WORKGROUPS_FOR_IDENTITY, RECEIVE_LDAP_CONFIG,
-  RECEIVE_ADMIN_CHECK, RECEIVE_TEST_LDAP, REQUEST_CLEAR_TEST_LDAP
+  RECEIVE_ADMIN_CHECK, RECEIVE_TEST_LDAP, REQUEST_CLEAR_TEST_LDAP, REQUEST_TEST_LDAP
 } from '../actions/users.actions';
 
 export const DEFAULT_HOST = "";
@@ -65,7 +65,8 @@ let initialState = {
     force_bind: true
   },
   isAdmin: false,
-  testResult: null
+  testResult: null,
+  requestingTestLdap: false
 };
 
 export const usersReducer = (state: any = initialState, action: any) => {
@@ -76,10 +77,23 @@ export const usersReducer = (state: any = initialState, action: any) => {
         }
       );
     }
-    case RECEIVE_TEST_LDAP : {
+    case REQUEST_TEST_LDAP: {
       return _.assign({}, state, {
-        testResult: action.ldapTestResult
+        requestingTestLdap: true
       });
+    }
+    case RECEIVE_TEST_LDAP : {
+      console.log(action.ldapTestResult);
+      if (action.ldapTestResult && action.ldapTestResult.groups) {
+        return _.assign({}, state, {
+          testResult: action.ldapTestResult,
+          requestingTestLdap: false
+        });
+      } else {
+        return _.assign({}, state, {
+          requestingTestLdap: false
+        });
+      }
     }
     case RECEIVE_ADMIN_CHECK : {
       return _.assign({}, state, {
