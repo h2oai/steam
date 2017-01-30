@@ -952,6 +952,7 @@ export function testLdapConfig(ldapConfig: LdapConfig) {
     dispatch(requestTestLdap());
     Remote.testLdapConfig(ldapConfig, (error: Error, count: number, groups: LdapGroup[]) => {
       if (error) {
+        dispatch(receiveTestLdap({count, groups}));
         dispatch(openNotification(NotificationType.Error, "LDAP", error.toString(), null));
       } else {
         dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
