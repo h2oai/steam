@@ -46,7 +46,7 @@ const (
 	standard_user = "standard user"
 )
 
-var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster", "ViewEngine"}
+var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster", "ViewEngine", "ViewUser", "ManageKeytab", "ViewKeytab"}
 
 type metadata map[string]string
 
