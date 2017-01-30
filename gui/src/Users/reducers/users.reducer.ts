@@ -83,7 +83,6 @@ export const usersReducer = (state: any = initialState, action: any) => {
       });
     }
     case RECEIVE_TEST_LDAP : {
-      console.log(action.ldapTestResult);
       if (action.ldapTestResult && action.ldapTestResult.groups) {
         return _.assign({}, state, {
           testResult: action.ldapTestResult,

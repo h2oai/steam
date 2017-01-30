@@ -1,4 +1,5 @@
 @import '../../variables.scss';
+@import '../../App/styles/app.scss';
 
 .user-access {
   .bulk-select {
@@ -45,4 +46,11 @@
 .auth-left {
   font-weight: bold;
   width: 240px;
+}
+
+.test-config {
+  background: $brand-orange !important;
+  color: $brand-white !important;
+  border: none;
+  line-height: 1.3em;
 }

@@ -551,7 +551,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         <div id="actionButtonsContainer" className="space-20">
           {defaultSelectedDB.toLowerCase() === 'ldap' ?
             <div>
-              <Button className="button-secondary" onClick={this.onTestConfigClicked} loading={this.props.requestingTestLdap}>Test Config</Button> &nbsp;
+              <Button className="test-config button-secondary" onClick={this.onTestConfigClicked} loading={this.props.requestingTestLdap}>Test Config</Button> &nbsp;
               <div className="button-secondary" onClick={this.onResetClicked}>Reset</div> &nbsp;
               <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
             </div>
