@@ -234,13 +234,16 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		return 0, errors.Wrap(err, "get user")
 	}
 	// Write keytab if not exists already
-	kt, err := s.viewKeytab(pz)
-	if err != nil {
-		return 0, errors.Wrap(err, "viewing keytab")
-	}
-	keytabPath, err := kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
-	if err != nil {
-		return 0, errors.Wrap(err, "writing keytab file")
+	var keytabPath string
+	if s.kerberosEnabled {
+		kt, err := s.viewKeytab(pz)
+		if err != nil {
+			return 0, errors.Wrap(err, "viewing keytab")
+		}
+		keytabPath, err = kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
+		if err != nil {
+			return 0, errors.Wrap(err, "writing keytab file")
+		}
 	}
 	// Start cluster in yarn
 	appId, address, out, token, contextPath, err := yarn.StartCloud(size, s.kerberosEnabled, memory,
@@ -301,14 +304,17 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 	if err != nil {
 		return errors.Wrap(err, "get user")
 	}
-	// Write keytab if not exists already
-	kt, err := s.viewKeytab(pz)
-	if err != nil {
-		return errors.Wrap(err, "viewing keytab")
-	}
-	keytabPath, err := kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
-	if err != nil {
-		return errors.Wrap(err, "writing keytab file")
+	var keytabPath string
+	if s.kerberosEnabled {
+		// Write keytab if not exists already
+		kt, err := s.viewKeytab(pz)
+		if err != nil {
+			return errors.Wrap(err, "viewing keytab")
+		}
+		keytabPath, err = kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
+		if err != nil {
+			return errors.Wrap(err, "writing keytab file")
+		}
 	}
 	// Stop clouds
 	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnDetails.ApplicationId,
