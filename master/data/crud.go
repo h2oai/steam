@@ -7,6 +7,8 @@ import (
 	"log"
 	"time"
 
+	"encoding/base64"
+
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"gopkg.in/doug-martin/goqu.v3"
@@ -3503,6 +3505,7 @@ func (ds *Datastore) CreateKeytab(filename string, file []byte, options ...Query
 	if err != nil {
 		return 0, errors.Wrap(err, "beginning transaction")
 	}
+	b := base64.StdEncoding.EncodeToString(file)
 
 	var id int64
 	err = tx.Wrap(func() error {
@@ -3511,7 +3514,7 @@ func (ds *Datastore) CreateKeytab(filename string, file []byte, options ...Query
 		// Default insert fields
 		keytab := goqu.Record{
 			"filename": filename,
-			"file":     file,
+			"file":     b,
 		}
 		q.AddFields(keytab)
 		for _, option := range options {
@@ -3631,8 +3634,12 @@ func (ds *Datastore) ReadKeytab(options ...QueryOpt) (Keytab, bool, error) {
 
 		return nil
 	})
+	if err != nil {
+		return keytab, exists, errors.Wrap(err, "committing transaction")
+	}
 
-	return keytab, exists, errors.Wrap(err, "committing transaction")
+	keytab.File, err = base64.StdEncoding.DecodeString(string(keytab.File))
+	return keytab, exists, errors.Wrap(err, "base64 decoding")
 }
 
 func (ds *Datastore) UpdateKeytab(keytabId int64, options ...QueryOpt) error {

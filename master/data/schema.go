@@ -72,7 +72,7 @@ var createTableAuthentication = `
 CREATE TABLE authentication (
     id integer PRIMARY KEY AUTOINCREMENT,
     key text NOT NULL UNIQUE,
-    value texts NOT NULL,
+    value text NOT NULL,
     enabled boolean UNIQUE
 )
 `
@@ -216,7 +216,7 @@ CREATE TABLE keytab (
     identity_id integer,
     principal text,
     filename text NOT NULL,
-    file blob NOT NULL,
+    file text NOT NULL,
 
     FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE
 )
