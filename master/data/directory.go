@@ -51,7 +51,6 @@ func (ds *Datastore) Lookup(username, password, token string, tlsConfig *tls.Con
 		if err != nil {
 			log.Printf("LDAP ERROR creating ldap config from database: %v", err)
 			log.Println("LDAP ERROR resorting to local auth")
-
 			return ds.localLookup(identity, exists)
 		}
 		return ds.ldapLookup(identity, exists, username, password, token, conn)
@@ -82,6 +81,24 @@ func (ds *Datastore) localLookup(identity Identity, exists bool) (az.Principal, 
 		return nil, fmt.Errorf("%s is not a local user", identity.Name)
 	}
 
+	return ds.lookup(identity)
+}
+
+func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
+	// Validate if local
+	if identity.AuthType == LocalAuth || ds.users.Exists(token) {
+		return ds.lookup(identity)
+	}
+
+	identity, exists, err := ds.NewUser(identity, exists, username, password, token, conn)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating new user")
+	}
+
+	return ds.lookup(identity)
+}
+
+func (ds *Datastore) lookup(identity Identity) (az.Principal, error) {
 	// Fetch roles
 	roles, err := ds.ReadRoles(ForIdentity(identity.Id))
 	if err != nil {
@@ -109,18 +126,4 @@ func (ds *Datastore) localLookup(identity Identity, exists bool) (az.Principal, 
 	}
 
 	return &Principal{ds, &identity, permissions, isAdmin}, nil
-}
-
-func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
-	// Validate if local
-	if identity.AuthType == LocalAuth || ds.users.Exists(token) {
-		return ds.localLookup(identity, exists)
-	}
-
-	identity, exists, err := ds.NewUser(identity, exists, username, password, token, conn)
-	if err != nil {
-		return nil, errors.Wrap(err, "creating new user")
-	}
-
-	return ds.localLookup(identity, exists)
 }
