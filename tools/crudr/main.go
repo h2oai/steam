@@ -159,7 +159,7 @@ func decodeBytes(tbl Table) string {
 			_, err := buf.WriteString(fmt.Sprintf(`%s.%s, err = base64.StdEncoding.DecodeString(string(%s.%s))
 			if err != nil {
 				return errors.Wrap(err, "decoding %s")
-			}`, lowerFirst(tbl.Name), lowerFirst(col.Name), lowerFirst(tbl.Name), lowerFirst(col.Name), lowerFirst(col.Name)))
+			}`, lowerFirst(tbl.Name), col.Name, lowerFirst(tbl.Name), col.Name, lowerFirst(col.Name)))
 			if err != nil {
 				panic(err)
 			}

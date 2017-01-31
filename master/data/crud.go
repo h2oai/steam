@@ -3630,7 +3630,7 @@ func (ds *Datastore) ReadKeytab(options ...QueryOpt) (Keytab, bool, error) {
 			}
 		}
 
-		keytab.file, err = base64.StdEncoding.DecodeString(string(keytab.file))
+		keytab.File, err = base64.StdEncoding.DecodeString(string(keytab.File))
 		if err != nil {
 			return errors.Wrap(err, "decoding file")
 		}
