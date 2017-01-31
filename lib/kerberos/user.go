@@ -1,16 +1,16 @@
 package kerberos
 
 import (
+	"io/ioutil"
+	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"syscall"
-
-	"os"
-
-	"io/ioutil"
 
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/master/data"
+
 	"github.com/pkg/errors"
 )
 
@@ -41,11 +41,9 @@ func klist(uid, gid uint32) bool {
 }
 
 func WriteKeytab(keytab data.Keytab, workingDirectory string, uid, gid int) (string, error) {
-	fPath := path.Join(workingDirectory, fs.LibDir, fs.KindKeytab, keytab.Filename)
-	if _, err := os.Stat(fPath); os.IsNotExist(err) {
-		if err := ioutil.WriteFile(fPath, keytab.File, 0600); err != nil {
-			return "", errors.Wrap(err, "writing file")
-		}
+	fPath := path.Join(workingDirectory, fs.LibDir, fs.KindKeytab, strconv.FormatInt(keytab.Id, 10)+".keytab")
+	if err := ioutil.WriteFile(fPath, keytab.File, 0600); err != nil {
+		return "", errors.Wrap(err, "writing file")
 	}
 	return fPath, errors.Wrap(os.Chown(fPath, uid, gid), "changing ownership of file")
 }
