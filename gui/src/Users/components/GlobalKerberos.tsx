@@ -59,6 +59,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
 
   componentWillMount() {
     FocusStyleManager.onlyShowFocusOnTabs();
+    this.props.fetchGlobalKeytab();
     this.props.getConfig();
     if (this.props.globalKeytab) {
       this.setState({
@@ -161,7 +162,7 @@ function mapDispatchToProps(dispatch) {
   return {
     saveGlobalKerberos: bindActionCreators(saveGlobalKerberos, dispatch),
     getConfig: bindActionCreators(getConfig, dispatch),
-    fetchGlobalKeytab: bindActionCreators(fetchGlobalKeytab(), dispatch),
+    fetchGlobalKeytab: bindActionCreators(fetchGlobalKeytab, dispatch),
     deleteKeytab: bindActionCreators(deleteKeytab, dispatch),
     testKeytab: bindActionCreators(testKeytab, dispatch),
     setGlobalKerberosEnabled: bindActionCreators(setGlobalKerberosEnabled, dispatch)

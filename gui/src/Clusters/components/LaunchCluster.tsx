@@ -168,14 +168,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 </Popover>
               </Cell>
             </Row>
-            {_.get(this.props.config, 'kerberos_enabled', false) ? <Row>
-              <Cell>
-                Kerberos Keytab
-              </Cell>
-              <Cell>
-                <input type="text" name="keytab"/>
-              </Cell>
-            </Row> : null}
           </Table>
           {this.props.clusterLaunchIsInProgress ? null : <button type="submit" className="button-primary">Launch New Clusters</button>}
           {this.props.clusterLaunchIsInProgress ? <div className="pt-spinner .modifier">
