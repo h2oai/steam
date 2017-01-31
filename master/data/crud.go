@@ -4,10 +4,9 @@ package data
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"log"
 	"time"
-
-	"encoding/base64"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -3505,7 +3504,6 @@ func (ds *Datastore) CreateKeytab(filename string, file []byte, options ...Query
 	if err != nil {
 		return 0, errors.Wrap(err, "beginning transaction")
 	}
-	b := base64.StdEncoding.EncodeToString(file)
 
 	var id int64
 	err = tx.Wrap(func() error {
@@ -3514,7 +3512,7 @@ func (ds *Datastore) CreateKeytab(filename string, file []byte, options ...Query
 		// Default insert fields
 		keytab := goqu.Record{
 			"filename": filename,
-			"file":     b,
+			"file":     base64.StdEncoding.EncodeToString(file),
 		}
 		q.AddFields(keytab)
 		for _, option := range options {
@@ -3632,14 +3630,14 @@ func (ds *Datastore) ReadKeytab(options ...QueryOpt) (Keytab, bool, error) {
 			}
 		}
 
+		keytab.file, err = base64.StdEncoding.DecodeString(string(keytab.file))
+		if err != nil {
+			return errors.Wrap(err, "decoding file")
+		}
 		return nil
 	})
-	if err != nil {
-		return keytab, exists, errors.Wrap(err, "committing transaction")
-	}
 
-	keytab.File, err = base64.StdEncoding.DecodeString(string(keytab.File))
-	return keytab, exists, errors.Wrap(err, "base64 decoding")
+	return keytab, exists, errors.Wrap(err, "committing transaction")
 }
 
 func (ds *Datastore) UpdateKeytab(keytabId int64, options ...QueryOpt) error {
@@ -3718,7 +3716,7 @@ func createKeytab(tx *goqu.TxDatabase, filename string, file []byte, options ...
 	// Default insert fields
 	keytab := goqu.Record{
 		"filename": filename,
-		"file":     file,
+		"file":     base64.StdEncoding.EncodeToString(file),
 	}
 	q.AddFields(keytab)
 	for _, option := range options {
