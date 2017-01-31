@@ -73,7 +73,6 @@ type entity_types struct {
 	Engine     string
 	Identity   string
 	Label      string
-	Keytab     string
 	Model      string
 	Permission string
 	Privilege  string
@@ -89,7 +88,6 @@ func (e *entity_types) init() {
 		"engine",
 		"identity",
 		"label",
-		"keytab",
 		"model",
 		"permission",
 		"privilege",
@@ -105,7 +103,6 @@ var entity_types_list = []string{
 	"engine",
 	"identity",
 	"label",
-	"keytab",
 	"model",
 	"permission",
 	"privilege",
@@ -121,7 +118,6 @@ type entityTypeKeys struct {
 	ClusterYarnDetail int64
 	Engine            int64
 	Label             int64
-	Keytab            int64
 	Model             int64
 	MultinomialModel  int64
 	Identity          int64
@@ -142,8 +138,6 @@ func toEntityId(ds *Datastore, name string) int64 {
 		return ds.EntityType.Engine
 	case "label":
 		return ds.EntityType.Label
-	case "keytab":
-		return ds.EntityType.Keytab
 	case "model":
 		return ds.EntityType.Model
 	case "identity":
@@ -182,7 +176,6 @@ func newEntityTypeKeys(entityTypes []entityType) entityTypeKeys {
 		Cluster:   m["cluster"],
 		Engine:    m["engine"],
 		Label:     m["label"],
-		Keytab:    m["keytab"],
 		Model:     m["model"],
 		Identity:  m["identity"],
 		Project:   m["project"],
@@ -225,8 +218,6 @@ var permissions_list = []permission_map{
 	permission_map{"ViewLabel", "View label"},
 	permission_map{"ManageService", "Manage service"},
 	permission_map{"ViewService", "View service"},
-	permission_map{"ManageKeytab", "Manage keytab"},
-	permission_map{"ViewKeytab", "View keytab"},
 }
 
 type permissionKeys struct {
@@ -252,8 +243,6 @@ type permissionKeys struct {
 	ViewLabel        int64
 	ManageService    int64
 	ViewService      int64
-	ManageKeytab     int64
-	ViewKeytab       int64
 }
 
 func toPermissionMap(permissions []Permission) map[int64]permission_map {
@@ -303,8 +292,6 @@ func newPermissionKeys(permissions []Permission) permissionKeys {
 		ViewLabel:        m["ViewLabel"],
 		ManageService:    m["ManageService"],
 		ViewService:      m["ViewService"],
-		ManageKeytab:     m["ManageKeytab"],
-		ViewKeytab:       m["ViewKeytab"],
 	}
 }
 

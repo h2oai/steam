@@ -132,21 +132,6 @@ class SteamConnection:
 		response = self.connection.call("GetConfig", request)
 		return response['config']
 	
-	def set_global_kerberos(self, enabled):
-		"""
-		Set this to enable kerberos usage when applicable
-
-		Parameters:
-		enabled: Whether kerberos should be enabled or disabled (bool)
-
-		Returns:None
-		"""
-		request = {
-			'enabled': enabled
-		}
-		response = self.connection.call("SetGlobalKerberos", request)
-		return 
-	
 	def check_admin(self):
 		"""
 		Check if an identity has admin privileges
@@ -220,66 +205,6 @@ class SteamConnection:
 		}
 		response = self.connection.call("TestLdapConfig", request)
 		return response['count'], response['groups']
-	
-	def get_user_keytab(self):
-		"""
-		Get the keytab for the logged in user
-
-		Parameters:
-
-		Returns:
-		keytab: No description available (Keytab)
-		exists: No description available (bool)
-		"""
-		request = {
-		}
-		response = self.connection.call("GetUserKeytab", request)
-		return response['keytab'], response['exists']
-	
-	def get_steam_keytab(self):
-		"""
-		Get the keytab for Steam (used for polling)
-
-		Parameters:
-
-		Returns:
-		keytab: No description available (Keytab)
-		exists: No description available (bool)
-		"""
-		request = {
-		}
-		response = self.connection.call("GetSteamKeytab", request)
-		return response['keytab'], response['exists']
-	
-	def test_keytab(self, keytab_id):
-		"""
-		Test the keytab for the given user
-
-		Parameters:
-		keytab_id: No description available (int64)
-
-		Returns:None
-		"""
-		request = {
-			'keytab_id': keytab_id
-		}
-		response = self.connection.call("TestKeytab", request)
-		return 
-	
-	def delete_keytab(self, keytab_id):
-		"""
-		Delete the keytab entry for the given user
-
-		Parameters:
-		keytab_id: No description available (int64)
-
-		Returns:None
-		"""
-		request = {
-			'keytab_id': keytab_id
-		}
-		response = self.connection.call("DeleteKeytab", request)
-		return 
 	
 	def register_cluster(self, address):
 		"""

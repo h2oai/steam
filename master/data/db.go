@@ -37,8 +37,6 @@ import (
 	"github.com/spf13/pflag"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/doug-martin/goqu.v3"
-	_ "gopkg.in/doug-martin/goqu.v3/adapters/postgres"
-	_ "gopkg.in/doug-martin/goqu.v3/adapters/sqlite3"
 )
 
 const (
@@ -46,7 +44,7 @@ const (
 	standard_user = "standard user"
 )
 
-var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster", "ViewEngine", "ViewUser", "ManageKeytab", "ViewKeytab"}
+var standard_user_init_permissions = []string{"ManageCluster", "ViewCluster", "ViewEngine"}
 
 type metadata map[string]string
 

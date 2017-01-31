@@ -8,7 +8,6 @@ package {{.Name}}
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"log"
 	"time"
 
@@ -63,16 +62,16 @@ var debug bool
 
 {{define "fields" -}} {{/* ARG REQUIRED */ -}}
 	// Default insert fields
-	{{toName .Name}} := goqu.Record{
+	{{toFieldVar .Name}} := goqu.Record{
 		{{- range .Cols}}
 		{{- if .IsArg}}
-		"{{.TblName}}": {{toFieldVar .}},
+		"{{.TblName}}": {{toFieldVar .Name}},
 		{{- else if .Default}}
 		"{{.TblName}}": {{.Default}},
 		{{- end}}
 		{{- end}}
 	}
-	q.AddFields({{toName .Name}})
+	q.AddFields({{toFieldVar .Name}})
 {{- end}}
 
 {{define "insertSql" -}} {{/* ARG OPTIONAL */ -}}
@@ -162,6 +161,7 @@ var debug bool
 	}
 	{{template "postFunc"}}
 
+	return nil
 	{{- end}}
 {{- end}}
 
@@ -257,9 +257,6 @@ func (ds *Datastore) Read{{title .Name}}(options ...QueryOpt) ({{.Name}}, bool, 
 		{{template "getRow"}}
 		{{lowerFirst .Name}}, err = Scan{{title .Name}}(row)
 		{{template "scanRow"}}
-
-		{{decodeBytes .}}
-		return nil
 	})
 
 	return {{lowerFirst .Name}}, exists, errors.Wrap(err, "committing transaction")

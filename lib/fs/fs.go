@@ -59,7 +59,6 @@ const (
 	PackExt        = ".steam"
 	KindEngine     = "engine"
 	KindFile       = "file"
-	KindKeytab     = "keytab"
 	KindExperiment = "module"
 )
 
