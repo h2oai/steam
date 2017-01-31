@@ -172,7 +172,6 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   <span><i className="fa fa-cubes mar-bot-20"/> <a onClick={cluster.context_path !== "" ? this.goProxy.bind(this, cluster) : null} href={cluster.context_path !== "" ? null : 'http://' + cluster.address + cluster.context_path} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold link">{cluster.name}</a> {cluster.status.total_cpu_count ? <span> -- {cluster.status.total_cpu_count} &nbsp;cores</span> : null}</span>
                   <span className="remove-cluster">
-                    {_.get(this.props.config, 'kerberos_enabled', false) ? <input ref="keytabFilename" type="text" placeholder="Keytab filename"/> : null}
                     {hasPermissionToShow("ManageCluster", this.props.config, this.props.isAdmin) ? <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
                       className="fa fa-trash no-margin"/></button> : null }
                   </span>
