@@ -28,6 +28,8 @@ import (
 	"strconv"
 	"strings"
 
+	"io/ioutil"
+
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/master/az"
 	"github.com/h2oai/steam/master/data"
@@ -117,7 +119,17 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Invalid relative path: %s", err), http.StatusBadRequest)
 		}
+	case fs.KindKeytab:
+		if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+		if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
 
+		dstDir = path.Join(s.workingDirectory, fs.LibDir, typ)
 	default:
 		http.Error(w, fmt.Sprintf("Invalid upload type: %s", typ), http.StatusBadRequest)
 		return
@@ -148,10 +160,18 @@ func (s *UploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch typ {
 	case fs.KindEngine:
-		defer os.Remove(dstPath)
+		defer os.Remove(dstPath) // dstPath is a temp file
 
 		if err := s.handleEngine(w, pz, fileBaseName, dstDir, dstPath); err != nil {
 			log.Println("Failed saving engine to disk:", err)
+			return
+		}
+	case fs.KindKeytab:
+		defer os.Remove(dstPath) // dstPath is a temp file
+
+		principal := r.FormValue("principal")
+		if err := s.handleKeytab(w, pz, fileBaseName, dstPath, principal); err != nil {
+			log.Println("Failed saving keytab:", err)
 			return
 		}
 	}
@@ -210,4 +230,33 @@ func (s *UploadHandler) handleEngine(w http.ResponseWriter, pz az.Principal, fil
 	}
 
 	return nil
+}
+
+func (s *UploadHandler) handleKeytab(w http.ResponseWriter, pz az.Principal, fileName, filePath, principal string) error {
+	f, err := os.Open(filePath)
+	if err != nil {
+		// FIXME: ERROR
+		return err
+	}
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		// FIXME: ERROR
+		return err
+	}
+
+	switch principal {
+	case "user":
+		_, err := s.ds.CreateKeytab(
+			fileName, b, data.WithIdentityId(pz.Id()),
+			data.WithAudit(pz), data.WithPrivilege(pz, data.Owns),
+		)
+		return err
+	case "":
+		return errors.New("must specify a principal")
+	}
+	_, err = s.ds.CreateKeytab(
+		fileName, b, data.WithPrincipal(principal),
+		data.WithAudit(pz),
+	)
+	return err
 }

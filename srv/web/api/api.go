@@ -51,6 +51,12 @@ type LdapGroup struct {
 	Users int
 }
 
+type Keytab struct {
+	Id        int
+	Principal string
+	Name      string
+}
+
 type Cluster struct {
 	Id          int64
 	Name        string
@@ -310,11 +316,16 @@ type Workgroup struct {
 type Service struct {
 	PingServer                    PingServer                    `help:"Ping the Steam server"`
 	GetConfig                     GetConfig                     `help:"Get Steam start up configurations"`
+	SetGlobalKerberos             SetGlobalKerberos             `help:"Set this to enable kerberos usage when applicable"`
 	CheckAdmin                    CheckAdmin                    `help:"Check if an identity has admin privileges"`
 	SetLocalConfig                SetLocalConfig                `help:"Set security configuration to local"`
 	SetLdapConfig                 SetLdapConfig                 `help:"Set LDAP security configuration"`
 	GetLdapConfig                 GetLdapConfig                 `help:"Get LDAP security configurations"`
 	TestLdapConfig                TestLdapConfig                `help:"Test LDAP security configurations"`
+	GetUserKeytab                 GetUserKeytab                 `help:"Get the keytab for the logged in user"`
+	GetSteamKeytab                GetSteamKeytab                `help:"Get the keytab for Steam (used for polling)"`
+	TestKeytab                    TestKeytab                    `help:"Test the keytab for the given user"`
+	DeleteKeytab                  DeleteKeytab                  `help:"Delete the keytab entry for the given user"`
 	RegisterCluster               RegisterCluster               `help:"Connect to a cluster"`
 	UnregisterCluster             UnregisterCluster             `help:"Disconnect from a cluster"`
 	StartClusterOnYarn            StartClusterOnYarn            `help:"Start a cluster using Yarn"`
@@ -443,6 +454,10 @@ type GetConfig struct {
 	_      int
 	Config Config `help:"An object containing Steam startup configurations"`
 }
+type SetGlobalKerberos struct {
+	Enabled bool `help:"Whether kerberos should be enabled or disabled"`
+	_       int
+}
 type CheckAdmin struct {
 	_       int
 	IsAdmin bool
@@ -462,6 +477,24 @@ type TestLdapConfig struct {
 	_      int
 	Count  int
 	Groups []LdapGroup
+}
+type GetSteamKeytab struct {
+	_      int
+	Keytab Keytab
+	Exists bool
+}
+type GetUserKeytab struct {
+	_      int
+	Keytab Keytab
+	Exists bool
+}
+type TestKeytab struct {
+	KeytabId int64
+	_        int
+}
+type DeleteKeytab struct {
+	KeytabId int64
+	_        int
 }
 type RegisterCluster struct {
 	Address   string
