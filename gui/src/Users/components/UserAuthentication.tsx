@@ -44,7 +44,8 @@ interface Props {
   authType: string,
   onCreateRoleClicked: Function,
   onManageRoleClicked: Function,
-  testResults: LdapTestResult
+  testResults: LdapTestResult,
+  requestingTestLdap: boolean
 }
 interface DispatchProps {
   fetchLdapConfig: Function,
@@ -94,7 +95,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   }
 
   validateAll = () => {
-    if (this.state.hostValue.length > 3) {
+    if (this.state.hostValue && this.state.hostValue.length > 3) {
       this.setState({ hostInputValid: true });
     } else {
       this.setState({ hostInputValid: false });
@@ -102,19 +103,19 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
     this.validatePasswords();
 
-    if (this.state.userbaseDnValue.length > 0) {
+    if (this.state.userbaseDnValue && this.state.userbaseDnValue.length > 0) {
       this.setState({ userbaseDnInputValid: true });
     } else {
       this.setState({ userbaseDnInputValid: false });
     }
 
-    if (this.state.usernameAttributeValue.length > 0) {
+    if (this.state.usernameAttributeValue && this.state.usernameAttributeValue.length > 0) {
       this.setState({ usernameAttributeInputValid: true });
     } else {
       this.setState({ usernameAttributeInputValid: false });
     }
 
-    if (this.state.groupBaseDnValue.length > 0) {
+    if (this.state.groupBaseDnValue && this.state.groupBaseDnValue.length > 0) {
       this.setState({ groupBaseDnInputValid: true });
     } else {
       this.setState({ groupBaseDnInputValid: false });
@@ -123,15 +124,11 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
   };
 
   validatePasswords = () => {
-    if (this.confirmPasswordInput.value.length > 0) {
-      if (this.bindDnPasswordInput.value.length < 2) {
+    if (this.confirmPasswordInput.value && this.confirmPasswordInput.value.length > 0) {
+      if (this.bindDnPasswordInput.value && this.bindDnPasswordInput.value.length < 2) {
         this.state.passwordInputValid = false;
       } else {
-        if (this.bindDnPasswordInput.value === this.confirmPasswordInput.value) {
-          this.state.passwordInputValid = true;
-        } else {
-          this.state.passwordInputValid = false;
-        }
+        this.state.passwordInputValid = this.bindDnPasswordInput.value === this.confirmPasswordInput.value;
       }
     } else {
       this.state.passwordInputValid = null;
@@ -552,7 +549,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
         <div id="actionButtonsContainer" className="space-20">
           {defaultSelectedDB.toLowerCase() === 'ldap' ?
             <div>
-              <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
+              <Button className="test-config button-secondary" onClick={this.onTestConfigClicked} loading={this.props.requestingTestLdap}>Test Config</Button> &nbsp;
               <div className="button-secondary" onClick={this.onResetClicked}>Reset</div> &nbsp;
               <div className="button-primary" onClick={this.onSaveConfigClicked}>Save Config</div>
             </div>
@@ -625,7 +622,8 @@ function mapStateToProps(state): any {
     ldapConfig: state.users.ldapConfig,
     doesLdapExist: state.users.ldapExists,
     authType,
-    testResults: state.users.testResult
+    testResults: state.users.testResult,
+    requestingTestLdap: state.users.requestingTestLdap
   };
 }
 

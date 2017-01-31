@@ -1,4 +1,5 @@
 @import '../../variables.scss';
+@import '../../App/styles/app.scss';
 
 .user-access {
   .bulk-select {
@@ -46,4 +47,11 @@
   font-weight: bold;
   width: 240px;
   vertical-align: top;
+}
+
+.test-config {
+  background: $brand-orange !important;
+  color: $brand-white !important;
+  border: none;
+  line-height: 1.3em;
 }
