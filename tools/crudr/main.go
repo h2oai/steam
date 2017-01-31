@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -56,11 +57,13 @@ func main() {
 	funcMap := template.FuncMap{
 		"strLen":       strLen,
 		"toArgs":       toArgs,
+		"toName":       toName,
 		"title":        strings.Title,
 		"lowerFirst":   lowerFirst,
 		"toFieldVar":   toFieldVar,
 		"toPluralName": toPluralName,
 		"camelToSnake": snaker.CamelToSnake,
+		"decodeBytes":  decodeBytes,
 	}
 
 	tmpl, err := template.New("crud").Funcs(funcMap).Parse(src)
@@ -112,7 +115,7 @@ func toArgs(cols []Col) string {
 			if args != "" {
 				args += ", "
 			}
-			args += toFieldVar(col.Name)
+			args += toName(col.Name)
 		}
 	}
 	if args != "" {
@@ -122,9 +125,17 @@ func toArgs(cols []Col) string {
 	return args
 }
 
-func toFieldVar(str string) string {
-	val := lowerFirst(str)
+func toFieldVar(col Col) string {
+	switch col.Type {
+	case "[]byte":
+		return fmt.Sprintf("base64.StdEncoding.EncodeToString(%s)", lowerFirst(col.Name))
+	}
 
+	return toName(col.Name)
+}
+
+func toName(str string) string {
+	val := lowerFirst(str)
 	switch val {
 	case "type":
 		return "typ"
@@ -139,4 +150,20 @@ func toPluralName(str string) string {
 	}
 
 	return str
+}
+
+func decodeBytes(tbl Table) string {
+	buf := new(bytes.Buffer)
+	for _, col := range tbl.Cols {
+		if col.Type == "[]byte" {
+			_, err := buf.WriteString(fmt.Sprintf(`%s.%s, err = base64.StdEncoding.DecodeString(string(%s.%s))
+			if err != nil {
+				return errors.Wrap(err, "decoding %s")
+			}`, lowerFirst(tbl.Name), col.Name, lowerFirst(tbl.Name), col.Name, lowerFirst(col.Name)))
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+	return buf.String()
 }

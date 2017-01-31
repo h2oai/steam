@@ -349,9 +349,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                     </td>
                   </tr>
                   <tr className="auth-row">
-                    <td className="auth-left">SSL-ENABLED &nbsp; <Tooltip className="steam-tooltip-launcher" content="The LDAP server port">
-                      <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-                    </Tooltip></td>
+                    <td className="auth-left">SSL-ENABLED</td>
                     <td className="auth-right">
                       <label className="pt-control pt-switch .modifier">
                         <input type="checkbox"
@@ -487,7 +485,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
 
 
                   <tr className="auth-row">
-                    <td className="auth-left">STATIC MEMBER ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute that contains the group name.<br /> A typical value for this is 'cn'.</div>}>
+                    <td className="auth-left">STATIC MEMBER ATTRIBUTE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The group attribute whose values are the group's members.<br /> Typical values are 'member' or 'memberUid'.<br /> Groups list user members with values of groupMappingAttribute, as specified above.</div>}>
                       <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                     </Tooltip></td>
                     <td className="auth-right">
@@ -516,7 +514,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
               <table>
                 <tbody>
                   <tr className="auth-row">
-                    <td className="auth-left">SEARCH REQUEST SIZE LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>H2O Steam can chase referrals with anonymous bind only.<br /> You must also have anonymous search enabled on your LDAP server. Turn this off if you have no need for referrals.</div>}>
+                    <td className="auth-left">SEARCH REQUEST SIZE LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>Sets the maximum number of entries requested by LDAP searches.<br /> The number actually returned is subject to the limit imposed by the LDAP server.</div>}>
                       <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                     </Tooltip></td>
                     <td className="auth-right">
@@ -529,7 +527,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
                   </tr>
 
                   <tr className="auth-row">
-                    <td className="auth-left">SEARCH REQUEST TIME LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>Sets the maximum number of entries requested by LDAP searches.<br /> The number actually returned is subject to the limit imposed by the LDAP server.</div>}>
+                    <td className="auth-left">SEARCH REQUEST TIME LIMIT &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>The maximum time limit in seconds to wait for LDAP searches to complete.<br /> This should be less than the UI timeout of 30s.</div>}>
                       <i className="fa fa-question-circle-o" aria-hidden="true"></i>
                     </Tooltip></td>
                     <td className="auth-right">
@@ -597,7 +595,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
           iconName="Confirm"
           isOpen={this.state.afterConfirmAction}
           onClose={() => this.setState({ afterConfirmAction: null })}
-          title="Confirm exit"
+          title="Confirm delete"
           >
           <div className="pt-dialog-body">
             Navigating away from this page will discard current LDAP config

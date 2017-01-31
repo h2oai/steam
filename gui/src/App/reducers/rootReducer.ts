@@ -29,6 +29,7 @@ import { servicesReducer } from '../../Projects/reducers/services.reducer';
 import { profileReducer } from '../../Profile/reducers/profile.reducers';
 import { deploymentReducer } from '../../Deployment/reducers/deployment.reducer';
 import { usersReducer } from '../../Users/reducers/users.reducer';
+import { userReducer } from '../../User/reducers/user.reducer';
 import { notificationReducer } from './notification.reducer';
 import { globalReducer } from './global.reducer';
 import { collaboratorsReducer } from "../../Collaborators/reducers/collaborators.reducer";
@@ -45,6 +46,7 @@ export const rootReducer = combineReducers({
   deployments: deploymentReducer,
   notification: notificationReducer,
   users: usersReducer,
+  user: userReducer,
   routing: routerReducer,
   collaborators: collaboratorsReducer,
   clusters: clustersReducer

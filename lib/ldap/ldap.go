@@ -295,11 +295,14 @@ func FromConfig(config *web.LdapConfig, tlsConfig *tls.Config) *Ldap {
 }
 
 func FromDatabase(config string, tlsConfig *tls.Config) (*Ldap, error) {
+	// FIXME: HACK to remove escaped quotes from sqlite???
+	config = strings.Replace(config, "\\", "", -1)
+
 	aux := struct {
 		Bind string
 		Ldap
 	}{}
-	if err := json.Unmarshal([]byte(config), &aux); err != nil {
+	if err := json.Unmarshal(json.RawMessage([]byte(config)), &aux); err != nil {
 		return nil, errors.Wrap(err, "deserializing config")
 	}
 
