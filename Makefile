@@ -39,6 +39,7 @@ SCRIPTS = ./scripts
 JETTYRUNNER = jetty-runner-9.2.12.v20150709.jar
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 RPM_OUT_DIR = $(ROOT_DIR)/dist/rpm
+STEAM_TAR_GZ=steam-${STEAM_RELEASE_VERSION}-linux-amd64.tar.gz
 
 all: build gui ssb launcher
 
@@ -117,7 +118,7 @@ clean:
 	rm -f packaging/env.list
 	rm -rf dist
 
-linux: gui
+linux:
 	rm -rf ./dist/$(DIST_LINUX)
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=$(STEAM_RELEASE_VERSION) -X main.BUILD_DATE=`date -u +%Y-%m-%dT%H:%M:%S%z`"
 	cd $(SLA) && env GOOS=linux GOARCH=amd64 go build
@@ -154,11 +155,10 @@ dist/rpm/centos-6: packaging/env.list
 
 release: ssb launcher linux
 
-debian_package:
+debian_package: STEAM_VERSION=${STEAM_RELEASE_VERSION}
+debian_package: linux
 	@echo STEAM_VERSION is $(STEAM_VERSION)
 	@echo STEAM_TAR_GZ is $(STEAM_TAR_GZ)
-	@echo STEAM_TAR_GZ_URL is $(STEAM_TAR_GZ_URL)
-	
 	rm -fr tmp
 	mkdir tmp
 	
@@ -166,7 +166,7 @@ debian_package:
 	sed "s/SUBST_PACKAGE_VERSION/$(STEAM_VERSION)/" packaging/debian/steam/DEBIAN/control > tmp/debian/steam/DEBIAN/control
 	pwd
 	
-	(cd tmp && wget $(STEAM_TAR_GZ_URL))
+	(cd tmp && cp ../dist/$(STEAM_TAR_GZ) .)
 	pwd
 	
 	mkdir -p tmp/debian/steam/opt/h2oai
