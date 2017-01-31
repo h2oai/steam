@@ -151,16 +151,6 @@
 			"Rev": "3fb96709c55732c801fed9abf32dad24c1090887"
 		},
 		{
-			"ImportPath": "gopkg.in/doug-martin/goqu.v3/adapters/postgres",
-			"Comment": "v3.3",
-			"Rev": "3fb96709c55732c801fed9abf32dad24c1090887"
-		},
-		{
-			"ImportPath": "gopkg.in/doug-martin/goqu.v3/adapters/sqlite3",
-			"Comment": "v3.3",
-			"Rev": "3fb96709c55732c801fed9abf32dad24c1090887"
-		},
-		{
 			"ImportPath": "gopkg.in/ldap.v2",
 			"Comment": "v2.5.0",
 			"Rev": "8168ee085ee43257585e50c6441aadf54ecb2c9f"

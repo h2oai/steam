@@ -322,7 +322,24 @@ func TestFromDatabase(t *testing.T) {
 		{
 			name: "basic test",
 			args: args{
-				config:    `{\"Address\":\"ldap.0xdata.loc:389\",\"Bind\":\"Y249YWRtaW4sZGM9MHhkYXRhLGRjPWxvYzoweGRhdGE=\",\"UserBaseDn\":\"ou=users,dc=0xdata,dc=loc\",\"UserBaseFilter\":\"\",\"UserNameAttribute\":\"uid\",\"GroupBaseDN\":\"ou=groups,dc=0xdata,dc=loc\",\"GroupNameAttribute\":\"cn\",\"GroupNames\":[\"jettygroup\",\"steamgroup\"],\"StaticMemberAttribute\":\"memberUid\",\"SearchRequestSizeLimit\":0,\"SearchRequestTimeLimit\":0,\"ForceBind\":false,\"Ldaps\":false}`,
+				config: `
+				{
+					"Address": "ldap.0xdata.loc:389",
+					"Bind": "Y249YWRtaW4sZGM9MHhkYXRhLGRjPWxvYzoweGRhdGE=",
+					"UserBaseDn": "ou=users,dc=0xdata,dc=loc",
+					"UserBaseFilter": "",
+					"UserNameAttribute": "uid",
+					"GroupBaseDN": "ou=groups,dc=0xdata,dc=loc",
+					"GroupNameAttribute": "cn",
+					"GroupNames": [
+						"jettygroup",
+						"steamgroup"
+					],
+					"StaticMemberAttribute": "memberUid",
+					"SearchRequestSizeLimit": 0,
+					"SearchRequestTimeLimit": 0,
+					"Ldaps": false
+				}`,
 				tlsConfig: &tls.Config{InsecureSkipVerify: true},
 			},
 			want: &Ldap{

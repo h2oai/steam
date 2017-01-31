@@ -24,7 +24,6 @@
 import App from './App/App';
 import Clusters from './Clusters/Clusters';
 import Users from './Users/Users';
-import User from './User/User';
 import Models from './Models/Models';
 import WelcomeSplashScreen from './Projects/components/WelcomeSplashScreen';
 import ModelDetails from './ModelDetails/ModelDetails';
@@ -195,17 +194,9 @@ export const routes: IRoute[] = [
       },
       //users
       {
-        path: 'configurations',
+        path: 'users',
         component: Users,
-        name: 'Configurations',
-        icon: 'fa fa-cog',
-        showInBreadcrumb: true,
-        showInNavigation: true
-      },
-      {
-        path: 'user',
-        component: User,
-        name: 'User',
+        name: 'Users',
         icon: 'fa fa-user',
         showInBreadcrumb: true,
         showInNavigation: true

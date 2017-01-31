@@ -32,7 +32,6 @@ import UserAuthentication from "./components/UserAuthentication";
 import {hasPermissionToShow} from "../App/utils/permissions";
 import {fetchConfig} from "../Clusters/actions/clusters.actions";
 import {fetchIsAdmin} from "../App/actions/global.actions";
-import GlobalKerberos from "./components/GlobalKerberos";
 
 
 interface Props {
@@ -98,16 +97,10 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     }
     if (props.isAdmin) {
       tabs["authentication"] = {
-        label: 'USER AUTHENTICATION',
+        label: 'AUTHENTICATION',
         isSelected: false,
         onClick: this.clickHandler.bind(this),
         component: <UserAuthentication />
-      };
-      tabs["cluster_authentication"] = {
-        label: 'GLOBAL KERBEROS',
-        isSelected: false,
-        onClick: this.clickHandler.bind(this),
-        component: <GlobalKerberos />
       };
     }
     return tabs;
@@ -129,7 +122,6 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     newState.tabs.roles.isSelected = false;
     newState.tabs.users.isSelected = true;
     newState.tabs.authentication.isSelected = false;
-    newState.tabs.cluster_authentication.isSelected = false;
     newState.isSelected = "users";
     this.setState(newState);
     this.props.enterNewUser();
@@ -140,7 +132,6 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     newState.tabs.roles.isSelected = true;
     newState.tabs.users.isSelected = false;
     newState.tabs.authentication.isSelected = false;
-    newState.tabs.cluster_authentication.isSelected = false;
     newState.isSelected = "roles";
     this.setState(newState);
     this.props.enterNewRole();
@@ -166,24 +157,21 @@ export class Users extends React.Component<Props & DispatchProps, any> {
     } else {
       return (
         <div className="users">
-          <PageHeader>Configurations (Steam Global)
+          <PageHeader>USERS & ROLES
             <div className="header-buttons">
               <div className="button-primary" onClick={this.onCreateUserClicked.bind(this)}>Create User</div>
               <div className="button-primary" onClick={this.onCreateRoleClicked.bind(this)}>Create Role</div>
             </div>
           </PageHeader>
-          <p>All settings on this page affect the Steam installation globally for administrators. All users on Steam can potentially be affected. Please be careful and consult support if you are unsure about the implications of updating these settings.</p>
 
           <div className="panel-container">
             <TabNavigation tabs={this.state.tabs}/>
-            {this.state.tabs.users && this.state.tabs.users.isSelected ?
+            {this.state.tabs.users && this.state.tabs.users.isSelected === true ?
               <UserAccess /> : null}
-            {this.state.tabs.roles && this.state.tabs.roles.isSelected ?
+            {this.state.tabs.roles && this.state.tabs.roles.isSelected === true ?
               <RolePermissions /> : null}
-            {this.state.tabs.authentication && this.state.tabs.authentication.isSelected ?
+            {this.state.tabs.authentication && this.state.tabs.authentication.isSelected === true ?
               <UserAuthentication onCreateRoleClicked={this.onCreateRoleClicked.bind(this)} onManageRoleClicked={() => this.clickHandler(this.state.tabs.roles)} /> : null}
-            {this.state.tabs.cluster_authentication && this.state.tabs.cluster_authentication.isSelected ?
-              <GlobalKerberos /> : null}
           </div>
         </div>
       );
@@ -196,7 +184,7 @@ function mapStateToProps(state: any): any {
     createNewUserIsEntered: state.users.createNewUserIsEntered,
     createNewRoleIsEntered: state.users.createNewRoleIsEntered,
     isAdmin: state.global.isAdmin,
-    config: state.clusters.config
+    config: state.clusters.config,
   };
 }
 

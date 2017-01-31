@@ -163,13 +163,6 @@ export interface Job {
   completed_at: number
 }
 
-export interface Keytab {
-  
-  id: number
-  principal: string
-  name: string
-}
-
 export interface Label {
   
   id: number
@@ -352,9 +345,6 @@ export interface Service {
   // Get Steam start up configurations
   getConfig: (go: (error: Error, config: Config) => void) => void
   
-  // Set this to enable kerberos usage when applicable
-  setGlobalKerberos: (enabled: boolean, go: (error: Error) => void) => void
-  
   // Check if an identity has admin privileges
   checkAdmin: (go: (error: Error, isAdmin: boolean) => void) => void
   
@@ -369,18 +359,6 @@ export interface Service {
   
   // Test LDAP security configurations
   testLdapConfig: (config: LdapConfig, go: (error: Error, count: number, groups: LdapGroup[]) => void) => void
-  
-  // Get the keytab for the logged in user
-  getUserKeytab: (go: (error: Error, keytab: Keytab, exists: boolean) => void) => void
-  
-  // Get the keytab for Steam (used for polling)
-  getSteamKeytab: (go: (error: Error, keytab: Keytab, exists: boolean) => void) => void
-  
-  // Test the keytab for the given user
-  testKeytab: (keytabId: number, go: (error: Error) => void) => void
-  
-  // Delete the keytab entry for the given user
-  deleteKeytab: (keytabId: number, go: (error: Error) => void) => void
   
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
@@ -744,16 +722,6 @@ interface GetConfigOut {
   
 }
 
-interface SetGlobalKerberosIn {
-  
-  enabled: boolean
-  
-}
-
-interface SetGlobalKerberosOut {
-  
-}
-
 interface CheckAdminIn {
   
 }
@@ -805,50 +773,6 @@ interface TestLdapConfigOut {
   count: number
   
   groups: LdapGroup[]
-  
-}
-
-interface GetUserKeytabIn {
-  
-}
-
-interface GetUserKeytabOut {
-  
-  keytab: Keytab
-  
-  exists: boolean
-  
-}
-
-interface GetSteamKeytabIn {
-  
-}
-
-interface GetSteamKeytabOut {
-  
-  keytab: Keytab
-  
-  exists: boolean
-  
-}
-
-interface TestKeytabIn {
-  
-  keytab_id: number
-  
-}
-
-interface TestKeytabOut {
-  
-}
-
-interface DeleteKeytabIn {
-  
-  keytab_id: number
-  
-}
-
-interface DeleteKeytabOut {
   
 }
 
@@ -2355,18 +2279,6 @@ export function getConfig(go: (error: Error, config: Config) => void): void {
   });
 }
 
-export function setGlobalKerberos(enabled: boolean, go: (error: Error) => void): void {
-  const req: SetGlobalKerberosIn = { enabled: enabled };
-  Proxy.Call("SetGlobalKerberos", req, function(error, data) {
-    if (error) {
-      return go(error);
-    } else {
-      const d: SetGlobalKerberosOut = <SetGlobalKerberosOut> data;
-      return go(null);
-    }
-  });
-}
-
 export function checkAdmin(go: (error: Error, isAdmin: boolean) => void): void {
   const req: CheckAdminIn = {  };
   Proxy.Call("CheckAdmin", req, function(error, data) {
@@ -2423,54 +2335,6 @@ export function testLdapConfig(config: LdapConfig, go: (error: Error, count: num
     } else {
       const d: TestLdapConfigOut = <TestLdapConfigOut> data;
       return go(null, d.count, d.groups);
-    }
-  });
-}
-
-export function getUserKeytab(go: (error: Error, keytab: Keytab, exists: boolean) => void): void {
-  const req: GetUserKeytabIn = {  };
-  Proxy.Call("GetUserKeytab", req, function(error, data) {
-    if (error) {
-      return go(error, null, null);
-    } else {
-      const d: GetUserKeytabOut = <GetUserKeytabOut> data;
-      return go(null, d.keytab, d.exists);
-    }
-  });
-}
-
-export function getSteamKeytab(go: (error: Error, keytab: Keytab, exists: boolean) => void): void {
-  const req: GetSteamKeytabIn = {  };
-  Proxy.Call("GetSteamKeytab", req, function(error, data) {
-    if (error) {
-      return go(error, null, null);
-    } else {
-      const d: GetSteamKeytabOut = <GetSteamKeytabOut> data;
-      return go(null, d.keytab, d.exists);
-    }
-  });
-}
-
-export function testKeytab(keytabId: number, go: (error: Error) => void): void {
-  const req: TestKeytabIn = { keytab_id: keytabId };
-  Proxy.Call("TestKeytab", req, function(error, data) {
-    if (error) {
-      return go(error);
-    } else {
-      const d: TestKeytabOut = <TestKeytabOut> data;
-      return go(null);
-    }
-  });
-}
-
-export function deleteKeytab(keytabId: number, go: (error: Error) => void): void {
-  const req: DeleteKeytabIn = { keytab_id: keytabId };
-  Proxy.Call("DeleteKeytab", req, function(error, data) {
-    if (error) {
-      return go(error);
-    } else {
-      const d: DeleteKeytabOut = <DeleteKeytabOut> data;
-      return go(null);
     }
   });
 }

@@ -154,14 +154,9 @@ func parseType(typ ast.Expr) string {
 		if y, ok := x.X.(*ast.Ident); ok {
 			return strings.TrimSpace(fmt.Sprintf("%s.%s", y.Name, x.Sel.Name))
 		} else {
-			panic(fmt.Sprintf("unhandled selector: %T", x.X))
+			panic(fmt.Sprintf("unhandled selector: %s", y.Name))
 		}
-	case *ast.ArrayType:
-		if y, ok := x.Elt.(*ast.Ident); ok {
-			return strings.TrimSpace(fmt.Sprintf("[]%s", y.Name))
-		} else {
-			panic(fmt.Sprintf("unhandled array type: %T", x.Elt))
-		}
+
 	default:
 		panic(fmt.Sprintf("unhandled field type: %T", x))
 	}

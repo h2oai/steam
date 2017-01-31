@@ -19,12 +19,9 @@ package data
 
 import (
 	"crypto/tls"
-	"log"
 
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/master/az"
-
-	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -49,9 +46,7 @@ func (ds *Datastore) Lookup(username, password, token string, tlsConfig *tls.Con
 	case LDAPAuth:
 		conn, err := ldap.FromDatabase(auth.Value, tlsConfig)
 		if err != nil {
-			log.Printf("LDAP ERROR creating ldap config from database: %v", err)
-			log.Println("LDAP ERROR resorting to local auth")
-			return ds.localLookup(identity, exists)
+			return nil, errors.Wrap(err, "creating ldap config from database")
 		}
 		return ds.ldapLookup(identity, exists, username, password, token, conn)
 	}
@@ -68,39 +63,13 @@ func (ds *Datastore) LookupUser(name string) (az.Principal, error) {
 		return nil, nil
 	}
 
-	return ds.lookup(identity)
+	return ds.localLookup(identity, ok)
 }
 
 func (ds *Datastore) localLookup(identity Identity, exists bool) (az.Principal, error) {
 	// Validate that this identity exists
 	if !exists {
-		return nil, errors.New("unable to locate user")
-	}
-	// Validate that this is a local user
-	if identity.AuthType != LocalAuth {
-		return nil, fmt.Errorf("%s is not a local user", identity.Name)
-	}
-
-	return ds.lookup(identity)
-}
-
-func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
-	// Validate if local
-	if exists && (identity.AuthType == LocalAuth || ds.users.Exists(token)) {
-		return ds.lookup(identity)
-	}
-
-	identity, exists, err := ds.NewUser(identity, exists, username, password, token, conn)
-	if err != nil {
-		return nil, errors.Wrap(err, "creating new user")
-	}
-
-	return ds.lookup(identity)
-}
-
-func (ds *Datastore) lookup(identity Identity) (az.Principal, error) {
-	if !identity.IsActive {
-		return nil, errors.New("inactive user cannot log in")
+		return nil, nil
 	}
 
 	// Fetch roles
@@ -130,4 +99,18 @@ func (ds *Datastore) lookup(identity Identity) (az.Principal, error) {
 	}
 
 	return &Principal{ds, &identity, permissions, isAdmin}, nil
+}
+
+func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
+	// Validate if local
+	if identity.AuthType == LocalAuth || ds.users.Exists(token) {
+		return ds.localLookup(identity, exists)
+	}
+
+	identity, exists, err := ds.NewUser(identity, exists, username, password, token, conn)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating new user")
+	}
+
+	return ds.localLookup(identity, exists)
 }
