@@ -53,6 +53,7 @@ var schema = map[string]string{
 	"identity_workgroup":  createTableIdentityWorkgroup,
 	"history":             createTableHistory,
 	"label":               createTableLabel,
+	"keytab":              createTableKeytab,
 	"meta":                createTableMeta,
 	"model":               createTableModel,
 	"multinomial_model":   createTableMultinomialModel,
@@ -71,7 +72,7 @@ var createTableAuthentication = `
 CREATE TABLE authentication (
     id integer PRIMARY KEY AUTOINCREMENT,
     key text NOT NULL UNIQUE,
-    value texts NOT NULL,
+    value text NOT NULL,
     enabled boolean UNIQUE
 )
 `
@@ -206,6 +207,18 @@ CREATE TABLE label (
 
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE SET NULL,
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
+)
+`
+
+var createTableKeytab = `
+CREATE TABLE keytab (
+    id integer PRIMARY KEY AUTOINCREMENT,
+    identity_id integer,
+    principal text,
+    filename text NOT NULL,
+    file text NOT NULL,
+
+    FOREIGN KEY (identity_id) REFERENCES identity(id) ON DELETE CASCADE
 )
 `
 

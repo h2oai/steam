@@ -46,6 +46,11 @@ export function getConfig(): void {
   Proxy.Call("GetConfig", req, print);
 }
 
+export function setGlobalKerberos(enabled: boolean): void {
+  const req: any = { enabled: enabled };
+  Proxy.Call("SetGlobalKerberos", req, print);
+}
+
 export function checkAdmin(): void {
   const req: any = {  };
   Proxy.Call("CheckAdmin", req, print);
@@ -69,6 +74,26 @@ export function getLdapConfig(): void {
 export function testLdapConfig(config: LdapConfig): void {
   const req: any = { config: config };
   Proxy.Call("TestLdapConfig", req, print);
+}
+
+export function getUserKeytab(): void {
+  const req: any = {  };
+  Proxy.Call("GetUserKeytab", req, print);
+}
+
+export function getSteamKeytab(): void {
+  const req: any = {  };
+  Proxy.Call("GetSteamKeytab", req, print);
+}
+
+export function testKeytab(keytabId: number): void {
+  const req: any = { keytab_id: keytabId };
+  Proxy.Call("TestKeytab", req, print);
+}
+
+export function deleteKeytab(keytabId: number): void {
+  const req: any = { keytab_id: keytabId };
+  Proxy.Call("DeleteKeytab", req, print);
 }
 
 export function registerCluster(address: string): void {

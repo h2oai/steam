@@ -26,7 +26,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
-	"path"
+	"os/user"
 	"sort"
 	"strconv"
 	"strings"
@@ -35,6 +35,7 @@ import (
 	"github.com/h2oai/steam/bindings"
 	"github.com/h2oai/steam/lib/fs"
 	"github.com/h2oai/steam/lib/haproxy"
+	"github.com/h2oai/steam/lib/kerberos"
 	"github.com/h2oai/steam/lib/ldap"
 	"github.com/h2oai/steam/lib/svc"
 	"github.com/h2oai/steam/lib/yarn"
@@ -67,8 +68,12 @@ func NewService(
 	tlsConfig *tls.Config,
 	compilationServiceAddress, scoringServiceAddress, clusterProxyAddress string,
 	scoringServicePortsRange [2]int,
-	kerberos bool,
 ) *Service {
+	kerberos, err := ViewGlobalKerberos(ds)
+	if err != nil {
+		// FIXME: THIS SHOULD BE HANDLED MORE GRACEFULLY
+		panic(err)
+	}
 	return &Service{
 		version, workingDir,
 		ds,
@@ -223,11 +228,26 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	if _, err := os.Stat(fs.GetAssetsPath(s.workingDir, "cert.pem")); os.IsNotExist(err) {
 		return 0, errors.New("SSL \"" + fs.GetAssetsPath(s.workingDir, "cert.pem") + "\" cert file does not exist")
 	}
-	// FIXME implement keytab generation on the fly
-	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
+	// Get UID and GID for impersonation
+	uid, gid, err := getUser(pz.Name())
+	if err != nil {
+		return 0, errors.Wrap(err, "get user")
+	}
+	// Write keytab if not exists already
+	var keytabPath string
+	if s.kerberosEnabled {
+		kt, err := s.viewKeytab(pz)
+		if err != nil {
+			return 0, errors.Wrap(err, "viewing keytab")
+		}
+		keytabPath, err = kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
+		if err != nil {
+			return 0, errors.Wrap(err, "writing keytab file")
+		}
+	}
 	// Start cluster in yarn
 	appId, address, out, token, contextPath, err := yarn.StartCloud(size, s.kerberosEnabled, memory,
-		clusterName, engine.Location, identity.Name, keytabPath, secure)
+		clusterName, engine.Location, identity.Name, keytabPath, secure, uid, gid)
 	if err != nil {
 		return 0, errors.Wrap(err, "starting yarn cluster")
 	}
@@ -279,11 +299,26 @@ func (s *Service) StopClusterOnYarn(pz az.Principal, clusterId int64, keytab str
 	} else if !exists {
 		return errors.New("failed locating yarn details")
 	}
-	// FIXME implement keytab generation on the fly
-	keytabPath := path.Join(s.workingDir, fs.KTDir, keytab)
+	// Get UID and GID for impersonation
+	uid, gid, err := getUser(pz.Name())
+	if err != nil {
+		return errors.Wrap(err, "get user")
+	}
+	var keytabPath string
+	if s.kerberosEnabled {
+		// Write keytab if not exists already
+		kt, err := s.viewKeytab(pz)
+		if err != nil {
+			return errors.Wrap(err, "viewing keytab")
+		}
+		keytabPath, err = kerberos.WriteKeytab(kt, s.workingDir, int(uid), int(gid))
+		if err != nil {
+			return errors.Wrap(err, "writing keytab file")
+		}
+	}
 	// Stop clouds
 	if err := yarn.StopCloud(s.kerberosEnabled, cluster.Name, yarnDetails.ApplicationId,
-		yarnDetails.OutputDir, identity.Name, keytabPath); err != nil {
+		yarnDetails.OutputDir, identity.Name, keytabPath, uid, gid); err != nil {
 		return errors.Wrap(err, "stopping cluster")
 	}
 	// Delete cluster
@@ -1592,7 +1627,7 @@ func (s *Service) CreateIdentity(pz az.Principal, name string, password string) 
 	}
 	// Create identity
 	id, err := s.ds.CreateIdentity(name, data.WithPassword(hash), data.WithDefaultIdentityWorkgroup,
-		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz),
+		data.WithPrivilege(pz, data.Owns), data.WithAudit(pz), data.WithSelfView,
 	)
 	return id, errors.Wrap(err, "creating identity in database")
 }
@@ -2364,9 +2399,11 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	} else if !exists {
 		return nil, false, nil
 	}
+	// FIXME: HACK to remove escaped quotes from sqlite???
+	authentication.Value = strings.Replace(authentication.Value, "\\", "", -1)
 
 	var deserial ldapSerialized
-	if err := json.Unmarshal([]byte(authentication.Value), &deserial); err != nil {
+	if err := json.Unmarshal(json.RawMessage(authentication.Value), &deserial); err != nil {
 		return nil, false, errors.Wrap(err, "deserializing config metadata")
 	}
 
@@ -2380,6 +2417,165 @@ func (s *Service) TestLdapConfig(pz az.Principal, config *web.LdapConfig) (int, 
 }
 
 func (s *Service) CheckAdmin(pz az.Principal) (bool, error) { return pz.IsAdmin(), nil }
+
+func (s *Service) GetSteamKeytab(pz az.Principal) (*web.Keytab, bool, error) {
+	// Only admin can see/modify
+	if !pz.IsAdmin() {
+		return nil, false, errors.New("user is not an admin")
+	}
+	// Read keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByPrincipalSteam)
+	if err != nil {
+		return nil, false, errors.Wrap(err, "reading keytab from database")
+	}
+	return toKeytab(keytab), exists, nil
+}
+
+func (s *Service) viewKeytab(pz az.Principal) (data.Keytab, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
+		return data.Keytab{}, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return data.Keytab{}, errors.Wrap(err, "checking view privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	if err != nil {
+		return data.Keytab{}, errors.Wrap(err, "reading keytab from database")
+	} else if !exists {
+		return data.Keytab{}, errors.New("unable to locate keytab for user")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+		return data.Keytab{}, errors.Wrap(err, "checking view privileges")
+	}
+	return keytab, nil
+}
+
+func (s *Service) GetUserKeytab(pz az.Principal) (*web.Keytab, bool, error) {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
+		return nil, false, errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return nil, false, errors.Wrap(err, "checking view privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ByIdentityId(pz.Id()))
+	if err != nil {
+		return nil, false, errors.Wrap(err, "reading keytab from database")
+	} else if exists {
+		if err := pz.CheckView(s.ds.EntityType.Keytab, keytab.Id); err != nil {
+			return nil, false, errors.Wrap(err, "checking view privileges")
+		}
+	}
+	return toKeytab(keytab), exists, nil
+}
+
+func (s *Service) TestKeytab(pz az.Principal, keytabId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewKeytab); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return errors.Wrap(err, "checking owns privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ById(keytabId))
+	if err != nil {
+		return errors.Wrap(err, "reading keytab from database")
+	} else if !exists {
+		return errors.New("cannot locate keytab")
+	}
+	var name string
+	// Final privileges must be handled differently if a steam/user keytab
+	if keytab.Principal.Valid { // Is the steam keytab
+		if !pz.IsAdmin() {
+			return errors.New("user is not a valid admin")
+		}
+		name = keytab.Principal.String
+	} else {
+		if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytabId); err != nil {
+			return errors.Wrap(err, "checking view privileges")
+		}
+		name = pz.Name()
+	}
+	// Get user uid and gid for impersonation of execs
+	uid, gid, err := getUser(name)
+	if err != nil {
+		return errors.Wrap(err, "get user")
+	}
+	// Generate keytab on disk, if not available
+	kpath, err := kerberos.WriteKeytab(keytab, s.workingDir, int(uid), int(gid))
+	if err != nil {
+		return errors.Wrap(err, "write keytab")
+	}
+	// Test by performing a kinit
+	return kerberos.Kinit(kpath, name, uid, gid)
+}
+
+func (s *Service) DeleteKeytab(pz az.Principal, keytabId int64) error {
+	// Check permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ManageKeytab); err != nil {
+		return errors.Wrap(err, "checking permission")
+	}
+	if err := pz.CheckView(s.ds.EntityType.Identity, pz.Id()); err != nil {
+		return errors.Wrap(err, "checking owns privileges")
+	}
+	// Read Keytab
+	keytab, exists, err := s.ds.ReadKeytab(data.ById(keytabId))
+	if err != nil {
+		return errors.Wrap(err, "reading keytab from database")
+	} else if !exists {
+		return errors.New("cannot locate keytab")
+	}
+	// Final privileges must be handled differently if a steam/user keytab
+	if keytab.Principal.Valid { // Is the steam keytab
+		if !pz.IsAdmin() {
+			return errors.New("user is not a valid admin")
+		}
+	} else if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytabId); err != nil {
+		return errors.Wrap(err, "checking view privileges")
+	}
+	// Delete local Keytab
+	if err := kerberos.DeleteKeytab(keytab.Filename, s.workingDir); err != nil {
+		return errors.Wrap(err, "deleting local keytab")
+	}
+	// Delete Keytab
+	return s.ds.DeleteKeytab(keytabId)
+}
+
+func ViewGlobalKerberos(ds *data.Datastore) (bool, error) {
+	meta, exists, err := ds.ReadMeta(data.ByKey("kerberos"))
+	if err != nil {
+		return false, errors.Wrap(err, "reading meta table")
+	} else if !exists {
+		return false, nil
+	}
+	return strconv.ParseBool(meta.Value)
+}
+
+func (s *Service) SetGlobalKerberos(pz az.Principal, enabled bool) error {
+	// Check permission (only admin)
+	if !pz.IsAdmin() {
+		return errors.New("user is not an admin")
+	}
+
+	meta, exists, err := s.ds.ReadMeta(data.ByKey("kerberos"))
+	if err != nil {
+		return errors.Wrap(err, "reading meta table")
+	} else if exists {
+		if err := s.ds.UpdateMeta(meta.Id, data.WithValue(strconv.FormatBool(enabled))); err != nil {
+			errors.Wrap(err, "updating kerberos value")
+		}
+	} else {
+		if _, err := s.ds.CreateMeta("kerberos", data.WithValue(strconv.FormatBool(enabled))); err != nil {
+			errors.Wrap(err, "creating kerberos value")
+		}
+	}
+	s.kerberosEnabled = enabled
+	return nil
+}
 
 // --- ---------- ---
 // --- ---------- ---
@@ -2478,6 +2674,24 @@ func toSizeBytes(i int64) string {
 	}
 
 	return ""
+}
+
+// Helper func to get uid/gid
+func getUser(username string) (uint32, uint32, error) {
+	u, err := user.Lookup(username)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "user lookup")
+	}
+
+	uid, err := strconv.ParseUint(u.Uid, 10, 64)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "parsing uid")
+	}
+	gid, err := strconv.ParseUint(u.Gid, 10, 64)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "parsing gid")
+	}
+	return uint32(uid), uint32(gid), nil
 }
 
 // //
@@ -2869,4 +3083,12 @@ func toLdapGroup(gs map[string]int) []*web.LdapGroup {
 		ar = append(ar, &web.LdapGroup{Name: g, Users: u})
 	}
 	return ar
+}
+
+func toKeytab(k data.Keytab) *web.Keytab {
+	return &web.Keytab{
+		Id:        int(k.Id),
+		Principal: k.Principal.String,
+		Name:      k.Filename,
+	}
 }
