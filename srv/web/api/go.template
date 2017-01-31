@@ -28,7 +28,7 @@ import (
   "encoding/json"
   "log"
   "net/http"
-  
+
   "github.com/h2oai/steam/master/az"
   "github.com/rs/xid"
 )
@@ -122,7 +122,12 @@ func (this *Impl) {{.Name}}(r *http.Request, in *{{.Name}}In, out *{{.Name}}Out)
 		return azerr
 	}
 
-  req, merr := json.Marshal(in)
+  jsonIn := make(map[string]interface{})
+  {{- range .Inputs}}{{- if not .LogOmit}}
+  jsonIn["{{snake .Name}}"] = {{createMaps . "in"}}
+  {{- end}}{{- end}}
+
+  req, merr := json.Marshal(jsonIn)
   if merr != nil {
     log.Println(guid, "REQ", pz, name, merr)
   } else {
@@ -135,10 +140,15 @@ func (this *Impl) {{.Name}}(r *http.Request, in *{{.Name}}In, out *{{.Name}}Out)
 		return err
 	}
   {{range $i, $e := .Outputs}}
-	out.{{.Name}} = val{{$i}} 
+	out.{{.Name}} = val{{$i}}
   {{end}}
 
-  {{cleanJSON .Outputs}}
+  jsonOut := make(map[string]interface{})
+  {{- range .Outputs}}{{- if not .LogOmit}}
+  jsonOut["{{snake .Name}}"] = {{createMaps . "out"}}
+  {{- end}}{{- end}}
+
+  res, merr := json.Marshal(jsonOut)
   if merr != nil {
     log.Println(guid, "RES", pz, name, merr)
   } else {

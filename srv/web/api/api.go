@@ -33,7 +33,7 @@ type LdapConfig struct {
 	Port                   int
 	Ldaps                  bool
 	BindDn                 string
-	BindPassword           string
+	BindPassword           string `log:"-"`
 	UserBaseDn             string
 	UserBaseFilter         string
 	UserNameAttribute      string
@@ -64,7 +64,7 @@ type Cluster struct {
 	TypeId      int64
 	DetailId    int64
 	Address     string
-	Token       string
+	Token       string `log:"-"`
 	State       string
 	CreatedAt   int64
 }
@@ -120,7 +120,7 @@ type Dataset struct {
 	Description        string
 	FrameName          string
 	ResponseColumnName string
-	JSONProperties     string
+	JSONProperties     string `log:"-"`
 	CreatedAt          int64
 }
 
@@ -139,7 +139,7 @@ type Model struct {
 	Location            string
 	ModelObjectType     string
 	MaxRuntime          int
-	JSONMetrics         string
+	JSONMetrics         string `log:"-"`
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -160,7 +160,7 @@ type BinomialModel struct {
 	Location            string
 	ModelObjectType     string
 	MaxRuntime          int
-	JSONMetrics         string
+	JSONMetrics         string `log:"-"`
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -186,7 +186,7 @@ type MultinomialModel struct {
 	Location            string
 	ModelObjectType     string
 	MaxRuntime          int
-	JSONMetrics         string
+	JSONMetrics         string `log:"-"`
 	CreatedAt           int64
 	LabelId             int64
 	LabelName           string
@@ -210,7 +210,7 @@ type RegressionModel struct {
 	Location             string
 	ModelObjectType      string
 	MaxRuntime           int
-	JSONMetrics          string
+	JSONMetrics          string `log:"-"`
 	CreatedAt            int64
 	LabelId              int64
 	LabelName            string
@@ -460,7 +460,7 @@ type SetGlobalKerberos struct {
 }
 type CheckAdmin struct {
 	_       int
-	IsAdmin bool
+	IsAdmin bool `help:"A boolean value indicating if the current user is has admin"`
 }
 type SetLocalConfig struct {
 }
@@ -948,7 +948,7 @@ type DeleteWorkgroup struct {
 }
 type CreateIdentity struct {
 	Name       string `help:"A string name."`
-	Password   string `help:"A string password"`
+	Password   string `help:"A string password" log:"-"`
 	_          int
 	IdentityId int64 `help:"Integer ID of the identity in Steam."`
 }
@@ -1002,7 +1002,7 @@ type UnlinkIdentityFromRole struct {
 }
 type UpdateIdentity struct {
 	IdentityId int64  `help:"Integer ID of an identity in Steam."`
-	Password   string `help:"Password for identity"`
+	Password   string `help:"Password for identity" log:"-"`
 }
 type ActivateIdentity struct {
 	IdentityId int64 `help:"Integer ID of an identity in Steam."`
