@@ -2487,21 +2487,21 @@ func (s *Service) TestKeytab(pz az.Principal, keytabId int64) error {
 	} else if !exists {
 		return errors.New("cannot locate keytab")
 	}
-	var uid, gid uint32
+	var name string
 	// Final privileges must be handled differently if a steam/user keytab
 	if keytab.Principal.Valid { // Is the steam keytab
 		if !pz.IsAdmin() {
 			return errors.New("user is not a valid admin")
 		}
-		// Get user uid and gid for impersonation of execs
-		uid, gid, err = getUser(keytab.Principal.String)
+		name = keytab.Principal.String
 	} else {
 		if err := pz.CheckOwns(s.ds.EntityType.Keytab, keytabId); err != nil {
 			return errors.Wrap(err, "checking view privileges")
 		}
-		// Get user uid and gid for impersonation of execs
-		uid, gid, err = getUser(pz.Name())
+		name = pz.Name()
 	}
+	// Get user uid and gid for impersonation of execs
+	uid, gid, err := getUser(name)
 	if err != nil {
 		return errors.Wrap(err, "get user")
 	}
@@ -2511,7 +2511,7 @@ func (s *Service) TestKeytab(pz az.Principal, keytabId int64) error {
 		return errors.Wrap(err, "write keytab")
 	}
 	// Test by performing a kinit
-	return kerberos.Kinit(kpath, pz.Name(), uid, gid)
+	return kerberos.Kinit(kpath, name, uid, gid)
 }
 
 func (s *Service) DeleteKeytab(pz az.Principal, keytabId int64) error {
