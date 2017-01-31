@@ -68,7 +68,7 @@ func (ds *Datastore) LookupUser(name string) (az.Principal, error) {
 		return nil, nil
 	}
 
-	return ds.localLookup(identity, ok)
+	return ds.lookup(identity)
 }
 
 func (ds *Datastore) localLookup(identity Identity, exists bool) (az.Principal, error) {
