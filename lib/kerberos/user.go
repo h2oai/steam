@@ -20,7 +20,7 @@ func Kinit(keytabFile, principal string, uid, gid uint32) error {
 	if klist(uid, gid) {
 		args = append(args, "-R")
 	} else {
-		args = append(args, "-k", "-t", keytabFile)
+		args = append(args, "-k", "-t", keytabFile, "-l", "1m")
 	}
 
 	cmd := exec.Command("kinit", append(args, principal)...)
