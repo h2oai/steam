@@ -86,7 +86,7 @@ func (ds *Datastore) localLookup(identity Identity, exists bool) (az.Principal, 
 
 func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, password, token string, conn *ldap.Ldap) (az.Principal, error) {
 	// Validate if local
-	if identity.AuthType == LocalAuth || ds.users.Exists(token) {
+	if exists && (identity.AuthType == LocalAuth || ds.users.Exists(token)) {
 		return ds.lookup(identity)
 	}
 
