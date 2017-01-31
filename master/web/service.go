@@ -2399,9 +2399,11 @@ func (s *Service) GetLdapConfig(pz az.Principal) (*web.LdapConfig, bool, error) 
 	} else if !exists {
 		return nil, false, nil
 	}
+	// FIXME: HACK to remove escaped quotes from sqlite???
+	authentication.Value = strings.Replace(authentication.Value, "\\", "", -1)
 
 	var deserial ldapSerialized
-	if err := json.Unmarshal([]byte(authentication.Value), &deserial); err != nil {
+	if err := json.Unmarshal(json.RawMessage(authentication.Value), &deserial); err != nil {
 		return nil, false, errors.Wrap(err, "deserializing config metadata")
 	}
 
