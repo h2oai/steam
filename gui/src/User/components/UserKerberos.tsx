@@ -22,7 +22,7 @@ import '../styles/user.scss';
 import { } from "../../Proxy/Proxy";
 import {fetchUserKeytab, deleteKeytab, testKeytab, saveLocalKerberos} from "../actions/user.actions";
 import {Keytab} from "../../Proxy/Proxy";
-
+import { Dialog } from '@blueprintjs/core/dist/components/dialog/dialog';
 
 interface Props {
   userKeytab: Keytab
@@ -44,7 +44,8 @@ export class UserKerberos extends React.Component<Props & DispatchProps, any> {
   constructor(params) {
     super(params);
     this.state = {
-      uploadText: "Upload New Keytab"
+      uploadText: "Upload New Keytab",
+      afterConfirmAction: null
     };
 
   }
@@ -55,6 +56,7 @@ export class UserKerberos extends React.Component<Props & DispatchProps, any> {
 
   onDeleteKeytab = (id) => {
     this.props.deleteKeytab(id, false);
+    this.setState({afterConfirmAction: null});
   };
   onTestConfigClicked = () => {
     this.props.testKeytab(this.props.userKeytab.id);
@@ -76,7 +78,7 @@ export class UserKerberos extends React.Component<Props & DispatchProps, any> {
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>Your principle keytab</p>
-                {this.props.userKeytab ? <p>{this.props.userKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.userKeytab.id)}></i></p>
+                {this.props.userKeytab ? <p>{this.props.userKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.setState({afterConfirmAction: () => this.onDeleteKeytab(this.props.userKeytab.id)})}></i></p>
                   : <p>
                     <label className="pt-file-upload">
                       <input ref="keytab" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
@@ -93,6 +95,23 @@ export class UserKerberos extends React.Component<Props & DispatchProps, any> {
               <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
             </div>
         </div> : null}
+
+        <Dialog
+          iconName="Confirm"
+          isOpen={this.state.afterConfirmAction}
+          onClose={() => this.setState({ afterConfirmAction: null })}
+          title="Confirm exit"
+        >
+          <div className="pt-dialog-body">
+            Are you sure you wish to delete this keytab?
+          </div>
+          <div className="pt-dialog-footer">
+            <div className="pt-dialog-footer-actions">
+              <div className="button-secondary" onClick={() => this.setState({ afterConfirmAction: null })}>Cancel</div> &nbsp;
+              <div className="button-primary" onClick={this.state.afterConfirmAction}>Accept</div>
+            </div>
+          </div>
+        </Dialog>
 
       </div>
     );

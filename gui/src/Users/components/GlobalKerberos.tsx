@@ -27,6 +27,7 @@ import { Config } from "../../Proxy/Proxy";
 import { saveGlobalKerberos, fetchGlobalKeytab, setGlobalKerberosEnabled } from "../actions/users.actions";
 import { deleteKeytab, testKeytab } from "../../User/actions/user.actions";
 import { Keytab } from "../../Proxy/Proxy";
+import { Dialog } from '@blueprintjs/core/dist/components/dialog/dialog';
 
 interface Props {
   config: Config,
@@ -52,7 +53,8 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
     super(params);
     this.state = {
       uploadText: "Upload New Keytab",
-      steamPrincipleValue: ""
+      steamPrincipleValue: "",
+      afterConfirmAction: null
     };
 
   }
@@ -78,6 +80,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
 
   onDeleteKeytab = (id: number) => {
     this.props.deleteKeytab(id, true);
+    this.setState({ afterConfirmAction: null });
   };
   onTestConfigClicked = () => {
     this.props.testKeytab(this.props.globalKeytab.id);
@@ -128,7 +131,7 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
               <td className="auth-left">PRINCIPLE KEYTAB</td>
               <td>
                 <p>This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
-                {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.onDeleteKeytab(this.props.globalKeytab.id)}></i></p> :
+                {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.setState({ afterConfirmAction: () => this.onDeleteKeytab(this.props.globalKeytab.id) })}></i></p> :
                   <p>
                     <label className="pt-file-upload">
                       <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
@@ -142,9 +145,26 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
 
         {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <div id="actionButtonsContainer" className="space-20">
           <div>
-            <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
+            <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
           </div>
         </div> : null}
+
+        <Dialog
+          iconName="Confirm"
+          isOpen={this.state.afterConfirmAction}
+          onClose={() => this.setState({ afterConfirmAction: null })}
+          title="Confirm exit"
+        >
+          <div className="pt-dialog-body">
+            Are you sure you wish to delete this keytab?
+          </div>
+          <div className="pt-dialog-footer">
+            <div className="pt-dialog-footer-actions">
+              <div className="button-secondary" onClick={() => this.setState({ afterConfirmAction: null })}>Cancel</div> &nbsp;
+              <div className="button-primary" onClick={this.state.afterConfirmAction}>Accept</div>
+            </div>
+          </div>
+        </Dialog>
 
       </div>
     );

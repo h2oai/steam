@@ -598,7 +598,7 @@ export class UserAuthentication extends React.Component<Props & DispatchProps, a
           iconName="Confirm"
           isOpen={this.state.afterConfirmAction}
           onClose={() => this.setState({ afterConfirmAction: null })}
-          title="Confirm exit"
+          title="Confirm delete"
           >
           <div className="pt-dialog-body">
             Navigating away from this page will discard current LDAP config
