@@ -99,6 +99,10 @@ func (ds *Datastore) ldapLookup(identity Identity, exists bool, username, passwo
 }
 
 func (ds *Datastore) lookup(identity Identity) (az.Principal, error) {
+	if !identity.IsActive {
+		return nil, errors.New("inactive user cannot log in")
+	}
+
 	// Fetch roles
 	roles, err := ds.ReadRoles(ForIdentity(identity.Id))
 	if err != nil {
