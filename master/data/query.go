@@ -799,12 +799,15 @@ func ByPrivilege(pz az.Principal) QueryOpt {
 		x := q.tx.From("identity_workgroup").Select("workgroup_id").Where(
 			goqu.I("identity_id").Eq(pz.Id()),
 		)
-		aux := q.tx.From("privilege").SelectDistinct("entity_id").Where(
+		// FIXME: Resolves STEAM-723: Combined Select was resulting in only first ID being returned
+		var ids []int64
+		if err := q.tx.From("privilege").SelectDistinct("entity_id").Where(
 			goqu.I("workgroup_id").In(x),
 			goqu.I("entity_type").Eq(q.entityType),
-		)
-
-		q.dataset = q.dataset.Where(goqu.I("id").In(aux))
+		).ScanVals(&ids); err != nil {
+			return err
+		}
+		q.dataset = q.dataset.Where(q.I("id").In(ids))
 		return nil
 	}
 }
