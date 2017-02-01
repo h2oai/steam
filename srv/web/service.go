@@ -2829,13 +2829,16 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 	out.Config = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Config == nil {
+		out.Config = &Config{}
+	}
 	jsonOut["config"] = map[string]interface{}{
-		"authentication_type":   out.AuthenticationType,
-		"cluster_proxy_address": out.ClusterProxyAddress,
-		"kerberos_enabled":      out.KerberosEnabled,
-		"version":               out.Version,
-		"username":              out.Username,
-		"permissions":           out.Permissions,
+		"authentication_type":   out.Config.AuthenticationType,
+		"cluster_proxy_address": out.Config.ClusterProxyAddress,
+		"kerberos_enabled":      out.Config.KerberosEnabled,
+		"version":               out.Config.Version,
+		"username":              out.Config.Username,
+		"permissions":           out.Config.Permissions,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -2975,20 +2978,20 @@ func (this *Impl) SetLdapConfig(r *http.Request, in *SetLdapConfigIn, out *SetLd
 
 	jsonIn := make(map[string]interface{})
 	jsonIn["config"] = map[string]interface{}{
-		"host":                      in.Host,
-		"port":                      in.Port,
-		"ldaps":                     in.Ldaps,
-		"bind_dn":                   in.BindDn,
-		"user_base_dn":              in.UserBaseDn,
-		"user_base_filter":          in.UserBaseFilter,
-		"user_name_attribute":       in.UserNameAttribute,
-		"group_base_dn":             in.GroupBaseDn,
-		"group_name_attribute":      in.GroupNameAttribute,
-		"static_member_attribute":   in.StaticMemberAttribute,
-		"group_names":               in.GroupNames,
-		"search_request_size_limit": in.SearchRequestSizeLimit,
-		"search_request_time_limit": in.SearchRequestTimeLimit,
-		"force_bind":                in.ForceBind,
+		"host":                      in.Config.Host,
+		"port":                      in.Config.Port,
+		"ldaps":                     in.Config.Ldaps,
+		"bind_dn":                   in.Config.BindDn,
+		"user_base_dn":              in.Config.UserBaseDn,
+		"user_base_filter":          in.Config.UserBaseFilter,
+		"user_name_attribute":       in.Config.UserNameAttribute,
+		"group_base_dn":             in.Config.GroupBaseDn,
+		"group_name_attribute":      in.Config.GroupNameAttribute,
+		"static_member_attribute":   in.Config.StaticMemberAttribute,
+		"group_names":               in.Config.GroupNames,
+		"search_request_size_limit": in.Config.SearchRequestSizeLimit,
+		"search_request_time_limit": in.Config.SearchRequestTimeLimit,
+		"force_bind":                in.Config.ForceBind,
 	}
 
 	req, merr := json.Marshal(jsonIn)
@@ -3046,21 +3049,24 @@ func (this *Impl) GetLdapConfig(r *http.Request, in *GetLdapConfigIn, out *GetLd
 	out.Exists = val1
 
 	jsonOut := make(map[string]interface{})
+	if out.Config == nil {
+		out.Config = &LdapConfig{}
+	}
 	jsonOut["config"] = map[string]interface{}{
-		"host":                      out.Host,
-		"port":                      out.Port,
-		"ldaps":                     out.Ldaps,
-		"bind_dn":                   out.BindDn,
-		"user_base_dn":              out.UserBaseDn,
-		"user_base_filter":          out.UserBaseFilter,
-		"user_name_attribute":       out.UserNameAttribute,
-		"group_base_dn":             out.GroupBaseDn,
-		"group_name_attribute":      out.GroupNameAttribute,
-		"static_member_attribute":   out.StaticMemberAttribute,
-		"group_names":               out.GroupNames,
-		"search_request_size_limit": out.SearchRequestSizeLimit,
-		"search_request_time_limit": out.SearchRequestTimeLimit,
-		"force_bind":                out.ForceBind,
+		"host":                      out.Config.Host,
+		"port":                      out.Config.Port,
+		"ldaps":                     out.Config.Ldaps,
+		"bind_dn":                   out.Config.BindDn,
+		"user_base_dn":              out.Config.UserBaseDn,
+		"user_base_filter":          out.Config.UserBaseFilter,
+		"user_name_attribute":       out.Config.UserNameAttribute,
+		"group_base_dn":             out.Config.GroupBaseDn,
+		"group_name_attribute":      out.Config.GroupNameAttribute,
+		"static_member_attribute":   out.Config.StaticMemberAttribute,
+		"group_names":               out.Config.GroupNames,
+		"search_request_size_limit": out.Config.SearchRequestSizeLimit,
+		"search_request_time_limit": out.Config.SearchRequestTimeLimit,
+		"force_bind":                out.Config.ForceBind,
 	}
 	jsonOut["exists"] = out.Exists
 
@@ -3086,20 +3092,20 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 
 	jsonIn := make(map[string]interface{})
 	jsonIn["config"] = map[string]interface{}{
-		"host":                      in.Host,
-		"port":                      in.Port,
-		"ldaps":                     in.Ldaps,
-		"bind_dn":                   in.BindDn,
-		"user_base_dn":              in.UserBaseDn,
-		"user_base_filter":          in.UserBaseFilter,
-		"user_name_attribute":       in.UserNameAttribute,
-		"group_base_dn":             in.GroupBaseDn,
-		"group_name_attribute":      in.GroupNameAttribute,
-		"static_member_attribute":   in.StaticMemberAttribute,
-		"group_names":               in.GroupNames,
-		"search_request_size_limit": in.SearchRequestSizeLimit,
-		"search_request_time_limit": in.SearchRequestTimeLimit,
-		"force_bind":                in.ForceBind,
+		"host":                      in.Config.Host,
+		"port":                      in.Config.Port,
+		"ldaps":                     in.Config.Ldaps,
+		"bind_dn":                   in.Config.BindDn,
+		"user_base_dn":              in.Config.UserBaseDn,
+		"user_base_filter":          in.Config.UserBaseFilter,
+		"user_name_attribute":       in.Config.UserNameAttribute,
+		"group_base_dn":             in.Config.GroupBaseDn,
+		"group_name_attribute":      in.Config.GroupNameAttribute,
+		"static_member_attribute":   in.Config.StaticMemberAttribute,
+		"group_names":               in.Config.GroupNames,
+		"search_request_size_limit": in.Config.SearchRequestSizeLimit,
+		"search_request_time_limit": in.Config.SearchRequestTimeLimit,
+		"force_bind":                in.Config.ForceBind,
 	}
 
 	req, merr := json.Marshal(jsonIn)
@@ -3121,9 +3127,15 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 
 	jsonOut := make(map[string]interface{})
 	jsonOut["count"] = out.Count
-	jsonOut["groups"] = map[string]interface{}{
-		"name":  out.Name,
-		"users": out.Users,
+	if out.Groups == nil {
+		out.Groups = []*LdapGroup{}
+	}
+	jsonOut["groups"] = make([]map[string]interface{}, len(out.Groups))
+	for i, v := range out.Groups {
+		tmp := make(map[string]interface{})
+		tmp["name"] = v.Name
+		tmp["users"] = v.Users
+		jsonOut["groups"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3166,10 +3178,13 @@ func (this *Impl) GetUserKeytab(r *http.Request, in *GetUserKeytabIn, out *GetUs
 	out.Exists = val1
 
 	jsonOut := make(map[string]interface{})
+	if out.Keytab == nil {
+		out.Keytab = &Keytab{}
+	}
 	jsonOut["keytab"] = map[string]interface{}{
-		"id":        out.Id,
-		"principal": out.Principal,
-		"name":      out.Name,
+		"id":        out.Keytab.Id,
+		"principal": out.Keytab.Principal,
+		"name":      out.Keytab.Name,
 	}
 	jsonOut["exists"] = out.Exists
 
@@ -3213,10 +3228,13 @@ func (this *Impl) GetSteamKeytab(r *http.Request, in *GetSteamKeytabIn, out *Get
 	out.Exists = val1
 
 	jsonOut := make(map[string]interface{})
+	if out.Keytab == nil {
+		out.Keytab = &Keytab{}
+	}
 	jsonOut["keytab"] = map[string]interface{}{
-		"id":        out.Id,
-		"principal": out.Principal,
-		"name":      out.Name,
+		"id":        out.Keytab.Id,
+		"principal": out.Keytab.Principal,
+		"name":      out.Keytab.Name,
 	}
 	jsonOut["exists"] = out.Exists
 
@@ -3499,15 +3517,18 @@ func (this *Impl) GetCluster(r *http.Request, in *GetClusterIn, out *GetClusterO
 	out.Cluster = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Cluster == nil {
+		out.Cluster = &Cluster{}
+	}
 	jsonOut["cluster"] = map[string]interface{}{
-		"id":           out.Id,
-		"name":         out.Name,
-		"context_path": out.ContextPath,
-		"type_id":      out.TypeId,
-		"detail_id":    out.DetailId,
-		"address":      out.Address,
-		"state":        out.State,
-		"created_at":   out.CreatedAt,
+		"id":           out.Cluster.Id,
+		"name":         out.Cluster.Name,
+		"context_path": out.Cluster.ContextPath,
+		"type_id":      out.Cluster.TypeId,
+		"detail_id":    out.Cluster.DetailId,
+		"address":      out.Cluster.Address,
+		"state":        out.Cluster.State,
+		"created_at":   out.Cluster.CreatedAt,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3549,13 +3570,16 @@ func (this *Impl) GetClusterOnYarn(r *http.Request, in *GetClusterOnYarnIn, out 
 	out.Cluster = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Cluster == nil {
+		out.Cluster = &YarnCluster{}
+	}
 	jsonOut["cluster"] = map[string]interface{}{
-		"id":             out.Id,
-		"engine_id":      out.EngineId,
-		"size":           out.Size,
-		"application_id": out.ApplicationId,
-		"memory":         out.Memory,
-		"username":       out.Username,
+		"id":             out.Cluster.Id,
+		"engine_id":      out.Cluster.EngineId,
+		"size":           out.Cluster.Size,
+		"application_id": out.Cluster.ApplicationId,
+		"memory":         out.Cluster.Memory,
+		"username":       out.Cluster.Username,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3598,15 +3622,21 @@ func (this *Impl) GetClusters(r *http.Request, in *GetClustersIn, out *GetCluste
 	out.Clusters = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["clusters"] = map[string]interface{}{
-		"id":           out.Id,
-		"name":         out.Name,
-		"context_path": out.ContextPath,
-		"type_id":      out.TypeId,
-		"detail_id":    out.DetailId,
-		"address":      out.Address,
-		"state":        out.State,
-		"created_at":   out.CreatedAt,
+	if out.Clusters == nil {
+		out.Clusters = []*Cluster{}
+	}
+	jsonOut["clusters"] = make([]map[string]interface{}, len(out.Clusters))
+	for i, v := range out.Clusters {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["context_path"] = v.ContextPath
+		tmp["type_id"] = v.TypeId
+		tmp["detail_id"] = v.DetailId
+		tmp["address"] = v.Address
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["clusters"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3648,12 +3678,15 @@ func (this *Impl) GetClusterStatus(r *http.Request, in *GetClusterStatusIn, out 
 	out.ClusterStatus = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.ClusterStatus == nil {
+		out.ClusterStatus = &ClusterStatus{}
+	}
 	jsonOut["cluster_status"] = map[string]interface{}{
-		"version":                 out.Version,
-		"status":                  out.Status,
-		"max_memory":              out.MaxMemory,
-		"total_cpu_count":         out.TotalCpuCount,
-		"total_allowed_cpu_count": out.TotalAllowedCpuCount,
+		"version":                 out.ClusterStatus.Version,
+		"status":                  out.ClusterStatus.Status,
+		"max_memory":              out.ClusterStatus.MaxMemory,
+		"total_cpu_count":         out.ClusterStatus.TotalCpuCount,
+		"total_allowed_cpu_count": out.ClusterStatus.TotalAllowedCpuCount,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3734,13 +3767,16 @@ func (this *Impl) GetJob(r *http.Request, in *GetJobIn, out *GetJobOut) error {
 	out.Job = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Job == nil {
+		out.Job = &Job{}
+	}
 	jsonOut["job"] = map[string]interface{}{
-		"name":         out.Name,
-		"cluster_name": out.ClusterName,
-		"description":  out.Description,
-		"progress":     out.Progress,
-		"started_at":   out.StartedAt,
-		"completed_at": out.CompletedAt,
+		"name":         out.Job.Name,
+		"cluster_name": out.Job.ClusterName,
+		"description":  out.Job.Description,
+		"progress":     out.Job.Progress,
+		"started_at":   out.Job.StartedAt,
+		"completed_at": out.Job.CompletedAt,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3782,13 +3818,19 @@ func (this *Impl) GetJobs(r *http.Request, in *GetJobsIn, out *GetJobsOut) error
 	out.Jobs = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["jobs"] = map[string]interface{}{
-		"name":         out.Name,
-		"cluster_name": out.ClusterName,
-		"description":  out.Description,
-		"progress":     out.Progress,
-		"started_at":   out.StartedAt,
-		"completed_at": out.CompletedAt,
+	if out.Jobs == nil {
+		out.Jobs = []*Job{}
+	}
+	jsonOut["jobs"] = make([]map[string]interface{}, len(out.Jobs))
+	for i, v := range out.Jobs {
+		tmp := make(map[string]interface{})
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["description"] = v.Description
+		tmp["progress"] = v.Progress
+		tmp["started_at"] = v.StartedAt
+		tmp["completed_at"] = v.CompletedAt
+		jsonOut["jobs"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3874,12 +3916,18 @@ func (this *Impl) GetProjects(r *http.Request, in *GetProjectsIn, out *GetProjec
 	out.Projects = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["projects"] = map[string]interface{}{
-		"id":             out.Id,
-		"name":           out.Name,
-		"description":    out.Description,
-		"model_category": out.ModelCategory,
-		"created_at":     out.CreatedAt,
+	if out.Projects == nil {
+		out.Projects = []*Project{}
+	}
+	jsonOut["projects"] = make([]map[string]interface{}, len(out.Projects))
+	for i, v := range out.Projects {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["model_category"] = v.ModelCategory
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["projects"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -3921,12 +3969,15 @@ func (this *Impl) GetProject(r *http.Request, in *GetProjectIn, out *GetProjectO
 	out.Project = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Project == nil {
+		out.Project = &Project{}
+	}
 	jsonOut["project"] = map[string]interface{}{
-		"id":             out.Id,
-		"name":           out.Name,
-		"description":    out.Description,
-		"model_category": out.ModelCategory,
-		"created_at":     out.CreatedAt,
+		"id":             out.Project.Id,
+		"name":           out.Project.Name,
+		"description":    out.Project.Description,
+		"model_category": out.Project.ModelCategory,
+		"created_at":     out.Project.CreatedAt,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4052,14 +4103,20 @@ func (this *Impl) GetDatasources(r *http.Request, in *GetDatasourcesIn, out *Get
 	out.Datasources = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["datasources"] = map[string]interface{}{
-		"id":            out.Id,
-		"project_id":    out.ProjectId,
-		"name":          out.Name,
-		"description":   out.Description,
-		"kind":          out.Kind,
-		"configuration": out.Configuration,
-		"created_at":    out.CreatedAt,
+	if out.Datasources == nil {
+		out.Datasources = []*Datasource{}
+	}
+	jsonOut["datasources"] = make([]map[string]interface{}, len(out.Datasources))
+	for i, v := range out.Datasources {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["project_id"] = v.ProjectId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["kind"] = v.Kind
+		tmp["configuration"] = v.Configuration
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["datasources"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4101,14 +4158,17 @@ func (this *Impl) GetDatasource(r *http.Request, in *GetDatasourceIn, out *GetDa
 	out.Datasource = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Datasource == nil {
+		out.Datasource = &Datasource{}
+	}
 	jsonOut["datasource"] = map[string]interface{}{
-		"id":            out.Id,
-		"project_id":    out.ProjectId,
-		"name":          out.Name,
-		"description":   out.Description,
-		"kind":          out.Kind,
-		"configuration": out.Configuration,
-		"created_at":    out.CreatedAt,
+		"id":            out.Datasource.Id,
+		"project_id":    out.Datasource.ProjectId,
+		"name":          out.Datasource.Name,
+		"description":   out.Datasource.Description,
+		"kind":          out.Datasource.Kind,
+		"configuration": out.Datasource.Configuration,
+		"created_at":    out.Datasource.CreatedAt,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4276,14 +4336,20 @@ func (this *Impl) GetDatasets(r *http.Request, in *GetDatasetsIn, out *GetDatase
 	out.Datasets = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["datasets"] = map[string]interface{}{
-		"id":                   out.Id,
-		"datasource_id":        out.DatasourceId,
-		"name":                 out.Name,
-		"description":          out.Description,
-		"frame_name":           out.FrameName,
-		"response_column_name": out.ResponseColumnName,
-		"created_at":           out.CreatedAt,
+	if out.Datasets == nil {
+		out.Datasets = []*Dataset{}
+	}
+	jsonOut["datasets"] = make([]map[string]interface{}, len(out.Datasets))
+	for i, v := range out.Datasets {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["datasource_id"] = v.DatasourceId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["frame_name"] = v.FrameName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["datasets"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4325,14 +4391,17 @@ func (this *Impl) GetDataset(r *http.Request, in *GetDatasetIn, out *GetDatasetO
 	out.Dataset = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Dataset == nil {
+		out.Dataset = &Dataset{}
+	}
 	jsonOut["dataset"] = map[string]interface{}{
-		"id":                   out.Id,
-		"datasource_id":        out.DatasourceId,
-		"name":                 out.Name,
-		"description":          out.Description,
-		"frame_name":           out.FrameName,
-		"response_column_name": out.ResponseColumnName,
-		"created_at":           out.CreatedAt,
+		"id":                   out.Dataset.Id,
+		"datasource_id":        out.Dataset.DatasourceId,
+		"name":                 out.Dataset.Name,
+		"description":          out.Dataset.Description,
+		"frame_name":           out.Dataset.FrameName,
+		"response_column_name": out.Dataset.ResponseColumnName,
+		"created_at":           out.Dataset.CreatedAt,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4374,14 +4443,20 @@ func (this *Impl) GetDatasetsFromCluster(r *http.Request, in *GetDatasetsFromClu
 	out.Dataset = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["dataset"] = map[string]interface{}{
-		"id":                   out.Id,
-		"datasource_id":        out.DatasourceId,
-		"name":                 out.Name,
-		"description":          out.Description,
-		"frame_name":           out.FrameName,
-		"response_column_name": out.ResponseColumnName,
-		"created_at":           out.CreatedAt,
+	if out.Dataset == nil {
+		out.Dataset = []*Dataset{}
+	}
+	jsonOut["dataset"] = make([]map[string]interface{}, len(out.Dataset))
+	for i, v := range out.Dataset {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["datasource_id"] = v.DatasourceId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["frame_name"] = v.FrameName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["dataset"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4591,24 +4666,27 @@ func (this *Impl) BuildModelAuto(r *http.Request, in *BuildModelAutoIn, out *Bui
 	out.Model = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &Model{}
+	}
 	jsonOut["model"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4650,24 +4728,27 @@ func (this *Impl) GetModel(r *http.Request, in *GetModelIn, out *GetModelOut) er
 	out.Model = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &Model{}
+	}
 	jsonOut["model"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4711,24 +4792,30 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
 	out.Models = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["models"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
+	if out.Models == nil {
+		out.Models = []*Model{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4771,24 +4858,30 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
 	out.Models = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["models"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
+	if out.Models == nil {
+		out.Models = []*Model{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4916,29 +5009,35 @@ func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, 
 	out.Models = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["models"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
-		"mse":                   out.Mse,
-		"r_squared":             out.RSquared,
-		"logloss":               out.Logloss,
-		"auc":                   out.Auc,
-		"gini":                  out.Gini,
+	if out.Models == nil {
+		out.Models = []*BinomialModel{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		tmp["mse"] = v.Mse
+		tmp["r_squared"] = v.RSquared
+		tmp["logloss"] = v.Logloss
+		tmp["auc"] = v.Auc
+		tmp["gini"] = v.Gini
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -4980,29 +5079,32 @@ func (this *Impl) GetModelBinomial(r *http.Request, in *GetModelBinomialIn, out 
 	out.Model = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &BinomialModel{}
+	}
 	jsonOut["model"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
-		"mse":                   out.Mse,
-		"r_squared":             out.RSquared,
-		"logloss":               out.Logloss,
-		"auc":                   out.Auc,
-		"gini":                  out.Gini,
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
+		"mse":                   out.Model.Mse,
+		"r_squared":             out.Model.RSquared,
+		"logloss":               out.Model.Logloss,
+		"auc":                   out.Model.Auc,
+		"gini":                  out.Model.Gini,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -5089,27 +5191,33 @@ func (this *Impl) FindModelsMultinomial(r *http.Request, in *FindModelsMultinomi
 	out.Models = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["models"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
-		"mse":                   out.Mse,
-		"r_squared":             out.RSquared,
-		"logloss":               out.Logloss,
+	if out.Models == nil {
+		out.Models = []*MultinomialModel{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		tmp["mse"] = v.Mse
+		tmp["r_squared"] = v.RSquared
+		tmp["logloss"] = v.Logloss
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -5151,27 +5259,30 @@ func (this *Impl) GetModelMultinomial(r *http.Request, in *GetModelMultinomialIn
 	out.Model = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &MultinomialModel{}
+	}
 	jsonOut["model"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":   out.TrainingDatasetId,
-		"validation_dataset_id": out.ValidationDatasetId,
-		"name":                  out.Name,
-		"cluster_name":          out.ClusterName,
-		"model_key":             out.ModelKey,
-		"algorithm":             out.Algorithm,
-		"model_category":        out.ModelCategory,
-		"dataset_name":          out.DatasetName,
-		"response_column_name":  out.ResponseColumnName,
-		"logical_name":          out.LogicalName,
-		"location":              out.Location,
-		"model_object_type":     out.ModelObjectType,
-		"max_runtime":           out.MaxRuntime,
-		"created_at":            out.CreatedAt,
-		"label_id":              out.LabelId,
-		"label_name":            out.LabelName,
-		"mse":                   out.Mse,
-		"r_squared":             out.RSquared,
-		"logloss":               out.Logloss,
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
+		"mse":                   out.Model.Mse,
+		"r_squared":             out.Model.RSquared,
+		"logloss":               out.Model.Logloss,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -5258,27 +5369,33 @@ func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegression
 	out.Models = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["models"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":    out.TrainingDatasetId,
-		"validation_dataset_id":  out.ValidationDatasetId,
-		"name":                   out.Name,
-		"cluster_name":           out.ClusterName,
-		"model_key":              out.ModelKey,
-		"algorithm":              out.Algorithm,
-		"model_category":         out.ModelCategory,
-		"dataset_name":           out.DatasetName,
-		"response_column_name":   out.ResponseColumnName,
-		"logical_name":           out.LogicalName,
-		"location":               out.Location,
-		"model_object_type":      out.ModelObjectType,
-		"max_runtime":            out.MaxRuntime,
-		"created_at":             out.CreatedAt,
-		"label_id":               out.LabelId,
-		"label_name":             out.LabelName,
-		"mse":                    out.Mse,
-		"r_squared":              out.RSquared,
-		"mean_residual_deviance": out.MeanResidualDeviance,
+	if out.Models == nil {
+		out.Models = []*RegressionModel{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		tmp["mse"] = v.Mse
+		tmp["r_squared"] = v.RSquared
+		tmp["mean_residual_deviance"] = v.MeanResidualDeviance
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -5320,27 +5437,30 @@ func (this *Impl) GetModelRegression(r *http.Request, in *GetModelRegressionIn, 
 	out.Model = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &RegressionModel{}
+	}
 	jsonOut["model"] = map[string]interface{}{
-		"id": out.Id,
-		"training_dataset_id":    out.TrainingDatasetId,
-		"validation_dataset_id":  out.ValidationDatasetId,
-		"name":                   out.Name,
-		"cluster_name":           out.ClusterName,
-		"model_key":              out.ModelKey,
-		"algorithm":              out.Algorithm,
-		"model_category":         out.ModelCategory,
-		"dataset_name":           out.DatasetName,
-		"response_column_name":   out.ResponseColumnName,
-		"logical_name":           out.LogicalName,
-		"location":               out.Location,
-		"model_object_type":      out.ModelObjectType,
-		"max_runtime":            out.MaxRuntime,
-		"created_at":             out.CreatedAt,
-		"label_id":               out.LabelId,
-		"label_name":             out.LabelName,
-		"mse":                    out.Mse,
-		"r_squared":              out.RSquared,
-		"mean_residual_deviance": out.MeanResidualDeviance,
+		"id": out.Model.Id,
+		"training_dataset_id":    out.Model.TrainingDatasetId,
+		"validation_dataset_id":  out.Model.ValidationDatasetId,
+		"name":                   out.Model.Name,
+		"cluster_name":           out.Model.ClusterName,
+		"model_key":              out.Model.ModelKey,
+		"algorithm":              out.Model.Algorithm,
+		"model_category":         out.Model.ModelCategory,
+		"dataset_name":           out.Model.DatasetName,
+		"response_column_name":   out.Model.ResponseColumnName,
+		"logical_name":           out.Model.LogicalName,
+		"location":               out.Model.Location,
+		"model_object_type":      out.Model.ModelObjectType,
+		"max_runtime":            out.Model.MaxRuntime,
+		"created_at":             out.Model.CreatedAt,
+		"label_id":               out.Model.LabelId,
+		"label_name":             out.Model.LabelName,
+		"mse":                    out.Model.Mse,
+		"r_squared":              out.Model.RSquared,
+		"mean_residual_deviance": out.Model.MeanResidualDeviance,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -5780,13 +5900,19 @@ func (this *Impl) GetLabelsForProject(r *http.Request, in *GetLabelsForProjectIn
 	out.Labels = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["labels"] = map[string]interface{}{
-		"id":          out.Id,
-		"project_id":  out.ProjectId,
-		"model_id":    out.ModelId,
-		"name":        out.Name,
-		"description": out.Description,
-		"created_at":  out.CreatedAt,
+	if out.Labels == nil {
+		out.Labels = []*Label{}
+	}
+	jsonOut["labels"] = make([]map[string]interface{}, len(out.Labels))
+	for i, v := range out.Labels {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["project_id"] = v.ProjectId
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["labels"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -5909,15 +6035,18 @@ func (this *Impl) GetService(r *http.Request, in *GetServiceIn, out *GetServiceO
 	out.Service = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Service == nil {
+		out.Service = &ScoringService{}
+	}
 	jsonOut["service"] = map[string]interface{}{
-		"id":         out.Id,
-		"model_id":   out.ModelId,
-		"name":       out.Name,
-		"address":    out.Address,
-		"port":       out.Port,
-		"process_id": out.ProcessId,
-		"state":      out.State,
-		"created_at": out.CreatedAt,
+		"id":         out.Service.Id,
+		"model_id":   out.Service.ModelId,
+		"name":       out.Service.Name,
+		"address":    out.Service.Address,
+		"port":       out.Service.Port,
+		"process_id": out.Service.ProcessId,
+		"state":      out.Service.State,
+		"created_at": out.Service.CreatedAt,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -5960,15 +6089,21 @@ func (this *Impl) GetServices(r *http.Request, in *GetServicesIn, out *GetServic
 	out.Services = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["services"] = map[string]interface{}{
-		"id":         out.Id,
-		"model_id":   out.ModelId,
-		"name":       out.Name,
-		"address":    out.Address,
-		"port":       out.Port,
-		"process_id": out.ProcessId,
-		"state":      out.State,
-		"created_at": out.CreatedAt,
+	if out.Services == nil {
+		out.Services = []*ScoringService{}
+	}
+	jsonOut["services"] = make([]map[string]interface{}, len(out.Services))
+	for i, v := range out.Services {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["address"] = v.Address
+		tmp["port"] = v.Port
+		tmp["process_id"] = v.ProcessId
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["services"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6012,15 +6147,21 @@ func (this *Impl) GetServicesForProject(r *http.Request, in *GetServicesForProje
 	out.Services = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["services"] = map[string]interface{}{
-		"id":         out.Id,
-		"model_id":   out.ModelId,
-		"name":       out.Name,
-		"address":    out.Address,
-		"port":       out.Port,
-		"process_id": out.ProcessId,
-		"state":      out.State,
-		"created_at": out.CreatedAt,
+	if out.Services == nil {
+		out.Services = []*ScoringService{}
+	}
+	jsonOut["services"] = make([]map[string]interface{}, len(out.Services))
+	for i, v := range out.Services {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["address"] = v.Address
+		tmp["port"] = v.Port
+		tmp["process_id"] = v.ProcessId
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["services"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6064,15 +6205,21 @@ func (this *Impl) GetServicesForModel(r *http.Request, in *GetServicesForModelIn
 	out.Services = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["services"] = map[string]interface{}{
-		"id":         out.Id,
-		"model_id":   out.ModelId,
-		"name":       out.Name,
-		"address":    out.Address,
-		"port":       out.Port,
-		"process_id": out.ProcessId,
-		"state":      out.State,
-		"created_at": out.CreatedAt,
+	if out.Services == nil {
+		out.Services = []*ScoringService{}
+	}
+	jsonOut["services"] = make([]map[string]interface{}, len(out.Services))
+	for i, v := range out.Services {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["address"] = v.Address
+		tmp["port"] = v.Port
+		tmp["process_id"] = v.ProcessId
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["services"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6152,11 +6299,14 @@ func (this *Impl) GetEngine(r *http.Request, in *GetEngineIn, out *GetEngineOut)
 	out.Engine = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Engine == nil {
+		out.Engine = &Engine{}
+	}
 	jsonOut["engine"] = map[string]interface{}{
-		"id":         out.Id,
-		"name":       out.Name,
-		"location":   out.Location,
-		"created_at": out.CreatedAt,
+		"id":         out.Engine.Id,
+		"name":       out.Engine.Name,
+		"location":   out.Engine.Location,
+		"created_at": out.Engine.CreatedAt,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6197,11 +6347,17 @@ func (this *Impl) GetEngines(r *http.Request, in *GetEnginesIn, out *GetEnginesO
 	out.Engines = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["engines"] = map[string]interface{}{
-		"id":         out.Id,
-		"name":       out.Name,
-		"location":   out.Location,
-		"created_at": out.CreatedAt,
+	if out.Engines == nil {
+		out.Engines = []*Engine{}
+	}
+	jsonOut["engines"] = make([]map[string]interface{}, len(out.Engines))
+	for i, v := range out.Engines {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["location"] = v.Location
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["engines"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6280,9 +6436,15 @@ func (this *Impl) GetAllEntityTypes(r *http.Request, in *GetAllEntityTypesIn, ou
 	out.EntityTypes = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["entity_types"] = map[string]interface{}{
-		"id":   out.Id,
-		"name": out.Name,
+	if out.EntityTypes == nil {
+		out.EntityTypes = []*EntityType{}
+	}
+	jsonOut["entity_types"] = make([]map[string]interface{}, len(out.EntityTypes))
+	for i, v := range out.EntityTypes {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		jsonOut["entity_types"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6323,10 +6485,16 @@ func (this *Impl) GetAllPermissions(r *http.Request, in *GetAllPermissionsIn, ou
 	out.Permissions = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["permissions"] = map[string]interface{}{
-		"id":          out.Id,
-		"code":        out.Code,
-		"description": out.Description,
+	if out.Permissions == nil {
+		out.Permissions = []*Permission{}
+	}
+	jsonOut["permissions"] = make([]map[string]interface{}, len(out.Permissions))
+	for i, v := range out.Permissions {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["code"] = v.Code
+		tmp["description"] = v.Description
+		jsonOut["permissions"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6367,9 +6535,15 @@ func (this *Impl) GetAllClusterTypes(r *http.Request, in *GetAllClusterTypesIn, 
 	out.ClusterTypes = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["cluster_types"] = map[string]interface{}{
-		"id":   out.Id,
-		"name": out.Name,
+	if out.ClusterTypes == nil {
+		out.ClusterTypes = []*ClusterType{}
+	}
+	jsonOut["cluster_types"] = make([]map[string]interface{}, len(out.ClusterTypes))
+	for i, v := range out.ClusterTypes {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		jsonOut["cluster_types"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6411,10 +6585,16 @@ func (this *Impl) GetPermissionsForRole(r *http.Request, in *GetPermissionsForRo
 	out.Permissions = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["permissions"] = map[string]interface{}{
-		"id":          out.Id,
-		"code":        out.Code,
-		"description": out.Description,
+	if out.Permissions == nil {
+		out.Permissions = []*Permission{}
+	}
+	jsonOut["permissions"] = make([]map[string]interface{}, len(out.Permissions))
+	for i, v := range out.Permissions {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["code"] = v.Code
+		tmp["description"] = v.Description
+		jsonOut["permissions"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6456,10 +6636,16 @@ func (this *Impl) GetPermissionsForIdentity(r *http.Request, in *GetPermissionsF
 	out.Permissions = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["permissions"] = map[string]interface{}{
-		"id":          out.Id,
-		"code":        out.Code,
-		"description": out.Description,
+	if out.Permissions == nil {
+		out.Permissions = []*Permission{}
+	}
+	jsonOut["permissions"] = make([]map[string]interface{}, len(out.Permissions))
+	for i, v := range out.Permissions {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["code"] = v.Code
+		tmp["description"] = v.Description
+		jsonOut["permissions"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6544,11 +6730,17 @@ func (this *Impl) GetRoles(r *http.Request, in *GetRolesIn, out *GetRolesOut) er
 	out.Roles = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["roles"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+	if out.Roles == nil {
+		out.Roles = []*Role{}
+	}
+	jsonOut["roles"] = make([]map[string]interface{}, len(out.Roles))
+	for i, v := range out.Roles {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["roles"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6590,11 +6782,17 @@ func (this *Impl) GetRolesForIdentity(r *http.Request, in *GetRolesForIdentityIn
 	out.Roles = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["roles"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+	if out.Roles == nil {
+		out.Roles = []*Role{}
+	}
+	jsonOut["roles"] = make([]map[string]interface{}, len(out.Roles))
+	for i, v := range out.Roles {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["roles"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6636,11 +6834,14 @@ func (this *Impl) GetRole(r *http.Request, in *GetRoleIn, out *GetRoleOut) error
 	out.Role = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Role == nil {
+		out.Role = &Role{}
+	}
 	jsonOut["role"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+		"id":          out.Role.Id,
+		"name":        out.Role.Name,
+		"description": out.Role.Description,
+		"created":     out.Role.Created,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6682,11 +6883,14 @@ func (this *Impl) GetRoleByName(r *http.Request, in *GetRoleByNameIn, out *GetRo
 	out.Role = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Role == nil {
+		out.Role = &Role{}
+	}
 	jsonOut["role"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+		"id":          out.Role.Id,
+		"name":        out.Role.Name,
+		"description": out.Role.Description,
+		"created":     out.Role.Created,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -6966,11 +7170,17 @@ func (this *Impl) GetWorkgroups(r *http.Request, in *GetWorkgroupsIn, out *GetWo
 	out.Workgroups = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["workgroups"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+	if out.Workgroups == nil {
+		out.Workgroups = []*Workgroup{}
+	}
+	jsonOut["workgroups"] = make([]map[string]interface{}, len(out.Workgroups))
+	for i, v := range out.Workgroups {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["workgroups"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7012,11 +7222,17 @@ func (this *Impl) GetWorkgroupsForIdentity(r *http.Request, in *GetWorkgroupsFor
 	out.Workgroups = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["workgroups"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+	if out.Workgroups == nil {
+		out.Workgroups = []*Workgroup{}
+	}
+	jsonOut["workgroups"] = make([]map[string]interface{}, len(out.Workgroups))
+	for i, v := range out.Workgroups {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["workgroups"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7058,11 +7274,14 @@ func (this *Impl) GetWorkgroup(r *http.Request, in *GetWorkgroupIn, out *GetWork
 	out.Workgroup = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Workgroup == nil {
+		out.Workgroup = &Workgroup{}
+	}
 	jsonOut["workgroup"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+		"id":          out.Workgroup.Id,
+		"name":        out.Workgroup.Name,
+		"description": out.Workgroup.Description,
+		"created":     out.Workgroup.Created,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7104,11 +7323,14 @@ func (this *Impl) GetWorkgroupByName(r *http.Request, in *GetWorkgroupByNameIn, 
 	out.Workgroup = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Workgroup == nil {
+		out.Workgroup = &Workgroup{}
+	}
 	jsonOut["workgroup"] = map[string]interface{}{
-		"id":          out.Id,
-		"name":        out.Name,
-		"description": out.Description,
-		"created":     out.Created,
+		"id":          out.Workgroup.Id,
+		"name":        out.Workgroup.Name,
+		"description": out.Workgroup.Description,
+		"created":     out.Workgroup.Created,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7270,12 +7492,18 @@ func (this *Impl) GetIdentities(r *http.Request, in *GetIdentitiesIn, out *GetId
 	out.Identities = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["identities"] = map[string]interface{}{
-		"id":         out.Id,
-		"name":       out.Name,
-		"is_active":  out.IsActive,
-		"last_login": out.LastLogin,
-		"created":    out.Created,
+	if out.Identities == nil {
+		out.Identities = []*Identity{}
+	}
+	jsonOut["identities"] = make([]map[string]interface{}, len(out.Identities))
+	for i, v := range out.Identities {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["is_active"] = v.IsActive
+		tmp["last_login"] = v.LastLogin
+		tmp["created"] = v.Created
+		jsonOut["identities"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7317,12 +7545,18 @@ func (this *Impl) GetIdentitiesForWorkgroup(r *http.Request, in *GetIdentitiesFo
 	out.Identities = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["identities"] = map[string]interface{}{
-		"id":         out.Id,
-		"name":       out.Name,
-		"is_active":  out.IsActive,
-		"last_login": out.LastLogin,
-		"created":    out.Created,
+	if out.Identities == nil {
+		out.Identities = []*Identity{}
+	}
+	jsonOut["identities"] = make([]map[string]interface{}, len(out.Identities))
+	for i, v := range out.Identities {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["is_active"] = v.IsActive
+		tmp["last_login"] = v.LastLogin
+		tmp["created"] = v.Created
+		jsonOut["identities"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7364,12 +7598,18 @@ func (this *Impl) GetIdentitiesForRole(r *http.Request, in *GetIdentitiesForRole
 	out.Identities = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["identities"] = map[string]interface{}{
-		"id":         out.Id,
-		"name":       out.Name,
-		"is_active":  out.IsActive,
-		"last_login": out.LastLogin,
-		"created":    out.Created,
+	if out.Identities == nil {
+		out.Identities = []*Identity{}
+	}
+	jsonOut["identities"] = make([]map[string]interface{}, len(out.Identities))
+	for i, v := range out.Identities {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["is_active"] = v.IsActive
+		tmp["last_login"] = v.LastLogin
+		tmp["created"] = v.Created
+		jsonOut["identities"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7412,12 +7652,18 @@ func (this *Impl) GetIdentitiesForEntity(r *http.Request, in *GetIdentitiesForEn
 	out.Users = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["users"] = map[string]interface{}{
-		"kind":          out.Kind,
-		"identity_id":   out.IdentityId,
-		"identity_name": out.IdentityName,
-		"role_id":       out.RoleId,
-		"role_name":     out.RoleName,
+	if out.Users == nil {
+		out.Users = []*UserRole{}
+	}
+	jsonOut["users"] = make([]map[string]interface{}, len(out.Users))
+	for i, v := range out.Users {
+		tmp := make(map[string]interface{})
+		tmp["kind"] = v.Kind
+		tmp["identity_id"] = v.IdentityId
+		tmp["identity_name"] = v.IdentityName
+		tmp["role_id"] = v.RoleId
+		tmp["role_name"] = v.RoleName
+		jsonOut["users"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7459,12 +7705,15 @@ func (this *Impl) GetIdentity(r *http.Request, in *GetIdentityIn, out *GetIdenti
 	out.Identity = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Identity == nil {
+		out.Identity = &Identity{}
+	}
 	jsonOut["identity"] = map[string]interface{}{
-		"id":         out.Id,
-		"name":       out.Name,
-		"is_active":  out.IsActive,
-		"last_login": out.LastLogin,
-		"created":    out.Created,
+		"id":         out.Identity.Id,
+		"name":       out.Identity.Name,
+		"is_active":  out.Identity.IsActive,
+		"last_login": out.Identity.LastLogin,
+		"created":    out.Identity.Created,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7506,12 +7755,15 @@ func (this *Impl) GetIdentityByName(r *http.Request, in *GetIdentityByNameIn, ou
 	out.Identity = val0
 
 	jsonOut := make(map[string]interface{})
+	if out.Identity == nil {
+		out.Identity = &Identity{}
+	}
 	jsonOut["identity"] = map[string]interface{}{
-		"id":         out.Id,
-		"name":       out.Name,
-		"is_active":  out.IsActive,
-		"last_login": out.LastLogin,
-		"created":    out.Created,
+		"id":         out.Identity.Id,
+		"name":       out.Identity.Name,
+		"is_active":  out.Identity.IsActive,
+		"last_login": out.Identity.LastLogin,
+		"created":    out.Identity.Created,
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7865,11 +8117,17 @@ func (this *Impl) GetPrivileges(r *http.Request, in *GetPrivilegesIn, out *GetPr
 	out.Privileges = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["privileges"] = map[string]interface{}{
-		"kind":                  out.Kind,
-		"workgroup_id":          out.WorkgroupId,
-		"workgroup_name":        out.WorkgroupName,
-		"workgroup_description": out.WorkgroupDescription,
+	if out.Privileges == nil {
+		out.Privileges = []*EntityPrivilege{}
+	}
+	jsonOut["privileges"] = make([]map[string]interface{}, len(out.Privileges))
+	for i, v := range out.Privileges {
+		tmp := make(map[string]interface{})
+		tmp["kind"] = v.Kind
+		tmp["workgroup_id"] = v.WorkgroupId
+		tmp["workgroup_name"] = v.WorkgroupName
+		tmp["workgroup_description"] = v.WorkgroupDescription
+		jsonOut["privileges"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
@@ -7955,11 +8213,17 @@ func (this *Impl) GetHistory(r *http.Request, in *GetHistoryIn, out *GetHistoryO
 	out.History = val0
 
 	jsonOut := make(map[string]interface{})
-	jsonOut["history"] = map[string]interface{}{
-		"identity_id": out.IdentityId,
-		"action":      out.Action,
-		"description": out.Description,
-		"created_at":  out.CreatedAt,
+	if out.History == nil {
+		out.History = []*EntityHistory{}
+	}
+	jsonOut["history"] = make([]map[string]interface{}, len(out.History))
+	for i, v := range out.History {
+		tmp := make(map[string]interface{})
+		tmp["identity_id"] = v.IdentityId
+		tmp["action"] = v.Action
+		tmp["description"] = v.Description
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["history"].([]map[string]interface{})[i] = tmp
 	}
 
 	res, merr := json.Marshal(jsonOut)
