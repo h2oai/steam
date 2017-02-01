@@ -24,6 +24,8 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/serenize/snaker"
 )
 
 type Interface struct {
@@ -60,6 +62,7 @@ type Field struct {
 	Format       string
 	Struct       *Struct
 	Help         string
+	LogOmit      bool
 }
 
 func Define(name string, instance interface{}) (*Interface, error) {
@@ -155,6 +158,12 @@ func toStruct(s interface{}) (*Struct, error) {
 		if len(help) == 0 {
 			help = "No description available"
 		}
+		var logOmit bool
+		logTag := f.Tag.Get("log")
+		if len(logTag) != 0 {
+			// logOmit = strings.Contains(log, "-")
+			logOmit = true
+		}
 
 		if strings.HasPrefix(f.Name, "JSON") {
 			hasJSON = true
@@ -170,6 +179,7 @@ func toStruct(s interface{}) (*Struct, error) {
 			formatOf(ft.Name(), isArray, isStruct),
 			nil,
 			help,
+			logOmit,
 		}
 	}
 	return &Struct{t.Name(), hasJSON, fields}, nil
@@ -318,4 +328,66 @@ func cleanJSON(outputs []*Field) string {
 
 	// If all else fails, return default output
 	return `res, merr := json.Marshal(out)`
+}
+
+func createMaps(field *Field, prefix string) string {
+	if field.IsStruct && field.Struct != nil {
+		if field.IsArray {
+			return mapArrayFromStruct(field.Struct, field.Name, prefix)
+		}
+		return mapFromStruct(field.Struct, fmt.Sprintf("%s.%s", prefix, field.Name))
+	}
+	return fmt.Sprintf("%s.%s", prefix, field.Name)
+}
+
+var structMap = `map[string]interface{}{
+	{{- range .Fields}}{{- if not .LogOmit}}
+	"{{snake .Name}}": {{createMaps . "%s"}},
+	{{- end}}{{- end}}
+}`
+
+func mapFromStruct(s *Struct, prefix string) string {
+	tmpl := template.Must(
+		template.New(
+			"mapper",
+		).Funcs(template.FuncMap{
+			"snake":      snaker.CamelToSnake,
+			"createMaps": createMaps,
+		}).Parse(
+			fmt.Sprintf(structMap, prefix),
+		))
+
+	buf := new(bytes.Buffer)
+	if err := tmpl.Execute(buf, s); err != nil {
+		panic(err)
+	}
+	return buf.String()
+}
+
+var structArrayMap = `make([]map[string]interface{}, len(%s.%s))
+	for i, v := range %s.%s {
+		tmp := make(map[string]interface{})
+		{{- range .Fields}}{{- if not .LogOmit}}
+		tmp["{{snake .Name}}"] = v.{{.Name}}
+		{{- end}}{{- end}}
+		json%s["%s"].([]map[string]interface{})[i] = tmp
+	}
+`
+
+func mapArrayFromStruct(s *Struct, name, prefix string) string {
+	tmpl := template.Must(
+		template.New(
+			"arraymapper",
+		).Funcs(template.FuncMap{
+			"snake":      snaker.CamelToSnake,
+			"createMaps": createMaps,
+		}).Parse(
+			fmt.Sprintf(structArrayMap, prefix, name, prefix, name, strings.Title(prefix), snaker.CamelToSnake(name)),
+		))
+
+	buf := new(bytes.Buffer)
+	if err := tmpl.Execute(buf, s); err != nil {
+		panic(err)
+	}
+	return buf.String()
 }

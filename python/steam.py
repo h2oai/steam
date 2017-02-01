@@ -154,7 +154,7 @@ class SteamConnection:
 		Parameters:
 
 		Returns:
-		is_admin: No description available (bool)
+		is_admin: A boolean value indicating if the current user is has admin (bool)
 		"""
 		request = {
 		}

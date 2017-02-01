@@ -2770,7 +2770,10 @@ func (this *Impl) PingServer(r *http.Request, in *PingServerIn, out *PingServerO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["input"] = in.Input
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -2785,7 +2788,10 @@ func (this *Impl) PingServer(r *http.Request, in *PingServerIn, out *PingServerO
 
 	out.Output = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["output"] = out.Output
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -2805,7 +2811,9 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -2820,7 +2828,20 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 
 	out.Config = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Config == nil {
+		out.Config = &Config{}
+	}
+	jsonOut["config"] = map[string]interface{}{
+		"authentication_type":   out.Config.AuthenticationType,
+		"cluster_proxy_address": out.Config.ClusterProxyAddress,
+		"kerberos_enabled":      out.Config.KerberosEnabled,
+		"version":               out.Config.Version,
+		"username":              out.Config.Username,
+		"permissions":           out.Config.Permissions,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -2840,7 +2861,10 @@ func (this *Impl) SetGlobalKerberos(r *http.Request, in *SetGlobalKerberosIn, ou
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["enabled"] = in.Enabled
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -2853,7 +2877,9 @@ func (this *Impl) SetGlobalKerberos(r *http.Request, in *SetGlobalKerberosIn, ou
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -2873,7 +2899,9 @@ func (this *Impl) CheckAdmin(r *http.Request, in *CheckAdminIn, out *CheckAdminO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -2888,7 +2916,10 @@ func (this *Impl) CheckAdmin(r *http.Request, in *CheckAdminIn, out *CheckAdminO
 
 	out.IsAdmin = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["is_admin"] = out.IsAdmin
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -2908,7 +2939,9 @@ func (this *Impl) SetLocalConfig(r *http.Request, in *SetLocalConfigIn, out *Set
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -2921,7 +2954,9 @@ func (this *Impl) SetLocalConfig(r *http.Request, in *SetLocalConfigIn, out *Set
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -2941,7 +2976,25 @@ func (this *Impl) SetLdapConfig(r *http.Request, in *SetLdapConfigIn, out *SetLd
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["config"] = map[string]interface{}{
+		"host":                      in.Config.Host,
+		"port":                      in.Config.Port,
+		"ldaps":                     in.Config.Ldaps,
+		"bind_dn":                   in.Config.BindDn,
+		"user_base_dn":              in.Config.UserBaseDn,
+		"user_base_filter":          in.Config.UserBaseFilter,
+		"user_name_attribute":       in.Config.UserNameAttribute,
+		"group_base_dn":             in.Config.GroupBaseDn,
+		"group_name_attribute":      in.Config.GroupNameAttribute,
+		"static_member_attribute":   in.Config.StaticMemberAttribute,
+		"group_names":               in.Config.GroupNames,
+		"search_request_size_limit": in.Config.SearchRequestSizeLimit,
+		"search_request_time_limit": in.Config.SearchRequestTimeLimit,
+		"force_bind":                in.Config.ForceBind,
+	}
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -2954,7 +3007,9 @@ func (this *Impl) SetLdapConfig(r *http.Request, in *SetLdapConfigIn, out *SetLd
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -2974,7 +3029,9 @@ func (this *Impl) GetLdapConfig(r *http.Request, in *GetLdapConfigIn, out *GetLd
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -2991,7 +3048,29 @@ func (this *Impl) GetLdapConfig(r *http.Request, in *GetLdapConfigIn, out *GetLd
 
 	out.Exists = val1
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Config == nil {
+		out.Config = &LdapConfig{}
+	}
+	jsonOut["config"] = map[string]interface{}{
+		"host":                      out.Config.Host,
+		"port":                      out.Config.Port,
+		"ldaps":                     out.Config.Ldaps,
+		"bind_dn":                   out.Config.BindDn,
+		"user_base_dn":              out.Config.UserBaseDn,
+		"user_base_filter":          out.Config.UserBaseFilter,
+		"user_name_attribute":       out.Config.UserNameAttribute,
+		"group_base_dn":             out.Config.GroupBaseDn,
+		"group_name_attribute":      out.Config.GroupNameAttribute,
+		"static_member_attribute":   out.Config.StaticMemberAttribute,
+		"group_names":               out.Config.GroupNames,
+		"search_request_size_limit": out.Config.SearchRequestSizeLimit,
+		"search_request_time_limit": out.Config.SearchRequestTimeLimit,
+		"force_bind":                out.Config.ForceBind,
+	}
+	jsonOut["exists"] = out.Exists
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3011,7 +3090,25 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["config"] = map[string]interface{}{
+		"host":                      in.Config.Host,
+		"port":                      in.Config.Port,
+		"ldaps":                     in.Config.Ldaps,
+		"bind_dn":                   in.Config.BindDn,
+		"user_base_dn":              in.Config.UserBaseDn,
+		"user_base_filter":          in.Config.UserBaseFilter,
+		"user_name_attribute":       in.Config.UserNameAttribute,
+		"group_base_dn":             in.Config.GroupBaseDn,
+		"group_name_attribute":      in.Config.GroupNameAttribute,
+		"static_member_attribute":   in.Config.StaticMemberAttribute,
+		"group_names":               in.Config.GroupNames,
+		"search_request_size_limit": in.Config.SearchRequestSizeLimit,
+		"search_request_time_limit": in.Config.SearchRequestTimeLimit,
+		"force_bind":                in.Config.ForceBind,
+	}
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3028,7 +3125,20 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 
 	out.Groups = val1
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["count"] = out.Count
+	if out.Groups == nil {
+		out.Groups = []*LdapGroup{}
+	}
+	jsonOut["groups"] = make([]map[string]interface{}, len(out.Groups))
+	for i, v := range out.Groups {
+		tmp := make(map[string]interface{})
+		tmp["name"] = v.Name
+		tmp["users"] = v.Users
+		jsonOut["groups"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3048,7 +3158,9 @@ func (this *Impl) GetUserKeytab(r *http.Request, in *GetUserKeytabIn, out *GetUs
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3065,7 +3177,18 @@ func (this *Impl) GetUserKeytab(r *http.Request, in *GetUserKeytabIn, out *GetUs
 
 	out.Exists = val1
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Keytab == nil {
+		out.Keytab = &Keytab{}
+	}
+	jsonOut["keytab"] = map[string]interface{}{
+		"id":        out.Keytab.Id,
+		"principal": out.Keytab.Principal,
+		"name":      out.Keytab.Name,
+	}
+	jsonOut["exists"] = out.Exists
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3085,7 +3208,9 @@ func (this *Impl) GetSteamKeytab(r *http.Request, in *GetSteamKeytabIn, out *Get
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3102,7 +3227,18 @@ func (this *Impl) GetSteamKeytab(r *http.Request, in *GetSteamKeytabIn, out *Get
 
 	out.Exists = val1
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Keytab == nil {
+		out.Keytab = &Keytab{}
+	}
+	jsonOut["keytab"] = map[string]interface{}{
+		"id":        out.Keytab.Id,
+		"principal": out.Keytab.Principal,
+		"name":      out.Keytab.Name,
+	}
+	jsonOut["exists"] = out.Exists
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3122,7 +3258,10 @@ func (this *Impl) TestKeytab(r *http.Request, in *TestKeytabIn, out *TestKeytabO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["keytab_id"] = in.KeytabId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3135,7 +3274,9 @@ func (this *Impl) TestKeytab(r *http.Request, in *TestKeytabIn, out *TestKeytabO
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3155,7 +3296,10 @@ func (this *Impl) DeleteKeytab(r *http.Request, in *DeleteKeytabIn, out *DeleteK
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["keytab_id"] = in.KeytabId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3168,7 +3312,9 @@ func (this *Impl) DeleteKeytab(r *http.Request, in *DeleteKeytabIn, out *DeleteK
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3188,7 +3334,10 @@ func (this *Impl) RegisterCluster(r *http.Request, in *RegisterClusterIn, out *R
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["address"] = in.Address
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3203,7 +3352,10 @@ func (this *Impl) RegisterCluster(r *http.Request, in *RegisterClusterIn, out *R
 
 	out.ClusterId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["cluster_id"] = out.ClusterId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3223,7 +3375,10 @@ func (this *Impl) UnregisterCluster(r *http.Request, in *UnregisterClusterIn, ou
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3236,7 +3391,9 @@ func (this *Impl) UnregisterCluster(r *http.Request, in *UnregisterClusterIn, ou
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3256,7 +3413,15 @@ func (this *Impl) StartClusterOnYarn(r *http.Request, in *StartClusterOnYarnIn, 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_name"] = in.ClusterName
+	jsonIn["engine_id"] = in.EngineId
+	jsonIn["size"] = in.Size
+	jsonIn["memory"] = in.Memory
+	jsonIn["secure"] = in.Secure
+	jsonIn["keytab"] = in.Keytab
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3271,7 +3436,10 @@ func (this *Impl) StartClusterOnYarn(r *http.Request, in *StartClusterOnYarnIn, 
 
 	out.ClusterId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["cluster_id"] = out.ClusterId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3291,7 +3459,11 @@ func (this *Impl) StopClusterOnYarn(r *http.Request, in *StopClusterOnYarnIn, ou
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+	jsonIn["keytab"] = in.Keytab
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3304,7 +3476,9 @@ func (this *Impl) StopClusterOnYarn(r *http.Request, in *StopClusterOnYarnIn, ou
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3324,7 +3498,10 @@ func (this *Impl) GetCluster(r *http.Request, in *GetClusterIn, out *GetClusterO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3339,7 +3516,22 @@ func (this *Impl) GetCluster(r *http.Request, in *GetClusterIn, out *GetClusterO
 
 	out.Cluster = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Cluster == nil {
+		out.Cluster = &Cluster{}
+	}
+	jsonOut["cluster"] = map[string]interface{}{
+		"id":           out.Cluster.Id,
+		"name":         out.Cluster.Name,
+		"context_path": out.Cluster.ContextPath,
+		"type_id":      out.Cluster.TypeId,
+		"detail_id":    out.Cluster.DetailId,
+		"address":      out.Cluster.Address,
+		"state":        out.Cluster.State,
+		"created_at":   out.Cluster.CreatedAt,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3359,7 +3551,10 @@ func (this *Impl) GetClusterOnYarn(r *http.Request, in *GetClusterOnYarnIn, out 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3374,7 +3569,20 @@ func (this *Impl) GetClusterOnYarn(r *http.Request, in *GetClusterOnYarnIn, out 
 
 	out.Cluster = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Cluster == nil {
+		out.Cluster = &YarnCluster{}
+	}
+	jsonOut["cluster"] = map[string]interface{}{
+		"id":             out.Cluster.Id,
+		"engine_id":      out.Cluster.EngineId,
+		"size":           out.Cluster.Size,
+		"application_id": out.Cluster.ApplicationId,
+		"memory":         out.Cluster.Memory,
+		"username":       out.Cluster.Username,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3394,7 +3602,11 @@ func (this *Impl) GetClusters(r *http.Request, in *GetClustersIn, out *GetCluste
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3409,7 +3621,25 @@ func (this *Impl) GetClusters(r *http.Request, in *GetClustersIn, out *GetCluste
 
 	out.Clusters = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Clusters == nil {
+		out.Clusters = []*Cluster{}
+	}
+	jsonOut["clusters"] = make([]map[string]interface{}, len(out.Clusters))
+	for i, v := range out.Clusters {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["context_path"] = v.ContextPath
+		tmp["type_id"] = v.TypeId
+		tmp["detail_id"] = v.DetailId
+		tmp["address"] = v.Address
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["clusters"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3429,7 +3659,10 @@ func (this *Impl) GetClusterStatus(r *http.Request, in *GetClusterStatusIn, out 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3444,7 +3677,19 @@ func (this *Impl) GetClusterStatus(r *http.Request, in *GetClusterStatusIn, out 
 
 	out.ClusterStatus = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.ClusterStatus == nil {
+		out.ClusterStatus = &ClusterStatus{}
+	}
+	jsonOut["cluster_status"] = map[string]interface{}{
+		"version":                 out.ClusterStatus.Version,
+		"status":                  out.ClusterStatus.Status,
+		"max_memory":              out.ClusterStatus.MaxMemory,
+		"total_cpu_count":         out.ClusterStatus.TotalCpuCount,
+		"total_allowed_cpu_count": out.ClusterStatus.TotalAllowedCpuCount,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3464,7 +3709,10 @@ func (this *Impl) DeleteCluster(r *http.Request, in *DeleteClusterIn, out *Delet
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3477,7 +3725,9 @@ func (this *Impl) DeleteCluster(r *http.Request, in *DeleteClusterIn, out *Delet
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3497,7 +3747,11 @@ func (this *Impl) GetJob(r *http.Request, in *GetJobIn, out *GetJobOut) error {
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+	jsonIn["job_name"] = in.JobName
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3512,7 +3766,20 @@ func (this *Impl) GetJob(r *http.Request, in *GetJobIn, out *GetJobOut) error {
 
 	out.Job = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Job == nil {
+		out.Job = &Job{}
+	}
+	jsonOut["job"] = map[string]interface{}{
+		"name":         out.Job.Name,
+		"cluster_name": out.Job.ClusterName,
+		"description":  out.Job.Description,
+		"progress":     out.Job.Progress,
+		"started_at":   out.Job.StartedAt,
+		"completed_at": out.Job.CompletedAt,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3532,7 +3799,10 @@ func (this *Impl) GetJobs(r *http.Request, in *GetJobsIn, out *GetJobsOut) error
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3547,7 +3817,23 @@ func (this *Impl) GetJobs(r *http.Request, in *GetJobsIn, out *GetJobsOut) error
 
 	out.Jobs = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Jobs == nil {
+		out.Jobs = []*Job{}
+	}
+	jsonOut["jobs"] = make([]map[string]interface{}, len(out.Jobs))
+	for i, v := range out.Jobs {
+		tmp := make(map[string]interface{})
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["description"] = v.Description
+		tmp["progress"] = v.Progress
+		tmp["started_at"] = v.StartedAt
+		tmp["completed_at"] = v.CompletedAt
+		jsonOut["jobs"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3567,7 +3853,12 @@ func (this *Impl) CreateProject(r *http.Request, in *CreateProjectIn, out *Creat
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+	jsonIn["model_category"] = in.ModelCategory
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3582,7 +3873,10 @@ func (this *Impl) CreateProject(r *http.Request, in *CreateProjectIn, out *Creat
 
 	out.ProjectId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["project_id"] = out.ProjectId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3602,7 +3896,11 @@ func (this *Impl) GetProjects(r *http.Request, in *GetProjectsIn, out *GetProjec
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3617,7 +3915,22 @@ func (this *Impl) GetProjects(r *http.Request, in *GetProjectsIn, out *GetProjec
 
 	out.Projects = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Projects == nil {
+		out.Projects = []*Project{}
+	}
+	jsonOut["projects"] = make([]map[string]interface{}, len(out.Projects))
+	for i, v := range out.Projects {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["model_category"] = v.ModelCategory
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["projects"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3637,7 +3950,10 @@ func (this *Impl) GetProject(r *http.Request, in *GetProjectIn, out *GetProjectO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3652,7 +3968,19 @@ func (this *Impl) GetProject(r *http.Request, in *GetProjectIn, out *GetProjectO
 
 	out.Project = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Project == nil {
+		out.Project = &Project{}
+	}
+	jsonOut["project"] = map[string]interface{}{
+		"id":             out.Project.Id,
+		"name":           out.Project.Name,
+		"description":    out.Project.Description,
+		"model_category": out.Project.ModelCategory,
+		"created_at":     out.Project.CreatedAt,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3672,7 +4000,10 @@ func (this *Impl) DeleteProject(r *http.Request, in *DeleteProjectIn, out *Delet
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3685,7 +4016,9 @@ func (this *Impl) DeleteProject(r *http.Request, in *DeleteProjectIn, out *Delet
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3705,7 +4038,13 @@ func (this *Impl) CreateDatasource(r *http.Request, in *CreateDatasourceIn, out 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+	jsonIn["path"] = in.Path
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3720,7 +4059,10 @@ func (this *Impl) CreateDatasource(r *http.Request, in *CreateDatasourceIn, out 
 
 	out.DatasourceId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["datasource_id"] = out.DatasourceId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3740,7 +4082,12 @@ func (this *Impl) GetDatasources(r *http.Request, in *GetDatasourcesIn, out *Get
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3755,7 +4102,24 @@ func (this *Impl) GetDatasources(r *http.Request, in *GetDatasourcesIn, out *Get
 
 	out.Datasources = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Datasources == nil {
+		out.Datasources = []*Datasource{}
+	}
+	jsonOut["datasources"] = make([]map[string]interface{}, len(out.Datasources))
+	for i, v := range out.Datasources {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["project_id"] = v.ProjectId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["kind"] = v.Kind
+		tmp["configuration"] = v.Configuration
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["datasources"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3775,7 +4139,10 @@ func (this *Impl) GetDatasource(r *http.Request, in *GetDatasourceIn, out *GetDa
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["datasource_id"] = in.DatasourceId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3790,7 +4157,21 @@ func (this *Impl) GetDatasource(r *http.Request, in *GetDatasourceIn, out *GetDa
 
 	out.Datasource = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Datasource == nil {
+		out.Datasource = &Datasource{}
+	}
+	jsonOut["datasource"] = map[string]interface{}{
+		"id":            out.Datasource.Id,
+		"project_id":    out.Datasource.ProjectId,
+		"name":          out.Datasource.Name,
+		"description":   out.Datasource.Description,
+		"kind":          out.Datasource.Kind,
+		"configuration": out.Datasource.Configuration,
+		"created_at":    out.Datasource.CreatedAt,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3810,7 +4191,13 @@ func (this *Impl) UpdateDatasource(r *http.Request, in *UpdateDatasourceIn, out 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["datasource_id"] = in.DatasourceId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+	jsonIn["path"] = in.Path
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3823,7 +4210,9 @@ func (this *Impl) UpdateDatasource(r *http.Request, in *UpdateDatasourceIn, out 
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3843,7 +4232,10 @@ func (this *Impl) DeleteDatasource(r *http.Request, in *DeleteDatasourceIn, out 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["datasource_id"] = in.DatasourceId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3856,7 +4248,9 @@ func (this *Impl) DeleteDatasource(r *http.Request, in *DeleteDatasourceIn, out 
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3876,7 +4270,14 @@ func (this *Impl) CreateDataset(r *http.Request, in *CreateDatasetIn, out *Creat
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+	jsonIn["datasource_id"] = in.DatasourceId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+	jsonIn["response_column_name"] = in.ResponseColumnName
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3891,7 +4292,10 @@ func (this *Impl) CreateDataset(r *http.Request, in *CreateDatasetIn, out *Creat
 
 	out.DatasetId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["dataset_id"] = out.DatasetId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3911,7 +4315,12 @@ func (this *Impl) GetDatasets(r *http.Request, in *GetDatasetsIn, out *GetDatase
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["datasource_id"] = in.DatasourceId
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3926,13 +4335,24 @@ func (this *Impl) GetDatasets(r *http.Request, in *GetDatasetsIn, out *GetDatase
 
 	out.Datasets = val0
 
-	aux := make([]Dataset, len(out.Datasets))
-	for i, val := range out.Datasets {
-		aux[i] = *val
-		aux[i].JSONProperties = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Datasets == nil {
+		out.Datasets = []*Dataset{}
+	}
+	jsonOut["datasets"] = make([]map[string]interface{}, len(out.Datasets))
+	for i, v := range out.Datasets {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["datasource_id"] = v.DatasourceId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["frame_name"] = v.FrameName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["datasets"].([]map[string]interface{})[i] = tmp
 	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3952,7 +4372,10 @@ func (this *Impl) GetDataset(r *http.Request, in *GetDatasetIn, out *GetDatasetO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["dataset_id"] = in.DatasetId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -3967,10 +4390,21 @@ func (this *Impl) GetDataset(r *http.Request, in *GetDatasetIn, out *GetDatasetO
 
 	out.Dataset = val0
 
-	aux := *out.Dataset
-	aux.JSONProperties = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Dataset == nil {
+		out.Dataset = &Dataset{}
+	}
+	jsonOut["dataset"] = map[string]interface{}{
+		"id":                   out.Dataset.Id,
+		"datasource_id":        out.Dataset.DatasourceId,
+		"name":                 out.Dataset.Name,
+		"description":          out.Dataset.Description,
+		"frame_name":           out.Dataset.FrameName,
+		"response_column_name": out.Dataset.ResponseColumnName,
+		"created_at":           out.Dataset.CreatedAt,
+	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -3990,7 +4424,10 @@ func (this *Impl) GetDatasetsFromCluster(r *http.Request, in *GetDatasetsFromClu
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4005,13 +4442,24 @@ func (this *Impl) GetDatasetsFromCluster(r *http.Request, in *GetDatasetsFromClu
 
 	out.Dataset = val0
 
-	aux := make([]Dataset, len(out.Dataset))
-	for i, val := range out.Dataset {
-		aux[i] = *val
-		aux[i].JSONProperties = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Dataset == nil {
+		out.Dataset = []*Dataset{}
+	}
+	jsonOut["dataset"] = make([]map[string]interface{}, len(out.Dataset))
+	for i, v := range out.Dataset {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["datasource_id"] = v.DatasourceId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["frame_name"] = v.FrameName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["dataset"].([]map[string]interface{})[i] = tmp
 	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4031,7 +4479,13 @@ func (this *Impl) UpdateDataset(r *http.Request, in *UpdateDatasetIn, out *Updat
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["dataset_id"] = in.DatasetId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+	jsonIn["response_column_name"] = in.ResponseColumnName
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4044,7 +4498,9 @@ func (this *Impl) UpdateDataset(r *http.Request, in *UpdateDatasetIn, out *Updat
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4064,7 +4520,12 @@ func (this *Impl) SplitDataset(r *http.Request, in *SplitDatasetIn, out *SplitDa
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["dataset_id"] = in.DatasetId
+	jsonIn["ratio1"] = in.Ratio1
+	jsonIn["ratio2"] = in.Ratio2
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4079,7 +4540,10 @@ func (this *Impl) SplitDataset(r *http.Request, in *SplitDatasetIn, out *SplitDa
 
 	out.DatasetIds = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["dataset_ids"] = out.DatasetIds
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4099,7 +4563,10 @@ func (this *Impl) DeleteDataset(r *http.Request, in *DeleteDatasetIn, out *Delet
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["dataset_id"] = in.DatasetId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4112,7 +4579,9 @@ func (this *Impl) DeleteDataset(r *http.Request, in *DeleteDatasetIn, out *Delet
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4132,7 +4601,12 @@ func (this *Impl) BuildModel(r *http.Request, in *BuildModelIn, out *BuildModelO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+	jsonIn["dataset_id"] = in.DatasetId
+	jsonIn["algorithm"] = in.Algorithm
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4147,7 +4621,10 @@ func (this *Impl) BuildModel(r *http.Request, in *BuildModelIn, out *BuildModelO
 
 	out.ModelId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["model_id"] = out.ModelId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4167,7 +4644,13 @@ func (this *Impl) BuildModelAuto(r *http.Request, in *BuildModelAutoIn, out *Bui
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+	jsonIn["dataset"] = in.Dataset
+	jsonIn["target_name"] = in.TargetName
+	jsonIn["max_run_time"] = in.MaxRunTime
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4182,10 +4665,31 @@ func (this *Impl) BuildModelAuto(r *http.Request, in *BuildModelAutoIn, out *Bui
 
 	out.Model = val0
 
-	aux := *out.Model
-	aux.JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &Model{}
+	}
+	jsonOut["model"] = map[string]interface{}{
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
+	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4205,7 +4709,10 @@ func (this *Impl) GetModel(r *http.Request, in *GetModelIn, out *GetModelOut) er
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4220,10 +4727,31 @@ func (this *Impl) GetModel(r *http.Request, in *GetModelIn, out *GetModelOut) er
 
 	out.Model = val0
 
-	aux := *out.Model
-	aux.JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &Model{}
+	}
+	jsonOut["model"] = map[string]interface{}{
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
+	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4243,7 +4771,12 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4258,13 +4791,34 @@ func (this *Impl) GetModels(r *http.Request, in *GetModelsIn, out *GetModelsOut)
 
 	out.Models = val0
 
-	aux := make([]Model, len(out.Models))
-	for i, val := range out.Models {
-		aux[i] = *val
-		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Models == nil {
+		out.Models = []*Model{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4284,7 +4838,11 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+	jsonIn["frame_key"] = in.FrameKey
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4299,13 +4857,34 @@ func (this *Impl) GetModelsFromCluster(r *http.Request, in *GetModelsFromCluster
 
 	out.Models = val0
 
-	aux := make([]Model, len(out.Models))
-	for i, val := range out.Models {
-		aux[i] = *val
-		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Models == nil {
+		out.Models = []*Model{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4325,7 +4904,10 @@ func (this *Impl) FindModelsCount(r *http.Request, in *FindModelsCountIn, out *F
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4340,7 +4922,10 @@ func (this *Impl) FindModelsCount(r *http.Request, in *FindModelsCountIn, out *F
 
 	out.Count = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["count"] = out.Count
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4360,7 +4945,9 @@ func (this *Impl) GetAllBinomialSortCriteria(r *http.Request, in *GetAllBinomial
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4375,7 +4962,10 @@ func (this *Impl) GetAllBinomialSortCriteria(r *http.Request, in *GetAllBinomial
 
 	out.Criteria = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["criteria"] = out.Criteria
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4395,7 +4985,15 @@ func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["name_part"] = in.NamePart
+	jsonIn["sort_by"] = in.SortBy
+	jsonIn["ascending"] = in.Ascending
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4410,13 +5008,39 @@ func (this *Impl) FindModelsBinomial(r *http.Request, in *FindModelsBinomialIn, 
 
 	out.Models = val0
 
-	aux := make([]BinomialModel, len(out.Models))
-	for i, val := range out.Models {
-		aux[i] = *val
-		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Models == nil {
+		out.Models = []*BinomialModel{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		tmp["mse"] = v.Mse
+		tmp["r_squared"] = v.RSquared
+		tmp["logloss"] = v.Logloss
+		tmp["auc"] = v.Auc
+		tmp["gini"] = v.Gini
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4436,7 +5060,10 @@ func (this *Impl) GetModelBinomial(r *http.Request, in *GetModelBinomialIn, out 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4451,10 +5078,36 @@ func (this *Impl) GetModelBinomial(r *http.Request, in *GetModelBinomialIn, out 
 
 	out.Model = val0
 
-	aux := *out.Model
-	aux.JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &BinomialModel{}
+	}
+	jsonOut["model"] = map[string]interface{}{
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
+		"mse":                   out.Model.Mse,
+		"r_squared":             out.Model.RSquared,
+		"logloss":               out.Model.Logloss,
+		"auc":                   out.Model.Auc,
+		"gini":                  out.Model.Gini,
+	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4474,7 +5127,9 @@ func (this *Impl) GetAllMultinomialSortCriteria(r *http.Request, in *GetAllMulti
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4489,7 +5144,10 @@ func (this *Impl) GetAllMultinomialSortCriteria(r *http.Request, in *GetAllMulti
 
 	out.Criteria = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["criteria"] = out.Criteria
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4509,7 +5167,15 @@ func (this *Impl) FindModelsMultinomial(r *http.Request, in *FindModelsMultinomi
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["name_part"] = in.NamePart
+	jsonIn["sort_by"] = in.SortBy
+	jsonIn["ascending"] = in.Ascending
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4524,13 +5190,37 @@ func (this *Impl) FindModelsMultinomial(r *http.Request, in *FindModelsMultinomi
 
 	out.Models = val0
 
-	aux := make([]MultinomialModel, len(out.Models))
-	for i, val := range out.Models {
-		aux[i] = *val
-		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Models == nil {
+		out.Models = []*MultinomialModel{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		tmp["mse"] = v.Mse
+		tmp["r_squared"] = v.RSquared
+		tmp["logloss"] = v.Logloss
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4550,7 +5240,10 @@ func (this *Impl) GetModelMultinomial(r *http.Request, in *GetModelMultinomialIn
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4565,10 +5258,34 @@ func (this *Impl) GetModelMultinomial(r *http.Request, in *GetModelMultinomialIn
 
 	out.Model = val0
 
-	aux := *out.Model
-	aux.JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &MultinomialModel{}
+	}
+	jsonOut["model"] = map[string]interface{}{
+		"id": out.Model.Id,
+		"training_dataset_id":   out.Model.TrainingDatasetId,
+		"validation_dataset_id": out.Model.ValidationDatasetId,
+		"name":                  out.Model.Name,
+		"cluster_name":          out.Model.ClusterName,
+		"model_key":             out.Model.ModelKey,
+		"algorithm":             out.Model.Algorithm,
+		"model_category":        out.Model.ModelCategory,
+		"dataset_name":          out.Model.DatasetName,
+		"response_column_name":  out.Model.ResponseColumnName,
+		"logical_name":          out.Model.LogicalName,
+		"location":              out.Model.Location,
+		"model_object_type":     out.Model.ModelObjectType,
+		"max_runtime":           out.Model.MaxRuntime,
+		"created_at":            out.Model.CreatedAt,
+		"label_id":              out.Model.LabelId,
+		"label_name":            out.Model.LabelName,
+		"mse":                   out.Model.Mse,
+		"r_squared":             out.Model.RSquared,
+		"logloss":               out.Model.Logloss,
+	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4588,7 +5305,9 @@ func (this *Impl) GetAllRegressionSortCriteria(r *http.Request, in *GetAllRegres
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4603,7 +5322,10 @@ func (this *Impl) GetAllRegressionSortCriteria(r *http.Request, in *GetAllRegres
 
 	out.Criteria = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["criteria"] = out.Criteria
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4623,7 +5345,15 @@ func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegression
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["name_part"] = in.NamePart
+	jsonIn["sort_by"] = in.SortBy
+	jsonIn["ascending"] = in.Ascending
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4638,13 +5368,37 @@ func (this *Impl) FindModelsRegression(r *http.Request, in *FindModelsRegression
 
 	out.Models = val0
 
-	aux := make([]RegressionModel, len(out.Models))
-	for i, val := range out.Models {
-		aux[i] = *val
-		aux[i].JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Models == nil {
+		out.Models = []*RegressionModel{}
+	}
+	jsonOut["models"] = make([]map[string]interface{}, len(out.Models))
+	for i, v := range out.Models {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["training_dataset_id"] = v.TrainingDatasetId
+		tmp["validation_dataset_id"] = v.ValidationDatasetId
+		tmp["name"] = v.Name
+		tmp["cluster_name"] = v.ClusterName
+		tmp["model_key"] = v.ModelKey
+		tmp["algorithm"] = v.Algorithm
+		tmp["model_category"] = v.ModelCategory
+		tmp["dataset_name"] = v.DatasetName
+		tmp["response_column_name"] = v.ResponseColumnName
+		tmp["logical_name"] = v.LogicalName
+		tmp["location"] = v.Location
+		tmp["model_object_type"] = v.ModelObjectType
+		tmp["max_runtime"] = v.MaxRuntime
+		tmp["created_at"] = v.CreatedAt
+		tmp["label_id"] = v.LabelId
+		tmp["label_name"] = v.LabelName
+		tmp["mse"] = v.Mse
+		tmp["r_squared"] = v.RSquared
+		tmp["mean_residual_deviance"] = v.MeanResidualDeviance
+		jsonOut["models"].([]map[string]interface{})[i] = tmp
 	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4664,7 +5418,10 @@ func (this *Impl) GetModelRegression(r *http.Request, in *GetModelRegressionIn, 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4679,10 +5436,34 @@ func (this *Impl) GetModelRegression(r *http.Request, in *GetModelRegressionIn, 
 
 	out.Model = val0
 
-	aux := *out.Model
-	aux.JSONMetrics = "JSON DATA OMITTED..."
+	jsonOut := make(map[string]interface{})
+	if out.Model == nil {
+		out.Model = &RegressionModel{}
+	}
+	jsonOut["model"] = map[string]interface{}{
+		"id": out.Model.Id,
+		"training_dataset_id":    out.Model.TrainingDatasetId,
+		"validation_dataset_id":  out.Model.ValidationDatasetId,
+		"name":                   out.Model.Name,
+		"cluster_name":           out.Model.ClusterName,
+		"model_key":              out.Model.ModelKey,
+		"algorithm":              out.Model.Algorithm,
+		"model_category":         out.Model.ModelCategory,
+		"dataset_name":           out.Model.DatasetName,
+		"response_column_name":   out.Model.ResponseColumnName,
+		"logical_name":           out.Model.LogicalName,
+		"location":               out.Model.Location,
+		"model_object_type":      out.Model.ModelObjectType,
+		"max_runtime":            out.Model.MaxRuntime,
+		"created_at":             out.Model.CreatedAt,
+		"label_id":               out.Model.LabelId,
+		"label_name":             out.Model.LabelName,
+		"mse":                    out.Model.Mse,
+		"r_squared":              out.Model.RSquared,
+		"mean_residual_deviance": out.Model.MeanResidualDeviance,
+	}
 
-	res, merr := json.Marshal(aux)
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4702,7 +5483,13 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["cluster_id"] = in.ClusterId
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["model_key"] = in.ModelKey
+	jsonIn["model_name"] = in.ModelName
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4717,7 +5504,10 @@ func (this *Impl) ImportModelFromCluster(r *http.Request, in *ImportModelFromClu
 
 	out.ModelId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["model_id"] = out.ModelId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4737,7 +5527,10 @@ func (this *Impl) CheckMojo(r *http.Request, in *CheckMojoIn, out *CheckMojoOut)
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["algo"] = in.Algo
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4752,7 +5545,10 @@ func (this *Impl) CheckMojo(r *http.Request, in *CheckMojoIn, out *CheckMojoOut)
 
 	out.CanMojo = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["can_mojo"] = out.CanMojo
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4772,7 +5568,10 @@ func (this *Impl) ImportModelPojo(r *http.Request, in *ImportModelPojoIn, out *I
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4785,7 +5584,9 @@ func (this *Impl) ImportModelPojo(r *http.Request, in *ImportModelPojoIn, out *I
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4805,7 +5606,10 @@ func (this *Impl) ImportModelMojo(r *http.Request, in *ImportModelMojoIn, out *I
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4818,7 +5622,9 @@ func (this *Impl) ImportModelMojo(r *http.Request, in *ImportModelMojoIn, out *I
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4838,7 +5644,10 @@ func (this *Impl) DeleteModel(r *http.Request, in *DeleteModelIn, out *DeleteMod
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4851,7 +5660,9 @@ func (this *Impl) DeleteModel(r *http.Request, in *DeleteModelIn, out *DeleteMod
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4871,7 +5682,12 @@ func (this *Impl) CreateLabel(r *http.Request, in *CreateLabelIn, out *CreateLab
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4886,7 +5702,10 @@ func (this *Impl) CreateLabel(r *http.Request, in *CreateLabelIn, out *CreateLab
 
 	out.LabelId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["label_id"] = out.LabelId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4906,7 +5725,12 @@ func (this *Impl) UpdateLabel(r *http.Request, in *UpdateLabelIn, out *UpdateLab
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["label_id"] = in.LabelId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4919,7 +5743,9 @@ func (this *Impl) UpdateLabel(r *http.Request, in *UpdateLabelIn, out *UpdateLab
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4939,7 +5765,10 @@ func (this *Impl) DeleteLabel(r *http.Request, in *DeleteLabelIn, out *DeleteLab
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["label_id"] = in.LabelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4952,7 +5781,9 @@ func (this *Impl) DeleteLabel(r *http.Request, in *DeleteLabelIn, out *DeleteLab
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -4972,7 +5803,11 @@ func (this *Impl) LinkLabelWithModel(r *http.Request, in *LinkLabelWithModelIn, 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["label_id"] = in.LabelId
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -4985,7 +5820,9 @@ func (this *Impl) LinkLabelWithModel(r *http.Request, in *LinkLabelWithModelIn, 
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5005,7 +5842,11 @@ func (this *Impl) UnlinkLabelFromModel(r *http.Request, in *UnlinkLabelFromModel
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["label_id"] = in.LabelId
+	jsonIn["model_id"] = in.ModelId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5018,7 +5859,9 @@ func (this *Impl) UnlinkLabelFromModel(r *http.Request, in *UnlinkLabelFromModel
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5038,7 +5881,10 @@ func (this *Impl) GetLabelsForProject(r *http.Request, in *GetLabelsForProjectIn
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5053,7 +5899,23 @@ func (this *Impl) GetLabelsForProject(r *http.Request, in *GetLabelsForProjectIn
 
 	out.Labels = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Labels == nil {
+		out.Labels = []*Label{}
+	}
+	jsonOut["labels"] = make([]map[string]interface{}, len(out.Labels))
+	for i, v := range out.Labels {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["project_id"] = v.ProjectId
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["labels"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5073,7 +5935,12 @@ func (this *Impl) StartService(r *http.Request, in *StartServiceIn, out *StartSe
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+	jsonIn["name"] = in.Name
+	jsonIn["package_name"] = in.PackageName
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5088,7 +5955,10 @@ func (this *Impl) StartService(r *http.Request, in *StartServiceIn, out *StartSe
 
 	out.ServiceId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["service_id"] = out.ServiceId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5108,7 +5978,10 @@ func (this *Impl) StopService(r *http.Request, in *StopServiceIn, out *StopServi
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["service_id"] = in.ServiceId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5121,7 +5994,9 @@ func (this *Impl) StopService(r *http.Request, in *StopServiceIn, out *StopServi
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5141,7 +6016,10 @@ func (this *Impl) GetService(r *http.Request, in *GetServiceIn, out *GetServiceO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["service_id"] = in.ServiceId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5156,7 +6034,22 @@ func (this *Impl) GetService(r *http.Request, in *GetServiceIn, out *GetServiceO
 
 	out.Service = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Service == nil {
+		out.Service = &ScoringService{}
+	}
+	jsonOut["service"] = map[string]interface{}{
+		"id":         out.Service.Id,
+		"model_id":   out.Service.ModelId,
+		"name":       out.Service.Name,
+		"address":    out.Service.Address,
+		"port":       out.Service.Port,
+		"process_id": out.Service.ProcessId,
+		"state":      out.Service.State,
+		"created_at": out.Service.CreatedAt,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5176,7 +6069,11 @@ func (this *Impl) GetServices(r *http.Request, in *GetServicesIn, out *GetServic
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5191,7 +6088,25 @@ func (this *Impl) GetServices(r *http.Request, in *GetServicesIn, out *GetServic
 
 	out.Services = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Services == nil {
+		out.Services = []*ScoringService{}
+	}
+	jsonOut["services"] = make([]map[string]interface{}, len(out.Services))
+	for i, v := range out.Services {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["address"] = v.Address
+		tmp["port"] = v.Port
+		tmp["process_id"] = v.ProcessId
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["services"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5211,7 +6126,12 @@ func (this *Impl) GetServicesForProject(r *http.Request, in *GetServicesForProje
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5226,7 +6146,25 @@ func (this *Impl) GetServicesForProject(r *http.Request, in *GetServicesForProje
 
 	out.Services = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Services == nil {
+		out.Services = []*ScoringService{}
+	}
+	jsonOut["services"] = make([]map[string]interface{}, len(out.Services))
+	for i, v := range out.Services {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["address"] = v.Address
+		tmp["port"] = v.Port
+		tmp["process_id"] = v.ProcessId
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["services"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5246,7 +6184,12 @@ func (this *Impl) GetServicesForModel(r *http.Request, in *GetServicesForModelIn
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["model_id"] = in.ModelId
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5261,7 +6204,25 @@ func (this *Impl) GetServicesForModel(r *http.Request, in *GetServicesForModelIn
 
 	out.Services = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Services == nil {
+		out.Services = []*ScoringService{}
+	}
+	jsonOut["services"] = make([]map[string]interface{}, len(out.Services))
+	for i, v := range out.Services {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["model_id"] = v.ModelId
+		tmp["name"] = v.Name
+		tmp["address"] = v.Address
+		tmp["port"] = v.Port
+		tmp["process_id"] = v.ProcessId
+		tmp["state"] = v.State
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["services"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5281,7 +6242,10 @@ func (this *Impl) DeleteService(r *http.Request, in *DeleteServiceIn, out *Delet
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["service_id"] = in.ServiceId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5294,7 +6258,9 @@ func (this *Impl) DeleteService(r *http.Request, in *DeleteServiceIn, out *Delet
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5314,7 +6280,10 @@ func (this *Impl) GetEngine(r *http.Request, in *GetEngineIn, out *GetEngineOut)
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["engine_id"] = in.EngineId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5329,7 +6298,18 @@ func (this *Impl) GetEngine(r *http.Request, in *GetEngineIn, out *GetEngineOut)
 
 	out.Engine = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Engine == nil {
+		out.Engine = &Engine{}
+	}
+	jsonOut["engine"] = map[string]interface{}{
+		"id":         out.Engine.Id,
+		"name":       out.Engine.Name,
+		"location":   out.Engine.Location,
+		"created_at": out.Engine.CreatedAt,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5349,7 +6329,9 @@ func (this *Impl) GetEngines(r *http.Request, in *GetEnginesIn, out *GetEnginesO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5364,7 +6346,21 @@ func (this *Impl) GetEngines(r *http.Request, in *GetEnginesIn, out *GetEnginesO
 
 	out.Engines = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Engines == nil {
+		out.Engines = []*Engine{}
+	}
+	jsonOut["engines"] = make([]map[string]interface{}, len(out.Engines))
+	for i, v := range out.Engines {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["location"] = v.Location
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["engines"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5384,7 +6380,10 @@ func (this *Impl) DeleteEngine(r *http.Request, in *DeleteEngineIn, out *DeleteE
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["engine_id"] = in.EngineId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5397,7 +6396,9 @@ func (this *Impl) DeleteEngine(r *http.Request, in *DeleteEngineIn, out *DeleteE
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5417,7 +6418,9 @@ func (this *Impl) GetAllEntityTypes(r *http.Request, in *GetAllEntityTypesIn, ou
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5432,7 +6435,19 @@ func (this *Impl) GetAllEntityTypes(r *http.Request, in *GetAllEntityTypesIn, ou
 
 	out.EntityTypes = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.EntityTypes == nil {
+		out.EntityTypes = []*EntityType{}
+	}
+	jsonOut["entity_types"] = make([]map[string]interface{}, len(out.EntityTypes))
+	for i, v := range out.EntityTypes {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		jsonOut["entity_types"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5452,7 +6467,9 @@ func (this *Impl) GetAllPermissions(r *http.Request, in *GetAllPermissionsIn, ou
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5467,7 +6484,20 @@ func (this *Impl) GetAllPermissions(r *http.Request, in *GetAllPermissionsIn, ou
 
 	out.Permissions = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Permissions == nil {
+		out.Permissions = []*Permission{}
+	}
+	jsonOut["permissions"] = make([]map[string]interface{}, len(out.Permissions))
+	for i, v := range out.Permissions {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["code"] = v.Code
+		tmp["description"] = v.Description
+		jsonOut["permissions"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5487,7 +6517,9 @@ func (this *Impl) GetAllClusterTypes(r *http.Request, in *GetAllClusterTypesIn, 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5502,7 +6534,19 @@ func (this *Impl) GetAllClusterTypes(r *http.Request, in *GetAllClusterTypesIn, 
 
 	out.ClusterTypes = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.ClusterTypes == nil {
+		out.ClusterTypes = []*ClusterType{}
+	}
+	jsonOut["cluster_types"] = make([]map[string]interface{}, len(out.ClusterTypes))
+	for i, v := range out.ClusterTypes {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		jsonOut["cluster_types"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5522,7 +6566,10 @@ func (this *Impl) GetPermissionsForRole(r *http.Request, in *GetPermissionsForRo
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5537,7 +6584,20 @@ func (this *Impl) GetPermissionsForRole(r *http.Request, in *GetPermissionsForRo
 
 	out.Permissions = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Permissions == nil {
+		out.Permissions = []*Permission{}
+	}
+	jsonOut["permissions"] = make([]map[string]interface{}, len(out.Permissions))
+	for i, v := range out.Permissions {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["code"] = v.Code
+		tmp["description"] = v.Description
+		jsonOut["permissions"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5557,7 +6617,10 @@ func (this *Impl) GetPermissionsForIdentity(r *http.Request, in *GetPermissionsF
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5572,7 +6635,20 @@ func (this *Impl) GetPermissionsForIdentity(r *http.Request, in *GetPermissionsF
 
 	out.Permissions = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Permissions == nil {
+		out.Permissions = []*Permission{}
+	}
+	jsonOut["permissions"] = make([]map[string]interface{}, len(out.Permissions))
+	for i, v := range out.Permissions {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["code"] = v.Code
+		tmp["description"] = v.Description
+		jsonOut["permissions"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5592,7 +6668,11 @@ func (this *Impl) CreateRole(r *http.Request, in *CreateRoleIn, out *CreateRoleO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5607,7 +6687,10 @@ func (this *Impl) CreateRole(r *http.Request, in *CreateRoleIn, out *CreateRoleO
 
 	out.RoleId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["role_id"] = out.RoleId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5627,7 +6710,11 @@ func (this *Impl) GetRoles(r *http.Request, in *GetRolesIn, out *GetRolesOut) er
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5642,7 +6729,21 @@ func (this *Impl) GetRoles(r *http.Request, in *GetRolesIn, out *GetRolesOut) er
 
 	out.Roles = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Roles == nil {
+		out.Roles = []*Role{}
+	}
+	jsonOut["roles"] = make([]map[string]interface{}, len(out.Roles))
+	for i, v := range out.Roles {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["roles"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5662,7 +6763,10 @@ func (this *Impl) GetRolesForIdentity(r *http.Request, in *GetRolesForIdentityIn
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5677,7 +6781,21 @@ func (this *Impl) GetRolesForIdentity(r *http.Request, in *GetRolesForIdentityIn
 
 	out.Roles = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Roles == nil {
+		out.Roles = []*Role{}
+	}
+	jsonOut["roles"] = make([]map[string]interface{}, len(out.Roles))
+	for i, v := range out.Roles {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["roles"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5697,7 +6815,10 @@ func (this *Impl) GetRole(r *http.Request, in *GetRoleIn, out *GetRoleOut) error
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5712,7 +6833,18 @@ func (this *Impl) GetRole(r *http.Request, in *GetRoleIn, out *GetRoleOut) error
 
 	out.Role = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Role == nil {
+		out.Role = &Role{}
+	}
+	jsonOut["role"] = map[string]interface{}{
+		"id":          out.Role.Id,
+		"name":        out.Role.Name,
+		"description": out.Role.Description,
+		"created":     out.Role.Created,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5732,7 +6864,10 @@ func (this *Impl) GetRoleByName(r *http.Request, in *GetRoleByNameIn, out *GetRo
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["name"] = in.Name
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5747,7 +6882,18 @@ func (this *Impl) GetRoleByName(r *http.Request, in *GetRoleByNameIn, out *GetRo
 
 	out.Role = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Role == nil {
+		out.Role = &Role{}
+	}
+	jsonOut["role"] = map[string]interface{}{
+		"id":          out.Role.Id,
+		"name":        out.Role.Name,
+		"description": out.Role.Description,
+		"created":     out.Role.Created,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5767,7 +6913,12 @@ func (this *Impl) UpdateRole(r *http.Request, in *UpdateRoleIn, out *UpdateRoleO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5780,7 +6931,9 @@ func (this *Impl) UpdateRole(r *http.Request, in *UpdateRoleIn, out *UpdateRoleO
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5800,7 +6953,11 @@ func (this *Impl) LinkRoleWithPermissions(r *http.Request, in *LinkRoleWithPermi
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+	jsonIn["permission_ids"] = in.PermissionIds
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5813,7 +6970,9 @@ func (this *Impl) LinkRoleWithPermissions(r *http.Request, in *LinkRoleWithPermi
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5833,7 +6992,11 @@ func (this *Impl) LinkRoleWithPermission(r *http.Request, in *LinkRoleWithPermis
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+	jsonIn["permission_id"] = in.PermissionId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5846,7 +7009,9 @@ func (this *Impl) LinkRoleWithPermission(r *http.Request, in *LinkRoleWithPermis
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5866,7 +7031,11 @@ func (this *Impl) UnlinkRoleFromPermission(r *http.Request, in *UnlinkRoleFromPe
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+	jsonIn["permission_id"] = in.PermissionId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5879,7 +7048,9 @@ func (this *Impl) UnlinkRoleFromPermission(r *http.Request, in *UnlinkRoleFromPe
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5899,7 +7070,10 @@ func (this *Impl) DeleteRole(r *http.Request, in *DeleteRoleIn, out *DeleteRoleO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5912,7 +7086,9 @@ func (this *Impl) DeleteRole(r *http.Request, in *DeleteRoleIn, out *DeleteRoleO
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5932,7 +7108,11 @@ func (this *Impl) CreateWorkgroup(r *http.Request, in *CreateWorkgroupIn, out *C
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5947,7 +7127,10 @@ func (this *Impl) CreateWorkgroup(r *http.Request, in *CreateWorkgroupIn, out *C
 
 	out.WorkgroupId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["workgroup_id"] = out.WorkgroupId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -5967,7 +7150,11 @@ func (this *Impl) GetWorkgroups(r *http.Request, in *GetWorkgroupsIn, out *GetWo
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -5982,7 +7169,21 @@ func (this *Impl) GetWorkgroups(r *http.Request, in *GetWorkgroupsIn, out *GetWo
 
 	out.Workgroups = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Workgroups == nil {
+		out.Workgroups = []*Workgroup{}
+	}
+	jsonOut["workgroups"] = make([]map[string]interface{}, len(out.Workgroups))
+	for i, v := range out.Workgroups {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["workgroups"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6002,7 +7203,10 @@ func (this *Impl) GetWorkgroupsForIdentity(r *http.Request, in *GetWorkgroupsFor
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6017,7 +7221,21 @@ func (this *Impl) GetWorkgroupsForIdentity(r *http.Request, in *GetWorkgroupsFor
 
 	out.Workgroups = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Workgroups == nil {
+		out.Workgroups = []*Workgroup{}
+	}
+	jsonOut["workgroups"] = make([]map[string]interface{}, len(out.Workgroups))
+	for i, v := range out.Workgroups {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["description"] = v.Description
+		tmp["created"] = v.Created
+		jsonOut["workgroups"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6037,7 +7255,10 @@ func (this *Impl) GetWorkgroup(r *http.Request, in *GetWorkgroupIn, out *GetWork
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["workgroup_id"] = in.WorkgroupId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6052,7 +7273,18 @@ func (this *Impl) GetWorkgroup(r *http.Request, in *GetWorkgroupIn, out *GetWork
 
 	out.Workgroup = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Workgroup == nil {
+		out.Workgroup = &Workgroup{}
+	}
+	jsonOut["workgroup"] = map[string]interface{}{
+		"id":          out.Workgroup.Id,
+		"name":        out.Workgroup.Name,
+		"description": out.Workgroup.Description,
+		"created":     out.Workgroup.Created,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6072,7 +7304,10 @@ func (this *Impl) GetWorkgroupByName(r *http.Request, in *GetWorkgroupByNameIn, 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["name"] = in.Name
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6087,7 +7322,18 @@ func (this *Impl) GetWorkgroupByName(r *http.Request, in *GetWorkgroupByNameIn, 
 
 	out.Workgroup = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Workgroup == nil {
+		out.Workgroup = &Workgroup{}
+	}
+	jsonOut["workgroup"] = map[string]interface{}{
+		"id":          out.Workgroup.Id,
+		"name":        out.Workgroup.Name,
+		"description": out.Workgroup.Description,
+		"created":     out.Workgroup.Created,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6107,7 +7353,12 @@ func (this *Impl) UpdateWorkgroup(r *http.Request, in *UpdateWorkgroupIn, out *U
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["workgroup_id"] = in.WorkgroupId
+	jsonIn["name"] = in.Name
+	jsonIn["description"] = in.Description
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6120,7 +7371,9 @@ func (this *Impl) UpdateWorkgroup(r *http.Request, in *UpdateWorkgroupIn, out *U
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6140,7 +7393,10 @@ func (this *Impl) DeleteWorkgroup(r *http.Request, in *DeleteWorkgroupIn, out *D
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["workgroup_id"] = in.WorkgroupId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6153,7 +7409,9 @@ func (this *Impl) DeleteWorkgroup(r *http.Request, in *DeleteWorkgroupIn, out *D
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6173,7 +7431,10 @@ func (this *Impl) CreateIdentity(r *http.Request, in *CreateIdentityIn, out *Cre
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["name"] = in.Name
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6188,7 +7449,10 @@ func (this *Impl) CreateIdentity(r *http.Request, in *CreateIdentityIn, out *Cre
 
 	out.IdentityId = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["identity_id"] = out.IdentityId
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6208,7 +7472,11 @@ func (this *Impl) GetIdentities(r *http.Request, in *GetIdentitiesIn, out *GetId
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6223,7 +7491,22 @@ func (this *Impl) GetIdentities(r *http.Request, in *GetIdentitiesIn, out *GetId
 
 	out.Identities = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Identities == nil {
+		out.Identities = []*Identity{}
+	}
+	jsonOut["identities"] = make([]map[string]interface{}, len(out.Identities))
+	for i, v := range out.Identities {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["is_active"] = v.IsActive
+		tmp["last_login"] = v.LastLogin
+		tmp["created"] = v.Created
+		jsonOut["identities"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6243,7 +7526,10 @@ func (this *Impl) GetIdentitiesForWorkgroup(r *http.Request, in *GetIdentitiesFo
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["workgroup_id"] = in.WorkgroupId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6258,7 +7544,22 @@ func (this *Impl) GetIdentitiesForWorkgroup(r *http.Request, in *GetIdentitiesFo
 
 	out.Identities = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Identities == nil {
+		out.Identities = []*Identity{}
+	}
+	jsonOut["identities"] = make([]map[string]interface{}, len(out.Identities))
+	for i, v := range out.Identities {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["is_active"] = v.IsActive
+		tmp["last_login"] = v.LastLogin
+		tmp["created"] = v.Created
+		jsonOut["identities"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6278,7 +7579,10 @@ func (this *Impl) GetIdentitiesForRole(r *http.Request, in *GetIdentitiesForRole
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["role_id"] = in.RoleId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6293,7 +7597,22 @@ func (this *Impl) GetIdentitiesForRole(r *http.Request, in *GetIdentitiesForRole
 
 	out.Identities = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Identities == nil {
+		out.Identities = []*Identity{}
+	}
+	jsonOut["identities"] = make([]map[string]interface{}, len(out.Identities))
+	for i, v := range out.Identities {
+		tmp := make(map[string]interface{})
+		tmp["id"] = v.Id
+		tmp["name"] = v.Name
+		tmp["is_active"] = v.IsActive
+		tmp["last_login"] = v.LastLogin
+		tmp["created"] = v.Created
+		jsonOut["identities"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6313,7 +7632,11 @@ func (this *Impl) GetIdentitiesForEntity(r *http.Request, in *GetIdentitiesForEn
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["entity_type"] = in.EntityType
+	jsonIn["entity_id"] = in.EntityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6328,7 +7651,22 @@ func (this *Impl) GetIdentitiesForEntity(r *http.Request, in *GetIdentitiesForEn
 
 	out.Users = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Users == nil {
+		out.Users = []*UserRole{}
+	}
+	jsonOut["users"] = make([]map[string]interface{}, len(out.Users))
+	for i, v := range out.Users {
+		tmp := make(map[string]interface{})
+		tmp["kind"] = v.Kind
+		tmp["identity_id"] = v.IdentityId
+		tmp["identity_name"] = v.IdentityName
+		tmp["role_id"] = v.RoleId
+		tmp["role_name"] = v.RoleName
+		jsonOut["users"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6348,7 +7686,10 @@ func (this *Impl) GetIdentity(r *http.Request, in *GetIdentityIn, out *GetIdenti
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6363,7 +7704,19 @@ func (this *Impl) GetIdentity(r *http.Request, in *GetIdentityIn, out *GetIdenti
 
 	out.Identity = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Identity == nil {
+		out.Identity = &Identity{}
+	}
+	jsonOut["identity"] = map[string]interface{}{
+		"id":         out.Identity.Id,
+		"name":       out.Identity.Name,
+		"is_active":  out.Identity.IsActive,
+		"last_login": out.Identity.LastLogin,
+		"created":    out.Identity.Created,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6383,7 +7736,10 @@ func (this *Impl) GetIdentityByName(r *http.Request, in *GetIdentityByNameIn, ou
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["name"] = in.Name
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6398,7 +7754,19 @@ func (this *Impl) GetIdentityByName(r *http.Request, in *GetIdentityByNameIn, ou
 
 	out.Identity = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Identity == nil {
+		out.Identity = &Identity{}
+	}
+	jsonOut["identity"] = map[string]interface{}{
+		"id":         out.Identity.Id,
+		"name":       out.Identity.Name,
+		"is_active":  out.Identity.IsActive,
+		"last_login": out.Identity.LastLogin,
+		"created":    out.Identity.Created,
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6418,7 +7786,11 @@ func (this *Impl) LinkIdentityWithWorkgroup(r *http.Request, in *LinkIdentityWit
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+	jsonIn["workgroup_id"] = in.WorkgroupId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6431,7 +7803,9 @@ func (this *Impl) LinkIdentityWithWorkgroup(r *http.Request, in *LinkIdentityWit
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6451,7 +7825,11 @@ func (this *Impl) UnlinkIdentityFromWorkgroup(r *http.Request, in *UnlinkIdentit
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+	jsonIn["workgroup_id"] = in.WorkgroupId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6464,7 +7842,9 @@ func (this *Impl) UnlinkIdentityFromWorkgroup(r *http.Request, in *UnlinkIdentit
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6484,7 +7864,11 @@ func (this *Impl) LinkIdentityWithRole(r *http.Request, in *LinkIdentityWithRole
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+	jsonIn["role_id"] = in.RoleId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6497,7 +7881,9 @@ func (this *Impl) LinkIdentityWithRole(r *http.Request, in *LinkIdentityWithRole
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6517,7 +7903,11 @@ func (this *Impl) UnlinkIdentityFromRole(r *http.Request, in *UnlinkIdentityFrom
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+	jsonIn["role_id"] = in.RoleId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6530,7 +7920,9 @@ func (this *Impl) UnlinkIdentityFromRole(r *http.Request, in *UnlinkIdentityFrom
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6550,7 +7942,10 @@ func (this *Impl) UpdateIdentity(r *http.Request, in *UpdateIdentityIn, out *Upd
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6563,7 +7958,9 @@ func (this *Impl) UpdateIdentity(r *http.Request, in *UpdateIdentityIn, out *Upd
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6583,7 +7980,10 @@ func (this *Impl) ActivateIdentity(r *http.Request, in *ActivateIdentityIn, out 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6596,7 +7996,9 @@ func (this *Impl) ActivateIdentity(r *http.Request, in *ActivateIdentityIn, out 
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6616,7 +8018,10 @@ func (this *Impl) DeactivateIdentity(r *http.Request, in *DeactivateIdentityIn, 
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["identity_id"] = in.IdentityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6629,7 +8034,9 @@ func (this *Impl) DeactivateIdentity(r *http.Request, in *DeactivateIdentityIn, 
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6649,7 +8056,13 @@ func (this *Impl) ShareEntity(r *http.Request, in *ShareEntityIn, out *ShareEnti
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["kind"] = in.Kind
+	jsonIn["workgroup_id"] = in.WorkgroupId
+	jsonIn["entity_type_id"] = in.EntityTypeId
+	jsonIn["entity_id"] = in.EntityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6662,7 +8075,9 @@ func (this *Impl) ShareEntity(r *http.Request, in *ShareEntityIn, out *ShareEnti
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6682,7 +8097,11 @@ func (this *Impl) GetPrivileges(r *http.Request, in *GetPrivilegesIn, out *GetPr
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["entity_type_id"] = in.EntityTypeId
+	jsonIn["entity_id"] = in.EntityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6697,7 +8116,21 @@ func (this *Impl) GetPrivileges(r *http.Request, in *GetPrivilegesIn, out *GetPr
 
 	out.Privileges = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.Privileges == nil {
+		out.Privileges = []*EntityPrivilege{}
+	}
+	jsonOut["privileges"] = make([]map[string]interface{}, len(out.Privileges))
+	for i, v := range out.Privileges {
+		tmp := make(map[string]interface{})
+		tmp["kind"] = v.Kind
+		tmp["workgroup_id"] = v.WorkgroupId
+		tmp["workgroup_name"] = v.WorkgroupName
+		tmp["workgroup_description"] = v.WorkgroupDescription
+		jsonOut["privileges"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6717,7 +8150,13 @@ func (this *Impl) UnshareEntity(r *http.Request, in *UnshareEntityIn, out *Unsha
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["kind"] = in.Kind
+	jsonIn["workgroup_id"] = in.WorkgroupId
+	jsonIn["entity_type_id"] = in.EntityTypeId
+	jsonIn["entity_id"] = in.EntityId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6730,7 +8169,9 @@ func (this *Impl) UnshareEntity(r *http.Request, in *UnshareEntityIn, out *Unsha
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6750,7 +8191,13 @@ func (this *Impl) GetHistory(r *http.Request, in *GetHistoryIn, out *GetHistoryO
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["entity_type_id"] = in.EntityTypeId
+	jsonIn["entity_id"] = in.EntityId
+	jsonIn["offset"] = in.Offset
+	jsonIn["limit"] = in.Limit
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6765,7 +8212,21 @@ func (this *Impl) GetHistory(r *http.Request, in *GetHistoryIn, out *GetHistoryO
 
 	out.History = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	if out.History == nil {
+		out.History = []*EntityHistory{}
+	}
+	jsonOut["history"] = make([]map[string]interface{}, len(out.History))
+	for i, v := range out.History {
+		tmp := make(map[string]interface{})
+		tmp["identity_id"] = v.IdentityId
+		tmp["action"] = v.Action
+		tmp["description"] = v.Description
+		tmp["created_at"] = v.CreatedAt
+		jsonOut["history"].([]map[string]interface{})[i] = tmp
+	}
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6785,7 +8246,11 @@ func (this *Impl) CreatePackage(r *http.Request, in *CreatePackageIn, out *Creat
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["name"] = in.Name
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6798,7 +8263,9 @@ func (this *Impl) CreatePackage(r *http.Request, in *CreatePackageIn, out *Creat
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6818,7 +8285,10 @@ func (this *Impl) GetPackages(r *http.Request, in *GetPackagesIn, out *GetPackag
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6833,7 +8303,10 @@ func (this *Impl) GetPackages(r *http.Request, in *GetPackagesIn, out *GetPackag
 
 	out.Packages = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["packages"] = out.Packages
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6853,7 +8326,12 @@ func (this *Impl) GetPackageDirectories(r *http.Request, in *GetPackageDirectori
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["package_name"] = in.PackageName
+	jsonIn["relative_path"] = in.RelativePath
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6868,7 +8346,10 @@ func (this *Impl) GetPackageDirectories(r *http.Request, in *GetPackageDirectori
 
 	out.Directories = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["directories"] = out.Directories
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6888,7 +8369,12 @@ func (this *Impl) GetPackageFiles(r *http.Request, in *GetPackageFilesIn, out *G
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["package_name"] = in.PackageName
+	jsonIn["relative_path"] = in.RelativePath
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6903,7 +8389,10 @@ func (this *Impl) GetPackageFiles(r *http.Request, in *GetPackageFilesIn, out *G
 
 	out.Files = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["files"] = out.Files
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6923,7 +8412,11 @@ func (this *Impl) DeletePackage(r *http.Request, in *DeletePackageIn, out *Delet
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["name"] = in.Name
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6936,7 +8429,9 @@ func (this *Impl) DeletePackage(r *http.Request, in *DeletePackageIn, out *Delet
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6956,7 +8451,12 @@ func (this *Impl) DeletePackageDirectory(r *http.Request, in *DeletePackageDirec
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["package_name"] = in.PackageName
+	jsonIn["relative_path"] = in.RelativePath
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -6969,7 +8469,9 @@ func (this *Impl) DeletePackageDirectory(r *http.Request, in *DeletePackageDirec
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -6989,7 +8491,12 @@ func (this *Impl) DeletePackageFile(r *http.Request, in *DeletePackageFileIn, ou
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["package_name"] = in.PackageName
+	jsonIn["relative_path"] = in.RelativePath
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -7002,7 +8509,9 @@ func (this *Impl) DeletePackageFile(r *http.Request, in *DeletePackageFileIn, ou
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -7022,7 +8531,12 @@ func (this *Impl) SetAttributesForPackage(r *http.Request, in *SetAttributesForP
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["package_name"] = in.PackageName
+	jsonIn["attributes"] = in.Attributes
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -7035,7 +8549,9 @@ func (this *Impl) SetAttributesForPackage(r *http.Request, in *SetAttributesForP
 		return err
 	}
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
@@ -7055,7 +8571,11 @@ func (this *Impl) GetAttributesForPackage(r *http.Request, in *GetAttributesForP
 		return azerr
 	}
 
-	req, merr := json.Marshal(in)
+	jsonIn := make(map[string]interface{})
+	jsonIn["project_id"] = in.ProjectId
+	jsonIn["package_name"] = in.PackageName
+
+	req, merr := json.Marshal(jsonIn)
 	if merr != nil {
 		log.Println(guid, "REQ", pz, name, merr)
 	} else {
@@ -7070,7 +8590,10 @@ func (this *Impl) GetAttributesForPackage(r *http.Request, in *GetAttributesForP
 
 	out.Attributes = val0
 
-	res, merr := json.Marshal(out)
+	jsonOut := make(map[string]interface{})
+	jsonOut["attributes"] = out.Attributes
+
+	res, merr := json.Marshal(jsonOut)
 	if merr != nil {
 		log.Println(guid, "RES", pz, name, merr)
 	} else {
