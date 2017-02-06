@@ -1,26 +1,26 @@
 /*
-  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+ Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
-  License, or (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Affero General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import * as React from 'react';
 import * as _ from 'lodash';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import '../styles/users.scss';
-import { } from "../../Proxy/Proxy";
+import {} from "../../Proxy/Proxy";
 import { Tooltip, FocusStyleManager } from "@blueprintjs/core";
 import { getConfig } from "../../Clusters/actions/clusters.actions";
 import { Config } from "../../Proxy/Proxy";
@@ -75,12 +75,12 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
       this.setState({
         steamPrincipleValue: nextProps.globalKeytab.principal
       });
-    };
+    }
   };
 
   onDeleteKeytab = (id: number) => {
     this.props.deleteKeytab(id, true);
-    this.setState({ afterConfirmAction: null });
+    this.setState({afterConfirmAction: null});
   };
   onTestConfigClicked = () => {
     this.props.testKeytab(this.props.globalKeytab.id);
@@ -98,56 +98,63 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
       <div className="cluster-authentication intro">
         <table className="space-20">
           <tbody>
-            <tr>
-              <td className="auth-left">KERBEROS ENABLED</td>
-              <td>
-                <label className="pt-control pt-switch .modifier">
-                  <input type="checkbox"
-                    checked={this.props.config ? this.props.config.kerberos_enabled : false}
-                    onChange={
+          <tr>
+            <td className="auth-left">KERBEROS ENABLED</td>
+            <td>
+              <label className="pt-control pt-switch .modifier">
+                <input type="checkbox"
+                       checked={this.props.config ? this.props.config.kerberos_enabled : false}
+                       onChange={
                       (e: any) => {
                         this.props.setGlobalKerberosEnabled(this.props.config ? !this.props.config.kerberos_enabled : true);
                       }
                     }
-                    />
-                  <span className="pt-control-indicator"></span>
-                </label>
+                />
+                <span className="pt-control-indicator"></span>
+              </label>
 
-              </td>
-            </tr>
-            {this.props.config && this.props.config.kerberos_enabled ? <tr>
-              <td className="auth-left">STEAM PRINCIPLE &nbsp; <Tooltip className="steam-tooltip-launcher" content={<div>This is the kerberos principle used for steam monitoring and management</div>}>
-                <i className="fa fa-question-circle-o" aria-hidden="true"></i>
-              </Tooltip></td>
-              <td>
-                <input type="text"
-                  className="pt-input ldap-input "
-                  value={this.state.steamPrincipleValue}
-                  onChange={(e: any) => this.setState({ "steamPrincipleValue": e.target.value })}
-                  ></input>
-              </td>
-            </tr> : null}
-            {this.state.steamPrincipleValue !== "" && this.props.config && this.props.config.kerberos_enabled ? <tr>
-              <td className="auth-left">PRINCIPLE KEYTAB</td>
-              <td>
-                <p>This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
-                {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true" onClick={() => this.setState({ afterConfirmAction: () => this.onDeleteKeytab(this.props.globalKeytab.id) })}></i></p> :
-                  <p>
-                    <label className="pt-file-upload">
-                      <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)} />
-                      <span className="pt-file-upload-input">{this.state.uploadText}</span>
-                    </label>
-                  </p>}
-              </td>
-            </tr> : null}
+            </td>
+          </tr>
+          {this.props.config && this.props.config.kerberos_enabled ? <tr>
+            <td className="auth-left">STEAM PRINCIPLE &nbsp; <Tooltip className="steam-tooltip-launcher"
+                                                                      content={<div>This is the kerberos principle used for steam monitoring and management</div>}>
+              <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+            </Tooltip></td>
+            <td>
+              <input type="text"
+                     className="pt-input ldap-input "
+                     value={this.state.steamPrincipleValue}
+                     onChange={(e: any) => this.setState({ "steamPrincipleValue": e.target.value })}
+              ></input>
+            </td>
+          </tr> : null}
+          {this.state.steamPrincipleValue !== "" && this.props.config && this.props.config.kerberos_enabled ? <tr>
+            <td className="auth-left">PRINCIPLE KEYTAB</td>
+            <td>
+              <p>
+                This keytab is used for the steam installation in the background. Personal principle keytabs for each Steam users are configured by themselves in Steam "User Preferences"</p>
+              {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ?
+                <p>{this.props.globalKeytab.name} &nbsp; <i className="fa fa-times" aria-hidden="true"
+                                                            onClick={() => this.setState({ afterConfirmAction: () => this.onDeleteKeytab(this.props.globalKeytab.id) })}></i>
+                </p> :
+                <p>
+                  <label className="pt-file-upload">
+                    <input ref="file" type="file" onChange={(e) => this.onNewKeytabSelected(e)}/>
+                    <span className="pt-file-upload-input">{this.state.uploadText}</span>
+                  </label>
+                </p>}
+            </td>
+          </tr> : null}
           </tbody>
         </table>
 
-        {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ? <div id="actionButtonsContainer" className="space-20">
-          <div>
-            <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div> &nbsp;
-          </div>
-        </div> : null}
+        {this.props.globalKeytab && this.props.config && this.props.config.kerberos_enabled ?
+          <div id="actionButtonsContainer" className="space-20">
+            <div>
+              <div className="button-secondary" onClick={this.onTestConfigClicked}>Test Config</div>
+              &nbsp;
+            </div>
+          </div> : null}
 
         <Dialog
           iconName="Confirm"
@@ -160,7 +167,8 @@ export class GlobalKerberos extends React.Component<Props & DispatchProps, any> 
           </div>
           <div className="pt-dialog-footer">
             <div className="pt-dialog-footer-actions">
-              <div className="button-secondary" onClick={() => this.setState({ afterConfirmAction: null })}>Cancel</div> &nbsp;
+              <div className="button-secondary" onClick={() => this.setState({ afterConfirmAction: null })}>Cancel</div>
+              &nbsp;
               <div className="button-primary" onClick={this.state.afterConfirmAction}>Accept</div>
             </div>
           </div>

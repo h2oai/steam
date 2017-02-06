@@ -17,7 +17,6 @@
       }
     }
     &:last-of-type {
-      //border-bottom: none;
       margin-bottom: $medium;
     }
     &.header {
@@ -30,4 +29,7 @@
       }
     }
   }
+}
+.spinner-container {
+  text-align: center;
 }
