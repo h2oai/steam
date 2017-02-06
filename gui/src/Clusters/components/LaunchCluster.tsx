@@ -1,19 +1,19 @@
 /*
-  Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
+ Copyright (C) 2016 H2O.ai, Inc. <http://h2o.ai/>
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
-  License, or (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Affero General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
  * Created by justin on 9/8/16.
@@ -37,7 +37,8 @@ interface Props {
   engines: any,
   config: any,
   isAdmin: boolean
-  clusterLaunchIsInProgress: boolean
+  clusterLaunchIsInProgress: boolean,
+  engineUploading: boolean
 }
 
 interface DispatchProps {
@@ -90,7 +91,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     if (hasPermissionToShow("ManageEngine", this.props.config, this.props.isAdmin)) {
       uploadEngine = (
         <label className="pt-file-upload">
-          <input ref="engine" type="file" onChange={this.uploadEngine.bind(this)} />
+          <input ref="engine" type="file" onChange={this.uploadEngine.bind(this)}/>
           <span className="pt-file-upload-input">Upload New Engine...</span>
         </label>
       );
@@ -110,13 +111,24 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     }
 
     let engineSelectContent = (
-      <div>
+      <div className="engine-select">
         {this.props.engines.map((engine, i) => {
-          return <div key={i} className="pt-menu-item pt-popover-dismiss" onClick={() => this.setState({ selectedEngine: engine })}>
+          return <div key={i} className="pt-menu-item pt-popover-dismiss"
+                      onClick={() => this.setState({ selectedEngine: engine })}>
             {engine.name}
           </div>;
         })}
-        {uploadEngine}
+        {this.props.engineUploading ? <div className="spinner-container">
+          <div className="pt-spinner modifier">
+            <div className="pt-spinner-svg-container">
+              <svg viewBox="0 0 100 100">
+                <path className="pt-spinner-track"
+                      d="M 50,50 m 0,-44.5 a 44.5,44.5 0 1 1 0,89 a 44.5,44.5 0 1 1 0,-89"></path>
+                <path className="pt-spinner-head" d="M 94.5 50 A 44.5 44.5 0 0 0 50 5.5"></path>
+              </svg>
+            </div>
+          </div>
+        </div> : uploadEngine}
       </div>
     );
 
@@ -169,11 +181,13 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
             </Row>
           </Table>
-          {this.props.clusterLaunchIsInProgress ? null : <button type="submit" className="button-primary">Launch New Clusters</button>}
-          {this.props.clusterLaunchIsInProgress ? <div className="pt-spinner .modifier">
+          {this.props.clusterLaunchIsInProgress ? null :
+            <button type="submit" className="button-primary">Launch New Clusters</button>}
+          {this.props.clusterLaunchIsInProgress ? <div className="pt-spinner modifier">
             <div className="pt-spinner-svg-container">
               <svg viewBox="0 0 100 100">
-                <path className="pt-spinner-track" d="M 50,50 m 0,-44.5 a 44.5,44.5 0 1 1 0,89 a 44.5,44.5 0 1 1 0,-89"></path>
+                <path className="pt-spinner-track"
+                      d="M 50,50 m 0,-44.5 a 44.5,44.5 0 1 1 0,89 a 44.5,44.5 0 1 1 0,-89"></path>
                 <path className="pt-spinner-head" d="M 94.5 50 A 44.5 44.5 0 0 0 50 5.5"></path>
               </svg>
             </div>
@@ -189,7 +203,8 @@ function mapStateToProps(state) {
     engines: state.clusters.engines,
     config: state.clusters.config,
     isAdmin: state.global.isAdmin,
-    clusterLaunchIsInProgress: state.clusters.clusterLaunchIsInProgress
+    clusterLaunchIsInProgress: state.clusters.clusterLaunchIsInProgress,
+    engineUploading: state.clusters.engineUploading
   };
 }
 

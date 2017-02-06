@@ -21,14 +21,15 @@
 import * as _ from 'lodash';
 import {
   RECEIVE_ENGINES, FETCH_CONFIG_COMPLETED, START_CLUSTER_COMPLETED,
-  START_CLUSTER
+  START_CLUSTER, UPLOAD_ENGINE_COMPLETED, START_UPLOAD_ENGINE
 } from '../actions/clusters.actions';
 
 
 let initialState = {
   engines: [],
   config: null,
-  clusterLaunchIsInProgress: false
+  clusterLaunchIsInProgress: false,
+  engineUploading: false
 };
 
 export const clustersReducer = (state = initialState, action) => {
@@ -48,6 +49,14 @@ export const clustersReducer = (state = initialState, action) => {
     case START_CLUSTER_COMPLETED:
       return _.assign({}, state, {
         clusterLaunchIsInProgress: false
+      });
+    case START_UPLOAD_ENGINE:
+      return _.assign({}, state, {
+        engineUploading: true
+      });
+    case UPLOAD_ENGINE_COMPLETED:
+      return _.assign({}, state, {
+        engineUploading: false
       });
     default:
       return state;

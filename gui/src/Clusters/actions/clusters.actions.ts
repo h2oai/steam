@@ -31,6 +31,8 @@ export const UPLOAD_ENGINE_COMPLETED = 'UPLOAD_ENGINE_COMPLETED';
 export const START_CLUSTER = 'START_CLUSTER';
 export const START_CLUSTER_COMPLETED = 'START_CLUSTER_COMPLETED';
 export const START_GET_ENGINES = 'START_GET_ENGINES';
+const ENVIRONMENT: ENVIRONMENT = <ENVIRONMENT> require('environment');
+const HOST = ENVIRONMENT && ENVIRONMENT.API_HOST ? ENVIRONMENT.API_HOST : '';
 
 export function receiveEngines(engines) {
   return {
@@ -93,7 +95,7 @@ export function uploadEngine(file) {
     dispatch(openNotification(NotificationType.Info, "Update", 'Uploading engine...', null));
     let data = new FormData();
     data.append('file', file.files[0]);
-    fetch(`/upload?type=engine`, {
+    fetch(`${HOST}/upload?type=engine`, {
       credentials: 'include',
       method: 'post',
       body: data
