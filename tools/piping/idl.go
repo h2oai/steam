@@ -391,3 +391,18 @@ func mapArrayFromStruct(s *Struct, name, prefix string) string {
 	}
 	return buf.String()
 }
+
+func rType(typ string) string {
+	switch typ {
+	case "int", "int64", "uint":
+		return "numeric"
+	case "string":
+		return "character"
+	case "bool":
+		return "logical"
+	case "LdapConfig":
+		return ""
+	default:
+		panic(fmt.Sprintf("unhandled r-type %s", typ))
+	}
+}

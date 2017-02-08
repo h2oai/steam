@@ -1,0 +1,85 @@
+# ------------------------------
+# --- This is generated code ---
+# ---      DO NOT EDIT       ---
+# ------------------------------
+
+#'
+#' Steam backend API calls
+#'
+#' These are the methods to communicate to the backend Steam API through RPC.
+#' @import jsonlite
+#' @import RCurl
+#'
+
+# .steamRPC is a wrapper for the curl calls to Steam
+.steamRPC <- function(conn, method, params) {
+    # Validate fields
+    if (!is.SteamConnection(conn)) { stop("conn must be a valid SteamConnection")}
+
+    if (length(params) > 0) {
+        params = list(params)
+    }
+    request <- list(
+        method = paste("web", method, sep="."),
+        params = params,
+        id = conn$uid
+    )
+
+    # Args for valid curl
+    payload <- toJSON(request, null="list", auto_unbox=TRUE)
+    address <- paste(conn$ip, paste(conn$port, "web", sep="/"), sep=":")
+    userpwd <- paste(conn$username, conn$password, sep=":")
+    header <- c('Content-Type' = 'application/json')
+    opts = curlOptions(userpwd = userpwd,httpauth = 1L, ssl.verifypeer = conn$verify_ssl)
+
+    # Error handling values
+    h <- basicHeaderGatherer()
+    .__curlErr = FALSE
+    .__curlErrMessage <- ""
+    httpStatusCode = -1L
+    httpStatusMessage = ""
+
+    # Return values
+    g <- basicTextGatherer(.mapUnicode = FALSE)
+
+    tmp <- tryCatch(curlPerform(
+            url = address,
+            postfields = payload,
+            writefunction = g$update,
+            headerfunction = h$update,
+            httpheader = header,
+            .opts = opts
+        ),
+        error = function(x) { .__curlErr <<- TRUE; .__curlErrMessage <<- x$message }
+    )
+    if (.__curlErr) {
+        stop(sprintf("%s: %s", .__curlErrMessage, g$value()[1]))
+    } else if (h$value()["status"] != 200){
+        stop(g$value()[1])
+    }
+    response <- fromJSON(g$value())
+    if (!is.null(response$error)) {
+        stop(response$error)
+    }
+
+    conn$uid <<- conn$uid + 1
+    response$result
+}
+
+{{with .Facade}}{{range .Methods}}
+#' {{.Help}}
+#'
+{{- range .Inputs}}
+#' @param {{snake .Name}}{{with rType .Type}} \code{ {{- . -}} }{{end}} {{.Help}}
+{{- end}}
+#'
+.{{lower .Name}} <- function(conn{{range .Inputs}}, {{snake .Name}}{{end}}) {
+    request <- list(
+        {{- range $i, $e := .Inputs}}{{if $i}},{{end}}
+        {{snake .Name}} = {{snake .Name}}
+        {{- else -}}{{end}}
+    )
+
+    .steamRPC(conn, "{{.Name}}", request)
+}
+{{end}}{{end}}

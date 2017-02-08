@@ -53,7 +53,11 @@ func main() {
 		"lower": lower,
 		"snake": snaker.CamelToSnake,
 	})
-
+	generate(ix, "srv/web/api/r.template", "r/backend.r", map[string]interface{}{
+		"rType": rType,
+		"lower": lower,
+		"snake": snaker.CamelToSnake,
+	})
 	methodGroups := toCLIMethodGroups(ix)
 	generate(methodGroups, "srv/web/api/cli.template", "cli2/cli.go", map[string]interface{}{
 		"lower": lower,

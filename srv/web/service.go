@@ -2996,8 +2996,8 @@ func (this *Impl) SetLdapConfig(r *http.Request, in *SetLdapConfigIn, out *SetLd
 	}
 
 	jsonIn := make(map[string]interface{})
-	if out.Config == nil {
-		out.Config = &LdapConfig{}
+	if in.Config == nil {
+		in.Config = &LdapConfig{}
 	}
 	jsonIn["config"] = map[string]interface{}{
 		"host":                      in.Config.Host,
@@ -3113,8 +3113,8 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 	}
 
 	jsonIn := make(map[string]interface{})
-	if out.Config == nil {
-		out.Config = &LdapConfig{}
+	if in.Config == nil {
+		in.Config = &LdapConfig{}
 	}
 	jsonIn["config"] = map[string]interface{}{
 		"host":                      in.Config.Host,
