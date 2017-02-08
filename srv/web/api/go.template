@@ -125,8 +125,8 @@ func (this *Impl) {{.Name}}(r *http.Request, in *{{.Name}}In, out *{{.Name}}Out)
   jsonIn := make(map[string]interface{})
   {{- range .Inputs}}{{- if not .LogOmit}}
   {{- if .IsStruct}}
-  if out.{{.Name}} == nil {
-    out.{{.Name}} = {{if .IsArray}}[]*{{else}}&{{end}}{{with .Struct}}{{.Name}}{{end}}{}
+  if in.{{.Name}} == nil {
+    in.{{.Name}} = {{if .IsArray}}[]*{{else}}&{{end}}{{with .Struct}}{{.Name}}{{end}}{}
   }{{end}}
   jsonIn["{{snake .Name}}"] = {{createMaps . "in"}}
   {{- end}}{{- end}}
