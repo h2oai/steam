@@ -58,7 +58,7 @@ export class App extends React.Component<Props & DispatchProps, any> {
     let unsupportedBrowser = (
       <div className="unsupported-browser">
         <h1>Browser not supported</h1>
-        <h3><a href="http://docs.h2o.ai/steam/latest-stable/steam-docs/Installation.html">Please review the list of supported browsers.</a></h3>
+        <h3>Chrome is currently the only supported browser.</h3>
       </div>
     );
     if (isChrome || isFirefox) {
