@@ -31,7 +31,7 @@ import Table from '../../Projects/components/Table';
 import '../styles/launchcluster.scss';
 import { NumericInput } from 'h2oUIKit';
 import { hasPermissionToShow } from "../../App/utils/permissions";
-import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core";
+import {Popover, PopoverInteractionKind, Position, Tooltip} from "@blueprintjs/core";
 
 interface Props {
   engines: any,
@@ -54,12 +54,14 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
     engine: (HTMLInputElement)
     clusterForm: (HTMLFormElement)
     engineList: (HTMLSelectElement)
+    clusterName: (HTMLInputElement)
   };
 
   constructor() {
     super();
     this.state = {
-      selectedEngine: null
+      selectedEngine: null,
+      clusterNameInvalid: false
     };
   }
 
@@ -83,6 +85,16 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   uploadEngine(event) {
     event.preventDefault();
     this.props.uploadEngine(this.refs.engine);
+  };
+
+  onClusterNameChanged = (e) => {
+    let matches = this.refs.clusterName.value.match(/[a-zA-Z_a-zA-Z0-9_\-]+/g);
+    console.log(matches);
+    if (matches && matches.length > 1) {
+      this.setState({clusterNameInvalid: true});
+    } else {
+      this.setState({clusterNameInvalid: false});
+    }
   };
 
   render() {
@@ -140,10 +152,16 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
             <Row header={true}/>
             <Row>
               <Cell>
-                CLUSTER NAME
+                CLUSTER NAME <Tooltip className="steam-tooltip-launcher" content={<div>Cluster name may not contain spaces</div>}>
+                <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+              </Tooltip>
               </Cell>
               <Cell>
-                <input type="text" name="name"/>
+                <input className={"pt-input " + (this.state.clusterNameInvalid ? 'pt-intent-danger' : null)}
+                       ref="clusterName"
+                       type="text"
+                       name="name"
+                       onChange={(e) => this.onClusterNameChanged(e)}  />
               </Cell>
             </Row>
             <Row>
