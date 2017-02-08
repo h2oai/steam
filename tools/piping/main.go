@@ -53,7 +53,7 @@ func main() {
 		"lower": lower,
 		"snake": snaker.CamelToSnake,
 	})
-	generate(ix, "srv/web/api/r.template", "r/backend.r", map[string]interface{}{
+	generate(ix, "srv/web/api/r.template", "r/steam-package/R/backend.r", map[string]interface{}{
 		"rType": rType,
 		"lower": lower,
 		"snake": snaker.CamelToSnake,

@@ -90,3 +90,4 @@ private
 # ignore packaging info
 packaging/env.list
 
+.Rproj.user

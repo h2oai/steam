@@ -1,0 +1,13 @@
+Package: steam
+Version: 1.1.0
+Type: Package
+Title: R Interface for Steam
+Date: 2017-02-08
+Author: The H2O.ai team
+Maintainer: blank <blank@0xdata.com>
+Description: blank
+Imports: RCurl,
+         jsonlite
+Collate:
+        'backend.r'
+        'steam.r'
