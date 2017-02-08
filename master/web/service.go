@@ -204,7 +204,7 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 		return 0, errors.Wrap(err, "checking permission")
 	}
 	// Validate name
-	nameRegEx := `[a-zA-Z_a-zA-Z0-9_\-]+`
+	nameRegEx := `^[a-zA-Z][a-zA-Z0-9_\-]*$`
 	if !regexp.MustCompile(nameRegEx).MatchString(clusterName) {
 		return 0, fmt.Errorf("invalid cluster name: %s. Must match %s", clusterName, nameRegEx)
 	}
