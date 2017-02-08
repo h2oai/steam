@@ -89,7 +89,6 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 
   onClusterNameChanged = (e) => {
     let matches = this.refs.clusterName.value.match(/[a-zA-Z_a-zA-Z0-9_\-]+/g);
-    console.log(matches);
     if (matches && matches.length > 1) {
       this.setState({clusterNameInvalid: true});
     } else {

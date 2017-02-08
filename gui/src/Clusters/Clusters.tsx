@@ -35,7 +35,6 @@ import { Link } from 'react-router';
 import { getConfig } from './actions/clusters.actions';
 import ConfirmDeleteClusterDialog from "./components/ConfirmDeleteClusterDialog";
 import { hasPermissionToShow } from "../App/utils/permissions";
-import {fetchIsAdmin} from "../App/actions/global.actions";
 
 interface DispatchProps {
   fetchClusters: Function
@@ -64,7 +63,8 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
       yarnClusterModalOpen: false,
       newClusterRequested: false,
       selectedCluster: null,
-      confirmDeleteClusterOpen: false
+      confirmDeleteClusterOpen: false,
+      clustersDeletedIds: []
     };
   }
 
@@ -107,6 +107,7 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   };
 
   onDeleteClusterClicked = (cluster) => {
+    console.log(cluster);
     this.setState({
       selectedCluster: cluster,
       confirmDeleteClusterOpen: true
@@ -114,7 +115,14 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   };
 
   onDeleteClusterConfirmed = () => {
+    let clusterToDeleteId = this.state.selectedCluster.id;
+    let newClusterDeletedIdsArray = JSON.parse(JSON.stringify(this.state.clustersDeletedIds));
+    newClusterDeletedIdsArray.push(clusterToDeleteId);
     this.removeCluster(this.state.selectedCluster);
+    this.setState({
+      clustersDeletedIds: newClusterDeletedIdsArray
+    });
+
     this.setState({
       selectedCluster: null,
       confirmDeleteClusterOpen: false
@@ -126,6 +134,15 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
       selectedCluster: null,
       confirmDeleteClusterOpen: false
     });
+  };
+
+  isInDeletedClusters = (clusterId): boolean => {
+    for (let deletedClusterId of this.state.clustersDeletedIds) {
+      if (clusterId === deletedClusterId) {
+        return true;
+      }
+    }
+    return false;
   };
 
   render(): React.ReactElement<HTMLDivElement> {
@@ -172,8 +189,22 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
                   <span><i className="fa fa-cubes mar-bot-20"/> <a onClick={cluster.context_path !== "" ? this.goProxy.bind(this, cluster) : null} href={cluster.context_path !== "" ? null : 'http://' + cluster.address + cluster.context_path} target="_blank"
                                                         rel="noopener" className="charcoal-grey semibold link">{cluster.name}</a> {cluster.status.total_cpu_count ? <span> -- {cluster.status.total_cpu_count} &nbsp;cores</span> : null}</span>
                   <span className="remove-cluster">
-                    {hasPermissionToShow("ManageCluster", this.props.config, this.props.isAdmin) ? <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}><i
-                      className="fa fa-trash no-margin"/></button> : null }
+                    {hasPermissionToShow("ManageCluster", this.props.config, this.props.isAdmin) ?
+                      this.isInDeletedClusters(cluster.id) ?
+                        <div className="pt-spinner modifier pt-small">
+                          <div className="pt-spinner-svg-container">
+                            <svg viewBox="0 0 100 100">
+                              <path className="pt-spinner-track"
+                                    d="M 50,50 m 0,-44.5 a 44.5,44.5 0 1 1 0,89 a 44.5,44.5 0 1 1 0,-89"></path>
+                              <path className="pt-spinner-head" d="M 94.5 50 A 44.5 44.5 0 0 0 50 5.5"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        :
+                        <button className="remove-cluster-button" onClick={(e) => this.onDeleteClusterClicked(cluster)}>
+                          <i className="fa fa-trash no-margin"/>
+                        </button>
+                      : null }
                   </span>
                 </header>
                 <div className="flexrow">
