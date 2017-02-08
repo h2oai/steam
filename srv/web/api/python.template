@@ -85,11 +85,11 @@ class SteamConnection:
 	def __init__(self, connection):
 		self.connection = connection
 	
-	def verify_ssl():
-		return connection.verify_ssl
+	def verify_ssl(self):
+		return self.connection.verify_ssl
 
-	def host():
-		return connection.host
+	def host(self):
+		return self.connection.host
 
 	def upload(self, target, path):
 		self.connection.upload(target, path)

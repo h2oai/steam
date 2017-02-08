@@ -85,15 +85,17 @@ class SteamConnection:
 	def __init__(self, connection):
 		self.connection = connection
 	
-	def verify_ssl():
-		return connection.verify_ssl
+	def verify_ssl(self):
+		return self.connection.verify_ssl
 
-	def host():
-		return connection.host
+	def host(self):
+		return self.connection.host
 
 	def upload(self, target, path):
 		self.connection.upload(target, path)
 
+	
+	
 	
 	def ping_server(self, input):
 		"""
@@ -1363,6 +1365,22 @@ class SteamConnection:
 			'engine_id': engine_id
 		}
 		response = self.connection.call("GetEngine", request)
+		return response['engine']
+	
+	def get_engine_by_version(self, version):
+		"""
+		Get an engine by a version substring
+
+		Parameters:
+		version: No description available (string)
+
+		Returns:
+		engine: No description available (Engine)
+		"""
+		request = {
+			'version': version
+		}
+		response = self.connection.call("GetEngineByVersion", request)
 		return response['engine']
 	
 	def get_engines(self):
