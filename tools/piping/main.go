@@ -49,7 +49,7 @@ func main() {
 		"snake":   snaker.CamelToSnake,
 		"js_type": jsTypeOf,
 	})
-	generate(ix, "srv/web/api/python.template", "python/steam.py", map[string]interface{}{
+	generate(ix, "srv/web/api/python.template", "python/backend.py", map[string]interface{}{
 		"lower": lower,
 		"snake": snaker.CamelToSnake,
 	})
