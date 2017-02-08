@@ -164,6 +164,11 @@
 			"ImportPath": "gopkg.in/ldap.v2",
 			"Comment": "v2.5.0",
 			"Rev": "8168ee085ee43257585e50c6441aadf54ecb2c9f"
+		},
+		{
+			"ImportPath": "gopkg.in/mattn/go-sqlite3.v1",
+			"Comment": "v1.2.0",
+			"Rev": "ca5e3819723d8eeaf170ad510e7da1d6d2e94a08"
 		}
 	]
 }

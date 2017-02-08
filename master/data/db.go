@@ -32,13 +32,13 @@ import (
 
 	"github.com/fatih/color"
 	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/doug-martin/goqu.v3"
 	_ "gopkg.in/doug-martin/goqu.v3/adapters/postgres"
 	_ "gopkg.in/doug-martin/goqu.v3/adapters/sqlite3"
+	_ "gopkg.in/mattn/go-sqlite3.v1"
 )
 
 const (
