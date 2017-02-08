@@ -27,6 +27,7 @@ import (
 	"net"
 	"os"
 	"os/user"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -201,6 +202,11 @@ func (s *Service) StartClusterOnYarn(pz az.Principal, clusterName string, engine
 	}
 	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
 		return 0, errors.Wrap(err, "checking permission")
+	}
+	// Validate name
+	nameRegEx := `[a-zA-Z_a-zA-Z0-9_\-]+`
+	if !regexp.MustCompile(nameRegEx).MatchString(clusterName) {
+		return 0, fmt.Errorf("invalid cluster name: %s. Must match %s", clusterName, nameRegEx)
 	}
 	// Check that name is unique to user that are still running
 	_, exists, err := s.ds.ReadCluster(data.ByName(clusterName), data.ByState(data.States.Started),
