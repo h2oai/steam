@@ -107,7 +107,6 @@ export class Clusters extends React.Component<Props & DispatchProps, any> {
   };
 
   onDeleteClusterClicked = (cluster) => {
-    console.log(cluster);
     this.setState({
       selectedCluster: cluster,
       confirmDeleteClusterOpen: true
