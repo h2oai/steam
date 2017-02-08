@@ -19,7 +19,7 @@ class RPCError(Exception):
 	def __str__(self):
 		return repr(self.value)
 
-class HTTPConnection:
+class HTTPSConnection:
 	def __init__(self, host, port, username, password, verify_ssl=True):
 		self.host = host
 		self.port = port
@@ -94,8 +94,6 @@ class SteamConnection:
 	def upload(self, target, path):
 		self.connection.upload(target, path)
 
-	
-	
 	
 	def ping_server(self, input):
 		"""

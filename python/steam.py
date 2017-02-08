@@ -3,6 +3,7 @@ import backend
 class SteamClient(object):
 	def __init__(self, httpconn):
 		self.__conn = backend.SteamConnection(httpconn)
+		self.__conn.ping_server("verify credentials")
 	
 	def start_cluster(self, name=None, num_nodes=0, mem_per_node=None, h2o_version=None):
 			
@@ -44,13 +45,11 @@ class SteamClient(object):
 def login(ip, port=9000, username=None, password=None, login_file=None, login_file_pass=None, verify_ssl=True):
 	if password is not None and username is not None:
 		steamconn = SteamClient(backend.HTTPSConnection(ip, port, username, password, verify_ssl))
-	else if logn_file is not None and login_file_pass is not None:
+	elif login_file is not None and login_file_pass is not None:
 		steamconn = SteamClient(backend.HTTPSConnection(ip, port, 'notimplemented', 'notimplemented', verify_ssl))
+	else:
+		raise LookupError("No credentials provided")
 
-	try:
-		steamconn.ping_server('valid login')
-	except:
-		raise LookupError("login credentials are invalid")
 
 	return steamconn
 
