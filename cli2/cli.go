@@ -1998,31 +1998,59 @@ Examples:
     $ steam get engine \
         --engine-id=?
 
+    Get an engine by a version substring
+    $ steam get engine --by-version \
+        --version=?
+
 `
 
 func getEngine(c *context) *cobra.Command {
+	var byVersion bool // Switch for GetEngineByVersion()
 	var engineId int64 // No description available
+	var version string // No description available
 
 	cmd := newCmd(c, getEngineHelp, func(c *context, args []string) {
+		if byVersion { // GetEngineByVersion
 
-		// Get engine details
-		engine, err := c.remote.GetEngine(
-			engineId, // No description available
-		)
-		if err != nil {
-			log.Fatalln(err)
+			// Get an engine by a version substring
+			engine, err := c.remote.GetEngineByVersion(
+				version, // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := []string{
+				fmt.Sprintf("Id:\t%v\t", engine.Id),               // No description available
+				fmt.Sprintf("Name:\t%v\t", engine.Name),           // No description available
+				fmt.Sprintf("Location:\t%v\t", engine.Location),   // No description available
+				fmt.Sprintf("CreatedAt:\t%v\t", engine.CreatedAt), // No description available
+			}
+			c.printt("Attribute\tValue\t", lines)
+			return
 		}
-		lines := []string{
-			fmt.Sprintf("Id:\t%v\t", engine.Id),               // No description available
-			fmt.Sprintf("Name:\t%v\t", engine.Name),           // No description available
-			fmt.Sprintf("Location:\t%v\t", engine.Location),   // No description available
-			fmt.Sprintf("CreatedAt:\t%v\t", engine.CreatedAt), // No description available
+		if true { // default
+
+			// Get engine details
+			engine, err := c.remote.GetEngine(
+				engineId, // No description available
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			lines := []string{
+				fmt.Sprintf("Id:\t%v\t", engine.Id),               // No description available
+				fmt.Sprintf("Name:\t%v\t", engine.Name),           // No description available
+				fmt.Sprintf("Location:\t%v\t", engine.Location),   // No description available
+				fmt.Sprintf("CreatedAt:\t%v\t", engine.CreatedAt), // No description available
+			}
+			c.printt("Attribute\tValue\t", lines)
+			return
 		}
-		c.printt("Attribute\tValue\t", lines)
-		return
 	})
+	cmd.Flags().BoolVar(&byVersion, "by-version", byVersion, "Get an engine by a version substring")
 
 	cmd.Flags().Int64Var(&engineId, "engine-id", engineId, "No description available")
+	cmd.Flags().StringVar(&version, "version", version, "No description available")
 	return cmd
 }
 

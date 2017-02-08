@@ -565,6 +565,9 @@ export interface Service {
   // Get engine details
   getEngine: (engineId: number, go: (error: Error, engine: Engine) => void) => void
   
+  // Get an engine by a version substring
+  getEngineByVersion: (version: string, go: (error: Error, engine: Engine) => void) => void
+  
   // List engines
   getEngines: (go: (error: Error, engines: Engine[]) => void) => void
   
@@ -1677,6 +1680,18 @@ interface GetEngineIn {
 }
 
 interface GetEngineOut {
+  
+  engine: Engine
+  
+}
+
+interface GetEngineByVersionIn {
+  
+  version: string
+  
+}
+
+interface GetEngineByVersionOut {
   
   engine: Engine
   
@@ -3202,6 +3217,18 @@ export function getEngine(engineId: number, go: (error: Error, engine: Engine) =
       return go(error, null);
     } else {
       const d: GetEngineOut = <GetEngineOut> data;
+      return go(null, d.engine);
+    }
+  });
+}
+
+export function getEngineByVersion(version: string, go: (error: Error, engine: Engine) => void): void {
+  const req: GetEngineByVersionIn = { version: version };
+  Proxy.Call("GetEngineByVersion", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: GetEngineByVersionOut = <GetEngineByVersionOut> data;
       return go(null, d.engine);
     }
   });

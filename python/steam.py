@@ -1372,6 +1372,22 @@ class SteamConnection:
 		response = self.connection.call("GetEngine", request)
 		return response['engine']
 	
+	def get_engine_by_version(self, version):
+		"""
+		Get an engine by a version substring
+
+		Parameters:
+		version: No description available (string)
+
+		Returns:
+		engine: No description available (Engine)
+		"""
+		request = {
+			'version': version
+		}
+		response = self.connection.call("GetEngineByVersion", request)
+		return response['engine']
+	
 	def get_engines(self):
 		"""
 		List engines

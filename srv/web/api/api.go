@@ -387,6 +387,7 @@ type Service struct {
 	GetServicesForModel           GetServicesForModel           `help:"List services for a model"`
 	DeleteService                 DeleteService                 `help:"Delete a service"`
 	GetEngine                     GetEngine                     `help:"Get engine details"`
+	GetEngineByVersion            GetEngineByVersion            `help:"Get an engine by a version substring"`
 	GetEngines                    GetEngines                    `help:"List engines"`
 	DeleteEngine                  DeleteEngine                  `help:"Delete an engine"`
 	GetAllEntityTypes             GetAllEntityTypes             `help:"List all entity types"`
@@ -834,6 +835,11 @@ type GetEngine struct {
 	EngineId int64
 	_        int
 	Engine   Engine
+}
+type GetEngineByVersion struct {
+	Version string
+	_       int
+	Engine  Engine
 }
 type GetEngines struct {
 	_       int

@@ -401,6 +401,11 @@ export function getEngine(engineId: number): void {
   Proxy.Call("GetEngine", req, print);
 }
 
+export function getEngineByVersion(version: string): void {
+  const req: any = { version: version };
+  Proxy.Call("GetEngineByVersion", req, print);
+}
+
 export function getEngines(): void {
   const req: any = {  };
   Proxy.Call("GetEngines", req, print);

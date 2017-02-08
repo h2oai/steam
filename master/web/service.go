@@ -1252,12 +1252,33 @@ func (s *Service) GetEngine(pz az.Principal, engineId int64) (*web.Engine, error
 	return toEngine(engine), err
 }
 
+func (s *Service) GetEngineByVersion(pz az.Principal, version string) (*web.Engine, error) {
+	// Check Permissions/privileges
+	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
+		return nil, errors.Wrap(err, "read permission")
+	}
+	// Fetch engines with privilege
+	// FIXME: not currently checking privilege
+	engines, err := s.ds.ReadEngines(data.WithFilterByName(version))
+	if err != nil {
+		return nil, errors.Wrap(err, "reading engines from database")
+	}
+	if len(engines) < 1 {
+		return nil, fmt.Errorf("failed to locate engine versioned %s", version)
+	} else if len(engines) > 1 {
+		return nil, fmt.Errorf("too many engines with the version substring %s", version)
+	}
+
+	return toEngine(engines[0]), nil
+}
+
 func (s *Service) GetEngines(pz az.Principal) ([]*web.Engine, error) {
 	// Check permissions/privileges
 	if err := pz.CheckPermission(s.ds.Permission.ViewEngine); err != nil {
 		return nil, errors.Wrap(err, "reading permission")
 	}
-	// Fetch clusters with privilege
+	// Fetch engines with privilege
+	// FIXME: not currently checking privilege
 	engines, err := s.ds.ReadEngines()
 	return toEngines(engines), errors.Wrap(err, "reading engines from database")
 }

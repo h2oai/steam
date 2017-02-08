@@ -399,6 +399,7 @@ type Service interface {
 	GetServicesForModel(pz az.Principal, modelId int64, offset uint, limit uint) ([]*ScoringService, error)
 	DeleteService(pz az.Principal, serviceId int64) error
 	GetEngine(pz az.Principal, engineId int64) (*Engine, error)
+	GetEngineByVersion(pz az.Principal, version string) (*Engine, error)
 	GetEngines(pz az.Principal) ([]*Engine, error)
 	DeleteEngine(pz az.Principal, engineId int64) error
 	GetAllEntityTypes(pz az.Principal) ([]*EntityType, error)
@@ -1076,6 +1077,14 @@ type GetEngineIn struct {
 }
 
 type GetEngineOut struct {
+	Engine *Engine `json:"engine"`
+}
+
+type GetEngineByVersionIn struct {
+	Version string `json:"version"`
+}
+
+type GetEngineByVersionOut struct {
 	Engine *Engine `json:"engine"`
 }
 
@@ -2243,6 +2252,16 @@ func (this *Remote) GetEngine(engineId int64) (*Engine, error) {
 	return out.Engine, nil
 }
 
+func (this *Remote) GetEngineByVersion(version string) (*Engine, error) {
+	in := GetEngineByVersionIn{version}
+	var out GetEngineByVersionOut
+	err := this.Proc.Call("GetEngineByVersion", &in, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out.Engine, nil
+}
+
 func (this *Remote) GetEngines() ([]*Engine, error) {
 	in := GetEnginesIn{}
 	var out GetEnginesOut
@@ -2977,6 +2996,9 @@ func (this *Impl) SetLdapConfig(r *http.Request, in *SetLdapConfigIn, out *SetLd
 	}
 
 	jsonIn := make(map[string]interface{})
+	if out.Config == nil {
+		out.Config = &LdapConfig{}
+	}
 	jsonIn["config"] = map[string]interface{}{
 		"host":                      in.Config.Host,
 		"port":                      in.Config.Port,
@@ -3091,6 +3113,9 @@ func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *Tes
 	}
 
 	jsonIn := make(map[string]interface{})
+	if out.Config == nil {
+		out.Config = &LdapConfig{}
+	}
 	jsonIn["config"] = map[string]interface{}{
 		"host":                      in.Config.Host,
 		"port":                      in.Config.Port,
@@ -6291,6 +6316,55 @@ func (this *Impl) GetEngine(r *http.Request, in *GetEngineIn, out *GetEngineOut)
 	}
 
 	val0, err := this.Service.GetEngine(pz, in.EngineId)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Engine = val0
+
+	jsonOut := make(map[string]interface{})
+	if out.Engine == nil {
+		out.Engine = &Engine{}
+	}
+	jsonOut["engine"] = map[string]interface{}{
+		"id":         out.Engine.Id,
+		"name":       out.Engine.Name,
+		"location":   out.Engine.Location,
+		"created_at": out.Engine.CreatedAt,
+	}
+
+	res, merr := json.Marshal(jsonOut)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetEngineByVersion(r *http.Request, in *GetEngineByVersionIn, out *GetEngineByVersionOut) error {
+	const name = "GetEngineByVersion"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	jsonIn := make(map[string]interface{})
+	jsonIn["version"] = in.Version
+
+	req, merr := json.Marshal(jsonIn)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.GetEngineByVersion(pz, in.Version)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err
