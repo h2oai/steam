@@ -1,26 +1,99 @@
-import backend
+# ------------------------------
+# --- This is generated code ---
+# ---      DO NOT EDIT       ---
+# ------------------------------
 
-class SteamClient(object):
-	def __init__(self, httpconn):
-		self.__conn = backend.SteamConnection(httpconn)
-		self.__conn.ping_server("verify credentials")
+
+import httplib
+import base64
+import string
+import json
+import sys
+import logging
+import ssl
+from collections import namedtuple
+
+class RPCError(Exception):
+	def __init__(self, value):
+		self.value = value
+	def __str__(self):
+		return repr(self.value)
+
+class HTTPSConnection:
+	def __init__(self, host, port, username, password, verify_ssl=True):
+		self.host = host
+		self.port = port
+		self.username = username
+		self.password = password
+		self.verify_ssl = verify_ssl
+		self.uid = 0
+
+	def call(self, method, params):
+		self.uid = self.uid + 1
+		request = {
+			'id': self.uid,
+			'method': 'web.' + method,
+			'params': [params]
+		}
+		payload = json.dumps(request)
+		ssl._https_verify_certificates(self.verify_ssl)
+		ws = httplib.HTTPS(self.host, self.port)
+		
+		ws.putrequest("POST", '/web')
+
+		ws.putheader("Host", self.host)
+		ws.putheader("User-Agent", "Steam Python Client")
+		ws.putheader("Content-type", "application/json; charset=\"UTF-8\"")
+		ws.putheader("Content-length", "%d" % len(payload))
+		auth = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
+		ws.putheader("Authorization", "Basic %s" % auth)
+		ws.endheaders()
+
+		ws.send(payload)
+
+		logging.info('%s@%s:%d %s(%s)', self.username, self.host, self.port, method, json.dumps(params))
+
+		code, status, header = ws.getreply()
+		reply = ws.getfile().read()
+
+		# print 'code:', code
+		# print 'status:', status
+		# print 'reply:', reply
+
+		if code != 200:
+			logging.exception('%s %s %s', code, status, reply)
+			raise RPCError(reply)
+
+		response = json.loads(reply)
+		error = response['error']
+
+		if error is None:
+			result = response['result']
+			logging.info('%s %s %s', code, status, json.dumps(result))
+			return result
+		else:
+			logging.exception('%s %s %s', code, status, error)
+			raise RPCError(error)
+
+class View(object):
+	def __init__(self, d):
+		self.__dict__ = d
+	def __str__(self):
+		return json.dumps(self.__dict__)
+
+class SteamConnection:
+	def __init__(self, connection):
+		self.connection = connection
 	
-	def start_cluster(self, name=None, num_nodes=0, mem_per_node=None, h2o_version=None):
-			
-		engine = self.__conn.get_engine_by_version(h2o_version)
-	
-		proxconf = self.__conn.get_config()
-		cluster = self.__conn.get_cluster(clid)
-		cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
-		conf = {'https':True, 'verify_ssl_certificates':self.__conn.verify_ssl, \
-			'port': int(cport), \
-			'context_path':'%s_%s' % (proxconf['username'], cluster['name']), \
-			'cookies':["%s=%s" % (cluster['name'], cluster['token'])], \
-<<<<<<< HEAD
-			'ip':self.connection.host}
-		return conf
-	
-	
+	def verify_ssl():
+		return connection.verify_ssl
+
+	def host():
+		return connection.host
+
+	def upload(self, target, path):
+		self.connection.upload(target, path)
+
 	
 	def ping_server(self, input):
 		"""
@@ -1292,22 +1365,6 @@ class SteamClient(object):
 		response = self.connection.call("GetEngine", request)
 		return response['engine']
 	
-	def get_engine_by_version(self, version):
-		"""
-		Get an engine by a version substring
-
-		Parameters:
-		version: No description available (string)
-
-		Returns:
-		engine: No description available (Engine)
-		"""
-		request = {
-			'version': version
-		}
-		response = self.connection.call("GetEngineByVersion", request)
-		return response['engine']
-	
 	def get_engines(self):
 		"""
 		List engines
@@ -2069,55 +2126,114 @@ class SteamClient(object):
 	def get_package_files(self, project_id, package_name, relative_path):
 		"""
 		List files in a project package
-=======
-			'ip':self.__conn.host}
-		return conf	
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:
+		files: No description available (string)
+		"""
+		request = {
+			'project_id': project_id,
+			'package_name': package_name,
+			'relative_path': relative_path
+		}
+		response = self.connection.call("GetPackageFiles", request)
+		return response['files']
 	
-	def stop_cluster(self, config):
-		name = config['context_path'].split('_')[1]
-		clid = None
-		clusts = self.__conn.get_clusters(0, 1000)
-		for c in clusts:
-			if c['name'] == name:
-				clid = c['id']
-				break
-		
-		if clid is None:
-			raise LookupError("Failed to locate referenced cluster")
->>>>>>> b54b870c95475570c5c80279015d2b4b37be3fdc
+	def delete_package(self, project_id, name):
+		"""
+		Delete a project package
 
-		self.__conn.stop_cluster_on_yarn(clid, None)
+		Parameters:
+		project_id: No description available (int64)
+		name: No description available (string)
 
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id,
+			'name': name
+		}
+		response = self.connection.call("DeletePackage", request)
+		return 
+	
+	def delete_package_directory(self, project_id, package_name, relative_path):
+		"""
+		Delete a directory in a project package
 
-	def upload_keytab(self, path):
-		self.__conn.upload(target="type=keytab&principal=user", path=path)
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
 
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id,
+			'package_name': package_name,
+			'relative_path': relative_path
+		}
+		response = self.connection.call("DeletePackageDirectory", request)
+		return 
+	
+	def delete_package_file(self, project_id, package_name, relative_path):
+		"""
+		Delete a file in a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		relative_path: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id,
+			'package_name': package_name,
+			'relative_path': relative_path
+		}
+		response = self.connection.call("DeletePackageFile", request)
+		return 
+	
+	def set_attributes_for_package(self, project_id, package_name, attributes):
+		"""
+		Set attributes on a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+		attributes: No description available (string)
+
+		Returns:None
+		"""
+		request = {
+			'project_id': project_id,
+			'package_name': package_name,
+			'attributes': attributes
+		}
+		response = self.connection.call("SetAttributesForPackage", request)
+		return 
+	
+	def get_attributes_for_package(self, project_id, package_name):
+		"""
+		List attributes for a project package
+
+		Parameters:
+		project_id: No description available (int64)
+		package_name: No description available (string)
+
+		Returns:
+		attributes: No description available (string)
+		"""
+		request = {
+			'project_id': project_id,
+			'package_name': package_name
+		}
+		response = self.connection.call("GetAttributesForPackage", request)
+		return response['attributes']
+	
 	
 
-#def create_login_file(path, username, password, login_file_pass):
-	
-
-def login(ip, port=9000, username=None, password=None, login_file=None, login_file_pass=None, verify_ssl=True):
-	if password is not None and username is not None:
-		steamconn = SteamClient(backend.HTTPSConnection(ip, port, username, password, verify_ssl))
-	elif login_file is not None and login_file_pass is not None:
-		steamconn = SteamClient(backend.HTTPSConnection(ip, port, 'notimplemented', 'notimplemented', verify_ssl))
-	else:
-		raise LookupError("No credentials provided")
-
-
-	return steamconn
-
-
-
-#	def get_cluster_connection(self, clid):
-#		proxconf = self.get_config()
-#		cluster = self.get_cluster(clid)
-#		cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
-#		conf = {'https':True, 'verify_ssl_certificates':self.connection.verify_ssl, \
-#			'port': int(cport), \
-#			'context_path':'%s_%s' % (proxconf['username'], cluster['name']), \
-#			'cookies':["%s=%s" % (cluster['name'], cluster['token'])], \
-#			'ip':self.connection.host}
-#		return conf	
-	

@@ -19,7 +19,7 @@ class RPCError(Exception):
 	def __str__(self):
 		return repr(self.value)
 
-class HTTPConnection:
+class HTTPSConnection:
 	def __init__(self, host, port, username, password, verify_ssl=True):
 		self.host = host
 		self.port = port
@@ -81,24 +81,19 @@ class View(object):
 	def __str__(self):
 		return json.dumps(self.__dict__)
 
-def connect(host, port, username, passw, verify_ssl=True):
-	steamconn = SteamConnection(HTTPConnection(host, port, username, passw, verify_ssl))
-	return steamconn
-
 class SteamConnection:
 	def __init__(self, connection):
 		self.connection = connection
-		
-	def get_cluster_connection(self, clid):
-		proxconf = self.get_config()
-		cluster = self.get_cluster(clid)
-		cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
-		conf = {'https':True, 'verify_ssl_certificates':self.connection.verify_ssl, \
-			'port': int(cport), \
-			'context_path':'%s_%s' % (proxconf['username'], cluster['name']), \
-			'cookies':["%s=%s" % (cluster['name'], cluster['token'])], \
-			'ip':self.connection.host}
-		return conf
+	
+	def verify_ssl():
+		return connection.verify_ssl
+
+	def host():
+		return connection.host
+
+	def upload(self, target, path):
+		self.connection.upload(target, path)
+
 	
 	{{with .Facade}}
 	{{range .Methods}}
