@@ -5,17 +5,9 @@ class SteamClient(object):
 		self.__conn = backend.SteamConnection(httpconn)
 	
 	def start_cluster(self, name=None, num_nodes=0, mem_per_node=None, h2o_version=None):
-		engine = None
-		eng = self.__conn.get_engines()
-		for e in eng:
-			if h2o_version in e['name']:
-				engine = e['id']
-				break
-
-		if engine is None:
-			raise LookupError("Cannot find engine with h2o version %s: contact your administrator" % h2o_version)
-		clid = self.__conn.start_cluster_on_yarn(name, engine, num_nodes, mem_per_node, True, None)
-		
+			
+		engine = self.__conn.get_engine_by_version(h2o_version)
+	
 		proxconf = self.__conn.get_config()
 		cluster = self.__conn.get_cluster(clid)
 		cport = proxconf['cluster_proxy_address'].split(':', 1)[1]
