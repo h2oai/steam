@@ -25,7 +25,4 @@ If you're an Open Source community member, you can contact H2O using one of the 
 
 
 ## Advisory Committee
-- Subodh Kumar (Capital One)
-- Jaideep Mokha (Capital One)
-
 
