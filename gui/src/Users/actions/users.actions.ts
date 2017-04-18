@@ -19,7 +19,9 @@ import * as Remote from '../../Proxy/Proxy';
 import * as _ from 'lodash';
 import { openNotification } from '../../App/actions/notification.actions';
 import { NotificationType } from '../../App/components/Notification';
-import { Permission, Role, Identity, Workgroup } from "../../Proxy/Proxy";
+import { Permission, Role, Identity, Workgroup, LdapConfig } from "../../Proxy/Proxy";
+import { getConfig } from '../../Clusters/actions/clusters.actions';
+import { LdapGroup } from "../../Proxy/Proxy";
 
 export const FILTER_SELECTIONS_CHANGED = 'FILTER_SELECTIONS_CHANGED';
 export const REQUEST_PERMISSIONS_WITH_ROLES = 'REQUEST_PERMISSIONS_WITH_ROLES';
@@ -55,7 +57,104 @@ export const REQUEST_UPDATE_USER_WORKGROUPS = 'REQUEST_UPDATE_USER_WORKGROUPS';
 export const RECEIVE_UPDATE_USER_WORKGROUPS = 'RECEIVE_UPDATE_USER_WORKGROUPS';
 export const REQUEST_UPDATE_USER_ROLES = 'REQUEST_UPDATE_USER_ROLES';
 export const RECEIVE_UPDATE_USER_ROLES = 'RECEIVE_UPDATE_USER_ROLES';
+export const REQUEST_LDAP_CONFIG = 'REQUEST_LDAP_CONFIG';
+export const RECEIVE_LDAP_CONFIG = 'RECEIVE_LDAP_CONFIG';
+export const REQUEST_SAVE_LDAP = 'REQUEST_SAVE_LDAP';
+export const RECEIVE_SAVE_LDAP = 'RECEIVE_SAVE_LDAP';
+export const REQUEST_TEST_LDAP = 'REQUEST_TEST_LDAP';
+export const RECEIVE_TEST_LDAP = 'RECEIVE_TEST_LDAP';
+export const REQUEST_ADMIN_CHECK = 'REQUEST_ADMIN_CHECK';
+export const RECEIVE_ADMIN_CHECK = 'RECEIVE_ADMIN_CHECK';
+export const REQUEST_SET_LOCAL_CONFIG = 'REQUEST_SET_LOCAL_CONFIG';
+export const RECEIVE_SET_LOCAL_CONFIG = 'RECEIVE_SET_LOCAL_CONFIG';
+export const REQUEST_CLEAR_TEST_LDAP = 'REQUEST_CLEAR_TEST_LDAP';
 
+export interface LdapTestResult {
+  count: number,
+  groups: LdapGroup[]
+}
+
+export function requestClearTestLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_CLEAR_TEST_LDAP
+    });
+  };
+};
+export function requestSetLocalConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_SET_LOCAL_CONFIG
+    });
+  };
+}
+export function receiveSetLocalConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_SET_LOCAL_CONFIG
+    });
+  };
+}
+export function requestAdminCheck() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_ADMIN_CHECK
+    });
+  };
+}
+export function receiveAdminCheck(isSuperuser) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_ADMIN_CHECK,
+      isAdmin: isSuperuser
+    });
+  };
+};
+export function requestTestLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_TEST_LDAP
+    });
+  };
+};
+export function receiveTestLdap(ldapTestResult: LdapTestResult) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_TEST_LDAP,
+      ldapTestResult
+    });
+  };
+};
+export function requestSaveLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_SAVE_LDAP
+    });
+  };
+};
+export function receiveSaveLdap() {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_SAVE_LDAP
+    });
+  };
+};
+export function requestLdapConfig() {
+  return (dispatch) => {
+    dispatch({
+      type: REQUEST_LDAP_CONFIG
+    });
+  };
+};
+export function receiveLdapConfig(config: LdapConfig, exists: boolean) {
+  return (dispatch) => {
+    dispatch({
+      type: RECEIVE_LDAP_CONFIG,
+      config,
+      exists
+    });
+  };
+};
 export function requestUpdateUserRoles() {
   return (dispatch) => {
     dispatch({
@@ -228,7 +327,7 @@ export function receiveSavePermissions(data): any {
 
 export function filterSelectionsChanged(id, selected) {
   return {
-    type : FILTER_SELECTIONS_CHANGED,
+    type: FILTER_SELECTIONS_CHANGED,
     id,
     selected
   };
@@ -298,31 +397,31 @@ export function receiveRoleNames(roleNames) {
 
 function getProjects(dispatch): Promise<Array<any>> {
   return new Promise((resolve, reject) => {
-      dispatch(requestProjects());
-      Remote.getProjects(0, 1000, (error, res: any) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null));
-          reject();
-        }
-        dispatch(receiveProjects(res));
-        resolve(res);
-      });
-    }
+    dispatch(requestProjects());
+    Remote.getProjects(0, 1000, (error, res: any) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving projects', null));
+        reject();
+      }
+      dispatch(receiveProjects(res));
+      resolve(res);
+    });
+  }
   );
 }
 
 function getUsers(dispatch): Promise<Array<Role>> {
   return new Promise((resolve, reject) => {
-      dispatch(requestUsers());
-      Remote.getIdentities(0, 1000, (error, res: any) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null));
-          reject();
-        }
-        dispatch(receiveUsers(res));
-        resolve(res);
-      });
-    }
+    dispatch(requestUsers());
+    Remote.getIdentities(0, 1000, (error, res: any) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving users', null));
+        reject();
+      }
+      dispatch(receiveUsers(res));
+      resolve(res);
+    });
+  }
   );
 }
 
@@ -331,16 +430,16 @@ function getUsers(dispatch): Promise<Array<Role>> {
  */
 function getRoles(dispatch): Promise<Array<Role>> {
   return new Promise((resolve, reject) => {
-      dispatch(requestRoleNames());
-      Remote.getRoles(0, 1000, (error, res: any) => {
-        if (error) {
-          dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null));
-          reject();
-        }
-        dispatch(receiveRoleNames(res));
-        resolve(res);
-      });
-    }
+    dispatch(requestRoleNames());
+    Remote.getRoles(0, 1000, (error, res: any) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, 'Load Error', 'There was an error retrieving roles', null));
+        reject();
+      }
+      dispatch(receiveRoleNames(res));
+      resolve(res);
+    });
+  }
   );
 }
 
@@ -381,7 +480,7 @@ export interface INewRolePermission {
   permissionId: number,
   isEnabled: boolean
 }
-export class NewRolePermission implements  INewRolePermission{
+export class NewRolePermission implements INewRolePermission {
   constructor(public permissionId: number, public isEnabled: boolean) { }
 }
 export function createRole(newRoleName: string, newRoleDescription: string, permissions: Array<INewRolePermission>) {
@@ -424,7 +523,7 @@ export interface INewUserDetails {
   roleIds: Array<number>
 }
 export class NewUserDetails implements INewUserDetails {
-  constructor(public name: string, public password: string, public workgroupIds: Array<number>, public roleIds: Array<number>) {  }
+  constructor(public name: string, public password: string, public workgroupIds: Array<number>, public roleIds: Array<number>) { }
 }
 export function createUser(newUserDetails: INewUserDetails) {
   return (dispatch) => {
@@ -529,8 +628,9 @@ export function fetchPermissionsWithRoles() {
               reject();
             }
             resolve({
-              roleId : role.id,
-              permissions : res
+              roleName: role.name,
+              roleId: role.id,
+              permissions: res
             });
           })
         ));
@@ -542,29 +642,28 @@ export function fetchPermissionsWithRoles() {
         });
 
         descriptionsPromise.then((descriptions) => {
-            let flags;
-            let permissionSet;
+          let flags;
+          let permissionSet;
 
-            for (let i = 0; i < descriptions.length; i++) {
-              flags = [];
-              for (let j = 0; j < permissionsByRole.length; j++) {
-                permissionSet = permissionsByRole[j];
-                if (_.findIndex(permissionSet.permissions, (o: Permission) => {
-                  return o.id === descriptions[i].id;
-                }) !== -1) {
-                  flags.push({value: true, roleId: permissionSet.roleId});
-                } else {
-                  flags.push({value: false, roleId: permissionSet.roleId});
-                }
+          for (let i = 0; i < descriptions.length; i++) {
+            flags = [];
+            for (let j = 0; j < permissionsByRole.length; j++) {
+              permissionSet = permissionsByRole[j];
+              if (_.findIndex(permissionSet.permissions, (o: Permission) => {
+                return o.id === descriptions[i].id;
+              }) !== -1) {
+                flags.push({ value: true, roleId: permissionSet.roleId, roleName: permissionSet.roleName });
+              } else {
+                flags.push({ value: false, roleId: permissionSet.roleId, roleName: permissionSet.roleName });
               }
-              output.push({
-                description : descriptions[i].description,
-                id: descriptions[i].id,
-                flags
-              });
             }
-
-            dispatch(receivePermissionsByRole(output));
+            output.push({
+              description: descriptions[i].description,
+              id: descriptions[i].id,
+              flags
+            });
+          }
+          dispatch(receivePermissionsByRole(output));
         });
       });
     });
@@ -580,7 +679,7 @@ export function saveUpdatedPermissions(updates) {
         Remote.linkRoleWithPermission(parseInt(update.newFlag.roleId, 10), update.permissionId, (error) => {
           if (error) {
             dispatch(receiveSavePermissions({
-                error
+              error
             }));
             return;
           }
@@ -740,6 +839,20 @@ export function updateUserWorkgroups(userId: number, requestedEnabledWorkgroupId
   };
 }
 
+export function fetchLdapConfig() {
+  return (dispatch, getState) => {
+    dispatch(requestLdapConfig());
+
+    Remote.getLdapConfig((error, config, exists) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP ERROR", error.toString(), null));
+        return;
+      }
+      dispatch(receiveLdapConfig(config, exists));
+    });
+  };
+}
+
 /***
  * @param userId
  * @param requestedEnabledRoleIds Role ids to be enabled for given user ID. Role ids not included will be disabled for given userID
@@ -813,6 +926,53 @@ export function updateUserRoles(userId: number, requestedEnabledRoleIds: Array<n
     Promise.all(updatePromises).then((response) => {
       dispatch(receiveUpdateUserRoles());
       dispatch(fetchUsersWithRolesAndProjects());
+    });
+  };
+}
+
+export function saveLdapConfig(ldapConfig: LdapConfig) {
+  return (dispatch, getState) => {
+    dispatch(requestSaveLdap());
+    Remote.setLdapConfig(ldapConfig, (error: Error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP ERROR", error.toString(), null));
+        return;
+      } else {
+        dispatch(receiveSaveLdap());
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP config updated.", null));
+        dispatch(fetchLdapConfig());
+        dispatch(getConfig());
+      }
+    });
+  };
+}
+
+export function testLdapConfig(ldapConfig: LdapConfig) {
+  return (dispatch, getState) => {
+    dispatch(requestTestLdap());
+    Remote.testLdapConfig(ldapConfig, (error: Error, count: number, groups: LdapGroup[]) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP", error.toString(), null));
+      } else {
+        dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Config Valid", null));
+        dispatch(receiveTestLdap({count, groups}));
+      }
+    });
+  };
+}
+
+export function setLocalConfig() {
+  return (dispatch, getState) => {
+    dispatch(requestSetLocalConfig());
+    Remote.setLocalConfig((error) => {
+      if (error) {
+        dispatch(openNotification(NotificationType.Error, "LDAP", error, null));
+        return;
+      }
+      dispatch(receiveSetLocalConfig());
+      dispatch(fetchLdapConfig());
+      dispatch(getConfig());
+      dispatch(openNotification(NotificationType.Confirm, "LDAP", "LDAP Removed", null));
     });
   };
 }

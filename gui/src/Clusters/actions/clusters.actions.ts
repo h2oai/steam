@@ -97,25 +97,27 @@ export function uploadEngine(file) {
       credentials: 'include',
       method: 'post',
       body: data
-    }).then(() => {
-      dispatch(openNotification(NotificationType.Confirm, "Success", 'Engine uploaded', null));
-      dispatch(uploadEngineCompleted(null));
-      dispatch(getEngines());
-    }).catch((error) => {
-      dispatch(uploadEngineCompleted(error));
-      dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
+    }).then((response) => {
+      if (response.status === 200) {
+        dispatch(openNotification(NotificationType.Confirm, "Success", 'Engine uploaded', null));
+        dispatch(uploadEngineCompleted(null));
+        dispatch(getEngines());
+      } else {
+        dispatch(uploadEngineCompleted(response.statusText));
+        dispatch(openNotification(NotificationType.Error, "Error", response.statusText, null));
+      }
     });
   };
 }
 
-export function startYarnCluster(clusterName, engineId, size, memory, keytab) {
+export function startYarnCluster(clusterName, engineId, size, memory, secure, keytab) {
   if (!clusterName || !engineId || !size || !memory) {
     openNotification(NotificationType.Error, "Error", 'All fields are required', null);
   }
   return (dispatch) => {
     dispatch(startCluster());
     dispatch(openNotification(NotificationType.Info, "Update", 'Connecting to YARN...', null));
-    Remote.startClusterOnYarn(clusterName, engineId, size, memory, keytab, (error, clusterId) => {
+    Remote.startClusterOnYarn(clusterName, engineId, size, memory, secure, keytab, (error, clusterId) => {
       if (error) {
         dispatch(openNotification(NotificationType.Error, "Error", error.toString(), null));
         dispatch(startClusterCompleted(error.toString()));
@@ -152,5 +154,11 @@ export function getConfig() {
       }
       dispatch(fetchConfigCompleted(config));
     });
+  };
+}
+
+export function resetConfig() {
+  return (dispatch) => {
+    dispatch(fetchConfigCompleted({}));
   };
 }

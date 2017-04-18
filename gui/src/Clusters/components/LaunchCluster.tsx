@@ -30,10 +30,14 @@ import PageHeader from '../../Projects/components/PageHeader';
 import Table from '../../Projects/components/Table';
 import '../styles/launchcluster.scss';
 import { NumericInput } from 'h2oUIKit';
+import { hasPermissionToShow } from "../../App/utils/permissions";
+import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core";
 
 interface Props {
   engines: any,
-  config: any
+  config: any,
+  isAdmin: boolean
+  clusterLaunchIsInProgress: boolean
 }
 
 interface DispatchProps {
@@ -54,7 +58,7 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   constructor() {
     super();
     this.state = {
-      engineId: null
+      selectedEngine: null
     };
   }
 
@@ -66,25 +70,56 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
   startCluster(event) {
     event.preventDefault();
     let clusterName = (this.refs.clusterForm.querySelector('input[name="name"]') as HTMLInputElement).value;
-    let engineId = this.state.engineId;
+    let engineId = this.state.selectedEngine.id;
     let size = (this.refs.clusterForm.querySelector('input[name="size"]') as HTMLInputElement).value;
     let memory = (this.refs.clusterForm.querySelector('input[name="memory"]') as HTMLInputElement).value;
     let keytab = _.get((this.refs.clusterForm.querySelector('input[name="keytab"]') as HTMLInputElement), 'value', '');
-    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', keytab);
+    // let secure = (this.refs.clusterForm.querySelector('input[name="secure"]') as HTMLInputElement).checked;
+    let secure = true;
+    this.props.startYarnCluster(clusterName, parseInt(engineId, 10), parseInt(size, 10), memory + 'g', secure, keytab);
   }
 
   uploadEngine(event) {
     event.preventDefault();
     this.props.uploadEngine(this.refs.engine);
-  }
-
-  onChangeEngine(event) {
-    this.setState({
-      engineId: event.target.value
-    });
-  }
+  };
 
   render() {
+
+    let uploadEngine;
+    if (hasPermissionToShow("ManageEngine", this.props.config, this.props.isAdmin)) {
+      uploadEngine = (
+        <label className="pt-file-upload">
+          <input ref="engine" type="file" onChange={this.uploadEngine.bind(this)} />
+          <span className="pt-file-upload-input">Upload New Engine...</span>
+        </label>
+      );
+    } else {
+      if (this.props.engines && this.props.engines.length > 0) {
+        uploadEngine = null;
+      } else {
+        uploadEngine = <div>Please ask your Admin to upload more engines</div>;
+      }
+    }
+
+    let currentEngineString;
+    if (this.state.selectedEngine) {
+      currentEngineString = this.state.selectedEngine.name;
+    } else {
+      currentEngineString = "Please select an engine";
+    }
+
+    let engineSelectContent = (
+      <div>
+        {this.props.engines.map((engine, i) => {
+          return <div key={i} className="pt-menu-item pt-popover-dismiss" onClick={() => this.setState({ selectedEngine: engine })}>
+            {engine.name}
+          </div>;
+        })}
+        {uploadEngine}
+      </div>
+    );
+
     return (
       <div className="launch-cluster">
         <PageHeader>LAUNCH NEW CLUSTER</PageHeader>
@@ -120,16 +155,17 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
                 H2O VERSION
               </Cell>
               <Cell>
-                <div className="upload-engine">
-                  <input ref="engine" type="file" name="engine"/>
-                  <div className="button-primary" onClick={this.uploadEngine.bind(this)}>Upload Engine</div>
-                </div>
-                <select onChange={this.onChangeEngine.bind(this)}>
-                  <option></option>
-                  {this.props.engines.map((engine, i) => {
-                    return <option key={i} value={engine.id}>{engine.name}</option>;
-                  })}
-                </select>
+
+                <Popover content={engineSelectContent}
+                         interactionKind={PopoverInteractionKind.CLICK}
+                         popoverClassName="pt-popover-content-sizing"
+                         position={Position.BOTTOM}
+                         useSmartPositioning={true}>
+                  <div className="pt-button">
+                    { currentEngineString } &nbsp;
+                    <span className="pt-icon-standa pt-icon-caret-down pt-align-right font-18"></span>
+                  </div>
+                </Popover>
               </Cell>
             </Row>
             {_.get(this.props.config, 'kerberos_enabled', false) ? <Row>
@@ -141,7 +177,15 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
               </Cell>
             </Row> : null}
           </Table>
-          <button type="submit" className="button-primary">Launch New Clusters</button>
+          {this.props.clusterLaunchIsInProgress ? null : <button type="submit" className="button-primary">Launch New Clusters</button>}
+          {this.props.clusterLaunchIsInProgress ? <div className="pt-spinner .modifier">
+            <div className="pt-spinner-svg-container">
+              <svg viewBox="0 0 100 100">
+                <path className="pt-spinner-track" d="M 50,50 m 0,-44.5 a 44.5,44.5 0 1 1 0,89 a 44.5,44.5 0 1 1 0,-89"></path>
+                <path className="pt-spinner-head" d="M 94.5 50 A 44.5 44.5 0 0 0 50 5.5"></path>
+              </svg>
+            </div>
+          </div> : null}
         </form>
       </div>
     );
@@ -151,7 +195,9 @@ export class LaunchCluster extends React.Component<Props & DispatchProps, any> {
 function mapStateToProps(state) {
   return {
     engines: state.clusters.engines,
-    config: state.clusters.config
+    config: state.clusters.config,
+    isAdmin: state.global.isAdmin,
+    clusterLaunchIsInProgress: state.clusters.clusterLaunchIsInProgress
   };
 }
 

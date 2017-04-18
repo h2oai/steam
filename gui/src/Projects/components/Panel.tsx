@@ -30,7 +30,7 @@ interface Props {
 
 export default class Panel extends React.Component<Props, any> {
 
-  onClick = (e: React.MouseEvent) => {
+  onClick = (e: React.MouseEvent<any>) => {
     if (this.props.onClick) {
       this.props.onClick();
     }

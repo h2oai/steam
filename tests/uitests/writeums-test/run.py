@@ -31,7 +31,7 @@ Perm id		Permission		Index
 """
 
 def setup():
-	tu.cliLogin('superuser', 'superuser')
+	tu.cliLogin('patrick', 'superuser')
 	role = tu.createRole('wicked', 'cool', [])
 	return role
 
@@ -91,7 +91,7 @@ def createUserTest(driver):
 		print "Couldn't click create user"
 		return False
 	try:
-		tu.createUser(driver, "rach", "bobben", ["Superuser"], [])
+		tu.createUser(driver, "rach", "bobben", ["admin"], [])
 		wait.until(lambda x: x.find_element_by_xpath("//div[@class='cell' and text()='rach']"))
 	except:
 		print "Failed to create user through UI"

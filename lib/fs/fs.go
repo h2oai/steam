@@ -25,7 +25,6 @@ import (
 	"io/ioutil"
 	"mime"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -35,6 +34,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"net/http"
 
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/pkg/errors"
@@ -315,6 +316,10 @@ func GetAssetsPath(wd, asset string) string {
 	return path.Join(wd, AssetsDir, asset)
 }
 
+func GetDBPath(wd, db string) string {
+	return path.Join(wd, DbDir, db)
+}
+
 func GetModelDirs(wd string, modelId int64) ([]string, error) {
 	modelDir := GetModelPath(wd, modelId)
 	files, err := ioutil.ReadDir(modelDir)
@@ -462,8 +467,21 @@ func GetExternalHost() (string, error) {
 	return "", fmt.Errorf("Failed determining external IP address.")
 }
 
-func Download(p, u string, preserveFilename bool) (int64, string, error) {
-	res, err := http.Get(u)
+func Get(url, token string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if token != "" {
+		req.Header.Set("Authorization", "Basic "+token)
+	}
+
+	return http.DefaultClient.Do(req)
+}
+
+func Download(token, p, u string, preserveFilename bool) (int64, string, error) {
+	res, err := Get(u, token)
 	if err != nil {
 		return 0, "", fmt.Errorf("File download failed: %s: %v", u, err)
 	}

@@ -1,0 +1,30 @@
+#!/bin/bash -ex
+# enter the directory where the build script is located
+cd "${0%/*}"
+
+# some useful variables
+SRC_DIR="$(pwd)/../../"
+CURRENT_DISTRO=$(basename $(pwd))
+BUILD_IMAGE="steam-${CURRENT_DISTRO}-build"
+TEST_IMAGE="steam-${CURRENT_DISTRO}-test"
+OUT_DIR="$(pwd)/../../dist/rpm/${CURRENT_DISTRO}"
+
+# create the build image from the provided directory
+docker build --pull -t ${BUILD_IMAGE} build-image
+
+#clean previous packages. you may want to omit this if
+#you want to preserve them all and have got other means of removing them.
+rm -rf ${OUT_DIR}
+
+# run the build-package script from the build-inside directory inside a container
+# started from the above build image. The script will access the source directory of 
+# the application in /source (read-only), can access the build-inside directory from /build-inside (read-only),
+# and should write the packages in /out.
+#
+# the env.list file is a good shortcut for sharing env variable that may be reused from various packages,
+# but you can choose to forward additional variables with the --env switch. It's quite common to forward
+# things like BUILD_NUMBER or GIT_COMMIT from a CI server to use them within the package.
+docker run --env-file ../env.list --rm -v $(pwd)/build-inside:/build-inside:ro -v ${SRC_DIR}:/source:ro -v ${OUT_DIR}:/out \
+	-w /build-inside ${BUILD_IMAGE} /build-inside/build-package \
+
+

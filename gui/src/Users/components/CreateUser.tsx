@@ -28,6 +28,7 @@ import { bindActionCreators } from 'redux';
 import {createUser, NewUserDetails} from "../actions/users.actions";
 import InputFeedback from "../../App/components/InputFeedback";
 import {FeedbackType} from "../../App/components/InputFeedback";
+import { Tooltip } from '@blueprintjs/core/dist/components/tooltip/tooltip';
 
 interface Props {
   workgroups: Array<Workgroup>,
@@ -165,7 +166,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
     ));
   };
 
-  onCancelClicked = (e: React.MouseEvent) => {
+  onCancelClicked = (e: React.MouseEvent<any>) => {
     this.props.cancelHandler();
   };
 
@@ -178,11 +179,12 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
         <Table>
           <Row>
             <Cell>
-              USERNAME
-              This must correspond with a username in your YARN system
+              USERNAME &nbsp;<Tooltip className="steam-tooltip-launcher" content="This must correspond with a username in your YARN system">
+                <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+              </Tooltip>
             </Cell>
             <Cell>
-              <input type="text" ref={(input) => this.nameInput = input} onChange={this.onNameChanged.bind(this)} />
+              <input type="text" className="pt-input" ref={(input) => this.nameInput = input} onChange={this.onNameChanged.bind(this)} />
             </Cell>
           </Row>
           <Row>
@@ -190,7 +192,7 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               PASSWORD
             </Cell>
             <Cell>
-              <input type="password" ref={(input) => this.passwordInput = input} onChange={this.onPasswordChanged.bind(this)} />
+              <input type="password" className="pt-input" ref={(input) => this.passwordInput = input} onChange={this.onPasswordChanged.bind(this)} />
             </Cell>
           </Row>
           <Row>
@@ -198,39 +200,24 @@ export class CreateUser extends React.Component<Props & DispatchProps, any> {
               CONFIRM PASSWORD
             </Cell>
             <Cell>
-              <input type="password" ref={(input) => this.passwordInputConfirm = input} onChange={this.onPasswordConfirmChanged.bind(this)} /><br />&nbsp;
+              <input type="password" className="pt-input" ref={(input) => this.passwordInputConfirm = input} onChange={this.onPasswordConfirmChanged.bind(this)} /><br />&nbsp;
               { this.state.invalidPasswordConfirmEntered ? <InputFeedback message="passwords do not match" type={FeedbackType.Error} /> : null }
               { this.state.validPasswordConfirmEntered ? <InputFeedback message="password confirmed" type={FeedbackType.Confirm} /> : null }
             </Cell>
           </Row>
           <Row>
             <Cell>
-              ROLE
-              The role(s) this user will have in Steam. At least one role is required.
+              ROLE &nbsp;<Tooltip className="steam-tooltip-launcher" content="The role(s) this user will have in Steam. At least one role is required.">
+                <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+              </Tooltip>
             </Cell>
             <Cell>
               <div>
                 {this.props.roles.map((role: Role, index, array) => {
                     return <div key={index}>
-                        <input type="checkbox" ref={(input) => this.registerRoleInput(input, role)} /> {role.description}
+                        <input type="checkbox" ref={(input) => this.registerRoleInput(input, role)} /> {role.name}
                       </div>;
                   })
-                }
-              </div>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell>
-              WORKGROUPS
-              The workgroup(s) this user will have access to
-            </Cell>
-            <Cell>
-              <div>
-                {this.props.workgroups ? this.props.workgroups.map((workgroup: Workgroup, index, array) => {
-                  return <div key={index}>
-                      <input type="checkbox" ref={(input) => this.registerWorkgroupInput(input, workgroup)} /> {workgroup.name}
-                    </div>;
-                }) : null
                 }
               </div>
             </Cell>

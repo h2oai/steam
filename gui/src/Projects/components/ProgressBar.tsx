@@ -72,7 +72,7 @@ export default class ProgressBar extends React.Component<Props, any> {
     }
   }
 
-  onClick = (e: React.MouseEvent) => {
+  onClick = (e: React.MouseEvent<any>) => {
     this.props.onClick();
   };
 

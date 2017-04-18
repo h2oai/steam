@@ -1,0 +1,12 @@
+# Needs to have linux '\n' lines endings! In ViM: `set ff=unix`
+case "$1" in
+  0)
+    /sbin/service %{name} stop
+    /sbin/chkconfig --del steam
+  ;;
+  1)
+    # This is an upgrade.
+    # Do nothing.
+  ;;
+esac
+

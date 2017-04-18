@@ -16,14 +16,18 @@
 */
 
 import * as _ from 'lodash';
-import { RECEIVE_ENTITY_IDS } from '../actions/global.actions';
+import {RECEIVE_ENTITY_IDS, RECEIVE_IS_ADMIN} from '../actions/global.actions';
 
 const initialState = {
-  entityIds: {}
+  entityIds: {},
+  isAdmin: false
 };
 
 export function globalReducer(state = initialState, action) {
   switch (action.type) {
+    case RECEIVE_IS_ADMIN: {
+      return _.assign({}, state, { isAdmin: action.isAdmin });
+    }
     case RECEIVE_ENTITY_IDS:
       let entityIds = {};
       for (let entityType of action.response) {

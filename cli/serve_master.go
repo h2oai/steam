@@ -47,8 +47,8 @@ func serveMaster(c *context) *cobra.Command {
 		dbName                    string
 		dbUserName                string
 		dbSSLMode                 string
-		superuserName             string
-		superuserPassword         string
+		adminName             string
+		adminPassword         string
 	)
 
 	opts := master.DefaultOpts
@@ -73,8 +73,8 @@ func serveMaster(c *context) *cobra.Command {
 				dbName,
 				dbUserName,
 				dbSSLMode,
-				superuserName,
-				superuserPassword,
+				adminName,
+				adminPassword,
 			},
 		})
 	})
@@ -94,8 +94,8 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Name, "Database name to use for application data storage")
 	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Username, "Database username to connect as")
 	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
-	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DB.SuperuserName, "Set superuser username (required for first-time-use only)")
-	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DB.SuperuserPassword, "Set superuser password (required for first-time-use only)")
+	cmd.Flags().StringVar(&adminName, "admin-name", opts.DB.AdminName, "Set admin username (required for first-time-use only)")
+	cmd.Flags().StringVar(&adminPassword, "admin-password", opts.DB.AdminPassword, "Set admin password (required for first-time-use only)")
 
 	return cmd
 

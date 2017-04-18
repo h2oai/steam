@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/h2oai/steam",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v74",
+	"GodepVersion": "v75",
 	"Packages": [
 		"./..."
 	],
@@ -22,6 +22,11 @@
 			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
 		},
 		{
+			"ImportPath": "github.com/fatih/color",
+			"Comment": "v1.1.0-4-gbf82308",
+			"Rev": "bf82308e8c8546dc2b945157173eb8a959ae9505"
+		},
+		{
 			"ImportPath": "github.com/go-ldap/ldap",
 			"Comment": "v2.4.1",
 			"Rev": "d0a5ced67b4dc310b9158d63a2c6f9c5ec13f105"
@@ -29,6 +34,11 @@
 		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
+		},
+		{
+			"ImportPath": "github.com/gorilla/handlers",
+			"Comment": "v1.1-14-g3a5767c",
+			"Rev": "3a5767ca75ece5f7f1440b1d16975247f8d8b221"
 		},
 		{
 			"ImportPath": "github.com/gorilla/rpc",
@@ -53,6 +63,15 @@
 			"Rev": "ee1442bda7bd1b6a84e913bdb421cb1874ec629d"
 		},
 		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.6-9-gd228849",
+			"Rev": "d228849504861217f796da67fae4f6e347643f15"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "30a891c33c7cde7b02a981314b4228ec99380cca"
+		},
+		{
 			"ImportPath": "github.com/mattn/go-sqlite3",
 			"Comment": "v1.1.0-78-gb5c99a7",
 			"Rev": "b5c99a720374818b629fd1fbf6d2cbb4fb9a5644"
@@ -67,6 +86,16 @@
 			"Rev": "17b591df37844cde689f4d5813e5cea0927d8dd2"
 		},
 		{
+			"ImportPath": "github.com/rs/cors",
+			"Comment": "v1.0",
+			"Rev": "a62a804a8a009876ca59105f7899938a1349f4b3"
+		},
+		{
+			"ImportPath": "github.com/rs/xhandler",
+			"Comment": "v1.0-1-ged27b6f",
+			"Rev": "ed27b6fd65218132ee50cd95f38474a3d8a2cd12"
+		},
+		{
 			"ImportPath": "github.com/rs/xid",
 			"Rev": "057f3c928c207d1e7e318929eeac93bb46e319e3"
 		},
@@ -77,7 +106,7 @@
 		},
 		{
 			"ImportPath": "github.com/serenize/snaker",
-			"Rev": "d88cc11617e4f179fa2c821a60908d5fabd7bdad"
+			"Rev": "543781d2b79bd95c51ffe70e70a55c946ca211ff"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
@@ -108,9 +137,23 @@
 			"Rev": "d7bf3545bb0dacf009c535b3d3fbf53ac0a339ab"
 		},
 		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "c200b10b5d5e122be351b67af224adc6128af5bf"
+		},
+		{
 			"ImportPath": "gopkg.in/asn1-ber.v1",
 			"Comment": "v1.1",
 			"Rev": "4e86f4367175e39f69d9358a5f17b4dda270378d"
+		},
+		{
+			"ImportPath": "gopkg.in/doug-martin/goqu.v3",
+			"Comment": "v3.3",
+			"Rev": "3fb96709c55732c801fed9abf32dad24c1090887"
+		},
+		{
+			"ImportPath": "gopkg.in/ldap.v2",
+			"Comment": "v2.5.0",
+			"Rev": "8168ee085ee43257585e50c6441aadf54ecb2c9f"
 		}
 	]
 }

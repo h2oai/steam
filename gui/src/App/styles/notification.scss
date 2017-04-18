@@ -87,3 +87,36 @@
   right: 22px;
   z-index: 10;
 }
+.pt-toast-message {
+  padding: 8px !important;
+  border-left: 12px;
+  border-top: 0px;
+  border-bottom: 0px;
+  border-right: 0px;
+  border-style: solid;
+}
+
+.steam-notification-error {
+  .pt-toast-message {
+    border-color: #fd7372;
+  }
+}
+.steam-notification-confirm {
+  .pt-toast-message {
+    border-color: #5fae08;
+  }
+}
+.steam-notification-info {
+  .pt-toast-message {
+    border-color: #9b9b9b;
+  }
+}
+.steam-notification-warning {
+  .pt-toast-message {
+    border-color: #f69d00;
+  }
+}
+
+.notification-content {
+  width: 435px;
+}

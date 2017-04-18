@@ -29,6 +29,9 @@ _testmain.go
 .DS_Store
 *.swp
 coverage.out
+*.rdb
+tmp
+private
 
 # ignore list
 /steamY
@@ -78,3 +81,12 @@ coverage.out
 /tools/steamlauncher/service.log
 /steam.log
 /service.log
+/node_modules
+
+# ignore idea files
+*.ipr
+*.iml
+
+# ignore packaging info
+packaging/env.list
+

@@ -19,9 +19,32 @@
  * Created by justin on 7/13/16.
  */
 
-declare function require(string): string;
+declare function require(string): any;
 
 interface Window {
   devToolsExtension: any
   ga: any
+  API_HOST: string
+  chrome?: {
+    webstore: any
+  }
+  InstallTrigger?: any
+}
+
+
+interface ENVIRONMENT {
+  API_HOST: string
+  PRODUCTION: boolean
+}
+declare module 'react-router-redux' {
+  export var syncHistoryWithStore: any;
+  export var routerReducer: any;
+}
+
+declare module 'react-router' {
+  export var Link: any;
+  export var hashHistory: any;
+  export var withRouter: any;
+  export var Router: any;
+  export var PlainRoute: any;
 }

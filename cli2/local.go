@@ -151,6 +151,8 @@ func serveMaster(c *context) *cobra.Command {
 		predictionServicePortsString string
 		enableProfiler               bool
 		yarnEnableKerberos           bool
+		dbDriver                     string
+		dbPath                       string
 		dbName                       string
 		dbUserName                   string
 		dbPassword                   string
@@ -161,8 +163,9 @@ func serveMaster(c *context) *cobra.Command {
 		dbSSLCertPath                string
 		dbSSLKeyPath                 string
 		dbSSLRootCertPath            string
-		superuserName                string
-		superuserPassword            string
+		adminName                    string
+		adminPassword                string
+		dev		             bool
 	)
 
 	opts := master.DefaultOpts
@@ -187,6 +190,11 @@ func serveMaster(c *context) *cobra.Command {
 			log.Fatalln("Invalid port range.")
 		}
 
+		var flag uint
+		if debug {
+			flag = flag | data.Debug
+		}
+
 		master.Run(c.version, c.buildDate, master.Opts{
 			webAddress,
 			webTLSCertPath,
@@ -202,29 +210,34 @@ func serveMaster(c *context) *cobra.Command {
 			master.YarnOpts{
 				yarnEnableKerberos,
 			},
-			master.DBOpts{
-				data.Connection{
-					dbName,
-					dbUserName,
-					dbPassword,
-					dbHost,
-					dbPort,
-					dbConnectionTimeout,
-					dbSSLMode,
-					dbSSLCertPath,
-					dbSSLKeyPath,
-					dbSSLRootCertPath,
-				},
-				superuserName,
-				superuserPassword,
+			data.DBOpts{
+				Driver: dbDriver,
+
+				Path: dbPath,
+
+				Name:              dbName,
+				User:              dbUserName,
+				Pass:              dbPassword,
+				Host:              dbHost,
+				Port:              dbPort,
+				ConnectionTimeout: dbConnectionTimeout,
+				SSLMode:           dbSSLMode,
+				SSLCert:           dbSSLCertPath,
+				SSLKey:            dbSSLKeyPath,
+				SSLRootCert:       dbSSLRootCertPath,
+
+				AdminName: adminName,
+				AdminPass: adminPassword,
+				Flags:     flag,
 			},
+			dev,
 		})
 	})
 	cmd.Flags().StringVar(&webAddress, "web-address", opts.WebAddress, "Web server address (\"<ip>:<port>\" or \":<port>\").")
 	cmd.Flags().StringVar(&webTLSCertPath, "web-tls-cert-path", opts.WebTLSCertPath, "Web server TLS certificate file path (optional).")
 	cmd.Flags().StringVar(&webTLSKeyPath, "web-tls-key-path", opts.WebTLSKeyPath, "Web server TLS key file path (optional).")
-	cmd.Flags().StringVar(&authProvider, "authentication-provider", opts.AuthProvider, "Authentication mechanism for client logins (one of \"basic\", \"digest\"), or \"basic-ldap\"")
-	cmd.Flags().StringVar(&authConfig, "authentication-config", opts.AuthConfig, "Configuration file for authentication (used in \"basic-ldap\")")
+	cmd.Flags().StringVar(&authProvider, "authentication-provider", opts.AuthProvider, "Authentication mechanism for client logins (local: \"basic\" or \"digest\"; ldap: \"basic-ldap\"")
+	// cmd.Flags().StringVar(&authConfig, "authentication-config", opts.AuthConfig, "Configuration file for authentication (used in \"basic-ldap\")")
 	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
 	cmd.Flags().StringVar(&clusterProxyAddress, "cluster-proxy-address", opts.ClusterProxyAddress, "Cluster proxy address (\"<ip>:<port>\" or \":<port>\")")
 	cmd.Flags().StringVar(&compilationServiceAddress, "compilation-service-address", opts.CompilationServiceAddress, "Model compilation service address (\"<ip>:<port>\")")
@@ -236,18 +249,23 @@ func serveMaster(c *context) *cobra.Command {
 	cmd.Flags().StringVar(&predictionServicePortsString, "prediction-service-port-range", "1025:65535", "Specified port range to create prediction services on. (\"<from>:<to>\")")
 	cmd.Flags().BoolVar(&enableProfiler, "profile", opts.EnableProfiler, "Enable Go profiler")
 	cmd.Flags().BoolVar(&yarnEnableKerberos, "yarn-enable-kerberos", opts.Yarn.KerberosEnabled, "Enable Kerberos authentication. Requires username and keytab.") // FIXME: Kerberos authentication is being passed by admin to all
-	// cmd.Flags().StringVar(&dbName, "db-name", opts.DB.Connection.DbName, "Database name to use for application data storage (required)")
-	// cmd.Flags().StringVar(&dbUserName, "db-username", opts.DB.Connection.User, "Database username (required)")
-	// cmd.Flags().StringVar(&dbPassword, "db-password", opts.DB.Connection.Password, "Database password (optional)")
-	// cmd.Flags().StringVar(&dbHost, "db-host", opts.DB.Connection.Host, "Database host (optional, defaults to localhost")
-	// cmd.Flags().StringVar(&dbPort, "db-port", opts.DB.Connection.Port, "Database port (optional, defaults to 5432)")
-	// cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DB.Connection.ConnectionTimeout, "Database connection timeout (optional)")
-	// cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DB.Connection.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
-	// cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DB.Connection.SSLCert, "Database connection SSL certificate path (optional)")
-	// cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DB.Connection.SSLKey, "Database connection SSL key path (optional)")
-	// cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DB.Connection.SSLRootCert, "Database connection SSL root certificate path (optional)")
-	cmd.Flags().StringVar(&superuserName, "superuser-name", opts.DB.SuperuserName, "Set superuser username (required for first-time-use only)")
-	cmd.Flags().StringVar(&superuserPassword, "superuser-password", opts.DB.SuperuserPassword, "Set superuser password (required for first-time-use only)")
+	cmd.Flags().BoolVar(&dev, "dev", opts.Dev, "Turns on development features")
+
+	// DB OPTS
+	cmd.Flags().StringVar(&dbDriver, "db-driver", opts.DBOpts.Driver, "Driver for sql implementation. (Supported types are \"sqlite3\" or \"postgres\")")
+	cmd.Flags().StringVar(&dbPath, "db-path", opts.DBOpts.Path, "Set the path to a local database")
+	cmd.Flags().StringVar(&dbName, "db-name", opts.DBOpts.Name, "Database name to use for application data storage (required)")
+	cmd.Flags().StringVar(&dbUserName, "db-username", opts.DBOpts.User, "Database username (required)")
+	cmd.Flags().StringVar(&dbPassword, "db-password", opts.DBOpts.Pass, "Database password (optional)")
+	cmd.Flags().StringVar(&dbHost, "db-host", opts.DBOpts.Host, "Database host (optional, defaults to localhost")
+	cmd.Flags().StringVar(&dbPort, "db-port", opts.DBOpts.Port, "Database port (optional, defaults to 5432)")
+	cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DBOpts.ConnectionTimeout, "Database connection timeout (optional)")
+	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DBOpts.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DBOpts.SSLCert, "Database connection SSL certificate path (optional)")
+	cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DBOpts.SSLKey, "Database connection SSL key path (optional)")
+	cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DBOpts.SSLRootCert, "Database connection SSL root certificate path (optional)")
+	cmd.Flags().StringVar(&adminName, "admin-name", opts.DBOpts.AdminName, "Set admin username (required for first-time-use only)")
+	cmd.Flags().StringVar(&adminPassword, "admin-password", opts.DBOpts.AdminPass, "Set admin password (required for first-time-use only)")
 
 	return cmd
 
@@ -270,7 +288,7 @@ func upload(c *context) *cobra.Command {
 
 var uploadFileHelp = `
 file [path]
-Upload an asset to Steam. 
+Upload an asset to Steam.
 Examples:
 
 	$ steam upload file \
@@ -318,7 +336,7 @@ func uploadFile(c *context) *cobra.Command {
 
 var uploadEngineHelp = `
 engine [path]
-Upload an engine to Steam. 
+Upload an engine to Steam.
 Examples:
 
 	$ steam upload engine \

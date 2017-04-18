@@ -8,6 +8,9 @@
     text-transform: none;
   }
 }
+.ldap-input {
+  width: 505px;
+}
 .filter-and-list {
   display: flex;
   flex-direction: row;
@@ -25,7 +28,6 @@
   width: 100%;
 }
 .filter-column {
-  margin-top: 1em;
   margin-right: 2em;
   width: 12em;
 }
@@ -34,4 +36,13 @@
 }
 .inactive {
   color: $h2o-soft-grey;
+}
+
+.space-20 {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.auth-left {
+  font-weight: bold;
+  width: 240px;
 }

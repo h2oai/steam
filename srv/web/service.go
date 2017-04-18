@@ -24,10 +24,11 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/h2oai/steam/master/az"
-	"github.com/rs/xid"
 	"log"
 	"net/http"
+
+	"github.com/h2oai/steam/master/az"
+	"github.com/rs/xid"
 )
 
 // --- Types ---
@@ -59,13 +60,15 @@ type BinomialModel struct {
 }
 
 type Cluster struct {
-	Id        int64  `json:"id"`
-	Name      string `json:"name"`
-	TypeId    int64  `json:"type_id"`
-	DetailId  int64  `json:"detail_id"`
-	Address   string `json:"address"`
-	State     string `json:"state"`
-	CreatedAt int64  `json:"created_at"`
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	ContextPath string `json:"context_path"`
+	TypeId      int64  `json:"type_id"`
+	DetailId    int64  `json:"detail_id"`
+	Address     string `json:"address"`
+	Token       string `json:"token"`
+	State       string `json:"state"`
+	CreatedAt   int64  `json:"created_at"`
 }
 
 type ClusterStatus struct {
@@ -82,8 +85,12 @@ type ClusterType struct {
 }
 
 type Config struct {
-	KerberosEnabled     bool   `json:"kerberos_enabled"`
-	ClusterProxyAddress string `json:"cluster_proxy_address"`
+	AuthenticationType  string        `json:"authentication_type"`
+	ClusterProxyAddress string        `json:"cluster_proxy_address"`
+	KerberosEnabled     bool          `json:"kerberos_enabled"`
+	Version             string        `json:"version"`
+	Username            string        `json:"username"`
+	Permissions         []*Permission `json:"permissions"`
 }
 
 type Dataset struct {
@@ -157,6 +164,29 @@ type Label struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	CreatedAt   int64  `json:"created_at"`
+}
+
+type LdapConfig struct {
+	Host                   string `json:"host"`
+	Port                   int    `json:"port"`
+	Ldaps                  bool   `json:"ldaps"`
+	BindDn                 string `json:"bind_dn"`
+	BindPassword           string `json:"bind_password"`
+	UserBaseDn             string `json:"user_base_dn"`
+	UserBaseFilter         string `json:"user_base_filter"`
+	UserNameAttribute      string `json:"user_name_attribute"`
+	GroupBaseDn            string `json:"group_base_dn"`
+	GroupNameAttribute     string `json:"group_name_attribute"`
+	StaticMemberAttribute  string `json:"static_member_attribute"`
+	GroupNames             string `json:"group_names"`
+	SearchRequestSizeLimit int    `json:"search_request_size_limit"`
+	SearchRequestTimeLimit int    `json:"search_request_time_limit"`
+	ForceBind              bool   `json:"force_bind"`
+}
+
+type LdapGroup struct {
+	Name  string `json:"name"`
+	Users int    `json:"users"`
 }
 
 type Model struct {
@@ -292,28 +322,33 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
+	CheckAdmin(pz az.Principal) (bool, error)
+	SetLocalConfig(pz az.Principal) error
+	SetLdapConfig(pz az.Principal, config *LdapConfig) error
+	GetLdapConfig(pz az.Principal) (*LdapConfig, bool, error)
+	TestLdapConfig(pz az.Principal, config *LdapConfig) (int, []*LdapGroup, error)
 	RegisterCluster(pz az.Principal, address string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
-	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, keytab string) (int64, error)
+	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error)
 	StopClusterOnYarn(pz az.Principal, clusterId int64, keytab string) error
 	GetCluster(pz az.Principal, clusterId int64) (*Cluster, error)
 	GetClusterOnYarn(pz az.Principal, clusterId int64) (*YarnCluster, error)
-	GetClusters(pz az.Principal, offset int64, limit int64) ([]*Cluster, error)
+	GetClusters(pz az.Principal, offset uint, limit uint) ([]*Cluster, error)
 	GetClusterStatus(pz az.Principal, clusterId int64) (*ClusterStatus, error)
 	DeleteCluster(pz az.Principal, clusterId int64) error
 	GetJob(pz az.Principal, clusterId int64, jobName string) (*Job, error)
 	GetJobs(pz az.Principal, clusterId int64) ([]*Job, error)
 	CreateProject(pz az.Principal, name string, description string, modelCategory string) (int64, error)
-	GetProjects(pz az.Principal, offset int64, limit int64) ([]*Project, error)
+	GetProjects(pz az.Principal, offset uint, limit uint) ([]*Project, error)
 	GetProject(pz az.Principal, projectId int64) (*Project, error)
 	DeleteProject(pz az.Principal, projectId int64) error
 	CreateDatasource(pz az.Principal, projectId int64, name string, description string, path string) (int64, error)
-	GetDatasources(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Datasource, error)
+	GetDatasources(pz az.Principal, projectId int64, offset uint, limit uint) ([]*Datasource, error)
 	GetDatasource(pz az.Principal, datasourceId int64) (*Datasource, error)
 	UpdateDatasource(pz az.Principal, datasourceId int64, name string, description string, path string) error
 	DeleteDatasource(pz az.Principal, datasourceId int64) error
 	CreateDataset(pz az.Principal, clusterId int64, datasourceId int64, name string, description string, responseColumnName string) (int64, error)
-	GetDatasets(pz az.Principal, datasourceId int64, offset int64, limit int64) ([]*Dataset, error)
+	GetDatasets(pz az.Principal, datasourceId int64, offset uint, limit uint) ([]*Dataset, error)
 	GetDataset(pz az.Principal, datasetId int64) (*Dataset, error)
 	GetDatasetsFromCluster(pz az.Principal, clusterId int64) ([]*Dataset, error)
 	UpdateDataset(pz az.Principal, datasetId int64, name string, description string, responseColumnName string) error
@@ -322,17 +357,17 @@ type Service interface {
 	BuildModel(pz az.Principal, clusterId int64, datasetId int64, algorithm string) (int64, error)
 	BuildModelAuto(pz az.Principal, clusterId int64, dataset string, targetName string, maxRunTime int) (*Model, error)
 	GetModel(pz az.Principal, modelId int64) (*Model, error)
-	GetModels(pz az.Principal, projectId int64, offset int64, limit int64) ([]*Model, error)
+	GetModels(pz az.Principal, projectId int64, offset uint, limit uint) ([]*Model, error)
 	GetModelsFromCluster(pz az.Principal, clusterId int64, frameKey string) ([]*Model, error)
 	FindModelsCount(pz az.Principal, projectId int64) (int64, error)
 	GetAllBinomialSortCriteria(pz az.Principal) ([]string, error)
-	FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error)
+	FindModelsBinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*BinomialModel, error)
 	GetModelBinomial(pz az.Principal, modelId int64) (*BinomialModel, error)
 	GetAllMultinomialSortCriteria(pz az.Principal) ([]string, error)
-	FindModelsMultinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error)
+	FindModelsMultinomial(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*MultinomialModel, error)
 	GetModelMultinomial(pz az.Principal, modelId int64) (*MultinomialModel, error)
 	GetAllRegressionSortCriteria(pz az.Principal) ([]string, error)
-	FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error)
+	FindModelsRegression(pz az.Principal, projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*RegressionModel, error)
 	GetModelRegression(pz az.Principal, modelId int64) (*RegressionModel, error)
 	ImportModelFromCluster(pz az.Principal, clusterId int64, projectId int64, modelKey string, modelName string) (int64, error)
 	CheckMojo(pz az.Principal, algo string) (bool, error)
@@ -348,9 +383,9 @@ type Service interface {
 	StartService(pz az.Principal, modelId int64, name string, packageName string) (int64, error)
 	StopService(pz az.Principal, serviceId int64) error
 	GetService(pz az.Principal, serviceId int64) (*ScoringService, error)
-	GetServices(pz az.Principal, offset int64, limit int64) ([]*ScoringService, error)
-	GetServicesForProject(pz az.Principal, projectId int64, offset int64, limit int64) ([]*ScoringService, error)
-	GetServicesForModel(pz az.Principal, modelId int64, offset int64, limit int64) ([]*ScoringService, error)
+	GetServices(pz az.Principal, offset uint, limit uint) ([]*ScoringService, error)
+	GetServicesForProject(pz az.Principal, projectId int64, offset uint, limit uint) ([]*ScoringService, error)
+	GetServicesForModel(pz az.Principal, modelId int64, offset uint, limit uint) ([]*ScoringService, error)
 	DeleteService(pz az.Principal, serviceId int64) error
 	GetEngine(pz az.Principal, engineId int64) (*Engine, error)
 	GetEngines(pz az.Principal) ([]*Engine, error)
@@ -361,7 +396,7 @@ type Service interface {
 	GetPermissionsForRole(pz az.Principal, roleId int64) ([]*Permission, error)
 	GetPermissionsForIdentity(pz az.Principal, identityId int64) ([]*Permission, error)
 	CreateRole(pz az.Principal, name string, description string) (int64, error)
-	GetRoles(pz az.Principal, offset int64, limit int64) ([]*Role, error)
+	GetRoles(pz az.Principal, offset uint, limit uint) ([]*Role, error)
 	GetRolesForIdentity(pz az.Principal, identityId int64) ([]*Role, error)
 	GetRole(pz az.Principal, roleId int64) (*Role, error)
 	GetRoleByName(pz az.Principal, name string) (*Role, error)
@@ -371,14 +406,14 @@ type Service interface {
 	UnlinkRoleFromPermission(pz az.Principal, roleId int64, permissionId int64) error
 	DeleteRole(pz az.Principal, roleId int64) error
 	CreateWorkgroup(pz az.Principal, name string, description string) (int64, error)
-	GetWorkgroups(pz az.Principal, offset int64, limit int64) ([]*Workgroup, error)
+	GetWorkgroups(pz az.Principal, offset uint, limit uint) ([]*Workgroup, error)
 	GetWorkgroupsForIdentity(pz az.Principal, identityId int64) ([]*Workgroup, error)
 	GetWorkgroup(pz az.Principal, workgroupId int64) (*Workgroup, error)
 	GetWorkgroupByName(pz az.Principal, name string) (*Workgroup, error)
 	UpdateWorkgroup(pz az.Principal, workgroupId int64, name string, description string) error
 	DeleteWorkgroup(pz az.Principal, workgroupId int64) error
 	CreateIdentity(pz az.Principal, name string, password string) (int64, error)
-	GetIdentities(pz az.Principal, offset int64, limit int64) ([]*Identity, error)
+	GetIdentities(pz az.Principal, offset uint, limit uint) ([]*Identity, error)
 	GetIdentitiesForWorkgroup(pz az.Principal, workgroupId int64) ([]*Identity, error)
 	GetIdentitiesForRole(pz az.Principal, roleId int64) ([]*Identity, error)
 	GetIdentitiesForEntity(pz az.Principal, entityType int64, entityId int64) ([]*UserRole, error)
@@ -394,7 +429,7 @@ type Service interface {
 	ShareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) error
 	GetPrivileges(pz az.Principal, entityTypeId int64, entityId int64) ([]*EntityPrivilege, error)
 	UnshareEntity(pz az.Principal, kind string, workgroupId int64, entityTypeId int64, entityId int64) error
-	GetHistory(pz az.Principal, entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error)
+	GetHistory(pz az.Principal, entityTypeId int64, entityId int64, offset uint, limit uint) ([]*EntityHistory, error)
 	CreatePackage(pz az.Principal, projectId int64, name string) error
 	GetPackages(pz az.Principal, projectId int64) ([]string, error)
 	GetPackageDirectories(pz az.Principal, projectId int64, packageName string, relativePath string) ([]string, error)
@@ -422,6 +457,43 @@ type GetConfigOut struct {
 	Config *Config `json:"config"`
 }
 
+type CheckAdminIn struct {
+}
+
+type CheckAdminOut struct {
+	IsAdmin bool `json:"is_admin"`
+}
+
+type SetLocalConfigIn struct {
+}
+
+type SetLocalConfigOut struct {
+}
+
+type SetLdapConfigIn struct {
+	Config *LdapConfig `json:"config"`
+}
+
+type SetLdapConfigOut struct {
+}
+
+type GetLdapConfigIn struct {
+}
+
+type GetLdapConfigOut struct {
+	Config *LdapConfig `json:"config"`
+	Exists bool        `json:"exists"`
+}
+
+type TestLdapConfigIn struct {
+	Config *LdapConfig `json:"config"`
+}
+
+type TestLdapConfigOut struct {
+	Count  int          `json:"count"`
+	Groups []*LdapGroup `json:"groups"`
+}
+
 type RegisterClusterIn struct {
 	Address string `json:"address"`
 }
@@ -442,6 +514,7 @@ type StartClusterOnYarnIn struct {
 	EngineId    int64  `json:"engine_id"`
 	Size        int    `json:"size"`
 	Memory      string `json:"memory"`
+	Secure      bool   `json:"secure"`
 	Keytab      string `json:"keytab"`
 }
 
@@ -474,8 +547,8 @@ type GetClusterOnYarnOut struct {
 }
 
 type GetClustersIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetClustersOut struct {
@@ -525,8 +598,8 @@ type CreateProjectOut struct {
 }
 
 type GetProjectsIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetProjectsOut struct {
@@ -561,8 +634,8 @@ type CreateDatasourceOut struct {
 
 type GetDatasourcesIn struct {
 	ProjectId int64 `json:"project_id"`
-	Offset    int64 `json:"offset"`
-	Limit     int64 `json:"limit"`
+	Offset    uint  `json:"offset"`
+	Limit     uint  `json:"limit"`
 }
 
 type GetDatasourcesOut struct {
@@ -608,8 +681,8 @@ type CreateDatasetOut struct {
 
 type GetDatasetsIn struct {
 	DatasourceId int64 `json:"datasource_id"`
-	Offset       int64 `json:"offset"`
-	Limit        int64 `json:"limit"`
+	Offset       uint  `json:"offset"`
+	Limit        uint  `json:"limit"`
 }
 
 type GetDatasetsOut struct {
@@ -690,8 +763,8 @@ type GetModelOut struct {
 
 type GetModelsIn struct {
 	ProjectId int64 `json:"project_id"`
-	Offset    int64 `json:"offset"`
-	Limit     int64 `json:"limit"`
+	Offset    uint  `json:"offset"`
+	Limit     uint  `json:"limit"`
 }
 
 type GetModelsOut struct {
@@ -727,8 +800,8 @@ type FindModelsBinomialIn struct {
 	NamePart  string `json:"name_part"`
 	SortBy    string `json:"sort_by"`
 	Ascending bool   `json:"ascending"`
-	Offset    int64  `json:"offset"`
-	Limit     int64  `json:"limit"`
+	Offset    uint   `json:"offset"`
+	Limit     uint   `json:"limit"`
 }
 
 type FindModelsBinomialOut struct {
@@ -755,8 +828,8 @@ type FindModelsMultinomialIn struct {
 	NamePart  string `json:"name_part"`
 	SortBy    string `json:"sort_by"`
 	Ascending bool   `json:"ascending"`
-	Offset    int64  `json:"offset"`
-	Limit     int64  `json:"limit"`
+	Offset    uint   `json:"offset"`
+	Limit     uint   `json:"limit"`
 }
 
 type FindModelsMultinomialOut struct {
@@ -783,8 +856,8 @@ type FindModelsRegressionIn struct {
 	NamePart  string `json:"name_part"`
 	SortBy    string `json:"sort_by"`
 	Ascending bool   `json:"ascending"`
-	Offset    int64  `json:"offset"`
-	Limit     int64  `json:"limit"`
+	Offset    uint   `json:"offset"`
+	Limit     uint   `json:"limit"`
 }
 
 type FindModelsRegressionOut struct {
@@ -915,8 +988,8 @@ type GetServiceOut struct {
 }
 
 type GetServicesIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetServicesOut struct {
@@ -925,8 +998,8 @@ type GetServicesOut struct {
 
 type GetServicesForProjectIn struct {
 	ProjectId int64 `json:"project_id"`
-	Offset    int64 `json:"offset"`
-	Limit     int64 `json:"limit"`
+	Offset    uint  `json:"offset"`
+	Limit     uint  `json:"limit"`
 }
 
 type GetServicesForProjectOut struct {
@@ -935,8 +1008,8 @@ type GetServicesForProjectOut struct {
 
 type GetServicesForModelIn struct {
 	ModelId int64 `json:"model_id"`
-	Offset  int64 `json:"offset"`
-	Limit   int64 `json:"limit"`
+	Offset  uint  `json:"offset"`
+	Limit   uint  `json:"limit"`
 }
 
 type GetServicesForModelOut struct {
@@ -1019,8 +1092,8 @@ type CreateRoleOut struct {
 }
 
 type GetRolesIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetRolesOut struct {
@@ -1101,8 +1174,8 @@ type CreateWorkgroupOut struct {
 }
 
 type GetWorkgroupsIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetWorkgroupsOut struct {
@@ -1159,8 +1232,8 @@ type CreateIdentityOut struct {
 }
 
 type GetIdentitiesIn struct {
-	Offset int64 `json:"offset"`
-	Limit  int64 `json:"limit"`
+	Offset uint `json:"offset"`
+	Limit  uint `json:"limit"`
 }
 
 type GetIdentitiesOut struct {
@@ -1294,8 +1367,8 @@ type UnshareEntityOut struct {
 type GetHistoryIn struct {
 	EntityTypeId int64 `json:"entity_type_id"`
 	EntityId     int64 `json:"entity_id"`
-	Offset       int64 `json:"offset"`
-	Limit        int64 `json:"limit"`
+	Offset       uint  `json:"offset"`
+	Limit        uint  `json:"limit"`
 }
 
 type GetHistoryOut struct {
@@ -1412,6 +1485,56 @@ func (this *Remote) GetConfig() (*Config, error) {
 	return out.Config, nil
 }
 
+func (this *Remote) CheckAdmin() (bool, error) {
+	in := CheckAdminIn{}
+	var out CheckAdminOut
+	err := this.Proc.Call("CheckAdmin", &in, &out)
+	if err != nil {
+		return false, err
+	}
+	return out.IsAdmin, nil
+}
+
+func (this *Remote) SetLocalConfig() error {
+	in := SetLocalConfigIn{}
+	var out SetLocalConfigOut
+	err := this.Proc.Call("SetLocalConfig", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) SetLdapConfig(config *LdapConfig) error {
+	in := SetLdapConfigIn{config}
+	var out SetLdapConfigOut
+	err := this.Proc.Call("SetLdapConfig", &in, &out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Remote) GetLdapConfig() (*LdapConfig, bool, error) {
+	in := GetLdapConfigIn{}
+	var out GetLdapConfigOut
+	err := this.Proc.Call("GetLdapConfig", &in, &out)
+	if err != nil {
+		return nil, false, err
+	}
+	return out.Config, out.Exists, nil
+}
+
+func (this *Remote) TestLdapConfig(config *LdapConfig) (int, []*LdapGroup, error) {
+	in := TestLdapConfigIn{config}
+	var out TestLdapConfigOut
+	err := this.Proc.Call("TestLdapConfig", &in, &out)
+	if err != nil {
+		return 0, nil, err
+	}
+	return out.Count, out.Groups, nil
+}
+
 func (this *Remote) RegisterCluster(address string) (int64, error) {
 	in := RegisterClusterIn{address}
 	var out RegisterClusterOut
@@ -1432,8 +1555,8 @@ func (this *Remote) UnregisterCluster(clusterId int64) error {
 	return nil
 }
 
-func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size int, memory string, keytab string) (int64, error) {
-	in := StartClusterOnYarnIn{clusterName, engineId, size, memory, keytab}
+func (this *Remote) StartClusterOnYarn(clusterName string, engineId int64, size int, memory string, secure bool, keytab string) (int64, error) {
+	in := StartClusterOnYarnIn{clusterName, engineId, size, memory, secure, keytab}
 	var out StartClusterOnYarnOut
 	err := this.Proc.Call("StartClusterOnYarn", &in, &out)
 	if err != nil {
@@ -1472,7 +1595,7 @@ func (this *Remote) GetClusterOnYarn(clusterId int64) (*YarnCluster, error) {
 	return out.Cluster, nil
 }
 
-func (this *Remote) GetClusters(offset int64, limit int64) ([]*Cluster, error) {
+func (this *Remote) GetClusters(offset uint, limit uint) ([]*Cluster, error) {
 	in := GetClustersIn{offset, limit}
 	var out GetClustersOut
 	err := this.Proc.Call("GetClusters", &in, &out)
@@ -1532,7 +1655,7 @@ func (this *Remote) CreateProject(name string, description string, modelCategory
 	return out.ProjectId, nil
 }
 
-func (this *Remote) GetProjects(offset int64, limit int64) ([]*Project, error) {
+func (this *Remote) GetProjects(offset uint, limit uint) ([]*Project, error) {
 	in := GetProjectsIn{offset, limit}
 	var out GetProjectsOut
 	err := this.Proc.Call("GetProjects", &in, &out)
@@ -1572,7 +1695,7 @@ func (this *Remote) CreateDatasource(projectId int64, name string, description s
 	return out.DatasourceId, nil
 }
 
-func (this *Remote) GetDatasources(projectId int64, offset int64, limit int64) ([]*Datasource, error) {
+func (this *Remote) GetDatasources(projectId int64, offset uint, limit uint) ([]*Datasource, error) {
 	in := GetDatasourcesIn{projectId, offset, limit}
 	var out GetDatasourcesOut
 	err := this.Proc.Call("GetDatasources", &in, &out)
@@ -1622,7 +1745,7 @@ func (this *Remote) CreateDataset(clusterId int64, datasourceId int64, name stri
 	return out.DatasetId, nil
 }
 
-func (this *Remote) GetDatasets(datasourceId int64, offset int64, limit int64) ([]*Dataset, error) {
+func (this *Remote) GetDatasets(datasourceId int64, offset uint, limit uint) ([]*Dataset, error) {
 	in := GetDatasetsIn{datasourceId, offset, limit}
 	var out GetDatasetsOut
 	err := this.Proc.Call("GetDatasets", &in, &out)
@@ -1712,7 +1835,7 @@ func (this *Remote) GetModel(modelId int64) (*Model, error) {
 	return out.Model, nil
 }
 
-func (this *Remote) GetModels(projectId int64, offset int64, limit int64) ([]*Model, error) {
+func (this *Remote) GetModels(projectId int64, offset uint, limit uint) ([]*Model, error) {
 	in := GetModelsIn{projectId, offset, limit}
 	var out GetModelsOut
 	err := this.Proc.Call("GetModels", &in, &out)
@@ -1752,7 +1875,7 @@ func (this *Remote) GetAllBinomialSortCriteria() ([]string, error) {
 	return out.Criteria, nil
 }
 
-func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*BinomialModel, error) {
+func (this *Remote) FindModelsBinomial(projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*BinomialModel, error) {
 	in := FindModelsBinomialIn{projectId, namePart, sortBy, ascending, offset, limit}
 	var out FindModelsBinomialOut
 	err := this.Proc.Call("FindModelsBinomial", &in, &out)
@@ -1782,7 +1905,7 @@ func (this *Remote) GetAllMultinomialSortCriteria() ([]string, error) {
 	return out.Criteria, nil
 }
 
-func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*MultinomialModel, error) {
+func (this *Remote) FindModelsMultinomial(projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*MultinomialModel, error) {
 	in := FindModelsMultinomialIn{projectId, namePart, sortBy, ascending, offset, limit}
 	var out FindModelsMultinomialOut
 	err := this.Proc.Call("FindModelsMultinomial", &in, &out)
@@ -1812,7 +1935,7 @@ func (this *Remote) GetAllRegressionSortCriteria() ([]string, error) {
 	return out.Criteria, nil
 }
 
-func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortBy string, ascending bool, offset int64, limit int64) ([]*RegressionModel, error) {
+func (this *Remote) FindModelsRegression(projectId int64, namePart string, sortBy string, ascending bool, offset uint, limit uint) ([]*RegressionModel, error) {
 	in := FindModelsRegressionIn{projectId, namePart, sortBy, ascending, offset, limit}
 	var out FindModelsRegressionOut
 	err := this.Proc.Call("FindModelsRegression", &in, &out)
@@ -1972,7 +2095,7 @@ func (this *Remote) GetService(serviceId int64) (*ScoringService, error) {
 	return out.Service, nil
 }
 
-func (this *Remote) GetServices(offset int64, limit int64) ([]*ScoringService, error) {
+func (this *Remote) GetServices(offset uint, limit uint) ([]*ScoringService, error) {
 	in := GetServicesIn{offset, limit}
 	var out GetServicesOut
 	err := this.Proc.Call("GetServices", &in, &out)
@@ -1982,7 +2105,7 @@ func (this *Remote) GetServices(offset int64, limit int64) ([]*ScoringService, e
 	return out.Services, nil
 }
 
-func (this *Remote) GetServicesForProject(projectId int64, offset int64, limit int64) ([]*ScoringService, error) {
+func (this *Remote) GetServicesForProject(projectId int64, offset uint, limit uint) ([]*ScoringService, error) {
 	in := GetServicesForProjectIn{projectId, offset, limit}
 	var out GetServicesForProjectOut
 	err := this.Proc.Call("GetServicesForProject", &in, &out)
@@ -1992,7 +2115,7 @@ func (this *Remote) GetServicesForProject(projectId int64, offset int64, limit i
 	return out.Services, nil
 }
 
-func (this *Remote) GetServicesForModel(modelId int64, offset int64, limit int64) ([]*ScoringService, error) {
+func (this *Remote) GetServicesForModel(modelId int64, offset uint, limit uint) ([]*ScoringService, error) {
 	in := GetServicesForModelIn{modelId, offset, limit}
 	var out GetServicesForModelOut
 	err := this.Proc.Call("GetServicesForModel", &in, &out)
@@ -2102,7 +2225,7 @@ func (this *Remote) CreateRole(name string, description string) (int64, error) {
 	return out.RoleId, nil
 }
 
-func (this *Remote) GetRoles(offset int64, limit int64) ([]*Role, error) {
+func (this *Remote) GetRoles(offset uint, limit uint) ([]*Role, error) {
 	in := GetRolesIn{offset, limit}
 	var out GetRolesOut
 	err := this.Proc.Call("GetRoles", &in, &out)
@@ -2202,7 +2325,7 @@ func (this *Remote) CreateWorkgroup(name string, description string) (int64, err
 	return out.WorkgroupId, nil
 }
 
-func (this *Remote) GetWorkgroups(offset int64, limit int64) ([]*Workgroup, error) {
+func (this *Remote) GetWorkgroups(offset uint, limit uint) ([]*Workgroup, error) {
 	in := GetWorkgroupsIn{offset, limit}
 	var out GetWorkgroupsOut
 	err := this.Proc.Call("GetWorkgroups", &in, &out)
@@ -2272,7 +2395,7 @@ func (this *Remote) CreateIdentity(name string, password string) (int64, error) 
 	return out.IdentityId, nil
 }
 
-func (this *Remote) GetIdentities(offset int64, limit int64) ([]*Identity, error) {
+func (this *Remote) GetIdentities(offset uint, limit uint) ([]*Identity, error) {
 	in := GetIdentitiesIn{offset, limit}
 	var out GetIdentitiesOut
 	err := this.Proc.Call("GetIdentities", &in, &out)
@@ -2432,7 +2555,7 @@ func (this *Remote) UnshareEntity(kind string, workgroupId int64, entityTypeId i
 	return nil
 }
 
-func (this *Remote) GetHistory(entityTypeId int64, entityId int64, offset int64, limit int64) ([]*EntityHistory, error) {
+func (this *Remote) GetHistory(entityTypeId int64, entityId int64, offset uint, limit uint) ([]*EntityHistory, error) {
 	in := GetHistoryIn{entityTypeId, entityId, offset, limit}
 	var out GetHistoryOut
 	err := this.Proc.Call("GetHistory", &in, &out)
@@ -2609,6 +2732,181 @@ func (this *Impl) GetConfig(r *http.Request, in *GetConfigIn, out *GetConfigOut)
 	return nil
 }
 
+func (this *Impl) CheckAdmin(r *http.Request, in *CheckAdminIn, out *CheckAdminOut) error {
+	const name = "CheckAdmin"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, err := this.Service.CheckAdmin(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.IsAdmin = val0
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) SetLocalConfig(r *http.Request, in *SetLocalConfigIn, out *SetLocalConfigOut) error {
+	const name = "SetLocalConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.SetLocalConfig(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) SetLdapConfig(r *http.Request, in *SetLdapConfigIn, out *SetLdapConfigOut) error {
+	const name = "SetLdapConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	err := this.Service.SetLdapConfig(pz, in.Config)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) GetLdapConfig(r *http.Request, in *GetLdapConfigIn, out *GetLdapConfigOut) error {
+	const name = "GetLdapConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, val1, err := this.Service.GetLdapConfig(pz)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Config = val0
+
+	out.Exists = val1
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
+func (this *Impl) TestLdapConfig(r *http.Request, in *TestLdapConfigIn, out *TestLdapConfigOut) error {
+	const name = "TestLdapConfig"
+
+	guid := xid.New().String()
+
+	pz, azerr := this.Az.Identify(r)
+	if azerr != nil {
+		return azerr
+	}
+
+	req, merr := json.Marshal(in)
+	if merr != nil {
+		log.Println(guid, "REQ", pz, name, merr)
+	} else {
+		log.Println(guid, "REQ", pz, name, string(req))
+	}
+
+	val0, val1, err := this.Service.TestLdapConfig(pz, in.Config)
+	if err != nil {
+		log.Println(guid, "ERR", pz, name, err)
+		return err
+	}
+
+	out.Count = val0
+
+	out.Groups = val1
+
+	res, merr := json.Marshal(out)
+	if merr != nil {
+		log.Println(guid, "RES", pz, name, merr)
+	} else {
+		log.Println(guid, "RES", pz, name, string(res))
+	}
+
+	return nil
+}
+
 func (this *Impl) RegisterCluster(r *http.Request, in *RegisterClusterIn, out *RegisterClusterOut) error {
 	const name = "RegisterCluster"
 
@@ -2694,7 +2992,7 @@ func (this *Impl) StartClusterOnYarn(r *http.Request, in *StartClusterOnYarnIn, 
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.StartClusterOnYarn(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Keytab)
+	val0, err := this.Service.StartClusterOnYarn(pz, in.ClusterName, in.EngineId, in.Size, in.Memory, in.Secure, in.Keytab)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err

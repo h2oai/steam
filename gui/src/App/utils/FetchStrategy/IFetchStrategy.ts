@@ -20,7 +20,8 @@
  */
 
 import { IFetchStrategyConfig } from './IFetchStrategyConfig';
+import {Dispatch} from "react-redux";
 
 export interface IFetchStrategy {
-  request(dispatch: Redux.Dispatch, config: IFetchStrategyConfig): void;
+  request(dispatch: Dispatch<any>, config: IFetchStrategyConfig): void;
 }

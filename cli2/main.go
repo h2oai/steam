@@ -25,8 +25,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/h2oai/steam/master"
+	"github.com/h2oai/steam/master/data"
 	"github.com/spf13/cobra"
 )
+
+var debug bool
 
 const (
 	steam = "steam"
@@ -71,7 +75,7 @@ var unauthenticatedCommands = []string{
 
 func requiresAuth(seq string) bool {
 	for _, c := range unauthenticatedCommands {
-		if strings.Contains(seq, c) {
+		if strings.Contains(seq, c) || strings.HasSuffix(strings.TrimSpace(seq), "steam") {
 			return false
 		}
 	}
@@ -94,11 +98,52 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		trace:     log.New(trace, "", 0),
 	}
 
-	var verbose bool
+	var (
+		verbose              bool
+		setAdmin, checkAdmin bool
+		workingDirectory     string
+		dbDriver             string
+		dbPath               string
+		dbName               string
+		dbUsername           string
+		dbPassword           string
+		dbHost               string
+		dbPort               string
+		dbConnectionTimeout  string
+		dbSSLMode            string
+		dbSSLCertPath        string
+		dbSSLKeyPath         string
+		dbSSLRootCertPath    string
+	)
 	cmd := &cobra.Command{
 		Use:               steam,
 		Short:             fmt.Sprintf("%s v%s build %s: Command Line Interface to Steam", steam, version, buildDate),
 		DisableAutoGenTag: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			dbOpts := data.DBOpts{
+				Driver:      dbDriver,
+				Path:        dbPath,
+				Name:        dbName,
+				User:        dbUsername,
+				Pass:        dbPassword,
+				Port:        dbPort,
+				Host:        dbHost,
+				SSLMode:     dbSSLMode,
+				SSLCert:     dbSSLCertPath,
+				SSLKey:      dbSSLKeyPath,
+				SSLRootCert: dbSSLRootCertPath,
+			}
+			if setAdmin {
+				if err := master.SetAdmin(workingDirectory, dbOpts); err != nil {
+					log.Fatalln(err)
+				}
+			}
+			if checkAdmin {
+				if err := master.CheckAdmin(workingDirectory, dbOpts); err != nil {
+					log.Fatalln(err)
+				}
+			}
+		},
 
 		// CLI configuration / init is in here as a pre-run routine so that
 		//   -v / --verbose is captured properly and used during config parsing.
@@ -109,6 +154,24 @@ func Steam(version, buildDate string, stdout, stderr, trace io.Writer) *cobra.Co
 		},
 	}
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+	cmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Set this to debug")
+
+	opts := master.DefaultOpts
+	cmd.Flags().BoolVar(&setAdmin, "set-admin", false, "Set this flag to set the Steam local admin")
+	cmd.Flags().BoolVar(&checkAdmin, "check-admin", false, "Set this flag to check if there is a Steam local admin")
+	cmd.Flags().StringVar(&workingDirectory, "working-directory", opts.WorkingDirectory, "Working directory for application files.")
+	cmd.Flags().StringVar(&dbDriver, "db-driver", opts.DBOpts.Driver, "Driver for sql implementation. (Supported types are \"sqlite3\" or \"postgres\")")
+	cmd.Flags().StringVar(&dbPath, "db-path", opts.DBOpts.Path, "Set the path to a local database")
+	cmd.Flags().StringVar(&dbName, "db-name", opts.DBOpts.Name, "Database name to use for application data storage (required)")
+	cmd.Flags().StringVar(&dbUsername, "db-username", opts.DBOpts.User, "Database username (required)")
+	cmd.Flags().StringVar(&dbPassword, "db-password", opts.DBOpts.Pass, "Database password (optional)")
+	cmd.Flags().StringVar(&dbHost, "db-host", opts.DBOpts.Host, "Database host (optional, defaults to localhost")
+	cmd.Flags().StringVar(&dbPort, "db-port", opts.DBOpts.Port, "Database port (optional, defaults to 5432)")
+	cmd.Flags().StringVar(&dbConnectionTimeout, "db-connection-timeout", opts.DBOpts.ConnectionTimeout, "Database connection timeout (optional)")
+	cmd.Flags().StringVar(&dbSSLMode, "db-ssl-mode", opts.DBOpts.SSLMode, "Database connection SSL mode: one of 'disable', 'require', 'verify-ca', 'verify-full'")
+	cmd.Flags().StringVar(&dbSSLCertPath, "db-ssl-cert-path", opts.DBOpts.SSLCert, "Database connection SSL certificate path (optional)")
+	cmd.Flags().StringVar(&dbSSLKeyPath, "db-ssl-key-path", opts.DBOpts.SSLKey, "Database connection SSL key path (optional)")
+	cmd.Flags().StringVar(&dbSSLRootCertPath, "db-ssl-root-cert-path", opts.DBOpts.SSLRootCert, "Database connection SSL root certificate path (optional)")
 
 	cmd.AddCommand(
 		login(c),

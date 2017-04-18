@@ -1,135 +1,158 @@
 Installing and Starting Steam
 =============================
 
-This section describes how administrators can install and start Steam. Refer to the following topics:
+This section applies to Administrators and describes how to install and start Steam in a Hadoop environment and make it accessible to a set of users. The process includes uploading an H2O driver and adding users via an LDAP config file. 
 
--  `Requirements`_
--  `Installing and Starting Steam on YARN`_
--  `Installing and Starting Steam on a Local Machine`_
--  `Next Steps`_
+Refer to the following topics. Be sure to follow the instructions for your platform:
 
-Requirements
-------------
+- `Installing on Ubuntu`_
+- `Installing on RHEL`_
+- `Starting Steam`_
+- `Adding an H2O Driver`_
+- `Configure LDAP Connection Settings`_
 
--  Chrome browser with an Internet connection. Note that Chrome is currently the only supported browser.
--  Steam tar file
+**Notes**: 
 
-   -  available from the `H2O Download <http://h2o.ai/download>`__ site
+ - Admins should verify whether their Hadoop environment requires sudo. If it does, then users must have a root password/root access.
 
--  JDK 1.7 or greater
--  H2O jar file for version 3.10.0.7 or greater
+ - This installation creates a SQLite database. 
 
-   -  available from the H2O Download page
-   -  If necessary, follow the instructions on the
-      http://www.h2o.ai/download/h2o/python or
-      http://www.h2o.ai/download/h2o/r page to upgrade H2O for Python or
-      R.
+Installing on Ubuntu 
+--------------------
 
-Installing and Starting Steam on YARN
--------------------------------------
+This section describes how to install Steam on Ubuntu. 
 
-A Steam YARN installation provides a method for data scientists and developers to work collaboratively when trainging and deploying models. 
+Requirements for Steam with Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Installation
-~~~~~~~~~~~~
-
-Perform the following steps to install Steam on a YARN edge node. 
-
-1. Go to the `H2O Download <http://h2o.ai/download>`__ site to download Steam. 
-
-2. Change directories to the Steam download file, copy the file to your edge node, then untar the Steam file. Be sure to enter the correct password when prompted. For example:
-
-   ::
-
-       cd ~/Downloads/steam-1.0.0-darwin-amd64
-       scp -r steam-1.0.0-darwin-amd64 <user>@<yarn_edge_node>:~
-       tar -xzvf steam-1.0.0-darwin-amd64.tar.gz 
+- Ubuntu 12.04 or greater
+- Steam .deb file. This is available via S3 download.
+- JDK 1.7 or greater
+- Chrome browser with an Internet connection. Note that Chrome is currently the only supported browser.
+- H2O bleeding edge driver for your version of Hadoop. This is available from the `H2O Download page <http://h2o.ai/download>`__. Click the **Install on Hadoop** tab, and select the correct version for your environment.
+- HAProxy 1.6 or greater. For Ubuntu, this is available from `haproxy.debian.net <https://haproxy.debian.net>`__
 
 
-Start Steam on YARN
-~~~~~~~~~~~~~~~~~~~
+Install HAProxy for Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After Steam is installed on the YARN edge node, the next step is to provide the designated Steam superuser with
-the URL of the edge node and the superuser login credentials. The superuser can then start Steam and begin creating roles, workgroups, and users.
+This section describes how to install HAProxy 1.6. You can skip this section if your environment already has HAProxy 1.6.or greater.
 
-1. SSH into the YARN edge node where the Steam package was copied. Note that this step requires superuser privileges. 
+1. In your browser, go to `https://haproxy.debian.net <https://haproxy.debian.net>`__.
+2. Select the system and version that you are running, then select an HAProxy version of 1.6-stable or greater. 
+3. Open a Terminal window and run the commands that are listed (using ``sudo`` if required). The example below shows the commands to use with Ubuntu version Trusty (14.04 LTS) and HAProxy version 1.7-stable. 
+   
+   .. figure:: images/haproxy_ubuntu.png
+      :alt: HAProxy for Ubuntu
 
- ::
+Install Steam on Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~
 
-  ssh <user>@<yarn_edge_node>
+1. Open a terminal window and ssh to your Hadoop edge node.
 
-2. Navigate to the Steam folder and start the Jetty server. This allows you to deploy models and run the Steam Prediction Service.
+  ::
+  
+    ssh <user>@<hadoop_edge_node>
+
+2. Download the Steam .deb file. For example:
 
   ::
 
-    java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+    wget https://s3.amazonaws.com/steam-release/steam_1.1.0.93_amd64.deb
 
-3. Open another terminal window and run the following command to start Steam. Be sure to include the ``--superuser-name=superuser`` and ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This starts Steam on the edge node at port 9000 and creates a Steam superuser. The Steam superuser is responsible for creating roles, workgroups, and users and maintains the H2O cluster. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` for information on how to start the compilation and/or prediction service on a different location and for additional flags that can be specified when starting Steam. 
+3. Unpackage the Steam .deb file.
 
- ::
-
-  sudo ./steam serve master --superuser-name=superuser --superuser-password=superuser
-
- **Note**: This version of Steam currently includes an experimental/early release of LDAP basic authentication support using the ``—-authentication-provider`` and ``—-authentication-config`` flags. When used, a configuration file is required. For example:
-
- ::
-
-  sudo ./steam serve master --superuser-name=superuser --superuser-password=superuser —-authentication-provider="ldap-basic" —-authentication-config="file/path.toml"
-
-
-4. Open a Chrome browser and navigate to the YARN edge node.
-
-Installing and Starting Steam on a Local Machine
-------------------------------------------------
-
-Users can download and install steam directly on a local machine without the need for a running instance of YARN. 
-
-Installation
-~~~~~~~~~~~~
-
-1. Go to the `H2O Download <http://h2o.ai/download>`__ site and download Steam. 
-
-2. Change directories to the Steam download file and untar the file.
-
- ::
+  ::
     
-    cd ~/Downloads/steam-1.0.0-darwin-amd64
-    tar -xzvf steam-1.0.0-darwin-amd64.tar.gz 
+    sudo dpkg -i steam_1.1.0.69_amd64.deb
 
-That's it! You are now ready to start Steam.
-
-Start Steam Locally
-~~~~~~~~~~~~~~~~~~~
-
-After Steam is installed, the following steps describe how to start Steam.
-
-1. Navigate to the untarred Steam folder. 
-
- ::
-
-  cd steam--darwin-amd64
-
-2. Start the Jetty server from within the Steam folder. This allows you to deploy models and run the Steam Prediction Service.
+4. Set the administrator username and password.
 
   ::
 
-    java -jar var/master/assets/jetty-runner.jar var/master/assets/ROOT.war
+    sudo service steam set-admin
+    username: administrator
+    password: ***********
 
-3. Open another terminal window and start Steam. Be sure to include the ``--superuser-name=superuser`` and
-   ``--superuser-password=superuser`` flags. (Or provide a more secure password.) This creates Steam superuser. A Steam superuser is responsible for creating roles,workgroups, and users. This also starts the Steam web service on ``localhost:9000``, the compilation service on ``localhost:8080`` (same as the Jetty server), and the prediction service on the external IP address of ``localhost``. You can change these using ``--compilation-service-address=<ip_address:port>`` and ``--prediction-service-host=<hostname>``. Refer to the `Steam Start Flags`_ section or use ``./steam serve master --help`` or ``./steam serve master -h`` to view additional options.
+  **Note**: If you forget your local administrator username or password, you can rerun this command to reset the values.
 
- ::
+5. Install the certificate and private key for the Steam server using one of the following methods:
 
-  ./steam serve master --superuser-name=superuser --superuser-password=superuser
+  ::
 
- **Note**: If you are demoing Steam and do not have an Internet connection, you can set the prediction service to point to localhost using ``--prediction-service-host=localhost``. 
+    sudo service steam create-self-signed-cert
+  
+ Or 
+   
+   Add a certificate in **/etc/steam/private_key.pem**, **/etc/steam/cert.pem**.
 
-4. Open a Chrome browser and navigate to http://localhost:9000.
+
+6. (Optional) Change the service port numbers in **/etc/steam/steam.conf**.
+
+At this point, you are ready to `Start Steam <installation.html#starting-steam>`__.
+
+Installing on RHEL
+------------------
+
+This section describes how to install Steam on RHEL <version???>
+
+Requirements for Steam with RHEL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- RHEL 6.6
+- Steam .deb file. This is available via S3 download.
+- JDK 1.7 or greater
+- Chrome browser with an Internet connection. Note that Chrome is currently the only supported browser.
+- H2O bleeding edge driver for your version of Hadoop. This is available from the `H2O Download page <http://h2o.ai/download>`__. Click the **Install on Hadoop** tab, and select the correct version for your environment.
+- HAProxy 1.6 or greater.
+
+Install HAProxy for RHEL
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+<Steps tbd>
+
+Install Steam on RHEL
+~~~~~~~~~~~~~~~~~~~~~
+
+1. Open a terminal window and ssh to your Hadoop edge node.
+
+  ::
+  
+    ssh <user>@<hadoop_edge_node>
+
+2. Download the Steam .deb file. For example:
+
+  ::
+
+    wget https://s3.amazonaws.com/steam-release/steam_1.1.0.93_amd64.deb
+
+
+<more steps tbd>
+
+At this point, you are ready to `Start Steam <installation.html#starting-steam>`__.
+
+Starting Steam
+--------------
+
+1. Start Steam by running the following command on your YARN edge node. Refer to the `Steam Start Flags`_ section for additional flags that can be specified when starting Steam.
+
+  ::
+    
+    sudo service steam start
+   
+2. (Optional) Check the log file to verify that Steam starts correctly:
+
+  ::
+
+    sudo cat /var/log/steam.log
+
+
+At this point, you can open a Chrome browser and navigate to your Hadoop edge node (where Steam is currently running). For example, ``https://<hadoop-edge-node>:9000``. Note that in your browser, you may be required to authenticate using the Administrator username and password that you created during the installation process. 
 
 Steam Start Flags
------------------
+~~~~~~~~~~~~~~~~~
 
-The following table lists the options/flags that can be added to the ``./steam serve master`` command when starting Steam. Use ``./steam serve master --help`` or ``./steam serve master -h`` for the most up-to-date list of available options.
+The following table lists the options/flags that can be added to the ``service steam start`` command when starting Steam. Use ``./steam serve master --help`` or ``./steam serve master -h`` for the most up-to-date list of available options.
 
 +-------------------------------------------+-----------------------------------------+
 | Flag                                      | Description                             |
@@ -158,10 +181,10 @@ The following table lists the options/flags that can be added to the ``./steam s
 | ``--profile=``                            | Specify ``true`` to enable the Go       |
 |                                           | profiler.                               |
 +-------------------------------------------+-----------------------------------------+
-| ``--superuser-name=``                     | Set the superuser username. This is     |
+| ``--admin-name=``                         | Set the admin username. This is         |
 |                                           | required at first-time-use only.        |
 +-------------------------------------------+-----------------------------------------+
-| ``--superuser-password=``                 | Set the superuser password. This is     |
+| ``--admin-password=``                     | Set the admin password. This is         |
 |                                           | required at first-time-use only.        |
 +-------------------------------------------+-----------------------------------------+
 | ``--web-address=``                        | Specify the web server address. For     |
@@ -181,9 +204,91 @@ The following table lists the options/flags that can be added to the ``./steam s
 |                                           | and keytab.                             |
 +-------------------------------------------+-----------------------------------------+
 
-Next Steps
-----------
 
-Now that Steam is up and running, you can log in to the machine that is
-running Steam and use the CLI to create additional roles, workgroups,
-and users. Refer to the `User Management <UserManagement.html>`__ section.
+Adding an H2O Driver
+--------------------
+
+**Note**: Currently, only the H2O bleeding edge release is supported on Steam. 
+
+1. On your local machine, download the h2odriver from the `H2O Download page <http://h2o.ai/download>`__. Be sure to select your version of Hadoop. For example:
+
+  ::
+
+    wget http://h2o-release.s3.amazonaws.com/h2o/master/3756/h2o-3.11.0.3756-hdp2.2.zip
+
+2. In the Steam UI, navigate to the **Clusters** page and select **Launch New Cluster**.
+
+3. In the H2O Version section of the **Launch New Cluster page**, click the **Choose File** button and browse to the H2O driver that you just downloaded.
+
+4. Click **Upload Engine** to add the egine to Steam.
+
+   .. figure:: images/upload_engine.png
+      :alt: Upload Engine
+    
+A message will display indicating that the engine was successfully uploaded.
+
+Configure LDAP Connection Settings
+----------------------------------
+
+1. Navigate to the **Users** page and select the **Authentication** tab. 
+
+ **Note**: Only admins have access to the Steam Users page.
+
+2. Select LDAP in the **User DB Type** drop down menu, then configure the LDAP connection settings. (Refer to the table below and the image that follows.)
+
+ +---------------------------+------------------------------+------------------------------------------+
+ | Field                     | Description                  | Example                                  |
+ +===========================+==============================+==========================================+
+ | Host                      | The LDAP host server address | ldap.0xdata.loc                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | Port                      | The LDAP server port         | 389                                      |
+ +---------------------------+------------------------------+------------------------------------------+
+ | SSL-Enabled               | Enable this if your LDAP     |                                          |
+ |                           | supports SSL.                |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | Bind DN                   | The Distinguished Name used  | cn=admin,dc=0xdata,dc=loc                |
+ |                           | by the LDAP server if        |                                          |
+ |                           | extended access is required. |                                          |
+ |                           | This can be left blank if    |                                          |
+ |                           | anonymous bind is sufficient.|                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | Bind DN Password          | The password for the Bind DN | h2o                                      |
+ |                           | user                         |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | User Base DN              | The location of the LDAP     | ou=users,dc=0xdata,dc=loc                |
+ |                           | users, specified by the DN of|                                          |
+ |                           | your user subtree            |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | User Base Filter          | The LDAP search filter used  | department=IT                            |
+ |                           | to filter users              |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | User Name Attribute       | The User Attribute that      | uid                                      |
+ |                           | contains the username        |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | Group DN                  | The Distinguished Name used  | cn=jettygroup,ou=groups,dc=0xdata,dc=loc |
+ |                           | for group synch              |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | Static Member Attribute   | The attribute for static     | memberUid                                |
+ |                           | group entries                |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | Search Request Size Limit | Limit the size of search     |                                          |
+ |                           | results. 0 indicates         |                                          |
+ |                           | unlimited.                   |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+ | Search Request Time Limit | Limit the time allotted for  | 0                                        |
+ |                           | completing search results. 0 |                                          |
+ |                           | indicates unlimited.         |                                          |
+ +---------------------------+------------------------------+------------------------------------------+
+
+ .. figure:: images/ldap_authentication_config.png
+    :alt: LDAP Configuration
+  
+3. Click **Test Config** when you are done. A valid response message indicates that the configuration was successful.
+4. Click **Save Config**.
+5. In order for the configuration to take effect, you must log out and restart (or stop then start) Steam.
+
+  ::
+    
+    sudo service steam restart
+
+After LDAP is configured, users can log in to Steam using their LDAP username and password. 

@@ -18,14 +18,67 @@
 /**
  * Created by justin on 8/8/16.
  */
-
+import * as React from 'react';
+import { Intent } from '@blueprintjs/core';
 import { NotificationType } from '../components/Notification';
+import { toastManager } from '../components/ToastManager';
+
 
 export const OPEN_NOTIFICATION = 'OPEN_NOTIFICATION';
 export const CLOSE_NOTIFICATION = 'CLOSE_NOTIFICATION';
 export const KILL_ALL_INACTIVE_NOTIFICATIONS = 'KILL_ALL_INACTIVE_NOTIFICATIONS';
 export const DISMISS_NOTIFICATION = 'DISMISS_NOTIFICATION';
 export const CLOSE_NOTIFICATION_MANAGER = 'CLOSE_NOTIFICATION_MANAGER';
+
+class ToastData {
+  constructor(public message, public intent, public className, public timeout) { };
+}
+export class ToastDataFactory {
+
+  constructor() { };
+
+  static create(notificationType: NotificationType, text: string) {
+    let message = React.createElement(
+      'div',
+      null,
+      React.createElement('div', { className: 'notification-indicator' }),
+      React.createElement(
+        'div',
+        { className: 'notification-content' },
+        text
+      )
+    );
+
+    let intent = Intent.NONE;
+    let className;
+    let timeout = 5000;
+    switch (notificationType) {
+      case NotificationType.Confirm:
+        className = "steam-notification steam-notification-confirm";
+        break;
+      case NotificationType.Error:
+        timeout = 0;
+        className = "steam-notification steam-notification-error";
+        break;
+      case NotificationType.Info:
+        className = "steam-notification steam-notification-info";
+        break;
+      case NotificationType.Warning:
+        className = "steam-notification steam-notification-warning";
+        break;
+      default :
+        console.log("ERROR: Unexpected notification type");
+    }
+
+    return new ToastData(
+      message,
+      intent,
+      className,
+      timeout
+    );
+  }
+
+}
 
 export interface NotificationData {
   isActive: Boolean;
@@ -45,11 +98,13 @@ export function openNotification(notificationType: NotificationType, header: str
 
 function _openNotification(notificationType: NotificationType, header: string, detail, actions, state) {
   let index = state.notification.allNotifications.length;
+  toastManager.show(ToastDataFactory.create(notificationType, detail));
+
   return {
     type: OPEN_NOTIFICATION,
     notificationData: {
-      isActive: true,
-      isAlive: true,
+      isActive: false,
+      isAlive: false,
       notificationType,
       header,
       detail,

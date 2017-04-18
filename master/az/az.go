@@ -18,6 +18,7 @@
 package az
 
 import (
+	"crypto/tls"
 	"net/http"
 )
 
@@ -27,7 +28,8 @@ type Principal interface {
 	Name() string
 	Password() string
 	IsActive() bool
-	IsSuperuser() bool
+	IsAdmin() bool
+	IsLocal() bool
 	HasPermission(code int64) bool
 	CheckPermission(code int64) error
 	Owns(entityTypeId, entityId int64) (bool, error)
@@ -39,10 +41,13 @@ type Principal interface {
 }
 
 type Directory interface {
-	Lookup(username string) (Principal, error)
+	// Lookup should return a Principal if the Principal is local or if the
+	// Principal validated against a valid external authentication provider
+	Lookup(username, password, basicAuthToken string, tlsConfig *tls.Config) (Principal, error)
+	LookupUser(username string) (Principal, error)
 }
 
 type Az interface {
-	Authenticate(username string) string
+	Authenticate(username, password, basicAuthToken string) (bool, string, string)
 	Identify(r *http.Request) (Principal, error)
 }

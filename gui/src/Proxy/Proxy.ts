@@ -29,457 +29,308 @@ import * as Proxy from './xhr';
 export interface BinomialModel {
   
   id: number
-  
   training_dataset_id: number
-  
   validation_dataset_id: number
-  
   name: string
-  
   cluster_name: string
-  
   model_key: string
-  
   algorithm: string
-  
   model_category: string
-  
   dataset_name: string
-  
   response_column_name: string
-  
   logical_name: string
-  
   location: string
-  
   model_object_type: string
-  
   max_runtime: number
-  
   json_metrics: string
-  
   created_at: number
-  
   label_id: number
-  
   label_name: string
-  
   mse: number
-  
   r_squared: number
-  
   logloss: number
-  
   auc: number
-  
   gini: number
-  
 }
 
 export interface Cluster {
   
   id: number
-  
   name: string
-  
+  context_path: string
   type_id: number
-  
   detail_id: number
-  
   address: string
-  
+  token: string
   state: string
-  
   created_at: number
-  
 }
 
 export interface ClusterStatus {
   
   version: string
-  
   status: string
-  
   max_memory: string
-  
   total_cpu_count: number
-  
   total_allowed_cpu_count: number
-  
 }
 
 export interface ClusterType {
   
   id: number
-  
   name: string
-  
 }
 
 export interface Config {
   
-  kerberos_enabled: boolean
-  
+  authentication_type: string
   cluster_proxy_address: string
-  
+  kerberos_enabled: boolean
+  version: string
+  username: string
+  permissions: Permission[]
 }
 
 export interface Dataset {
   
   id: number
-  
   datasource_id: number
-  
   name: string
-  
   description: string
-  
   frame_name: string
-  
   response_column_name: string
-  
   json_properties: string
-  
   created_at: number
-  
 }
 
 export interface Datasource {
   
   id: number
-  
   project_id: number
-  
   name: string
-  
   description: string
-  
   kind: string
-  
   configuration: string
-  
   created_at: number
-  
 }
 
 export interface Engine {
   
   id: number
-  
   name: string
-  
   location: string
-  
   created_at: number
-  
 }
 
 export interface EntityHistory {
   
   identity_id: number
-  
   action: string
-  
   description: string
-  
   created_at: number
-  
 }
 
 export interface EntityPrivilege {
   
   kind: string
-  
   workgroup_id: number
-  
   workgroup_name: string
-  
   workgroup_description: string
-  
 }
 
 export interface EntityType {
   
   id: number
-  
   name: string
-  
 }
 
 export interface Identity {
   
   id: number
-  
   name: string
-  
   is_active: boolean
-  
   last_login: number
-  
   created: number
-  
 }
 
 export interface Job {
   
   name: string
-  
   cluster_name: string
-  
   description: string
-  
   progress: string
-  
   started_at: number
-  
   completed_at: number
-  
 }
 
 export interface Label {
   
   id: number
-  
   project_id: number
-  
   model_id: number
+  name: string
+  description: string
+  created_at: number
+}
+
+export interface LdapConfig {
+  
+  host: string
+  port: number
+  ldaps: boolean
+  bind_dn: string
+  bind_password: string
+  user_base_dn: string
+  user_base_filter: string
+  user_name_attribute: string
+  group_base_dn: string
+  group_name_attribute: string
+  static_member_attribute: string
+  group_names: string
+  search_request_size_limit: number
+  search_request_time_limit: number
+  force_bind: boolean
+}
+
+export interface LdapGroup {
   
   name: string
-  
-  description: string
-  
-  created_at: number
-  
+  users: number
 }
 
 export interface Model {
   
   id: number
-  
   training_dataset_id: number
-  
   validation_dataset_id: number
-  
   name: string
-  
   cluster_name: string
-  
   model_key: string
-  
   algorithm: string
-  
   model_category: string
-  
   dataset_name: string
-  
   response_column_name: string
-  
   logical_name: string
-  
   location: string
-  
   model_object_type: string
-  
   max_runtime: number
-  
   json_metrics: string
-  
   created_at: number
-  
   label_id: number
-  
   label_name: string
-  
 }
 
 export interface MultinomialModel {
   
   id: number
-  
   training_dataset_id: number
-  
   validation_dataset_id: number
-  
   name: string
-  
   cluster_name: string
-  
   model_key: string
-  
   algorithm: string
-  
   model_category: string
-  
   dataset_name: string
-  
   response_column_name: string
-  
   logical_name: string
-  
   location: string
-  
   model_object_type: string
-  
   max_runtime: number
-  
   json_metrics: string
-  
   created_at: number
-  
   label_id: number
-  
   label_name: string
-  
   mse: number
-  
   r_squared: number
-  
   logloss: number
-  
 }
 
 export interface Permission {
   
   id: number
-  
   code: string
-  
   description: string
-  
 }
 
 export interface Project {
   
   id: number
-  
   name: string
-  
   description: string
-  
   model_category: string
-  
   created_at: number
-  
 }
 
 export interface RegressionModel {
   
   id: number
-  
   training_dataset_id: number
-  
   validation_dataset_id: number
-  
   name: string
-  
   cluster_name: string
-  
   model_key: string
-  
   algorithm: string
-  
   model_category: string
-  
   dataset_name: string
-  
   response_column_name: string
-  
   logical_name: string
-  
   location: string
-  
   model_object_type: string
-  
   max_runtime: number
-  
   json_metrics: string
-  
   created_at: number
-  
   label_id: number
-  
   label_name: string
-  
   mse: number
-  
   r_squared: number
-  
   mean_residual_deviance: number
-  
 }
 
 export interface Role {
   
   id: number
-  
   name: string
-  
   description: string
-  
   created: number
-  
 }
 
 export interface ScoringService {
   
   id: number
-  
   model_id: number
-  
   name: string
-  
   address: string
-  
   port: number
-  
   process_id: number
-  
   state: string
-  
   created_at: number
-  
 }
 
 export interface UserRole {
   
   kind: string
-  
   identity_id: number
-  
   identity_name: string
-  
   role_id: number
-  
   role_name: string
-  
 }
 
 export interface Workgroup {
   
   id: number
-  
   name: string
-  
   description: string
-  
   created: number
-  
 }
 
 export interface YarnCluster {
   
   id: number
-  
   engine_id: number
-  
   size: number
-  
   application_id: string
-  
   memory: string
-  
   username: string
-  
 }
 
 
@@ -491,8 +342,23 @@ export interface Service {
   // Ping the Steam server
   pingServer: (input: string, go: (error: Error, output: string) => void) => void
   
-  // No description available
+  // Get Steam start up configurations
   getConfig: (go: (error: Error, config: Config) => void) => void
+  
+  // Check if an identity has admin privileges
+  checkAdmin: (go: (error: Error, isAdmin: boolean) => void) => void
+  
+  // Set security configuration to local
+  setLocalConfig: (go: (error: Error) => void) => void
+  
+  // Set LDAP security configuration
+  setLdapConfig: (config: LdapConfig, go: (error: Error) => void) => void
+  
+  // Get LDAP security configurations
+  getLdapConfig: (go: (error: Error, config: LdapConfig, exists: boolean) => void) => void
+  
+  // Test LDAP security configurations
+  testLdapConfig: (config: LdapConfig, go: (error: Error, count: number, groups: LdapGroup[]) => void) => void
   
   // Connect to a cluster
   registerCluster: (address: string, go: (error: Error, clusterId: number) => void) => void
@@ -501,7 +367,7 @@ export interface Service {
   unregisterCluster: (clusterId: number, go: (error: Error) => void) => void
   
   // Start a cluster using Yarn
-  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void) => void
+  startClusterOnYarn: (clusterName: string, engineId: number, size: number, memory: string, secure: boolean, keytab: string, go: (error: Error, clusterId: number) => void) => void
   
   // Stop a cluster using Yarn
   stopClusterOnYarn: (clusterId: number, keytab: string, go: (error: Error) => void) => void
@@ -856,6 +722,60 @@ interface GetConfigOut {
   
 }
 
+interface CheckAdminIn {
+  
+}
+
+interface CheckAdminOut {
+  
+  is_admin: boolean
+  
+}
+
+interface SetLocalConfigIn {
+  
+}
+
+interface SetLocalConfigOut {
+  
+}
+
+interface SetLdapConfigIn {
+  
+  config: LdapConfig
+  
+}
+
+interface SetLdapConfigOut {
+  
+}
+
+interface GetLdapConfigIn {
+  
+}
+
+interface GetLdapConfigOut {
+  
+  config: LdapConfig
+  
+  exists: boolean
+  
+}
+
+interface TestLdapConfigIn {
+  
+  config: LdapConfig
+  
+}
+
+interface TestLdapConfigOut {
+  
+  count: number
+  
+  groups: LdapGroup[]
+  
+}
+
 interface RegisterClusterIn {
   
   address: string
@@ -887,6 +807,8 @@ interface StartClusterOnYarnIn {
   size: number
   
   memory: string
+  
+  secure: boolean
   
   keytab: string
   
@@ -2357,6 +2279,66 @@ export function getConfig(go: (error: Error, config: Config) => void): void {
   });
 }
 
+export function checkAdmin(go: (error: Error, isAdmin: boolean) => void): void {
+  const req: CheckAdminIn = {  };
+  Proxy.Call("CheckAdmin", req, function(error, data) {
+    if (error) {
+      return go(error, null);
+    } else {
+      const d: CheckAdminOut = <CheckAdminOut> data;
+      return go(null, d.is_admin);
+    }
+  });
+}
+
+export function setLocalConfig(go: (error: Error) => void): void {
+  const req: SetLocalConfigIn = {  };
+  Proxy.Call("SetLocalConfig", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: SetLocalConfigOut = <SetLocalConfigOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function setLdapConfig(config: LdapConfig, go: (error: Error) => void): void {
+  const req: SetLdapConfigIn = { config: config };
+  Proxy.Call("SetLdapConfig", req, function(error, data) {
+    if (error) {
+      return go(error);
+    } else {
+      const d: SetLdapConfigOut = <SetLdapConfigOut> data;
+      return go(null);
+    }
+  });
+}
+
+export function getLdapConfig(go: (error: Error, config: LdapConfig, exists: boolean) => void): void {
+  const req: GetLdapConfigIn = {  };
+  Proxy.Call("GetLdapConfig", req, function(error, data) {
+    if (error) {
+      return go(error, null, null);
+    } else {
+      const d: GetLdapConfigOut = <GetLdapConfigOut> data;
+      return go(null, d.config, d.exists);
+    }
+  });
+}
+
+export function testLdapConfig(config: LdapConfig, go: (error: Error, count: number, groups: LdapGroup[]) => void): void {
+  const req: TestLdapConfigIn = { config: config };
+  Proxy.Call("TestLdapConfig", req, function(error, data) {
+    if (error) {
+      return go(error, null, null);
+    } else {
+      const d: TestLdapConfigOut = <TestLdapConfigOut> data;
+      return go(null, d.count, d.groups);
+    }
+  });
+}
+
 export function registerCluster(address: string, go: (error: Error, clusterId: number) => void): void {
   const req: RegisterClusterIn = { address: address };
   Proxy.Call("RegisterCluster", req, function(error, data) {
@@ -2381,8 +2363,8 @@ export function unregisterCluster(clusterId: number, go: (error: Error) => void)
   });
 }
 
-export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, keytab: string, go: (error: Error, clusterId: number) => void): void {
-  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, keytab: keytab };
+export function startClusterOnYarn(clusterName: string, engineId: number, size: number, memory: string, secure: boolean, keytab: string, go: (error: Error, clusterId: number) => void): void {
+  const req: StartClusterOnYarnIn = { cluster_name: clusterName, engine_id: engineId, size: size, memory: memory, secure: secure, keytab: keytab };
   Proxy.Call("StartClusterOnYarn", req, function(error, data) {
     if (error) {
       return go(error, null);

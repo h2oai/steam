@@ -20,7 +20,7 @@
  */
 
 import * as React from 'react';
-import { withRouter, PlainRoute } from 'react-router';
+import { withRouter } from 'react-router';
 import NotificationsManager from './components/NotificationsManager';
 import Navigation from '../Navigation/components/Navigation/Navigation';
 import Breadcrumb from './components/Breadcrumb';
@@ -30,7 +30,7 @@ import './styles/breadcrumb.scss';
 import './styles/app.scss';
 
 interface Props {
-  routes: PlainRoute[],
+  routes: any,
   params: any
 }
 
@@ -39,7 +39,9 @@ interface DispatchProps {
 
 export class App extends React.Component<Props & DispatchProps, any> {
   render(): React.ReactElement<HTMLDivElement> {
-    return (
+    let isChrome = !!window.chrome && !!window.chrome.webstore;
+    let isFirefox = typeof window.InstallTrigger !== 'undefined';
+    let app = (
       <div className="app-container">
         <NotificationsManager />
         <Navigation routes={this.props.routes} params={this.props.params}></Navigation>
@@ -53,6 +55,17 @@ export class App extends React.Component<Props & DispatchProps, any> {
         </div>
       </div>
     );
+    let unsupportedBrowser = (
+      <div className="unsupported-browser">
+        <h1>Browser not supported</h1>
+        <h3><a href="http://docs.h2o.ai/steam/latest-stable/steam-docs/Installation.html">Please review the list of supported browsers.</a></h3>
+      </div>
+    );
+    if (isChrome || isFirefox) {
+      return app;
+    } else {
+      return unsupportedBrowser;
+    }
   }
 }
 export default withRouter(App);
