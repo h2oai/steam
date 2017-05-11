@@ -55,8 +55,8 @@
 
 // Form for model, shown in element
   function showModel(model, element) {
-    var names = model.m_names;
-    var domains = model.m_domains;
+    var names = model.m._names;
+    var domains = model.m._domains;
     var domainMap = model.domainMap;
 
     var form = '<legend>Parameters</legend>';
@@ -153,7 +153,7 @@
   function showInputParameters() {
     $.get(API_HOST + '/info', function(data, status) {
       // show result
-      if (data.problem_type === 'image') {
+      if (data.m.problem_type === 'image') {
         isBinaryPrediction = true;
         hideBatch();
       } else {
