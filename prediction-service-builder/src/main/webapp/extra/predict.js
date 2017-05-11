@@ -23,6 +23,7 @@
   var outputDomain;
   var API_HOST = '';
   var isBinaryPrediction = false;
+  var predictionVariableName;
 
 
 
@@ -54,9 +55,9 @@
 
 // Form for model, shown in element
   function showModel(model, element) {
-    var names = model.m._names;
-    var domains = model.m._domains;
-    var domainMap = model.domainMap;
+    var names = model.names;
+    var domains = model.domainValues;
+    var domainMap = model.domains;
 
     var form = '<legend>Parameters</legend>';
 
@@ -76,6 +77,7 @@
           form += '<label class="form-control-label file-icon image-picker"><span class="glyphicon glyphicon-folder-open circle-icon" aria-hidden="true"></span><span id="image-preview-name"></span></label>';
           form += '<input class="image-file" type="file" name="' + n + '" onchange="readURL(this);">';
           form += '<img id="image-preview"/>';
+          predictionVariableName = n;
         } else {
           form += '<input class="form-control" type="text" name="' + n + '" oninput="updateUrl(event);">';
         }
@@ -151,7 +153,7 @@
   function showInputParameters() {
     $.get(API_HOST + '/info', function(data, status) {
       // show result
-      if (data.m._problem_type === 'image') {
+      if (data.problemType === 'image') {
         isBinaryPrediction = true;
         hideBatch();
       } else {
@@ -171,7 +173,6 @@
     var result = '<legend>Model Predictions</legend>'
 
     if (data.classProbabilities) {
-
 
       // binomial and multinomial
       var label = data.label;
@@ -277,12 +278,11 @@
       path = '/predictbinary';
     }
     var cmd = API_HOST + path + params;
-    console.log(cmd);
     if (isBinaryPrediction) {
       var form = $('#allparams');
       var data = new FormData();
       $.each($(form).find('input[type="file"]')[0].files, function(i, file) {
-        data.append('binary_C' + (i + 1), file);
+        data.append('binary_' + predictionVariableName, file);
       });
       $.ajax({
         url: API_HOST + path,
@@ -295,7 +295,7 @@
           showResult(div, status, JSON.parse(data));
           var pardiv = document.querySelector(".curl");
           var host = API_HOST || window.location.protocol + '//' + window.location.host;
-          showCurl(pardiv, 'binary_C1=@' + $(form).find('input[type="file"]')[0].files[0].name, host + path);
+          showCurl(pardiv, 'binary_' + predictionVariableName + '=@' + $(form).find('input[type="file"]')[0].files[0].name, host + path);
         }
       })
         .fail(function(data, status, error) {
