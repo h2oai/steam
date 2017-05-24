@@ -56,3 +56,11 @@ task cleanGenerated(type: Delete) {
 }
 
 clean.dependsOn cleanGenerated
+
+task deploy (dependsOn: war){
+    copy {
+        from "build/libs"
+        into "."
+        include "*.war"
+    }
+}
