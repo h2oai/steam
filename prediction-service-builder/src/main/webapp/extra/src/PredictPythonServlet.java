@@ -249,8 +249,15 @@ public class PredictPythonServlet extends HttpServlet {
       for (String p : pairs) {
         String[] a = p.split(":");
         int index = Integer.parseInt(a[0]);
-        double value = Float.parseFloat(a[1]);
-        row.put(colNames[index], value);
+        String name = colNames[index];
+        try {
+          double value = Float.parseFloat(a[1]);
+          row.put(name, value);
+        }
+        catch (NumberFormatException e) {
+          // it wasn't a number so we'll use the string
+          row.put(name, a[1]);
+        }
       }
     }
     catch (NumberFormatException e) {
