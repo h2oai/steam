@@ -21,8 +21,5 @@ If you're an Open Source community member, you can contact H2O using one of the 
 
 - Click the Support link in the Steam UI to send an e-mail message
 - Send an e-mail message directly to <a href="mailto:support@h2o.ai">support@h2o.ai</a>
-- Ask your question on the [H2O Community] (https://community.h2o.ai/) site (create an account if necessary)
-
-
-## Advisory Committee
+- Ask your question on [Stack Overflow] (https://community.h2o.ai/) using the "h2o" tag
 
