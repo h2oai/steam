@@ -2,14 +2,14 @@
 
 rm -f example-python.war
 
-curl -X POST \
+curl --fail -X POST \
 --form pojo=@GBM_model_python_1463864606917_1.java \
 --form jar=@h2o-genmodel.jar \
 --form python=@score.py \
 --form pythonextra=@vectorizer.pickle \
 --form pythonextra=@lib/modelling.py \
 --form pythonextra=@lib/__init__.py \
-localhost:55000/makepythonwar > example-python.war
+localhost:55000/makepythonwar --output example-python.war || exit
 
 if [ -s example-python.war ]
 then
