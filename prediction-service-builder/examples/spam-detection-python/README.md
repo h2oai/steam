@@ -150,8 +150,14 @@ It is now started at ```http://localhost:55001```
 and looks like this
 
 
-![Builder Service](images/spam-detection-python localhost 55001.png)
+![Builder Service](images/example_service.png)
 
+You can also access predict from the command line:
+
+```
+$ curl -X POST --data 'To find out who it could  be call from your mobile or landline 09064015307 BOX334SK38ch ' http://localhost:55001/pypredict
+{"labelIndex":1,"label":"spam","classProbabilities":[0.7601361910841853,0.23986380891581469]}
+```
 
 **NOTE** You may get Python errors if you don't have the correct Python packages install.
 A good way to test this is to run ```score.py```. If it works fine it looks like this. 
