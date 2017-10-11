@@ -53,7 +53,7 @@ def train(cfg):
         os.makedirs(cfg.models_dir)
     saveModel(vectorizer, '{}/vectorizer.pickle'.format(cfg.models_dir))
     h2o.download_pojo(gbm_model, "{}/".format(cfg.models_dir))
-    h2o.shutdown()
+    h2o.cluster().shutdown()
 
 #
 # Main entry point. Accepts parameters
