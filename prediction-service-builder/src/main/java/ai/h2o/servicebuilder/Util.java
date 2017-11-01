@@ -42,6 +42,12 @@ public class Util {
   protected static final String MEMORY_FOR_JAVA_PROCESSES = "4g";
   protected static final String JAVA_TARGET_VERSION = "1.6";
 
+  protected static final String COMPILER_MEMORY = "compiler.memory";
+
+  public static String getXmxMemory() {
+      return System.getProperty(COMPILER_MEMORY, MEMORY_FOR_JAVA_PROCESSES);
+  }
+
 //  public static class Times {
 //    private long count = 0;
 //    private double totalTimeMs = 0;

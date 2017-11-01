@@ -149,7 +149,7 @@ public class MakeWarServlet extends HttpServlet {
         if (deepwaterjarfile != null)
           jarfiles += ":" + deepwaterjarfile;
         runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION,
-            "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES, "-cp", jarfiles, "-d", outDir.getPath(), pojofile),
+            "-J-Xmx" + getXmxMemory(), "-cp", jarfiles, "-d", outDir.getPath(), pojofile),
             "Compilation of pojo failed");
         logger.info("compiled pojo {}", pojofile);
       }
@@ -202,7 +202,7 @@ public class MakeWarServlet extends HttpServlet {
       copyExtraFile(servletPath, srcPath, tmpDir, "Logging.java", "Logging.java");
 
       // compile extra
-      List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+      List<String> cmd = Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + getXmxMemory(),
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
           "PredictServlet.java", "PredictBinaryServlet.java", "InfoServlet.java", "StatsServlet.java", "ServletUtil.java",
           "PingServlet.java", "Transform.java", "Logging.java");

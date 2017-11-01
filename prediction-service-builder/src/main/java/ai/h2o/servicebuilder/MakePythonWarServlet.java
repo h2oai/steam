@@ -140,7 +140,7 @@ public class MakePythonWarServlet extends HttpServlet {
 
       if (pojofile != null) {
         // Compile the pojo
-        runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+        runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + getXmxMemory(),
             "-cp", jarfile, "-d", outDir.getPath(), pojofile), "Compilation of pojo failed");
         logger.info("compiled pojo {}", pojofile);
       }
@@ -182,7 +182,7 @@ public class MakePythonWarServlet extends HttpServlet {
       copyExtraFile(servletPath, srcPath, tmpDir, "Logging.java", "Logging.java");
 
       // compile extra
-      runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+      runCmd(tmpDir, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + getXmxMemory(),
           "-cp", "WEB-INF/lib/*:WEB-INF/classes:extra/WEB-INF/lib/*", "-d", outDir.getPath(),
           "InfoServlet.java", "StatsServlet.java", "PredictPythonServlet.java", "ServletUtil.java", "PingServlet.java", "Transform.java", "Logging.java"),
           "Compilation of servlet failed");
