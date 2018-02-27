@@ -1,23 +1,9 @@
-FROM ubuntu:16.04
+FROM openjdk:jre-alpine
 
 # docker build -f Dockerfile-service -t predservice .
 # docker run --rm -p 55001:55001 -v $PWD:/host predservice example.war
 
 LABEL maintainer="H2o.ai <ops@h2o.ai>"
-
-ENV DEBIAN_FRONTEND noninteractive
-
-# Install Java 8
-RUN \
-  apt-get update && \
-  apt-get install -yqq software-properties-common && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update -yqq && \
-  echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections && \
-  apt-get install -y oracle-java8-installer && \
-  apt-get clean && \
-  rm -rf /var/cache/apt/* /var/cache/oracle-jdk8-installer
 
 COPY jetty-runner-8.1.14.v20131031.jar /
 
