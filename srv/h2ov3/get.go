@@ -37,7 +37,16 @@ func (h *H2O) GetCloudStatus() (*bindings.CloudV3, error) {
 	//@GET
 	u := h.url("/3/Cloud")
 
-	res, err := http.Get(u)
+	client := http.Client{}
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, fmt.Errorf("H2O request initialization failed: %s: %s", u, err)
+	}
+	if h.Username != "" && h.Password != "" {
+		req.SetBasicAuth(h.Username, h.Password)
+	}
+
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
 	}
@@ -89,7 +98,16 @@ func (h *H2O) GetFramesList() (*bindings.FramesV3, error) {
 	//@GET
 	u := h.url("/3/Frames")
 
-	res, err := http.Get(u)
+	client := http.Client{}
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, fmt.Errorf("H2O request initialization failed: %s: %s", u, err)
+	}
+	if h.Username != "" && h.Password != "" {
+		req.SetBasicAuth(h.Username, h.Password)
+	}
+
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("H2O get request failed: %s: %s", u, err)
 	}

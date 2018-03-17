@@ -123,6 +123,8 @@ type Cluster struct {
 	TypeId   int64
 	DetailId int64
 	Address  string
+	Username string
+	Password string
 	State    string
 	Created  time.Time
 }

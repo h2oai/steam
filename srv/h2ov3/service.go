@@ -34,12 +34,16 @@ import (
 )
 
 type H2O struct {
-	Address string
+	Address  string
+	Username string
+	Password string
 }
 
-func NewClient(address string) *H2O {
+func NewClient(address string, username string, password string) *H2O {
 	return &H2O{
 		address,
+		username,
+		password,
 	}
 }
 

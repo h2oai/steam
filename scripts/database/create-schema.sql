@@ -101,7 +101,7 @@ CREATE TABLE binomial_model (
     r_squared double precision,
     logloss double precision,
     auc double precision,
-    gini double precision, 
+    gini double precision,
 
     PRIMARY KEY (model_id),
     FOREIGN KEY (model_id) REFERENCES model(id) ON DELETE CASCADE
@@ -141,6 +141,8 @@ CREATE TABLE cluster (
     type_id integer NOT NULL,
     detail_id integer NOT NULL,
     address text NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
     state job_state NOT NULL,
     created datetime NOT NULL,
 
@@ -177,7 +179,7 @@ CREATE TABLE cluster (
 
 CREATE TABLE cluster_type (
     id integer PRIMARY KEY AUTOINCREMENT,
-    name text NOT NULL UNIQUE 
+    name text NOT NULL UNIQUE
 );
 
 
@@ -783,7 +785,7 @@ CREATE TABLE project (
     name text NOT NULL,
     description text NOT NULL,
     model_category text NOT NULL,
-    created datetime NOT NULL  
+    created datetime NOT NULL
 );
 
 
@@ -856,7 +858,7 @@ CREATE TABLE role (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
-    created datetime NOT NULL  
+    created datetime NOT NULL
 );
 
 
@@ -950,7 +952,7 @@ CREATE TABLE workgroup (
     type workgroup_type NOT NULL,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
-    created datetime NOT NULL 
+    created datetime NOT NULL
 );
 
 
@@ -1708,4 +1710,3 @@ CREATE INDEX fki_workgroup_id ON identity (workgroup_id);
 --
 -- PostgreSQL database dump complete
 --
-

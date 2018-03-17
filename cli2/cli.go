@@ -2746,7 +2746,7 @@ packages [?]
 Get Packages
 Examples:
 
-    List packages for a project 
+    List packages for a project
     $ steam get packages \
         --project-id=?
 
@@ -3751,13 +3751,17 @@ Examples:
 `
 
 func registerCluster(c *context) *cobra.Command {
-	var address string // No description available
+	var address string  // No description available
+	var username string // No description available
+	var password string // No description available
 
 	cmd := newCmd(c, registerClusterHelp, func(c *context, args []string) {
 
 		// Connect to a cluster
 		clusterId, err := c.remote.RegisterCluster(
-			address, // No description available
+			address,  // No description available
+			username, // No description available
+			password, // No description available
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -3767,6 +3771,8 @@ func registerCluster(c *context) *cobra.Command {
 	})
 
 	cmd.Flags().StringVar(&address, "address", address, "No description available")
+	cmd.Flags().StringVar(&username, "username", username, "No description available")
+	cmd.Flags().StringVar(&password, "password", password, "No description available")
 	return cmd
 }
 

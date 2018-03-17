@@ -582,7 +582,7 @@ func newDatastore(db *sql.DB) (*Datastore, error) {
 
 func isPrimed(db *sql.DB) (bool, error) {
 	row := db.QueryRow(`
-		SELECT 
+		SELECT
 			count(1)
 		FROM
 			meta
@@ -1178,19 +1178,19 @@ func (ds *Datastore) ReadRoles(pz az.Principal, offset, limit int64) ([]Role, er
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				 	$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
-						) AND 
+						) AND
 						entity_type_id = $3
 					)
 			)
-		ORDER BY 
+		ORDER BY
 			name
 		LIMIT $4
 		OFFSET $5
@@ -1239,15 +1239,15 @@ func (ds *Datastore) ReadRolesForIdentity(pz az.Principal, identityId int64) ([]
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  $2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
-						) AND 
+						) AND
 						entity_type_id = $4
 					)
 			)
@@ -1486,12 +1486,12 @@ func (ds *Datastore) ReadWorkgroups(pz az.Principal, offset, limit int64) ([]Wor
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  	$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
 						) AND
@@ -1529,15 +1529,15 @@ func (ds *Datastore) ReadWorkgroupsForIdentity(pz az.Principal, identityId int64
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  	$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
-						) AND 
+						) AND
 						entity_type_id = $4
 					)
 			)
@@ -1745,15 +1745,15 @@ func (ds *Datastore) ReadIdentities(pz az.Principal, offset, limit int64) ([]Ide
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  	$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
-						) AND 
+						) AND
 						entity_type_id = $3
 					)
 			)
@@ -1852,12 +1852,12 @@ func (ds *Datastore) ReadIdentitiesForWorkgroup(pz az.Principal, workgroupId int
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 					$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
 						) AND
@@ -1893,12 +1893,12 @@ func (ds *Datastore) ReadIdentitiesForRole(pz az.Principal, roleId int64) ([]Ide
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  	$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
 						) AND
@@ -1919,10 +1919,10 @@ func (ds *Datastore) ReadIdentitiesForRole(pz az.Principal, roleId int64) ([]Ide
 
 func (ds *Datastore) ReadUsersForEntity(pz az.Principal, entityTypeId, entityId int64) ([]IdentityAndRole, error) {
 	rows, err := ds.db.Query(`
-		SELECT 
+		SELECT
 			privilege.privilege_type,
-			identity.id, 
-			identity.name, 
+			identity.id,
+			identity.name,
 			role.id,
 			role.name
 		FROM
@@ -1930,7 +1930,7 @@ func (ds *Datastore) ReadUsersForEntity(pz az.Principal, entityTypeId, entityId 
 			identity_role,
 			privilege,
 			identity_workgroup
-		WHERE 
+		WHERE
 			identity_role.identity_id = identity.id AND
 			identity_role.role_id = role.id AND
 			privilege.workgroup_id = identity_workgroup.workgroup_id AND
@@ -2335,12 +2335,12 @@ func (ds *Datastore) ReadEngines(pz az.Principal) ([]Engine, error) {
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  	$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
 						) AND
@@ -2396,16 +2396,16 @@ func (ds *Datastore) DeleteEngine(pz az.Principal, engineId int64) error {
 
 // --- Cluster ---
 
-func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, state string) (int64, error) {
+func (ds *Datastore) CreateExternalCluster(pz az.Principal, name, address, username, password, state string) (int64, error) {
 	var id int64
 	err := ds.exec(func(tx *sql.Tx) error {
 		res, err := tx.Exec(`
 			INSERT INTO
 				cluster
-				(name, type_id, detail_id, address, state, created)
+				(name, type_id, detail_id, address, username, password, state, created)
 			VALUES
-				($1,   $2,      0,         $3,      $4,    datetime('now'))
-			`, name, ds.ClusterTypes.External, address, state)
+				($1,   $2,      0,         $3,      $4,       $5,       $6,    datetime('now'))
+			`, name, ds.ClusterTypes.External, address, username, password, state)
 		if err != nil {
 			return err
 		}
@@ -2508,7 +2508,7 @@ func (ds *Datastore) ReadClusterTypes(pz az.Principal) []ClusterType {
 func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Cluster, error) {
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, type_id, detail_id, address, username, password, state, created
 		FROM
 			cluster
 		WHERE
@@ -2516,12 +2516,12 @@ func (ds *Datastore) ReadClusters(pz az.Principal, offset, limit int64) ([]Clust
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 					$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
 						) AND
@@ -2547,7 +2547,7 @@ func (ds *Datastore) ReadCluster(pz az.Principal, clusterId int64) (Cluster, err
 	}
 	row := ds.db.QueryRow(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, type_id, detail_id, address, username, password, state, created
 		FROM
 			cluster
 		WHERE
@@ -2561,7 +2561,7 @@ func (ds *Datastore) ReadClusterByAddress(pz az.Principal, address string) (Clus
 	var cluster Cluster
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, type_id, detail_id, address, username, password, state, created
 		FROM
 			cluster
 		WHERE
@@ -2580,7 +2580,7 @@ func (ds *Datastore) ReadClusterByName(pz az.Principal, name string) (Cluster, b
 	var cluster Cluster
 	rows, err := ds.db.Query(`
 		SELECT
-			id, name, type_id, detail_id, address, state, created
+			id, name, type_id, detail_id, address, username, password, state, created
 		FROM
 			cluster
 		WHERE
@@ -2737,15 +2737,15 @@ func (ds *Datastore) ReadProjects(pz az.Principal, offset, limit int64) ([]Proje
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  	$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
-						) AND 
+						) AND
 						entity_type_id = $3
 					)
 			)
@@ -2862,8 +2862,8 @@ func (ds *Datastore) ReadDatasources(pz az.Principal, projectId, offset, limit i
 						(
 							workgroup_id IN
 							(
-								SELECT 
-									workgroup_id 
+								SELECT
+									workgroup_id
 								FROM
 									identity_workgroup
 								WHERE
@@ -3057,8 +3057,8 @@ func (ds *Datastore) ReadDatasets(pz az.Principal, datasourceId, offset, limit i
 						(
 							workgroup_id IN
 							(
-								SELECT 
-									workgroup_id 
+								SELECT
+									workgroup_id
 								FROM
 									identity_workgroup
 								WHERE
@@ -3367,15 +3367,15 @@ func (ds *Datastore) ReadModels(pz az.Principal, offset, limit int64) ([]Model, 
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 					$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
-						) AND 
+						) AND
 						entity_type_id = $3
 					)
 			)
@@ -3411,12 +3411,12 @@ func (ds *Datastore) ReadModelsForProject(pz az.Principal, projectId, offset, li
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 				  	$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
 						) AND
@@ -3448,7 +3448,7 @@ func (ds *Datastore) CountModelsForProject(pz az.Principal, projectId int64) (in
 			FROM
 				model
 			WHERE
-				project_id = $1	
+				project_id = $1
 			`, projectId)
 
 		return row.Scan(&ct)
@@ -3532,14 +3532,14 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 			bm.mse, bm.r_squared, bm.logloss, bm.auc, bm.gini
 		FROM
 			model
-		INNER JOIN 
+		INNER JOIN
 			binomial_model bm ON bm.model_id = model.id
 		LEFT OUTER JOIN
 			label ON label.model_id = model.id
 		WHERE
 			model.project_id = $1 AND
 			model.id IN
-			( 
+			(
 				SELECT DISTINCT
 					entity_id
 				FROM
@@ -3547,10 +3547,10 @@ func (ds *Datastore) ReadBinomialModels(pz az.Principal, projectId int64, namePa
 				WHERE
 					$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
-							) AND 
+							) AND
 							entity_type_id = $4
 						)
 			) AND
@@ -3582,7 +3582,7 @@ func (ds *Datastore) ReadBinomialModel(pz az.Principal, modelId int64) (Binomial
 
 	row := ds.db.QueryRow(`
 		SELECT
-			model.*, 
+			model.*,
 			label.id,
 			label.name,
 			bm.mse, bm.r_squared, bm.logloss, bm.auc, bm.gini
@@ -3631,7 +3631,7 @@ func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, nam
 		WHERE
 			model.project_id = $1 AND
 			model.id IN
-			( 
+			(
 				SELECT DISTINCT
 					entity_id
 				FROM
@@ -3639,10 +3639,10 @@ func (ds *Datastore) ReadMultinomialModels(pz az.Principal, projectId int64, nam
 				WHERE
 					$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
-							) AND 
+							) AND
 							entity_type_id = $4
 						)
 			) AND
@@ -3674,13 +3674,13 @@ func (ds *Datastore) ReadMultinomialModel(pz az.Principal, modelId int64) (Multi
 
 	row := ds.db.QueryRow(`
 		SELECT
-			model.*, 
+			model.*,
 			label.id,
 			label.name,
 			mm.mse, mm.r_squared, mm.logloss
 		FROM
 			model
-		INNER JOIN 
+		INNER JOIN
 			multinomial_model mm on mm.model_id = model.id
 		LEFT OUTER JOIN
 			label ON label.model_id = model.id
@@ -3716,14 +3716,14 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 			rm.mse, rm.r_squared, rm.mean_residual_deviance
 		FROM
 			model
-		INNER JOIN 
+		INNER JOIN
 			regression_model rm ON rm.model_id = model.id
 		LEFT OUTER JOIN
 			label ON label.model_id = model.id
 		WHERE
 			model.project_id = $1 AND
 			model.id IN
-			( 
+			(
 				SELECT DISTINCT
 					entity_id
 				FROM
@@ -3731,10 +3731,10 @@ func (ds *Datastore) ReadRegressionModels(pz az.Principal, projectId int64, name
 				WHERE
 					$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
-							) AND 
+							) AND
 							entity_type_id = $4
 						)
 			) AND
@@ -3766,7 +3766,7 @@ func (ds *Datastore) ReadRegressionModel(pz az.Principal, modelId int64) (Regres
 
 	row := ds.db.QueryRow(`
 		SELECT
-			model.*, 
+			model.*,
 			label.id,
 			label.name,
 			rm.mse, rm.r_squared, rm.mean_residual_deviance
@@ -3837,7 +3837,7 @@ func (ds *Datastore) UpdateModelObjectType(pz az.Principal, modelId int64, typ s
 			SET
 				model_object_type = $1
 			WHERE
-				id = $2	
+				id = $2
 			`, typ, modelId); err != nil {
 			return errors.Wrap(err, "failed executing transaction")
 		}
@@ -4053,15 +4053,15 @@ func (ds *Datastore) ReadLabelsForProject(pz az.Principal, projectId int64) ([]L
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 					$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
-						) AND 
+						) AND
 						entity_type_id = $4
 					)
 			)
@@ -4119,12 +4119,12 @@ func (ds *Datastore) ReadLabel(pz az.Principal, labelId int64) (Label, error) {
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 					$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
 						) AND
@@ -4209,15 +4209,15 @@ func (ds *Datastore) ReadServices(pz az.Principal, offset, limit int64) ([]Servi
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 					$1 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $2
-							) AND 
+							) AND
 							entity_type_id = $3
 						)
 			)
@@ -4245,12 +4245,12 @@ func (ds *Datastore) ReadServicesForProjectId(pz az.Principal, projectId, offset
 			(
 				SELECT DISTINCT
 					entity_id
-				FROM 
+				FROM
 					privilege
 				WHERE
 					$2 OR
 					(
-						workgroup_id IN 
+						workgroup_id IN
 						(
 							SELECT workgroup_id FROM identity_workgroup WHERE identity_id = $3
 						) AND
