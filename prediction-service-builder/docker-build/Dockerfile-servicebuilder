@@ -1,4 +1,4 @@
-FROM openjdk:jre-alpine
+FROM openjdk:jdk-alpine
 
 # docker build -f Dockerfile-servicebuilder -t predservicebuilder .
 # docker run --rm -p 55000:55000 predservicevbuilder
