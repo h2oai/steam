@@ -1,3 +1,6 @@
+# DEPRECATED
+This project is no longer maintained, please consider using [Enteprise Steam](https://www.h2o.ai/download/#enterprise-steam) instead.
+
 # Steam
 
 
