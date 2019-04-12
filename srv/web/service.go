@@ -292,7 +292,7 @@ type Az interface {
 type Service interface {
 	PingServer(pz az.Principal, input string) (string, error)
 	GetConfig(pz az.Principal) (*Config, error)
-	RegisterCluster(pz az.Principal, address string) (int64, error)
+	RegisterCluster(pz az.Principal, address string, username string, password string) (int64, error)
 	UnregisterCluster(pz az.Principal, clusterId int64) error
 	StartClusterOnYarn(pz az.Principal, clusterName string, engineId int64, size int, memory string, keytab string) (int64, error)
 	StopClusterOnYarn(pz az.Principal, clusterId int64, keytab string) error
@@ -423,7 +423,9 @@ type GetConfigOut struct {
 }
 
 type RegisterClusterIn struct {
-	Address string `json:"address"`
+	Address  string `json:"address"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type RegisterClusterOut struct {
@@ -1412,8 +1414,8 @@ func (this *Remote) GetConfig() (*Config, error) {
 	return out.Config, nil
 }
 
-func (this *Remote) RegisterCluster(address string) (int64, error) {
-	in := RegisterClusterIn{address}
+func (this *Remote) RegisterCluster(address string, username string, password string) (int64, error) {
+	in := RegisterClusterIn{address, username, password}
 	var out RegisterClusterOut
 	err := this.Proc.Call("RegisterCluster", &in, &out)
 	if err != nil {
@@ -2626,7 +2628,7 @@ func (this *Impl) RegisterCluster(r *http.Request, in *RegisterClusterIn, out *R
 		log.Println(guid, "REQ", pz, name, string(req))
 	}
 
-	val0, err := this.Service.RegisterCluster(pz, in.Address)
+	val0, err := this.Service.RegisterCluster(pz, in.Address, in.Username, in.Password)
 	if err != nil {
 		log.Println(guid, "ERR", pz, name, err)
 		return err

@@ -141,7 +141,7 @@ type Workgroup
 
 Ping(status bool) status bool
 
-RegisterCluster(address string) clusterId int64
+RegisterCluster(address string, username string, password string) clusterId int64
 UnregisterCluster(clusterId int64)
 StartYarnCluster(clusterName string, engineId int64, size int, memory string, username string) clusterId int64 
 StopYarnCluster(clusterId int64)
