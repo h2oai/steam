@@ -106,7 +106,7 @@ public class CompilePojoServlet extends HttpServlet {
 
       // Compile the pojo(s)
       for (String pojofile : pojofiles) {
-        runCmd(tmp, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + MEMORY_FOR_JAVA_PROCESSES,
+        runCmd(tmp, Arrays.asList("javac", "-target", JAVA_TARGET_VERSION, "-source", JAVA_TARGET_VERSION, "-J-Xmx" + getXmxMemory(),
             "-cp", jarfile + ":lib/*", "-d", "out", pojofile, "H2OPredictor.java"), "Compilation of pojo failed: " + pojofile);
       }
 
